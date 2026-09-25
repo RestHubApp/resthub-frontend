@@ -3,11 +3,18 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import LoginView from '../features/auth/LoginView'
 import ProfileView from '../features/auth/ProfileView'
+import AddItemsView from '../features/orders/AddItemsView'
+import BoardView from '../features/orders/BoardView'
+import HistoryView from '../features/orders/HistoryView'
+import NewOrderView from '../features/orders/NewOrderView'
+import OrderDetailView from '../features/orders/OrderDetailView'
+import OrdersView from '../features/orders/OrdersView'
 import AppShell from '../features/shell/AppShell'
 import ComingSoonView from '../features/shell/ComingSoonView'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import RequireSession from '../features/shell/RequireSession'
 import StaffView from '../features/staff/StaffView'
+import TablesView from '../features/tables/TablesView'
 
 /**
  * Una pantalla que exige un permiso.
@@ -41,10 +48,19 @@ const router = createBrowserRouter(
         },
         // Las pantallas sin construir ya tienen su ruta y su permiso: se
         // reemplaza ComingSoonView por la vista cuando exista.
-        conPermiso('pedidos', ComingSoonView, 'orders.take'),
-        conPermiso('tablero', ComingSoonView, 'orders.read_all'),
+        {
+          element: <RequireSession permission="orders.take" />,
+          children: [
+            { path: 'pedidos', Component: OrdersView },
+            { path: 'pedidos/nuevo', Component: NewOrderView },
+            { path: 'pedidos/:orderId', Component: OrderDetailView },
+            { path: 'pedidos/:orderId/agregar', Component: AddItemsView },
+          ],
+        },
+        conPermiso('tablero', BoardView, 'orders.read_all'),
+        conPermiso('tablero/historial', HistoryView, 'orders.read_all'),
         conPermiso('menu', ComingSoonView, 'menu.manage'),
-        conPermiso('mesas', ComingSoonView, 'tables.manage'),
+        conPermiso('mesas', TablesView, 'tables.manage'),
         conPermiso('inventario', ComingSoonView, 'inventory.read'),
         conPermiso('personal', StaffView, 'staff.manage'),
         conPermiso('panel', ComingSoonView, 'insights.read'),
