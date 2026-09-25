@@ -30,7 +30,7 @@ const NOMBRES: Record<Kind, string> = {
 /** Compra, merma, ajuste y edición de un insumo, desde su fila. */
 export default function IngredientRowActions({ ingredient, onAction }: IngredientRowActionsProps) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex gap-1.5">
       {ACCIONES.map((accion) => (
         <Button
           key={accion.kind}

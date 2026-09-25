@@ -36,6 +36,7 @@ function columnas(
         </span>
       ),
     },
+    { id: 'estado', header: 'Estado', cell: (insumo) => <IngredientStatus ingredient={insumo} /> },
     { id: 'minimo', header: 'Mínimo', className: NUMERO, cell: (insumo) => formatQuantity(insumo.min_stock, insumo.unit) },
     {
       id: 'costo',
@@ -44,7 +45,6 @@ function columnas(
       cell: (insumo) =>
         Number(insumo.unit_cost) > 0 ? formatUnitCost(insumo.unit_cost, insumo.unit) : formatMoney(0),
     },
-    { id: 'estado', header: 'Estado', cell: (insumo) => <IngredientStatus ingredient={insumo} /> },
   ]
   if (!canManage) {
     return base
