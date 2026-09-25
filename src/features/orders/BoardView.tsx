@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
 import { activeOrdersQueryKey, fetchActiveOrders } from '../../api/orders'
@@ -8,6 +8,8 @@ import EmptyState from '../../components/EmptyState'
 import Icon from '../../components/Icon'
 import PageHeader from '../../components/PageHeader'
 import { Button } from '../../components/ui/button'
+import { useOrderNoteFlags } from '../../hooks/useOrderNoteFlags'
+import { useCan } from '../../store/session'
 import BoardColumn from './board/BoardColumn'
 import TypeFilter, { type TypeFilterValue } from './board/TypeFilter'
 import CancelOrderDialog from './CancelOrderDialog'
@@ -43,7 +45,12 @@ export default function BoardView() {
   const [tipo, setTipo] = useState<TypeFilterValue>('all')
   const [cobrar, setCobrar] = useState<OrderResponse | null>(null)
   const [cancelar, setCancelar] = useState<OrderResponse | null>(null)
-  const pedidos = activos.data ?? []
+  const pedidos = useMemo(() => activos.data ?? [], [activos.data])
+  const ids = useMemo(() => pedidos.map((order) => order.id), [pedidos])
+  // El tablero ya escucha el canal de avisos: el tema `insights` refresca las
+  // notas desde useLiveUpdates y no hace falta una segunda conexión.
+  const veAlergias = useCan('insights.read')
+  const notas = useOrderNoteFlags(ids, { enabled: veAlergias, live: false })
   const visibles = tipo === 'all' ? pedidos : pedidos.filter((order) => order.type === tipo)
 
   return (
@@ -76,6 +83,7 @@ export default function BoardView() {
               title={columna.title}
               orders={visibles.filter((order) => order.status === columna.status)}
               now={now}
+              flagFor={notas.flagFor}
               onCharge={setCobrar}
               onCancel={setCancelar}
             />

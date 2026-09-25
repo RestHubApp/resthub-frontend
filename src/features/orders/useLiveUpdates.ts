@@ -2,6 +2,7 @@ import { type QueryClient, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
 import { currentUserQueryKey } from '../../api/auth'
+import { orderNotesQueryKey } from '../../api/insights'
 import { ordersQueryKey } from '../../api/orders'
 import { tablesQueryKey } from '../../api/tables'
 import { api } from '../../services/api'
@@ -23,8 +24,10 @@ const KEYS_BY_TOPIC: Readonly<Record<string, readonly (readonly unknown[])[]>> =
   orders: [ordersQueryKey, tablesQueryKey],
   menu: [MENU_KEY],
   permissions: [currentUserQueryKey],
+  // Solo llega al encargado: se clasificaron las notas de un pedido.
+  insights: [orderNotesQueryKey],
 }
-const EVERYTHING = [ordersQueryKey, tablesQueryKey, MENU_KEY] as const
+const EVERYTHING = [ordersQueryKey, tablesQueryKey, MENU_KEY, orderNotesQueryKey] as const
 
 const liveLogger = logger.child({ module: 'realtime' })
 

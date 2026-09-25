@@ -14,13 +14,13 @@ const LATE_MINUTES = 25
 /**
  * Cuanto lleva el pedido en el estado en que esta.
  *
- * En cocina y listo se mide desde el ultimo cambio, que es cuando entro a ese
- * estado; abierto y servido, desde que se abrio. Pasados 15 minutos se tine
+ * En cocina y listo se mide desde que entro a ese estado (`status_changed_at`,
+ * que no cambia al editar una nota); abierto y servido, desde que se abrio. Pasados 15 minutos se tine
  * de ambar y pasados 25 se marca "Demorado", con texto y no solo con color.
  */
 export default function ElapsedTime({ order, now }: ElapsedTimeProps) {
   const vigilado = order.status === 'in_kitchen' || order.status === 'ready'
-  const minutos = minutesSince(vigilado ? order.updated_at : order.created_at, now)
+  const minutos = minutesSince(vigilado ? order.status_changed_at : order.created_at, now)
   const tarde = vigilado && minutos >= LATE_MINUTES
   const alerta = vigilado && minutos >= WARN_MINUTES
 

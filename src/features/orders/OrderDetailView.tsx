@@ -4,6 +4,8 @@ import { useParams } from 'react-router'
 
 import { fetchOrder, orderQueryKey } from '../../api/orders'
 import EmptyState from '../../components/EmptyState'
+import { useOrderNoteFlags } from '../../hooks/useOrderNoteFlags'
+import { useCan } from '../../store/session'
 import BackLink from './BackLink'
 import CancelOrderDialog from './CancelOrderDialog'
 import ChargeDialog from './charge/ChargeDialog'
@@ -30,6 +32,9 @@ export default function OrderDetailView() {
     queryFn: () => fetchOrder(orderId),
     enabled: Number.isInteger(orderId),
   })
+  // Las alergias las ve el encargado; useLiveUpdates ya refresca las notas.
+  const veAlergias = useCan('insights.read')
+  const notas = useOrderNoteFlags(Number.isInteger(orderId) ? [orderId] : [], { enabled: veAlergias, live: false })
   const [dialogo, setDialogo] = useState<'charge' | 'cancel' | null>(null)
   const cerrar = () => {
     setDialogo(null)
@@ -54,7 +59,7 @@ export default function OrderDetailView() {
         <BackLink to="/pedidos" label="Pedidos" />
         <LiveIndicator status={live} />
       </div>
-      <OrderHeader order={order} />
+      <OrderHeader order={order} flagFor={notas.flagFor} />
       <OrderActions
         order={order}
         onCharge={() => {
@@ -65,7 +70,7 @@ export default function OrderDetailView() {
         }}
       />
       <OrderClosedInfo order={order} />
-      <OrderItems order={order} />
+      <OrderItems order={order} flagFor={notas.flagFor} />
       <ChargeDialog order={dialogo === 'charge' ? order : null} onClose={cerrar} />
       <CancelOrderDialog order={dialogo === 'cancel' ? order : null} onClose={cerrar} />
     </div>

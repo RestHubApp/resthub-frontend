@@ -1,4 +1,5 @@
 import type { OrderItemResponse } from '../../api/types'
+import type { OrderNoteFlag } from '../../hooks/useOrderNoteFlags'
 import ItemNote from './ItemNote'
 import { formatMoney } from '../../services/format'
 
@@ -6,10 +7,12 @@ interface OrderItemLineProps {
   readonly item: OrderItemResponse
   /** La cocina no necesita precios; el mesero y la caja, si. */
   readonly showPrice?: boolean
+  /** La lectura de su nota, para marcar una alergia. */
+  readonly flag?: OrderNoteFlag
 }
 
 /** "2 × Lomo saltado", con su nota resaltada debajo. */
-export default function OrderItemLine({ item, showPrice = false }: OrderItemLineProps) {
+export default function OrderItemLine({ item, showPrice = false, flag }: OrderItemLineProps) {
   return (
     <li className="flex flex-col">
       <div className="flex items-baseline gap-2">
@@ -20,7 +23,7 @@ export default function OrderItemLine({ item, showPrice = false }: OrderItemLine
         ) : null}
       </div>
       <div className="pl-9">
-        <ItemNote note={item.notes} />
+        <ItemNote note={item.notes} flag={flag} />
       </div>
     </li>
   )

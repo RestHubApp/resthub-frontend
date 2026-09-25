@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { changeOrderItem, removeOrderItem } from '../../../api/orders'
 import type { ChangeItemRequest, OrderItemResponse } from '../../../api/types'
 import Icon from '../../../components/Icon'
+import type { OrderNoteFlag } from '../../../hooks/useOrderNoteFlags'
 import { Button } from '../../../components/ui/button'
 import ItemNote from '../ItemNote'
 import QuantityStepper from '../QuantityStepper'
@@ -14,6 +15,7 @@ import { formatMoney } from '../../../services/format'
 interface EditableItemProps {
   readonly orderId: number
   readonly item: OrderItemResponse
+  readonly flag?: OrderNoteFlag
 }
 
 /**
@@ -22,7 +24,7 @@ interface EditableItemProps {
  * Solo mientras el pedido no llego a cocina; despues, cambiar un plato es algo
  * que se habla con la cocina y el servidor lo rechaza.
  */
-export default function EditableItem({ orderId, item }: EditableItemProps) {
+export default function EditableItem({ orderId, item, flag }: EditableItemProps) {
   const [editando, setEditando] = useState(false)
   const cambio = useOrderAction({
     mutationFn: (payload: ChangeItemRequest) => changeOrderItem(orderId, item.id, payload),
@@ -58,7 +60,7 @@ export default function EditableItem({ orderId, item }: EditableItemProps) {
           }}
         />
       </div>
-      <ItemNote note={item.notes} />
+      <ItemNote note={item.notes} flag={flag} />
       <Button type="button" variant="ghost" className="h-11 w-fit px-3" onClick={() => {
         setEditando(true)
       }}>
