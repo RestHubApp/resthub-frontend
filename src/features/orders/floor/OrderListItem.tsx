@@ -16,7 +16,7 @@ export default function OrderListItem({ order }: OrderListItemProps) {
       to={`/pedidos/${String(order.id)}`}
       className="flex min-h-16 items-center gap-3 rounded-xl bg-card px-4 py-3 ring-1 ring-foreground/10 outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <span className="font-heading text-lg font-bold tabular-nums">#{order.number}</span>
+      <span className="min-w-12 font-heading text-lg font-bold tabular-nums">#{order.number}</span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate font-medium">{orderPlace(order)}</span>
         <span className="text-sm text-muted-foreground">
