@@ -18,9 +18,18 @@ const CELL_HEIGHT = 28
 const HEADER_HEIGHT = 20
 // Las marcas del pico: un anillo del color de la superficie y otro de tinta.
 const PEAK_RING = '0 0 0 2px var(--card), 0 0 0 4px var(--foreground)'
+const ACTIVE_RING = '0 0 0 2px var(--card), 0 0 0 3px var(--muted-foreground)'
 
-function sameCell(a: HourlyCell, b: HourlyCell | null): boolean {
-  return b !== null && a.weekday === b.weekday && a.hour === b.hour
+function sameCell(a: HourlyCell, b: HourlyCell | null | undefined): boolean {
+  return b?.weekday === a.weekday && b.hour === a.hour
+}
+
+// El pico conserva su anillo; la celda señalada lleva uno más suave.
+function ringFor(cell: HourlyCell, peak: HourlyCell | null, active: HourlyCell | undefined): string | undefined {
+  if (sameCell(cell, peak)) {
+    return PEAK_RING
+  }
+  return sameCell(cell, active) ? ACTIVE_RING : undefined
 }
 
 /**
@@ -71,11 +80,11 @@ export default function Heatmap({ cells, peak, label, describe }: HeatmapProps) 
               onPointerEnter={() => {
                 cursor.setActive(r * columnas + c)
               }}
-              className="rounded-[4px] transition-[filter] hover:brightness-110"
+              className="rounded-[4px]"
               style={{
                 height: CELL_HEIGHT,
                 background: heatColor(heatStep(cell.paid_orders, model.max)),
-                boxShadow: sameCell(cell, peak) ? PEAK_RING : undefined,
+                boxShadow: ringFor(cell, peak, activa),
               }}
             />
           )),
