@@ -226,29 +226,21 @@
 
 /*
  * El boton del widget de accesibilidad vive fijo en la esquina inferior
- * derecha. En el celular, con sesion, esa franja es de la barra de navegacion:
- * se sube por encima para no tapar "Mas" ni quedar debajo del pulgar. El
- * widget fija su posicion con variables en linea, por eso hace falta
- * `!important` para ganarle.
+ * derecha. En el celular, con sesion, esa esquina es de la barra de
+ * navegacion y de los botones "+" de los platos al tomar un pedido: el boton
+ * flotante se oculta y el menu del widget se abre desde "Más". El widget fija
+ * su posicion con estilos en linea, por eso hace falta `!important`.
  */
 @media (width < 64rem) {
   html:has([data-bottom-nav]) .asw-menu-btn {
-    bottom: calc(4.75rem + env(safe-area-inset-bottom)) !important;
+    display: none !important;
   }
 }
-
 
 /*
- * Mientras se toma un pedido, la barra del carrito queda fija al pie (encima
- * de la barra de navegacion en el celular). El boton de accesibilidad sube por
- * encima de ella para no tapar "Enviar a cocina".
+ * En la laptop, mientras se toma un pedido la barra del carrito queda fija al
+ * pie: el boton de accesibilidad sube por encima para no tapar "Enviar a cocina".
  */
-@media (width < 64rem) {
-  html:has([data-cart-bar]) .asw-menu-btn {
-    bottom: calc(9.5rem + env(safe-area-inset-bottom)) !important;
-  }
-}
-
 @media (width >= 64rem) {
   html:has([data-cart-bar]) .asw-menu-btn {
     bottom: 6rem !important;

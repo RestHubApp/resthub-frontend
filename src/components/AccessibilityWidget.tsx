@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import 'sienna-accessibility'
 
 const ETIQUETA_ESPANOL = 'Abrir menú de accesibilidad'
 const ATRIBUTOS_ETIQUETA = ['aria-label', 'title'] as const
@@ -9,7 +8,10 @@ const ATRIBUTOS_ETIQUETA = ['aria-label', 'title'] as const
  *
  * El paquete se auto-inicializa como side-effect al importarse y corre en el
  * navegador del visitante, sin cuenta ni variable de entorno a diferencia de
- * UserWay. Sí hace una llamada externa: publica el locale de cada idioma y la
+ * UserWay. Se importa recién al montar, en su propio archivo: son 65 kB que
+ * la primera pantalla del celular no necesita para dibujarse. En el celular
+ * con sesión el botón flotante se oculta (tapaba el "+" de los platos) y el
+ * menú se abre desde "Más" (ver accessibilityMenu.ts). Sí hace una llamada externa: publica el locale de cada idioma y la
  * fuente de lectura en cdn.jsdelivr.net y los descarga de ahí (el tarball los
  * trae, pero el paquete arma las URL contra el CDN). Aceptamos ese CDN; si
  * está bloqueado, el widget cae al inglés. Al definir una CSP hay que permitir
@@ -27,6 +29,10 @@ const ATRIBUTOS_ETIQUETA = ['aria-label', 'title'] as const
  * mutación del DOM.
  */
 export default function AccessibilityWidget() {
+  useEffect(() => {
+    void import('sienna-accessibility')
+  }, [])
+
   useEffect(() => {
     function parchearBoton(boton: Element) {
       // Solo escribe si cambió: así el propio parche no vuelve a disparar el observer.

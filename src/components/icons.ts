@@ -9,6 +9,7 @@
 // rodea, para que hereden el tono de donde se usen.
 
 import {
+  Accessibility,
   AlignLeft,
   Armchair,
   ArrowDown,
@@ -108,6 +109,7 @@ export const ICONS = {
   personal: UsersRound,
   indicadores: ChartColumnIncreasing,
   perfil: UserRound,
+  accesibilidad: Accessibility,
   pago: Banknote,
   horario: Clock,
   pronto: Hourglass,

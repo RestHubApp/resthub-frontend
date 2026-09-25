@@ -1,13 +1,18 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 
+import { openAccessibilityMenu } from '../../components/accessibilityMenu'
 import Icon from '../../components/Icon'
+import { Button } from '../../components/ui/button'
 import type { CurrentUserResponse } from '../../api/types'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '../../components/ui/sheet'
 import type { NavEntry } from './navigation'
 import NavList from './NavList'
 import SessionActions from './SessionActions'
 import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
+
+// Lo que tarda en cerrarse el panel (la animación de `sheet`).
+const SHEET_CLOSE_MS = 350
 
 interface MoreSheetProps {
   /** Las pantallas que no entraron en la barra. */
@@ -16,7 +21,7 @@ interface MoreSheetProps {
 }
 
 /**
- * El ultimo boton de la barra inferior: lo que no entro y la cuenta.
+ * El ultimo boton de la barra inferior: lo que no entro, la accesibilidad y la cuenta.
  *
  * Se abre desde abajo, donde ya esta el pulgar. Si no sobra ninguna pantalla,
  * como en la cuenta de un mesero, se llama "Cuenta" porque solo lleva el
@@ -48,9 +53,22 @@ export default function MoreSheet({ entries, account }: MoreSheetProps) {
       >
         <SheetTitle className="m-0 px-3 font-heading text-lg font-semibold">{etiqueta}</SheetTitle>
         <SheetDescription className="sr-only">
-          Otras pantallas, tu perfil y la salida.
+          Otras pantallas, accesibilidad, tu perfil y la salida.
         </SheetDescription>
         {entries.length > 0 ? <NavList entries={entries} onNavigate={close} /> : null}
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-11 justify-start gap-3 px-3"
+          onClick={() => {
+            close()
+            // El menú del widget se abre cuando el panel ya soltó el foco.
+            window.setTimeout(openAccessibilityMenu, SHEET_CLOSE_MS)
+          }}
+        >
+          <Icon name="accesibilidad" size={18} />
+          <span>Accesibilidad</span>
+        </Button>
         <SessionActions
           fullName={account.user.full_name}
           roleLabel={account.user.role_label}
