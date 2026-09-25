@@ -11,6 +11,9 @@
 import {
   AlignLeft,
   Armchair,
+  ArrowDown,
+  ArrowLeftRight,
+  ArrowUp,
   Banknote,
   Boxes,
   Calendar,
@@ -22,8 +25,10 @@ import {
   ChevronsUpDown,
   CircleAlert,
   CircleX,
+  ClipboardCheck,
   ClipboardList,
   Clock,
+  Coins,
   Ellipsis,
   Eye,
   EyeOff,
@@ -37,12 +42,18 @@ import {
   type LucideIcon,
   Mail,
   Menu,
+  PackageMinus,
   Pencil,
   Phone,
   Plus,
   Power,
+  ScrollText,
   Search,
+  ShoppingCart,
   Store,
+  Tag,
+  Trash2,
+  TriangleAlert,
   UserCog,
   UserRound,
   UsersRound,
@@ -50,8 +61,6 @@ import {
 } from 'lucide-react'
 // Pedidos, tablero y cobro.
 import {
-  ArrowDown,
-  ArrowUp,
   CircleCheckBig,
   ConciergeBell,
   History,
@@ -61,8 +70,6 @@ import {
   Send,
   ShoppingBag,
   StickyNote,
-  Trash2,
-  TriangleAlert,
   WifiOff,
 } from 'lucide-react'
 
@@ -118,6 +125,15 @@ export const ICONS = {
   enVivo: Radio,
   sinConexion: WifiOff,
   reintentar: RefreshCw,
+  // Menú e inventario.
+  precio: Tag,
+  costo: Coins,
+  compra: ShoppingCart,
+  merma: PackageMinus,
+  conteo: ClipboardCheck,
+  receta: ScrollText,
+  movimientos: ArrowLeftRight,
+  aviso: TriangleAlert,
 
   // Campos de formulario: acompañan a la etiqueta, no la reemplazan.
   correo: Mail,

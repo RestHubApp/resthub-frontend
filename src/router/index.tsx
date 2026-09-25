@@ -9,6 +9,9 @@ import HistoryView from '../features/orders/HistoryView'
 import NewOrderView from '../features/orders/NewOrderView'
 import OrderDetailView from '../features/orders/OrderDetailView'
 import OrdersView from '../features/orders/OrdersView'
+import InventoryView from '../features/inventory/InventoryView'
+import RecipeEditorView from '../features/inventory/RecipeEditorView'
+import MenuView from '../features/menu/MenuView'
 import AppShell from '../features/shell/AppShell'
 import ComingSoonView from '../features/shell/ComingSoonView'
 import HomeRedirect from '../features/shell/HomeRedirect'
@@ -46,8 +49,6 @@ const router = createBrowserRouter(
           element: <RequireSession />,
           children: [{ path: 'perfil', Component: ProfileView }],
         },
-        // Las pantallas sin construir ya tienen su ruta y su permiso: se
-        // reemplaza ComingSoonView por la vista cuando exista.
         {
           element: <RequireSession permission="orders.take" />,
           children: [
@@ -59,9 +60,12 @@ const router = createBrowserRouter(
         },
         conPermiso('tablero', BoardView, 'orders.read_all'),
         conPermiso('tablero/historial', HistoryView, 'orders.read_all'),
-        conPermiso('menu', ComingSoonView, 'menu.manage'),
+        conPermiso('menu', MenuView, 'menu.manage'),
         conPermiso('mesas', TablesView, 'tables.manage'),
-        conPermiso('inventario', ComingSoonView, 'inventory.read'),
+        conPermiso('inventario', InventoryView, 'inventory.read'),
+        conPermiso('inventario/recetas/:menuItemId', RecipeEditorView, 'inventory.read'),
+        // Las pantallas sin construir ya tienen su ruta y su permiso: se
+        // reemplaza ComingSoonView por la vista cuando exista.
         conPermiso('personal', StaffView, 'staff.manage'),
         conPermiso('panel', ComingSoonView, 'insights.read'),
         // Cualquier ruta que no exista lleva al inicio de cada cuenta, no a un error.
