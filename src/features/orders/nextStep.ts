@@ -1,6 +1,7 @@
 import type { OrderStep } from '../../api/orders'
 import type { OrderResponse, OrderStatus, PermissionCode } from '../../api/types'
 import type { IconName } from '../../components/icons'
+import { STATUS_LABELS } from './orderLabels'
 
 /** Lo siguiente que se hace con un pedido en cada estado, y quien puede hacerlo. */
 export interface NextStep {
@@ -26,21 +27,21 @@ const STEPS: Partial<Record<OrderStatus, NextStep>> = {
     icon: 'listo',
     action: 'ready',
     permission: 'orders.manage',
-    waiting: 'En cocina. Esta pantalla avisa sola cuando esté listo.',
+    waiting: 'En cocina: esta pantalla avisa sola cuando esté listo.',
   },
   ready: {
     label: 'Marcar servido',
     icon: 'servir',
     action: 'served',
     permission: 'orders.take',
-    waiting: 'Listo para servir.',
+    waiting: 'Listo: falta servirlo.',
   },
   served: {
     label: 'Cobrar',
     icon: 'pago',
     action: 'charge',
     permission: 'orders.charge',
-    waiting: 'Servido: lo cobra el encargado en caja.',
+    waiting: 'Servido, por cobrar: lo cobra el encargado en caja.',
   },
 }
 
@@ -49,12 +50,7 @@ export function nextStepFor(status: OrderStatus): NextStep | undefined {
 }
 
 // El aviso sale del estado en que quedo el pedido, no del boton que se toco.
-const DONE: Partial<Record<OrderStatus, string>> = {
-  in_kitchen: 'enviado a cocina',
-  ready: 'listo para servir',
-  served: 'servido',
-}
-
+// Dice el mismo nombre del estado que la insignia y la columna del tablero.
 export function stepDoneMessage(order: OrderResponse): string {
-  return `Pedido #${String(order.number)} ${DONE[order.status] ?? 'actualizado'}.`
+  return `Pedido #${String(order.number)}: ${STATUS_LABELS[order.status].toLowerCase()}.`
 }

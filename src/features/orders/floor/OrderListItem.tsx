@@ -26,7 +26,7 @@ export default function OrderListItem({ order }: OrderListItemProps) {
         </span>
       </span>
       <span className="flex flex-col items-end gap-1">
-        <OrderStatusBadge status={order.status} label={order.status_label} />
+        <OrderStatusBadge status={order.status} />
         <span className="text-sm font-semibold tabular-nums">{formatMoney(order.total)}</span>
       </span>
     </Link>

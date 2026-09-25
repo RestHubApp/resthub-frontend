@@ -47,7 +47,7 @@ export default function TableCard({ table }: TableCardProps) {
     >
       <span className="flex items-start justify-between gap-2">
         <span className="font-heading text-xl font-bold">{nombre}</span>
-        <OrderStatusBadge status={order.status} label={order.status_label} />
+        <OrderStatusBadge status={order.status} />
       </span>
       <span className="text-sm font-semibold tabular-nums">
         #{order.number} · {formatMoney(order.total)}
@@ -55,7 +55,7 @@ export default function TableCard({ table }: TableCardProps) {
       {order.status === 'ready' ? (
         <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-success">
           <Icon name="servir" size={16} />
-          Listo para servir
+          Falta servirlo
         </span>
       ) : (
         <span className="mt-auto truncate text-sm text-foreground/75">

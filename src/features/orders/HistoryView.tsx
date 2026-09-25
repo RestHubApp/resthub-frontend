@@ -26,7 +26,7 @@ function columnas(timeZone: string): DataColumn<OrderResponse>[] {
   { id: 'fecha', header: 'Abierto', cell: (order) => formatDateTime(order.created_at, timeZone) },
   { id: 'lugar', header: 'Mesa o cliente', cell: (order) => orderPlace(order), className: 'whitespace-normal' },
   { id: 'mesero', header: 'Mesero', cell: (order) => order.waiter_name },
-  { id: 'estado', header: 'Estado', cell: (order) => <OrderStatusBadge status={order.status} label={order.status_label} /> },
+  { id: 'estado', header: 'Estado', cell: (order) => <OrderStatusBadge status={order.status} /> },
   { id: 'pago', header: 'Pago', cell: (order) => order.payment_method_label ?? '—' },
   { id: 'total', header: 'Total', cell: (order) => formatMoney(order.total), className: 'text-right tabular-nums' },
   {
@@ -73,7 +73,7 @@ export default function HistoryView() {
   return (
     <div className="flex flex-col gap-5">
       <BackLink to="/tablero" label="Tablero" />
-      <PageHeader title="Historial de pedidos" description="Todos los pedidos, cobrados, cancelados o en curso." />
+      <PageHeader title="Historial de pedidos" description="Todos los pedidos: pagados, cancelados o en curso." />
       <SectionCard title="Filtros" as="h2">
         <HistoryFiltersBar
           value={filtros}

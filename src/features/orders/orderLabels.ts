@@ -2,8 +2,19 @@ import type { OrderResponse, OrderStatus, OrderType, PaymentMethod } from '../..
 import { tableName } from '../../api/tables'
 import type { StatusTone } from '../../components/StatusBadge'
 
-// El texto de estados y medios de pago lo manda el servidor (`*_label`). Estas
-// tablas solo dicen como se ven y en que orden van.
+// El nombre de cada estado es uno solo en toda la aplicacion: la insignia, la
+// columna del tablero, el filtro del historial y los avisos dicen lo mismo.
+// "Servido, por cobrar" y no solo "Servido" porque es lo que falta hacer. Los
+// medios de pago usan el texto del servidor (`payment_method_label`).
+
+export const STATUS_LABELS: Record<OrderStatus, string> = {
+  open: 'Abierto',
+  in_kitchen: 'En cocina',
+  ready: 'Listo',
+  served: 'Servido, por cobrar',
+  paid: 'Pagado',
+  cancelled: 'Cancelado',
+}
 
 /** El tono de cada estado. El texto siempre acompana: el color no es la unica senal. */
 export const STATUS_TONE: Record<OrderStatus, StatusTone | undefined> = {
@@ -15,14 +26,12 @@ export const STATUS_TONE: Record<OrderStatus, StatusTone | undefined> = {
   cancelled: 'cancelled',
 }
 
-export const STATUS_OPTIONS: readonly { value: OrderStatus; label: string }[] = [
-  { value: 'open', label: 'Abierto' },
-  { value: 'in_kitchen', label: 'En cocina' },
-  { value: 'ready', label: 'Listo' },
-  { value: 'served', label: 'Servido' },
-  { value: 'paid', label: 'Pagado' },
-  { value: 'cancelled', label: 'Cancelado' },
-]
+const STATUS_ORDER: readonly OrderStatus[] = ['open', 'in_kitchen', 'ready', 'served', 'paid', 'cancelled']
+
+export const STATUS_OPTIONS: readonly { value: OrderStatus; label: string }[] = STATUS_ORDER.map((value) => ({
+  value,
+  label: STATUS_LABELS[value],
+}))
 
 export const TYPE_OPTIONS: readonly { value: OrderType; label: string }[] = [
   { value: 'dine_in', label: 'En mesa' },

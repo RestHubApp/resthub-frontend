@@ -21,7 +21,7 @@ export default function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
       <div role="status" className="flex flex-col items-center gap-2 rounded-xl bg-success/10 px-4 py-5 text-center text-success">
         <Icon name="listo" size={32} />
         <p className="m-0 font-semibold">
-          Pedido #{order.number} cobrado con {order.payment_method_label ?? 'el medio elegido'}
+          Pedido #{order.number} pagado con {order.payment_method_label ?? 'el medio elegido'}
         </p>
         {vuelto === null ? (
           <p className="m-0 text-2xl font-bold tabular-nums">{formatMoney(order.total)}</p>
@@ -41,7 +41,7 @@ export default function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
         </dl>
       )}
       <Button type="button" size="lg" className="h-11" onClick={onClose}>
-        Listo
+        Cerrar
       </Button>
     </div>
   )

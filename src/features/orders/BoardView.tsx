@@ -17,14 +17,10 @@ import ChargeDialog from './charge/ChargeDialog'
 import LiveIndicator from './LiveIndicator'
 import QueryError from './QueryError'
 import { useLiveUpdates } from './useLiveUpdates'
+import { STATUS_LABELS } from './orderLabels'
 import { useNow } from './useNow'
 
-const COLUMNAS: readonly { status: OrderStatus; title: string }[] = [
-  { status: 'open', title: 'Abierto' },
-  { status: 'in_kitchen', title: 'En cocina' },
-  { status: 'ready', title: 'Listo' },
-  { status: 'served', title: 'Servido, por cobrar' },
-]
+const COLUMNAS: readonly OrderStatus[] = ['open', 'in_kitchen', 'ready', 'served']
 
 function contar(orders: readonly OrderResponse[]): Record<TypeFilterValue, number> {
   const enMesa = orders.filter((order) => order.type === 'dine_in').length
@@ -79,9 +75,9 @@ export default function BoardView() {
         <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
           {COLUMNAS.map((columna) => (
             <BoardColumn
-              key={columna.status}
-              title={columna.title}
-              orders={visibles.filter((order) => order.status === columna.status)}
+              key={columna}
+              title={STATUS_LABELS[columna]}
+              orders={visibles.filter((order) => order.status === columna)}
               now={now}
               flagFor={notas.flagFor}
               onCharge={setCobrar}

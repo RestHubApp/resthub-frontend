@@ -23,7 +23,7 @@ export default function OrderClosedInfo({ order }: OrderClosedInfoProps) {
   }
   return (
     <dl className="m-0 grid grid-cols-2 gap-y-1 rounded-lg bg-success/10 px-4 py-3 text-sm text-success">
-      <dt>Cobrado con</dt>
+      <dt>Pagado con</dt>
       <dd className="m-0 text-right font-semibold">{order.payment_method_label}</dd>
       {order.amount_received === null ? null : (
         <>

@@ -21,7 +21,7 @@ export default function OrderHeader({ order, flagFor }: OrderHeaderProps) {
         <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-primary sm:text-3xl">
           Pedido #{order.number}
         </h1>
-        <OrderStatusBadge status={order.status} label={order.status_label} />
+        <OrderStatusBadge status={order.status} />
         {allergyIn(order, flagFor) === undefined ? null : <AllergyAlert />}
       </div>
       <p className="m-0 text-lg font-semibold">{orderPlace(order)}</p>
