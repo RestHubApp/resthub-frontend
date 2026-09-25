@@ -67,7 +67,14 @@
  *   un borde de campo; `--border`, que solo separa, puede ser mas claro;
  * - `--success` #1e7b34 da 5,3 a 1 y `--warning` #8a6100 da 5,5 a 1 con blanco.
  *
- * No hay tema oscuro: ninguna pantalla lo ofrece todavia.
+ * Los colores de graficos siguen la guia de visualizacion y pasaron el
+ * validador de paleta contra `--card` en claro y en oscuro:
+ *
+ * - `--chart-1..5` es la paleta categorica, en ese orden fijo (terracota,
+ *   violeta, verde azulado, azul, magenta). Ningun tono repite un color de
+ *   estado: el exito, el aviso y el peligro quedan reservados.
+ * - `--chart-seq-1..5` es la rampa secuencial de un solo tono (terracota) para
+ *   magnitudes, como el mapa de calor; `--chart-empty` marca el cero.
  */
 :root {
     --background: #faf7f2;
@@ -91,11 +98,20 @@
     --border: #e7dfd6;
     --input: #8c7f76;
     --ring: #c2410c;
-    --chart-1: #9a3412;
-    --chart-2: #1e7b34;
-    --chart-3: #c2410c;
-    --chart-4: #8a6100;
-    --chart-5: #655a52;
+    --chart-1: #c2410c;
+    --chart-2: #6b4fc8;
+    --chart-3: #0e8a6a;
+    --chart-4: #2a6fcf;
+    --chart-5: #b8457f;
+    --chart-seq-1: #f2a27c;
+    --chart-seq-2: #e07a4b;
+    --chart-seq-3: #c2410c;
+    --chart-seq-4: #973110;
+    --chart-seq-5: #6b230c;
+    --chart-empty: #f3eee8;
+    --chart-grid: #ede6de;
+    --chart-axis: #d6ccc2;
+    --chart-area: rgb(194 65 12 / 0.1);
     --radius: 0.625rem;
     --sidebar: #ffffff;
     --sidebar-foreground: #2b2521;
@@ -105,6 +121,59 @@
     --sidebar-accent-foreground: #7c2d12;
     --sidebar-border: #e7dfd6;
     --sidebar-ring: #c2410c;
+}
+
+/*
+ * Tema oscuro. Se activa con la clase `dark` en <html>; ninguna pantalla la
+ * pone todavia. Cada color se eligio para la superficie oscura (no es una
+ * inversion automatica) y cumple AA: el texto da 14,5 a 1 sobre `--card`, el
+ * texto apagado 7,2 a 1, y los graficos pasaron el validador contra #201b18.
+ */
+.dark {
+    --background: #171311;
+    --foreground: #f2ece6;
+    --card: #201b18;
+    --card-foreground: #f2ece6;
+    --popover: #26201c;
+    --popover-foreground: #f2ece6;
+    --primary: #e0703f;
+    --primary-foreground: #1a1310;
+    --secondary: #3a261c;
+    --secondary-foreground: #f6c4a8;
+    --muted: #2a2420;
+    --muted-foreground: #b3a79d;
+    --accent: #3a261c;
+    --accent-foreground: #f6c4a8;
+    --destructive: #f06a6a;
+    --success: #4cb86a;
+    --success-foreground: #0f1a12;
+    --warning: #d9a02b;
+    --border: #3a322d;
+    --input: #7a6d64;
+    --ring: #e0703f;
+    --chart-1: #e0703f;
+    --chart-2: #9582ea;
+    --chart-3: #1f9e7b;
+    --chart-4: #4f8fe6;
+    --chart-5: #d65c95;
+    --chart-seq-1: #8a3a1a;
+    --chart-seq-2: #b04a1f;
+    --chart-seq-3: #d4622d;
+    --chart-seq-4: #ec8551;
+    --chart-seq-5: #f9b08a;
+    --chart-empty: #2c2622;
+    --chart-grid: #2f2824;
+    --chart-axis: #4a403a;
+    --chart-area: rgb(224 112 63 / 0.12);
+    --sidebar: #1d1815;
+    --sidebar-foreground: #f2ece6;
+    --sidebar-primary: #e0703f;
+    --sidebar-primary-foreground: #1a1310;
+    --sidebar-accent: #3a261c;
+    --sidebar-accent-foreground: #f6c4a8;
+    --sidebar-border: #3a322d;
+    --sidebar-ring: #e0703f;
+    color-scheme: dark;
 }
 
 @layer base {
