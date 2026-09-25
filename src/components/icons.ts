@@ -48,6 +48,27 @@ import {
   UsersRound,
   UtensilsCrossed,
 } from 'lucide-react'
+// Panel BI e IA.
+import {
+  ArrowDownWideNarrow,
+  ArrowUpDown,
+  ArrowUpNarrowWide,
+  ChartLine,
+  ChevronDown,
+  CircleCheck,
+  ListChecks,
+  MoveRight,
+  OctagonAlert,
+  PackageX,
+  RotateCw,
+  ScanSearch,
+  ShieldAlert,
+  ShoppingBasket,
+  Sparkles,
+  Table2,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react'
 
 export const ICONS = {
   // Navegacion y dominio.
@@ -85,6 +106,26 @@ export const ICONS = {
 
   // Estado.
   alerta: CircleAlert,
+
+  // Panel BI e IA.
+  alergico: ShieldAlert,
+  actualizar: RotateCw,
+  tendenciaSube: TrendingUp,
+  tendenciaBaja: TrendingDown,
+  tendenciaEstable: MoveRight,
+  ordenar: ArrowUpDown,
+  ordenAscendente: ArrowUpNarrowWide,
+  ordenDescendente: ArrowDownWideNarrow,
+  ia: Sparkles,
+  reglas: ListChecks,
+  tabla: Table2,
+  grafico: ChartLine,
+  comprar: ShoppingBasket,
+  critico: OctagonAlert,
+  desperdicio: PackageX,
+  revisar: ScanSearch,
+  correcto: CircleCheck,
+  expandir: ChevronDown,
 
   // Campos de formulario: acompañan a la etiqueta, no la reemplazan.
   correo: Mail,
