@@ -5,6 +5,11 @@ interface AllergyBadgeProps {
   /** Lo que devuelve `flagFor(pedido, ítem)` de `useOrderNoteFlags`. */
   readonly flag: OrderNoteFlag | undefined
   readonly className?: string
+  /**
+   * Repite la nota para el lector de pantalla. Va en `false` cuando la nota
+   * ya se lee al lado, para no anunciarla dos veces.
+   */
+  readonly withNote?: boolean
 }
 
 const PERCENT = 100
@@ -23,7 +28,7 @@ function tooltip(flag: OrderNoteFlag): string {
  * o restricción; si la nota sigue pendiente o es una preferencia, no dibuja
  * nada. Lleva ícono y la palabra "Alergia": el rojo nunca va solo.
  */
-export default function AllergyBadge({ flag, className }: AllergyBadgeProps) {
+export default function AllergyBadge({ flag, className, withNote = true }: AllergyBadgeProps) {
   if (flag?.mentions_allergy !== true) {
     return null
   }
@@ -34,7 +39,7 @@ export default function AllergyBadge({ flag, className }: AllergyBadgeProps) {
     >
       <Icon name="alergico" size={14} />
       Alergia
-      <span className="sr-only">{`: ${flag.note}`}</span>
+      {withNote ? <span className="sr-only">{`: ${flag.note}`}</span> : null}
     </span>
   )
 }
