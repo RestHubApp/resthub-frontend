@@ -45,8 +45,8 @@ export default function TableCard({ table }: TableCardProps) {
       to={`/pedidos/${String(order.id)}`}
       className={`${BASE} bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)] ${order.status === 'ready' ? 'ring-2 ring-success' : 'ring-1 ring-primary/25'}`}
     >
-      <span className="flex items-start justify-between gap-2">
-        <span className="font-heading text-xl font-bold">{nombre}</span>
+      <span className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
+        <span className="font-heading text-xl font-bold whitespace-nowrap">{nombre}</span>
         <OrderStatusBadge status={order.status} />
       </span>
       <span className="text-sm font-semibold tabular-nums">
