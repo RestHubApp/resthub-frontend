@@ -48,6 +48,23 @@ import {
   UsersRound,
   UtensilsCrossed,
 } from 'lucide-react'
+// Pedidos, tablero y cobro.
+import {
+  ArrowDown,
+  ArrowUp,
+  CircleCheckBig,
+  ConciergeBell,
+  History,
+  Minus,
+  Radio,
+  RefreshCw,
+  Send,
+  ShoppingBag,
+  StickyNote,
+  Trash2,
+  TriangleAlert,
+  WifiOff,
+} from 'lucide-react'
 
 export const ICONS = {
   // Navegacion y dominio.
@@ -85,6 +102,22 @@ export const ICONS = {
 
   // Estado.
   alerta: CircleAlert,
+
+  // Pedidos, tablero y cobro.
+  quitar: Minus,
+  eliminar: Trash2,
+  llevar: ShoppingBag,
+  enviar: Send,
+  servir: ConciergeBell,
+  listo: CircleCheckBig,
+  nota: StickyNote,
+  alergia: TriangleAlert,
+  historial: History,
+  subir: ArrowUp,
+  bajar: ArrowDown,
+  enVivo: Radio,
+  sinConexion: WifiOff,
+  reintentar: RefreshCw,
 
   // Campos de formulario: acompañan a la etiqueta, no la reemplazan.
   correo: Mail,
