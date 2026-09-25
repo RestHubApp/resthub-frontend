@@ -713,6 +713,261 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/insights/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ventas, pedidos, ticket promedio y cancelados, contra el período anterior */
+        get: operations["sales_summary_api_v1_insights_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/sales/daily": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ventas por día */
+        get: operations["daily_sales_api_v1_insights_sales_daily_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/sales/hourly": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ventas por día de la semana y hora (mapa de calor) */
+        get: operations["hourly_sales_api_v1_insights_sales_hourly_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ingresos por medio de pago */
+        get: operations["payment_mix_api_v1_insights_payments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/waiters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pedidos y ventas por mesero */
+        get: operations["waiter_performance_api_v1_insights_waiters_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/dishes/top": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Platos más vendidos */
+        get: operations["top_dishes_api_v1_insights_dishes_top_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/dishes/margins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Margen por plato: precio menos costo de receta, y lo que dejó en el rango */
+        get: operations["dish_margins_api_v1_insights_dishes_margins_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/low-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Insumos bajo el mínimo, del más comprometido al menos */
+        get: operations["low_stock_api_v1_insights_low_stock_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/waste": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mermas del rango por insumo y por causa */
+        get: operations["waste_report_api_v1_insights_waste_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/waste/classify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clasificar la causa de las mermas que todavía no la tienen */
+        post: operations["classify_waste_api_v1_insights_waste_classify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/restock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sugerencia de compra por insumo (la última guardada, sin llamar a la IA) */
+        get: operations["read_restock_api_v1_insights_restock_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/restock/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recalcular y decidir de nuevo la compra de cada insumo */
+        post: operations["refresh_restock_api_v1_insights_restock_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/order-notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Clasificación de las notas de unos pedidos (alergias para el tablero) */
+        get: operations["read_order_notes_api_v1_insights_order_notes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/order-notes/classify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clasificar las notas aún sin clasificar de los pedidos en curso */
+        post: operations["classify_order_notes_api_v1_insights_order_notes_classify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/insights/ai-decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Decisiones de la IA y de las reglas, de la más nueva a la más vieja */
+        get: operations["list_ai_decisions_api_v1_insights_ai_decisions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -779,7 +1034,7 @@ export interface components {
          *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
          * @enum {string}
          */
-        ActivityKind: "signed_in" | "password_changed" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_cancelled" | "order_charged" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated";
+        ActivityKind: "signed_in" | "password_changed" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_cancelled" | "order_charged" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified";
         /** ActivityPageResponse */
         ActivityPageResponse: {
             /** Items */
@@ -826,10 +1081,59 @@ export interface components {
             /** Counted Stock */
             counted_stock?: number | string | null;
         };
+        /** AiDecisionPageResponse */
+        AiDecisionPageResponse: {
+            /** Items */
+            items: components["schemas"]["AiDecisionResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** AiDecisionResponse */
+        AiDecisionResponse: {
+            /** Id */
+            id: number;
+            kind: components["schemas"]["DecisionKind"];
+            /** Kind Label */
+            kind_label: string;
+            subject_type: components["schemas"]["SubjectType"];
+            /** Subject Id */
+            subject_id: number;
+            engine: components["schemas"]["Engine"];
+            /** Engine Label */
+            engine_label: string;
+            /** Model */
+            model: string | null;
+            /** Confidence */
+            confidence: number | null;
+            fallback_reason: components["schemas"]["FallbackReason"] | null;
+            /** Fallback Label */
+            fallback_label: string | null;
+            /** Input State */
+            input_state: {
+                [key: string]: unknown;
+            };
+            /** Output */
+            output: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /** CancelOrderRequest */
         CancelOrderRequest: {
             /** Reason */
             reason: string;
+        };
+        /** CauseCount */
+        CauseCount: {
+            cause: components["schemas"]["WasteCause"];
+            /** Label */
+            label: string;
+            /** Count */
+            count: number;
         };
         /** ChangeItemRequest */
         ChangeItemRequest: {
@@ -855,6 +1159,26 @@ export interface components {
             payment_method: components["schemas"]["PaymentMethod"];
             /** Amount Received */
             amount_received?: number | string | null;
+        };
+        /** ClassifyNotesResponse */
+        ClassifyNotesResponse: {
+            /** Classified */
+            classified: number;
+            /** Already Classified */
+            already_classified: number;
+            /** Allergies */
+            allergies: number;
+            /** Items */
+            items: components["schemas"]["NoteClassificationResponse"][];
+        };
+        /** ClassifyWasteResponse */
+        ClassifyWasteResponse: {
+            /** Classified */
+            classified: number;
+            /** Remaining */
+            remaining: number;
+            /** By Cause */
+            by_cause: components["schemas"]["CauseCount"][];
         };
         /** CreateCategoryRequest */
         CreateCategoryRequest: {
@@ -901,6 +1225,31 @@ export interface components {
             /** Label */
             label: string;
         };
+        /** DailySalesPoint */
+        DailySalesPoint: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Sales */
+            sales: string;
+            /** Paid Orders */
+            paid_orders: number;
+            /** Average Ticket */
+            average_ticket: string;
+        };
+        /** DailySalesResponse */
+        DailySalesResponse: {
+            period: components["schemas"]["PeriodResponse"];
+            /** Days */
+            days: components["schemas"]["DailySalesPoint"][];
+        };
+        /**
+         * DecisionKind
+         * @enum {string}
+         */
+        DecisionKind: "restock" | "order_note" | "waste_cause";
         /** DishCostResponse */
         DishCostResponse: {
             /** Menu Item Id */
@@ -920,6 +1269,48 @@ export interface components {
             /** Margin Percent */
             margin_percent: string | null;
         };
+        /** DishMarginResponse */
+        DishMarginResponse: {
+            /** Menu Item Id */
+            menu_item_id: number;
+            /** Name */
+            name: string;
+            /** Category */
+            category: string;
+            /** Price */
+            price: string;
+            /** Recipe Cost */
+            recipe_cost: string | null;
+            /** Unit Margin */
+            unit_margin: string | null;
+            /** Margin Percent */
+            margin_percent: string | null;
+            /** Quantity Sold */
+            quantity_sold: number;
+            /** Revenue */
+            revenue: string;
+            /** Estimated Cost */
+            estimated_cost: string | null;
+            /** Gross Margin */
+            gross_margin: string | null;
+        };
+        /** DishMarginsResponse */
+        DishMarginsResponse: {
+            period: components["schemas"]["PeriodResponse"];
+            /** Dishes */
+            dishes: components["schemas"]["DishMarginResponse"][];
+        };
+        /**
+         * Engine
+         * @enum {string}
+         */
+        Engine: "jev" | "rules";
+        /**
+         * FallbackReason
+         * @description Por qué decidieron las reglas y no Jev.
+         * @enum {string}
+         */
+        FallbackReason: "not_configured" | "unavailable" | "low_confidence";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -939,6 +1330,28 @@ export interface components {
             service: string;
             /** Version */
             version: string;
+        };
+        /** HourlyCellResponse */
+        HourlyCellResponse: {
+            /** Weekday */
+            weekday: number;
+            /** Weekday Label */
+            weekday_label: string;
+            /** Hour */
+            hour: number;
+            /** Paid Orders */
+            paid_orders: number;
+            /** Sales */
+            sales: string;
+            /** Average Sales */
+            average_sales: string;
+        };
+        /** HourlySalesResponse */
+        HourlySalesResponse: {
+            period: components["schemas"]["PeriodResponse"];
+            /** Cells */
+            cells: components["schemas"]["HourlyCellResponse"][];
+            peak: components["schemas"]["HourlyCellResponse"] | null;
         };
         /** IngredientResponse */
         IngredientResponse: {
@@ -976,6 +1389,21 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+        };
+        /** LowStockResponse */
+        LowStockResponse: {
+            /** Ingredient Id */
+            ingredient_id: number;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string;
+            /** Stock */
+            stock: string;
+            /** Min Stock */
+            min_stock: string;
+            /** Missing */
+            missing: string;
         };
         /** MenuCategoryResponse */
         MenuCategoryResponse: {
@@ -1097,6 +1525,44 @@ export interface components {
              */
             notes: string;
         };
+        /** NoteClassificationResponse */
+        NoteClassificationResponse: {
+            /** Order Id */
+            order_id: number;
+            /** Order Item Id */
+            order_item_id: number | null;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "item" | "order";
+            /** Dish Name */
+            dish_name: string;
+            /** Note */
+            note: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "classified" | "pending";
+            /** Mentions Allergy */
+            mentions_allergy: boolean | null;
+            note_type: components["schemas"]["NoteType"] | null;
+            /** Note Type Label */
+            note_type_label: string | null;
+            /** Allergy Probability */
+            allergy_probability: number | null;
+            /** Confidence */
+            confidence: number | null;
+            engine: components["schemas"]["Engine"] | null;
+            /** Decided At */
+            decided_at: string | null;
+        };
+        /**
+         * NoteType
+         * @enum {string}
+         */
+        NoteType: "allergy" | "preference" | "priority" | "other";
         /** OpenOrderRequest */
         OpenOrderRequest: {
             type: components["schemas"]["OrderType"];
@@ -1136,6 +1602,11 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** OrderNotesResponse */
+        OrderNotesResponse: {
+            /** Items */
+            items: components["schemas"]["NoteClassificationResponse"][];
         };
         /** OrderPageResponse */
         OrderPageResponse: {
@@ -1218,11 +1689,72 @@ export interface components {
          * @enum {string}
          */
         PaymentMethod: "cash" | "yape" | "plin" | "card" | "transfer";
+        /** PaymentMixResponse */
+        PaymentMixResponse: {
+            period: components["schemas"]["PeriodResponse"];
+            /** Total */
+            total: string;
+            /** Methods */
+            methods: components["schemas"]["PaymentShareResponse"][];
+        };
+        /** PaymentShareResponse */
+        PaymentShareResponse: {
+            /** Method */
+            method: string;
+            /** Label */
+            label: string;
+            /** Paid Orders */
+            paid_orders: number;
+            /** Amount */
+            amount: string;
+            /** Share Percent */
+            share_percent: string;
+        };
+        /** PeriodResponse */
+        PeriodResponse: {
+            /**
+             * Date From
+             * Format: date
+             */
+            date_from: string;
+            /**
+             * Date To
+             * Format: date
+             */
+            date_to: string;
+            /** Days */
+            days: number;
+            /** Timezone */
+            timezone: string;
+        };
         /**
          * Permission
          * @enum {string}
          */
         Permission: "menu.read" | "menu.manage" | "tables.read" | "tables.manage" | "orders.take" | "orders.read_all" | "orders.manage" | "orders.charge" | "inventory.read" | "inventory.manage" | "staff.manage" | "restaurant.manage" | "insights.read" | "activity.read";
+        /** PreviousTotals */
+        PreviousTotals: {
+            /** Sales */
+            sales: string;
+            /** Paid Orders */
+            paid_orders: number;
+            /** Average Ticket */
+            average_ticket: string;
+            /** Cancelled Orders */
+            cancelled_orders: number;
+            /** Cancelled Amount */
+            cancelled_amount: string;
+            /**
+             * Date From
+             * Format: date
+             */
+            date_from: string;
+            /**
+             * Date To
+             * Format: date
+             */
+            date_to: string;
+        };
         /** PurchaseRequest */
         PurchaseRequest: {
             /** Ingredient Id */
@@ -1337,6 +1869,82 @@ export interface components {
             created_at: string;
         };
         /**
+         * RestockAction
+         * @enum {string}
+         */
+        RestockAction: "buy_today" | "buy_this_week" | "wait" | "review_waste";
+        /** RestockItemResponse */
+        RestockItemResponse: {
+            /** Ingredient Id */
+            ingredient_id: number;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string;
+            /** Stock */
+            stock: string;
+            /** Min Stock */
+            min_stock: string;
+            /** Below Minimum */
+            below_minimum: boolean;
+            /** Daily Use 7D */
+            daily_use_7d: string;
+            /** Daily Use 28D */
+            daily_use_28d: string;
+            /** Coverage Days */
+            coverage_days: string | null;
+            /** Trend */
+            trend: string;
+            /** Trend Label */
+            trend_label: string;
+            /** Usage Change Percent */
+            usage_change_percent: string | null;
+            /** Wasted 28D */
+            wasted_28d: string;
+            /** Waste Share Percent */
+            waste_share_percent: string;
+            /** Days Since Last Purchase */
+            days_since_last_purchase: number | null;
+            action: components["schemas"]["RestockAction"];
+            /** Action Label */
+            action_label: string;
+            /** Urgency */
+            urgency: number;
+            /** Urgency Label */
+            urgency_label: string;
+            /** Urgency Score */
+            urgency_score: number;
+            /** Confidence */
+            confidence: number | null;
+            engine: components["schemas"]["Engine"];
+            /** Engine Label */
+            engine_label: string;
+            /** Model */
+            model: string | null;
+            fallback_reason: components["schemas"]["FallbackReason"] | null;
+            /** Fallback Label */
+            fallback_label: string | null;
+            /** Explanation */
+            explanation: string;
+            /** Decision Id */
+            decision_id: number | null;
+            /** Decided At */
+            decided_at: string | null;
+            /** Is Stale */
+            is_stale: boolean;
+        };
+        /** RestockResponse */
+        RestockResponse: {
+            /** Refreshed At */
+            refreshed_at: string | null;
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+            /** Items */
+            items: components["schemas"]["RestockItemResponse"][];
+        };
+        /**
          * Role
          * @description Tipo de cuenta.
          *
@@ -1346,6 +1954,27 @@ export interface components {
          * @enum {string}
          */
         Role: "admin" | "waiter";
+        /** SalesSummaryResponse */
+        SalesSummaryResponse: {
+            /** Sales */
+            sales: string;
+            /** Paid Orders */
+            paid_orders: number;
+            /** Average Ticket */
+            average_ticket: string;
+            /** Cancelled Orders */
+            cancelled_orders: number;
+            /** Cancelled Amount */
+            cancelled_amount: string;
+            period: components["schemas"]["PeriodResponse"];
+            previous: components["schemas"]["PreviousTotals"];
+            /** Sales Change Percent */
+            sales_change_percent: string | null;
+            /** Paid Orders Change Percent */
+            paid_orders_change_percent: string | null;
+            /** Average Ticket Change Percent */
+            average_ticket_change_percent: string | null;
+        };
         /**
          * SessionResponse
          * @description La cuenta propia, su restaurante y lo que su rol le deja hacer.
@@ -1419,6 +2048,12 @@ export interface components {
             movement: components["schemas"]["MovementResponse"];
             ingredient: components["schemas"]["IngredientResponse"];
         };
+        /**
+         * SubjectType
+         * @description Sobre qué se decidió. Con el identificador, apunta a una fila de otro módulo.
+         * @enum {string}
+         */
+        SubjectType: "ingredient" | "order" | "order_item" | "stock_movement";
         /** TableResponse */
         TableResponse: {
             /** Id */
@@ -1460,6 +2095,23 @@ export interface components {
          * @enum {string}
          */
         TableStatus: "free" | "occupied";
+        /** TopDishResponse */
+        TopDishResponse: {
+            /** Menu Item Id */
+            menu_item_id: number;
+            /** Name */
+            name: string;
+            /** Quantity */
+            quantity: number;
+            /** Revenue */
+            revenue: string;
+        };
+        /** TopDishesResponse */
+        TopDishesResponse: {
+            period: components["schemas"]["PeriodResponse"];
+            /** Dishes */
+            dishes: components["schemas"]["TopDishResponse"][];
+        };
         /**
          * Unit
          * @enum {string}
@@ -1537,6 +2189,73 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WaiterPerformanceResponse */
+        WaiterPerformanceResponse: {
+            /** Waiter Id */
+            waiter_id: number;
+            /** Name */
+            name: string;
+            /** Paid Orders */
+            paid_orders: number;
+            /** Sales */
+            sales: string;
+            /** Average Ticket */
+            average_ticket: string;
+            /** Cancelled Orders */
+            cancelled_orders: number;
+        };
+        /** WaitersResponse */
+        WaitersResponse: {
+            period: components["schemas"]["PeriodResponse"];
+            /** Waiters */
+            waiters: components["schemas"]["WaiterPerformanceResponse"][];
+        };
+        /** WasteByCauseResponse */
+        WasteByCauseResponse: {
+            cause: components["schemas"]["WasteCause"] | null;
+            /** Label */
+            label: string;
+            /** Events */
+            events: number;
+            /** Cost */
+            cost: string;
+            /** Share Percent */
+            share_percent: string;
+        };
+        /** WasteByIngredientResponse */
+        WasteByIngredientResponse: {
+            /** Ingredient Id */
+            ingredient_id: number;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string;
+            /** Events */
+            events: number;
+            /** Quantity */
+            quantity: string;
+            /** Cost */
+            cost: string;
+        };
+        /**
+         * WasteCause
+         * @enum {string}
+         */
+        WasteCause: "expiration" | "mishandling" | "customer_return" | "preparation_error" | "other";
+        /** WasteReportResponse */
+        WasteReportResponse: {
+            period: components["schemas"]["PeriodResponse"];
+            /** Events */
+            events: number;
+            /** Total Cost */
+            total_cost: string;
+            /** Pending Classification */
+            pending_classification: number;
+            /** By Ingredient */
+            by_ingredient: components["schemas"]["WasteByIngredientResponse"][];
+            /** By Cause */
+            by_cause: components["schemas"]["WasteByCauseResponse"][];
         };
         /** WasteRequest */
         WasteRequest: {
@@ -3224,6 +3943,447 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecipeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sales_summary_api_v1_insights_summary_get: {
+        parameters: {
+            query?: {
+                /** @description Desde este día del local (incluido) */
+                date_from?: string | null;
+                /** @description Hasta este día del local (incluido) */
+                date_to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesSummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    daily_sales_api_v1_insights_sales_daily_get: {
+        parameters: {
+            query?: {
+                /** @description Desde este día del local (incluido) */
+                date_from?: string | null;
+                /** @description Hasta este día del local (incluido) */
+                date_to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailySalesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hourly_sales_api_v1_insights_sales_hourly_get: {
+        parameters: {
+            query?: {
+                /** @description Desde este día del local (incluido) */
+                date_from?: string | null;
+                /** @description Hasta este día del local (incluido) */
+                date_to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HourlySalesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    payment_mix_api_v1_insights_payments_get: {
+        parameters: {
+            query?: {
+                /** @description Desde este día del local (incluido) */
+                date_from?: string | null;
+                /** @description Hasta este día del local (incluido) */
+                date_to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentMixResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    waiter_performance_api_v1_insights_waiters_get: {
+        parameters: {
+            query?: {
+                /** @description Desde este día del local (incluido) */
+                date_from?: string | null;
+                /** @description Hasta este día del local (incluido) */
+                date_to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WaitersResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    top_dishes_api_v1_insights_dishes_top_get: {
+        parameters: {
+            query?: {
+                /** @description Desde este día del local (incluido) */
+                date_from?: string | null;
+                /** @description Hasta este día del local (incluido) */
+                date_to?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopDishesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dish_margins_api_v1_insights_dishes_margins_get: {
+        parameters: {
+            query?: {
+                /** @description Desde este día del local (incluido) */
+                date_from?: string | null;
+                /** @description Hasta este día del local (incluido) */
+                date_to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DishMarginsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    low_stock_api_v1_insights_low_stock_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LowStockResponse"][];
+                };
+            };
+        };
+    };
+    waste_report_api_v1_insights_waste_get: {
+        parameters: {
+            query?: {
+                /** @description Desde este día del local (incluido) */
+                date_from?: string | null;
+                /** @description Hasta este día del local (incluido) */
+                date_to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WasteReportResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    classify_waste_api_v1_insights_waste_classify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassifyWasteResponse"];
+                };
+            };
+        };
+    };
+    read_restock_api_v1_insights_restock_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestockResponse"];
+                };
+            };
+        };
+    };
+    refresh_restock_api_v1_insights_restock_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestockResponse"];
+                };
+            };
+        };
+    };
+    read_order_notes_api_v1_insights_order_notes_get: {
+        parameters: {
+            query: {
+                /** @description Pedidos a consultar (repetible) */
+                order_ids: number[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderNotesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    classify_order_notes_api_v1_insights_order_notes_classify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassifyNotesResponse"];
+                };
+            };
+        };
+    };
+    list_ai_decisions_api_v1_insights_ai_decisions_get: {
+        parameters: {
+            query?: {
+                kind?: components["schemas"]["DecisionKind"] | null;
+                engine?: components["schemas"]["Engine"] | null;
+                subject_type?: components["schemas"]["SubjectType"] | null;
+                subject_id?: number | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiDecisionPageResponse"];
                 };
             };
             /** @description Validation Error */

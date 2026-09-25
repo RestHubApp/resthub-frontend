@@ -13,7 +13,6 @@ import InventoryView from '../features/inventory/InventoryView'
 import RecipeEditorView from '../features/inventory/RecipeEditorView'
 import MenuView from '../features/menu/MenuView'
 import AppShell from '../features/shell/AppShell'
-import ComingSoonView from '../features/shell/ComingSoonView'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import RequireSession from '../features/shell/RequireSession'
 import StaffView from '../features/staff/StaffView'
@@ -64,10 +63,17 @@ const router = createBrowserRouter(
         conPermiso('mesas', TablesView, 'tables.manage'),
         conPermiso('inventario', InventoryView, 'inventory.read'),
         conPermiso('inventario/recetas/:menuItemId', RecipeEditorView, 'inventory.read'),
-        // Las pantallas sin construir ya tienen su ruta y su permiso: se
-        // reemplaza ComingSoonView por la vista cuando exista.
         conPermiso('personal', StaffView, 'staff.manage'),
-        conPermiso('panel', ComingSoonView, 'insights.read'),
+        // El panel BI trae sus gráficos: se descarga recién al abrirlo, y el
+        // mesero, que no tiene el permiso, nunca lo baja.
+        {
+          element: <RequireSession permission="insights.read" />,
+          children: [
+            { path: 'panel', lazy: { Component: async () => (await import('../features/insights/InsightsView')).default } },
+            { path: 'panel/reposicion', lazy: { Component: async () => (await import('../features/insights/RestockView')).default } },
+            { path: 'panel/ia', lazy: { Component: async () => (await import('../features/insights/AiAuditView')).default } },
+          ],
+        },
         // Cualquier ruta que no exista lleva al inicio de cada cuenta, no a un error.
         { path: '*', element: <Navigate to="/" replace /> },
       ],
