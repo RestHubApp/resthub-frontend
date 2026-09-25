@@ -50,7 +50,15 @@ export function nextStepFor(status: OrderStatus): NextStep | undefined {
 }
 
 // El aviso sale del estado en que quedo el pedido, no del boton que se toco.
-// Dice el mismo nombre del estado que la insignia y la columna del tablero.
+// El aviso sale del estado en que quedo el pedido, no del boton que se toco, y
+// usa el mismo nombre del estado que la insignia y la columna del tablero.
+const DONE: Partial<Record<OrderStatus, string>> = {
+  in_kitchen: 'enviado a cocina',
+  ready: STATUS_LABELS.ready.toLowerCase(),
+  served: STATUS_LABELS.served.toLowerCase(),
+}
+
+/** "Pedido #12 enviado a cocina.", "Pedido #12 listo.", "Pedido #12 servido, por cobrar." */
 export function stepDoneMessage(order: OrderResponse): string {
-  return `Pedido #${String(order.number)}: ${STATUS_LABELS[order.status].toLowerCase()}.`
+  return `Pedido #${String(order.number)} ${DONE[order.status] ?? 'actualizado'}.`
 }

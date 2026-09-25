@@ -6,6 +6,7 @@ import { tablesQueryKey } from '../../../api/tables'
 import type { NewItemRequest, OrderResponse } from '../../../api/types'
 import { errorMessage } from '../../../services/api'
 import { useNotifications } from '../../../store/notifications'
+import { stepDoneMessage } from '../nextStep'
 import { draftKey, type OrderTarget } from './orderTarget'
 import { type DraftLine, toNewItems, useDraftActions } from './useOrderDraft'
 
@@ -42,7 +43,7 @@ async function openAndSend(target: OrderTarget, items: NewItemRequest[]): Promis
 function successMessage(target: OrderTarget, order: OrderResponse): string {
   return target.kind === 'add'
     ? `Platos agregados al pedido #${String(order.number)}.`
-    : `Pedido #${String(order.number)} enviado a cocina.`
+    : stepDoneMessage(order)
 }
 
 /**
