@@ -1,6 +1,6 @@
 import type { SalesSummary } from '../../api/types'
-import { formatInteger, formatMoney, formatShortDate, toNumber } from './format'
 import KpiTile from './KpiTile'
+import { formatInteger, formatMoney, formatShortDate, toNumber } from '../../services/format'
 
 interface KpiRowProps {
   readonly summary: SalesSummary

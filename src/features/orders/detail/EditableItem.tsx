@@ -4,12 +4,12 @@ import { changeOrderItem, removeOrderItem } from '../../../api/orders'
 import type { ChangeItemRequest, OrderItemResponse } from '../../../api/types'
 import Icon from '../../../components/Icon'
 import { Button } from '../../../components/ui/button'
-import { formatMoney } from '../format'
 import ItemNote from '../ItemNote'
 import QuantityStepper from '../QuantityStepper'
 import { MAX_QUANTITY } from '../taking/useOrderDraft'
 import { useOrderAction } from '../useOrderAction'
 import ItemNoteDialog from './ItemNoteDialog'
+import { formatMoney } from '../../../services/format'
 
 interface EditableItemProps {
   readonly orderId: number

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 import { setAuthToken, setUnauthorizedHandler } from '../services/api'
+import { DEFAULT_TIME_ZONE } from '../services/format'
 import { logger } from '../services/logger'
 import { queryClient } from '../services/queryClient'
 import type { CurrentUserResponse, PermissionCode } from '../api/types'
@@ -177,4 +178,12 @@ export function hasPermission(
  */
 export function useCan(permission: PermissionCode): boolean {
   return useSession((state) => hasPermission(state.account, permission))
+}
+
+/**
+ * La zona horaria del restaurante (`America/Lima`). "Hoy" y las horas de los
+ * pedidos son las del local, no las del navegador de quien mira.
+ */
+export function useTimeZone(): string {
+  return useSession((state) => state.account?.restaurant.timezone ?? DEFAULT_TIME_ZONE)
 }

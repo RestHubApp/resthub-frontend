@@ -1,7 +1,7 @@
 import type { OrderResponse } from '../../../api/types'
 import Icon from '../../../components/Icon'
 import { Button } from '../../../components/ui/button'
-import { formatMoney } from '../format'
+import { formatMoney } from '../../../services/format'
 
 interface ChargeReceiptProps {
   readonly order: OrderResponse

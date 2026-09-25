@@ -1,6 +1,6 @@
 import { z } from 'zod'
+import { toCents } from '../../../services/format'
 
-import { toCents } from '../format'
 
 const MONTO = /^\d{1,6}(?:[.,]\d{1,2})?$/u
 

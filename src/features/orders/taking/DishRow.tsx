@@ -1,8 +1,8 @@
 import type { OrderMenuItem } from '../../../api/types'
 import Icon from '../../../components/Icon'
-import { formatMoney } from '../format'
 import QuantityStepper from '../QuantityStepper'
 import { MAX_QUANTITY } from './useOrderDraft'
+import { formatMoney } from '../../../services/format'
 
 function rowTone(elegido: boolean, agotado: boolean): string {
   if (agotado) {

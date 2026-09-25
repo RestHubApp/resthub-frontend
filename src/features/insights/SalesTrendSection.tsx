@@ -2,10 +2,10 @@ import { fetchDailySales } from '../../api/insights'
 import type { DailySalesPoint, InsightsRangeParams } from '../../api/types'
 import ChartCard from './charts/ChartCard'
 import DataGrid from './charts/DataGrid'
-import { formatInteger, formatLongDate, formatMoney } from './format'
 import ReportState from './ReportState'
 import SalesChart from './SalesChart'
 import { useInsightsReport } from './useInsightsReport'
+import { formatInteger, formatLongDate, formatMoney } from '../../services/format'
 
 interface SalesTrendSectionProps {
   readonly range: InsightsRangeParams

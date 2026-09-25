@@ -49,3 +49,8 @@ export function orderPlace(order: Pick<OrderResponse, 'type' | 'table_label' | '
 export function isActive(status: OrderStatus): boolean {
   return status !== 'paid' && status !== 'cancelled'
 }
+
+/** "platos" o "plato", segun la cantidad. */
+export function dishCount(count: number): string {
+  return `${String(count)} ${count === 1 ? 'plato' : 'platos'}`
+}

@@ -1,11 +1,11 @@
 import { Link } from 'react-router'
 
 import type { OrderResponse } from '../../../api/types'
-import { formatMoney, minutesSince } from '../format'
 import OrderItemLine from '../OrderItemLine'
 import { orderPlace } from '../orderLabels'
 import BoardCardActions from './BoardCardActions'
 import ElapsedTime from './ElapsedTime'
+import { formatMoney, minutesSince } from '../../../services/format'
 
 interface BoardCardProps {
   readonly order: OrderResponse

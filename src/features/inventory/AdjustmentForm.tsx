@@ -15,8 +15,9 @@ import FormButtons from './FormButtons'
 import { adjustmentSchema, type AdjustmentValues } from './inventorySchema'
 import QuantityField from './QuantityField'
 import StockPreview from './StockPreview'
-import { formatQuantity, formatSignedQuantity, inputUnits } from './units'
+import { inputUnits } from './units'
 import { useInventoryChange } from './useInventoryChange'
+import { formatQuantity, formatSignedQuantity } from '../../services/format'
 
 interface AdjustmentFormProps {
   readonly ingredient: Ingredient

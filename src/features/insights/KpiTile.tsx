@@ -1,5 +1,5 @@
 import Icon from '../../components/Icon'
-import { formatChange, toNumber } from './format'
+import { formatChange, toNumber } from '../../services/format'
 
 interface KpiTileProps {
   readonly label: string

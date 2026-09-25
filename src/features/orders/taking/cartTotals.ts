@@ -1,5 +1,6 @@
-import { dishCount, formatCents, toCents } from '../format'
 import type { DraftLine } from './useOrderDraft'
+import { formatCents, toCents } from '../../../services/format'
+import { dishCount } from '../orderLabels'
 
 /** Cuantos platos y cuanto suman, ya formateados. */
 export function cartTotals(lines: readonly DraftLine[]) {

@@ -4,13 +4,13 @@ import type { Ingredient } from '../../api/types'
 import DataTable, { type DataColumn } from '../../components/DataTable'
 import FormMessage from '../../components/FormMessage'
 import { errorMessage } from '../../services/api'
-import { formatMoney } from '../../services/money'
 import IngredientFilters from './IngredientFilters'
 import IngredientRowActions from './IngredientRowActions'
 import IngredientStatus from './IngredientStatus'
 import type { StockAction } from './StockActionDialog'
-import { formatQuantity, formatUnitCost } from './units'
+import { formatUnitCost } from './units'
 import { useIngredients } from './useIngredients'
+import { formatMoney, formatQuantity } from '../../services/format'
 
 interface IngredientsPanelProps {
   readonly canManage: boolean

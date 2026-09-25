@@ -1,10 +1,10 @@
 import type { RestockItem } from '../../api/types'
 import ActionBadge from './ActionBadge'
 import EngineBadge from './EngineBadge'
-import { formatConfidence, formatDays, formatPercent, formatQuantity } from './format'
 import Metric from './Metric'
 import TrendText from './TrendText'
 import UrgencyMeter from './UrgencyMeter'
+import { formatConfidence, formatDays, formatPercent, formatQuantity } from '../../services/format'
 
 interface RestockItemCardProps {
   readonly item: RestockItem

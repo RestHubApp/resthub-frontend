@@ -4,9 +4,9 @@ import EmptyState from '../../components/EmptyState'
 import BarList from './charts/BarList'
 import ChartCard from './charts/ChartCard'
 import DataGrid from './charts/DataGrid'
-import { formatInteger, formatMoney } from './format'
 import ReportState from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
+import { formatInteger, formatMoney } from '../../services/format'
 
 interface TopDishesSectionProps {
   readonly range: InsightsRangeParams

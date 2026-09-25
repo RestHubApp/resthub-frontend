@@ -3,11 +3,11 @@ import type { InsightsRangeParams, WasteByIngredient } from '../../api/types'
 import ChartCard from './charts/ChartCard'
 import DataGrid from './charts/DataGrid'
 import ClassifyWasteButton from './ClassifyWasteButton'
-import { formatInteger, formatMoney, formatQuantity } from './format'
 import ReportState from './ReportState'
 import { WASTE_REPORT } from './useClassifyWaste'
 import { useInsightsReport } from './useInsightsReport'
 import WasteCharts from './WasteCharts'
+import { formatInteger, formatMoney, formatQuantity } from '../../services/format'
 
 interface WasteSectionProps {
   readonly range: InsightsRangeParams

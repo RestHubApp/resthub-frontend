@@ -6,13 +6,13 @@ import FormDialog from '../../components/FormDialog'
 import Icon from '../../components/Icon'
 import StatusBadge from '../../components/StatusBadge'
 import { Button } from '../../components/ui/button'
-import { formatMoney } from '../../services/money'
 import AvailabilityToggle from './AvailabilityToggle'
 import DishMargin from './DishMargin'
 import type { Direction } from './menuOrder'
 import MenuItemForm from './MenuItemForm'
 import MenuItemStatusButton from './MenuItemStatusButton'
 import MoveButtons from './MoveButtons'
+import { formatMoney } from '../../services/format'
 
 interface MenuItemRowProps {
   readonly item: MenuItem

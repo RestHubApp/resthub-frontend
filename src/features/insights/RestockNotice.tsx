@@ -1,7 +1,7 @@
 import type { RestockReport } from '../../api/types'
 import Icon from '../../components/Icon'
-import { DEFAULT_TIME_ZONE } from './dateRange'
-import { formatDateTime } from './format'
+import { formatDateTime } from '../../services/format'
+import { useTimeZone } from '../../store/session'
 
 interface RestockNoticeProps {
   readonly report: RestockReport
@@ -11,6 +11,7 @@ interface RestockNoticeProps {
 export default function RestockNotice({ report }: RestockNoticeProps) {
   const vencida = report.items.some((item) => item.is_stale)
   const guardada = report.refreshed_at !== null
+  const timeZone = useTimeZone()
 
   return (
     <div className="flex flex-col gap-2">
@@ -35,7 +36,7 @@ export default function RestockNotice({ report }: RestockNoticeProps) {
       ) : null}
       {report.refreshed_at === null ? null : (
         <p className="m-0 text-xs text-muted-foreground">
-          Última actualización: {formatDateTime(report.refreshed_at, DEFAULT_TIME_ZONE)}
+          Última actualización: {formatDateTime(report.refreshed_at, timeZone)}
         </p>
       )}
     </div>

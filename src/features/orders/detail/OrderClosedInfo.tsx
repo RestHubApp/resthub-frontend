@@ -1,5 +1,6 @@
 import type { OrderResponse } from '../../../api/types'
-import { formatDateTime, formatMoney } from '../format'
+import { formatDateTime, formatMoney } from '../../../services/format'
+import { useTimeZone } from '../../../store/session'
 
 interface OrderClosedInfoProps {
   readonly order: OrderResponse
@@ -7,11 +8,12 @@ interface OrderClosedInfoProps {
 
 /** Como termino un pedido: cobrado con que y cuanto, o cancelado y por que. */
 export default function OrderClosedInfo({ order }: OrderClosedInfoProps) {
+  const timeZone = useTimeZone()
   if (order.status === 'cancelled') {
     return (
       <p className="m-0 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
         <span className="font-semibold">Cancelado</span>
-        {order.cancelled_at === null ? '' : ` el ${formatDateTime(order.cancelled_at)}`}. Motivo:{' '}
+        {order.cancelled_at === null ? '' : ` el ${formatDateTime(order.cancelled_at, timeZone)}`}. Motivo:{' '}
         {order.cancel_reason}
       </p>
     )
@@ -34,7 +36,7 @@ export default function OrderClosedInfo({ order }: OrderClosedInfoProps) {
       {order.paid_at === null ? null : (
         <>
           <dt>Fecha</dt>
-          <dd className="m-0 text-right">{formatDateTime(order.paid_at)}</dd>
+          <dd className="m-0 text-right">{formatDateTime(order.paid_at, timeZone)}</dd>
         </>
       )}
     </dl>

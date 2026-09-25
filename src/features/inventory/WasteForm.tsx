@@ -11,8 +11,9 @@ import FormButtons from './FormButtons'
 import { wasteSchema, type WasteValues } from './inventorySchema'
 import QuantityField from './QuantityField'
 import StockPreview from './StockPreview'
-import { findInputUnit, formatQuantity, inputUnits, parseDecimal, toBaseQuantity } from './units'
+import { findInputUnit, inputUnits, parseDecimal, toBaseQuantity } from './units'
 import { useInventoryChange } from './useInventoryChange'
+import { formatQuantity } from '../../services/format'
 
 interface WasteFormProps {
   readonly ingredient: Ingredient

@@ -1,6 +1,6 @@
 import type { LowStockItem } from '../../api/types'
 import Icon from '../../components/Icon'
-import { formatQuantity, toNumber } from './format'
+import { formatQuantity, toNumber } from '../../services/format'
 
 const PERCENT = 100
 

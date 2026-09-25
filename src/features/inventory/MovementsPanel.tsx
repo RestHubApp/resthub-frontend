@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router'
 
 import { fetchMovements, movementListQueryKey } from '../../api/inventory'
 import type { Movement, MovementKind, MovementListParams } from '../../api/types'
@@ -8,16 +9,17 @@ import FormMessage from '../../components/FormMessage'
 import StatusBadge from '../../components/StatusBadge'
 import TablePagination from '../../components/TablePagination'
 import { errorMessage } from '../../services/api'
+import { formatDateTime, formatSignedQuantity } from '../../services/format'
+import { useTimeZone } from '../../store/session'
 import MovementFilters from './MovementFilters'
 import { KIND_TONES } from './movementKinds'
-import { formatSignedQuantity, formatUnitCost } from './units'
+import { formatUnitCost } from './units'
 import { useIngredients } from './useIngredients'
 
 const POR_PAGINA = 20
-const FECHA = new Intl.DateTimeFormat('es-PE', { dateStyle: 'short', timeStyle: 'short' })
-
-const COLUMNAS: DataColumn<Movement>[] = [
-  { id: 'fecha', header: 'Fecha', className: 'tabular-nums', cell: (mov) => FECHA.format(new Date(mov.created_at)) },
+function columnas(timeZone: string): DataColumn<Movement>[] {
+  return [
+  { id: 'fecha', header: 'Fecha', className: 'tabular-nums', cell: (mov) => formatDateTime(mov.created_at, timeZone) },
   { id: 'insumo', header: 'Insumo', cell: (mov) => mov.ingredient_name },
   { id: 'tipo', header: 'Tipo', cell: (mov) => <StatusBadge label={mov.kind_label} tone={KIND_TONES[mov.kind]} /> },
   {
@@ -40,13 +42,24 @@ const COLUMNAS: DataColumn<Movement>[] = [
     id: 'motivo',
     header: 'Motivo',
     className: 'min-w-48 whitespace-normal',
-    cell: (mov) => (mov.order_id === null ? mov.reason : `Pedido #${String(mov.order_id)}`) || '—',
+    cell: (mov) =>
+      mov.order_id === null ? (
+        mov.reason || '—'
+      ) : (
+        // El movimiento trae el id del pedido, no su número del día: se enlaza en vez de inventar un "#".
+        <Link to={`/pedidos/${String(mov.order_id)}`} className="font-medium text-primary underline-offset-4 hover:underline">
+          Ver pedido
+        </Link>
+      ),
   },
-]
+  ]
+}
 
 /** El libro de movimientos: cada entrada y salida de stock, la más reciente primero. */
 export default function MovementsPanel() {
   const insumos = useIngredients()
+  const timeZone = useTimeZone()
+  const columns = useMemo(() => columnas(timeZone), [timeZone])
   const [insumo, setInsumo] = useState('')
   const [tipo, setTipo] = useState('')
   const [pagina, setPagina] = useState(0)
@@ -85,7 +98,7 @@ export default function MovementsPanel() {
         </FormMessage>
       ) : (
         <DataTable
-          columns={COLUMNAS}
+          columns={columns}
           data={libro.data?.items ?? []}
           isLoading={libro.isPending}
           emptyMessage="No hay movimientos con estos filtros."

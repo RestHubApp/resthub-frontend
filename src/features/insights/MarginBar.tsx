@@ -1,4 +1,4 @@
-import { formatPercent, toNumber } from './format'
+import { formatPercent, toNumber } from '../../services/format'
 
 interface MarginBarProps {
   readonly percent: string

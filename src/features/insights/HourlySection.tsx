@@ -4,16 +4,16 @@ import EmptyState from '../../components/EmptyState'
 import ChartCard from './charts/ChartCard'
 import DataGrid from './charts/DataGrid'
 import Heatmap from './charts/Heatmap'
-import { formatHour, formatInteger, formatMoney } from './format'
 import ReportState from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
+import { formatHourOfDay, formatInteger, formatMoney } from '../../services/format'
 
 interface HourlySectionProps {
   readonly range: InsightsRangeParams
 }
 
 function franja(cell: HourlyCell): string {
-  return `${formatHour(cell.hour)} a ${formatHour(cell.hour + 1)}`
+  return `${formatHourOfDay(cell.hour)} a ${formatHourOfDay(cell.hour + 1)}`
 }
 
 const COLUMNS = [

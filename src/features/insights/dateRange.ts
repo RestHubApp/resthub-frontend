@@ -1,8 +1,6 @@
 // Rangos del panel. Los dias son del restaurante, no del navegador: a las
 // 11 p. m. en Lima ya es mañana en UTC, y "hoy" tiene que seguir siendo hoy.
 
-export const DEFAULT_TIME_ZONE = 'America/Lima'
-
 /** Un rango del panel, con ambos días incluidos. */
 export interface RangeDates {
   readonly date_from: string
@@ -28,12 +26,6 @@ const DAY_MS = 86_400_000
 
 export function isRangePreset(value: string | null): value is RangePreset {
   return RANGE_PRESETS.some((preset) => preset.value === value)
-}
-
-/** El dia de hoy en la zona del restaurante, como `2026-09-25`. */
-export function todayIn(timeZone: string): string {
-  // en-CA escribe las fechas como AAAA-MM-DD, que es el formato del API.
-  return new Intl.DateTimeFormat('en-CA', { timeZone }).format(new Date())
 }
 
 export function addDays(isoDate: string, days: number): string {

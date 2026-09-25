@@ -2,16 +2,17 @@ import { useQuery } from '@tanstack/react-query'
 
 import { fetchOrders, MAX_ORDERS_PAGE, orderListQueryKey } from '../../../api/orders'
 import EmptyState from '../../../components/EmptyState'
-import { useSession } from '../../../store/session'
-import { todayIso } from '../format'
+import { useSession, useTimeZone } from '../../../store/session'
 import { isActive } from '../orderLabels'
 import QueryError from '../QueryError'
 import OrderList from './OrderList'
+import { todayIn } from '../../../services/format'
 
 /** Lo que tomo el mesero hoy: primero lo que sigue en curso, despues lo cerrado. */
 export default function MyOrdersPanel() {
   const userId = useSession((state) => state.account?.user.id)
-  const hoy = todayIso()
+  const timeZone = useTimeZone()
+  const hoy = todayIn(timeZone)
   const params = { waiter_id: userId, date_from: hoy, date_to: hoy, limit: MAX_ORDERS_PAGE }
   const pedidos = useQuery({
     queryKey: orderListQueryKey(params),

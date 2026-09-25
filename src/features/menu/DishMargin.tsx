@@ -2,7 +2,7 @@ import { Link } from 'react-router'
 
 import type { DishCost } from '../../api/types'
 import Icon from '../../components/Icon'
-import { formatMoney, formatPercent } from '../../services/money'
+import { formatMoney, formatPercent } from '../../services/format'
 
 interface DishMarginProps {
   readonly itemId: number

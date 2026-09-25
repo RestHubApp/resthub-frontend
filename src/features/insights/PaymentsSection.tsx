@@ -4,9 +4,9 @@ import EmptyState from '../../components/EmptyState'
 import BarList from './charts/BarList'
 import ChartCard from './charts/ChartCard'
 import DataGrid from './charts/DataGrid'
-import { formatInteger, formatMoney, formatPercent, toNumber } from './format'
 import ReportState from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
+import { formatInteger, formatMoney, formatPercent, toNumber } from '../../services/format'
 
 interface PaymentsSectionProps {
   readonly range: InsightsRangeParams

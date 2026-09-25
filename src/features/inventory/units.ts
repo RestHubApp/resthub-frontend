@@ -1,5 +1,5 @@
 import type { IngredientUnit } from '../../api/types'
-import { formatMoney } from '../../services/money'
+import { formatMoney } from '../../services/format'
 
 // El inventario guarda cada cantidad en la unidad base (gramos, mililitros o
 // unidades), que es la que suma sin errores. La gente, en cambio, compra por
@@ -30,9 +30,6 @@ export const UNIT_OPTIONS: readonly { readonly value: IngredientUnit; readonly l
   { value: 'unit', label: 'Unidades (botellas, latas, piezas)' },
 ]
 
-const CANTIDAD = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 })
-const UMBRAL_GRANDE = 1000
-
 /** Las unidades para escribir una cantidad, la más grande primero: se compra por kilo. */
 export function inputUnits(unit: IngredientUnit): readonly InputUnit[] {
   const grande = GRANDE[unit]
@@ -50,26 +47,6 @@ export function priceUnit(unit: IngredientUnit): InputUnit {
 
 export function baseUnitLabel(unit: IngredientUnit): string {
   return BASE[unit].label
-}
-
-/** "5.6 kg", "150 g", "12 unid.". Pasa a kg o L desde mil gramos o mililitros. */
-export function formatQuantity(value: string | number, unit: IngredientUnit): string {
-  const numero = Number(value)
-  if (!Number.isFinite(numero)) {
-    return '—'
-  }
-  const grande = GRANDE[unit]
-  if (grande !== undefined && Math.abs(numero) >= UMBRAL_GRANDE) {
-    return `${CANTIDAD.format(numero / grande.factor)} ${grande.label}`
-  }
-  return `${CANTIDAD.format(numero)} ${BASE[unit].label}`
-}
-
-/** Con signo siempre visible, para el libro de movimientos: "+5 kg", "−150 g". */
-export function formatSignedQuantity(value: string, unit: IngredientUnit): string {
-  const numero = Number(value)
-  const texto = formatQuantity(Math.abs(numero), unit)
-  return numero < 0 ? `−${texto}` : `+${texto}`
 }
 
 /** "S/ 4.20 por kg": el costo guardado por gramo, mostrado por kilo. */

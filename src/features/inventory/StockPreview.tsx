@@ -1,5 +1,5 @@
 import type { Ingredient } from '../../api/types'
-import { formatQuantity } from './units'
+import { formatQuantity } from '../../services/format'
 
 interface StockPreviewProps {
   readonly ingredient: Ingredient

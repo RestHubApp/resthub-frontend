@@ -1,7 +1,4 @@
-import { useState } from 'react'
-
 import { fetchSalesSummary } from '../../api/insights'
-import { DEFAULT_TIME_ZONE } from './dateRange'
 import HourlySection from './HourlySection'
 import KpiRow from './KpiRow'
 import LowStockSection from './LowStockSection'
@@ -16,6 +13,7 @@ import { useInsightsRange } from './useInsightsRange'
 import { useInsightsReport } from './useInsightsReport'
 import WaitersSection from './WaitersSection'
 import WasteSection from './WasteSection'
+import { useTimeZone } from '../../store/session'
 
 /**
  * El panel del encargado: cómo va el negocio en el período elegido.
@@ -24,16 +22,10 @@ import WasteSection from './WasteSection'
  * los números de todas las tarjetas coinciden entre sí.
  */
 export default function InsightsView() {
-  const [zona, setZona] = useState(DEFAULT_TIME_ZONE)
+  const zona = useTimeZone()
   const range = useInsightsRange(zona)
   const summary = useInsightsReport('summary', range.params, fetchSalesSummary)
   const periodo = summary.data?.period
-
-  // Los días son los del restaurante: si su zona no es la supuesta, se
-  // recalcula "hoy" con la que informa el servidor.
-  if (periodo !== undefined && periodo.timezone !== zona) {
-    setZona(periodo.timezone)
-  }
 
   return (
     <div className="flex flex-col gap-6">

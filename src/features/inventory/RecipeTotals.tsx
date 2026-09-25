@@ -1,6 +1,6 @@
 import { cn } from 'cn'
+import { formatMoney, formatPercent } from '../../services/format'
 
-import { formatMoney, formatPercent } from '../../services/money'
 
 interface RecipeTotalsProps {
   readonly price: number

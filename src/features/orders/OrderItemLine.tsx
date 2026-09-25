@@ -1,6 +1,6 @@
 import type { OrderItemResponse } from '../../api/types'
-import { formatMoney } from './format'
 import ItemNote from './ItemNote'
+import { formatMoney } from '../../services/format'
 
 interface OrderItemLineProps {
   readonly item: OrderItemResponse

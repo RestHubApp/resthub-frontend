@@ -1,7 +1,7 @@
 import type { RestockItem } from '../../api/types'
 import Icon from '../../components/Icon'
 import type { IconName } from '../../components/icons'
-import { formatChange } from './format'
+import { formatChange } from '../../services/format'
 
 const TREND_ICONS: Partial<Record<string, IconName>> = {
   rising: 'tendenciaSube',

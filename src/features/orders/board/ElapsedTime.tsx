@@ -1,6 +1,6 @@
 import type { OrderResponse } from '../../../api/types'
 import Icon from '../../../components/Icon'
-import { formatMinutes, minutesSince } from '../format'
+import { formatMinutes, minutesSince } from '../../../services/format'
 
 interface ElapsedTimeProps {
   readonly order: OrderResponse

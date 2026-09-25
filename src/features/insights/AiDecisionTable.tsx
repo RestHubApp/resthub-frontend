@@ -3,10 +3,12 @@ import DataTable, { type DataColumn } from '../../components/DataTable'
 import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
 import AiDecisionDetail from './AiDecisionDetail'
-import { DEFAULT_TIME_ZONE } from './dateRange'
 import EngineBadge from './EngineBadge'
-import { formatConfidence, formatDateTime } from './format'
 import { ACTION_LABELS } from './restockActions'
+import { useMemo } from 'react'
+
+import { formatConfidence, formatDateTime } from '../../services/format'
+import { useTimeZone } from '../../store/session'
 
 const SUBJECTS: Record<AiDecision['subject_type'], string> = {
   ingredient: 'Insumo',
@@ -44,8 +46,9 @@ function resumen(decision: AiDecision): string {
   return labels[codigo] ?? codigo
 }
 
-const COLUMNS: DataColumn<AiDecision>[] = [
-  { id: 'fecha', header: 'Fecha', cell: (d) => formatDateTime(d.created_at, DEFAULT_TIME_ZONE), className: 'whitespace-nowrap' },
+function columns(timeZone: string): DataColumn<AiDecision>[] {
+  return [
+  { id: 'fecha', header: 'Fecha', cell: (d) => formatDateTime(d.created_at, timeZone), className: 'whitespace-nowrap' },
   { id: 'tipo', header: 'Tipo', cell: (d) => d.kind_label },
   { id: 'sujeto', header: 'Sobre', cell: (d) => `${SUBJECTS[d.subject_type]} #${String(d.subject_id)}` },
   { id: 'decision', header: 'Decisión', cell: resumen },
@@ -65,7 +68,8 @@ const COLUMNS: DataColumn<AiDecision>[] = [
       </Button>
     ),
   },
-]
+  ]
+}
 
 interface AiDecisionTableProps {
   readonly decisions: readonly AiDecision[]
@@ -74,9 +78,11 @@ interface AiDecisionTableProps {
 
 /** Cada decisión guardada, con su entrada y salida a un clic. */
 export default function AiDecisionTable({ decisions, isLoading }: AiDecisionTableProps) {
+  const timeZone = useTimeZone()
+  const columnas = useMemo(() => columns(timeZone), [timeZone])
   return (
     <DataTable
-      columns={COLUMNS}
+      columns={columnas}
       data={decisions}
       isLoading={isLoading}
       emptyMessage="No hay decisiones con esos filtros."

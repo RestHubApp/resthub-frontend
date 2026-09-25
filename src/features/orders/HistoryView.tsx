@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { fetchOrders, orderListQueryKey } from '../../api/orders'
 import type { OrderResponse } from '../../api/types'
@@ -10,17 +10,20 @@ import SectionCard from '../../components/SectionCard'
 import TablePagination from '../../components/TablePagination'
 import { Button } from '../../components/ui/button'
 import BackLink from './BackLink'
-import { formatDateTime, formatMoney, todayIso } from './format'
 import HistoryFiltersBar from './history/HistoryFiltersBar'
 import { type HistoryFilters, PAGE_SIZE, toParams } from './history/historyFilters'
 import OrderSummary from './history/OrderSummary'
 import { orderPlace } from './orderLabels'
 import OrderStatusBadge from './OrderStatusBadge'
 import QueryError from './QueryError'
+import { useTimeZone } from '../../store/session'
+import { formatDateTime, formatMoney, todayIn } from '../../services/format'
 
-const COLUMNAS: DataColumn<OrderResponse>[] = [
+function columnas(timeZone: string): DataColumn<OrderResponse>[] {
+  return [
+
   { id: 'numero', header: 'N.º', cell: (order) => <span className="font-semibold tabular-nums">#{order.number}</span> },
-  { id: 'fecha', header: 'Abierto', cell: (order) => formatDateTime(order.created_at) },
+  { id: 'fecha', header: 'Abierto', cell: (order) => formatDateTime(order.created_at, timeZone) },
   { id: 'lugar', header: 'Mesa o cliente', cell: (order) => orderPlace(order), className: 'whitespace-normal' },
   { id: 'mesero', header: 'Mesero', cell: (order) => order.waiter_name },
   { id: 'estado', header: 'Estado', cell: (order) => <OrderStatusBadge status={order.status} label={order.status_label} /> },
@@ -43,7 +46,8 @@ const COLUMNAS: DataColumn<OrderResponse>[] = [
       </Button>
     ),
   },
-]
+  ]
+}
 
 /**
  * El historial de pedidos del encargado, con filtros y el detalle de cada uno.
@@ -52,7 +56,9 @@ const COLUMNAS: DataColumn<OrderResponse>[] = [
  * Arranca en el dia de hoy, que es lo que se revisa al cerrar la caja.
  */
 export default function HistoryView() {
-  const hoy = todayIso()
+  const timeZone = useTimeZone()
+  const hoy = todayIn(timeZone)
+  const columns = useMemo(() => columnas(timeZone), [timeZone])
   const [filtros, setFiltros] = useState<HistoryFilters>({ from: hoy, to: hoy, status: '', type: '', waiterId: '' })
   const [pagina, setPagina] = useState(0)
   const params = toParams(filtros, pagina)
@@ -82,7 +88,7 @@ export default function HistoryView() {
           <QueryError error={historial.error} fallback="No se pudo cargar el historial." onRetry={() => void historial.refetch()} />
         ) : (
           <DataTable
-            columns={COLUMNAS}
+            columns={columns}
             data={historial.data?.items ?? []}
             isLoading={historial.isPending}
             emptyMessage="Ningún pedido coincide con los filtros."

@@ -2,9 +2,10 @@ import { Link } from 'react-router'
 
 import type { TableState } from '../../../api/types'
 import Icon from '../../../components/Icon'
-import { dishCount, formatMoney } from '../format'
 import { tableName } from '../../../api/tables'
 import OrderStatusBadge from '../OrderStatusBadge'
+import { formatMoney } from '../../../services/format'
+import { dishCount } from '../orderLabels'
 
 interface TableCardProps {
   readonly table: TableState

@@ -5,8 +5,8 @@ import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
 import IngredientStatus from './IngredientStatus'
 import type { StockAction } from './StockActionDialog'
-import { formatQuantity } from './units'
 import { useLowStock } from './useLowStock'
+import { formatQuantity } from '../../services/format'
 
 interface AlertsPanelProps {
   readonly canManage: boolean

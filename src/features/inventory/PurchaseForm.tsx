@@ -13,8 +13,9 @@ import { purchaseSchema, type PurchaseValues } from './inventorySchema'
 import { costHint, costLabel, purchaseDefaults, purchaseMath, purchasePayload } from './purchaseMath'
 import QuantityField from './QuantityField'
 import StockPreview from './StockPreview'
-import { formatQuantity, inputUnits, priceUnit } from './units'
+import { inputUnits, priceUnit } from './units'
 import { useInventoryChange } from './useInventoryChange'
+import { formatQuantity } from '../../services/format'
 
 interface PurchaseFormProps {
   readonly ingredient: Ingredient

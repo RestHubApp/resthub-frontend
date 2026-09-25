@@ -9,7 +9,7 @@ import Icon from '../../components/Icon'
 import StatusBadge from '../../components/StatusBadge'
 import { buttonVariants } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
-import { formatMoney, formatPercent } from '../../services/money'
+import { formatMoney, formatPercent } from '../../services/format'
 
 interface RecipesPanelProps {
   readonly canManage: boolean
