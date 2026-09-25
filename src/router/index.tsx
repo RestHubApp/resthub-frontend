@@ -7,6 +7,7 @@ import AppShell from '../features/shell/AppShell'
 import ComingSoonView from '../features/shell/ComingSoonView'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import RequireSession from '../features/shell/RequireSession'
+import MenuView from '../features/menu/MenuView'
 import StaffView from '../features/staff/StaffView'
 
 /**
@@ -43,7 +44,7 @@ const router = createBrowserRouter(
         // reemplaza ComingSoonView por la vista cuando exista.
         conPermiso('pedidos', ComingSoonView, 'orders.take'),
         conPermiso('tablero', ComingSoonView, 'orders.read_all'),
-        conPermiso('menu', ComingSoonView, 'menu.manage'),
+        conPermiso('menu', MenuView, 'menu.manage'),
         conPermiso('mesas', ComingSoonView, 'tables.manage'),
         conPermiso('inventario', ComingSoonView, 'inventory.read'),
         conPermiso('personal', StaffView, 'staff.manage'),
