@@ -1024,6 +1024,11 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+            /**
+             * Status Changed At
+             * Format: date-time
+             */
+            status_changed_at: string;
         };
         /**
          * ActivityKind
@@ -1669,6 +1674,11 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+            /**
+             * Status Changed At
+             * Format: date-time
+             */
+            status_changed_at: string;
             /** Paid At */
             paid_at: string | null;
             /** Cancelled At */
@@ -1996,6 +2006,8 @@ export interface components {
             name: string;
             /** Slug */
             slug: string;
+            /** Timezone */
+            timezone: string;
         };
         /** SessionUserResponse */
         SessionUserResponse: {
