@@ -1,6 +1,7 @@
 import type { ComponentProps, ComponentType } from 'react'
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
+import EmptyState from '../components/EmptyState'
 import LoginView from '../features/auth/LoginView'
 import AddItemsView from '../features/orders/AddItemsView'
 import NewOrderView from '../features/orders/NewOrderView'
@@ -13,6 +14,14 @@ import RequireSession from '../features/shell/RequireSession'
 type Permission = NonNullable<ComponentProps<typeof RequireSession>['permission']>
 
 const PANEL: Permission = 'insights.read'
+
+// Al abrir la aplicacion directo en una pantalla perezosa (recargar el
+// tablero), esto se ve dentro del armazon mientras llega su archivo.
+const CARGANDO = <EmptyState title="Cargando…" />
+
+function perezosa(path: string, load: () => Promise<{ default: ComponentType }>): RouteObject {
+  return { path, hydrateFallbackElement: CARGANDO, lazy: { Component: async () => (await load()).default } }
+}
 
 /**
  * Una pantalla que exige un permiso y que se descarga recién al abrirla.
@@ -28,7 +37,7 @@ const PANEL: Permission = 'insights.read'
 function conPermiso(path: string, load: () => Promise<{ default: ComponentType }>, permission: Permission): RouteObject {
   return {
     element: <RequireSession permission={permission} />,
-    children: [{ path, lazy: { Component: async () => (await load()).default } }],
+    children: [perezosa(path, load)],
   }
 }
 
@@ -42,7 +51,7 @@ const router = createBrowserRouter(
         { path: 'acceso', Component: LoginView },
         {
           element: <RequireSession />,
-          children: [{ path: 'perfil', lazy: { Component: async () => (await import('../features/auth/ProfileView')).default } }],
+          children: [perezosa('perfil', () => import('../features/auth/ProfileView'))],
         },
         {
           element: <RequireSession permission="orders.take" />,
