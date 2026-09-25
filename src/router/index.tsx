@@ -2,37 +2,33 @@ import type { ComponentProps, ComponentType } from 'react'
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import LoginView from '../features/auth/LoginView'
-import ProfileView from '../features/auth/ProfileView'
 import AddItemsView from '../features/orders/AddItemsView'
-import BoardView from '../features/orders/BoardView'
-import HistoryView from '../features/orders/HistoryView'
 import NewOrderView from '../features/orders/NewOrderView'
 import OrderDetailView from '../features/orders/OrderDetailView'
 import OrdersView from '../features/orders/OrdersView'
-import InventoryView from '../features/inventory/InventoryView'
-import RecipeEditorView from '../features/inventory/RecipeEditorView'
-import MenuView from '../features/menu/MenuView'
 import AppShell from '../features/shell/AppShell'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import RequireSession from '../features/shell/RequireSession'
-import StaffView from '../features/staff/StaffView'
-import TablesView from '../features/tables/TablesView'
+
+type Permission = NonNullable<ComponentProps<typeof RequireSession>['permission']>
+
+const PANEL: Permission = 'insights.read'
 
 /**
- * Una pantalla que exige un permiso.
+ * Una pantalla que exige un permiso y que se descarga recién al abrirla.
  *
- * Es una comodidad de la interfaz: la autorizacion de verdad la aplica el
- * servidor en cada peticion, y esta guarda solo evita mostrar una pantalla que
- * va a responder 403. El permiso es el mismo que muestra la entrada del menu.
+ * El permiso es una comodidad de la interfaz: la autorizacion de verdad la
+ * aplica el servidor en cada peticion, y esta guarda solo evita mostrar una
+ * pantalla que va a responder 403. Es el mismo que muestra la entrada del menu.
+ *
+ * Las pantallas del encargado van en su propio archivo: el celular del
+ * mesero arranca con el acceso y la toma de pedidos, y nunca baja el tablero,
+ * el inventario ni el panel.
  */
-function conPermiso(
-  path: string,
-  Component: ComponentType,
-  permission: NonNullable<ComponentProps<typeof RequireSession>['permission']>,
-): RouteObject {
+function conPermiso(path: string, load: () => Promise<{ default: ComponentType }>, permission: Permission): RouteObject {
   return {
     element: <RequireSession permission={permission} />,
-    children: [{ path, Component }],
+    children: [{ path, lazy: { Component: async () => (await load()).default } }],
   }
 }
 
@@ -46,7 +42,7 @@ const router = createBrowserRouter(
         { path: 'acceso', Component: LoginView },
         {
           element: <RequireSession />,
-          children: [{ path: 'perfil', Component: ProfileView }],
+          children: [{ path: 'perfil', lazy: { Component: async () => (await import('../features/auth/ProfileView')).default } }],
         },
         {
           element: <RequireSession permission="orders.take" />,
@@ -57,23 +53,16 @@ const router = createBrowserRouter(
             { path: 'pedidos/:orderId/agregar', Component: AddItemsView },
           ],
         },
-        conPermiso('tablero', BoardView, 'orders.read_all'),
-        conPermiso('tablero/historial', HistoryView, 'orders.read_all'),
-        conPermiso('menu', MenuView, 'menu.manage'),
-        conPermiso('mesas', TablesView, 'tables.manage'),
-        conPermiso('inventario', InventoryView, 'inventory.read'),
-        conPermiso('inventario/recetas/:menuItemId', RecipeEditorView, 'inventory.read'),
-        conPermiso('personal', StaffView, 'staff.manage'),
-        // El panel BI trae sus gráficos: se descarga recién al abrirlo, y el
-        // mesero, que no tiene el permiso, nunca lo baja.
-        {
-          element: <RequireSession permission="insights.read" />,
-          children: [
-            { path: 'panel', lazy: { Component: async () => (await import('../features/insights/InsightsView')).default } },
-            { path: 'panel/reposicion', lazy: { Component: async () => (await import('../features/insights/RestockView')).default } },
-            { path: 'panel/ia', lazy: { Component: async () => (await import('../features/insights/AiAuditView')).default } },
-          ],
-        },
+        conPermiso('tablero', () => import('../features/orders/BoardView'), 'orders.read_all'),
+        conPermiso('tablero/historial', () => import('../features/orders/HistoryView'), 'orders.read_all'),
+        conPermiso('menu', () => import('../features/menu/MenuView'), 'menu.manage'),
+        conPermiso('mesas', () => import('../features/tables/TablesView'), 'tables.manage'),
+        conPermiso('inventario', () => import('../features/inventory/InventoryView'), 'inventory.read'),
+        conPermiso('inventario/recetas/:menuItemId', () => import('../features/inventory/RecipeEditorView'), 'inventory.read'),
+        conPermiso('personal', () => import('../features/staff/StaffView'), 'staff.manage'),
+        conPermiso('panel', () => import('../features/insights/InsightsView'), PANEL),
+        conPermiso('panel/reposicion', () => import('../features/insights/RestockView'), PANEL),
+        conPermiso('panel/ia', () => import('../features/insights/AiAuditView'), PANEL),
         // Cualquier ruta que no exista lleva al inicio de cada cuenta, no a un error.
         { path: '*', element: <Navigate to="/" replace /> },
       ],

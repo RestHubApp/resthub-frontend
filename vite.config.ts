@@ -56,6 +56,17 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          // React cambia menos que la aplicacion: en su propio archivo queda
+          // en la cache del celular entre una version y la siguiente.
+          groups: [{ name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/u, priority: 10 }],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
