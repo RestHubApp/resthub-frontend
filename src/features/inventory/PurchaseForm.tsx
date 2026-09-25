@@ -35,7 +35,7 @@ export default function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) 
   const compra = useInventoryChange({
     send: (datos: PurchaseValues) => registerPurchase(purchasePayload(ingredient.id, datos, ingredient.unit)),
     success: (resultado) =>
-      `Compra registrada: ${ingredient.name} queda en ${formatQuantity(resultado.ingredient.stock, ingredient.unit)}.`,
+      `Compra registrada: ${ingredient.name} queda en ${formatQuantity(resultado.ingredient.stock, ingredient.unit)}`,
     onDone,
   })
   const errores = formState.errors

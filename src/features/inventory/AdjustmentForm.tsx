@@ -55,7 +55,7 @@ export default function AdjustmentForm({ ingredient, onDone }: AdjustmentFormPro
   const ajuste = useInventoryChange({
     send: (datos: AdjustmentValues) => registerAdjustment(adjustmentPayload(datos, ingredient)),
     success: (resultado) =>
-      `Ajuste de ${formatSignedQuantity(resultado.movement.quantity, ingredient.unit)}: ${ingredient.name} queda en ${formatQuantity(resultado.ingredient.stock, ingredient.unit)}.`,
+      `Ajuste de ${formatSignedQuantity(resultado.movement.quantity, ingredient.unit)}: ${ingredient.name} queda en ${formatQuantity(resultado.ingredient.stock, ingredient.unit)}`,
     onDone,
   })
   const errores = formState.errors

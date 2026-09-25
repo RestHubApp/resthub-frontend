@@ -49,10 +49,17 @@ export default function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
               <h3 className="m-0 text-base font-semibold">{insumo.name}</h3>
               <IngredientStatus ingredient={insumo} />
             </div>
-            <p className="m-0 text-sm text-muted-foreground">
-              Hay <strong className={insumo.is_negative ? 'text-destructive' : 'text-foreground'}>{formatQuantity(insumo.stock, insumo.unit)}</strong>
-              {' '}de un mínimo de {formatQuantity(insumo.min_stock, insumo.unit)}. Faltan{' '}
-              <strong className="text-foreground">{formatQuantity(falta, insumo.unit)}</strong> para llegar.
+            <p className="m-0 flex flex-wrap gap-x-3 text-sm text-muted-foreground">
+              <span>
+                Hay{' '}
+                <strong className={insumo.is_negative ? 'text-destructive' : 'text-foreground'}>
+                  {formatQuantity(insumo.stock, insumo.unit)}
+                </strong>
+              </span>
+              <span>Mínimo {formatQuantity(insumo.min_stock, insumo.unit)}</span>
+              <span>
+                Faltan <strong className="text-foreground">{formatQuantity(falta, insumo.unit)}</strong>
+              </span>
             </p>
             {canManage ? (
               <Button

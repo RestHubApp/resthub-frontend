@@ -43,7 +43,7 @@ export default function WasteForm({ ingredient, onDone }: WasteFormProps) {
         reason: datos.reason,
       }),
     success: (resultado) =>
-      `Merma registrada: ${ingredient.name} queda en ${formatQuantity(resultado.ingredient.stock, ingredient.unit)}.`,
+      `Merma registrada: ${ingredient.name} queda en ${formatQuantity(resultado.ingredient.stock, ingredient.unit)}`,
     onDone,
   })
   const errores = formState.errors

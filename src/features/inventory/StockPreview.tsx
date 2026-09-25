@@ -8,7 +8,9 @@ interface StockPreviewProps {
 }
 
 /**
- * Cómo queda el stock si se guarda: "Hoy hay 150 g. Quedará en 5.15 kg".
+ * Cómo queda el stock si se guarda: "Hoy hay 150 g → quedará en 5.15 kg".
+ *
+ * Sin punto final: "12 unid." ya trae el suyo.
  *
  * Se anuncia con cortesía mientras se escribe, sin interrumpir.
  */
@@ -20,10 +22,10 @@ export default function StockPreview({ ingredient, delta }: StockPreviewProps) {
   return (
     <p aria-live="polite" className="m-0 rounded-lg bg-muted px-3 py-2 text-sm">
       Hoy hay <strong>{formatQuantity(actual, ingredient.unit)}</strong>
-      {quedara === null ? '.' : (
+      {quedara === null ? null : (
         <>
-          . Quedará en <strong>{formatQuantity(quedara, ingredient.unit)}</strong>
-          {quedara < minimo ? ', todavía bajo el mínimo.' : '.'}
+          {' '}→ quedará en <strong>{formatQuantity(quedara, ingredient.unit)}</strong>
+          {quedara < minimo ? ', todavía bajo el mínimo' : null}
         </>
       )}
     </p>
