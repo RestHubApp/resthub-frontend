@@ -50,7 +50,7 @@ function columns(timeZone: string): DataColumn<AiDecision>[] {
   return [
   { id: 'fecha', header: 'Fecha', cell: (d) => formatDateTime(d.created_at, timeZone), className: 'whitespace-nowrap' },
   { id: 'tipo', header: 'Tipo', cell: (d) => d.kind_label },
-  { id: 'sujeto', header: 'Sobre', cell: (d) => `${SUBJECTS[d.subject_type]} #${String(d.subject_id)}` },
+  { id: 'sujeto', header: 'Sobre', cell: (d) => `${SUBJECTS[d.subject_type]} (id ${String(d.subject_id)})` },
   { id: 'decision', header: 'Decisión', cell: resumen },
   {
     id: 'motor',
