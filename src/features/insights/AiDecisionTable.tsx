@@ -6,6 +6,7 @@ import AiDecisionDetail from './AiDecisionDetail'
 import { DEFAULT_TIME_ZONE } from './dateRange'
 import EngineBadge from './EngineBadge'
 import { formatConfidence, formatDateTime } from './format'
+import { ACTION_LABELS } from './restockActions'
 
 const SUBJECTS: Record<AiDecision['subject_type'], string> = {
   ingredient: 'Insumo',
@@ -14,13 +15,33 @@ const SUBJECTS: Record<AiDecision['subject_type'], string> = {
   stock_movement: 'Merma',
 }
 
+// La salida guarda códigos; aca se leen en español.
+const OUTPUT_LABELS: Record<AiDecision['kind'], { readonly key: string; readonly labels: Partial<Record<string, string>> }> = {
+  restock: { key: 'action', labels: ACTION_LABELS },
+  order_note: {
+    key: 'note_type',
+    labels: { allergy: 'Alergia o restricción', preference: 'Preferencia', priority: 'Prioridad', other: 'Otro' },
+  },
+  waste_cause: {
+    key: 'cause',
+    labels: {
+      expiration: 'Vencimiento',
+      mishandling: 'Mala manipulación',
+      customer_return: 'Devolución del cliente',
+      preparation_error: 'Error de preparación',
+      other: 'Otro',
+    },
+  },
+}
+
 // Lo que decidió, en una línea: la acción, el tipo de nota o la causa.
 function resumen(decision: AiDecision): string {
-  const salida = decision.output
-  const texto = ['action_label', 'note_type_label', 'cause_label', 'action', 'note_type', 'cause']
-    .map((clave) => salida[clave])
-    .find((valor) => typeof valor === 'string')
-  return typeof texto === 'string' ? texto : '—'
+  const { key, labels } = OUTPUT_LABELS[decision.kind]
+  const codigo = decision.output[key]
+  if (typeof codigo !== 'string') {
+    return '—'
+  }
+  return labels[codigo] ?? codigo
 }
 
 const COLUMNS: DataColumn<AiDecision>[] = [

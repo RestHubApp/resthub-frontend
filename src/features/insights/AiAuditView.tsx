@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { aiDecisionsQueryKey, fetchAiDecisions } from '../../api/insights'
-import type { DecisionEngine, DecisionKind } from '../../api/types'
+import type { AiDecisionParams, DecisionEngine, DecisionKind } from '../../api/types'
 import FormMessage from '../../components/FormMessage'
 import SectionCard from '../../components/SectionCard'
 import TablePagination from '../../components/TablePagination'
@@ -23,6 +23,16 @@ const ENGINES: readonly { value: DecisionEngine; label: string }[] = [
   { value: 'rules', label: 'Reglas fijas' },
 ]
 
+// Un filtro vacío no viaja: el servidor lo entiende como "todos".
+function queryParams(kind: DecisionKind | '', engine: DecisionEngine | '', pagina: number): AiDecisionParams {
+  return {
+    ...(kind === '' ? {} : { kind }),
+    ...(engine === '' ? {} : { engine }),
+    limit: PAGE_SIZE,
+    offset: pagina * PAGE_SIZE,
+  }
+}
+
 /**
  * La bitácora de la IA: cada decisión con lo que vio el motor, lo que
  * respondió, su confianza y si hubo que recurrir a las reglas.
@@ -31,12 +41,7 @@ export default function AiAuditView() {
   const [kind, setKind] = useState<DecisionKind | ''>('')
   const [engine, setEngine] = useState<DecisionEngine | ''>('')
   const [pagina, setPagina] = useState(0)
-  const params = {
-    kind: kind === '' ? undefined : kind,
-    engine: engine === '' ? undefined : engine,
-    limit: PAGE_SIZE,
-    offset: pagina * PAGE_SIZE,
-  }
+  const params = queryParams(kind, engine, pagina)
   const decisiones = useQuery({
     queryKey: [...aiDecisionsQueryKey, params],
     queryFn: () => fetchAiDecisions(params),
@@ -48,7 +53,10 @@ export default function AiAuditView() {
   return (
     <div className="flex flex-col gap-6">
       <PanelHeader description="Cada decisión de la IA queda guardada: qué datos vio, qué respondió, con qué confianza y qué motor la tomó." />
-      <SectionCard title="Decisiones" description={`${String(total)} en total con estos filtros.`}>
+      <SectionCard
+        title="Decisiones"
+        description={decisiones.isPending ? 'Cargando…' : `${String(total)} en total con estos filtros.`}
+      >
         <div className="flex flex-wrap gap-4">
           <FilterSelect label="Tipo" value={kind} options={KINDS} allLabel="Todos los tipos" onChange={(valor) => { setKind(valor); setPagina(0) }} />
           <FilterSelect label="Motor" value={engine} options={ENGINES} allLabel="Todos los motores" onChange={(valor) => { setEngine(valor); setPagina(0) }} />
