@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/api/v1/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sondeo de vida */
+        get: operations["health_api_v1_health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Avisos en tiempo real */
+        get: operations["stream_events_api_v1_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
@@ -28,8 +62,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuenta que emitió la petición */
-        get: operations["read_current_user_api_v1_auth_me_get"];
+        /** Sesión de la cuenta que pregunta */
+        get: operations["read_current_session_api_v1_auth_me_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -55,21 +89,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/health": {
+    "/api/v1/restaurant": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Estado del servicio */
-        get: operations["health_api_v1_health_get"];
+        /** Restaurante de la cuenta */
+        get: operations["read_restaurant_api_v1_restaurant_get"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Editar el restaurante propio */
+        patch: operations["update_restaurant_api_v1_restaurant_patch"];
         trace?: never;
     };
     "/api/v1/staff": {
@@ -79,11 +114,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Personal del restaurante */
+        /** Listar el personal */
         get: operations["list_staff_api_v1_staff_get"];
         put?: never;
-        /** Crear una cuenta del personal */
-        post: operations["create_staff_api_v1_staff_post"];
+        /** Dar de alta a un mesero o a otro encargado */
+        post: operations["register_staff_api_v1_staff_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -97,31 +132,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Ver a un miembro */
+        get: operations["read_staff_member_api_v1_staff__user_id__get"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Editar una cuenta del personal */
+        /** Editar nombre o rol */
         patch: operations["update_staff_api_v1_staff__user_id__patch"];
-        trace?: never;
-    };
-    "/api/v1/staff/{user_id}/password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Restablecer la contraseña de una cuenta del personal */
-        post: operations["reset_staff_password_api_v1_staff__user_id__password_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/v1/staff/{user_id}/status": {
@@ -133,8 +152,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Activar o desactivar una cuenta del personal */
-        post: operations["change_staff_status_api_v1_staff__user_id__status_post"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Activar o desactivar una cuenta */
+        patch: operations["change_staff_status_api_v1_staff__user_id__status_patch"];
+        trace?: never;
+    };
+    "/api/v1/staff/{user_id}/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restablecer la contraseña de una cuenta */
+        post: operations["reset_staff_password_api_v1_staff__user_id__password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Movimientos de las cuentas */
+        get: operations["read_activity_api_v1_activity_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -145,17 +198,67 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** AccessTokenResponse */
+        /**
+         * AccessTokenResponse
+         * @description El token y, en la misma respuesta, la sesión que abre.
+         *
+         *     Así la interfaz no necesita una segunda petición a `/auth/me` para
+         *     dibujarse después de entrar.
+         */
         AccessTokenResponse: {
+            user: components["schemas"]["SessionUserResponse"];
+            restaurant: components["schemas"]["SessionRestaurantResponse"];
+            /** Permissions */
+            permissions: components["schemas"]["Permission"][];
             /** Access Token */
             access_token: string;
-            /** Expires In */
-            expires_in: number;
             /**
              * Token Type
              * @default bearer
              */
             token_type: string;
+            /** Expires In */
+            expires_in: number;
+        };
+        /**
+         * ActivityKind
+         * @description Qué ocurrió.
+         *
+         *     El tipo es un código estable y la frase legible se arma al mostrarla. Si se
+         *     guardara la frase, cada variante del texto sería un valor distinto y no se
+         *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
+         * @enum {string}
+         */
+        ActivityKind: "signed_in" | "password_changed" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "restaurant_updated";
+        /** ActivityPageResponse */
+        ActivityPageResponse: {
+            /** Items */
+            items: components["schemas"]["ActivityResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** ActivityResponse */
+        ActivityResponse: {
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Kind Label */
+            kind_label: string;
+            /** Detail */
+            detail: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** User Id */
+            user_id: number;
+            /** User Name */
+            user_name: string;
+            user_role: components["schemas"]["Role"];
+            /** User Role Label */
+            user_role_label: string;
         };
         /** ChangeOwnPasswordRequest */
         ChangeOwnPasswordRequest: {
@@ -169,37 +272,23 @@ export interface components {
             /** Is Active */
             is_active: boolean;
         };
-        /** CreateStaffRequest */
-        CreateStaffRequest: {
-            /** Full Name */
-            full_name: string;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            role: components["schemas"]["Role"];
-            /** Password */
-            password: string;
-        };
-        /** CurrentUserResponse */
-        CurrentUserResponse: {
-            user: components["schemas"]["UserResponse"];
-            restaurant: components["schemas"]["RestaurantResponse"];
-            /** Permissions */
-            permissions: components["schemas"]["Permission"][];
-        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
-        /** HealthResponse */
+        /**
+         * HealthResponse
+         * @description Respuesta del sondeo de vida.
+         *
+         *     Está tipada, y no devuelta como diccionario suelto, para que el esquema
+         *     OpenAPI describa los campos y el frontend derive el tipo exacto.
+         */
         HealthResponse: {
-            /** Service */
-            service: string;
             /** Status */
             status: string;
+            /** Service */
+            service: string;
             /** Version */
             version: string;
         };
@@ -217,7 +306,20 @@ export interface components {
          * Permission
          * @enum {string}
          */
-        Permission: "menu.read" | "menu.manage" | "tables.read" | "tables.manage" | "orders.take" | "orders.read_all" | "orders.manage" | "orders.charge" | "inventory.read" | "inventory.manage" | "staff.manage" | "insights.read" | "activity.read";
+        Permission: "menu.read" | "menu.manage" | "tables.read" | "tables.manage" | "orders.take" | "orders.read_all" | "orders.manage" | "orders.charge" | "inventory.read" | "inventory.manage" | "staff.manage" | "restaurant.manage" | "insights.read" | "activity.read";
+        /** RegisterStaffRequest */
+        RegisterStaffRequest: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Full Name */
+            full_name: string;
+            role: components["schemas"]["Role"];
+            /** Password */
+            password: string;
+        };
         /** ResetStaffPasswordRequest */
         ResetStaffPasswordRequest: {
             /** New Password */
@@ -231,21 +333,62 @@ export interface components {
             name: string;
             /** Slug */
             slug: string;
+            /** Timezone */
+            timezone: string;
+            /** Is Active */
+            is_active: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /**
          * Role
+         * @description Tipo de cuenta.
+         *
+         *     Son dos y fijos: quien administra el local desde la laptop y quien toma
+         *     pedidos desde el celular. Sin roles editables, lo que cada uno puede hacer
+         *     lo decide el mapa de `permissions.py`.
          * @enum {string}
          */
         Role: "admin" | "waiter";
-        /** StaffListResponse */
-        StaffListResponse: {
-            /** Items */
-            items: components["schemas"]["StaffResponse"][];
-            /** Total */
-            total: number;
+        /**
+         * SessionResponse
+         * @description La cuenta propia, su restaurante y lo que su rol le deja hacer.
+         *
+         *     La interfaz arma la navegación con `permissions`; la API igual rechaza lo
+         *     no permitido, así que ocultar es comodidad y no seguridad.
+         */
+        SessionResponse: {
+            user: components["schemas"]["SessionUserResponse"];
+            restaurant: components["schemas"]["SessionRestaurantResponse"];
+            /** Permissions */
+            permissions: components["schemas"]["Permission"][];
         };
-        /** StaffResponse */
-        StaffResponse: {
+        /** SessionRestaurantResponse */
+        SessionRestaurantResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
+        /** SessionUserResponse */
+        SessionUserResponse: {
+            /** Id */
+            id: number;
+            /** Full Name */
+            full_name: string;
+            /** Email */
+            email: string;
+            role: components["schemas"]["Role"];
+            /** Role Label */
+            role_label: string;
+        };
+        /** StaffMemberResponse */
+        StaffMemberResponse: {
             /** Id */
             id: number;
             /** Full Name */
@@ -263,25 +406,25 @@ export interface components {
              */
             created_at: string;
         };
+        /** StaffPageResponse */
+        StaffPageResponse: {
+            /** Items */
+            items: components["schemas"]["StaffMemberResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** UpdateRestaurantRequest */
+        UpdateRestaurantRequest: {
+            /** Name */
+            name?: string | null;
+            /** Timezone */
+            timezone?: string | null;
+        };
         /** UpdateStaffRequest */
         UpdateStaffRequest: {
             /** Full Name */
             full_name?: string | null;
-            /** Email */
-            email?: string | null;
             role?: components["schemas"]["Role"] | null;
-        };
-        /** UserResponse */
-        UserResponse: {
-            /** Id */
-            id: number;
-            /** Full Name */
-            full_name: string;
-            /** Email */
-            email: string;
-            role: components["schemas"]["Role"];
-            /** Role Label */
-            role_label: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -291,6 +434,10 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
     };
     responses: never;
@@ -301,6 +448,46 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    health_api_v1_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    stream_events_api_v1_events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
+                };
+            };
+        };
+    };
     login_api_v1_auth_login_post: {
         parameters: {
             query?: never;
@@ -334,7 +521,7 @@ export interface operations {
             };
         };
     };
-    read_current_user_api_v1_auth_me_get: {
+    read_current_session_api_v1_auth_me_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -349,7 +536,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CurrentUserResponse"];
+                    "application/json": components["schemas"]["SessionResponse"];
                 };
             };
         };
@@ -385,7 +572,7 @@ export interface operations {
             };
         };
     };
-    health_api_v1_health_get: {
+    read_restaurant_api_v1_restaurant_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -400,32 +587,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HealthResponse"];
+                    "application/json": components["schemas"]["RestaurantResponse"];
                 };
             };
         };
     };
-    list_staff_api_v1_staff_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StaffListResponse"];
-                };
-            };
-        };
-    };
-    create_staff_api_v1_staff_post: {
+    update_restaurant_api_v1_restaurant_patch: {
         parameters: {
             query?: never;
             header?: never;
@@ -434,7 +601,80 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateStaffRequest"];
+                "application/json": components["schemas"]["UpdateRestaurantRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_staff_api_v1_staff_get: {
+        parameters: {
+            query?: {
+                /** @description Filtra por rol */
+                role?: components["schemas"]["Role"][] | null;
+                /** @description Busca en nombre y correo */
+                search?: string | null;
+                /** @description Filtra por estado */
+                is_active?: boolean | null;
+                /** @description Columna, '-' invierte */
+                ordering?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffPageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_staff_api_v1_staff_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterStaffRequest"];
             };
         };
         responses: {
@@ -444,7 +684,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StaffResponse"];
+                    "application/json": components["schemas"]["StaffMemberResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_staff_member_api_v1_staff__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMemberResponse"];
                 };
             };
             /** @description Validation Error */
@@ -479,7 +750,42 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StaffResponse"];
+                    "application/json": components["schemas"]["StaffMemberResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_staff_status_api_v1_staff__user_id__status_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeStaffStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMemberResponse"];
                 };
             };
             /** @description Validation Error */
@@ -526,20 +832,21 @@ export interface operations {
             };
         };
     };
-    change_staff_status_api_v1_staff__user_id__status_post: {
+    read_activity_api_v1_activity_get: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                user_id: number;
+            query?: {
+                /** @description Filtra por rol */
+                role?: components["schemas"]["Role"][] | null;
+                /** @description Filtra por acción */
+                kind?: components["schemas"]["ActivityKind"][] | null;
+                limit?: number;
+                offset?: number;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChangeStaffStatusRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -547,7 +854,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StaffResponse"];
+                    "application/json": components["schemas"]["ActivityPageResponse"];
                 };
             };
             /** @description Validation Error */

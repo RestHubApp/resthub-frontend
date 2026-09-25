@@ -28,9 +28,9 @@ export default function StaffEditForm({ account, isSelf, onDone }: StaffEditForm
   })
 
   const guardar = useMutation({
-    // La cuenta propia no manda el tipo: el servidor igual lo rechazaria.
+    // La cuenta propia no manda el tipo: el servidor responde 409 si lo intenta.
     mutationFn: (valores: StaffIdentityValues) =>
-      updateStaff(account.id, isSelf ? { ...valores, role: undefined } : valores),
+      updateStaff(account.id, isSelf ? { full_name: valores.full_name } : valores),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: staffQueryKey })
       onDone()
@@ -52,14 +52,13 @@ export default function StaffEditForm({ account, isSelf, onDone }: StaffEditForm
       <StaffFields
         fields={{
           full_name: register('full_name'),
-          email: register('email'),
           role: register('role'),
         }}
         errors={{
           full_name: errores.full_name?.message,
-          email: errores.email?.message,
           role: errores.role?.message,
         }}
+        fixedEmail={account.email}
         lockedRoleLabel={isSelf ? account.role_label : undefined}
       />
 

@@ -19,15 +19,19 @@ export const ROLE_OPTIONS: readonly UserRole[] = ['waiter', 'admin']
 
 const roleRule = z.enum(['admin', 'waiter'], 'Elige el tipo de cuenta')
 
+// El correo no esta aca: se fija al crear la cuenta y el servidor no deja
+// cambiarlo, porque es con lo que la persona entra.
 export const staffIdentitySchema = z.object({
   full_name: nombreRule('nombre completo', MAX_NOMBRE_COMPLETO, 'el'),
-  email: correoRule,
   role: roleRule,
 })
 
 export type StaffIdentityValues = z.infer<typeof staffIdentitySchema>
 
-export const createStaffSchema = staffIdentitySchema.extend({ password: passwordRule })
+export const createStaffSchema = staffIdentitySchema.extend({
+  email: correoRule,
+  password: passwordRule,
+})
 
 export type CreateStaffValues = z.infer<typeof createStaffSchema>
 
@@ -39,7 +43,7 @@ export const EMPTY_CREATE_STAFF: CreateStaffValues = {
 }
 
 export function identityOf(account: StaffResponse): StaffIdentityValues {
-  return { full_name: account.full_name, email: account.email, role: account.role }
+  return { full_name: account.full_name, role: account.role }
 }
 
 export const resetPasswordSchema = z.object({ new_password: passwordRule })

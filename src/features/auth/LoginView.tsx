@@ -4,8 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 
-import { fetchCurrentUser, login } from '../../api/auth'
-import type { LoginRequest } from '../../api/types'
+import { login } from '../../api/auth'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import PasswordField from '../../components/PasswordField'
@@ -52,18 +51,6 @@ function destinoDe(estado: unknown): string {
   return typeof desde === 'string' && desde.startsWith('/') && desde !== '/acceso' ? desde : '/'
 }
 
-/**
- * Entrar es dos pasos: el token y, con el, la cuenta.
- *
- * La sesion no se abre hasta tener las dos cosas, porque sin la cuenta no hay
- * restaurante ni permisos, y el menu quedaria vacio.
- */
-async function entrar(credenciales: LoginRequest) {
-  const { access_token: token } = await login(credenciales)
-  const account = await fetchCurrentUser(token)
-  return { token, account }
-}
-
 export default function LoginView() {
   const signIn = useSession((state) => state.signIn)
   const navigate = useNavigate()
@@ -75,9 +62,11 @@ export default function LoginView() {
   })
 
   const acceder = useMutation({
-    mutationFn: entrar,
-    onSuccess: ({ token, account }) => {
-      signIn(token, account)
+    mutationFn: login,
+    // La respuesta ya trae la cuenta, el restaurante y los permisos: la sesion
+    // se abre sin pedir `/auth/me` aparte.
+    onSuccess: ({ access_token: token, user, restaurant, permissions }) => {
+      signIn(token, { user, restaurant, permissions })
       void navigate(destino, { replace: true })
     },
   })
