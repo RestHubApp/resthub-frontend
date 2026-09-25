@@ -41,7 +41,7 @@ export default function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
         </dl>
       )}
       <Button type="button" size="lg" className="h-11" onClick={onClose}>
-        Cerrar
+        Terminar
       </Button>
     </div>
   )
