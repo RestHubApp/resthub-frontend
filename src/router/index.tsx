@@ -3,11 +3,13 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import LoginView from '../features/auth/LoginView'
 import ProfileView from '../features/auth/ProfileView'
+import InventoryView from '../features/inventory/InventoryView'
+import RecipeEditorView from '../features/inventory/RecipeEditorView'
+import MenuView from '../features/menu/MenuView'
 import AppShell from '../features/shell/AppShell'
 import ComingSoonView from '../features/shell/ComingSoonView'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import RequireSession from '../features/shell/RequireSession'
-import MenuView from '../features/menu/MenuView'
 import StaffView from '../features/staff/StaffView'
 
 /**
@@ -46,7 +48,8 @@ const router = createBrowserRouter(
         conPermiso('tablero', ComingSoonView, 'orders.read_all'),
         conPermiso('menu', MenuView, 'menu.manage'),
         conPermiso('mesas', ComingSoonView, 'tables.manage'),
-        conPermiso('inventario', ComingSoonView, 'inventory.read'),
+        conPermiso('inventario', InventoryView, 'inventory.read'),
+        conPermiso('inventario/recetas/:menuItemId', RecipeEditorView, 'inventory.read'),
         conPermiso('personal', StaffView, 'staff.manage'),
         conPermiso('panel', ComingSoonView, 'insights.read'),
         // Cualquier ruta que no exista lleva al inicio de cada cuenta, no a un error.

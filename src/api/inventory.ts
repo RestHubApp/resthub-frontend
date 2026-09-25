@@ -68,7 +68,11 @@ export async function fetchLowStock(): Promise<Ingredient[]> {
 }
 
 export async function fetchMovements(params: MovementListParams): Promise<MovementPage> {
-  const { data } = await api.get<MovementPage>('/inventory/movements', { params })
+  // El tipo es una lista: FastAPI la espera como `kind=a&kind=b`, sin corchetes.
+  const { data } = await api.get<MovementPage>('/inventory/movements', {
+    params,
+    paramsSerializer: { indexes: null },
+  })
   return data
 }
 
