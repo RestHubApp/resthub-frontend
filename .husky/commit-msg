@@ -1,0 +1,21 @@
+# Mensajes en Conventional Commits, en español: `tipo(ámbito opcional): resumen`.
+# Los mensajes que arma Git al fusionar o revertir pasan sin revisar.
+primera=$(head -n 1 "$1")
+
+case "$primera" in
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *) ;;
+  *)
+    if ! printf '%s\n' "$primera" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+'; then
+      echo "Commit rechazado: el mensaje no sigue Conventional Commits." >&2
+      echo "Formato: tipo(ámbito opcional): resumen en español" >&2
+      echo "Tipos: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert" >&2
+      exit 1
+    fi
+    ;;
+esac
+
+# Regla heredada de GestVet: la autoría la dice el commit, no una línea extra.
+if grep -Eiq '^[[:space:]]*co-authored-by:' "$1"; then
+  echo "Commit rechazado: RestHub no permite lineas Co-authored-by." >&2
+  exit 1
+fi

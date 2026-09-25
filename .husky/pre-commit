@@ -1,0 +1,4 @@
+set -e
+
+# Linters sobre los archivos preparados para el commit.
+pnpm exec lint-staged
