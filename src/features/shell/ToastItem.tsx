@@ -8,9 +8,11 @@ const AUTO_DISMISS_MS = 8_000
 
 // El tono lo lleva el icono y no un borde de color: el texto queda siempre en
 // el color de lectura, y el aviso se entiende igual sin distinguir colores.
+// Un aviso informativo casi siempre confirma algo hecho: lleva la marca de
+// correcto, no la de alerta, que queda para lo que salió mal.
 const ICON_TONE = {
-  info: 'text-primary',
-  warning: 'text-warning',
+  info: { name: 'correcto', className: 'text-success' },
+  warning: { name: 'alerta', className: 'text-warning' },
 } as const
 
 interface ToastItemProps {
@@ -33,7 +35,7 @@ export default function ToastItem({ id, tone, message }: ToastItemProps) {
 
   return (
     <div className="flex items-start gap-3 rounded-xl bg-card p-3 text-sm text-card-foreground shadow-lg ring-1 ring-foreground/10">
-      <Icon name="alerta" size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone]}`} />
+      <Icon name={ICON_TONE[tone].name} size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone].className}`} />
       <p className="m-0 flex-1">{message}</p>
       <Button
         type="button"
