@@ -47,7 +47,16 @@ const router = createBrowserRouter(
         conPermiso('mesas', ComingSoonView, 'tables.manage'),
         conPermiso('inventario', ComingSoonView, 'inventory.read'),
         conPermiso('personal', StaffView, 'staff.manage'),
-        conPermiso('panel', ComingSoonView, 'insights.read'),
+        // El panel BI trae sus gráficos: se descarga recién al abrirlo, y el
+        // mesero, que no tiene el permiso, nunca lo baja.
+        {
+          element: <RequireSession permission="insights.read" />,
+          children: [
+            { path: 'panel', lazy: { Component: async () => (await import('../features/insights/InsightsView')).default } },
+            { path: 'panel/reposicion', lazy: { Component: async () => (await import('../features/insights/RestockView')).default } },
+            { path: 'panel/ia', lazy: { Component: async () => (await import('../features/insights/AiAuditView')).default } },
+          ],
+        },
         // Cualquier ruta que no exista lleva al inicio de cada cuenta, no a un error.
         { path: '*', element: <Navigate to="/" replace /> },
       ],
