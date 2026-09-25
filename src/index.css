@@ -168,3 +168,20 @@
   }
 }
 
+
+/*
+ * Mientras se toma un pedido, la barra del carrito queda fija al pie (encima
+ * de la barra de navegacion en el celular). El boton de accesibilidad sube por
+ * encima de ella para no tapar "Enviar a cocina".
+ */
+@media (width < 64rem) {
+  html:has([data-cart-bar]) .asw-menu-btn {
+    bottom: calc(9.5rem + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+@media (width >= 64rem) {
+  html:has([data-cart-bar]) .asw-menu-btn {
+    bottom: 6rem !important;
+  }
+}
