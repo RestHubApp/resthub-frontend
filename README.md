@@ -85,6 +85,27 @@ La navegación sale de `src/features/shell/navigation.ts`: cada entrada declara
 el permiso de `GET /auth/me` que la muestra. En pantallas anchas va en una barra
 lateral; en el celular, en una barra inferior al alcance del pulgar.
 
+## Formatos, zona horaria y carga
+
+- Soles, porcentajes, cantidades de insumo (g → kg, ml → L), fechas y horas
+  salen de un solo módulo, `src/services/format.ts`. Ninguna pantalla crea su
+  propio `Intl.NumberFormat`.
+- "Hoy" y las horas son las del restaurante (`restaurant.timezone` de
+  `GET /auth/me`, con `useTimeZone()`), no las del navegador de quien mira.
+- El acceso y la toma de pedidos del mesero van en el archivo inicial; las
+  pantallas del encargado (tablero, historial, menú, mesas, inventario,
+  personal, perfil y panel) se descargan al abrirlas (`lazy` en
+  `src/router/index.tsx`).
+
+## Tema oscuro (preparado, no activo)
+
+`src/index.css` trae un bloque `.dark` con la paleta completa para superficies
+oscuras (contraste AA verificado) y Tailwind tiene la variante `dark:` ligada a
+esa clase. **Ninguna pantalla lo activa**: no hay selector ni se sigue
+`prefers-color-scheme`. Solo el panel BI se revisó en oscuro; antes de
+ofrecerlo en toda la aplicación hay que recorrer las demás pantallas con la
+clase `dark` puesta en `<html>` y corregir lo que no se lea.
+
 ## Convenciones
 
 - Interfaz, mensajes y comentarios en español; identificadores en inglés.
