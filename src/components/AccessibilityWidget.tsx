@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 
 const ETIQUETA_ESPANOL = 'Abrir menú de accesibilidad'
-const ATRIBUTOS_ETIQUETA = ['aria-label', 'title'] as const
+const ETIQUETA_CERRAR = 'Cerrar menú de accesibilidad'
+const ARIA_LABEL = 'aria-label'
+const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
 
 /**
  * Widget de accesibilidad Sienna (MIT, github.com/bennyluk/Sienna-Accessibility-Widget).
@@ -48,15 +50,33 @@ export default function AccessibilityWidget() {
       parchearBoton(existente)
     }
 
-    const contenedor = document.querySelector('.asw-container') ?? document.body
+    // El widget crea su menú la primera vez que se abre, visible pero sin
+    // `display` en línea, y su botón de cerrar alterna ese valor: el primer
+    // toque en la X lo pasaba a "block" y el menú seguía abierto. Se deja
+    // escrito para que el primer cierre funcione. Su X, además, se anuncia en
+    // inglés ("Close").
+    function fijarMenu(menu: HTMLElement | null) {
+      const capa = menu?.parentElement
+      if (capa?.style.display === '') {
+        capa.style.display = 'block'
+      }
+      const cerrar = menu?.querySelector('.asw-menu-close')
+      if (cerrar && cerrar.getAttribute(ARIA_LABEL) !== ETIQUETA_CERRAR) {
+        cerrar.setAttribute(ARIA_LABEL, ETIQUETA_CERRAR)
+      }
+    }
+
+    // El widget se importa después de montar y agrega su botón y su menú al
+    // final de <body>: se observa <body> y no un contenedor que aún no existe.
     const observer = new MutationObserver(() => {
       const boton = document.querySelector('.asw-menu-btn')
       if (boton) {
         parchearBoton(boton)
       }
+      fijarMenu(document.querySelector<HTMLElement>('.asw-menu'))
     })
 
-    observer.observe(contenedor, {
+    observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
