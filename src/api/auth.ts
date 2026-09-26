@@ -4,6 +4,7 @@ import type {
   ChangeOwnPasswordRequest,
   CurrentUserResponse,
   LoginRequest,
+  PreviewExchangeRequest,
 } from './types'
 
 export const currentUserQueryKey = ['auth', 'me'] as const
@@ -36,4 +37,16 @@ export async function fetchCurrentUser(): Promise<CurrentUserResponse> {
 
 export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<void> {
   await api.post('/auth/me/password', payload)
+}
+
+/**
+ * Canjea el codigo de vista previa por una sesion del local de muestra.
+ *
+ * Sale sin credencial: la pestana de vista previa todavia no tiene sesion, y
+ * nunca manda la real del navegador. Un codigo invalido, vencido o ya usado
+ * responde 401.
+ */
+export async function exchangePreviewCode(payload: PreviewExchangeRequest): Promise<AccessTokenResponse> {
+  const { data } = await api.post<AccessTokenResponse>('/auth/preview', payload)
+  return data
 }
