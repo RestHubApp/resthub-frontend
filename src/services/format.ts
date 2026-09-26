@@ -29,6 +29,7 @@ const PERCENT = 100
 const MS_PER_MINUTE = 60_000
 const MINUTES_PER_HOUR = 60
 const NO_VALUE = '—'
+const TEN_MS = 10
 
 /** Un monto o cantidad del API como número; lo que no es número, cero. */
 export function toNumber(value: string | number | null | undefined): number {
@@ -98,6 +99,22 @@ export function formatConfidence(value: number | null): string {
 export function formatDays(value: string | number): string {
   const numero = toNumber(value)
   return `${TWO_DECIMALS.format(numero)} ${numero === 1 ? 'día' : 'días'}`
+}
+
+/**
+ * Una duración medida por el servidor: `0.8 ms`, `85 ms`, `1.25 s`.
+ *
+ * Por debajo de 10 ms lleva un decimal: el tiempo de base de una petición
+ * rápida vive ahí y redondeado a entero se leería como cero.
+ */
+export function formatMilliseconds(value: number): string {
+  if (!Number.isFinite(value)) {
+    return NO_VALUE
+  }
+  if (Math.abs(value) >= THOUSAND) {
+    return `${TWO_DECIMALS.format(value / THOUSAND)} s`
+  }
+  return `${(Math.abs(value) < TEN_MS ? ONE_DECIMAL : INTEGER).format(value)} ms`
 }
 
 // ---------------------------------------------------------------- Cantidades
@@ -220,6 +237,17 @@ export function wallClockIn(isoDateTime: string, timeZone: string): { day: strin
     instante,
   )
   return { day, time }
+}
+
+/** La hora de un instante en el reloj de 24 h de la zona: `14:05`. */
+export function formatClock(isoDateTime: string, timeZone: string): string {
+  return wallClockIn(isoDateTime, timeZone).time
+}
+
+/** Día corto y hora de 24 h de un instante: `25 set., 14:05`. */
+export function formatShortDateTime(isoDateTime: string, timeZone: string): string {
+  const { day, time } = wallClockIn(isoDateTime, timeZone)
+  return `${formatShortDate(day)}, ${time}`
 }
 
 /** El instante (ISO, en UTC) de un día y hora del reloj del local. */
