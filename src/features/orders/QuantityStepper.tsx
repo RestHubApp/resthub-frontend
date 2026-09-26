@@ -23,7 +23,8 @@ export default function QuantityStepper({
   disabled = false,
   canRemove = true,
 }: QuantityStepperProps) {
-  const quitaPlato = quantity <= 1
+  // Con la cantidad en 1, "−" quita el plato, si se puede quitar.
+  const quitaPlato = quantity <= 1 && canRemove
 
   return (
     <div className="flex items-center gap-1">
@@ -32,7 +33,7 @@ export default function QuantityStepper({
         variant="outline"
         className={BUTTON}
         aria-label={quitaPlato ? `Quitar ${name}` : `Uno menos de ${name}`}
-        disabled={disabled || (quitaPlato && !canRemove)}
+        disabled={disabled || quantity <= 1 && !canRemove}
         onClick={() => {
           onChange(quantity - 1)
         }}

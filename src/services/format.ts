@@ -190,3 +190,25 @@ export function formatMinutes(minutes: number): string {
   const rest = String(minutes % MINUTES_PER_HOUR).padStart(2, '0')
   return `${String(Math.floor(minutes / MINUTES_PER_HOUR))} h ${rest} min`
 }
+
+// Las horas que se escriben (una reserva a las 20:00) son del reloj del local,
+// no del navegador: quien reserva desde otra zona igual escribe la hora de acá.
+
+/** Día y hora del reloj del local para un instante: `{ day: '2026-09-25', time: '20:00' }`. */
+export function wallClockIn(isoDateTime: string, timeZone: string): { day: string; time: string } {
+  const instante = new Date(isoDateTime)
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone }).format(instante)
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(
+    instante,
+  )
+  return { day, time }
+}
+
+/** El instante (ISO, en UTC) de un día y hora del reloj del local. */
+export function zonedInstant(day: string, time: string, timeZone: string): string {
+  const supuesto = new Date(`${day}T${time}:00Z`).getTime()
+  // Cuánto se corre el reloj del local respecto de UTC en ese momento.
+  const reloj = wallClockIn(new Date(supuesto).toISOString(), timeZone)
+  const desfase = new Date(`${reloj.day}T${reloj.time}:00Z`).getTime() - supuesto
+  return new Date(supuesto - desfase).toISOString()
+}

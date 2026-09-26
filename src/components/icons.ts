@@ -16,7 +16,10 @@ import {
   ArrowLeftRight,
   ArrowUp,
   Banknote,
+  Bike,
+  BookUser,
   Boxes,
+  CalendarClock,
   Calendar,
   ChartColumnIncreasing,
   Check,
@@ -65,6 +68,7 @@ import {
   CircleCheckBig,
   ConciergeBell,
   History,
+  MapPin,
   Minus,
   Radio,
   RefreshCw,
@@ -73,6 +77,8 @@ import {
   StickyNote,
   WifiOff,
 } from 'lucide-react'
+// Caja: turnos, cuentas divididas, descuentos, cortesías y propinas.
+import { BadgePercent, CookingPot, Gift, HandCoins, Printer, Split, Wallet } from 'lucide-react'
 // Panel BI e IA.
 import {
   ArrowDownWideNarrow,
@@ -148,6 +154,17 @@ export const ICONS = {
   enVivo: Radio,
   sinConexion: WifiOff,
   reintentar: RefreshCw,
+  caja: Wallet,
+  propina: HandCoins,
+  descuento: BadgePercent,
+  cortesia: Gift,
+  dividir: Split,
+  imprimir: Printer,
+  cocina: CookingPot,
+  delivery: Bike,
+  clientes: BookUser,
+  reservas: CalendarClock,
+  ubicacion: MapPin,
   // Menú e inventario.
   precio: Tag,
   costo: Coins,

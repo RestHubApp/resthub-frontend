@@ -37,5 +37,8 @@ jobs:
       - name: ESLint
         run: pnpm lint
 
+      - name: Pruebas unitarias
+        run: pnpm test
+
       - name: Verificación de tipos y compilación
         run: pnpm build

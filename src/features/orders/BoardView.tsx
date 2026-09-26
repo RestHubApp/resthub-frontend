@@ -23,8 +23,8 @@ import { useNow } from './useNow'
 const COLUMNAS: readonly OrderStatus[] = ['open', 'in_kitchen', 'ready', 'served']
 
 function contar(orders: readonly OrderResponse[]): Record<TypeFilterValue, number> {
-  const enMesa = orders.filter((order) => order.type === 'dine_in').length
-  return { all: orders.length, dine_in: enMesa, takeaway: orders.length - enMesa }
+  const de = (type: OrderResponse['type']) => orders.filter((order) => order.type === type).length
+  return { all: orders.length, dine_in: de('dine_in'), takeaway: de('takeaway'), delivery: de('delivery') }
 }
 
 /**

@@ -1,77 +1,104 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
-import { z } from 'zod'
 
+import { saveCustomer } from '../../../api/customers'
 import DialogFormActions from '../../../components/DialogFormActions'
 import FormDialog from '../../../components/FormDialog'
-import { textoOpcional } from '../../../components/formRules'
 import Icon from '../../../components/Icon'
-import TextField from '../../../components/TextField'
 import { Button } from '../../../components/ui/button'
 import { onSubmit } from '../../../hooks/formSubmit'
+import CustomerLookup from './CustomerLookup'
+import TakeawayFields from './TakeawayFields'
+import { EMPTY_TAKEAWAY, fromCustomer, newOrderPath, takeawaySchema, type TakeawayValues } from './takeawaySchema'
 
-const MAX_CLIENTE = 80
-const schema = z.object({ customer_name: textoOpcional(MAX_CLIENTE) })
-type Values = z.infer<typeof schema>
+const MODOS: readonly { value: TakeawayValues['mode']; label: string }[] = [
+  { value: 'takeaway', label: 'Recoge en local' },
+  { value: 'delivery', label: 'Delivery' },
+]
 
 /**
- * "Para llevar": pide el nombre del cliente y lleva a la toma del pedido.
+ * Un delivery a alguien que no está en la libreta lo agrega, así la próxima
+ * vez no dicta su dirección. Si ya estaba (mismo teléfono) o no hay señal, se
+ * sigue igual: el servidor lo reconoce por el teléfono al abrir el pedido.
+ */
+async function withCustomer(values: TakeawayValues): Promise<TakeawayValues> {
+  if (values.mode !== 'delivery' || values.customer_id !== null || values.phone === '') {
+    return values
+  }
+  try {
+    const nuevo = await saveCustomer({
+      name: values.customer_name,
+      phone: values.phone,
+      email: '',
+      address: values.address,
+      reference: values.reference,
+      notes: '',
+    })
+    return { ...values, customer_id: nuevo.id }
+  } catch {
+    return values
+  }
+}
+
+/**
+ * "Para llevar": pide los datos del cliente y lleva a la toma del pedido.
  *
- * El nombre es opcional pero ayuda a entregar la bolsa correcta cuando hay
- * tres esperando. El pedido no se crea aca, sino al enviarlo a cocina.
+ * Si recoge en el local, el nombre es opcional pero ayuda a entregar la bolsa
+ * correcta. Si es delivery, el nombre, el teléfono y la dirección son
+ * obligatorios. El pedido no se crea aca, sino al enviarlo a cocina.
  */
 export default function TakeawayDialog() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
-  const { register, handleSubmit, formState, reset } = useForm<Values>({
-    resolver: zodResolver(schema),
-    defaultValues: { customer_name: '' },
-  })
+  const form = useForm<TakeawayValues>({ resolver: zodResolver(takeawaySchema), defaultValues: EMPTY_TAKEAWAY })
+  const mode = useWatch({ control: form.control, name: 'mode' })
 
   const cambiar = (abierto: boolean) => {
     setOpen(abierto)
     if (!abierto) {
-      reset()
+      form.reset(EMPTY_TAKEAWAY)
     }
   }
 
   return (
     <>
-      <Button
-        type="button"
-        size="lg"
-        className="h-11 px-4"
-        onClick={() => {
-          cambiar(true)
-        }}
-      >
+      <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
+        cambiar(true)
+      }}>
         <Icon name="llevar" size={18} />
-        <span>Para llevar</span>
+        <span>Para llevar / Delivery</span>
       </Button>
-      <FormDialog open={open} onOpenChange={cambiar} title="Pedido para llevar">
+      <FormDialog open={open} onOpenChange={cambiar} title="Pedido para llevar o delivery">
         <form
           noValidate
           className="flex flex-col gap-5"
-          onSubmit={onSubmit(
-            handleSubmit((valores) => {
-              const query = new URLSearchParams({ tipo: 'llevar', cliente: valores.customer_name })
-              void navigate(`/pedidos/nuevo?${query.toString()}`)
-            }),
-          )}
+          onSubmit={onSubmit(form.handleSubmit(async (valores) => navigate(newOrderPath(await withCustomer(valores)))))}
         >
-          <TextField
-            id="takeaway-customer"
-            label="Nombre del cliente (opcional)"
-            placeholder="Por ejemplo, Ana"
-            icon="perfil"
-            autoComplete="off"
-            maxLength={MAX_CLIENTE}
-            hint="Se muestra en el tablero para entregar el pedido correcto."
-            field={register('customer_name')}
-            error={formState.errors.customer_name?.message}
-          />
+          <div role="radiogroup" aria-label="Cómo se entrega" className="grid grid-cols-2 gap-2">
+            {MODOS.map((modo) => (
+              <Button
+                key={modo.value}
+                type="button"
+                role="radio"
+                aria-checked={mode === modo.value}
+                variant={mode === modo.value ? 'default' : 'outline'}
+                size="lg"
+                className="h-11"
+                onClick={() => {
+                  form.setValue('mode', modo.value)
+                }}
+              >
+                <Icon name={modo.value === 'delivery' ? 'delivery' : 'llevar'} size={16} />
+                <span>{modo.label}</span>
+              </Button>
+            ))}
+          </div>
+          <CustomerLookup onPick={(cliente) => {
+            form.reset(fromCustomer(cliente, form.getValues('mode')))
+          }} />
+          <TakeawayFields form={form} delivery={mode === 'delivery'} />
           <DialogFormActions>
             <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={() => {
               cambiar(false)

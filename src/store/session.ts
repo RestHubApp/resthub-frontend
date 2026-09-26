@@ -25,6 +25,8 @@ interface SessionState {
   signIn: (token: string, account: CurrentUserResponse) => void
   /** Aplica una lectura nueva de `GET /auth/me`: nombre, restaurante o permisos. */
   refresh: (account: CurrentUserResponse) => void
+  /** Cambia el token por uno renovado sin cerrar la sesion. */
+  renew: (token: string, account: CurrentUserResponse) => void
   signOut: () => void
   /** Cierra la sesion porque el servidor ya no acepta el token. */
   expire: () => void
@@ -65,7 +67,7 @@ function writeStoredSession(session: StoredSession | null): void {
  * Solo se lee la fecha de vencimiento para no mostrar pantallas que igual van a
  * responder 401. La firma la comprueba el servidor, que es quien decide.
  */
-function venceEn(token: string): number | null {
+export function venceEn(token: string): number | null {
   try {
     const carga = token.split('.')[1] ?? ''
     const datos = JSON.parse(atob(carga.replaceAll('-', '+').replaceAll('_', '/'))) as {
@@ -138,6 +140,17 @@ export const useSession = create<SessionState>((set, get) => ({
     }
     writeStoredSession({ token, account })
     set({ account })
+  },
+
+  renew: (token, account) => {
+    if (get().token === null) {
+      return
+    }
+    setAuthToken(token)
+    writeStoredSession({ token, account })
+    set({ token, account })
+    programarVencimiento(token)
+    logger.info('auth.renewed')
   },
 
   signOut: () => {

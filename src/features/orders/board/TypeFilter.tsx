@@ -12,6 +12,7 @@ const OPCIONES: readonly { value: TypeFilterValue; label: string }[] = [
   { value: 'all', label: 'Todos' },
   { value: 'dine_in', label: 'En mesa' },
   { value: 'takeaway', label: 'Para llevar' },
+  { value: 'delivery', label: 'Delivery' },
 ]
 
 const CHIP =
