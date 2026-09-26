@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { createStaff, staffQueryKey } from '../../api/staff'
+import { createStaff } from '../../api/staff'
 import DialogFormActions from '../../components/DialogFormActions'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -12,6 +12,7 @@ import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
 import { MIN_PASSWORD } from '../../services/fieldRules'
 import StaffFields from './StaffFields'
+import { saveStaffMember } from './staffList'
 import { type CreateStaffValues, createStaffSchema, EMPTY_CREATE_STAFF } from './staffSchema'
 
 interface StaffCreateFormProps {
@@ -28,8 +29,8 @@ export default function StaffCreateForm({ onDone }: StaffCreateFormProps) {
 
   const alta = useMutation({
     mutationFn: createStaff,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: staffQueryKey })
+    onSuccess: (cuenta) => {
+      saveStaffMember(queryClient, cuenta)
       onDone()
     },
   })

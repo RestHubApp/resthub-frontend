@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { staffQueryKey, updateStaff } from '../../api/staff'
+import { updateStaff } from '../../api/staff'
 import type { StaffResponse } from '../../api/types'
 import DialogFormActions from '../../components/DialogFormActions'
 import FormMessage from '../../components/FormMessage'
@@ -11,6 +11,7 @@ import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
 import StaffFields from './StaffFields'
+import { saveStaffMember } from './staffList'
 import { identityOf, type StaffIdentityValues, staffIdentitySchema } from './staffSchema'
 
 interface StaffEditFormProps {
@@ -31,8 +32,8 @@ export default function StaffEditForm({ account, isSelf, onDone }: StaffEditForm
     // La cuenta propia no manda el tipo: el servidor responde 409 si lo intenta.
     mutationFn: (valores: StaffIdentityValues) =>
       updateStaff(account.id, isSelf ? { full_name: valores.full_name } : valores),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: staffQueryKey })
+    onSuccess: (cuenta) => {
+      saveStaffMember(queryClient, cuenta)
       onDone()
     },
   })

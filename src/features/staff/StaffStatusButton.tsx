@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { changeStaffStatus, staffQueryKey } from '../../api/staff'
+import { changeStaffStatus } from '../../api/staff'
 import type { StaffResponse } from '../../api/types'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
+import { saveStaffMember } from './staffList'
 
 interface StaffStatusButtonProps {
   readonly account: StaffResponse
@@ -24,8 +25,8 @@ export default function StaffStatusButton({ account, disabled }: StaffStatusButt
   const queryClient = useQueryClient()
   const estado = useMutation({
     mutationFn: () => changeStaffStatus(account.id, !account.is_active),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: staffQueryKey })
+    onSuccess: (cuenta) => {
+      saveStaffMember(queryClient, cuenta)
     },
   })
   const cambiar = () => {
