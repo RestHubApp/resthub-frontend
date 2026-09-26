@@ -29,6 +29,18 @@ interface Credential {
   alVencer: (() => void) | null
 }
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    /**
+     * La petición sale sin credencial aunque haya una sesión abierta, y su 401
+     * no cierra ninguna. Es para lo que abre una sesión nueva sin depender de
+     * la actual: canjear un código de vista previa en una pestaña que ya
+     * muestra otra vista previa no manda el token de esa vista previa.
+     */
+    withoutCredential?: boolean
+  }
+}
+
 const restaurante: Credential = { token: null, alVencer: null }
 const plataforma: Credential = { token: null, alVencer: null }
 
@@ -207,7 +219,10 @@ function registrarFallo(error: unknown): void {
 
 api.interceptors.request.use((config) => {
   config.headers.set(REQUEST_ID_HEADER, nuevoIdDePeticion())
-  const token = tokenFor(config, { restaurant: restaurante.token, platform: plataforma.token })
+  const token =
+    config.withoutCredential === true
+      ? null
+      : tokenFor(config, { restaurant: restaurante.token, platform: plataforma.token })
   if (token !== null) {
     config.headers.set('Authorization', `Bearer ${token}`)
   }

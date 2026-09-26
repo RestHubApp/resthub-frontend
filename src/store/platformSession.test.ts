@@ -1,4 +1,4 @@
-import type { InternalAxiosRequestConfig } from 'axios'
+import { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const CLAVE = 'resthub.platform-session.v1'
@@ -159,5 +159,55 @@ describe('renovación de la sesión de plataforma', () => {
     usePlatformSession.getState().renew(otraCuenta, tokenQueVence(7200), OTRO)
     expect(usePlatformSession.getState().token).toBeNull()
     expect(storage.datos.has(CLAVE)).toBe(false)
+  })
+})
+
+// Una pestaña de vista previa recién cargada, con la sesión real de plataforma en localStorage.
+async function cargarEnVistaPrevia(token: string) {
+  const storage = fakeStorage({ [CLAVE]: JSON.stringify({ token, admin: ADMIN }) })
+  vi.stubGlobal('localStorage', storage)
+  vi.stubGlobal('sessionStorage', fakeStorage())
+  vi.stubGlobal('location', { pathname: '/vista-previa', search: '', hash: '' })
+  vi.resetModules()
+  const { usePlatformSession } = await import('./platformSession')
+  const { api } = await import('../services/api')
+  return { storage, usePlatformSession, api }
+}
+
+describe('en una pestaña de vista previa', () => {
+  it('no lee la sesión de plataforma del navegador', async () => {
+    const { usePlatformSession } = await cargarEnVistaPrevia(tokenQueVence(3600))
+    expect(usePlatformSession.getState()).toMatchObject({ token: null, admin: null, expired: false })
+  })
+
+  it('entrar, salir o vencer queda en memoria y no toca la sesión real', async () => {
+    const real = tokenQueVence(3600)
+    const { storage, usePlatformSession } = await cargarEnVistaPrevia(real)
+    const guardada = storage.datos.get(CLAVE)
+
+    usePlatformSession.getState().signIn(tokenQueVence(3600), ADMIN)
+    expect(storage.datos.get(CLAVE)).toBe(guardada)
+
+    usePlatformSession.getState().signOut()
+    expect(storage.datos.get(CLAVE)).toBe(guardada)
+
+    usePlatformSession.getState().signIn(tokenQueVence(3600), ADMIN)
+    usePlatformSession.getState().expire()
+    expect(storage.datos.get(CLAVE)).toBe(guardada)
+  })
+
+  it('un 401 de plataforma ahí no borra la sesión real', async () => {
+    const { storage, usePlatformSession, api } = await cargarEnVistaPrevia(tokenQueVence(3600))
+    const guardada = storage.datos.get(CLAVE)
+    usePlatformSession.getState().signIn(tokenQueVence(3600), ADMIN)
+    const adapter = (config: InternalAxiosRequestConfig) => {
+      const response = { data: {}, status: 401, statusText: 'Unauthorized', headers: {}, config }
+      return Promise.reject(new AxiosError('401', 'ERR_BAD_REQUEST', config, null, response))
+    }
+
+    await expect(api.get('/platform/restaurants', { adapter })).rejects.toThrow()
+
+    expect(usePlatformSession.getState().token).toBeNull()
+    expect(storage.datos.get(CLAVE)).toBe(guardada)
   })
 })

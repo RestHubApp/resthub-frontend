@@ -4,7 +4,7 @@ import ConfirmDialog from '../../components/ConfirmDialog'
 import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
 import { useQueuedOrders } from '../../store/offlineQueue'
-import { useSession } from '../../store/session'
+import { usePreview, useSession } from '../../store/session'
 
 interface SessionActionsProps {
   readonly fullName: string
@@ -12,9 +12,15 @@ interface SessionActionsProps {
   readonly onNavigate?: () => void
 }
 
-/** El perfil propio y la salida, al pie de la barra lateral y del panel "Más". */
+/**
+ * El perfil propio y la salida, al pie de la barra lateral y del panel "Más".
+ *
+ * En una vista previa no hay «Cerrar sesión»: se sale desde la franja de
+ * arriba, que ademas descarta la sesion de la pestana.
+ */
 export default function SessionActions({ fullName, roleLabel, onNavigate }: SessionActionsProps) {
   const signOut = useSession((state) => state.signOut)
+  const preview = usePreview()
   const pendientes = useQueuedOrders(useSession((state) => state.account))
   const navigate = useNavigate()
 
@@ -36,6 +42,22 @@ export default function SessionActions({ fullName, roleLabel, onNavigate }: Sess
     </Button>
   )
 
+  const salida =
+    pendientes.length === 0 ? (
+      salir(cerrarSesion)
+    ) : (
+      // Los pedidos no se borran, pero no salen hasta que esta cuenta vuelva
+      // a entrar: quien cierra la sesion tiene que saberlo.
+      <ConfirmDialog
+        trigger={salir()}
+        title="¿Cerrar sesión con pedidos sin enviar?"
+        description={`${cuantos} señal: ${pendientes.map((pedido) => pedido.label).join(', ')}. Quedan guardados en este celular y se envían cuando vuelvas a entrar con tu cuenta.`}
+        confirmLabel="Cerrar sesión"
+        confirmVariant="default"
+        onConfirm={cerrarSesion}
+      />
+    )
+
   return (
     <div className="flex flex-col gap-1 border-t pt-3">
       <Button asChild variant="ghost" className="h-auto min-h-11 justify-start gap-3 px-3 py-2">
@@ -47,20 +69,7 @@ export default function SessionActions({ fullName, roleLabel, onNavigate }: Sess
           </span>
         </Link>
       </Button>
-      {pendientes.length === 0 ? (
-        salir(cerrarSesion)
-      ) : (
-        // Los pedidos no se borran, pero no salen hasta que esta cuenta vuelva
-        // a entrar: quien cierra la sesion tiene que saberlo.
-        <ConfirmDialog
-          trigger={salir()}
-          title="¿Cerrar sesión con pedidos sin enviar?"
-          description={`${cuantos} señal: ${pendientes.map((pedido) => pedido.label).join(', ')}. Quedan guardados en este celular y se envían cuando vuelvas a entrar con tu cuenta.`}
-          confirmLabel="Cerrar sesión"
-          confirmVariant="default"
-          onConfirm={cerrarSesion}
-        />
-      )}
+      {preview ? null : salida}
     </div>
   )
 }

@@ -150,6 +150,7 @@ aparte: el celular del mesero nunca baja este código.
 | `/plataforma/restaurantes/nuevo` | Alta del restaurante (nombre, identificador, zona horaria) y de su primer encargado. |
 | `/plataforma/restaurantes/:id` | Ficha: nombre y zona horaria editables, activar o desactivar, encargados y «Agregar encargado». |
 | `/plataforma/bitacora` | Bitácora de lo que hizo cada administrador. |
+| `/plataforma/vista-previa` | El local de muestra y «Ver como encargado» / «Ver como mesero» (ver abajo). |
 
 - **Otra sesión, no otro rol.** `store/platformSession.ts` guarda su token en
   `resthub.platform-session.v1`, aparte de `resthub.session.v2`. El cliente
@@ -177,6 +178,84 @@ aparte: el celular del mesero nunca baja este código.
   administrador cambió mientras tanto.
 - Desactivar se confirma y explica que corta al instante el acceso de todo el
   personal del local; activar va directo. Las horas del área son las de Lima.
+
+### Vista previa como encargado o mesero
+
+Para depurar, el administrador abre RestHub tal como lo ve una cuenta de un
+local, pero **solo en el local de muestra** (`restaurants.is_sandbox`), con
+datos ficticios: no hay forma, ni por API, de mirar un restaurante real. La
+vista previa se usa de verdad (tomar pedidos, cobrar, encolar sin señal).
+
+1. `/plataforma/vista-previa` muestra el local de muestra (o que todavía no
+   existe), cuándo se creó y sus cuentas, que no tienen contraseña. «Reiniciar
+   local de muestra» se confirma: el vigente queda archivado (desactivado) y se
+   crea uno nuevo con los datos de siempre. Si el local no tiene una cuenta
+   activa del tipo pedido, el servidor responde 409 y la pantalla ofrece
+   reiniciarlo ahí mismo.
+2. «Ver como…» pide `POST /platform/preview {as}` (un código de un solo uso
+   que vale 60 s) y abre una **pestaña nueva** en `/vista-previa#codigo=…` con
+   `noopener`. El código va en el fragmento y no en la consulta: el fragmento
+   no viaja al servidor que sirve la aplicación y no queda en sus registros.
+   Con `noopener` el navegador no dice si bloqueó la pestaña, así que queda
+   un enlace de repuesto mientras el código vale.
+3. Al cargar la página, antes de crear el router (`services/tabStorage.ts`,
+   importado primero en `main.tsx`), una pestaña cargada en `/vista-previa`
+   saca el fragmento de la barra con `history.replaceState` y lo guarda en
+   memoria: si el archivo de la pantalla de canje no llega, el código igual
+   deja la barra y el historial. La ruta se reconoce como la compara React
+   Router (sin distinguir mayúsculas, decodificada, con o sin barra final:
+   `/Vista-Previa/` o `/vista%2Dprevia` cuentan) y queda escrita como
+   `/vista-previa`. El `loader` de la ruta (`features/auth/previewEntry.ts`,
+   fuera de las guardas) toma el código de memoria y lo canjea con
+   `POST /auth/preview`, sin credencial (`withoutCredential`): tampoco manda
+   la de una vista previa ya abierta en esa pestaña. Es el `loader` y no un
+   efecto: corre una vez por carga, aunque el modo estricto repita los efectos.
+   Si se llegó navegando desde una pestaña normal, carga una sola vez
+   `/vista-previa` con el fragmento (`location.replace`), nunca `reload()`.
+   Si el servidor lo acepta (`preview: true`), entra al armazón normal; si no,
+   explica por qué (inválido, vencido o ya usado; sin conexión) y enlaza a la
+   administración.
+4. Mientras dura, una franja fija arriba dice «Vista previa · Restaurante de
+   muestra · como Mesero», cuánto falta para que venza y ofrece «Salir de la
+   vista previa» (cierra la pestaña o, si el navegador no deja, vuelve a
+   `/plataforma` recargando). No hay «Cerrar sesión» ni «Cambiar contraseña»:
+   el servidor rechaza cambiarla (403) y renovar el token (401), así que la
+   sesión no se renueva y vence a los 30 minutos (`exp`).
+
+**Dónde se guarda.** La pestaña elige su almacenamiento una sola vez, al
+cargarse (`services/tabStorage.ts`):
+
+| Pestaña | Sesión de restaurante | Cola sin señal |
+|---|---|---|
+| Normal | `localStorage`, `resthub.session.v2` | `localStorage`, `resthub.pedidos-sin-enviar.v2` |
+| Vista previa | `sessionStorage`, `resthub.vista-previa.sesion.v1` | `sessionStorage`, misma clave de la cola |
+
+- Es de vista previa la pestaña cargada en `/vista-previa` o marcada con
+  `resthub.vista-previa.pestana.v1` en su `sessionStorage` (se marca al abrir
+  la sesión y se desmarca solo al salir a propósito, así una vista previa
+  vencida no vuelve a leer la sesión real al recargar).
+- Una pestaña de vista previa nunca lee ni escribe `resthub.session.v2` ni la
+  sesión de plataforma: la sesión real del navegador y la de plataforma siguen
+  intactas en las demás pestañas, y un 401 del canje no cierra ninguna. Sin
+  `sessionStorage` la vista previa vive en memoria; nunca cae en
+  `localStorage`.
+- Ahí la sesión de plataforma queda vacía y solo en memoria, y `/plataforma`
+  no muestra el área: dice «Estás en una vista previa» y ofrece «Salir de la
+  vista previa» (`features/shell/PreviewPlatformGate.tsx`). Así un 401 o un
+  «Salir» en esa pestaña no cierran la sesión real del administrador.
+- Cerrar la pestaña termina la vista previa y descarta su cola. Salir o que
+  venza la sesión vacía la cola entera de la pestaña (`discardPreviewQueue`),
+  de cualquier cuenta del local de muestra: es solo de esa pestaña y ya no
+  tiene con qué enviarse. Salir con pedidos sin enviar se confirma antes.
+- Sin sesión, una pestaña de vista previa no ofrece el acceso normal: dice que
+  la vista previa venció o terminó.
+- **Duplicar la pestaña** copia su `sessionStorage`: la copia es otra pestaña
+  de vista previa con la misma sesión y una copia de la cola. Desde ahí cada
+  una sigue por su lado (lo que una encola o descarta no lo ve la otra) y las
+  dos vencen a la vez, con el mismo token; salir en una no cierra la otra.
+- **Un enlace abierto en una pestaña nueva** (Ctrl o clic central) no hereda
+  el `sessionStorage`: es una pestaña normal, sin la vista previa, que usa la
+  sesión real del navegador (o muestra el acceso).
 
 ## Comprobantes electrónicos
 
@@ -253,7 +332,9 @@ aparte: el celular del mesero nunca baja este código.
   sesión» avisa antes si quedan pedidos sin enviar.
 - El token dura una hora. Mientras la aplicación se usa, `useSessionRenewal`
   pide uno nuevo (`POST /auth/refresh`) cinco minutos antes de que venza; una
-  pantalla sin tocar por media hora deja que la sesión se cierre sola.
+  pantalla sin tocar por media hora deja que la sesión se cierre sola. La
+  sesión de una vista previa no se renueva y su cola vive en su pestaña (ver
+  «Vista previa como encargado o mesero»).
 
 ## Tema oscuro (preparado, no activo)
 

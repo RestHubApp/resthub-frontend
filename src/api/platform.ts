@@ -13,7 +13,10 @@ import type {
   PlatformRestaurantDetail,
   PlatformRestaurantListParams,
   PlatformRestaurantPage,
+  PlatformSandbox,
   PlatformTokenResponse,
+  PreviewCodeResponse,
+  PreviewRequest,
   UpdatePlatformRestaurantRequest,
 } from './types'
 
@@ -25,6 +28,7 @@ import type {
 export const platformQueryKey = [PLATFORM_QUERY_ROOT] as const
 export const platformRestaurantsQueryKey = [...platformQueryKey, 'restaurants'] as const
 export const platformActivityQueryKey = [...platformQueryKey, 'activity'] as const
+export const platformSandboxQueryKey = [...platformQueryKey, 'sandbox'] as const
 
 // Las escrituras llevan la misma raíz: cerrar la sesión de plataforma las saca
 // del caché de mutaciones, que guarda lo enviado, y cerrar la del restaurante
@@ -34,6 +38,8 @@ export const platformMutationKeys = {
   createRestaurant: [...platformRestaurantsQueryKey, 'create'],
   updateRestaurant: [...platformRestaurantsQueryKey, 'update'],
   addOwner: [...platformRestaurantsQueryKey, 'owners', 'add'],
+  resetSandbox: [...platformSandboxQueryKey, 'reset'],
+  startPreview: [...platformQueryKey, 'preview'],
 } as const
 
 /**
@@ -125,4 +131,29 @@ export function platformActivityQuery(params: PlatformActivityParams) {
       return data
     },
   })
+}
+
+/** El local de muestra vigente y sus cuentas; `restaurant` es `null` si todavía no existe. */
+export const platformSandboxQuery = queryOptions({
+  queryKey: platformSandboxQueryKey,
+  queryFn: async () => {
+    const { data } = await api.get<PlatformSandbox>('/platform/sandbox')
+    return data
+  },
+})
+
+/** Archiva el local de muestra vigente (si hay) y crea uno nuevo con los datos de muestra. */
+export async function resetPlatformSandbox(): Promise<PlatformSandbox> {
+  const { data } = await api.post<PlatformSandbox>('/platform/sandbox/reset')
+  return data
+}
+
+/**
+ * Un código de un solo uso para entrar al local de muestra como su encargado
+ * o su mesero. Vale `expires_in` segundos y lo canjea la pestaña nueva en
+ * `POST /auth/preview`.
+ */
+export async function startPlatformPreview(payload: PreviewRequest): Promise<PreviewCodeResponse> {
+  const { data } = await api.post<PreviewCodeResponse>('/platform/preview', payload)
+  return data
 }

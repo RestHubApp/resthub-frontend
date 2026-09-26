@@ -5,11 +5,17 @@ import { DEFAULT_TIME_ZONE } from '../services/format'
 import { logger } from '../services/logger'
 import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
 import { clearQueriesExcept, PLATFORM_QUERY_ROOT } from '../services/queryClient'
+import { isPreviewTab, setPreviewTabMark, tabStorage } from '../services/tabStorage'
+import { discardPreviewQueue } from './offlineQueue'
 import type { CurrentUserResponse, PermissionCode } from '../api/types'
 
-// La version va en la clave: si cambia la forma de lo guardado, una sesion
-// vieja se descarta en vez de leerse como si tuviera la forma nueva.
-const STORAGE_KEY = 'resthub.session.v2'
+// Donde se guarda la sesion lo decide la pestana al cargarse (`tabStorage`):
+// `localStorage` en una pestana normal y `sessionStorage` en una de vista
+// previa, cada una con su clave. La version va en la clave: si cambia la forma
+// de lo guardado, una sesion vieja se descarta en vez de leerse como si tuviera
+// la forma nueva.
+const ALMACEN = tabStorage.storage
+const STORAGE_KEY = tabStorage.sessionKey
 // Las versiones anteriores ya no se leen; tampoco se dejan con un token adentro.
 const OLD_STORAGE_KEYS = ['resthub.session.v1'] as const
 
@@ -36,18 +42,30 @@ interface SessionState {
   signOut: () => void
   /** Cierra la sesion porque el servidor ya no acepta el token. */
   expire: () => void
+  /**
+   * Abre la sesion de vista previa que entrego `POST /auth/preview`.
+   *
+   * Solo en una pestana de vista previa y solo con una sesion que el servidor
+   * marco `preview: true`: asi nunca termina en `localStorage`.
+   */
+  startPreview: (token: string, account: CurrentUserResponse) => void
+  /**
+   * Sale de la vista previa: borra su sesion y deja de tratar la pestana como
+   * de vista previa. En una pestana normal no hace nada.
+   */
+  exitPreview: () => void
 }
 
 /**
  * Lee la sesion guardada del navegador.
  *
- * El token vive en `localStorage` para que recargar la pagina no eche al
- * usuario. Cualquier lectura puede fallar en una ventana privada o con el
+ * El token se guarda para que recargar la pagina no eche al usuario.
+ * Cualquier lectura puede fallar en una ventana privada o con el
  * almacenamiento bloqueado, asi que el fallo se trata como "no hay sesion".
  */
 function readStoredSession(): StoredSession | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = ALMACEN?.getItem(STORAGE_KEY) ?? null
     return raw === null ? null : (JSON.parse(raw) as StoredSession)
   } catch {
     return null
@@ -55,9 +73,13 @@ function readStoredSession(): StoredSession | null {
 }
 
 function forgetOldSessions(): void {
+  // Una pestana de vista previa no toca lo que hay en `localStorage`.
+  if (isPreviewTab()) {
+    return
+  }
   try {
     for (const key of OLD_STORAGE_KEYS) {
-      localStorage.removeItem(key)
+      ALMACEN?.removeItem(key)
     }
   } catch {
     // Sin almacenamiento tampoco hay nada viejo que borrar.
@@ -67,10 +89,10 @@ function forgetOldSessions(): void {
 function writeStoredSession(session: StoredSession | null): void {
   try {
     if (session === null) {
-      localStorage.removeItem(STORAGE_KEY)
+      ALMACEN?.removeItem(STORAGE_KEY)
       return
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
+    ALMACEN?.setItem(STORAGE_KEY, JSON.stringify(session))
   } catch {
     // Sin almacenamiento la sesion dura lo que dure la pestana. Es una
     // degradacion aceptable; perder el acceso por no poder escribir no lo es.
@@ -89,13 +111,25 @@ function limpiarSesion(): void {
   // Nada de la cuenta anterior queda en el cache para la siguiente. Lo del
   // administrador del sistema es de otra sesion y se queda.
   clearQueriesExcept(PLATFORM_QUERY_ROOT)
+  // En una vista previa, al salir o vencer, su cola (solo de esta pestana y
+  // del local de muestra) ya no tiene con que enviarse. En una normal no hace nada.
+  discardPreviewQueue()
+}
+
+/** Si lo guardado se puede seguir usando: vigente y, en una vista previa, marcado como tal. */
+function vigente(session: StoredSession | null): session is StoredSession {
+  return session !== null && !isTokenExpired(session.token) && (!isPreviewTab() || session.account.preview)
 }
 
 forgetOldSessions()
 const guardada = readStoredSession()
-const restored = guardada !== null && !isTokenExpired(guardada.token) ? guardada : null
+const restored = vigente(guardada) ? guardada : null
 if (guardada !== null && restored === null) {
   writeStoredSession(null)
+}
+// Una vista previa que se recarga ya vencida tampoco guarda su cola.
+if (restored === null) {
+  discardPreviewQueue()
 }
 setAuthToken(restored?.token ?? null)
 
@@ -149,12 +183,38 @@ export const useSession = create<SessionState>((set, get) => ({
     set({ token: null, account: null, expired: true })
     logger.warn('auth.session_expired')
   },
+
+  startPreview: (token, account) => {
+    if (!isPreviewTab() || !account.preview) {
+      throw new Error('Una sesion de vista previa solo se abre en su propia pestana.')
+    }
+    // Lo que esta pestana haya cargado antes no se mezcla con el local de muestra.
+    clearQueriesExcept(PLATFORM_QUERY_ROOT)
+    setPreviewTabMark(true)
+    get().signIn(token, account)
+    logger.info({ restaurantId: account.restaurant.id }, 'auth.preview_started')
+  },
+
+  exitPreview: () => {
+    if (!isPreviewTab()) {
+      return
+    }
+    limpiarSesion()
+    setPreviewTabMark(false)
+    set({ token: null, account: null, expired: false })
+    logger.info('auth.preview_exited')
+  },
 }))
 
 programarVencimiento(restored?.token ?? null)
 setUnauthorizedHandler(() => {
   useSession.getState().expire()
 })
+
+/** Si la sesion abierta es una vista previa del local de muestra, segun el servidor. */
+export function usePreview(): boolean {
+  return useSession((state) => state.account?.preview === true)
+}
 
 export function hasPermission(
   account: CurrentUserResponse | null,

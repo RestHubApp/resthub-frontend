@@ -189,3 +189,12 @@ export type PlatformActivityPage = components['schemas']['PlatformActivityPageRe
 export type PlatformActivityParams = NonNullable<
   operations['read_activity_api_v1_platform_activity_get']['parameters']['query']
 >
+
+// Vista previa: el local de muestra, sus cuentas y el código de un solo uso
+// con que una pestaña nueva entra como su encargado o su mesero.
+export type PlatformSandbox = components['schemas']['SandboxResponse']
+export type PlatformSandboxAccount = components['schemas']['SandboxAccountResponse']
+export type PreviewAs = components['schemas']['PreviewAs']
+export type PreviewRequest = components['schemas']['PreviewRequest']
+export type PreviewCodeResponse = components['schemas']['PreviewCodeResponse']
+export type PreviewExchangeRequest = components['schemas']['PreviewExchangeRequest']

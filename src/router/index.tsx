@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import EmptyState from '../components/EmptyState'
 import LoginView from '../features/auth/LoginView'
+import PreviewEntryPending from '../features/auth/PreviewEntryPending'
 import { prefetchCash } from '../features/cash/prefetchCash'
 import { prefetchInsights } from '../features/insights/prefetchInsights'
 import { prefetchInventory } from '../features/inventory/prefetchInventory'
@@ -15,6 +16,7 @@ import { prefetchBoard, prefetchFloor, prefetchKitchen } from '../features/order
 import { prefetchRoles } from '../features/roles/prefetchRoles'
 import AppShell from '../features/shell/AppShell'
 import HomeRedirect from '../features/shell/HomeRedirect'
+import PreviewPlatformGate from '../features/shell/PreviewPlatformGate'
 import RequireSession from '../features/shell/RequireSession'
 import type { ScreenPreload } from '../features/shell/screenPreload'
 import { prefetchStaff } from '../features/staff/prefetchStaff'
@@ -110,15 +112,34 @@ const PLATAFORMA: RouteObject = {
         { path: 'restaurantes/nuevo', ...plataforma(() => import('../features/platform/NewRestaurantView')) },
         { path: 'restaurantes/:restaurantId', ...plataforma(() => import('../features/platform/RestaurantDetailView')) },
         { path: 'bitacora', ...plataforma(() => import('../features/platform/ActivityView')) },
+        { path: 'vista-previa', ...plataforma(() => import('../features/platform/PreviewView')) },
       ],
     },
     { path: '*', element: <Navigate to="/plataforma" replace /> },
   ],
 }
 
+/**
+ * La pestaña que abre «Ver como…» en el área de plataforma.
+ *
+ * Va fuera de las dos guardas: canjea el código de un solo uso (el `loader`,
+ * que corre una vez por carga) y lleva al armazón del restaurante con la
+ * sesión de vista previa, que vive solo en esta pestaña.
+ */
+const VISTA_PREVIA: RouteObject = {
+  path: '/vista-previa',
+  hydrateFallbackElement: <PreviewEntryPending />,
+  lazy: {
+    loader: async () => (await import('../features/auth/previewEntry')).previewEntryLoader,
+    Component: async () => (await import('../features/auth/PreviewEntryView')).default,
+  },
+}
+
 const router = createBrowserRouter(
   [
-    PLATAFORMA,
+    // En una pestaña de vista previa, la puerta muestra un aviso en vez del área.
+    { element: <PreviewPlatformGate />, children: [PLATAFORMA] },
+    VISTA_PREVIA,
     {
       path: '/',
       element: <AppShell screens={PRECARGAS} />,

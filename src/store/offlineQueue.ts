@@ -1,11 +1,14 @@
 import { useSyncExternalStore } from 'react'
 
 import type { CurrentUserResponse, OpenOrderRequest } from '../api/types'
+import { tabStorage } from '../services/tabStorage'
 
 // Los pedidos que el mesero tomó sin señal, a la espera de enviarse.
 //
 // Viven en `localStorage` para sobrevivir a cerrar la app o que el celular se
-// apague. Cada uno lleva el `client_request_id` con que se va a abrir: si el
+// apague. En una pestaña de vista previa viven en su `sessionStorage`, como su
+// sesión: lo que se encola en el local de muestra muere con la pestaña y nunca
+// se mezcla con la cola real del navegador. Cada uno lleva el `client_request_id` con que se va a abrir: si el
 // envío llegó al servidor pero la respuesta se perdió, el reintento devuelve
 // el mismo pedido en vez de duplicarlo.
 //
@@ -17,6 +20,7 @@ import type { CurrentUserResponse, OpenOrderRequest } from '../api/types'
 //
 // La versión va en la clave: la v1 no decía de quién era cada pedido y no se lee.
 const STORAGE_KEY = 'resthub.pedidos-sin-enviar.v2'
+const ALMACEN = tabStorage.storage
 
 /** La cuenta dueña de un pedido en cola: la persona y el local donde lo tomó. */
 export interface QueueOwner {
@@ -57,7 +61,7 @@ function read(): readonly QueuedOrder[] {
     return cache.value
   }
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = ALMACEN?.getItem(STORAGE_KEY) ?? null
     const parsed: unknown = raw === null ? null : JSON.parse(raw)
     cache.value = Array.isArray(parsed) ? (parsed as QueuedOrder[]) : EMPTY
   } catch {
@@ -84,9 +88,9 @@ function write(queue: readonly QueuedOrder[]): void {
   cache.value = queue
   try {
     if (queue.length === 0) {
-      localStorage.removeItem(STORAGE_KEY)
+      ALMACEN?.removeItem(STORAGE_KEY)
     } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(queue))
+      ALMACEN?.setItem(STORAGE_KEY, JSON.stringify(queue))
     }
   } catch {
     // Sin almacenamiento la cola dura lo que la pestaña: es lo mejor posible.
@@ -95,9 +99,13 @@ function write(queue: readonly QueuedOrder[]): void {
 }
 
 // Otra pestaña cambió la cola (o se vació el almacenamiento): se vuelve a
-// leer y se avisa a las pantallas.
+// leer y se avisa a las pantallas. Un cambio en el otro almacenamiento (la
+// cola real, vista desde una vista previa) no es de esta cola.
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event: StorageEvent) => {
+    if (event.storageArea !== null && event.storageArea !== ALMACEN) {
+      return
+    }
     if (event.key === STORAGE_KEY || event.key === null) {
       cache.value = null
       notify()
@@ -128,6 +136,22 @@ export function removeQueued(clientRequestId: string): void {
   write(fresh().filter((order) => order.request.client_request_id !== clientRequestId))
 }
 
+/**
+ * Vacía la cola entera de una pestaña de vista previa: al salir de ella o al
+ * vencer su sesión.
+ *
+ * Esa cola vive en el `sessionStorage` de la pestaña y es solo suya: cuanto
+ * tiene es del local de muestra, y sin sesión ya no hay con qué enviarlo.
+ * En una pestaña normal no hace nada: la cola del navegador guarda pedidos de
+ * verdad, de varias cuentas.
+ */
+export function discardPreviewQueue(): void {
+  if (tabStorage.kind !== 'preview') {
+    return
+  }
+  write(EMPTY)
+}
+
 export function subscribeQueue(listener: Listener): () => void {
   listeners.add(listener)
   return () => {
@@ -138,5 +162,7 @@ export function subscribeQueue(listener: Listener): () => void {
 /** Los pedidos en cola de la cuenta, al día con cada cambio de la cola. */
 export function useQueuedOrders(account: CurrentUserResponse | null): readonly QueuedOrder[] {
   const owner = ownerOf(account)
-  return useSyncExternalStore(subscribeQueue, () => queuedOrders(owner))
+  const snapshot = () => queuedOrders(owner)
+  // La misma lectura sirve al generar la pantalla fuera del navegador (las pruebas).
+  return useSyncExternalStore(subscribeQueue, snapshot, snapshot)
 }

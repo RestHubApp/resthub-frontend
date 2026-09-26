@@ -1,6 +1,6 @@
 import PageHeader from '../../components/PageHeader'
 import SectionCard from '../../components/SectionCard'
-import { useSession } from '../../store/session'
+import { usePreview, useSession } from '../../store/session'
 import ChangePasswordForm from './ChangePasswordForm'
 
 const TERMINO = 'm-0 text-sm text-muted-foreground'
@@ -15,6 +15,7 @@ const DATO = 'm-0 text-base font-medium break-words'
  */
 export default function ProfileView() {
   const account = useSession((state) => state.account)
+  const preview = usePreview()
 
   if (account === null) {
     return null
@@ -42,9 +43,12 @@ export default function ProfileView() {
         </dl>
       </SectionCard>
 
-      <SectionCard title="Cambiar contraseña">
-        <ChangePasswordForm />
-      </SectionCard>
+      {/* La cuenta de muestra no tiene contraseña y el servidor rechaza cambiarla. */}
+      {preview ? null : (
+        <SectionCard title="Cambiar contraseña">
+          <ChangePasswordForm />
+        </SectionCard>
+      )}
     </div>
   )
 }

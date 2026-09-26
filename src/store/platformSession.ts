@@ -4,6 +4,7 @@ import type { PlatformAdmin } from '../api/types'
 import { setPlatformAuthToken, setPlatformUnauthorizedHandler } from '../services/api'
 import { logger } from '../services/logger'
 import { clearQueriesOf, PLATFORM_QUERY_ROOT } from '../services/queryClient'
+import { isPreviewTab } from '../services/tabStorage'
 import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
 
 // La sesión del administrador del sistema. Es otra sesión, no un rol: vive en
@@ -35,11 +36,19 @@ interface PlatformSessionState {
   expire: () => void
 }
 
+// Una pestaña de vista previa no lee ni escribe la sesión de plataforma del
+// navegador: vive solo en su memoria (y el área de plataforma no se muestra
+// ahí). Si no, un 401 o un «Salir» en esa pestaña cerraría la sesión real del
+// administrador en todas las demás.
+function almacen(): Storage | null {
+  return isPreviewTab() ? null : localStorage
+}
+
 // Una lectura o escritura puede fallar en una ventana privada o con el
 // almacenamiento bloqueado: se trata como «no hay sesión guardada».
 function readStored(): StoredPlatformSession | null {
   try {
-    const raw = localStorage.getItem(PLATFORM_STORAGE_KEY)
+    const raw = almacen()?.getItem(PLATFORM_STORAGE_KEY) ?? null
     return raw === null ? null : (JSON.parse(raw) as StoredPlatformSession)
   } catch {
     return null
@@ -48,11 +57,12 @@ function readStored(): StoredPlatformSession | null {
 
 function writeStored(session: StoredPlatformSession | null): void {
   try {
+    const storage = almacen()
     if (session === null) {
-      localStorage.removeItem(PLATFORM_STORAGE_KEY)
+      storage?.removeItem(PLATFORM_STORAGE_KEY)
       return
     }
-    localStorage.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(session))
+    storage?.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(session))
   } catch {
     // Sin almacenamiento la sesión dura lo que dure la pestaña.
   }
