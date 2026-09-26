@@ -170,6 +170,11 @@ aparte: el celular del mesero nunca baja este código.
   después del alta.
 - **Zona horaria:** una lista de zonas IANA comunes con Lima primero
   (`timeZones.ts`); la ficha agrega la zona guardada si no está en la lista.
+  La valida `Intl` (con sus alias, como `GMT` o `EST5EDT`), y en la ficha solo
+  si cambió: una zona guardada que el navegador no conoce no impide renombrar.
+- **Ficha:** sigue a la relectura sin perder lo que se está escribiendo, y al
+  guardar manda solo los campos que se editaron: no pisa lo que otro
+  administrador cambió mientras tanto.
 - Desactivar se confirma y explica que corta al instante el acceso de todo el
   personal del local; activar va directo. Las horas del área son las de Lima.
 
