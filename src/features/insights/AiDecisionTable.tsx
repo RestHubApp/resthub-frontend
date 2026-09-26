@@ -36,6 +36,25 @@ const OUTPUT_LABELS: Record<AiDecision['kind'], { readonly key: string; readonly
   },
 }
 
+// Un insumo o una merma se anuncian como tales; un plato ya se entiende junto
+// al número de su pedido.
+const PREFIJOS: Partial<Record<AiDecision['subject_type'], string>> = { ingredient: 'Insumo: ', stock_movement: 'Merma: ' }
+
+// El asunto por su nombre: el número del pedido y el insumo o plato. El id
+// solo aparece si el asunto ya no existe y no hay otra forma de nombrarlo.
+function asunto(decision: AiDecision): string {
+  const prefijo = PREFIJOS[decision.subject_type] ?? ''
+  const nombre = decision.subject_label === null ? null : `${prefijo}${decision.subject_label}`
+  const pedido = decision.order_number === null ? null : `Pedido #${String(decision.order_number)}`
+  const partes = [nombre, pedido].filter((parte) => parte !== null)
+  return partes.length > 0 ? partes.join(' · ') : `${SUBJECTS[decision.subject_type]} (id ${String(decision.subject_id)})`
+}
+
+// Jev da una probabilidad; las reglas no tienen una y se dicen como tales.
+function confianza(decision: AiDecision): string {
+  return decision.confidence_kind === 'rule' ? decision.confidence_kind_label : formatConfidence(decision.confidence)
+}
+
 // Lo que decidió, en una línea: la acción, el tipo de nota o la causa.
 function resumen(decision: AiDecision): string {
   const { key, labels } = OUTPUT_LABELS[decision.kind]
@@ -50,14 +69,14 @@ function columns(timeZone: string): DataColumn<AiDecision>[] {
   return [
   { id: 'fecha', header: 'Fecha', cell: (d) => formatDateTime(d.created_at, timeZone), className: 'whitespace-nowrap' },
   { id: 'tipo', header: 'Tipo', cell: (d) => d.kind_label },
-  { id: 'sujeto', header: 'Sobre', cell: (d) => `${SUBJECTS[d.subject_type]} (id ${String(d.subject_id)})` },
+  { id: 'sujeto', header: 'Sobre', cell: asunto },
   { id: 'decision', header: 'Decisión', cell: resumen },
   {
     id: 'motor',
     header: 'Motor',
     cell: (d) => <EngineBadge engine={d.engine} fallbackReason={d.fallback_reason} fallbackLabel={d.fallback_label} />,
   },
-  { id: 'confianza', header: 'Confianza', cell: (d) => formatConfidence(d.confidence), className: 'text-right tabular-nums' },
+  { id: 'confianza', header: 'Confianza', cell: confianza, className: 'text-right tabular-nums' },
   {
     id: 'detalle',
     header: 'Detalle',
