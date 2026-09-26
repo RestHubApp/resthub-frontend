@@ -1,4 +1,4 @@
-import { renewSession } from '../../api/auth'
+import { renewSession, sessionOf } from '../../api/auth'
 import { useTokenRenewal } from '../../hooks/useTokenRenewal'
 import { useSession } from '../../store/session'
 
@@ -15,6 +15,6 @@ export function useSessionRenewal(): void {
 
   useTokenRenewal(token, async (origen) => {
     const nuevo = await renewSession()
-    renew(origen, nuevo.access_token, { user: nuevo.user, restaurant: nuevo.restaurant, permissions: nuevo.permissions })
+    renew(origen, nuevo.access_token, sessionOf(nuevo))
   })
 }

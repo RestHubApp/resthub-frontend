@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 
-import { login } from '../../api/auth'
+import { login, sessionOf } from '../../api/auth'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import PasswordField from '../../components/PasswordField'
@@ -80,8 +80,8 @@ export default function LoginView() {
     mutationFn: login,
     // La respuesta ya trae la cuenta, el restaurante y los permisos: la sesion
     // se abre sin pedir `/auth/me` aparte.
-    onSuccess: ({ access_token: token, user, restaurant, permissions }) => {
-      signIn(token, { user, restaurant, permissions })
+    onSuccess: (respuesta) => {
+      signIn(respuesta.access_token, sessionOf(respuesta))
       void navigate(destino, { replace: true })
     },
   })

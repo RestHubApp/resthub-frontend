@@ -8,6 +8,15 @@ import type {
 
 export const currentUserQueryKey = ['auth', 'me'] as const
 
+/**
+ * La sesion que trae una respuesta con token: la cuenta, su restaurante, sus
+ * permisos y si es una vista previa. Es lo mismo que devuelve `GET /auth/me`.
+ */
+export function sessionOf(response: AccessTokenResponse): CurrentUserResponse {
+  const { user, restaurant, permissions, preview } = response
+  return { user, restaurant, permissions, preview }
+}
+
 /** El token y, en la misma respuesta, la cuenta, su restaurante y sus permisos. */
 export async function login(payload: LoginRequest): Promise<AccessTokenResponse> {
   const { data } = await api.post<AccessTokenResponse>('/auth/login', payload)
