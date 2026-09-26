@@ -1103,6 +1103,10 @@ export interface components {
             subject_type: components["schemas"]["SubjectType"];
             /** Subject Id */
             subject_id: number;
+            /** Order Number */
+            order_number: number | null;
+            /** Subject Label */
+            subject_label: string | null;
             engine: components["schemas"]["Engine"];
             /** Engine Label */
             engine_label: string;
@@ -1110,6 +1114,9 @@ export interface components {
             model: string | null;
             /** Confidence */
             confidence: number | null;
+            confidence_kind: components["schemas"]["ConfidenceKind"];
+            /** Confidence Kind Label */
+            confidence_kind_label: string;
             fallback_reason: components["schemas"]["FallbackReason"] | null;
             /** Fallback Label */
             fallback_label: string | null;
@@ -1185,6 +1192,18 @@ export interface components {
             /** By Cause */
             by_cause: components["schemas"]["CauseCount"][];
         };
+        /**
+         * ConfidenceKind
+         * @description De dónde sale la seguridad de una decisión.
+         *
+         *     Jev reparte probabilidad entre las opciones y de ahí sale un número de 0 a
+         *     1. Las reglas no: aplican un umbral o una palabra clave y responden igual
+         *     cada vez. Ponerles un 1.0 diría que nunca se equivocan, y una merma con un
+         *     motivo ambiguo cae en "otro" aunque no lo sea. Por eso su confianza queda
+         *     vacía y este tipo dice por qué.
+         * @enum {string}
+         */
+        ConfidenceKind: "model" | "rule";
         /** CreateCategoryRequest */
         CreateCategoryRequest: {
             /** Name */
@@ -1505,6 +1524,8 @@ export interface components {
             reason: string;
             /** Order Id */
             order_id: number | null;
+            /** Order Number */
+            order_number: number | null;
             /** Order Item Id */
             order_item_id: number | null;
             /** Created By */
