@@ -1396,6 +1396,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/observability/logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Buscar en los logs */
+        get: operations["search_logs_api_v1_platform_observability_logs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/observability/logs/{entry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Una entrada de log */
+        get: operations["read_log_api_v1_platform_observability_logs__entry_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/observability/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Peticiones una por una */
+        get: operations["search_requests_api_v1_platform_observability_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/observability/routes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rutas de la ventana */
+        get: operations["read_routes_api_v1_platform_observability_routes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/observability/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Peticiones por estado HTTP */
+        get: operations["read_status_api_v1_platform_observability_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/observability/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Indicadores de la ventana */
+        get: operations["read_summary_api_v1_platform_observability_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/observability/timeseries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Serie temporal */
+        get: operations["read_timeseries_api_v1_platform_observability_timeseries_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/preview": {
         parameters: {
             query?: never;
@@ -1616,7 +1735,13 @@ export interface paths {
         /** Listar el personal */
         get: operations["list_staff_api_v1_staff_get"];
         put?: never;
-        /** Dar de alta a alguien con uno de los roles del restaurante */
+        /**
+         * Dar de alta a alguien con uno de los roles del restaurante
+         * @description En el local de muestra, el correo se guarda en el dominio de muestra.
+         *
+         *     `ana@gmail.com` queda como `ana-<id del local>@muestra.resthub.invalid`, y
+         *     la respuesta trae el correo con el que quedó.
+         */
         post: operations["register_staff_api_v1_staff_post"];
         delete?: never;
         options?: never;
@@ -2569,6 +2694,74 @@ export interface components {
             /** Order Id */
             order_id: number;
         };
+        /** LogDetailResponse */
+        LogDetailResponse: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Event */
+            event: string;
+            /** Fields */
+            fields: {
+                [key: string]: unknown;
+            };
+            /** Has Traceback */
+            has_traceback: boolean;
+            /** Id */
+            id: number;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "warning" | "error";
+            /** Logger */
+            logger: string;
+            /** Request Id */
+            request_id: string | null;
+            /** Restaurant Id */
+            restaurant_id: number | null;
+            /** Traceback */
+            traceback: string | null;
+        };
+        /** LogEntryResponse */
+        LogEntryResponse: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Event */
+            event: string;
+            /** Has Traceback */
+            has_traceback: boolean;
+            /** Id */
+            id: number;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "warning" | "error";
+            /** Logger */
+            logger: string;
+            /** Request Id */
+            request_id: string | null;
+            /** Restaurant Id */
+            restaurant_id: number | null;
+        };
+        /**
+         * LogLevel
+         * @enum {string}
+         */
+        LogLevel: "warning" | "error";
+        /** LogPageResponse */
+        LogPageResponse: {
+            /** Items */
+            items: components["schemas"]["LogEntryResponse"][];
+            /** Next Before Id */
+            next_before_id: number | null;
+        };
         /** LoginRequest */
         LoginRequest: {
             /**
@@ -2848,6 +3041,32 @@ export interface components {
          * @enum {string}
          */
         NoteType: "allergy" | "preference" | "priority" | "other";
+        /** ObservabilitySummaryResponse */
+        ObservabilitySummaryResponse: {
+            /** Active Restaurants */
+            active_restaurants: number;
+            /** Avg Db Ms */
+            avg_db_ms: number;
+            /** Dropped Events */
+            dropped_events: number;
+            /** Error Rate */
+            error_rate: number;
+            /** Errors 4Xx */
+            errors_4xx: number;
+            /** Errors 5Xx */
+            errors_5xx: number;
+            /** P50 Ms */
+            p50_ms: number;
+            /** P95 Ms */
+            p95_ms: number;
+            /** P99 Ms */
+            p99_ms: number;
+            /** Requests */
+            requests: number;
+            /** Sampled */
+            sampled: boolean;
+            window: components["schemas"]["Window"];
+        };
         /** OpenCashRequest */
         OpenCashRequest: {
             /**
@@ -3477,6 +3696,46 @@ export interface components {
             /** Lines */
             lines: components["schemas"]["RecipeLineRequest"][];
         };
+        /** RequestEntryResponse */
+        RequestEntryResponse: {
+            /** Account Id */
+            account_id: number | null;
+            /**
+             * Account Kind
+             * @enum {string}
+             */
+            account_kind: "staff" | "platform" | "preview" | "anonymous";
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Db Ms */
+            db_ms: number;
+            /** Db Queries */
+            db_queries: number;
+            /** Duration Ms */
+            duration_ms: number;
+            /** Id */
+            id: number;
+            /** Method */
+            method: string;
+            /** Request Id */
+            request_id: string;
+            /** Restaurant Id */
+            restaurant_id: number | null;
+            /** Route */
+            route: string;
+            /** Status */
+            status: number;
+        };
+        /** RequestPageResponse */
+        RequestPageResponse: {
+            /** Items */
+            items: components["schemas"]["RequestEntryResponse"][];
+            /** Next Before Id */
+            next_before_id: number | null;
+        };
         /** ReservationRequest */
         ReservationRequest: {
             /** Customer Id */
@@ -3739,6 +3998,30 @@ export interface components {
             /** Permissions */
             permissions: components["schemas"]["Permission"][];
         };
+        /**
+         * RouteSort
+         * @enum {string}
+         */
+        RouteSort: "requests" | "p95" | "errors";
+        /** RouteStatsResponse */
+        RouteStatsResponse: {
+            /** Avg Db Ms */
+            avg_db_ms: number;
+            /** Errors 5Xx */
+            errors_5xx: number;
+            /** Method */
+            method: string;
+            /** P50 Ms */
+            p50_ms: number;
+            /** P95 Ms */
+            p95_ms: number;
+            /** Requests */
+            requests: number;
+            /** Route */
+            route: string;
+            /** Sampled */
+            sampled: boolean;
+        };
         /** SalesSummaryResponse */
         SalesSummaryResponse: {
             /** Average Ticket */
@@ -3845,6 +4128,13 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** StatusCountResponse */
+        StatusCountResponse: {
+            /** Count */
+            count: number;
+            /** Status */
+            status: number;
+        };
         /**
          * StockChangeResponse
          * @description El movimiento registrado y el insumo como quedó.
@@ -3945,6 +4235,29 @@ export interface components {
          * @enum {string}
          */
         TableStatus: "free" | "occupied";
+        /** TimePointResponse */
+        TimePointResponse: {
+            /** Errors 5Xx */
+            errors_5xx: number;
+            /** P95 Ms */
+            p95_ms: number;
+            /** Requests */
+            requests: number;
+            /**
+             * T
+             * Format: date-time
+             */
+            t: string;
+        };
+        /** TimeseriesResponse */
+        TimeseriesResponse: {
+            /** Bucket Seconds */
+            bucket_seconds: number;
+            /** Points */
+            points: components["schemas"]["TimePointResponse"][];
+            /** Sampled */
+            sampled: boolean;
+        };
         /** TopDishResponse */
         TopDishResponse: {
             /** Menu Item Id */
@@ -4144,6 +4457,11 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /**
+         * Window
+         * @enum {string}
+         */
+        Window: "1h" | "6h" | "24h" | "7d";
     };
     responses: never;
     parameters: never;
@@ -7098,6 +7416,256 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlatformAccessTokenResponse"];
+                };
+            };
+        };
+    };
+    search_logs_api_v1_platform_observability_logs_get: {
+        parameters: {
+            query?: {
+                /** @description Ventana que termina ahora. */
+                window?: components["schemas"]["Window"];
+                /** @description Solo este restaurante. */
+                restaurant_id?: number | null;
+                level?: components["schemas"]["LogLevel"] | null;
+                search?: string | null;
+                request_id?: string | null;
+                limit?: number;
+                /** @description `next_before_id` de la página anterior. */
+                before_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogPageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_log_api_v1_platform_observability_logs__entry_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_requests_api_v1_platform_observability_requests_get: {
+        parameters: {
+            query?: {
+                /** @description Ventana que termina ahora. */
+                window?: components["schemas"]["Window"];
+                /** @description Solo este restaurante. */
+                restaurant_id?: number | null;
+                status_min?: number | null;
+                /** @description Plantilla. */
+                route?: string | null;
+                request_id?: string | null;
+                limit?: number;
+                /** @description `next_before_id` de la página anterior. */
+                before_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestPageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_routes_api_v1_platform_observability_routes_get: {
+        parameters: {
+            query?: {
+                /** @description Ventana que termina ahora. */
+                window?: components["schemas"]["Window"];
+                /** @description Solo este restaurante. */
+                restaurant_id?: number | null;
+                sort?: components["schemas"]["RouteSort"];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RouteStatsResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_status_api_v1_platform_observability_status_get: {
+        parameters: {
+            query?: {
+                /** @description Ventana que termina ahora. */
+                window?: components["schemas"]["Window"];
+                /** @description Solo este restaurante. */
+                restaurant_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusCountResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_summary_api_v1_platform_observability_summary_get: {
+        parameters: {
+            query?: {
+                /** @description Ventana que termina ahora. */
+                window?: components["schemas"]["Window"];
+                /** @description Solo este restaurante. */
+                restaurant_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ObservabilitySummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_timeseries_api_v1_platform_observability_timeseries_get: {
+        parameters: {
+            query?: {
+                /** @description Ventana que termina ahora. */
+                window?: components["schemas"]["Window"];
+                /** @description Solo este restaurante. */
+                restaurant_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimeseriesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
