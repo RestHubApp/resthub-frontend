@@ -26,8 +26,8 @@ export function staffListQueryKey(params: StaffListParams) {
 }
 
 export async function fetchStaff(params: StaffListParams = {}): Promise<StaffListResponse> {
-  // El filtro por rol es una lista: FastAPI la espera como `role=a&role=b` y
-  // no con los corchetes que Axios agrega por defecto.
+  // El filtro por rol es una lista: FastAPI la espera como `role_id=1&role_id=2`
+  // y no con los corchetes que Axios agrega por defecto.
   const { data } = await api.get<StaffListResponse>('/staff', {
     params,
     paramsSerializer: { indexes: null },
@@ -44,7 +44,7 @@ export async function createStaff(payload: CreateStaffRequest): Promise<StaffRes
   return data
 }
 
-/** Nombre y tipo de cuenta. El correo no se edita: es con lo que la persona entra. */
+/** Nombre y rol. El correo no se edita: es con lo que la persona entra. */
 export async function updateStaff(
   userId: number,
   payload: UpdateStaffRequest,

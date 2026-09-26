@@ -12,6 +12,7 @@ import NewOrderView from '../features/orders/NewOrderView'
 import OrderDetailView from '../features/orders/OrderDetailView'
 import OrdersView from '../features/orders/OrdersView'
 import { prefetchBoard, prefetchFloor, prefetchKitchen } from '../features/orders/prefetchOrders'
+import { prefetchRoles } from '../features/roles/prefetchRoles'
 import AppShell from '../features/shell/AppShell'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import RequireSession from '../features/shell/RequireSession'
@@ -57,6 +58,7 @@ const PANTALLAS: readonly LazyScreen[] = [
   { path: 'inventario', permission: 'inventory.read', load: () => import('../features/inventory/InventoryView'), prefetch: prefetchInventory },
   { path: 'inventario/recetas/:menuItemId', permission: 'inventory.read', load: () => import('../features/inventory/RecipeEditorView') },
   { path: 'personal', permission: 'staff.manage', load: () => import('../features/staff/StaffView'), prefetch: prefetchStaff },
+  { path: 'roles', permission: 'roles.manage', load: () => import('../features/roles/RolesView'), prefetch: prefetchRoles },
   { path: 'panel', permission: PANEL, load: () => import('../features/insights/InsightsView'), prefetch: prefetchInsights },
   { path: 'panel/reposicion', permission: PANEL, load: () => import('../features/insights/RestockView') },
   { path: 'panel/ia', permission: PANEL, load: () => import('../features/insights/AiAuditView') },

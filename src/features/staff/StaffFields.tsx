@@ -1,31 +1,33 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
+import type { Role } from '../../api/types'
+import ReadOnlyField from '../../components/ReadOnlyField'
 import SelectField from '../../components/SelectField'
 import TextField from '../../components/TextField'
 import { NativeSelectOption } from '../../components/ui/native-select'
 import { soloLetras } from '../../services/fieldRules'
-import ReadOnlyField from './ReadOnlyField'
-import { ROLE_LABELS, ROLE_OPTIONS } from './staffSchema'
 
 interface StaffFieldsProps {
   /** Lo que devuelve `register(...)` para cada campo. */
   readonly fields: {
     readonly full_name: UseFormRegisterReturn
-    readonly role: UseFormRegisterReturn
+    readonly role_id: UseFormRegisterReturn
     /** Solo al crear. Al editar, el correo se muestra y no se cambia. */
     readonly email?: UseFormRegisterReturn
   }
   readonly errors: {
     readonly full_name?: string
     readonly email?: string
-    readonly role?: string
+    readonly role_id?: string
   }
+  /** Los roles que quien mira puede dar. */
+  readonly roles: readonly Role[]
   /** El correo de una cuenta que ya existe. */
   readonly fixedEmail?: string
   /**
-   * El tipo de la cuenta propia, que no se puede cambiar: quien se quita el
-   * rol de encargado se queda sin esta pantalla. Con valor, se muestra en vez
-   * de la lista.
+   * El rol de la cuenta propia, que no se puede cambiar: quien se quita el
+   * permiso de administrar el personal se queda sin esta pantalla. Con valor,
+   * se muestra en vez de la lista.
    */
   readonly lockedRoleLabel?: string
 }
@@ -40,6 +42,7 @@ interface StaffFieldsProps {
 export default function StaffFields({
   fields,
   errors,
+  roles,
   fixedEmail,
   lockedRoleLabel,
 }: StaffFieldsProps) {
@@ -79,21 +82,22 @@ export default function StaffFields({
       )}
       {lockedRoleLabel !== undefined ? (
         <ReadOnlyField
-          label="Tipo de cuenta"
+          label="Rol"
           value={lockedRoleLabel}
-          hint="No puedes cambiar el tipo de tu propia cuenta."
+          hint="No puedes cambiar el rol de tu propia cuenta."
         />
       ) : (
         <SelectField
-          id="role"
-          label="Tipo de cuenta"
+          id="role_id"
+          label="Rol"
           icon="tipoDeCuenta"
-          field={fields.role}
-          error={errors.role}
+          hint="Solo aparecen los roles con permisos que tu cuenta también tiene."
+          field={fields.role_id}
+          error={errors.role_id}
         >
-          {ROLE_OPTIONS.map((role) => (
-            <NativeSelectOption key={role} value={role}>
-              {ROLE_LABELS[role]}
+          {roles.map((role) => (
+            <NativeSelectOption key={role.id} value={String(role.id)}>
+              {role.name}
             </NativeSelectOption>
           ))}
         </SelectField>

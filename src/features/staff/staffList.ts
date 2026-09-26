@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
 
+import { rolesQueryKey } from '../../api/roles'
 import { MAX_STAFF_PAGE, staffQuery, staffQueryKey } from '../../api/staff'
 import type { StaffListResponse, StaffResponse } from '../../api/types'
 import { upsertInList } from '../../services/cacheList'
@@ -25,9 +26,11 @@ function conCuenta(pagina: StaffListResponse, cuenta: StaffResponse): StaffListR
 
 /**
  * Pone la cuenta como la devolvió el servidor en la lista y relee de fondo
- * las listas de personal (la de esta pantalla y los filtros del historial).
+ * las listas de personal (la de esta pantalla y los filtros del historial) y
+ * los roles, que cuentan cuántas personas tiene cada uno.
  */
 export function saveStaffMember(queryClient: QueryClient, cuenta: StaffResponse): void {
   queryClient.setQueryData(STAFF_LIST_QUERY.queryKey, (pagina) => pagina && conCuenta(pagina, cuenta))
   void queryClient.invalidateQueries({ queryKey: staffQueryKey })
+  void queryClient.invalidateQueries({ queryKey: rolesQueryKey })
 }

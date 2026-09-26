@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 import { createStaff } from '../../api/staff'
+import type { Role } from '../../api/types'
 import DialogFormActions from '../../components/DialogFormActions'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -11,24 +12,32 @@ import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
 import { MIN_PASSWORD } from '../../services/fieldRules'
+import { defaultRoleId } from './roleOptions'
 import StaffFields from './StaffFields'
 import { saveStaffMember } from './staffList'
-import { type CreateStaffValues, createStaffSchema, EMPTY_CREATE_STAFF } from './staffSchema'
+import {
+  createPayload,
+  type CreateStaffValues,
+  createStaffSchema,
+  emptyCreateStaff,
+} from './staffSchema'
 
 interface StaffCreateFormProps {
+  /** Los roles que quien mira puede dar. */
+  readonly roles: readonly Role[]
   /** Se llama al crear la cuenta o al cancelar: cierra la ventana. */
   readonly onDone: () => void
 }
 
-export default function StaffCreateForm({ onDone }: StaffCreateFormProps) {
+export default function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState } = useForm<CreateStaffValues>({
     resolver: zodResolver(createStaffSchema),
-    defaultValues: EMPTY_CREATE_STAFF,
+    defaultValues: emptyCreateStaff(defaultRoleId(roles)),
   })
 
   const alta = useMutation({
-    mutationFn: createStaff,
+    mutationFn: (valores: CreateStaffValues) => createStaff(createPayload(valores)),
     onSuccess: (cuenta) => {
       saveStaffMember(queryClient, cuenta)
       onDone()
@@ -51,13 +60,14 @@ export default function StaffCreateForm({ onDone }: StaffCreateFormProps) {
         fields={{
           full_name: register('full_name'),
           email: register('email'),
-          role: register('role'),
+          role_id: register('role_id'),
         }}
         errors={{
           full_name: errores.full_name?.message,
           email: errores.email?.message,
-          role: errores.role?.message,
+          role_id: errores.role_id?.message,
         }}
+        roles={roles}
       />
       <PasswordField
         id="password"

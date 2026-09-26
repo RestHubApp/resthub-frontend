@@ -36,9 +36,10 @@ El aislamiento lo garantiza el backend; el frontend no debe abrirle huecos.
 
 ### Permisos y roles
 
-- Hay dos roles: encargado y mesero (que además cobra). La interfaz pregunta
-  por permisos (`useCan('orders.charge')`), nunca por el rol: marca cualquier
-  comparación con `role`.
+- Cada restaurante tiene el encargado, el mesero (que además cobra) y los
+  roles que arme en «Roles». La interfaz pregunta por permisos
+  (`useCan('orders.charge')`), nunca por el rol: marca cualquier comparación
+  con el rol, su nombre o su clase para decidir qué se muestra.
 - Ocultar un botón es comodidad, no seguridad; el servidor vuelve a
   comprobar. Aun así, la pantalla no debe ofrecer lo que el servidor va a
   rechazar: el mesero ve «Cobrar» solo en los pedidos que tomó.
