@@ -181,6 +181,21 @@ export function useCan(permission: PermissionCode): boolean {
 }
 
 /**
+ * `useCan` fuera de un componente, con la sesión de este momento.
+ *
+ * Lo usan las precargas: pedir por adelantado algo que el servidor va a
+ * rechazar con 403 solo gasta un viaje de red.
+ */
+export function can(permission: PermissionCode): boolean {
+  return hasPermission(useSession.getState().account, permission)
+}
+
+/** La zona horaria del restaurante fuera de un componente. */
+export function currentTimeZone(): string {
+  return useSession.getState().account?.restaurant.timezone ?? DEFAULT_TIME_ZONE
+}
+
+/**
  * La zona horaria del restaurante (`America/Lima`). "Hoy" y las horas de los
  * pedidos son las del local, no las del navegador de quien mira.
  */

@@ -17,7 +17,7 @@ export const RANGE_PRESETS: readonly { readonly value: RangePreset; readonly lab
   { value: 'personalizado', label: 'Personalizado' },
 ]
 
-export const DEFAULT_PRESET: RangePreset = '30d'
+export const DEFAULT_PRESET: Exclude<RangePreset, 'personalizado'> = '30d'
 
 /** El tope de dias que acepta el servidor en un reporte. */
 export const MAX_RANGE_DAYS = 366

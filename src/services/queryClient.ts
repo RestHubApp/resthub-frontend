@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient, type QueryExecuteOptions, type QueryKey } from '@tanstack/react-query'
 
 import { debeReintentar } from './api'
 
@@ -18,3 +18,20 @@ export const queryClient = new QueryClient({
     },
   },
 })
+
+// Una precarga que falla no avisa: la pantalla vuelve a pedir y muestra su error.
+function ignorar(): undefined {
+  return undefined
+}
+
+/**
+ * Pide una consulta por adelantado, sin esperarla.
+ *
+ * Si ya está en el caché y no pasó su `staleTime`, no viaja al servidor; si
+ * ya va en camino, se suma a esa misma petición.
+ */
+export function prefetch<TData, TKey extends QueryKey>(
+  options: QueryExecuteOptions<TData, Error, TData, TData, TKey>,
+): void {
+  queryClient.query(options).catch(ignorar)
+}
