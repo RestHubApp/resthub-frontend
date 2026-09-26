@@ -15,6 +15,7 @@ const ENTRADAS: readonly Entry[] = [
   { to: '/plataforma', label: 'Restaurantes', icon: 'restaurante', within: '/plataforma/restaurantes/' },
   { to: '/plataforma/bitacora', label: 'Bitácora', icon: 'historial' },
   { to: '/plataforma/vista-previa', label: 'Vista previa', icon: 'ver' },
+  { to: '/plataforma/observabilidad', label: 'Observabilidad', icon: 'observabilidad' },
 ]
 
 const BASE =
