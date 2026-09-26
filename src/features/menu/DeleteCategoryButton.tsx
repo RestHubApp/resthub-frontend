@@ -3,6 +3,7 @@ import type { MenuSection } from '../../api/types'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
+import { withoutCategory } from './menuCache'
 import { useMenuAction } from './useMenuAction'
 
 interface DeleteCategoryButtonProps {
@@ -19,6 +20,7 @@ interface DeleteCategoryButtonProps {
 export default function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
   const borrar = useMenuAction({
     send: () => deleteCategory(category.id),
+    updateCache: (menu) => withoutCategory(menu, category.id),
     failure: `No se pudo eliminar la categoría ${category.name}.`,
     success: `Categoría ${category.name} eliminada.`,
   })

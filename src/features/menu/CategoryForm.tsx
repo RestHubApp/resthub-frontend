@@ -11,7 +11,9 @@ import TextField from '../../components/TextField'
 import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
+import { withCategory } from './menuCache'
 import { type CategoryValues, categorySchema } from './menuSchema'
+import { MENU_KEY } from './useMenuData'
 
 interface CategoryFormProps {
   /** La categoría que se edita. Sin ella, se crea una nueva. */
@@ -29,8 +31,9 @@ export default function CategoryForm({ category, onDone }: CategoryFormProps) {
   const guardar = useMutation({
     mutationFn: (valores: CategoryValues) =>
       category === undefined ? createCategory(valores) : updateCategory(category.id, valores),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: menuQueryKey })
+    onSuccess: (categoria) => {
+      queryClient.setQueryData(MENU_KEY, (menu) => menu && withCategory(menu, categoria))
+      void queryClient.invalidateQueries({ queryKey: menuQueryKey })
       onDone()
     },
   })

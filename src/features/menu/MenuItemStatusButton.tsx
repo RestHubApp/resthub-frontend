@@ -3,6 +3,7 @@ import type { MenuItem } from '../../api/types'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
+import { withItem } from './menuCache'
 import { useMenuAction } from './useMenuAction'
 
 interface MenuItemStatusButtonProps {
@@ -18,6 +19,7 @@ interface MenuItemStatusButtonProps {
 export default function MenuItemStatusButton({ item }: MenuItemStatusButtonProps) {
   const estado = useMenuAction({
     send: () => updateMenuItem(item.id, { is_active: !item.is_active }),
+    updateCache: withItem,
     failure: `No se pudo actualizar ${item.name}.`,
   })
   const cambiar = () => {

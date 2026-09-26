@@ -11,6 +11,7 @@ import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
+import { withItem } from './menuCache'
 import MenuItemFields from './MenuItemFields'
 import {
   emptyMenuItem,
@@ -19,6 +20,7 @@ import {
   type MenuItemValues,
   menuItemValuesOf,
 } from './menuSchema'
+import { MENU_KEY } from './useMenuData'
 
 interface MenuItemFormProps {
   /** El plato que se edita. Sin él, se crea uno nuevo. */
@@ -49,12 +51,12 @@ export default function MenuItemForm({
         ? createMenuItem({ ...cuerpo, is_available: true })
         : updateMenuItem(item.id, cuerpo)
     },
-    onSuccess: async () => {
-      // El precio cambia el margen, que se calcula en el inventario.
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: menuQueryKey }),
-        queryClient.invalidateQueries({ queryKey: dishCostsQueryKey }),
-      ])
+    onSuccess: (plato) => {
+      queryClient.setQueryData(MENU_KEY, (menu) => menu && withItem(menu, plato))
+      // La carta del mesero y el margen, que se calcula en el inventario con
+      // el precio, se releen de fondo.
+      void queryClient.invalidateQueries({ queryKey: menuQueryKey })
+      void queryClient.invalidateQueries({ queryKey: dishCostsQueryKey })
       onDone()
     },
   })
