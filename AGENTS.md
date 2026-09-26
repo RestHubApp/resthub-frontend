@@ -11,14 +11,28 @@ pnpm install --frozen-lockfile
 pnpm typecheck && pnpm lint && pnpm build
 ```
 
-Commits en Conventional Commits en español (`feat(pedidos): …`), sin líneas
-`Co-authored-by`: el hook `commit-msg` lo exige.
+Commits en Conventional Commits en español (`feat(pedidos): …`). El hook
+`.husky/commit-msg` comprueba la forma y que no haya líneas `Co-authored-by`;
+el español es convención del equipo, no lo comprueba el hook.
 
 ## Code Review Rules
 
 Escribe la revisión en español. Formato, lint, límites entre carpetas y tipos
 ya los revisa el CI: no los comentes. Marca solo lo que cambia el
 comportamiento o rompe una regla de esta lista.
+
+### Aislamiento entre restaurantes y sesión
+
+El aislamiento lo garantiza el backend; el frontend no debe abrirle huecos.
+
+- El cliente nunca envía `restaurant_id` (ni en el cuerpo, la URL o un
+  parámetro): el servidor lo toma del token. Marca cualquier petición que lo
+  mande.
+- Al cerrar o vencer la sesión se vacía el caché de consultas
+  (`queryClient.clear()`) y lo guardado de la cuenta; nada de una cuenta queda
+  visible para la siguiente en el mismo celular.
+- Un 404 se muestra como «no existe» sin sugerir que el recurso es de otro
+  local.
 
 ### Permisos y roles
 
@@ -38,6 +52,12 @@ comportamiento o rompe una regla de esta lista.
   una vez con `queryOptions` y la usan la vista y la precarga.
 - Después de guardar se muestra lo que devolvió el servidor, no lo que se
   envió.
+- Si el servidor rechaza un cambio porque el pedido cambió mientras tanto
+  (409), se avisa y se relee; no se reintenta a ciegas ni se muestra el dato
+  viejo como si se hubiera guardado.
+- La IA nunca bloquea una pantalla: las marcas de las notas (alergias) y las
+  sugerencias llegan en consultas aparte. Tomar, servir o cobrar un pedido no
+  espera a la IA ni falla si esa consulta falla.
 
 ### Dinero, fechas y textos
 
