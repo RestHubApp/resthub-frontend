@@ -156,8 +156,10 @@ aparte: el celular del mesero nunca baja este código.
   HTTP (`services/api.ts`) elige la credencial por ruta: a `/platform/*` va
   solo el token de plataforma y al resto solo el de restaurante, y un 401
   cierra solo la sesión dueña de esa ruta. Abrir, cerrar o dejar vencer una no
-  toca la otra; cerrar la de restaurante vacía el caché salvo las consultas
-  `['platform', …]`, y cerrar la de plataforma vacía solo esas.
+  toca la otra; cerrar la de restaurante vacía el caché salvo las consultas y
+  mutaciones `['platform', …]`, y cerrar la de plataforma vacía solo esas. Las
+  mutaciones que llevan una contraseña (acceso, alta, nuevo encargado) salen
+  del caché en cuanto nadie mira su resultado (`gcTime: 0`).
 - Vence y se renueva como la del restaurante (`hooks/useTokenRenewal.ts`,
   `POST /platform/auth/refresh` cinco minutos antes). Sin sesión, la guarda
   lleva a `/plataforma/acceso`, que explica si venció.

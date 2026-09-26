@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { updatePlatformRestaurant } from '../../api/platform'
+import { platformMutationKeys, updatePlatformRestaurant } from '../../api/platform'
 import type { PlatformRestaurantDetail } from '../../api/types'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import FormMessage from '../../components/FormMessage'
@@ -28,6 +28,7 @@ function personas(total: number): string {
 export default function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonProps) {
   const queryClient = useQueryClient()
   const estado = useMutation({
+    mutationKey: platformMutationKeys.updateRestaurant,
     mutationFn: () => updatePlatformRestaurant(restaurant.id, { is_active: !restaurant.is_active }),
     onSuccess: (guardado) => {
       saveRestaurant(queryClient, guardado)

@@ -91,6 +91,22 @@ describe('sesión de plataforma', () => {
     expect(queryClient.getQueryData(['orders'])).toEqual({ items: [] })
   })
 
+  it('al cerrarse saca del caché las mutaciones de plataforma y sus contraseñas', async () => {
+    const { usePlatformSession, queryClient } = await cargar()
+    const { platformMutationKeys } = await import('../api/platform')
+    usePlatformSession.getState().signIn(tokenQueVence(3600), ADMIN)
+    const mutaciones = queryClient.getMutationCache()
+    const mutationFn = () => Promise.resolve(null)
+    await mutaciones
+      .build(queryClient, { mutationKey: platformMutationKeys.addOwner, mutationFn })
+      .execute({ password: 'x'.repeat(12) })
+    await mutaciones.build(queryClient, { mutationKey: ['orders', 'create'], mutationFn }).execute(undefined)
+
+    usePlatformSession.getState().signOut()
+
+    expect(mutaciones.getAll().map((m) => m.options.mutationKey)).toEqual([['orders', 'create']])
+  })
+
   it('su token viaja solo a /platform/* y el del restaurante al resto', async () => {
     const { usePlatformSession, api, setAuthToken } = await cargar()
     const token = tokenQueVence(3600)

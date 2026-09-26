@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { platformLogin } from '../../api/platform'
+import { PASSWORD_MUTATION_GC_TIME, platformLogin, platformMutationKeys } from '../../api/platform'
 import type { PlatformAdmin } from '../../api/types'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -28,7 +28,9 @@ export default function PlatformLoginForm({ expired, onSignedIn }: PlatformLogin
   })
 
   const acceder = useMutation({
+    mutationKey: platformMutationKeys.login,
     mutationFn: platformLogin,
+    gcTime: PASSWORD_MUTATION_GC_TIME,
     onSuccess: ({ access_token: token, admin }) => {
       onSignedIn(token, admin)
     },

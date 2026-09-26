@@ -1,10 +1,9 @@
 import { create } from 'zustand'
 
-import { platformQueryKey } from '../api/platform'
 import type { PlatformAdmin } from '../api/types'
 import { setPlatformAuthToken, setPlatformUnauthorizedHandler } from '../services/api'
 import { logger } from '../services/logger'
-import { queryClient } from '../services/queryClient'
+import { clearQueriesOf, PLATFORM_QUERY_ROOT } from '../services/queryClient'
 import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
 
 // La sesión del administrador del sistema. Es otra sesión, no un rol: vive en
@@ -63,8 +62,9 @@ function limpiar(): void {
   setPlatformAuthToken(null)
   writeStored(null)
   programarVencimiento(null)
-  // Solo lo de plataforma: las consultas del restaurante son de otra sesión.
-  queryClient.removeQueries({ queryKey: platformQueryKey })
+  // Solo lo de plataforma, consultas y mutaciones (con las contraseñas de los
+  // encargados dados de alta): lo del restaurante es de otra sesión.
+  clearQueriesOf(PLATFORM_QUERY_ROOT)
 }
 
 function abrir(token: string, admin: PlatformAdmin): void {

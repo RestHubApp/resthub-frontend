@@ -26,6 +26,22 @@ export const platformQueryKey = [PLATFORM_QUERY_ROOT] as const
 export const platformRestaurantsQueryKey = [...platformQueryKey, 'restaurants'] as const
 export const platformActivityQueryKey = [...platformQueryKey, 'activity'] as const
 
+// Las escrituras llevan la misma raíz: cerrar la sesión de plataforma las saca
+// del caché de mutaciones, que guarda lo enviado, y cerrar la del restaurante
+// no las toca.
+export const platformMutationKeys = {
+  login: [...platformQueryKey, 'login'],
+  createRestaurant: [...platformRestaurantsQueryKey, 'create'],
+  updateRestaurant: [...platformRestaurantsQueryKey, 'update'],
+  addOwner: [...platformRestaurantsQueryKey, 'owners', 'add'],
+} as const
+
+/**
+ * Para las mutaciones que llevan una contraseña: en cuanto nadie mira su
+ * resultado, salen del caché en vez de esperar los cinco minutos de siempre.
+ */
+export const PASSWORD_MUTATION_GC_TIME = 0
+
 /** Lo que el servidor devuelve por página si no se le pide otra cosa. */
 export const PLATFORM_PAGE_SIZE = 25
 

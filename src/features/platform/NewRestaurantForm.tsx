@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { type FieldErrors, useForm } from 'react-hook-form'
 
-import { createPlatformRestaurant } from '../../api/platform'
+import { createPlatformRestaurant, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } from '../../api/platform'
 import type { PlatformRestaurantDetail } from '../../api/types'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -52,7 +52,9 @@ export default function NewRestaurantForm({ onCreated, onCancel }: NewRestaurant
   // El nombre con el que se sugirió el identificador que está en el campo.
   const [nombreAnterior, setNombreAnterior] = useState('')
   const alta = useMutation({
+    mutationKey: platformMutationKeys.createRestaurant,
     mutationFn: (valores: CreateRestaurantValues) => createPlatformRestaurant(createRestaurantPayload(valores)),
+    gcTime: PASSWORD_MUTATION_GC_TIME,
     onSuccess: (restaurante) => {
       saveRestaurant(queryClient, restaurante)
       onCreated(restaurante)

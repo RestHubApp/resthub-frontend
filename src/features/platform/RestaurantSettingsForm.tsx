@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { updatePlatformRestaurant } from '../../api/platform'
+import { platformMutationKeys, updatePlatformRestaurant } from '../../api/platform'
 import type { PlatformRestaurantDetail, UpdatePlatformRestaurantRequest } from '../../api/types'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -42,6 +42,7 @@ export default function RestaurantSettingsForm({ restaurant }: RestaurantSetting
     resetOptions: { keepDirtyValues: true },
   })
   const guardar = useMutation({
+    mutationKey: platformMutationKeys.updateRestaurant,
     mutationFn: (cambios: UpdatePlatformRestaurantRequest) => updatePlatformRestaurant(restaurant.id, cambios),
     onSuccess: (guardado) => {
       saveRestaurant(queryClient, guardado)

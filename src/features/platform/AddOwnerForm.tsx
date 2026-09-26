@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { addPlatformOwner } from '../../api/platform'
+import { addPlatformOwner, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } from '../../api/platform'
 import DialogFormActions from '../../components/DialogFormActions'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -27,7 +27,9 @@ export default function AddOwnerForm({ restaurantId, onDone }: AddOwnerFormProps
     defaultValues: EMPTY_OWNER,
   })
   const alta = useMutation({
+    mutationKey: platformMutationKeys.addOwner,
     mutationFn: (valores: OwnerValues) => addPlatformOwner(restaurantId, valores),
+    gcTime: PASSWORD_MUTATION_GC_TIME,
     onSuccess: (encargado) => {
       saveOwner(queryClient, restaurantId, encargado)
       onDone()
