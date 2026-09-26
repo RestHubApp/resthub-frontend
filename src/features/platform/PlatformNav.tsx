@@ -14,6 +14,7 @@ interface Entry {
 const ENTRADAS: readonly Entry[] = [
   { to: '/plataforma', label: 'Restaurantes', icon: 'restaurante', within: '/plataforma/restaurantes/' },
   { to: '/plataforma/bitacora', label: 'Bitácora', icon: 'historial' },
+  { to: '/plataforma/vista-previa', label: 'Vista previa', icon: 'ver' },
 ]
 
 const BASE =
@@ -31,11 +32,11 @@ interface PlatformNavProps {
   readonly pathname: string
 }
 
-/** Las dos pantallas del área, en la franja de arriba: caben también en el celular. */
+/** Las pantallas del área, en la franja de arriba; en un celular angosto bajan a otra fila. */
 export default function PlatformNav({ pathname }: PlatformNavProps) {
   return (
     <nav aria-label="Administración del sistema" className="order-last w-full sm:order-none sm:w-auto">
-      <ul className="m-0 flex list-none gap-1 p-0">
+      <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
         {ENTRADAS.map((entrada) => {
           const actual = activa(entrada, pathname)
           return (

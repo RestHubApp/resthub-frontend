@@ -111,6 +111,7 @@ const PLATAFORMA: RouteObject = {
         { path: 'restaurantes/nuevo', ...plataforma(() => import('../features/platform/NewRestaurantView')) },
         { path: 'restaurantes/:restaurantId', ...plataforma(() => import('../features/platform/RestaurantDetailView')) },
         { path: 'bitacora', ...plataforma(() => import('../features/platform/ActivityView')) },
+        { path: 'vista-previa', ...plataforma(() => import('../features/platform/PreviewView')) },
       ],
     },
     { path: '*', element: <Navigate to="/plataforma" replace /> },
