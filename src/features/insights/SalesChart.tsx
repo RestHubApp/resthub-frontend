@@ -1,6 +1,6 @@
 import type { DailySalesPoint } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
-import AreaChart from './charts/AreaChart'
+import AreaChart from '../../components/charts/AreaChart'
 import { formatInteger, formatLongDate, formatMoney, formatMoneyCompact, formatShortDate, toNumber } from '../../services/format'
 
 /** La serie diaria de ventas, o un aviso si el rango es de un día. */

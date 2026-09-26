@@ -198,3 +198,27 @@ export type PreviewAs = components['schemas']['PreviewAs']
 export type PreviewRequest = components['schemas']['PreviewRequest']
 export type PreviewCodeResponse = components['schemas']['PreviewCodeResponse']
 export type PreviewExchangeRequest = components['schemas']['PreviewExchangeRequest']
+
+// Panel de observabilidad (`/platform/observability`): tráfico, errores,
+// latencias y logs que el backend guarda de sí mismo.
+type ObsQuery<TOperation extends keyof operations> = NonNullable<operations[TOperation]['parameters']['query']>
+
+export type ObsWindow = components['schemas']['Window']
+export type ObsLogLevel = components['schemas']['LogLevel']
+export type ObsRouteSort = components['schemas']['RouteSort']
+/** `error_rate` es una fracción de 0 a 1 (5xx sobre el total); una ventana vacía viene en cero. */
+export type ObsSummary = components['schemas']['ObservabilitySummaryResponse']
+export type ObsTimeseries = components['schemas']['TimeseriesResponse']
+export type ObsTimePoint = components['schemas']['TimePointResponse']
+export type ObsRouteStats = components['schemas']['RouteStatsResponse']
+export type ObsStatusCount = components['schemas']['StatusCountResponse']
+export type ObsLogEntry = components['schemas']['LogEntryResponse']
+export type ObsLogPage = components['schemas']['LogPageResponse']
+export type ObsLogDetail = components['schemas']['LogDetailResponse']
+export type ObsRequestEntry = components['schemas']['RequestEntryResponse']
+export type ObsRequestPage = components['schemas']['RequestPageResponse']
+export type ObsAccountKind = ObsRequestEntry['account_kind']
+export type ObsWindowParams = ObsQuery<'read_summary_api_v1_platform_observability_summary_get'>
+export type ObsRoutesParams = ObsQuery<'read_routes_api_v1_platform_observability_routes_get'>
+export type ObsLogsParams = ObsQuery<'search_logs_api_v1_platform_observability_logs_get'>
+export type ObsRequestsParams = ObsQuery<'search_requests_api_v1_platform_observability_requests_get'>

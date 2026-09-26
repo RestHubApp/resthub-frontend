@@ -20,16 +20,34 @@ export interface AreaGeometry {
   readonly y: (value: number) => number
   readonly linePath: string
   readonly areaPath: string
+  /** La línea de la serie superpuesta; vacía si no hay. */
+  readonly overlayPath: string
   readonly maxIndex: number
 }
 
-/** Las coordenadas de una serie en el tamaño disponible, con el cero abajo. */
-export function areaGeometry(points: readonly SeriesPoint[], width: number, height: number): AreaGeometry {
+function pathOf(values: readonly number[], x: (index: number) => number, y: (value: number) => number): string {
+  return values
+    .map((value, index) => `${index === 0 ? 'M' : 'L'}${x(index).toFixed(1)},${y(value).toFixed(1)}`)
+    .join(' ')
+}
+
+/**
+ * Las coordenadas de una serie en el tamaño disponible, con el cero abajo.
+ *
+ * `overlay` es una segunda serie de la misma unidad (los errores dentro de las
+ * peticiones): comparte el eje, así que el tope cubre a las dos.
+ */
+export function areaGeometry(
+  points: readonly SeriesPoint[],
+  width: number,
+  height: number,
+  overlay: readonly number[] = [],
+): AreaGeometry {
   const plotLeft = AREA_MARGIN.left
   const plotRight = Math.max(plotLeft + 1, width - AREA_MARGIN.right)
   const plotTop = AREA_MARGIN.top
   const plotBottom = height - AREA_MARGIN.bottom
-  const maximo = Math.max(0, ...points.map((point) => point.value))
+  const maximo = Math.max(0, ...points.map((point) => point.value), ...overlay)
   const ticks = niceTicks(maximo)
   const tope = ticks.at(-1) ?? 1
   const step = points.length > 1 ? (plotRight - plotLeft) / (points.length - 1) : 0
@@ -37,9 +55,11 @@ export function areaGeometry(points: readonly SeriesPoint[], width: number, heig
   const x = (index: number) => plotLeft + index * step
   const y = (value: number) => plotBottom - (value / tope) * (plotBottom - plotTop)
 
-  const linePath = points
-    .map((point, index) => `${index === 0 ? 'M' : 'L'}${x(index).toFixed(1)},${y(point.value).toFixed(1)}`)
-    .join(' ')
+  const linePath = pathOf(
+    points.map((point) => point.value),
+    x,
+    y,
+  )
   const areaPath =
     points.length === 0
       ? ''
@@ -49,5 +69,18 @@ export function areaGeometry(points: readonly SeriesPoint[], width: number, heig
     0,
   )
 
-  return { ticks, plotLeft, plotRight, plotTop, plotBottom, step, x, y, linePath, areaPath, maxIndex }
+  return {
+    ticks,
+    plotLeft,
+    plotRight,
+    plotTop,
+    plotBottom,
+    step,
+    x,
+    y,
+    linePath,
+    areaPath,
+    overlayPath: pathOf(overlay, x, y),
+    maxIndex,
+  }
 }
