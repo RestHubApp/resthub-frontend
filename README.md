@@ -66,10 +66,9 @@ El script lee la variable de la terminal, no de `.env.local`. Después de
 regenerar, `pnpm build` señala cada pantalla que quedó desalineada con el contrato.
 Nadie edita el archivo generado: los alias legibles están en `src/api/types.ts`.
 
-Los del API de plataforma (`/platform/*`) siguen la misma regla. El backend
-tiene dos esquemas `UpdateRestaurantRequest` (el del restaurante propio y el de
-la plataforma) y el OpenAPI los publica con el nombre del módulo delante; sus
-alias se toman del cuerpo de la operación para no depender de ese nombre.
+Los del API de plataforma (`/platform/*`) siguen la misma regla: sus esquemas
+llevan `Platform` delante cuando el nombre chocaría con uno del restaurante
+(`PlatformUpdateRestaurantRequest`).
 
 ## Estructura
 

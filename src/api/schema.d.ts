@@ -3144,6 +3144,15 @@ export interface components {
         PlatformSessionResponse: {
             admin: components["schemas"]["PlatformAdminResponse"];
         };
+        /** PlatformUpdateRestaurantRequest */
+        PlatformUpdateRestaurantRequest: {
+            /** Is Active */
+            is_active?: boolean | null;
+            /** Name */
+            name?: string | null;
+            /** Timezone */
+            timezone?: string | null;
+        };
         /** PreviousTotals */
         PreviousTotals: {
             /** Average Ticket */
@@ -3886,6 +3895,17 @@ export interface components {
             /** Notes */
             notes?: string | null;
         };
+        /** UpdateRestaurantRequest */
+        UpdateRestaurantRequest: {
+            /** Auto Out Of Stock */
+            auto_out_of_stock?: boolean | null;
+            /** Max Waiter Discount Percent */
+            max_waiter_discount_percent?: number | string | null;
+            /** Name */
+            name?: string | null;
+            /** Timezone */
+            timezone?: string | null;
+        };
         /** UpdateStaffRequest */
         UpdateStaffRequest: {
             /** Full Name */
@@ -4003,26 +4023,6 @@ export interface components {
             quantity: number | string;
             /** Reason */
             reason: string;
-        };
-        /** UpdateRestaurantRequest */
-        resthub__modules__platform__adapters__api__schemas__UpdateRestaurantRequest: {
-            /** Is Active */
-            is_active?: boolean | null;
-            /** Name */
-            name?: string | null;
-            /** Timezone */
-            timezone?: string | null;
-        };
-        /** UpdateRestaurantRequest */
-        resthub__modules__restaurants__adapters__api__schemas__UpdateRestaurantRequest: {
-            /** Auto Out Of Stock */
-            auto_out_of_stock?: boolean | null;
-            /** Max Waiter Discount Percent */
-            max_waiter_discount_percent?: number | string | null;
-            /** Name */
-            name?: string | null;
-            /** Timezone */
-            timezone?: string | null;
         };
     };
     responses: never;
@@ -7058,7 +7058,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["resthub__modules__platform__adapters__api__schemas__UpdateRestaurantRequest"];
+                "application/json": components["schemas"]["PlatformUpdateRestaurantRequest"];
             };
         };
         responses: {
@@ -7279,7 +7279,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["resthub__modules__restaurants__adapters__api__schemas__UpdateRestaurantRequest"];
+                "application/json": components["schemas"]["UpdateRestaurantRequest"];
             };
         };
         responses: {
