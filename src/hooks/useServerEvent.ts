@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { api } from '../services/api'
+import { api, currentAuthToken } from '../services/api'
 import { EventStreamError, readEventStream } from '../services/eventStream'
 import { logger } from '../services/logger'
 
@@ -10,12 +10,6 @@ const FORBIDDEN = 403
 
 const eventLogger = logger.child({ module: 'realtime' })
 
-// La credencial ya viaja en cada petición de Axios; la capa de hooks no puede
-// leer el almacén de sesión, así que la toma de ahí.
-function currentToken(): string | null {
-  const cabecera = api.defaults.headers.common.Authorization
-  return typeof cabecera === 'string' ? cabecera.replace(/^Bearer /u, '') : null
-}
 
 /**
  * Escucha un tema del canal de avisos del servidor (`GET /events`) mientras
@@ -32,7 +26,8 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
   })
 
   useEffect(() => {
-    const token = currentToken()
+    // La capa de hooks no puede leer el almacén de sesión: el token lo da el cliente HTTP.
+    const token = currentAuthToken()
     if (!enabled || token === null) {
       return undefined
     }
