@@ -233,8 +233,10 @@ cargarse (`services/tabStorage.ts`):
   no muestra el área: dice «Estás en una vista previa» y ofrece «Salir de la
   vista previa» (`features/shell/PreviewPlatformGate.tsx`). Así un 401 o un
   «Salir» en esa pestaña no cierran la sesión real del administrador.
-- Cerrar la pestaña termina la vista previa y descarta su cola. Salir con
-  pedidos del local de muestra sin enviar se confirma antes de descartarlos.
+- Cerrar la pestaña termina la vista previa y descarta su cola. Salir o que
+  venza la sesión vacía la cola entera de la pestaña (`discardPreviewQueue`),
+  de cualquier cuenta del local de muestra: es solo de esa pestaña y ya no
+  tiene con qué enviarse. Salir con pedidos sin enviar se confirma antes.
 - Sin sesión, una pestaña de vista previa no ofrece el acceso normal: dice que
   la vista previa venció o terminó.
 

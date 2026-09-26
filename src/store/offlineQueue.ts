@@ -136,12 +136,20 @@ export function removeQueued(clientRequestId: string): void {
   write(fresh().filter((order) => order.request.client_request_id !== clientRequestId))
 }
 
-/** Descarta los pedidos en cola de esa cuenta: al salir de una vista previa, los del local de muestra. */
-export function discardQueued(owner: QueueOwner | null): void {
-  if (owner === null) {
+/**
+ * Vacía la cola entera de una pestaña de vista previa: al salir de ella o al
+ * vencer su sesión.
+ *
+ * Esa cola vive en el `sessionStorage` de la pestaña y es solo suya: cuanto
+ * tiene es del local de muestra, y sin sesión ya no hay con qué enviarlo.
+ * En una pestaña normal no hace nada: la cola del navegador guarda pedidos de
+ * verdad, de varias cuentas.
+ */
+export function discardPreviewQueue(): void {
+  if (tabStorage.kind !== 'preview') {
     return
   }
-  write(fresh().filter((order) => !belongsTo(order, owner)))
+  write(EMPTY)
 }
 
 export function subscribeQueue(listener: Listener): () => void {

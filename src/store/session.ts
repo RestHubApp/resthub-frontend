@@ -6,6 +6,7 @@ import { logger } from '../services/logger'
 import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
 import { clearQueriesExcept, PLATFORM_QUERY_ROOT } from '../services/queryClient'
 import { isPreviewTab, setPreviewTabMark, tabStorage } from '../services/tabStorage'
+import { discardPreviewQueue } from './offlineQueue'
 import type { CurrentUserResponse, PermissionCode } from '../api/types'
 
 // Donde se guarda la sesion lo decide la pestana al cargarse (`tabStorage`):
@@ -110,6 +111,9 @@ function limpiarSesion(): void {
   // Nada de la cuenta anterior queda en el cache para la siguiente. Lo del
   // administrador del sistema es de otra sesion y se queda.
   clearQueriesExcept(PLATFORM_QUERY_ROOT)
+  // En una vista previa, al salir o vencer, su cola (solo de esta pestana y
+  // del local de muestra) ya no tiene con que enviarse. En una normal no hace nada.
+  discardPreviewQueue()
 }
 
 /** Si lo guardado se puede seguir usando: vigente y, en una vista previa, marcado como tal. */
@@ -122,6 +126,10 @@ const guardada = readStoredSession()
 const restored = vigente(guardada) ? guardada : null
 if (guardada !== null && restored === null) {
   writeStoredSession(null)
+}
+// Una vista previa que se recarga ya vencida tampoco guarda su cola.
+if (restored === null) {
+  discardPreviewQueue()
 }
 setAuthToken(restored?.token ?? null)
 

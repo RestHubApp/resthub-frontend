@@ -96,6 +96,7 @@ describe('renovación de la sesión del restaurante', () => {
 
 const MARCA = 'resthub.vista-previa.pestana.v1'
 const PREVIA = 'resthub.vista-previa.sesion.v1'
+const COLA = 'resthub.pedidos-sin-enviar.v2'
 
 function cuentaDeMuestra(): CurrentUserResponse {
   return { ...cuenta(9), preview: true }
@@ -193,5 +194,43 @@ describe('sesión de vista previa', () => {
 
     expect(useSession.getState().token).toBe(token)
     expect(guardado(storage)).toEqual({ token, account: cuenta(1) })
+  })
+})
+
+describe('cola de la vista previa', () => {
+  it('al vencer o salir se descarta la cola entera de la pestaña', async () => {
+    for (const cerrar of ['expire', 'exitPreview'] as const) {
+      const { local, pestana, useSession } = await pestanaDeVistaPrevia()
+      local.datos.set(COLA, JSON.stringify([{ userId: 1, restaurantId: 1 }]))
+      const real = local.datos.get(COLA)
+      useSession.getState().startPreview(tokenQueVence(1800), cuentaDeMuestra())
+      // Pedidos de dos cuentas del local de muestra, como tras entrar como encargado y luego como mesero.
+      pestana.datos.set(COLA, JSON.stringify([{ userId: 9, restaurantId: 1 }, { userId: 10, restaurantId: 1 }]))
+
+      useSession.getState()[cerrar]()
+
+      expect(pestana.datos.has(COLA)).toBe(false)
+      expect(local.datos.get(COLA)).toBe(real)
+    }
+  })
+
+  it('al recargarse ya vencida tampoco guarda su cola', async () => {
+    const { pestana } = await pestanaDeVistaPrevia('/pedidos', {
+      [MARCA]: '1',
+      [PREVIA]: JSON.stringify({ token: tokenQueVence(-10), account: cuentaDeMuestra() }),
+      [COLA]: JSON.stringify([{ userId: 9, restaurantId: 1 }]),
+    })
+    expect(pestana.datos.has(COLA)).toBe(false)
+  })
+
+  it('en una pestaña normal cerrar o vencer la sesión no toca la cola', async () => {
+    const { storage, useSession } = await cargar()
+    const cola = JSON.stringify([{ userId: 1, restaurantId: 1 }])
+    storage.datos.set(COLA, cola)
+    useSession.getState().signIn(tokenQueVence(3600), cuenta(1))
+
+    useSession.getState().expire()
+
+    expect(storage.datos.get(COLA)).toBe(cola)
   })
 })

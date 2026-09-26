@@ -161,16 +161,28 @@ describe('en una vista previa', () => {
   })
 })
 
-describe('discardQueued', () => {
-  it('descarta solo los pedidos de esa cuenta', async () => {
-    const { enqueueOrder, discardQueued, queuedOrders } = await cola()
+describe('discardPreviewQueue', () => {
+  it('en una vista previa vacía la cola entera de la pestaña, de cualquier cuenta', async () => {
+    const { enqueueOrder, discardPreviewQueue, queuedOrders, local, pestana } = await colaDeVistaPrevia()
+    local.datos.set(V2, JSON.stringify([pedido('real', mesero)]))
     enqueueOrder(pedido('a', mesero))
     enqueueOrder(pedido('b', otroMesero))
 
-    discardQueued(mesero)
+    discardPreviewQueue()
 
     expect(queuedOrders(mesero)).toEqual([])
-    expect(queuedOrders(otroMesero).map((p) => p.label)).toEqual(['Mesa b'])
+    expect(queuedOrders(otroMesero)).toEqual([])
+    expect(pestana.datos.has(V2)).toBe(false)
+    expect(JSON.parse(local.datos.get(V2) ?? '[]')).toEqual([pedido('real', mesero)])
+  })
+
+  it('en una pestaña normal no toca la cola del navegador', async () => {
+    const { enqueueOrder, discardPreviewQueue, queuedOrders } = await cola()
+    enqueueOrder(pedido('a', mesero))
+
+    discardPreviewQueue()
+
+    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a'])
   })
 })
 
