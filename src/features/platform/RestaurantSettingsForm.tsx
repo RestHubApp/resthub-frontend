@@ -32,7 +32,7 @@ interface RestaurantSettingsFormProps {
 export default function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormProps) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState, reset } = useForm<RestaurantSettingsValues>({
-    resolver: zodResolver(restaurantSettingsSchema),
+    resolver: zodResolver(restaurantSettingsSchema(restaurant.timezone)),
     defaultValues: settingsOf(restaurant),
   })
   const guardar = useMutation({

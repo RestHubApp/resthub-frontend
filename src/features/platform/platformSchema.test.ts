@@ -82,9 +82,20 @@ describe('settingsPayload', () => {
     })
   })
 
-  it('valida el nombre y la zona como el alta', () => {
-    expect(mensajes(restaurantSettingsSchema.safeParse({ name: '  ', timezone: 'america/lima' }))).toEqual([
+  it('valida el nombre y la zona nueva como el alta', () => {
+    expect(mensajes(restaurantSettingsSchema(LIMA).safeParse({ name: '  ', timezone: 'america/lima' }))).toEqual([
       'name',
+      'timezone',
+    ])
+  })
+
+  it('no vuelve a validar la zona que el restaurante ya tiene', () => {
+    // Una zona que este navegador no conoce no impide cambiar el nombre.
+    const guardada = 'Mars/Olympus_Mons'
+    expect(restaurantSettingsSchema(guardada).safeParse({ name: 'Otro nombre', timezone: guardada }).success).toBe(
+      true,
+    )
+    expect(mensajes(restaurantSettingsSchema(guardada).safeParse({ name: ESQUINA, timezone: 'Mars/Otra' }))).toEqual([
       'timezone',
     ])
   })

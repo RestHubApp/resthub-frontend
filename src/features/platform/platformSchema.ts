@@ -40,10 +40,17 @@ export const slugRule = z
   .max(MAX_SLUG, `Usa como máximo ${String(MAX_SLUG)} caracteres`)
   .regex(SLUG_PATTERN, 'Usa solo minúsculas, números y guiones, sin guion al inicio ni al final')
 
-export const timeZoneRule = z
-  .string()
-  .min(1, 'Elige la zona horaria')
-  .refine(isValidTimeZone, 'Elige una zona horaria de la lista')
+/**
+ * La zona horaria elegida. `sinCambio` es la que ya tiene el restaurante: esa
+ * no se vuelve a validar, así una zona guardada que este navegador no conoce
+ * no impide cambiarle el nombre.
+ */
+export function timeZoneRule(sinCambio?: string) {
+  return z
+    .string()
+    .min(1, 'Elige la zona horaria')
+    .refine((zona) => zona === sinCambio || isValidTimeZone(zona), 'Elige una zona horaria de la lista')
+}
 
 /** Un encargado: la primera cuenta del restaurante o una más. */
 export const ownerSchema = z.object({
@@ -59,7 +66,7 @@ export const EMPTY_OWNER: OwnerValues = { full_name: '', email: '', password: ''
 export const createRestaurantSchema = z.object({
   name: restaurantNameRule,
   slug: slugRule,
-  timezone: timeZoneRule,
+  timezone: timeZoneRule(),
   owner: ownerSchema,
 })
 
@@ -77,12 +84,15 @@ export function createRestaurantPayload(values: CreateRestaurantValues): CreateP
   return { name: values.name, slug: values.slug, timezone: values.timezone, owner: { ...values.owner } }
 }
 
-export const restaurantSettingsSchema = z.object({
-  name: restaurantNameRule,
-  timezone: timeZoneRule,
-})
+/** El nombre y la zona de un restaurante que ya existe, con la zona que tiene guardada. */
+export function restaurantSettingsSchema(currentTimeZone: string) {
+  return z.object({
+    name: restaurantNameRule,
+    timezone: timeZoneRule(currentTimeZone),
+  })
+}
 
-export type RestaurantSettingsValues = z.infer<typeof restaurantSettingsSchema>
+export type RestaurantSettingsValues = z.infer<ReturnType<typeof restaurantSettingsSchema>>
 
 export function settingsOf(restaurant: PlatformRestaurantDetail): RestaurantSettingsValues {
   return { name: restaurant.name, timezone: restaurant.timezone }

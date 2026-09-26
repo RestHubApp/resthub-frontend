@@ -18,10 +18,17 @@ describe('isValidTimeZone', () => {
   it('acepta nombres de IANA escritos como los guarda el servidor', () => {
     expect(isValidTimeZone('America/Argentina/Buenos_Aires')).toBe(true)
     expect(isValidTimeZone('UTC')).toBe(true)
+    expect(isValidTimeZone('Etc/GMT+5')).toBe(true)
   })
 
-  it('rechaza zonas inventadas, mal escritas o demasiado largas', () => {
-    for (const mala of ['America/Atlantida', 'america/lima', 'Lima', '', `America/${'A'.repeat(64)}`]) {
+  it('acepta los alias de IANA que el navegador conoce', () => {
+    for (const alias of ['GMT', 'UCT', 'Zulu', 'EST5EDT', 'US/Pacific', 'Asia/Calcutta']) {
+      expect(isValidTimeZone(alias)).toBe(true)
+    }
+  })
+
+  it('rechaza zonas inventadas, mal escritas, desfases sueltos o demasiado largas', () => {
+    for (const mala of ['America/Atlantida', 'america/lima', 'utc', 'Lima', '+05:00', '', `America/${'A'.repeat(64)}`]) {
       expect(isValidTimeZone(mala)).toBe(false)
     }
   })

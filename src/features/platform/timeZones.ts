@@ -43,22 +43,29 @@ export const COMMON_TIME_ZONES: readonly TimeZoneOption[] = [
   { value: 'UTC', label: 'UTC' },
 ]
 
-// La forma de un nombre de IANA, con mayúsculas donde van: el servidor busca
-// la zona tal cual y en Linux `america/lima` no existe, aunque el navegador
-// la acepte.
-const NOMBRE_IANA = /^(?:UTC|[A-Z][A-Za-z_-]*(?:\/[A-Z][A-Za-z0-9_+-]*)+)$/u
-
-/** Si el nombre es una zona horaria que el servidor va a aceptar. */
+/**
+ * Si el nombre es una zona horaria que el servidor va a aceptar.
+ *
+ * La decide `Intl`, que conoce también los alias de IANA (`GMT`, `UCT`,
+ * `Zulu`, `EST5EDT`). Dos cosas que `Intl` acepta y el servidor no: la
+ * misma zona con otras mayúsculas (el servidor la busca tal cual y en Linux
+ * `america/lima` no existe) y un desfase suelto como `+05:00`, que no es una
+ * zona de IANA. `Intl` devuelve el nombre con sus mayúsculas canónicas, así
+ * que si solo cambian las mayúsculas, se escribió mal.
+ */
 export function isValidTimeZone(zone: string): boolean {
-  if (zone.length > MAX_TIME_ZONE || !NOMBRE_IANA.test(zone)) {
+  if (zone === '' || zone.length > MAX_TIME_ZONE) {
     return false
   }
+  let canonica: string
   try {
-    new Intl.DateTimeFormat('es-PE', { timeZone: zone }).format(0)
-    return true
+    canonica = new Intl.DateTimeFormat('es-PE', { timeZone: zone }).resolvedOptions().timeZone
   } catch {
     return false
   }
+  const soloMayusculas = canonica !== zone && canonica.toLowerCase() === zone.toLowerCase()
+  const desfase = /^[+-]/u.test(canonica)
+  return !soloMayusculas && !desfase
 }
 
 /**
