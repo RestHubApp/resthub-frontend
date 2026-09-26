@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { Link, useLocation, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 
 import { login, sessionOf } from '../../api/auth'
@@ -13,6 +13,7 @@ import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
 import { correoRule, MAX_PASSWORD } from '../../services/fieldRules'
+import { isPreviewTab } from '../../services/tabStorage'
 import { useSession } from '../../store/session'
 import AuthAside from './AuthAside'
 import AuthCard from './AuthCard'
@@ -85,6 +86,12 @@ export default function LoginView() {
       void navigate(destino, { replace: true })
     },
   })
+
+  // Una pestaña de vista previa no es para entrar con una cuenta real: su
+  // sesion se guardaria en la pestaña, no en el navegador.
+  if (isPreviewTab()) {
+    return <Navigate to="/" replace />
+  }
 
   return (
     <AuthCard title="Iniciar sesión" aside={PANEL} footer={PLATAFORMA}>
