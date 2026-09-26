@@ -94,8 +94,15 @@ export const NAV_ENTRIES: readonly NavEntry[] = [
     to: '/personal',
     label: 'Personal',
     icon: 'personal',
-    description: 'Las cuentas de meseros y encargados del restaurante.',
+    description: 'Las cuentas del restaurante y el rol de cada una.',
     permission: 'staff.manage',
+  },
+  {
+    to: '/roles',
+    label: 'Roles',
+    icon: 'roles',
+    description: 'Qué puede hacer cada rol del restaurante: encargado, mesero y los que armes.',
+    permission: 'roles.manage',
   },
   {
     to: '/panel',

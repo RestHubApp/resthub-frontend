@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 import { updateStaff } from '../../api/staff'
-import type { StaffResponse } from '../../api/types'
+import type { Role, StaffResponse } from '../../api/types'
 import DialogFormActions from '../../components/DialogFormActions'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -12,16 +12,23 @@ import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
 import StaffFields from './StaffFields'
 import { saveStaffMember } from './staffList'
-import { identityOf, type StaffIdentityValues, staffIdentitySchema } from './staffSchema'
+import {
+  identityOf,
+  identityPayload,
+  type StaffIdentityValues,
+  staffIdentitySchema,
+} from './staffSchema'
 
 interface StaffEditFormProps {
   readonly account: StaffResponse
-  /** La cuenta es la de quien esta mirando: no puede cambiarse el tipo. */
+  /** Los roles que quien mira puede dar, con el que la cuenta ya tiene. */
+  readonly roles: readonly Role[]
+  /** La cuenta es la de quien esta mirando: no puede cambiarse el rol. */
   readonly isSelf: boolean
   readonly onDone: () => void
 }
 
-export default function StaffEditForm({ account, isSelf, onDone }: StaffEditFormProps) {
+export default function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormProps) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState } = useForm<StaffIdentityValues>({
     resolver: zodResolver(staffIdentitySchema),
@@ -29,9 +36,9 @@ export default function StaffEditForm({ account, isSelf, onDone }: StaffEditForm
   })
 
   const guardar = useMutation({
-    // La cuenta propia no manda el tipo: el servidor responde 409 si lo intenta.
+    // La cuenta propia no manda el rol: el servidor responde 409 si lo intenta.
     mutationFn: (valores: StaffIdentityValues) =>
-      updateStaff(account.id, isSelf ? { full_name: valores.full_name } : valores),
+      updateStaff(account.id, isSelf ? { full_name: valores.full_name } : identityPayload(valores)),
     onSuccess: (cuenta) => {
       saveStaffMember(queryClient, cuenta)
       onDone()
@@ -53,12 +60,13 @@ export default function StaffEditForm({ account, isSelf, onDone }: StaffEditForm
       <StaffFields
         fields={{
           full_name: register('full_name'),
-          role: register('role'),
+          role_id: register('role_id'),
         }}
         errors={{
           full_name: errores.full_name?.message,
-          role: errores.role?.message,
+          role_id: errores.role_id?.message,
         }}
+        roles={roles}
         fixedEmail={account.email}
         lockedRoleLabel={isSelf ? account.role_label : undefined}
       />

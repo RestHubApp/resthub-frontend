@@ -23,7 +23,7 @@ export default function ProfileView() {
   const datos = [
     { termino: 'Nombre', dato: account.user.full_name },
     { termino: 'Correo', dato: account.user.email },
-    { termino: 'Tipo de cuenta', dato: account.user.role_label },
+    { termino: 'Rol', dato: account.user.role_label },
     { termino: 'Restaurante', dato: account.restaurant.name },
   ]
 

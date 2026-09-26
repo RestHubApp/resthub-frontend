@@ -8,7 +8,9 @@ import type { CurrentUserResponse, PermissionCode } from '../api/types'
 
 // La version va en la clave: si cambia la forma de lo guardado, una sesion
 // vieja se descarta en vez de leerse como si tuviera la forma nueva.
-const STORAGE_KEY = 'resthub.session.v1'
+const STORAGE_KEY = 'resthub.session.v2'
+// Las versiones anteriores ya no se leen; tampoco se dejan con un token adentro.
+const OLD_STORAGE_KEYS = ['resthub.session.v1'] as const
 const MS_POR_SEGUNDO = 1000
 
 interface StoredSession {
@@ -45,6 +47,16 @@ function readStoredSession(): StoredSession | null {
     return raw === null ? null : (JSON.parse(raw) as StoredSession)
   } catch {
     return null
+  }
+}
+
+function forgetOldSessions(): void {
+  try {
+    for (const key of OLD_STORAGE_KEYS) {
+      localStorage.removeItem(key)
+    }
+  } catch {
+    // Sin almacenamiento tampoco hay nada viejo que borrar.
   }
 }
 
@@ -110,6 +122,7 @@ function limpiarSesion(): void {
   queryClient.clear()
 }
 
+forgetOldSessions()
 const guardada = readStoredSession()
 const restored = guardada !== null && !estaVencido(guardada.token) ? guardada : null
 if (guardada !== null && restored === null) {
@@ -128,7 +141,7 @@ export const useSession = create<SessionState>((set, get) => ({
     set({ token, account, expired: false })
     programarVencimiento(token)
     logger.info(
-      { userId: account.user.id, role: account.user.role, restaurantId: account.restaurant.id },
+      { userId: account.user.id, roleId: account.user.role_id, restaurantId: account.restaurant.id },
       'auth.signed_in',
     )
   },
@@ -191,6 +204,17 @@ export function hasPermission(
  */
 export function useCan(permission: PermissionCode): boolean {
   return useSession((state) => hasPermission(state.account, permission))
+}
+
+const SIN_PERMISOS: readonly PermissionCode[] = []
+
+/**
+ * Todos los permisos de la cuenta.
+ *
+ * Para comparar con los de un rol: nadie da un permiso que no tiene.
+ */
+export function usePermissions(): readonly PermissionCode[] {
+  return useSession((state) => state.account?.permissions ?? SIN_PERMISOS)
 }
 
 /**
