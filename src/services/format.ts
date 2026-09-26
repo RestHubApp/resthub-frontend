@@ -20,6 +20,7 @@ const SOLES_COMPACT = new Intl.NumberFormat(LOCALE, {
 const INTEGER = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 })
 const ONE_DECIMAL = new Intl.NumberFormat(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const TWO_DECIMALS = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 })
+const UP_TO_ONE_DECIMAL = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 })
 // Un kilo o un litro se cuenta hasta el gramo: 1.125 kg no es 1.13 kg.
 const THREE_DECIMALS = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 3 })
 
@@ -102,7 +103,7 @@ export function formatDays(value: string | number): string {
 }
 
 /**
- * Una duración medida por el servidor: `0.8 ms`, `85 ms`, `1.25 s`.
+ * Una duración medida por el servidor: `0 ms`, `0.8 ms`, `85 ms`, `1.25 s`.
  *
  * Por debajo de 10 ms lleva un decimal: el tiempo de base de una petición
  * rápida vive ahí y redondeado a entero se leería como cero.
@@ -114,7 +115,7 @@ export function formatMilliseconds(value: number): string {
   if (Math.abs(value) >= THOUSAND) {
     return `${TWO_DECIMALS.format(value / THOUSAND)} s`
   }
-  return `${(Math.abs(value) < TEN_MS ? ONE_DECIMAL : INTEGER).format(value)} ms`
+  return `${(Math.abs(value) < TEN_MS ? UP_TO_ONE_DECIMAL : INTEGER).format(value)} ms`
 }
 
 // ---------------------------------------------------------------- Cantidades
@@ -247,6 +248,14 @@ export function formatClock(isoDateTime: string, timeZone: string): string {
 /** Día corto y hora de 24 h de un instante: `25 set., 14:05`. */
 export function formatShortDateTime(isoDateTime: string, timeZone: string): string {
   const { day, time } = wallClockIn(isoDateTime, timeZone)
+  return `${formatShortDate(day)}, ${time}`
+}
+
+/** Con segundos, para ordenar lo que pasó en el mismo minuto: `25 set., 14:05:09`. */
+export function formatTimestamp(isoDateTime: string, timeZone: string): string {
+  const instante = new Date(isoDateTime)
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone }).format(instante)
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone, timeStyle: 'medium', hourCycle: 'h23' }).format(instante)
   return `${formatShortDate(day)}, ${time}`
 }
 
