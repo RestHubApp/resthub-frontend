@@ -1,8 +1,8 @@
 # RestHub · frontend
 
 Interfaz web de RestHub: pedidos desde el celular del mesero, tablero de cocina
-y caja, menú, mesas, inventario, personal y panel BI desde la laptop del
-encargado. Consume el API de [resthub-backend](https://github.com/RestHubApp/resthub-backend)
+y caja, menú, mesas, inventario, personal, roles y panel BI desde la laptop
+del encargado. Consume el API de [resthub-backend](https://github.com/RestHubApp/resthub-backend)
 bajo `/api/v1`. La documentación del producto vive en Notion.
 
 ## Stack
@@ -96,7 +96,7 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
   `GET /auth/me`, con `useTimeZone()`), no las del navegador de quien mira.
 - El acceso y la toma de pedidos del mesero van en el archivo inicial; las
   pantallas del encargado (tablero, historial, menú, mesas, inventario,
-  personal, perfil y panel) se descargan al abrirlas (`lazy` en
+  personal, roles, perfil y panel) se descargan al abrirlas (`lazy` en
   `src/router/index.tsx`).
 - Con la sesión abierta, el armazón baja en ratos libres
   (`requestIdleCallback`) los archivos de las pantallas que la cuenta puede
@@ -107,6 +107,27 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
 - Después de guardar, las pantallas ponen en el caché lo que devolvió el
   servidor y releen de fondo, sin esperar ese segundo viaje para mostrar el
   cambio. Mientras carga una lista se ve su silueta, no un «Cargando…».
+
+## Personal, roles y permisos
+
+- Cada restaurante tiene sus roles: el encargado (fijo, con todos los
+  permisos), el mesero (rol base: sus permisos se cambian, su nombre no) y los
+  que arme el local, como cocina o caja. La interfaz nunca pregunta por el
+  rol: pregunta por permisos (`useCan`), así que cambiar los permisos de un
+  rol cambia el menú y las pantallas de quien lo tiene.
+- «Roles» (`/roles`, `roles.manage`, `features/roles`): la lista de roles con
+  cuántas personas tienen cada uno y un resumen de lo que pueden hacer. El
+  formulario muestra el catálogo de `GET /permissions` en casillas por grupo;
+  los permisos que la cuenta no tiene aparecen apagados, porque nadie da lo
+  que no tiene. Un rol personalizado sin personas se puede borrar.
+- «Personal» (`staff.manage`) elige el rol de cada cuenta entre los de
+  `GET /roles`, y solo ofrece los que la cuenta puede dar. Una cuenta cuyo rol
+  tiene permisos que faltan se ve, pero no se edita. Nadie cambia su propio
+  rol.
+- Al guardar el rol propio se relee `GET /auth/me` en el momento. A quien
+  tiene el rol le llega el aviso `permissions`, que relee su sesión mientras
+  mira una pantalla en vivo (pedidos, tablero, cocina); en las demás, la
+  sesión se relee cada cinco minutos.
 
 ## Comprobantes electrónicos
 
