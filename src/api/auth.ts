@@ -14,6 +14,12 @@ export async function login(payload: LoginRequest): Promise<AccessTokenResponse>
   return data
 }
 
+/** Un token nuevo para la sesion actual, pedido antes de que venza el que hay. */
+export async function renewSession(): Promise<AccessTokenResponse> {
+  const { data } = await api.post<AccessTokenResponse>('/auth/refresh')
+  return data
+}
+
 export async function fetchCurrentUser(): Promise<CurrentUserResponse> {
   const { data } = await api.get<CurrentUserResponse>('/auth/me')
   return data

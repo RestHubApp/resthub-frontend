@@ -12,8 +12,9 @@ bajo `/api/v1`. La documentación del producto vive en Notion.
 - React Router en modo librería, TanStack Query y TanStack Table.
 - React Hook Form + Zod para formularios, Zustand para el estado de cliente.
 - Axios como cliente HTTP, con tipos generados por openapi-typescript.
-- PWA instalable con vite-plugin-pwa (sin modo sin conexión).
+- PWA instalable con vite-plugin-pwa; sin señal, el mesero puede tomar pedidos nuevos (ver abajo).
 - ESLint estricto (typescript-eslint, sonarjs, límites de arquitectura), Husky y lint-staged.
+- Vitest para las reglas puras (cuentas del cobro, opciones, compras, horas).
 - pnpm 12 (fijado en `packageManager`).
 
 ## Cómo correrlo
@@ -36,6 +37,7 @@ contraseña `resthub123`.
 | `pnpm dev` | Servidor de desarrollo |
 | `pnpm lint` | ESLint sobre todo el proyecto |
 | `pnpm typecheck` | Verificación de tipos |
+| `pnpm test` | Pruebas unitarias con Vitest (`*.test.ts` junto al código) |
 | `pnpm build` | Tipos y compilación de producción en `dist/` |
 | `pnpm preview` | Sirve la compilación de producción |
 | `pnpm generate:api` | Regenera `src/api/schema.d.ts` desde el OpenAPI del backend |
@@ -105,6 +107,83 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
 - Después de guardar, las pantallas ponen en el caché lo que devolvió el
   servidor y releen de fondo, sin esperar ese segundo viaje para mostrar el
   cambio. Mientras carga una lista se ve su silueta, no un «Cargando…».
+
+## Comprobantes electrónicos
+
+- Con el pedido pagado, el recibo del cobro y el detalle del pedido ofrecen
+  «Emitir boleta o factura» (`features/orders/invoice`). Ya emitido, muestran
+  el número, el estado ante SUNAT, el PDF del proveedor e «Imprimir».
+- «Comprobantes» (`features/billing`, `billing.manage`): datos fiscales del
+  local (el token del proveedor nunca se muestra), lo emitido y el reenvío de
+  lo pendiente o rechazado. `/comprobantes/:id/imprimir` es la representación
+  impresa en 80 mm con base imponible, IGV y total.
+
+## Opciones de platos y compras
+
+- En «Menú», cada plato puede tener grupos de opciones (tamaño, extras): se
+  escriben una por línea con su precio adicional después de «=». Al tomar el
+  pedido, un plato con opciones abre una ventana para elegirlas; cada
+  combinación es una línea del borrador (`lineKeyFor`).
+- Un plato «Agotado» o «Sin insumos» (su receta no alcanza con el stock) se
+  ve pero no se puede pedir. La regla se apaga desde «Inventario».
+- «Inventario» suma las pestañas «Compras» (órdenes de compra: crear desde
+  las sugerencias, marcar enviada, recibir con el costo real) y «Proveedores».
+
+## Cocina, mesas e impresión
+
+- «Cocina» (`/cocina`, `orders.take`) muestra solo lo que falta preparar y lo
+  que espera a salir, en tarjetas grandes para una pantalla en la cocina; quien
+  tiene `orders.manage` marca «Listo».
+- En el detalle de un pedido en mesa: «Cambiar de mesa» y «Unir otra mesa».
+- `/imprimir/:orderId/comanda|cuenta` arma una hoja de 80 mm para impresora
+  térmica (comanda sin precios; precuenta o ticket) y lanza el diálogo de
+  impresión del navegador.
+
+## Cobro y caja
+
+- Los meseros cobran los pedidos que tomaron (`orders.charge`); el encargado,
+  cualquiera. La ventana de cobro (`features/orders/charge`) muestra la cuenta
+  (platos, cortesías, descuento, ya pagado y lo que falta) y cobra de a un
+  pago: todo junto, en partes iguales o por platos, con propina aparte. Cada
+  pago manda `expected_balance`, así un doble toque no cobra dos veces.
+- Los montos de cada parte se calculan en céntimos con las mismas reglas que
+  el servidor (`chargeMath.ts`); el que vale es el que responde el servidor.
+- Descuento y cortesías van antes del primer pago. El mesero ve su tope
+  (`GET /restaurant`); las cortesías solo le aparecen al encargado.
+- «Caja» (`features/cash`, `cash.manage`) abre y cierra el turno, muestra el
+  arqueo en vivo (escucha los avisos `orders` y `cash`), el historial de
+  turnos y el tope de descuento del mesero. Sin caja abierta, el cobro lo
+  avisa y no deja confirmar.
+
+## Delivery, clientes y reservas
+
+- «Para llevar / Delivery» pregunta si el cliente recoge o se le lleva. En
+  delivery pide nombre, teléfono y dirección (y una referencia). Se puede
+  buscar al cliente en la libreta para no dictar sus datos; si es nuevo, se
+  agrega solo. El pedido muestra la dirección y el teléfono (con enlace para
+  llamar), y la comanda y la precuenta los imprimen.
+- «Clientes» (`/clientes`, `customers.read`): búsqueda por nombre o teléfono,
+  visitas, gasto, ticket promedio, últimos pedidos y notas. Frecuente es quien
+  vino tres veces o más.
+- «Reservas» (`/reservas`, `reservations.read`): las del día elegido, por hora.
+  La hora se escribe en el reloj del local (`zonedInstant` en `format.ts`); si
+  se asigna mesa, el servidor rechaza otra reserva que se cruce.
+
+## Sin conexión y sesión
+
+- Si al enviar un pedido nuevo no hay señal (o el servidor no responde), el
+  pedido queda en una cola del celular (`store/offlineQueue.ts`,
+  `localStorage`) y un aviso en «Pedidos» dice cuántos esperan. Se envían
+  solos al volver la conexión, o con «Reintentar». Cada pedido lleva un
+  `client_request_id`: un reintento de algo que sí llegó no lo duplica. Solo
+  se encolan pedidos nuevos; cobrar, cambiar estados o editar necesitan señal.
+- Cada pedido en cola es de la cuenta y el local que lo tomaron: en un celular
+  compartido, otra cuenta no los ve ni los envía con su token. Cerrar o vencer
+  la sesión no los borra; salen cuando esa cuenta vuelve a entrar, y «Cerrar
+  sesión» avisa antes si quedan pedidos sin enviar.
+- El token dura una hora. Mientras la aplicación se usa, `useSessionRenewal`
+  pide uno nuevo (`POST /auth/refresh`) cinco minutos antes de que venza; una
+  pantalla sin tocar por media hora deja que la sesión se cierre sola.
 
 ## Tema oscuro (preparado, no activo)
 

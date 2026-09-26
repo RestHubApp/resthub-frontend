@@ -10,10 +10,14 @@ import BackLink from './BackLink'
 import CancelOrderDialog from './CancelOrderDialog'
 import ChargeDialog from './charge/ChargeDialog'
 import OrderActions from './detail/OrderActions'
+import DeliveryCard from './detail/DeliveryCard'
 import OrderClosedInfo from './detail/OrderClosedInfo'
 import OrderHeader from './detail/OrderHeader'
 import OrderItems from './detail/OrderItems'
+import PrintLinks from './detail/PrintLinks'
+import TableMoves from './detail/TableMoves'
 import LiveIndicator from './LiveIndicator'
+import { isActive } from './orderLabels'
 import QueryError from './QueryError'
 import { useLiveUpdates } from './useLiveUpdates'
 
@@ -60,6 +64,7 @@ export default function OrderDetailView() {
         <LiveIndicator status={live} />
       </div>
       <OrderHeader order={order} flagFor={notas.flagFor} />
+      <DeliveryCard order={order} />
       <OrderActions
         order={order}
         onCharge={() => {
@@ -69,6 +74,8 @@ export default function OrderDetailView() {
           setDialogo('cancel')
         }}
       />
+      {order.type === 'dine_in' && isActive(order.status) ? <TableMoves order={order} /> : null}
+      <PrintLinks order={order} />
       <OrderClosedInfo order={order} />
       <OrderItems order={order} flagFor={notas.flagFor} />
       <ChargeDialog order={dialogo === 'charge' ? order : null} onClose={cerrar} />

@@ -11,6 +11,7 @@ import SideNav from './SideNav'
 import ToastStack from './ToastStack'
 import { useAccountRefresh } from './useAccountRefresh'
 import { useIdlePreload } from './useIdlePreload'
+import { useSessionRenewal } from './useSessionRenewal'
 
 // Es estatico: se crea una vez y no depende de props ni del estado.
 const SKIP_LINK = (
@@ -41,6 +42,7 @@ interface AppShellProps {
 export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
   const account = useSession((state) => state.account)
   useAccountRefresh()
+  useSessionRenewal()
   useIdlePreload(screens)
 
   if (account === null) {

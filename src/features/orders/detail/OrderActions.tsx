@@ -7,6 +7,7 @@ import { Button } from '../../../components/ui/button'
 import { useCan } from '../../../store/session'
 import { nextStepFor, stepDoneMessage } from '../nextStep'
 import { isActive } from '../orderLabels'
+import { useCanTakeStep } from '../useCanTakeStep'
 import { useOrderAction } from '../useOrderAction'
 
 interface OrderActionsProps {
@@ -25,7 +26,7 @@ const WIDE = 'h-12 w-full px-5 text-base sm:w-auto'
  */
 export default function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
   const paso = nextStepFor(order.status)
-  const puede = useCan(paso?.permission ?? 'orders.take')
+  const puede = useCanTakeStep(order, paso)
   const puedeCancelar = useCan('orders.manage')
   const avanzar = useOrderAction({
     mutationFn: (step: OrderStep) => advanceOrder(order.id, step),

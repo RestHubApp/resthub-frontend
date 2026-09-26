@@ -41,7 +41,7 @@ const STEPS: Partial<Record<OrderStatus, NextStep>> = {
     icon: 'pago',
     action: 'charge',
     permission: 'orders.charge',
-    waiting: 'Servido, por cobrar: lo cobra el encargado en caja.',
+    waiting: 'Servido, por cobrar: lo cobra quien lo atendió o el encargado.',
   },
 }
 

@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
+import { api, SLOW_TIMEOUT_MS } from '../services/api'
 import type {
   AiDecisionPage,
   AiDecisionParams,
@@ -92,7 +92,7 @@ export async function fetchLowStock(): Promise<LowStockItem[]> {
 
 /** Clasifica con la IA el motivo de las mermas que aún no lo tienen. */
 export async function classifyWaste(): Promise<ClassifyWasteResult> {
-  const { data } = await api.post<ClassifyWasteResult>('/insights/waste/classify')
+  const { data } = await api.post<ClassifyWasteResult>('/insights/waste/classify', undefined, { timeout: SLOW_TIMEOUT_MS })
   return data
 }
 
@@ -104,7 +104,7 @@ export async function fetchRestock(): Promise<RestockReport> {
 
 /** Decide de nuevo cada insumo y lo guarda. Con Jev puede tardar varios segundos. */
 export async function refreshRestock(): Promise<RestockReport> {
-  const { data } = await api.post<RestockReport>('/insights/restock/refresh')
+  const { data } = await api.post<RestockReport>('/insights/restock/refresh', undefined, { timeout: SLOW_TIMEOUT_MS })
   return data
 }
 
@@ -128,5 +128,5 @@ export async function fetchOrderNotes(orderIds: readonly number[]): Promise<Orde
 
 /** Clasifica las notas pendientes del restaurante (lo normal es que ocurra al enviar a cocina). */
 export async function classifyOrderNotes(): Promise<void> {
-  await api.post('/insights/order-notes/classify')
+  await api.post('/insights/order-notes/classify', undefined, { timeout: SLOW_TIMEOUT_MS })
 }

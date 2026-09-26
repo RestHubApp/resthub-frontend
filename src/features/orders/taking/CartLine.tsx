@@ -15,13 +15,18 @@ const MAX_NOTA = 200
 
 /** Un plato del borrador: cantidad, subtotal y la nota para la cocina. */
 export default function CartLine({ line, onQuantity, onNotes }: CartLineProps) {
-  const notaId = `nota-${String(line.menuItemId)}`
+  const notaId = `nota-${line.lineKey.replaceAll(/[^\w-]/gu, '-')}`
 
   return (
     <li className="flex flex-col gap-2 border-b pb-4 last:border-b-0">
       <div className="flex items-center gap-3">
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="font-medium">{line.name}</span>
+          {line.modifiers.length > 0 ? (
+            <span className="text-sm text-muted-foreground">
+              {line.modifiers.map((modifier) => modifier.option).join(' · ')}
+            </span>
+          ) : null}
           <span className="text-sm text-muted-foreground tabular-nums">
             {formatCents(toCents(line.unitPrice) * line.quantity)}
           </span>

@@ -1,90 +1,100 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
+import { useQuery } from '@tanstack/react-query'
+import { useWatch } from 'react-hook-form'
 
-import { chargeOrder } from '../../../api/orders'
-import type { ChargeOrderRequest, OrderResponse } from '../../../api/types'
+import { currentCashQuery } from '../../../api/cash'
+import type { OrderResponse } from '../../../api/types'
 import DialogFormActions from '../../../components/DialogFormActions'
-import { decimalParaApi } from '../../../components/formRules'
 import Icon from '../../../components/Icon'
 import { Button } from '../../../components/ui/button'
 import { onSubmit } from '../../../hooks/formSubmit'
-import { useOrderAction } from '../useOrderAction'
+import AdjustmentsPanel from './AdjustmentsPanel'
+import BillSummary from './BillSummary'
 import CashAmountField from './CashAmountField'
-import { amountCents, chargeSchema, type ChargeValues } from './chargeSchema'
+import CashClosedNotice from './CashClosedNotice'
+import { amountCents, tipCents } from './chargeSchema'
 import PaymentMethodPicker from './PaymentMethodPicker'
-import { formatMoney, toCents } from '../../../services/format'
+import PaymentsDone from './PaymentsDone'
+import SplitDetails from './SplitDetails'
+import SplitModePicker from './SplitModePicker'
+import TipField from './TipField'
+import { usePaymentForm } from './usePaymentForm'
 
 interface ChargeFormProps {
   readonly order: OrderResponse
-  readonly onCharged: (order: OrderResponse) => void
+  readonly onPaid: (order: OrderResponse) => void
   readonly onCancel: () => void
 }
 
-function toPayload(valores: ChargeValues): ChargeOrderRequest {
-  const efectivo = valores.payment_method === 'cash'
-  return {
-    payment_method: valores.payment_method,
-    amount_received: efectivo ? decimalParaApi(valores.amount_received) : null,
-  }
-}
-
-function changeFor(totalCents: number, amount: string): number | null {
+function changeFor(dueCents: number, amount: string): number | null {
   if (amount.trim() === '') {
     return 0
   }
   const cents = amountCents(amount)
-  return cents === null || cents < totalCents ? null : cents - totalCents
+  return cents === null || cents < dueCents ? null : cents - dueCents
 }
 
-export default function ChargeForm({ order, onCharged, onCancel }: ChargeFormProps) {
-  const totalCents = toCents(order.total)
-  const { register, handleSubmit, formState, setValue, control } = useForm<ChargeValues>({
-    resolver: zodResolver(chargeSchema(totalCents)),
-    defaultValues: { payment_method: 'cash', amount_received: '' },
-  })
+/**
+ * El cobro de un pedido servido: la cuenta, cómo se divide y cada pago.
+ *
+ * Una cuenta dividida se cobra de a una persona: después de cada pago el
+ * formulario queda listo para la siguiente, con el saldo actualizado.
+ */
+export default function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
+  const caja = useQuery(currentCashQuery)
+  const pago = usePaymentForm(order, onPaid)
+  const { register, formState, setValue, control } = pago.form
   const metodo = useWatch({ control, name: 'payment_method' })
   const monto = useWatch({ control, name: 'amount_received' })
-  const cobro = useOrderAction({
-    mutationFn: (payload: ChargeOrderRequest) => chargeOrder(order.id, payload),
-    failure: 'No se pudo registrar el cobro.',
-    onSuccess: onCharged,
-  })
+  const propina = tipCents(useWatch({ control, name: 'tip' })) ?? 0
+  const cerrada = caja.data?.is_open === false
+  const aCobrar = pago.parte + propina
 
   return (
-    <form
-      noValidate
-      className="flex flex-col gap-5"
-      onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          cobro.mutate(toPayload(valores))
-        }),
-      )}
-    >
-      <p className="m-0 flex items-baseline justify-between rounded-lg bg-secondary px-4 py-3 text-secondary-foreground">
-        <span className="font-medium">Total a cobrar</span>
-        <span className="text-2xl font-bold tabular-nums">{formatMoney(order.total)}</span>
-      </p>
-      <PaymentMethodPicker field={register('payment_method')} />
-      {metodo === 'cash' ? (
-        <CashAmountField
-          field={register('amount_received')}
-          error={formState.errors.amount_received?.message}
-          totalCents={totalCents}
-          changeCents={changeFor(totalCents, monto)}
+    <div className="flex flex-col gap-5">
+      {cerrada ? <CashClosedNotice /> : null}
+      <BillSummary order={order} />
+      <PaymentsDone order={order} />
+      {/* Fuera del formulario del pago: el descuento tiene el suyo, y un
+          formulario dentro de otro no es válido. */}
+      <AdjustmentsPanel order={order} />
+      <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(pago.enviar)}>
+        <SplitModePicker value={pago.modo} onChange={pago.setModo} />
+        <SplitDetails order={order} draft={pago} />
+        <PaymentMethodPicker field={register('payment_method')} />
+        <TipField
+          field={register('tip')}
+          error={formState.errors.tip?.message}
           onQuick={(amount) => {
-            setValue('amount_received', amount, { shouldValidate: true })
+            setValue('tip', amount, { shouldValidate: true })
           }}
         />
-      ) : null}
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onCancel}>
-          Volver
-        </Button>
-        <Button type="submit" size="lg" variant="success" className="h-11 px-5 text-base" disabled={cobro.isPending}>
-          <Icon name="pago" size={18} />
-          <span>{cobro.isPending ? 'Cobrando…' : 'Confirmar cobro'}</span>
-        </Button>
-      </DialogFormActions>
-    </form>
+        {metodo === 'cash' ? (
+          <CashAmountField
+            field={register('amount_received')}
+            error={formState.errors.amount_received?.message}
+            totalCents={aCobrar}
+            changeCents={changeFor(aCobrar, monto)}
+            onQuick={(amount) => {
+              setValue('amount_received', amount, { shouldValidate: true })
+            }}
+          />
+        ) : null}
+        <DialogFormActions>
+          <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onCancel}>
+            Volver
+          </Button>
+          <Button
+            type="submit"
+            size="lg"
+            variant="success"
+            className="h-11 px-5 text-base"
+            disabled={cerrada || !pago.puedeCobrar}
+          >
+            <Icon name="pago" size={18} />
+            <span>{pago.pago.isPending ? 'Cobrando…' : 'Confirmar pago'}</span>
+          </Button>
+        </DialogFormActions>
+      </form>
+    </div>
   )
 }

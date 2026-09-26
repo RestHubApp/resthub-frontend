@@ -29,7 +29,7 @@ export default function TakeOrder({ target, title, description, notice }: TakeOr
   const key = draftKey(target)
   const lines = useDraftLines(key)
   const { add, setQuantity, setNotes } = useDraftActions()
-  const enviar = useSubmitDraft(target)
+  const enviar = useSubmitDraft(target, title)
   const [resumen, setResumen] = useState(false)
   const submitLabel = target.kind === 'add' ? 'Agregar al pedido' : 'Enviar a cocina'
   const submit = () => {
@@ -49,11 +49,11 @@ export default function TakeOrder({ target, title, description, notice }: TakeOr
       {notice}
       <MenuPicker
         lines={lines}
-        onAdd={(item) => {
-          add(key, item)
+        onAdd={(item, modifiers) => {
+          add(key, item, modifiers)
         }}
-        onChange={(menuItemId, quantity) => {
-          setQuantity(key, menuItemId, quantity)
+        onChange={(lineKey, quantity) => {
+          setQuantity(key, lineKey, quantity)
         }}
       />
       <CartBar
@@ -70,11 +70,11 @@ export default function TakeOrder({ target, title, description, notice }: TakeOr
         onOpenChange={setResumen}
         title={`Resumen · ${title}`}
         lines={lines}
-        onQuantity={(menuItemId, quantity) => {
-          setQuantity(key, menuItemId, quantity)
+        onQuantity={(lineKey, quantity) => {
+          setQuantity(key, lineKey, quantity)
         }}
-        onNotes={(menuItemId, notes) => {
-          setNotes(key, menuItemId, notes)
+        onNotes={(lineKey, notes) => {
+          setNotes(key, lineKey, notes)
         }}
         submitLabel={submitLabel}
         pending={enviar.isPending}

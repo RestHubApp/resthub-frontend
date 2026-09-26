@@ -46,6 +46,24 @@ export type NewItemRequest = components['schemas']['NewItemRequest']
 export type ChangeItemRequest = components['schemas']['ChangeItemRequest']
 export type UpdateOrderRequest = components['schemas']['UpdateOrderRequest']
 export type ChargeOrderRequest = components['schemas']['ChargeOrderRequest']
+export type PaymentRequest = components['schemas']['PaymentRequest']
+export type PaymentResponse = components['schemas']['PaymentResponse']
+export type DiscountRequest = components['schemas']['DiscountRequest']
+export type CourtesyRequest = components['schemas']['CourtesyRequest']
+
+// Caja: el turno abierto, su arqueo y los turnos anteriores.
+export type CurrentCash = components['schemas']['CurrentCashResponse']
+export type CashSession = components['schemas']['CashSessionResponse']
+export type CashSummary = components['schemas']['CashSummaryResponse']
+export type CashMethodTotal = components['schemas']['MethodTotalResponse']
+export type CashWaiterTips = components['schemas']['WaiterTipsResponse']
+export type CashSessionPage = components['schemas']['CashSessionPageResponse']
+export type OpenCashRequest = components['schemas']['OpenCashRequest']
+export type CloseCashRequest = components['schemas']['CloseCashRequest']
+
+// El restaurante propio, con el tope de descuento del mesero.
+export type OwnRestaurant = components['schemas']['RestaurantResponse']
+export type UpdateRestaurantRequest = components['schemas']['UpdateRestaurantRequest']
 export type OrderListParams = NonNullable<
   operations['list_orders_api_v1_orders_get']['parameters']['query']
 >
@@ -115,3 +133,32 @@ export type AiDecisionParams = NonNullable<
 >
 export type OrderNoteClassification = components['schemas']['NoteClassificationResponse']
 export type OrderNotesReport = components['schemas']['OrderNotesResponse']
+
+// Compras: proveedores, órdenes de compra y lo que conviene pedir.
+export type Supplier = components['schemas']['SupplierResponse']
+export type SupplierRequest = components['schemas']['SupplierRequest']
+export type PurchaseOrder = components['schemas']['PurchaseOrderResponse']
+export type PurchaseOrderLine = components['schemas']['PurchaseLineResponse']
+export type PurchaseOrderPage = components['schemas']['PurchaseOrderPageResponse']
+export type PurchaseOrderStatus = components['schemas']['PurchaseOrderStatus']
+export type CreatePurchaseOrderRequest = components['schemas']['CreatePurchaseOrderRequest']
+export type ReceivePurchaseOrderRequest = components['schemas']['ReceivePurchaseOrderRequest']
+export type PurchaseSuggestion = components['schemas']['PurchaseSuggestionResponse']
+
+// Comprobantes electrónicos: datos fiscales, boletas y facturas.
+export type BillingSettings = components['schemas']['BillingSettingsResponse']
+export type BillingSettingsRequest = components['schemas']['BillingSettingsRequest']
+export type Invoice = components['schemas']['InvoiceResponse']
+export type InvoicePage = components['schemas']['InvoicePageResponse']
+export type IssueInvoiceRequest = components['schemas']['IssueInvoiceRequest']
+export type InvoiceKind = components['schemas']['InvoiceKind']
+export type InvoiceStatus = components['schemas']['InvoiceStatus']
+export type DocumentType = components['schemas']['DocumentType']
+
+// Clientes frecuentes y reservas de mesa.
+export type Customer = components['schemas']['CustomerResponse']
+export type CustomerPage = components['schemas']['CustomerPageResponse']
+export type CustomerRequest = components['schemas']['CustomerRequest']
+export type Reservation = components['schemas']['ReservationResponse']
+export type ReservationRequest = components['schemas']['ReservationRequest']
+export type ReservationStatus = components['schemas']['ReservationStatus']

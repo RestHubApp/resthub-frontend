@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import EmptyState from '../components/EmptyState'
 import LoginView from '../features/auth/LoginView'
+import { prefetchCash } from '../features/cash/prefetchCash'
 import { prefetchInsights } from '../features/insights/prefetchInsights'
 import { prefetchInventory } from '../features/inventory/prefetchInventory'
 import { prefetchMenu } from '../features/menu/prefetchMenu'
@@ -10,7 +11,7 @@ import AddItemsView from '../features/orders/AddItemsView'
 import NewOrderView from '../features/orders/NewOrderView'
 import OrderDetailView from '../features/orders/OrderDetailView'
 import OrdersView from '../features/orders/OrdersView'
-import { prefetchBoard, prefetchFloor } from '../features/orders/prefetchOrders'
+import { prefetchBoard, prefetchFloor, prefetchKitchen } from '../features/orders/prefetchOrders'
 import AppShell from '../features/shell/AppShell'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import RequireSession from '../features/shell/RequireSession'
@@ -19,6 +20,8 @@ import { prefetchStaff } from '../features/staff/prefetchStaff'
 import { prefetchTables } from '../features/tables/prefetchTables'
 
 const PANEL = 'insights.read'
+// Lo que hace el mesero: tomar pedidos, ver la cocina, imprimir.
+const MESERO = 'orders.take'
 
 // Al abrir la aplicacion directo en una pantalla perezosa (recargar el
 // tablero), esto se ve dentro del armazon mientras llega su archivo.
@@ -42,6 +45,13 @@ const PANTALLAS: readonly LazyScreen[] = [
   { path: 'perfil', load: () => import('../features/auth/ProfileView') },
   { path: 'tablero', permission: 'orders.read_all', load: () => import('../features/orders/BoardView'), prefetch: prefetchBoard },
   { path: 'tablero/historial', permission: 'orders.read_all', load: () => import('../features/orders/HistoryView') },
+  { path: 'cocina', permission: MESERO, load: () => import('../features/orders/KitchenView'), prefetch: prefetchKitchen },
+  { path: 'imprimir/:orderId/:kind', permission: MESERO, load: () => import('../features/orders/PrintView') },
+  { path: 'comprobantes', permission: 'billing.manage', load: () => import('../features/billing/BillingView') },
+  { path: 'comprobantes/:invoiceId/imprimir', permission: 'billing.issue', load: () => import('../features/billing/InvoicePrintView') },
+  { path: 'reservas', permission: 'reservations.read', load: () => import('../features/reservations/ReservationsView') },
+  { path: 'clientes', permission: 'customers.read', load: () => import('../features/customers/CustomersView') },
+  { path: 'caja', permission: 'cash.manage', load: () => import('../features/cash/CashView'), prefetch: prefetchCash },
   { path: 'menu', permission: 'menu.manage', load: () => import('../features/menu/MenuView'), prefetch: prefetchMenu },
   { path: 'mesas', permission: 'tables.manage', load: () => import('../features/tables/TablesView'), prefetch: prefetchTables },
   { path: 'inventario', permission: 'inventory.read', load: () => import('../features/inventory/InventoryView'), prefetch: prefetchInventory },
@@ -54,7 +64,7 @@ const PANTALLAS: readonly LazyScreen[] = [
 
 /** Pedidos va en el archivo inicial: de esa pantalla solo se adelantan los datos. */
 const PRECARGAS: readonly ScreenPreload[] = [
-  { path: 'pedidos', permission: 'orders.take', prefetch: prefetchFloor },
+  { path: 'pedidos', permission: MESERO, prefetch: prefetchFloor },
   ...PANTALLAS,
 ]
 

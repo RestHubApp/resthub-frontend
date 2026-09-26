@@ -13,6 +13,13 @@ export function prefetchFloor(): void {
   }
 }
 
+/** Cocina: los pedidos en curso, que también ve el mesero. */
+export function prefetchKitchen(): void {
+  if (can('orders.take')) {
+    prefetch(activeOrdersQuery)
+  }
+}
+
 /** Tablero: los pedidos en curso. */
 export function prefetchBoard(): void {
   if (can('orders.read_all')) {

@@ -10,12 +10,22 @@ import CategoryChips from './CategoryChips'
 import DishRow from './DishRow'
 import { visibleSections } from './menuFilter'
 import SearchBox from './SearchBox'
-import type { DraftLine } from './useOrderDraft'
+import ModifierDialog from './ModifierDialog'
+import { type DraftLine, type DraftModifier, lineKeyFor } from './useOrderDraft'
 
 interface MenuPickerProps {
   readonly lines: readonly DraftLine[]
-  readonly onAdd: (item: OrderMenuItem) => void
-  readonly onChange: (menuItemId: number, quantity: number) => void
+  readonly onAdd: (item: OrderMenuItem, modifiers?: readonly DraftModifier[]) => void
+  readonly onChange: (lineKey: string, quantity: number) => void
+}
+
+/** Cuántas porciones de cada plato hay en el borrador, sumando sus combinaciones. */
+function countByDish(lines: readonly DraftLine[]): Map<number, number> {
+  const cuenta = new Map<number, number>()
+  for (const line of lines) {
+    cuenta.set(line.menuItemId, (cuenta.get(line.menuItemId) ?? 0) + line.quantity)
+  }
+  return cuenta
 }
 
 /** La carta para elegir platos: busqueda, categorias y la lista. */
@@ -24,10 +34,8 @@ export default function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) 
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState<number | null>(null)
   const termino = useDeferredValue(busqueda)
-  const cantidades = useMemo(
-    () => new Map(lines.map((line) => [line.menuItemId, line.quantity])),
-    [lines],
-  )
+  const cantidades = useMemo(() => countByDish(lines), [lines])
+  const [configurando, setConfigurando] = useState<OrderMenuItem | null>(null)
   const secciones = useMemo(
     () => visibleSections(carta.data?.categories ?? [], termino, categoria),
     [carta.data, termino, categoria],
@@ -71,16 +79,30 @@ export default function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) 
                 item={item}
                 quantity={cantidades.get(item.id) ?? 0}
                 onAdd={() => {
+                  if (item.modifier_groups.length > 0) {
+                    setConfigurando(item)
+                    return
+                  }
                   onAdd(item)
                 }}
                 onChange={(cantidad) => {
-                  onChange(item.id, cantidad)
+                  onChange(lineKeyFor(item.id), cantidad)
                 }}
               />
             ))}
           </ul>
         </section>
       ))}
+      <ModifierDialog
+        item={configurando}
+        onConfirm={(item, modifiers) => {
+          onAdd(item, modifiers)
+          setConfigurando(null)
+        }}
+        onClose={() => {
+          setConfigurando(null)
+        }}
+      />
     </div>
   )
 }

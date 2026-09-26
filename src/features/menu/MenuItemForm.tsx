@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { dishCostsQueryKey } from '../../api/inventory'
@@ -13,6 +14,8 @@ import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
 import { withItem } from './menuCache'
 import MenuItemFields from './MenuItemFields'
+import ModifierGroupsEditor from './ModifierGroupsEditor'
+import { draftsOf, type GroupDraft, type ParsedGroup, parseGroups } from './modifierDrafts'
 import {
   emptyMenuItem,
   menuItemPayload,
@@ -43,9 +46,12 @@ export default function MenuItemForm({
     defaultValues: item === undefined ? emptyMenuItem(defaultCategoryId) : menuItemValuesOf(item),
   })
 
+  const [grupos, setGrupos] = useState<GroupDraft[]>(() => draftsOf(item))
+  const [errorGrupos, setErrorGrupos] = useState<string | null>(null)
+
   const guardar = useMutation({
-    mutationFn: (valores: MenuItemValues) => {
-      const cuerpo = menuItemPayload(valores)
+    mutationFn: (valores: MenuItemValues & { modifier_groups: ParsedGroup[] }) => {
+      const cuerpo = { ...menuItemPayload(valores), modifier_groups: valores.modifier_groups }
       // Un plato nuevo entra disponible: se crea para venderlo.
       return item === undefined
         ? createMenuItem({ ...cuerpo, is_available: true })
@@ -69,11 +75,18 @@ export default function MenuItemForm({
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
         handleSubmit((valores) => {
-          guardar.mutate(valores)
+          const opciones = parseGroups(grupos)
+          if (!opciones.ok) {
+            setErrorGrupos(opciones.error)
+            return
+          }
+          setErrorGrupos(null)
+          guardar.mutate({ ...valores, modifier_groups: opciones.value })
         }),
       )}
     >
       <MenuItemFields register={register} errors={formState.errors} categories={categories} />
+      <ModifierGroupsEditor groups={grupos} error={errorGrupos} onChange={setGrupos} />
 
       {guardar.isError ? (
         <FormMessage tone="error">

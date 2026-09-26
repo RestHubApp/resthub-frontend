@@ -11,7 +11,10 @@ import { type InventorySection, SECTIONS } from './inventorySections'
 import InventoryTabs from './InventoryTabs'
 import LowStockSummary from './LowStockSummary'
 import MovementsPanel from './MovementsPanel'
+import PurchaseOrdersPanel from './PurchaseOrdersPanel'
 import RecipesPanel from './RecipesPanel'
+import StockRulesCard from './StockRulesCard'
+import SuppliersPanel from './SuppliersPanel'
 import StockActionDialog, { type StockAction } from './StockActionDialog'
 import { useLowStock } from './useLowStock'
 
@@ -60,6 +63,7 @@ export default function InventoryView() {
           ) : undefined
         }
       />
+      {canManage ? <StockRulesCard /> : null}
       <LowStockSummary
         onShowAlerts={() => {
           irA('alertas')
@@ -74,6 +78,8 @@ export default function InventoryView() {
           movimientos: <MovementsPanel />,
           alertas: <AlertsPanel canManage={canManage} onAction={abrir} />,
           recetas: <RecipesPanel canManage={canManage} />,
+          compras: <PurchaseOrdersPanel canManage={canManage} />,
+          proveedores: <SuppliersPanel canManage={canManage} />,
         }}
       />
       <StockActionDialog

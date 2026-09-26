@@ -36,6 +36,7 @@ export const STATUS_OPTIONS: readonly { value: OrderStatus; label: string }[] = 
 export const TYPE_OPTIONS: readonly { value: OrderType; label: string }[] = [
   { value: 'dine_in', label: 'En mesa' },
   { value: 'takeaway', label: 'Para llevar' },
+  { value: 'delivery', label: 'Delivery' },
 ]
 
 export const PAYMENT_METHODS: readonly { value: PaymentMethod; label: string }[] = [
@@ -46,12 +47,27 @@ export const PAYMENT_METHODS: readonly { value: PaymentMethod; label: string }[]
   { value: 'transfer', label: 'Transferencia' },
 ]
 
-/** "Mesa 3" o "Para llevar · Ana". */
+/** "Mesa 3", "Para llevar · Ana" o "Delivery · Ana". */
 export function orderPlace(order: Pick<OrderResponse, 'type' | 'table_label' | 'customer_name'>): string {
   if (order.type === 'dine_in') {
     return order.table_label === null ? 'Mesa' : tableName(order.table_label)
   }
-  return order.customer_name === '' ? 'Para llevar' : `Para llevar · ${order.customer_name}`
+  const tipo = order.type === 'delivery' ? 'Delivery' : 'Para llevar'
+  return order.customer_name === '' ? tipo : `${tipo} · ${order.customer_name}`
+}
+
+/** Teléfono, dirección y referencia de un delivery, sin los vacíos. Nada si no es delivery. */
+export function deliveryLines(
+  order: Pick<OrderResponse, 'type' | 'customer_phone' | 'delivery_address' | 'delivery_reference'>,
+): string[] {
+  if (order.type !== 'delivery') {
+    return []
+  }
+  return [
+    order.delivery_address,
+    order.delivery_reference === '' ? '' : `Ref.: ${order.delivery_reference}`,
+    order.customer_phone === '' ? '' : `Tel.: ${order.customer_phone}`,
+  ].filter((line) => line !== '')
 }
 
 /** Un pedido que todavia ocupa mesa o espera cobro. */
