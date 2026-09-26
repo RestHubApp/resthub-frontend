@@ -74,12 +74,28 @@ describe('platformLoginSchema', () => {
 })
 
 describe('settingsPayload', () => {
+  const AMBOS = { name: true, timezone: true }
+  const NUEVO = 'La Esquina 2'
+
   it('manda solo lo que cambió', () => {
-    expect(settingsPayload({ name: ESQUINA, timezone: LIMA }, DETALLE)).toEqual({})
-    expect(settingsPayload({ name: 'La Esquina 2', timezone: LIMA }, DETALLE)).toEqual({ name: 'La Esquina 2' })
-    expect(settingsPayload({ name: ESQUINA, timezone: BOGOTA }, DETALLE)).toEqual({
+    expect(settingsPayload({ name: ESQUINA, timezone: LIMA }, AMBOS, DETALLE)).toEqual({})
+    expect(settingsPayload({ name: NUEVO, timezone: LIMA }, AMBOS, DETALLE)).toEqual({
+      name: NUEVO,
+    })
+    expect(settingsPayload({ name: ESQUINA, timezone: BOGOTA }, AMBOS, DETALLE)).toEqual({ timezone: BOGOTA })
+  })
+
+  it('no manda un campo que el usuario no tocó aunque difiera de lo guardado', () => {
+    // Otro administrador cambió la zona a Bogotá mientras aquí se editaba el
+    // nombre: el formulario todavía tiene Lima, pero no la devuelve.
+    const releido = { ...DETALLE, timezone: BOGOTA }
+    expect(settingsPayload({ name: NUEVO, timezone: LIMA }, { name: true }, releido)).toEqual({
+      name: NUEVO,
+    })
+    expect(settingsPayload({ name: 'Viejo', timezone: BOGOTA }, { timezone: true }, DETALLE)).toEqual({
       timezone: BOGOTA,
     })
+    expect(settingsPayload({ name: 'Viejo', timezone: BOGOTA }, {}, DETALLE)).toEqual({})
   })
 
   it('valida el nombre y la zona nueva como el alta', () => {

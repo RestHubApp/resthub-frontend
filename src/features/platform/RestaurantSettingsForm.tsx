@@ -1,9 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { updatePlatformRestaurant } from '../../api/platform'
-import type { PlatformRestaurantDetail } from '../../api/types'
+import type { PlatformRestaurantDetail, UpdatePlatformRestaurantRequest } from '../../api/types'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import TextField from '../../components/TextField'
@@ -26,18 +27,22 @@ interface RestaurantSettingsFormProps {
 /**
  * Nombre y zona horaria del restaurante.
  *
- * Al guardar, el formulario toma lo que devolvió el servidor: si recortó el
- * nombre o rechazó algo, se ve eso y no lo que se escribió.
+ * El formulario sigue a la ficha del caché: si se relee y otro administrador
+ * cambió algo, se ve aquí sin perder lo que se está escribiendo. Al guardar
+ * viaja solo lo que el usuario tocó, y el formulario toma lo que devolvió el
+ * servidor: si recortó el nombre o rechazó algo, se ve eso y no lo que se
+ * escribió.
  */
 export default function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormProps) {
   const queryClient = useQueryClient()
+  const guardados = useMemo(() => settingsOf(restaurant), [restaurant])
   const { register, handleSubmit, formState, reset } = useForm<RestaurantSettingsValues>({
     resolver: zodResolver(restaurantSettingsSchema(restaurant.timezone)),
-    defaultValues: settingsOf(restaurant),
+    values: guardados,
+    resetOptions: { keepDirtyValues: true },
   })
   const guardar = useMutation({
-    mutationFn: (valores: RestaurantSettingsValues) =>
-      updatePlatformRestaurant(restaurant.id, settingsPayload(valores, restaurant)),
+    mutationFn: (cambios: UpdatePlatformRestaurantRequest) => updatePlatformRestaurant(restaurant.id, cambios),
     onSuccess: (guardado) => {
       saveRestaurant(queryClient, guardado)
       reset(settingsOf(guardado))
@@ -50,7 +55,13 @@ export default function RestaurantSettingsForm({ restaurant }: RestaurantSetting
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
         handleSubmit((valores) => {
-          guardar.mutate(valores)
+          const cambios = settingsPayload(valores, formState.dirtyFields, restaurant)
+          if (Object.keys(cambios).length === 0) {
+            // Lo tocado quedó igual a lo guardado: no hay nada que enviar.
+            reset(guardados)
+            return
+          }
+          guardar.mutate(cambios)
         }),
       )}
     >

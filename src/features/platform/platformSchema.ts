@@ -98,19 +98,28 @@ export function settingsOf(restaurant: PlatformRestaurantDetail): RestaurantSett
   return { name: restaurant.name, timezone: restaurant.timezone }
 }
 
+/** Los campos que el usuario tocó, como los da `formState.dirtyFields`. */
+export type EditedSettings = Partial<Record<keyof RestaurantSettingsValues, boolean | undefined>>
+
 /**
- * Solo lo que cambió: la bitácora registra cada edición, y reenviar un nombre
- * igual no es un cambio.
+ * Solo lo que el usuario cambió.
+ *
+ * Se compara con los campos que tocó y no con el formulario entero: si otro
+ * administrador cambió la zona mientras aquí se editaba el nombre, guardar el
+ * nombre no le devuelve la zona vieja. Un campo tocado que quedó igual a lo
+ * guardado tampoco viaja: la bitácora registra cada edición, y reenviar un
+ * nombre igual no es un cambio.
  */
 export function settingsPayload(
   values: RestaurantSettingsValues,
+  edited: EditedSettings,
   current: PlatformRestaurantDetail,
 ): UpdatePlatformRestaurantRequest {
   const cambios: UpdatePlatformRestaurantRequest = {}
-  if (values.name !== current.name) {
+  if (edited.name === true && values.name !== current.name) {
     cambios.name = values.name
   }
-  if (values.timezone !== current.timezone) {
+  if (edited.timezone === true && values.timezone !== current.timezone) {
     cambios.timezone = values.timezone
   }
   return cambios
