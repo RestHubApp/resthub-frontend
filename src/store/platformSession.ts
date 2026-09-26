@@ -24,8 +24,12 @@ interface PlatformSessionState {
   signIn: (token: string, admin: PlatformAdmin) => void
   /** Aplica una lectura nueva de `GET /platform/auth/me`. */
   refresh: (admin: PlatformAdmin) => void
-  /** Cambia el token por uno renovado sin cerrar la sesión. */
-  renew: (token: string, admin: PlatformAdmin) => void
+  /**
+   * Cambia el token `origin` por uno renovado sin cerrar la sesión. Si la
+   * sesión ya no es la de `origin` (se cerró o entró otra cuenta mientras
+   * viajaba la renovación), la respuesta se descarta.
+   */
+  renew: (origin: string, token: string, admin: PlatformAdmin) => void
   signOut: () => void
   /** Cierra la sesión porque el servidor ya no acepta el token. */
   expire: () => void
@@ -100,8 +104,8 @@ export const usePlatformSession = create<PlatformSessionState>((set, get) => ({
     set({ admin })
   },
 
-  renew: (token, admin) => {
-    if (get().token === null) {
+  renew: (origin, token, admin) => {
+    if (get().token !== origin) {
       return
     }
     abrir(token, admin)

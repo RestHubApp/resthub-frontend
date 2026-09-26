@@ -27,8 +27,12 @@ interface SessionState {
   signIn: (token: string, account: CurrentUserResponse) => void
   /** Aplica una lectura nueva de `GET /auth/me`: nombre, restaurante o permisos. */
   refresh: (account: CurrentUserResponse) => void
-  /** Cambia el token por uno renovado sin cerrar la sesion. */
-  renew: (token: string, account: CurrentUserResponse) => void
+  /**
+   * Cambia el token `origin` por uno renovado sin cerrar la sesion. Si la
+   * sesion ya no es la de `origin` (se cerro o entro otra cuenta mientras
+   * viajaba la renovacion), la respuesta se descarta.
+   */
+  renew: (origin: string, token: string, account: CurrentUserResponse) => void
   signOut: () => void
   /** Cierra la sesion porque el servidor ya no acepta el token. */
   expire: () => void
@@ -120,8 +124,8 @@ export const useSession = create<SessionState>((set, get) => ({
     set({ account })
   },
 
-  renew: (token, account) => {
-    if (get().token === null) {
+  renew: (origin, token, account) => {
+    if (get().token !== origin) {
       return
     }
     setAuthToken(token)

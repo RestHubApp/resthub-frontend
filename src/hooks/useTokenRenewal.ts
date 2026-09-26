@@ -23,8 +23,12 @@ function marcarActividad(): void {
  * una con su propio pedido de renovación. Si la renovación falla, no pasa
  * nada: la sesión sigue hasta su vencimiento y ahí se cierra como siempre.
  * `renew` puede cambiar en cada render sin reprogramar la renovación.
+ *
+ * `renew` recibe el token que se está renovando: si mientras viajaba la
+ * petición se cerró la sesión o entró otra cuenta, la respuesta ya no es de
+ * la sesión abierta y el almacén la descarta.
  */
-export function useTokenRenewal(token: string | null, renew: () => Promise<void>): void {
+export function useTokenRenewal(token: string | null, renew: (origin: string) => Promise<void>): void {
   const renovarRef = useRef(renew)
   useEffect(() => {
     renovarRef.current = renew
@@ -42,8 +46,9 @@ export function useTokenRenewal(token: string | null, renew: () => Promise<void>
   }, [])
 
   useEffect(() => {
-    const vencimiento = token === null ? null : tokenExpiresAt(token)
-    if (vencimiento === null) {
+    const origen = token
+    const vencimiento = origen === null ? null : tokenExpiresAt(origen)
+    if (origen === null || vencimiento === null) {
       return
     }
     const renovar = async () => {
@@ -51,7 +56,7 @@ export function useTokenRenewal(token: string | null, renew: () => Promise<void>
         return
       }
       try {
-        await renovarRef.current()
+        await renovarRef.current(origen)
       } catch (error) {
         logger.warn({ error: String(error) }, 'auth.renew_failed')
       }

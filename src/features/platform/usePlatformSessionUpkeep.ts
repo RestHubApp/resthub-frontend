@@ -19,9 +19,9 @@ export function usePlatformSessionUpkeep(): void {
   const renew = usePlatformSession((state) => state.renew)
   const refresh = usePlatformSession((state) => state.refresh)
 
-  useTokenRenewal(token, async () => {
+  useTokenRenewal(token, async (origen) => {
     const nuevo = await renewPlatformSession()
-    renew(nuevo.access_token, nuevo.admin)
+    renew(origen, nuevo.access_token, nuevo.admin)
   })
 
   const yo = useQuery({ ...platformMeQuery, enabled: token !== null, staleTime: REFRESH_MS, refetchInterval: REFRESH_MS })

@@ -125,3 +125,39 @@ describe('sesión de plataforma', () => {
     expect(cabeceras['/orders']).toBe('Bearer restaurante')
   })
 })
+
+describe('renovación de la sesión de plataforma', () => {
+  it('renueva el token de la sesión que pidió la renovación', async () => {
+    const { storage, usePlatformSession } = await cargar()
+    const viejo = tokenQueVence(3600)
+    const nuevo = tokenQueVence(7200)
+    usePlatformSession.getState().signIn(viejo, ADMIN)
+
+    usePlatformSession.getState().renew(viejo, nuevo, ADMIN)
+
+    expect(usePlatformSession.getState().token).toBe(nuevo)
+    expect(JSON.parse(storage.datos.get(CLAVE) ?? '{}')).toEqual({ token: nuevo, admin: ADMIN })
+  })
+
+  it('descarta una renovación que llega después de que la sesión cambió', async () => {
+    const { storage, usePlatformSession } = await cargar()
+    const viejo = tokenQueVence(3600)
+    const otraCuenta = tokenQueVence(3500)
+    const OTRO = { ...ADMIN, id: 2 }
+    usePlatformSession.getState().signIn(viejo, ADMIN)
+    // Mientras viajaba la renovación se cerró la sesión y entró otra cuenta.
+    usePlatformSession.getState().signOut()
+    usePlatformSession.getState().signIn(otraCuenta, OTRO)
+
+    usePlatformSession.getState().renew(viejo, tokenQueVence(7200), ADMIN)
+
+    expect(usePlatformSession.getState()).toMatchObject({ token: otraCuenta, admin: OTRO })
+    expect(JSON.parse(storage.datos.get(CLAVE) ?? '{}')).toEqual({ token: otraCuenta, admin: OTRO })
+
+    // Y sin sesión abierta tampoco revive la que se cerró.
+    usePlatformSession.getState().signOut()
+    usePlatformSession.getState().renew(otraCuenta, tokenQueVence(7200), OTRO)
+    expect(usePlatformSession.getState().token).toBeNull()
+    expect(storage.datos.has(CLAVE)).toBe(false)
+  })
+})
