@@ -14,23 +14,34 @@ interface AreaChartProps {
   readonly formatValue: (value: number) => string
   readonly formatTick: (value: number) => string
   readonly describe: (index: number) => { title: string; rows: readonly TooltipRow[] }
+  /** Una segunda serie de la misma unidad, como línea sin lavado sobre la primera. */
+  readonly overlay?: AreaOverlay
+}
+
+export interface AreaOverlay {
+  /** Un valor por punto de `points`, en el mismo orden. */
+  readonly values: readonly number[]
+  readonly color: string
 }
 
 const HEIGHT = 260
 const SERIES = 'var(--chart-1)'
 const PIXELS_PER_LABEL = 84
+// Sin segunda serie, su línea queda vacía.
+const NO_OVERLAY: AreaOverlay = { values: [], color: 'none' }
 
 /**
- * Una serie en el tiempo: línea de 2 px sobre un lavado del 10 %.
+ * Una serie en el tiempo: línea de 2 px sobre un lavado del 10 %, y a veces
+ * una segunda serie de la misma unidad como línea sola, en otro color.
  *
  * Un solo eje, desde cero. La cruz vertical sigue al puntero y se engancha al
- * día más cercano, así nadie tiene que apuntar a una línea de 2 px. Solo el
+ * punto más cercano, así nadie tiene que apuntar a una línea de 2 px. Solo el
  * máximo lleva rótulo; el resto está en el eje, la lectura y la tabla.
  */
-export default function AreaChart({ points, label, formatValue, formatTick, describe }: AreaChartProps) {
+export default function AreaChart({ points, label, formatValue, formatTick, describe, overlay = NO_OVERLAY }: AreaChartProps) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const cursor = useChartCursor(points.length)
-  const geometry = areaGeometry(points, width, HEIGHT)
+  const geometry = areaGeometry(points, width, HEIGHT, overlay.values)
   const { x, y, plotTop, plotBottom, maxIndex } = geometry
   const maximo = points[maxIndex]
   const activo = cursor.active === null ? undefined : points[cursor.active]
@@ -64,6 +75,7 @@ export default function AreaChart({ points, label, formatValue, formatTick, desc
           />
           <path d={geometry.areaPath} fill="var(--chart-area)" />
           <path d={geometry.linePath} fill="none" stroke={SERIES} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+          <path d={geometry.overlayPath} fill="none" stroke={overlay.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
           {points.length === 0 || maximo.value <= 0 ? null : (
             <g aria-hidden>
               <circle cx={x(maxIndex)} cy={y(maximo.value)} r={4} fill={SERIES} stroke="var(--card)" strokeWidth={2} />
