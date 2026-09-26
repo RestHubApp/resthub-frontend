@@ -29,8 +29,13 @@ El aislamiento lo garantiza el backend; el frontend no debe abrirle huecos.
   parámetro): el servidor lo toma del token. Marca cualquier petición que lo
   mande.
 - Al cerrar o vencer la sesión se vacía el caché de consultas
-  (`queryClient.clear()`) y lo guardado de la cuenta; nada de una cuenta queda
-  visible para la siguiente en el mismo celular.
+  (`clearQueriesExcept`, que solo deja las de la sesión de plataforma) y lo
+  guardado de la cuenta; nada de una cuenta queda visible para la siguiente en
+  el mismo celular.
+- La sesión del administrador del sistema es otra sesión: su token viaja solo
+  a `/platform/*` y el de restaurante nunca va ahí. Marca cualquier petición
+  que mezcle credenciales o una pantalla de `/plataforma` que lea la sesión
+  del restaurante.
 - Un 404 se muestra como «no existe» sin sugerir que el recurso es de otro
   local.
 
