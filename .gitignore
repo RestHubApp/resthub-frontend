@@ -35,3 +35,6 @@ dev-dist
 .playwright-cli/
 .playwright/
 .claude
+.vercel
+.env*
+!.env.example
