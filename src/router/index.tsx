@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import EmptyState from '../components/EmptyState'
 import LoginView from '../features/auth/LoginView'
+import PreviewEntryPending from '../features/auth/PreviewEntryPending'
 import { prefetchCash } from '../features/cash/prefetchCash'
 import { prefetchInsights } from '../features/insights/prefetchInsights'
 import { prefetchInventory } from '../features/inventory/prefetchInventory'
@@ -116,9 +117,26 @@ const PLATAFORMA: RouteObject = {
   ],
 }
 
+/**
+ * La pestaña que abre «Ver como…» en el área de plataforma.
+ *
+ * Va fuera de las dos guardas: canjea el código de un solo uso (el `loader`,
+ * que corre una vez por carga) y lleva al armazón del restaurante con la
+ * sesión de vista previa, que vive solo en esta pestaña.
+ */
+const VISTA_PREVIA: RouteObject = {
+  path: '/vista-previa',
+  hydrateFallbackElement: <PreviewEntryPending />,
+  lazy: {
+    loader: async () => (await import('../features/auth/previewEntry')).previewEntryLoader,
+    Component: async () => (await import('../features/auth/PreviewEntryView')).default,
+  },
+}
+
 const router = createBrowserRouter(
   [
     PLATAFORMA,
+    VISTA_PREVIA,
     {
       path: '/',
       element: <AppShell screens={PRECARGAS} />,
