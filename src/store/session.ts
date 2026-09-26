@@ -4,8 +4,7 @@ import { setAuthToken, setUnauthorizedHandler } from '../services/api'
 import { DEFAULT_TIME_ZONE } from '../services/format'
 import { logger } from '../services/logger'
 import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
-import { clearQueriesExcept } from '../services/queryClient'
-import { PLATFORM_QUERY_ROOT } from '../api/platform'
+import { clearQueriesExcept, PLATFORM_QUERY_ROOT } from '../services/queryClient'
 import type { CurrentUserResponse, PermissionCode } from '../api/types'
 
 // La version va en la clave: si cambia la forma de lo guardado, una sesion

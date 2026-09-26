@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import { api } from '../services/api'
+import { PLATFORM_QUERY_ROOT } from '../services/queryClient'
 import type {
   CreatePlatformRestaurantRequest,
   PlatformActivityPage,
@@ -21,14 +22,9 @@ import type {
 // `/platform`, y el cliente HTTP les pone el token de esa sesión y nunca el
 // de un restaurante.
 
-/**
- * La raíz de todas las claves de plataforma. Cerrar una sesión de restaurante
- * vacía el caché salvo esto, y cerrar la de plataforma vacía solo esto.
- */
-export const PLATFORM_QUERY_ROOT = 'platform'
-
 export const platformQueryKey = [PLATFORM_QUERY_ROOT] as const
 export const platformRestaurantsQueryKey = [...platformQueryKey, 'restaurants'] as const
+export const platformActivityQueryKey = [...platformQueryKey, 'activity'] as const
 
 /** Lo que el servidor devuelve por página si no se le pide otra cosa. */
 export const PLATFORM_PAGE_SIZE = 25
@@ -107,7 +103,7 @@ export async function addPlatformOwner(
 
 export function platformActivityQuery(params: PlatformActivityParams) {
   return queryOptions({
-    queryKey: [...platformQueryKey, 'activity', params],
+    queryKey: [...platformActivityQueryKey, params],
     queryFn: async () => {
       const { data } = await api.get<PlatformActivityPage>('/platform/activity', { params })
       return data

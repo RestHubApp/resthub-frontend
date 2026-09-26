@@ -37,6 +37,13 @@ export function prefetch<TData, TKey extends QueryKey>(
 }
 
 /**
+ * La raíz de las claves del administrador del sistema. Cerrar una sesión de
+ * restaurante vacía el caché salvo esto, y cerrar la de plataforma vacía solo
+ * esto.
+ */
+export const PLATFORM_QUERY_ROOT = 'platform'
+
+/**
  * Vacía el caché de una sesión que se cierra sin tocar el de la otra.
  *
  * En el mismo navegador pueden estar abiertas la sesión de un restaurante y la
