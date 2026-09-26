@@ -11,8 +11,13 @@ export type ChangeOwnPasswordRequest = components['schemas']['ChangeOwnPasswordR
 export type CurrentUserResponse = components['schemas']['SessionResponse']
 export type UserResponse = components['schemas']['SessionUserResponse']
 export type RestaurantResponse = components['schemas']['SessionRestaurantResponse']
-export type UserRole = components['schemas']['Role']
 export type PermissionCode = components['schemas']['Permission']
+
+// Roles del restaurante: el encargado, el mesero y los que arma cada local.
+export type Role = components['schemas']['RoleResponse']
+export type RoleKind = components['schemas']['RoleKind']
+export type RoleRequest = components['schemas']['RoleRequest']
+export type PermissionInfo = components['schemas']['PermissionResponse']
 
 export type StaffResponse = components['schemas']['StaffMemberResponse']
 export type StaffListResponse = components['schemas']['StaffPageResponse']
@@ -46,6 +51,24 @@ export type NewItemRequest = components['schemas']['NewItemRequest']
 export type ChangeItemRequest = components['schemas']['ChangeItemRequest']
 export type UpdateOrderRequest = components['schemas']['UpdateOrderRequest']
 export type ChargeOrderRequest = components['schemas']['ChargeOrderRequest']
+export type PaymentRequest = components['schemas']['PaymentRequest']
+export type PaymentResponse = components['schemas']['PaymentResponse']
+export type DiscountRequest = components['schemas']['DiscountRequest']
+export type CourtesyRequest = components['schemas']['CourtesyRequest']
+
+// Caja: el turno abierto, su arqueo y los turnos anteriores.
+export type CurrentCash = components['schemas']['CurrentCashResponse']
+export type CashSession = components['schemas']['CashSessionResponse']
+export type CashSummary = components['schemas']['CashSummaryResponse']
+export type CashMethodTotal = components['schemas']['MethodTotalResponse']
+export type CashWaiterTips = components['schemas']['WaiterTipsResponse']
+export type CashSessionPage = components['schemas']['CashSessionPageResponse']
+export type OpenCashRequest = components['schemas']['OpenCashRequest']
+export type CloseCashRequest = components['schemas']['CloseCashRequest']
+
+// El restaurante propio, con el tope de descuento del mesero.
+export type OwnRestaurant = components['schemas']['RestaurantResponse']
+export type UpdateRestaurantRequest = components['schemas']['UpdateRestaurantRequest']
 export type OrderListParams = NonNullable<
   operations['list_orders_api_v1_orders_get']['parameters']['query']
 >
@@ -115,3 +138,87 @@ export type AiDecisionParams = NonNullable<
 >
 export type OrderNoteClassification = components['schemas']['NoteClassificationResponse']
 export type OrderNotesReport = components['schemas']['OrderNotesResponse']
+
+// Compras: proveedores, órdenes de compra y lo que conviene pedir.
+export type Supplier = components['schemas']['SupplierResponse']
+export type SupplierRequest = components['schemas']['SupplierRequest']
+export type PurchaseOrder = components['schemas']['PurchaseOrderResponse']
+export type PurchaseOrderLine = components['schemas']['PurchaseLineResponse']
+export type PurchaseOrderPage = components['schemas']['PurchaseOrderPageResponse']
+export type PurchaseOrderStatus = components['schemas']['PurchaseOrderStatus']
+export type CreatePurchaseOrderRequest = components['schemas']['CreatePurchaseOrderRequest']
+export type ReceivePurchaseOrderRequest = components['schemas']['ReceivePurchaseOrderRequest']
+export type PurchaseSuggestion = components['schemas']['PurchaseSuggestionResponse']
+
+// Comprobantes electrónicos: datos fiscales, boletas y facturas.
+export type BillingSettings = components['schemas']['BillingSettingsResponse']
+export type BillingSettingsRequest = components['schemas']['BillingSettingsRequest']
+export type Invoice = components['schemas']['InvoiceResponse']
+export type InvoicePage = components['schemas']['InvoicePageResponse']
+export type IssueInvoiceRequest = components['schemas']['IssueInvoiceRequest']
+export type InvoiceKind = components['schemas']['InvoiceKind']
+export type InvoiceStatus = components['schemas']['InvoiceStatus']
+export type DocumentType = components['schemas']['DocumentType']
+
+// Clientes frecuentes y reservas de mesa.
+export type Customer = components['schemas']['CustomerResponse']
+export type CustomerPage = components['schemas']['CustomerPageResponse']
+export type CustomerRequest = components['schemas']['CustomerRequest']
+export type Reservation = components['schemas']['ReservationResponse']
+export type ReservationRequest = components['schemas']['ReservationRequest']
+export type ReservationStatus = components['schemas']['ReservationStatus']
+
+// Administración del sistema (`/platform`): el equipo de RestHub, sus
+// restaurantes, sus encargados y la bitácora.
+export type PlatformAdmin = components['schemas']['PlatformAdminResponse']
+export type PlatformLoginRequest = components['schemas']['PlatformLoginRequest']
+export type PlatformTokenResponse = components['schemas']['PlatformAccessTokenResponse']
+export type PlatformMeResponse = components['schemas']['PlatformSessionResponse']
+export type PlatformRestaurantSummary = components['schemas']['RestaurantSummaryResponse']
+export type PlatformRestaurantPage = components['schemas']['RestaurantPageResponse']
+export type PlatformRestaurantListParams = NonNullable<
+  operations['list_restaurants_api_v1_platform_restaurants_get']['parameters']['query']
+>
+export type PlatformRestaurantDetail = components['schemas']['RestaurantDetailResponse']
+export type PlatformOwner = components['schemas']['OwnerResponse']
+export type PlatformOwnerRequest = components['schemas']['NewOwnerRequest']
+export type CreatePlatformRestaurantRequest = components['schemas']['CreateRestaurantRequest']
+export type UpdatePlatformRestaurantRequest = components['schemas']['PlatformUpdateRestaurantRequest']
+export type PlatformActivityEntry = components['schemas']['PlatformActivityResponse']
+export type PlatformActivityPage = components['schemas']['PlatformActivityPageResponse']
+export type PlatformActivityParams = NonNullable<
+  operations['read_activity_api_v1_platform_activity_get']['parameters']['query']
+>
+
+// Vista previa: el local de muestra, sus cuentas y el código de un solo uso
+// con que una pestaña nueva entra como su encargado o su mesero.
+export type PlatformSandbox = components['schemas']['SandboxResponse']
+export type PlatformSandboxAccount = components['schemas']['SandboxAccountResponse']
+export type PreviewAs = components['schemas']['PreviewAs']
+export type PreviewRequest = components['schemas']['PreviewRequest']
+export type PreviewCodeResponse = components['schemas']['PreviewCodeResponse']
+export type PreviewExchangeRequest = components['schemas']['PreviewExchangeRequest']
+
+// Panel de observabilidad (`/platform/observability`): tráfico, errores,
+// latencias y logs que el backend guarda de sí mismo.
+type ObsQuery<TOperation extends keyof operations> = NonNullable<operations[TOperation]['parameters']['query']>
+
+export type ObsWindow = components['schemas']['Window']
+export type ObsLogLevel = components['schemas']['LogLevel']
+export type ObsRouteSort = components['schemas']['RouteSort']
+/** `error_rate` es una fracción de 0 a 1 (5xx sobre el total); una ventana vacía viene en cero. */
+export type ObsSummary = components['schemas']['ObservabilitySummaryResponse']
+export type ObsTimeseries = components['schemas']['TimeseriesResponse']
+export type ObsTimePoint = components['schemas']['TimePointResponse']
+export type ObsRouteStats = components['schemas']['RouteStatsResponse']
+export type ObsStatusCount = components['schemas']['StatusCountResponse']
+export type ObsLogEntry = components['schemas']['LogEntryResponse']
+export type ObsLogPage = components['schemas']['LogPageResponse']
+export type ObsLogDetail = components['schemas']['LogDetailResponse']
+export type ObsRequestEntry = components['schemas']['RequestEntryResponse']
+export type ObsRequestPage = components['schemas']['RequestPageResponse']
+export type ObsAccountKind = ObsRequestEntry['account_kind']
+export type ObsWindowParams = ObsQuery<'read_summary_api_v1_platform_observability_summary_get'>
+export type ObsRoutesParams = ObsQuery<'read_routes_api_v1_platform_observability_routes_get'>
+export type ObsLogsParams = ObsQuery<'search_logs_api_v1_platform_observability_logs_get'>
+export type ObsRequestsParams = ObsQuery<'search_requests_api_v1_platform_observability_requests_get'>

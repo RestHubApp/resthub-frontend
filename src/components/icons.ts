@@ -16,7 +16,10 @@ import {
   ArrowLeftRight,
   ArrowUp,
   Banknote,
+  Bike,
+  BookUser,
   Boxes,
+  CalendarClock,
   Calendar,
   ChartColumnIncreasing,
   Check,
@@ -50,6 +53,7 @@ import {
   Power,
   ScrollText,
   Search,
+  ShieldCheck,
   ShoppingCart,
   Store,
   Tag,
@@ -65,6 +69,7 @@ import {
   CircleCheckBig,
   ConciergeBell,
   History,
+  MapPin,
   Minus,
   Radio,
   RefreshCw,
@@ -73,6 +78,8 @@ import {
   StickyNote,
   WifiOff,
 } from 'lucide-react'
+// Caja: turnos, cuentas divididas, descuentos, cortesías y propinas.
+import { BadgePercent, CookingPot, Gift, HandCoins, Printer, Split, Wallet } from 'lucide-react'
 // Panel BI e IA.
 import {
   ArrowDownWideNarrow,
@@ -94,6 +101,8 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
+// Observabilidad del sistema.
+import { Activity, Pause, Play } from 'lucide-react'
 
 export const ICONS = {
   // Navegacion y dominio.
@@ -107,6 +116,7 @@ export const ICONS = {
   mesa: Armchair,
   inventario: Boxes,
   personal: UsersRound,
+  roles: ShieldCheck,
   indicadores: ChartColumnIncreasing,
   perfil: UserRound,
   accesibilidad: Accessibility,
@@ -148,6 +158,17 @@ export const ICONS = {
   enVivo: Radio,
   sinConexion: WifiOff,
   reintentar: RefreshCw,
+  caja: Wallet,
+  propina: HandCoins,
+  descuento: BadgePercent,
+  cortesia: Gift,
+  dividir: Split,
+  imprimir: Printer,
+  cocina: CookingPot,
+  delivery: Bike,
+  clientes: BookUser,
+  reservas: CalendarClock,
+  ubicacion: MapPin,
   // Menú e inventario.
   precio: Tag,
   costo: Coins,
@@ -177,6 +198,11 @@ export const ICONS = {
   revisar: ScanSearch,
   correcto: CircleCheck,
   expandir: ChevronDown,
+
+  // Observabilidad del sistema.
+  observabilidad: Activity,
+  pausar: Pause,
+  reanudar: Play,
 
   // Campos de formulario: acompañan a la etiqueta, no la reemplazan.
   correo: Mail,

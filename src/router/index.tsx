@@ -3,6 +3,8 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import EmptyState from '../components/EmptyState'
 import LoginView from '../features/auth/LoginView'
+import PreviewEntryPending from '../features/auth/PreviewEntryPending'
+import { prefetchCash } from '../features/cash/prefetchCash'
 import { prefetchInsights } from '../features/insights/prefetchInsights'
 import { prefetchInventory } from '../features/inventory/prefetchInventory'
 import { prefetchMenu } from '../features/menu/prefetchMenu'
@@ -10,15 +12,19 @@ import AddItemsView from '../features/orders/AddItemsView'
 import NewOrderView from '../features/orders/NewOrderView'
 import OrderDetailView from '../features/orders/OrderDetailView'
 import OrdersView from '../features/orders/OrdersView'
-import { prefetchBoard, prefetchFloor } from '../features/orders/prefetchOrders'
+import { prefetchBoard, prefetchFloor, prefetchKitchen } from '../features/orders/prefetchOrders'
+import { prefetchRoles } from '../features/roles/prefetchRoles'
 import AppShell from '../features/shell/AppShell'
 import HomeRedirect from '../features/shell/HomeRedirect'
+import PreviewPlatformGate from '../features/shell/PreviewPlatformGate'
 import RequireSession from '../features/shell/RequireSession'
 import type { ScreenPreload } from '../features/shell/screenPreload'
 import { prefetchStaff } from '../features/staff/prefetchStaff'
 import { prefetchTables } from '../features/tables/prefetchTables'
 
 const PANEL = 'insights.read'
+// Lo que hace el mesero: tomar pedidos, ver la cocina, imprimir.
+const MESERO = 'orders.take'
 
 // Al abrir la aplicacion directo en una pantalla perezosa (recargar el
 // tablero), esto se ve dentro del armazon mientras llega su archivo.
@@ -42,11 +48,19 @@ const PANTALLAS: readonly LazyScreen[] = [
   { path: 'perfil', load: () => import('../features/auth/ProfileView') },
   { path: 'tablero', permission: 'orders.read_all', load: () => import('../features/orders/BoardView'), prefetch: prefetchBoard },
   { path: 'tablero/historial', permission: 'orders.read_all', load: () => import('../features/orders/HistoryView') },
+  { path: 'cocina', permission: MESERO, load: () => import('../features/orders/KitchenView'), prefetch: prefetchKitchen },
+  { path: 'imprimir/:orderId/:kind', permission: MESERO, load: () => import('../features/orders/PrintView') },
+  { path: 'comprobantes', permission: 'billing.manage', load: () => import('../features/billing/BillingView') },
+  { path: 'comprobantes/:invoiceId/imprimir', permission: 'billing.issue', load: () => import('../features/billing/InvoicePrintView') },
+  { path: 'reservas', permission: 'reservations.read', load: () => import('../features/reservations/ReservationsView') },
+  { path: 'clientes', permission: 'customers.read', load: () => import('../features/customers/CustomersView') },
+  { path: 'caja', permission: 'cash.manage', load: () => import('../features/cash/CashView'), prefetch: prefetchCash },
   { path: 'menu', permission: 'menu.manage', load: () => import('../features/menu/MenuView'), prefetch: prefetchMenu },
   { path: 'mesas', permission: 'tables.manage', load: () => import('../features/tables/TablesView'), prefetch: prefetchTables },
   { path: 'inventario', permission: 'inventory.read', load: () => import('../features/inventory/InventoryView'), prefetch: prefetchInventory },
   { path: 'inventario/recetas/:menuItemId', permission: 'inventory.read', load: () => import('../features/inventory/RecipeEditorView') },
   { path: 'personal', permission: 'staff.manage', load: () => import('../features/staff/StaffView'), prefetch: prefetchStaff },
+  { path: 'roles', permission: 'roles.manage', load: () => import('../features/roles/RolesView'), prefetch: prefetchRoles },
   { path: 'panel', permission: PANEL, load: () => import('../features/insights/InsightsView'), prefetch: prefetchInsights },
   { path: 'panel/reposicion', permission: PANEL, load: () => import('../features/insights/RestockView') },
   { path: 'panel/ia', permission: PANEL, load: () => import('../features/insights/AiAuditView') },
@@ -54,7 +68,7 @@ const PANTALLAS: readonly LazyScreen[] = [
 
 /** Pedidos va en el archivo inicial: de esa pantalla solo se adelantan los datos. */
 const PRECARGAS: readonly ScreenPreload[] = [
-  { path: 'pedidos', permission: 'orders.take', prefetch: prefetchFloor },
+  { path: 'pedidos', permission: MESERO, prefetch: prefetchFloor },
   ...PANTALLAS,
 ]
 
@@ -74,8 +88,59 @@ function conPermiso({ path, load, permission }: LazyScreen): RouteObject {
   }
 }
 
+/** Una pantalla del área de plataforma, que se descarga recién al abrirla. */
+function plataforma(load: () => Promise<{ default: ComponentType }>) {
+  return { hydrateFallbackElement: CARGANDO, lazy: { Component: async () => (await load()).default } } as const
+}
+
+/**
+ * El área del administrador del sistema, aparte del armazón de un restaurante.
+ *
+ * Cada pantalla va en su propio archivo: el celular del mesero nunca baja este
+ * código ni la sesión de plataforma. La guarda mira solo esa sesión; una
+ * sesión de restaurante abierta no entra.
+ */
+const PLATAFORMA: RouteObject = {
+  path: '/plataforma',
+  ...plataforma(() => import('../features/platform/PlatformShell')),
+  children: [
+    { path: 'acceso', ...plataforma(() => import('../features/platform/PlatformLoginView')) },
+    {
+      ...plataforma(() => import('../features/platform/RequirePlatformSession')),
+      children: [
+        { index: true, ...plataforma(() => import('../features/platform/RestaurantsView')) },
+        { path: 'restaurantes/nuevo', ...plataforma(() => import('../features/platform/NewRestaurantView')) },
+        { path: 'restaurantes/:restaurantId', ...plataforma(() => import('../features/platform/RestaurantDetailView')) },
+        { path: 'bitacora', ...plataforma(() => import('../features/platform/ActivityView')) },
+        { path: 'vista-previa', ...plataforma(() => import('../features/platform/PreviewView')) },
+        { path: 'observabilidad', ...plataforma(() => import('../features/platform/observability/ObservabilityView')) },
+      ],
+    },
+    { path: '*', element: <Navigate to="/plataforma" replace /> },
+  ],
+}
+
+/**
+ * La pestaña que abre «Ver como…» en el área de plataforma.
+ *
+ * Va fuera de las dos guardas: canjea el código de un solo uso (el `loader`,
+ * que corre una vez por carga) y lleva al armazón del restaurante con la
+ * sesión de vista previa, que vive solo en esta pestaña.
+ */
+const VISTA_PREVIA: RouteObject = {
+  path: '/vista-previa',
+  hydrateFallbackElement: <PreviewEntryPending />,
+  lazy: {
+    loader: async () => (await import('../features/auth/previewEntry')).previewEntryLoader,
+    Component: async () => (await import('../features/auth/PreviewEntryView')).default,
+  },
+}
+
 const router = createBrowserRouter(
   [
+    // En una pestaña de vista previa, la puerta muestra un aviso en vez del área.
+    { element: <PreviewPlatformGate />, children: [PLATAFORMA] },
+    VISTA_PREVIA,
     {
       path: '/',
       element: <AppShell screens={PRECARGAS} />,

@@ -20,6 +20,7 @@ const SOLES_COMPACT = new Intl.NumberFormat(LOCALE, {
 const INTEGER = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 })
 const ONE_DECIMAL = new Intl.NumberFormat(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const TWO_DECIMALS = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 })
+const UP_TO_ONE_DECIMAL = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 })
 // Un kilo o un litro se cuenta hasta el gramo: 1.125 kg no es 1.13 kg.
 const THREE_DECIMALS = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 3 })
 
@@ -29,6 +30,7 @@ const PERCENT = 100
 const MS_PER_MINUTE = 60_000
 const MINUTES_PER_HOUR = 60
 const NO_VALUE = '—'
+const TEN_MS = 10
 
 /** Un monto o cantidad del API como número; lo que no es número, cero. */
 export function toNumber(value: string | number | null | undefined): number {
@@ -98,6 +100,22 @@ export function formatConfidence(value: number | null): string {
 export function formatDays(value: string | number): string {
   const numero = toNumber(value)
   return `${TWO_DECIMALS.format(numero)} ${numero === 1 ? 'día' : 'días'}`
+}
+
+/**
+ * Una duración medida por el servidor: `0 ms`, `0.8 ms`, `85 ms`, `1.25 s`.
+ *
+ * Por debajo de 10 ms lleva un decimal: el tiempo de base de una petición
+ * rápida vive ahí y redondeado a entero se leería como cero.
+ */
+export function formatMilliseconds(value: number): string {
+  if (!Number.isFinite(value)) {
+    return NO_VALUE
+  }
+  if (Math.abs(value) >= THOUSAND) {
+    return `${TWO_DECIMALS.format(value / THOUSAND)} s`
+  }
+  return `${(Math.abs(value) < TEN_MS ? UP_TO_ONE_DECIMAL : INTEGER).format(value)} ms`
 }
 
 // ---------------------------------------------------------------- Cantidades
@@ -189,4 +207,63 @@ export function formatMinutes(minutes: number): string {
   }
   const rest = String(minutes % MINUTES_PER_HOUR).padStart(2, '0')
   return `${String(Math.floor(minutes / MINUTES_PER_HOUR))} h ${rest} min`
+}
+
+const SECONDS_PER_MINUTE = 60
+
+/**
+ * Lo que falta para un vencimiento, como un reloj: `29:59`, `0:05`, `1:02:03`.
+ *
+ * Se redondea hacia arriba: mientras quede algo, no se lee `0:00`.
+ */
+export function formatCountdown(ms: number): string {
+  const segundos = Math.max(0, Math.ceil(ms / THOUSAND))
+  const minutos = Math.floor(segundos / SECONDS_PER_MINUTE)
+  const ss = String(segundos % SECONDS_PER_MINUTE).padStart(2, '0')
+  if (minutos < MINUTES_PER_HOUR) {
+    return `${String(minutos)}:${ss}`
+  }
+  const mm = String(minutos % MINUTES_PER_HOUR).padStart(2, '0')
+  return `${String(Math.floor(minutos / MINUTES_PER_HOUR))}:${mm}:${ss}`
+}
+
+// Las horas que se escriben (una reserva a las 20:00) son del reloj del local,
+// no del navegador: quien reserva desde otra zona igual escribe la hora de acá.
+
+/** Día y hora del reloj del local para un instante: `{ day: '2026-09-25', time: '20:00' }`. */
+export function wallClockIn(isoDateTime: string, timeZone: string): { day: string; time: string } {
+  const instante = new Date(isoDateTime)
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone }).format(instante)
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(
+    instante,
+  )
+  return { day, time }
+}
+
+/** La hora de un instante en el reloj de 24 h de la zona: `14:05`. */
+export function formatClock(isoDateTime: string, timeZone: string): string {
+  return wallClockIn(isoDateTime, timeZone).time
+}
+
+/** Día corto y hora de 24 h de un instante: `25 set., 14:05`. */
+export function formatShortDateTime(isoDateTime: string, timeZone: string): string {
+  const { day, time } = wallClockIn(isoDateTime, timeZone)
+  return `${formatShortDate(day)}, ${time}`
+}
+
+/** Con segundos, para ordenar lo que pasó en el mismo minuto: `25 set., 14:05:09`. */
+export function formatTimestamp(isoDateTime: string, timeZone: string): string {
+  const instante = new Date(isoDateTime)
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone }).format(instante)
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone, timeStyle: 'medium', hourCycle: 'h23' }).format(instante)
+  return `${formatShortDate(day)}, ${time}`
+}
+
+/** El instante (ISO, en UTC) de un día y hora del reloj del local. */
+export function zonedInstant(day: string, time: string, timeZone: string): string {
+  const supuesto = new Date(`${day}T${time}:00Z`).getTime()
+  // Cuánto se corre el reloj del local respecto de UTC en ese momento.
+  const reloj = wallClockIn(new Date(supuesto).toISOString(), timeZone)
+  const desfase = new Date(`${reloj.day}T${reloj.time}:00Z`).getTime() - supuesto
+  return new Date(supuesto - desfase).toISOString()
 }

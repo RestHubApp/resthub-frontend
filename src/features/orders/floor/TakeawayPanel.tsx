@@ -22,12 +22,12 @@ export default function TakeawayPanel() {
       />
     )
   }
-  const paraLlevar = activos.data.filter((order) => order.type === 'takeaway')
+  const paraLlevar = activos.data.filter((order) => order.type !== 'dine_in')
   if (paraLlevar.length === 0) {
     return (
       <EmptyState
-        title="No hay pedidos para llevar en curso"
-        description="Usa el botón «Para llevar» de arriba para tomar uno."
+        title="No hay pedidos para llevar ni delivery en curso"
+        description="Usa el botón «Para llevar / Delivery» de arriba para tomar uno."
       />
     )
   }

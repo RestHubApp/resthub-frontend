@@ -23,6 +23,9 @@ export default function OrderItemLine({ item, showPrice = false, flag }: OrderIt
         ) : null}
       </div>
       <div className="pl-9">
+        {item.modifiers.length > 0 ? (
+          <p className="m-0 text-sm font-medium">{item.modifiers.map((modifier) => modifier.option).join(' · ')}</p>
+        ) : null}
         <ItemNote note={item.notes} flag={flag} />
       </div>
     </li>

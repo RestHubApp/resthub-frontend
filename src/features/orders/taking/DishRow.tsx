@@ -26,9 +26,20 @@ interface DishRowProps {
  * agotado se ve, para que el mesero pueda avisarle al cliente, pero no se
  * puede elegir.
  */
+/** Por qué no se puede pedir: agotado a mano o sin insumos según la receta. */
+function unavailableLabel(item: OrderMenuItem): string | null {
+  if (!item.is_available) {
+    return 'Agotado'
+  }
+  return item.out_of_stock ? 'Sin insumos' : null
+}
+
 export default function DishRow({ item, quantity, onAdd, onChange }: DishRowProps) {
-  const agotado = !item.is_available
+  const motivo = unavailableLabel(item)
+  const agotado = motivo !== null
   const elegido = quantity > 0
+  // Un plato con opciones se ajusta en el resumen: cada combinación es una línea.
+  const conOpciones = item.modifier_groups.length > 0
 
   return (
     <li
@@ -42,11 +53,14 @@ export default function DishRow({ item, quantity, onAdd, onChange }: DishRowProp
       >
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className={`font-medium ${agotado ? 'text-muted-foreground line-through decoration-1' : ''}`}>{item.name}</span>
-          <span className="text-sm text-muted-foreground tabular-nums">{formatMoney(item.price)}</span>
+          <span className="text-sm text-muted-foreground tabular-nums">
+            {formatMoney(item.price)}
+            {item.modifier_groups.length > 0 ? ' · con opciones' : ''}
+          </span>
         </span>
         {agotado ? (
           <span className="rounded-full bg-foreground/85 px-2.5 py-1 text-xs font-semibold text-background">
-            Agotado
+            {motivo}
           </span>
         ) : null}
         {!agotado && !elegido ? (
@@ -55,8 +69,13 @@ export default function DishRow({ item, quantity, onAdd, onChange }: DishRowProp
           </span>
         ) : null}
       </button>
-      {elegido ? (
+      {elegido && !conOpciones ? (
         <QuantityStepper name={item.name} quantity={quantity} max={MAX_QUANTITY} onChange={onChange} />
+      ) : null}
+      {elegido && conOpciones ? (
+        <span className="rounded-full bg-primary px-2.5 py-1 text-sm font-semibold text-primary-foreground tabular-nums">
+          ×{quantity}
+        </span>
       ) : null}
     </li>
   )

@@ -14,10 +14,10 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    // Instalable, sin modo sin conexion: el service worker solo guarda el
-    // armazon de la aplicacion (HTML, JS, CSS e iconos). Ninguna respuesta del
-    // API se guarda en cache; un pedido tiene que viajar al servidor o fallar a
-    // la vista, nunca quedar en una cola que el mesero no ve.
+    // Instalable: el service worker solo guarda el armazon de la aplicacion
+    // (HTML, JS, CSS e iconos). Ninguna respuesta del API se guarda en cache.
+    // Sin senal, lo unico que espera es un pedido nuevo del mesero, en una cola
+    // a la vista (`features/orders/offline`) que se envia sola al volver.
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'favicon.svg', 'apple-touch-icon-180x180.png'],

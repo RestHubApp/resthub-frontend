@@ -7,6 +7,7 @@ import TableGrid from './floor/TableGrid'
 import TakeawayDialog from './floor/TakeawayDialog'
 import TakeawayPanel from './floor/TakeawayPanel'
 import LiveIndicator from './LiveIndicator'
+import OfflineOrdersBanner from './offline/OfflineOrdersBanner'
 import { useLiveUpdates } from './useLiveUpdates'
 
 const VISTAS = ['mesas', 'llevar', 'mios'] as const
@@ -41,6 +42,7 @@ export default function OrdersView() {
           </div>
         }
       />
+      <OfflineOrdersBanner />
       <Tabs
         value={vista}
         onValueChange={(valor) => {
@@ -50,7 +52,7 @@ export default function OrdersView() {
       >
         <TabsList className="h-12 w-full sm:w-fit">
           <TabsTrigger value="mesas" className={TRIGGER}>Mesas</TabsTrigger>
-          <TabsTrigger value="llevar" className={TRIGGER}>Para llevar</TabsTrigger>
+          <TabsTrigger value="llevar" className={TRIGGER}>Llevar y delivery</TabsTrigger>
           <TabsTrigger value="mios" className={TRIGGER}>Mis pedidos</TabsTrigger>
         </TabsList>
         <TabsContent value="mesas">

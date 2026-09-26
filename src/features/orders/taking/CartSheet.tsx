@@ -10,8 +10,8 @@ interface CartSheetProps {
   readonly onOpenChange: (open: boolean) => void
   readonly title: string
   readonly lines: readonly DraftLine[]
-  readonly onQuantity: (menuItemId: number, quantity: number) => void
-  readonly onNotes: (menuItemId: number, notes: string) => void
+  readonly onQuantity: (lineKey: string, quantity: number) => void
+  readonly onNotes: (lineKey: string, notes: string) => void
   readonly submitLabel: string
   readonly pending: boolean
   readonly onSubmit: () => void
@@ -52,13 +52,13 @@ export default function CartSheet({
           <ul className="m-0 flex list-none flex-col gap-4 p-0">
             {lines.map((line) => (
               <CartLine
-                key={line.menuItemId}
+                key={line.lineKey}
                 line={line}
                 onQuantity={(cantidad) => {
-                  onQuantity(line.menuItemId, cantidad)
+                  onQuantity(line.lineKey, cantidad)
                 }}
                 onNotes={(nota) => {
-                  onNotes(line.menuItemId, nota)
+                  onNotes(line.lineKey, nota)
                 }}
               />
             ))}
