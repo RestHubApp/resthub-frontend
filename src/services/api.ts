@@ -13,6 +13,14 @@ const SERVER_ERROR = 500
 const CLIENT_ERROR = 400
 const UNAUTHORIZED = 401
 
+// Sin limite, una conexion colgada deja la peticion abierta para siempre: el
+// pedido nunca cae en la cola sin senal y el boton se queda en «Enviando…».
+// Vencido el plazo, Axios falla sin respuesta, igual que un corte de red.
+const TIMEOUT_MS = 15_000
+
+/** El plazo de lo que tarda de verdad: la IA decidiendo o el proveedor de comprobantes. */
+export const SLOW_TIMEOUT_MS = 60_000
+
 // Lo registra el almacen de sesion: los servicios son la capa mas baja y no
 // pueden importarlo.
 const sesion: { alVencer: (() => void) | null } = { alVencer: null }
@@ -50,6 +58,7 @@ function apiBaseUrl(): string {
 
 export const api = axios.create({
   baseURL: apiBaseUrl(),
+  timeout: TIMEOUT_MS,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',

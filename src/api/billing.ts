@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api, errorStatus } from '../services/api'
+import { api, errorStatus, SLOW_TIMEOUT_MS } from '../services/api'
 import type {
   BillingSettings,
   BillingSettingsRequest,
@@ -65,12 +65,15 @@ export async function fetchOrderInvoice(orderId: number): Promise<Invoice | null
   }
 }
 
+/** El servidor lo manda al proveedor antes de responder: puede tardar más que una petición común. */
 export async function issueInvoice(payload: IssueInvoiceRequest): Promise<Invoice> {
-  const { data } = await api.post<Invoice>('/billing/invoices', payload)
+  const { data } = await api.post<Invoice>('/billing/invoices', payload, { timeout: SLOW_TIMEOUT_MS })
   return data
 }
 
 export async function resendInvoice(invoiceId: number): Promise<Invoice> {
-  const { data } = await api.post<Invoice>(`/billing/invoices/${String(invoiceId)}/resend`)
+  const { data } = await api.post<Invoice>(`/billing/invoices/${String(invoiceId)}/resend`, undefined, {
+    timeout: SLOW_TIMEOUT_MS,
+  })
   return data
 }
