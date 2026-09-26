@@ -101,6 +101,8 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
+// Observabilidad del sistema.
+import { Activity, Pause, Play } from 'lucide-react'
 
 export const ICONS = {
   // Navegacion y dominio.
@@ -196,6 +198,11 @@ export const ICONS = {
   revisar: ScanSearch,
   correcto: CircleCheck,
   expandir: ChevronDown,
+
+  // Observabilidad del sistema.
+  observabilidad: Activity,
+  pausar: Pause,
+  reanudar: Play,
 
   // Campos de formulario: acompañan a la etiqueta, no la reemplazan.
   correo: Mail,
