@@ -6,6 +6,7 @@ import {
   obsSearch,
   parseObsFilters,
   requestsOf,
+  requestsOfRoute,
   requestsParams,
   windowParams,
 } from './obsFilters'
@@ -75,6 +76,14 @@ describe('enlaces entre logs y peticiones', () => {
       statusMin: null,
       route: '',
       requestId: 'req-1',
+    })
+  })
+
+  it('a las peticiones de una ruta, con cualquier estado', () => {
+    expect(parseObsFilters(requestsOfRoute({ ...filtros, requestId: 'r' }, '/z'))).toEqual({
+      ...filtros,
+      statusMin: null,
+      route: '/z',
     })
   })
 

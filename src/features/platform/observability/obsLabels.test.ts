@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { bucketAxisLabel, bucketTitle, formatErrorRate, prettyFields, statusLabel } from './obsLabels'
+import {
+  bucketAxisLabel,
+  bucketTitle,
+  formatBucket,
+  formatErrorRate,
+  prettyFields,
+  statusLabel,
+  toSeries,
+} from './obsLabels'
 
 const LIMA = 'America/Lima'
 const INICIO = '2026-09-25T19:00:00Z'
@@ -41,5 +49,18 @@ describe('prettyFields', () => {
   it('con sangría y como texto; sin campos, nada', () => {
     expect(prettyFields({})).toBeNull()
     expect(prettyFields({ a: 1, b: '<b>' })).toBe('{\n  "a": 1,\n  "b": "<b>"\n}')
+  })
+})
+
+describe('formatBucket y toSeries', () => {
+  it('el ancho del cubo en minutos u horas', () => {
+    expect(formatBucket(60)).toBe('1 min')
+    expect(formatBucket(15 * 60)).toBe('15 min')
+    expect(formatBucket(2 * 3600)).toBe('2 h')
+  })
+
+  it('un punto por cubo con la medida elegida', () => {
+    const puntos = [{ t: INICIO, requests: 8, errors_5xx: 1, p95_ms: 120 }]
+    expect(toSeries(puntos, 60, LIMA, (p) => p.p95_ms)).toEqual([{ key: INICIO, axisLabel: '14:00', value: 120 }])
   })
 })

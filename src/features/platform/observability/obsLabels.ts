@@ -1,7 +1,9 @@
-import type { ObsAccountKind, ObsLogLevel } from '../../../api/types'
+import type { SeriesPoint } from '../../../components/charts/areaGeometry'
+import type { ObsAccountKind, ObsLogLevel, ObsTimePoint } from '../../../api/types'
 import { formatClock, formatPercent, formatShortDateTime } from '../../../services/format'
 
 const SECONDS_PER_HOUR = 3600
+const SECONDS_PER_MINUTE = 60
 const MS_PER_SECOND = 1000
 const PERCENT = 100
 
@@ -18,6 +20,27 @@ export function bucketAxisLabel(start: string, bucketSeconds: number, timeZone: 
 export function bucketTitle(start: string, bucketSeconds: number, timeZone: string): string {
   const fin = new Date(new Date(start).getTime() + bucketSeconds * MS_PER_SECOND).toISOString()
   return `${formatShortDateTime(start, timeZone)} – ${formatClock(fin, timeZone)}`
+}
+
+/** El ancho de un cubo: `15 min`, `2 h`. */
+export function formatBucket(seconds: number): string {
+  return seconds >= SECONDS_PER_HOUR
+    ? `${String(seconds / SECONDS_PER_HOUR)} h`
+    : `${String(Math.max(1, Math.round(seconds / SECONDS_PER_MINUTE)))} min`
+}
+
+/** Una serie del gráfico de área, un punto por cubo, con su rótulo del eje. */
+export function toSeries(
+  points: readonly ObsTimePoint[],
+  bucketSeconds: number,
+  timeZone: string,
+  value: (point: ObsTimePoint) => number,
+): SeriesPoint[] {
+  return points.map((point) => ({
+    key: point.t,
+    axisLabel: bucketAxisLabel(point.t, bucketSeconds, timeZone),
+    value: value(point),
+  }))
 }
 
 /** La tasa de error del servidor (una fracción de 0 a 1) como porcentaje: `1.2 %`. */

@@ -133,6 +133,11 @@ export function requestsOf(filters: ObsFilters, requestId: string): URLSearchPar
   return obsSearch({ ...filters, statusMin: null, route: '', requestId })
 }
 
+/** El enlace a las peticiones de una ruta (su plantilla), con cualquier estado. */
+export function requestsOfRoute(filters: ObsFilters, route: string): URLSearchParams {
+  return obsSearch({ ...filters, statusMin: null, route, requestId: '' })
+}
+
 /** El enlace a los logs de un `request_id`, soltando los demás filtros de logs. */
 export function logsOf(filters: ObsFilters, requestId: string): URLSearchParams {
   return obsSearch({ ...filters, logLevel: null, logSearch: '', logRequestId: requestId })
