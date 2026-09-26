@@ -75,7 +75,8 @@ llevan `Platform` delante cuando el nombre chocaría con uno del restaurante
 ```
 src/
   api/          contrato generado, alias de tipos y funciones por recurso (auth, staff, platform…)
-  components/   piezas compartidas; components/ui es código del CLI de shadcn
+  components/   piezas compartidas; components/ui es código del CLI de shadcn y
+                components/charts, los gráficos SVG propios (panel BI y observabilidad)
   features/     una carpeta por módulo: auth, shell, staff, platform…
   hooks/        hooks compartidos sin dominio
   router/       rutas y guardas por permiso

@@ -1,9 +1,9 @@
 import type { HourlyCell } from '../../../api/types'
-import ChartTooltip, { type TooltipRow } from './ChartTooltip'
+import ChartTooltip, { type TooltipRow } from '../../../components/charts/ChartTooltip'
 import { heatColor, heatmapModel, heatStep } from './heatmapModel'
 import HeatmapLegend from './HeatmapLegend'
-import { useChartCursor } from './useChartCursor'
-import { useElementWidth } from './useElementWidth'
+import { useChartCursor } from '../../../components/charts/useChartCursor'
+import { useElementWidth } from '../../../components/charts/useElementWidth'
 
 interface HeatmapProps {
   readonly cells: readonly HourlyCell[]
