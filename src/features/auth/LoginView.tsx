@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { useLocation, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 
 import { login } from '../../api/auth'
@@ -39,6 +39,17 @@ const PANEL = (
   />
 )
 
+// Discreto a propósito: es la puerta del equipo de RestHub, no la del
+// personal, y lleva a otra sesión que no toca la de este acceso.
+const PLATAFORMA = (
+  <Link
+    to="/plataforma/acceso"
+    className="inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+  >
+    Administración del sistema
+  </Link>
+)
+
 /**
  * A dónde ir después de entrar.
  *
@@ -72,7 +83,7 @@ export default function LoginView() {
   })
 
   return (
-    <AuthCard title="Iniciar sesión" aside={PANEL}>
+    <AuthCard title="Iniciar sesión" aside={PANEL} footer={PLATAFORMA}>
       <form
         noValidate
         className="flex flex-col gap-5"
