@@ -35,3 +35,16 @@ export function prefetch<TData, TKey extends QueryKey>(
 ): void {
   queryClient.query(options).catch(ignorar)
 }
+
+/**
+ * Vacía el caché de una sesión que se cierra sin tocar el de la otra.
+ *
+ * En el mismo navegador pueden estar abiertas la sesión de un restaurante y la
+ * del administrador del sistema; cada una guarda sus consultas bajo su propia
+ * raíz de clave. Cerrar la del restaurante borra cada consulta salvo las de `keep`, así nada
+ * de esa cuenta queda a la vista de la siguiente y la otra sesión sigue igual.
+ */
+export function clearQueriesExcept(keep: string): void {
+  queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== keep })
+  queryClient.getMutationCache().clear()
+}

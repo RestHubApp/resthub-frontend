@@ -4,7 +4,8 @@ import { setAuthToken, setUnauthorizedHandler } from '../services/api'
 import { DEFAULT_TIME_ZONE } from '../services/format'
 import { logger } from '../services/logger'
 import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
-import { queryClient } from '../services/queryClient'
+import { clearQueriesExcept } from '../services/queryClient'
+import { PLATFORM_QUERY_ROOT } from '../api/platform'
 import type { CurrentUserResponse, PermissionCode } from '../api/types'
 
 // La version va en la clave: si cambia la forma de lo guardado, una sesion
@@ -82,8 +83,9 @@ function limpiarSesion(): void {
   setAuthToken(null)
   writeStoredSession(null)
   programarVencimiento(null)
-  // Nada de la cuenta anterior queda en el cache para la siguiente.
-  queryClient.clear()
+  // Nada de la cuenta anterior queda en el cache para la siguiente. Lo del
+  // administrador del sistema es de otra sesion y se queda.
+  clearQueriesExcept(PLATFORM_QUERY_ROOT)
 }
 
 forgetOldSessions()
