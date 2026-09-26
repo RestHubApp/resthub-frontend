@@ -172,11 +172,15 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
 ## Sin conexión y sesión
 
 - Si al enviar un pedido nuevo no hay señal (o el servidor no responde), el
-  pedido queda en una cola del celular (`features/orders/offline`,
+  pedido queda en una cola del celular (`store/offlineQueue.ts`,
   `localStorage`) y un aviso en «Pedidos» dice cuántos esperan. Se envían
   solos al volver la conexión, o con «Reintentar». Cada pedido lleva un
   `client_request_id`: un reintento de algo que sí llegó no lo duplica. Solo
   se encolan pedidos nuevos; cobrar, cambiar estados o editar necesitan señal.
+- Cada pedido en cola es de la cuenta y el local que lo tomaron: en un celular
+  compartido, otra cuenta no los ve ni los envía con su token. Cerrar o vencer
+  la sesión no los borra; salen cuando esa cuenta vuelve a entrar, y «Cerrar
+  sesión» avisa antes si quedan pedidos sin enviar.
 - El token dura una hora. Mientras la aplicación se usa, `useSessionRenewal`
   pide uno nuevo (`POST /auth/refresh`) cinco minutos antes de que venza; una
   pantalla sin tocar por media hora deja que la sesión se cierre sola.
