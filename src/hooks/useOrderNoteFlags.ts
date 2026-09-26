@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef } from 'react'
 
 import { classifyOrderNotes, fetchOrderNotes, MAX_ORDER_NOTES_ORDERS, orderNotesQueryKey } from '../api/insights'
@@ -53,6 +53,9 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
     queryKey: [...orderNotesQueryKey, ids],
     queryFn: () => fetchOrderNotes(ids),
     enabled: activo,
+    // Al llegar un pedido nuevo cambia la lista de ids: los distintivos de los
+    // que ya estaban siguen a la vista mientras se pregunta por la lista nueva.
+    placeholderData: keepPreviousData,
   })
 
   useServerEvent('insights', () => {
@@ -64,7 +67,12 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
     onSuccess: () => queryClient.invalidateQueries({ queryKey: orderNotesQueryKey }),
   })
   const pedidas = useRef(new Set<string>())
-  const items = notas.data?.items
+  const datos = notas.data
+  // Lo que se conserva de la consulta anterior puede traer pedidos que ya no están.
+  const items = useMemo(() => {
+    const vigentes = new Set(ids)
+    return datos?.items.filter((item) => vigentes.has(item.order_id))
+  }, [datos, ids])
   useEffect(() => {
     const nuevas = (items ?? [])
       .filter((item) => item.status === 'pending')
