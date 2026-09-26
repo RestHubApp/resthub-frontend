@@ -11,6 +11,7 @@ import {
 import { Fragment, type ReactNode, useMemo } from 'react'
 
 import { usePagination } from '../hooks/usePagination'
+import DataTableSkeleton from './DataTableSkeleton'
 import EmptyState from './EmptyState'
 import TablePagination from './TablePagination'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
@@ -35,6 +36,9 @@ export interface DataColumn<TData extends RowData> {
   /** Clases de la celda, por ejemplo para que un texto largo pueda partirse. */
   readonly className?: string
 }
+
+// Filas de la silueta: las que caben a la vista, no una página entera.
+const FILAS_CARGANDO = 6
 
 const features = tableFeatures({
   rowExpandingFeature,
@@ -107,7 +111,7 @@ export default function DataTable<TData extends RowData>({
   })
 
   if (isLoading) {
-    return <EmptyState title="Cargando…" />
+    return <DataTableSkeleton headers={columns.map((column) => column.header)} rows={Math.min(pageSize ?? FILAS_CARGANDO, FILAS_CARGANDO)} />
   }
   if (data.length === 0) {
     return <EmptyState title={emptyMessage} />
