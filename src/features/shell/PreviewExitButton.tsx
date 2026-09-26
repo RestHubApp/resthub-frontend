@@ -5,21 +5,28 @@ import { useQueuedOrders } from '../../store/offlineQueue'
 import { useSession } from '../../store/session'
 import { leavePreview } from './leavePreview'
 
+// En la franja, blanco sobre su color; en una pantalla, el botón principal de siempre.
+const ESTILOS = {
+  banner: 'h-11 gap-2 bg-white px-3 text-warning hover:bg-white/90 focus-visible:ring-white/70',
+  page: 'h-11 gap-2 px-4',
+} as const
+
+interface PreviewExitButtonProps {
+  /** Dónde va: en la franja de arriba (por omisión) o en una pantalla. */
+  readonly tone?: keyof typeof ESTILOS
+}
+
 /**
- * «Salir de la vista previa», en la franja de arriba.
+ * «Salir de la vista previa», en la franja de arriba o en una pantalla.
  *
  * Si quedaron pedidos sin enviar en el local de muestra, se avisa antes de
  * descartarlos: nada se pierde en silencio, ni siquiera en una prueba.
  */
-export default function PreviewExitButton() {
+export default function PreviewExitButton({ tone = 'banner' }: PreviewExitButtonProps) {
   const pendientes = useQueuedOrders(useSession((state) => state.account))
 
   const boton = (onClick?: () => void) => (
-    <Button
-      type="button"
-      className="h-11 gap-2 bg-white px-3 text-warning hover:bg-white/90 focus-visible:ring-white/70"
-      onClick={onClick}
-    >
+    <Button type="button" size={tone === 'page' ? 'lg' : 'default'} className={ESTILOS[tone]} onClick={onClick}>
       <Icon name="salir" size={18} />
       <span>Salir de la vista previa</span>
     </Button>

@@ -229,6 +229,10 @@ cargarse (`services/tabStorage.ts`):
   intactas en las demás pestañas, y un 401 del canje no cierra ninguna. Sin
   `sessionStorage` la vista previa vive en memoria; nunca cae en
   `localStorage`.
+- Ahí la sesión de plataforma queda vacía y solo en memoria, y `/plataforma`
+  no muestra el área: dice «Estás en una vista previa» y ofrece «Salir de la
+  vista previa» (`features/shell/PreviewPlatformGate.tsx`). Así un 401 o un
+  «Salir» en esa pestaña no cierran la sesión real del administrador.
 - Cerrar la pestaña termina la vista previa y descarta su cola. Salir con
   pedidos del local de muestra sin enviar se confirma antes de descartarlos.
 - Sin sesión, una pestaña de vista previa no ofrece el acceso normal: dice que

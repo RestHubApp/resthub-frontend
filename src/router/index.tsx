@@ -16,6 +16,7 @@ import { prefetchBoard, prefetchFloor, prefetchKitchen } from '../features/order
 import { prefetchRoles } from '../features/roles/prefetchRoles'
 import AppShell from '../features/shell/AppShell'
 import HomeRedirect from '../features/shell/HomeRedirect'
+import PreviewPlatformGate from '../features/shell/PreviewPlatformGate'
 import RequireSession from '../features/shell/RequireSession'
 import type { ScreenPreload } from '../features/shell/screenPreload'
 import { prefetchStaff } from '../features/staff/prefetchStaff'
@@ -136,7 +137,8 @@ const VISTA_PREVIA: RouteObject = {
 
 const router = createBrowserRouter(
   [
-    PLATAFORMA,
+    // En una pestaña de vista previa, la puerta muestra un aviso en vez del área.
+    { element: <PreviewPlatformGate />, children: [PLATAFORMA] },
     VISTA_PREVIA,
     {
       path: '/',

@@ -154,5 +154,7 @@ export function subscribeQueue(listener: Listener): () => void {
 /** Los pedidos en cola de la cuenta, al día con cada cambio de la cola. */
 export function useQueuedOrders(account: CurrentUserResponse | null): readonly QueuedOrder[] {
   const owner = ownerOf(account)
-  return useSyncExternalStore(subscribeQueue, () => queuedOrders(owner))
+  const snapshot = () => queuedOrders(owner)
+  // La misma lectura sirve al generar la pantalla fuera del navegador (las pruebas).
+  return useSyncExternalStore(subscribeQueue, snapshot, snapshot)
 }
