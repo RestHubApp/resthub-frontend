@@ -46,17 +46,62 @@ interface TabEnvironment {
   readonly tab: KeyValueStorage | null
 }
 
-/** La ruta sin la base de la aplicación, siempre con barra inicial. */
-function sinBase(pathname: string, base: string): string {
-  const prefijo = base.replace(/\/$/u, '')
-  const resto = prefijo !== '' && pathname.startsWith(prefijo) ? pathname.slice(prefijo.length) : pathname
-  return resto.startsWith('/') ? resto : `/${resto}`
+// Estas dos funciones copian cómo React Router lee la dirección: quita la
+// base sin distinguir mayúsculas y decodifica cada tramo. Si esta pestaña y el
+// router no coincidieran, `/Vista-Previa` o `/vista%2Dprevia` llegarían a la
+// ruta de canje en una pestaña que no se eligió como de vista previa.
+function quitarBase(pathname: string, base: string): string | null {
+  if (base === '' || base === '/') {
+    return pathname
+  }
+  if (!pathname.toLowerCase().startsWith(base.toLowerCase())) {
+    return null
+  }
+  const inicio = base.endsWith('/') ? base.length - 1 : base.length
+  const siguiente = pathname.charAt(inicio)
+  if (siguiente !== '' && siguiente !== '/') {
+    return null
+  }
+  return pathname.slice(inicio) || '/'
 }
 
-/** Si la página se cargó en la ruta que canjea un código de vista previa. */
+function decodificar(ruta: string): string {
+  try {
+    return ruta
+      .split('/')
+      .map((tramo) => decodeURIComponent(tramo).replace(/\//gu, '%2F'))
+      .join('/')
+  } catch {
+    // Un `%` mal escrito: el router tampoco la decodifica.
+    return ruta
+  }
+}
+
+/**
+ * La ruta de la aplicación tal como la compara React Router: sin la base,
+ * decodificada, en minúsculas (sus rutas no distinguen mayúsculas) y sin la
+ * barra final. `null` si la dirección no está bajo la base.
+ */
+export function appPath(pathname: string, base: string): string | null {
+  const ruta = quitarBase(pathname, base)
+  if (ruta === null) {
+    return null
+  }
+  let normal = decodificar(ruta).toLowerCase()
+  while (normal.endsWith('/')) {
+    normal = normal.slice(0, -1)
+  }
+  return normal === '' ? '/' : normal
+}
+
+/** Si la página se cargó en la ruta que canjea un código de vista previa, escrita como sea. */
 export function isPreviewEntry(pathname: string, base: string): boolean {
-  const ruta = sinBase(pathname, base).replace(/\/$/u, '')
-  return ruta === PREVIEW_ENTRY_PATH
+  return appPath(pathname, base) === PREVIEW_ENTRY_PATH
+}
+
+/** La dirección de la ruta de canje tal como la escribe la aplicación, con su base. */
+export function previewEntryUrl(base: string = import.meta.env.BASE_URL): string {
+  return `${base.replace(/\/$/u, '')}${PREVIEW_ENTRY_PATH}`
 }
 
 function marcada(tab: KeyValueStorage | null): boolean {

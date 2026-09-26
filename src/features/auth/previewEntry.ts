@@ -3,7 +3,7 @@ import { redirect } from 'react-router'
 import { exchangePreviewCode, sessionOf } from '../../api/auth'
 import { errorStatus } from '../../services/api'
 import { logger } from '../../services/logger'
-import { isPreviewTab } from '../../services/tabStorage'
+import { isPreviewTab, previewEntryUrl } from '../../services/tabStorage'
 import { useSession } from '../../store/session'
 import { failureOf, previewCodeFrom, type PreviewEntryFailure, withoutHash } from './previewCode'
 
@@ -22,9 +22,12 @@ export type PreviewEntryResult = PreviewEntryFailure | 'reloading'
 export async function previewEntryLoader(): Promise<PreviewEntryResult | Response> {
   // Solo una pestaña cargada en esta ruta guarda la sesión en su
   // `sessionStorage`. Si se llegó navegando dentro de la aplicación, se carga
-  // de nuevo, con el código todavía en la dirección.
+  // de nuevo, con el código todavía en la dirección. No se recarga «lo mismo»:
+  // se carga la ruta de canje escrita como la escribe la aplicación, que al
+  // cargar siempre elige una pestaña de vista previa, así que esto pasa una
+  // sola vez y no puede quedar recargando.
   if (!isPreviewTab()) {
-    window.location.reload()
+    window.location.replace(`${previewEntryUrl()}${window.location.search}${window.location.hash}`)
     return 'reloading'
   }
 
