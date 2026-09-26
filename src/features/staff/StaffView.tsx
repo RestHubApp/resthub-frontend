@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { rolesQuery } from '../../api/roles'
 import type { StaffResponse } from '../../api/types'
 import DataTable, { type DataColumn } from '../../components/DataTable'
 import FormDialog from '../../components/FormDialog'
@@ -11,12 +12,17 @@ import SectionCard from '../../components/SectionCard'
 import StatusBadge from '../../components/StatusBadge'
 import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
-import { useSession } from '../../store/session'
+import { usePermissions, useSession } from '../../store/session'
+import { canManageAccount } from './roleOptions'
+import RoleOptionsGate from './RoleOptionsGate'
 import StaffCreateForm from './StaffCreateForm'
 import { STAFF_LIST_QUERY } from './staffList'
 import StaffRowActions from './StaffRowActions'
 
-function columnas(propiaId: number | undefined): DataColumn<StaffResponse>[] {
+function columnas(
+  propiaId: number | undefined,
+  puedeGestionar: (cuenta: StaffResponse) => boolean,
+): DataColumn<StaffResponse>[] {
   return [
     {
       id: 'nombre',
@@ -24,7 +30,7 @@ function columnas(propiaId: number | undefined): DataColumn<StaffResponse>[] {
       cell: (cuenta) => (cuenta.id === propiaId ? `${cuenta.full_name} (tú)` : cuenta.full_name),
     },
     { id: 'correo', header: 'Correo', cell: (cuenta) => cuenta.email },
-    { id: 'tipo', header: 'Tipo de cuenta', cell: (cuenta) => cuenta.role_label },
+    { id: 'rol', header: 'Rol', cell: (cuenta) => cuenta.role_label },
     {
       id: 'estado',
       header: 'Estado',
@@ -38,22 +44,31 @@ function columnas(propiaId: number | undefined): DataColumn<StaffResponse>[] {
     {
       id: 'acciones',
       header: 'Acciones',
-      cell: (cuenta) => <StaffRowActions account={cuenta} isSelf={cuenta.id === propiaId} />,
+      cell: (cuenta) => (
+        <StaffRowActions
+          account={cuenta}
+          isSelf={cuenta.id === propiaId}
+          manageable={puedeGestionar(cuenta)}
+        />
+      ),
     },
   ]
 }
 
-/** Las cuentas de meseros y encargados del restaurante. */
+/** Las cuentas del restaurante, cada una con su rol. */
 export default function StaffView() {
   const personal = useQuery(STAFF_LIST_QUERY)
+  const roles = useQuery(rolesQuery())
+  const granted = usePermissions()
   const propiaId = useSession((state) => state.account?.user.id)
+  const puedeGestionar = (cuenta: StaffResponse) => canManageAccount(cuenta, roles.data, granted)
   const [creando, setCreando] = useState(false)
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Personal"
-        description="Quién puede entrar a RestHub, con qué tipo de cuenta y si está activa."
+        description="Quién puede entrar a RestHub, con qué rol y si está activa."
         actions={
           <Button
             type="button"
@@ -73,14 +88,19 @@ export default function StaffView() {
         open={creando}
         onOpenChange={setCreando}
         title="Nueva cuenta"
-        description="Un mesero toma pedidos desde su celular; un encargado además administra el restaurante."
+        description="El rol decide qué puede hacer: un mesero toma pedidos desde su celular; un encargado administra el restaurante."
         size="lg"
       >
-        <StaffCreateForm
-          onDone={() => {
-            setCreando(false)
-          }}
-        />
+        <RoleOptionsGate>
+          {(opciones) => (
+            <StaffCreateForm
+              roles={opciones}
+              onDone={() => {
+                setCreando(false)
+              }}
+            />
+          )}
+        </RoleOptionsGate>
       </FormDialog>
 
       <SectionCard title="Equipo">
@@ -90,7 +110,7 @@ export default function StaffView() {
           </FormMessage>
         ) : (
           <DataTable
-            columns={columnas(propiaId)}
+            columns={columnas(propiaId, puedeGestionar)}
             data={personal.data?.items ?? []}
             isLoading={personal.isPending}
             emptyMessage="Todavía no hay cuentas registradas."

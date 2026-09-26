@@ -11,8 +11,13 @@ export type ChangeOwnPasswordRequest = components['schemas']['ChangeOwnPasswordR
 export type CurrentUserResponse = components['schemas']['SessionResponse']
 export type UserResponse = components['schemas']['SessionUserResponse']
 export type RestaurantResponse = components['schemas']['SessionRestaurantResponse']
-export type UserRole = components['schemas']['Role']
 export type PermissionCode = components['schemas']['Permission']
+
+// Roles del restaurante: el encargado, el mesero y los que arma cada local.
+export type Role = components['schemas']['RoleResponse']
+export type RoleKind = components['schemas']['RoleKind']
+export type RoleRequest = components['schemas']['RoleRequest']
+export type PermissionInfo = components['schemas']['PermissionResponse']
 
 export type StaffResponse = components['schemas']['StaffMemberResponse']
 export type StaffListResponse = components['schemas']['StaffPageResponse']
