@@ -46,9 +46,9 @@ function columnas(timeZone: string): DataColumn<Movement>[] {
       mov.order_id === null ? (
         mov.reason || '—'
       ) : (
-        // El movimiento trae el id del pedido, no su número del día: se enlaza en vez de inventar un "#".
+        // El enlace usa el id; el texto, el número del día que ve el personal.
         <Link to={`/pedidos/${String(mov.order_id)}`} className="font-medium text-primary underline-offset-4 hover:underline">
-          Ver pedido
+          {mov.order_number === null ? 'Ver pedido' : `Pedido #${String(mov.order_number)}`}
         </Link>
       ),
   },
