@@ -1,43 +1,76 @@
-import type { ComponentProps, ComponentType } from 'react'
+import type { ComponentType } from 'react'
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import EmptyState from '../components/EmptyState'
 import LoginView from '../features/auth/LoginView'
+import { prefetchInsights } from '../features/insights/prefetchInsights'
+import { prefetchInventory } from '../features/inventory/prefetchInventory'
+import { prefetchMenu } from '../features/menu/prefetchMenu'
 import AddItemsView from '../features/orders/AddItemsView'
 import NewOrderView from '../features/orders/NewOrderView'
 import OrderDetailView from '../features/orders/OrderDetailView'
 import OrdersView from '../features/orders/OrdersView'
+import { prefetchBoard, prefetchFloor } from '../features/orders/prefetchOrders'
 import AppShell from '../features/shell/AppShell'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import RequireSession from '../features/shell/RequireSession'
+import type { ScreenPreload } from '../features/shell/screenPreload'
+import { prefetchStaff } from '../features/staff/prefetchStaff'
+import { prefetchTables } from '../features/tables/prefetchTables'
 
-type Permission = NonNullable<ComponentProps<typeof RequireSession>['permission']>
-
-const PANEL: Permission = 'insights.read'
+const PANEL = 'insights.read'
 
 // Al abrir la aplicacion directo en una pantalla perezosa (recargar el
 // tablero), esto se ve dentro del armazon mientras llega su archivo.
 const CARGANDO = <EmptyState title="Cargando…" />
 
-function perezosa(path: string, load: () => Promise<{ default: ComponentType }>): RouteObject {
-  return { path, hydrateFallbackElement: CARGANDO, lazy: { Component: async () => (await load()).default } }
-}
+/** Una pantalla que se descarga recién al abrirla (o antes, si el armazón la adelanta). */
+type LazyScreen = Omit<ScreenPreload, 'load'> & { readonly load: () => Promise<{ default: ComponentType }> }
 
 /**
- * Una pantalla que exige un permiso y que se descarga recién al abrirla.
+ * Las pantallas que se descargan aparte, con el permiso que exige cada una.
  *
- * El permiso es una comodidad de la interfaz: la autorizacion de verdad la
- * aplica el servidor en cada peticion, y esta guarda solo evita mostrar una
- * pantalla que va a responder 403. Es el mismo que muestra la entrada del menu.
+ * Es la única lista de sus `import()`: de acá salen las rutas y lo que el
+ * armazón adelanta, así que una pantalla nueva no puede quedar en una y
+ * faltar en la otra.
  *
  * Las pantallas del encargado van en su propio archivo: el celular del
  * mesero arranca con el acceso y la toma de pedidos, y nunca baja el tablero,
  * el inventario ni el panel.
  */
-function conPermiso(path: string, load: () => Promise<{ default: ComponentType }>, permission: Permission): RouteObject {
+const PANTALLAS: readonly LazyScreen[] = [
+  { path: 'perfil', load: () => import('../features/auth/ProfileView') },
+  { path: 'tablero', permission: 'orders.read_all', load: () => import('../features/orders/BoardView'), prefetch: prefetchBoard },
+  { path: 'tablero/historial', permission: 'orders.read_all', load: () => import('../features/orders/HistoryView') },
+  { path: 'menu', permission: 'menu.manage', load: () => import('../features/menu/MenuView'), prefetch: prefetchMenu },
+  { path: 'mesas', permission: 'tables.manage', load: () => import('../features/tables/TablesView'), prefetch: prefetchTables },
+  { path: 'inventario', permission: 'inventory.read', load: () => import('../features/inventory/InventoryView'), prefetch: prefetchInventory },
+  { path: 'inventario/recetas/:menuItemId', permission: 'inventory.read', load: () => import('../features/inventory/RecipeEditorView') },
+  { path: 'personal', permission: 'staff.manage', load: () => import('../features/staff/StaffView'), prefetch: prefetchStaff },
+  { path: 'panel', permission: PANEL, load: () => import('../features/insights/InsightsView'), prefetch: prefetchInsights },
+  { path: 'panel/reposicion', permission: PANEL, load: () => import('../features/insights/RestockView') },
+  { path: 'panel/ia', permission: PANEL, load: () => import('../features/insights/AiAuditView') },
+]
+
+/** Pedidos va en el archivo inicial: de esa pantalla solo se adelantan los datos. */
+const PRECARGAS: readonly ScreenPreload[] = [
+  { path: 'pedidos', permission: 'orders.take', prefetch: prefetchFloor },
+  ...PANTALLAS,
+]
+
+/**
+ * La ruta de una pantalla perezosa, detrás de su guarda.
+ *
+ * El permiso es una comodidad de la interfaz: la autorizacion de verdad la
+ * aplica el servidor en cada peticion, y esta guarda solo evita mostrar una
+ * pantalla que va a responder 403. Es el mismo que muestra la entrada del menu.
+ */
+function conPermiso({ path, load, permission }: LazyScreen): RouteObject {
   return {
     element: <RequireSession permission={permission} />,
-    children: [perezosa(path, load)],
+    children: [
+      { path, hydrateFallbackElement: CARGANDO, lazy: { Component: async () => (await load()).default } },
+    ],
   }
 }
 
@@ -45,14 +78,10 @@ const router = createBrowserRouter(
   [
     {
       path: '/',
-      Component: AppShell,
+      element: <AppShell screens={PRECARGAS} />,
       children: [
         { index: true, Component: HomeRedirect },
         { path: 'acceso', Component: LoginView },
-        {
-          element: <RequireSession />,
-          children: [perezosa('perfil', () => import('../features/auth/ProfileView'))],
-        },
         {
           element: <RequireSession permission="orders.take" />,
           children: [
@@ -62,16 +91,7 @@ const router = createBrowserRouter(
             { path: 'pedidos/:orderId/agregar', Component: AddItemsView },
           ],
         },
-        conPermiso('tablero', () => import('../features/orders/BoardView'), 'orders.read_all'),
-        conPermiso('tablero/historial', () => import('../features/orders/HistoryView'), 'orders.read_all'),
-        conPermiso('menu', () => import('../features/menu/MenuView'), 'menu.manage'),
-        conPermiso('mesas', () => import('../features/tables/TablesView'), 'tables.manage'),
-        conPermiso('inventario', () => import('../features/inventory/InventoryView'), 'inventory.read'),
-        conPermiso('inventario/recetas/:menuItemId', () => import('../features/inventory/RecipeEditorView'), 'inventory.read'),
-        conPermiso('personal', () => import('../features/staff/StaffView'), 'staff.manage'),
-        conPermiso('panel', () => import('../features/insights/InsightsView'), PANEL),
-        conPermiso('panel/reposicion', () => import('../features/insights/RestockView'), PANEL),
-        conPermiso('panel/ia', () => import('../features/insights/AiAuditView'), PANEL),
+        ...PANTALLAS.map(conPermiso),
         // Cualquier ruta que no exista lleva al inicio de cada cuenta, no a un error.
         { path: '*', element: <Navigate to="/" replace /> },
       ],

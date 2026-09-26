@@ -1,7 +1,6 @@
-import { NavLink } from 'react-router'
-
 import Icon from '../../components/Icon'
 import type { NavEntry } from './navigation'
+import PreloadLink from './PreloadLink'
 
 interface NavListProps {
   readonly entries: readonly NavEntry[]
@@ -30,10 +29,10 @@ export default function NavList({ entries, onNavigate }: NavListProps) {
     <ul className="m-0 flex list-none flex-col gap-1 p-0">
       {entries.map((entry) => (
         <li key={entry.to}>
-          <NavLink to={entry.to} className={linkClass} onClick={onNavigate}>
+          <PreloadLink to={entry.to} className={linkClass} onClick={onNavigate}>
             <Icon name={entry.icon} size={18} />
             <span>{entry.label}</span>
-          </NavLink>
+          </PreloadLink>
         </li>
       ))}
     </ul>

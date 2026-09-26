@@ -6,9 +6,11 @@ import BottomNav from './BottomNav'
 import Brand from './Brand'
 import { entriesFor } from './navigation'
 import RestaurantName from './RestaurantName'
+import { type ScreenPreload, ScreenPreloadContext } from './screenPreload'
 import SideNav from './SideNav'
 import ToastStack from './ToastStack'
 import { useAccountRefresh } from './useAccountRefresh'
+import { useIdlePreload } from './useIdlePreload'
 
 // Es estatico: se crea una vez y no depende de props ni del estado.
 const SKIP_LINK = (
@@ -20,6 +22,13 @@ const SKIP_LINK = (
   </a>
 )
 
+const SIN_PANTALLAS: readonly ScreenPreload[] = []
+
+interface AppShellProps {
+  /** Las pantallas que se adelantan: sus archivos en ratos libres, sus datos al acercarse al enlace. */
+  readonly screens?: readonly ScreenPreload[]
+}
+
 /**
  * El armazon de todas las pantallas.
  *
@@ -29,9 +38,10 @@ const SKIP_LINK = (
  * una barra inferior, y arriba queda el nombre del restaurante; el contenido
  * reserva abajo el alto de esa barra para que nada quede tapado.
  */
-export default function AppShell() {
+export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
   const account = useSession((state) => state.account)
   useAccountRefresh()
+  useIdlePreload(screens)
 
   if (account === null) {
     return (
@@ -51,27 +61,29 @@ export default function AppShell() {
   const entries = entriesFor(account.permissions)
 
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
-      {SKIP_LINK}
-      <AccessibilityWidget />
-      <ToastStack />
-      <SideNav entries={entries} account={account} />
+    <ScreenPreloadContext value={screens}>
+      <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
+        {SKIP_LINK}
+        <AccessibilityWidget />
+        <ToastStack />
+        <SideNav entries={entries} account={account} />
 
-      <div className="flex min-h-dvh min-w-0 flex-col">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-card px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 lg:hidden">
-          <Brand to="/" compact />
-          <RestaurantName name={account.restaurant.name} variant="header" />
-        </header>
-        <main
-          id="contenido"
-          tabIndex={-1}
-          className="mx-auto w-full max-w-[1100px] flex-1 px-4 pt-6 pb-28 outline-none sm:px-6 lg:pb-8"
-        >
-          <Outlet />
-        </main>
+        <div className="flex min-h-dvh min-w-0 flex-col">
+          <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-card px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 lg:hidden">
+            <Brand to="/" compact />
+            <RestaurantName name={account.restaurant.name} variant="header" />
+          </header>
+          <main
+            id="contenido"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-[1100px] flex-1 px-4 pt-6 pb-28 outline-none sm:px-6 lg:pb-8"
+          >
+            <Outlet />
+          </main>
+        </div>
+
+        <BottomNav entries={entries} account={account} />
       </div>
-
-      <BottomNav entries={entries} account={account} />
-    </div>
+    </ScreenPreloadContext>
   )
 }

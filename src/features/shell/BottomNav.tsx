@@ -1,9 +1,8 @@
-import { NavLink } from 'react-router'
-
 import Icon from '../../components/Icon'
 import type { CurrentUserResponse } from '../../api/types'
 import MoreSheet from './MoreSheet'
 import type { NavEntry } from './navigation'
+import PreloadLink from './PreloadLink'
 import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
 
 interface BottomNavProps {
@@ -40,10 +39,10 @@ export default function BottomNav({ entries, account }: BottomNavProps) {
       <ul className="m-0 flex list-none gap-1 p-0">
         {visibles.map((entry) => (
           <li key={entry.to} className="flex flex-1">
-            <NavLink to={entry.to} className={tabClass}>
+            <PreloadLink to={entry.to} className={tabClass}>
               <Icon name={entry.icon} size={22} />
               <span className="max-w-full truncate">{entry.label}</span>
-            </NavLink>
+            </PreloadLink>
           </li>
         ))}
         <li className="flex flex-1">
