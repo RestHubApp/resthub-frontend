@@ -6,8 +6,9 @@ import { tablesQueryKey } from '../../../api/tables'
 import type { OpenOrderRequest, OrderResponse } from '../../../api/types'
 import { errorMessage } from '../../../services/api'
 import { useNotifications } from '../../../store/notifications'
+import { enqueueOrder, ownerOf, type QueueOwner } from '../../../store/offlineQueue'
+import { useSession } from '../../../store/session'
 import { stepDoneMessage } from '../nextStep'
-import { enqueueOrder } from '../offline/offlineQueue'
 import { isOffline } from '../offline/useOfflineOrders'
 import { draftKey, openRequest, type OrderTarget } from './orderTarget'
 import { type DraftLine, toNewItems, useDraftActions } from './useOrderDraft'
@@ -37,14 +38,18 @@ async function openAndSend(request: OpenOrderRequest): Promise<OrderResponse> {
 }
 
 /** Abre y envía; si no hay señal, lo deja en la cola del celular. */
-async function openOrQueue(request: OpenOrderRequest, label: string): Promise<OrderResponse | typeof QUEUED> {
+async function openOrQueue(
+  request: OpenOrderRequest,
+  label: string,
+  owner: QueueOwner | null,
+): Promise<OrderResponse | typeof QUEUED> {
   try {
     return await openAndSend(request)
   } catch (error) {
-    if (error instanceof NotSentError || !isOffline(error)) {
+    if (error instanceof NotSentError || !isOffline(error) || owner === null) {
       throw error
     }
-    enqueueOrder({ request, label, queuedAt: new Date().toISOString() })
+    enqueueOrder({ ...owner, request, label, queuedAt: new Date().toISOString() })
     return QUEUED
   }
 }
@@ -69,6 +74,7 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
   const navigate = useNavigate()
   const push = useNotifications((state) => state.push)
   const { clear } = useDraftActions()
+  const owner = ownerOf(useSession((state) => state.account))
   const key = draftKey(target)
 
   const refrescar = () =>
@@ -82,7 +88,7 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
       const items = toNewItems(lines)
       return target.kind === 'add'
         ? addOrderItems(target.orderId, items)
-        : openOrQueue(openRequest(target, items, crypto.randomUUID()), label)
+        : openOrQueue(openRequest(target, items, crypto.randomUUID()), label, owner)
     },
     onSuccess: async (order) => {
       clear(key)

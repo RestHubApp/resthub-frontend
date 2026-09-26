@@ -1,13 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import { advanceOrder, openOrder, ordersQueryKey } from '../../../api/orders'
 import { tablesQueryKey } from '../../../api/tables'
 import { errorMessage, errorStatus } from '../../../services/api'
 import { useNotifications } from '../../../store/notifications'
-import { type QueuedOrder, queuedOrders, removeQueued, subscribeQueue } from './offlineQueue'
+import { belongsTo, ownerOf, type QueuedOrder, queuedOrders, removeQueued, useQueuedOrders } from '../../../store/offlineQueue'
+import { useSession } from '../../../store/session'
 
 const CONFLICT = 409
+const UNAUTHORIZED = 401
 // Mientras haya pedidos esperando, se reintenta cada medio minuto por si el
 // navegador no avisa que volvió la señal (pasa en algunos celulares).
 const RETRY_MS = 30_000
@@ -43,18 +45,24 @@ async function sendQueued(pedido: QueuedOrder): Promise<number> {
  * rechazo de verdad (plato agotado, mesa ocupada) se avisa y sale de la cola.
  */
 export function useOfflineOrders() {
-  const pendientes = useSyncExternalStore(subscribeQueue, queuedOrders)
+  const pendientes = useQueuedOrders(useSession((state) => state.account))
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   const enviando = useRef(false)
 
   const enviar = useCallback(async () => {
-    if (enviando.current || queuedOrders().length === 0) {
+    const owner = ownerOf(useSession.getState().account)
+    if (enviando.current || queuedOrders(owner).length === 0) {
       return
     }
     enviando.current = true
     try {
-      for (const pedido of queuedOrders()) {
+      for (const pedido of queuedOrders(owner)) {
+        // Si la sesión se cerró o cambió de cuenta a mitad de la cola, el
+        // token ya no es el de quien tomó el pedido.
+        if (!belongsTo(pedido, ownerOf(useSession.getState().account))) {
+          break
+        }
         const siguio = await sendQueued(pedido).then(
           (numero) => {
             removeQueued(pedido.request.client_request_id ?? '')
@@ -62,8 +70,9 @@ export function useOfflineOrders() {
             return true
           },
           (error: unknown) => {
-            // Sin señal se corta y se reintenta después; un rechazo sale de la cola.
-            if (isOffline(error)) {
+            // Sin señal se corta y se reintenta después, igual que con la sesión
+            // vencida: vuelve a salir cuando esa cuenta entre. Un rechazo sale de la cola.
+            if (isOffline(error) || errorStatus(error) === UNAUTHORIZED) {
               return false
             }
             removeQueued(pedido.request.client_request_id ?? '')
