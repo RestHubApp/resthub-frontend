@@ -66,6 +66,20 @@ function read(): readonly QueuedOrder[] {
   return cache.value
 }
 
+// Lo que está guardado ahora, no lo que leyó esta pestaña: la PWA y una
+// pestaña del navegador comparten la cola, y escribir sobre una copia vieja
+// borraría en silencio lo que encoló la otra.
+function fresh(): readonly QueuedOrder[] {
+  cache.value = null
+  return read()
+}
+
+function notify(): void {
+  for (const listener of listeners) {
+    listener()
+  }
+}
+
 function write(queue: readonly QueuedOrder[]): void {
   cache.value = queue
   try {
@@ -77,9 +91,18 @@ function write(queue: readonly QueuedOrder[]): void {
   } catch {
     // Sin almacenamiento la cola dura lo que la pestaña: es lo mejor posible.
   }
-  for (const listener of listeners) {
-    listener()
-  }
+  notify()
+}
+
+// Otra pestaña cambió la cola (o se vació el almacenamiento): se vuelve a
+// leer y se avisa a las pantallas.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY || event.key === null) {
+      cache.value = null
+      notify()
+    }
+  })
 }
 
 /** Los pedidos en cola de esa cuenta; los de otras cuentas no se listan ni se envían. */
@@ -98,11 +121,11 @@ export function queuedOrders(owner: QueueOwner | null): readonly QueuedOrder[] {
 }
 
 export function enqueueOrder(order: QueuedOrder): void {
-  write([...read(), order])
+  write([...fresh(), order])
 }
 
 export function removeQueued(clientRequestId: string): void {
-  write(read().filter((order) => order.request.client_request_id !== clientRequestId))
+  write(fresh().filter((order) => order.request.client_request_id !== clientRequestId))
 }
 
 export function subscribeQueue(listener: Listener): () => void {

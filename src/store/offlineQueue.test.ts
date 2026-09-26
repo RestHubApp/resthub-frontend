@@ -98,6 +98,34 @@ describe('queuedOrders', () => {
   })
 })
 
+describe('varias pestañas', () => {
+  it('encolar no borra lo que encoló otra pestaña', async () => {
+    const { enqueueOrder, queuedOrders, storage } = await cola()
+    enqueueOrder(pedido('a', mesero))
+    // La otra pestaña leyó la cola antes y le sumó su pedido.
+    storage.datos.set(V2, JSON.stringify([pedido('a', mesero), pedido('b', mesero)]))
+
+    enqueueOrder(pedido('c', mesero))
+
+    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a', 'Mesa b', 'Mesa c'])
+  })
+
+  it('un cambio en otra pestaña se ve sin recargar', async () => {
+    const ventana = new EventTarget()
+    vi.stubGlobal('window', ventana)
+    const { enqueueOrder, queuedOrders, subscribeQueue, storage } = await cola()
+    enqueueOrder(pedido('a', mesero))
+    const aviso = vi.fn()
+    subscribeQueue(aviso)
+
+    storage.datos.set(V2, JSON.stringify([pedido('a', mesero), pedido('b', mesero)]))
+    ventana.dispatchEvent(Object.assign(new Event('storage'), { key: V2 }))
+
+    expect(aviso).toHaveBeenCalled()
+    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a', 'Mesa b'])
+  })
+})
+
 describe('ownerOf', () => {
   it('toma la persona y el local de la sesión', async () => {
     const { ownerOf } = await cola()
