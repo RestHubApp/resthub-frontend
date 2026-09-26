@@ -79,7 +79,7 @@ export default function PreviewLauncher() {
             key={as}
             type="button"
             size="lg"
-            className="h-11 flex-1 px-4 sm:flex-none"
+            className="h-11 w-full px-4 sm:w-auto"
             disabled={inicio.isPending}
             onClick={() => {
               abrir(as)
