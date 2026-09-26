@@ -1,4 +1,4 @@
-import axios, { type InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 
 import { logger } from './logger'
 
@@ -35,15 +35,51 @@ const plataforma: Credential = { token: null, alVencer: null }
 /** El prefijo de las rutas del administrador del sistema, relativo a `/api/v1`. */
 export const PLATFORM_PREFIX = '/platform'
 
+/** Lo que decide adónde va una petición: la ruta y, si la hay, su propia base o sus parámetros. */
+export type RequestTarget = string | undefined | AxiosRequestConfig
+
+type Destino = 'restaurant' | 'platform' | 'foreign'
+
+// Sin navegador (las pruebas) no hay origen de la página: se usa uno fijo.
+function origenDeLaPagina(): string {
+  return typeof window === 'undefined' ? 'http://localhost' : window.location.origin
+}
+
+function urlDe(destino: RequestTarget): URL | null {
+  const config = typeof destino === 'object' ? destino : { url: destino ?? '' }
+  try {
+    // `getUri` junta la base, la ruta y los parámetros como lo hará Axios al
+    // enviar; `URL` resuelve los `..` y una ruta sin barra inicial.
+    return new URL(api.getUri(config), origenDeLaPagina())
+  } catch {
+    return null
+  }
+}
+
 /**
- * Si una ruta del API es del administrador del sistema.
+ * A quién pertenece la petición, mirando la dirección final y no el texto de
+ * la ruta: `platform/x` sin barra es de plataforma, `/platform/../orders` no,
+ * y una dirección de otro origen (`https://otro.com/…`, `//otro.com/…`) no
+ * es de ninguna sesión.
+ */
+function destinoDe(destino: RequestTarget): Destino {
+  const base = urlDe({ url: '' })
+  const url = base === null ? null : urlDe(destino)
+  if (base === null || url?.origin !== base.origin) {
+    return 'foreign'
+  }
+  const plataforma = `${base.pathname.replace(/\/$/u, '')}${PLATFORM_PREFIX}`
+  return url.pathname === plataforma || url.pathname.startsWith(`${plataforma}/`) ? 'platform' : 'restaurant'
+}
+
+/**
+ * Si una petición es del administrador del sistema.
  *
  * Solo cuenta el prefijo completo: `/platformas` o `/restaurant/platform` no
  * lo son. La consulta (`?search=`) no cambia a quien pertenece la ruta.
  */
-export function isPlatformPath(url: string | undefined): boolean {
-  const ruta = (url ?? '').split('?')[0] ?? ''
-  return ruta === PLATFORM_PREFIX || ruta.startsWith(`${PLATFORM_PREFIX}/`)
+export function isPlatformPath(destino: RequestTarget): boolean {
+  return destinoDe(destino) === 'platform'
 }
 
 /** Los tokens abiertos en este momento, por sesion. */
@@ -58,13 +94,21 @@ export interface SessionTokens {
  * Cada sesión viaja solo a sus rutas: el token de plataforma nunca sale hacia
  * un endpoint de restaurante ni el de restaurante hacia `/platform/*`. El
  * servidor rechazaría la mezcla con 401, pero ademas no tiene por que verla.
+ * Una petición a otro origen que el del API no lleva ninguno.
  */
-export function tokenFor(url: string | undefined, tokens: SessionTokens): string | null {
-  return isPlatformPath(url) ? tokens.platform : tokens.restaurant
+export function tokenFor(destino: RequestTarget, tokens: SessionTokens): string | null {
+  switch (destinoDe(destino)) {
+    case 'platform':
+      return tokens.platform
+    case 'restaurant':
+      return tokens.restaurant
+    case 'foreign':
+      return null
+  }
 }
 
-function credentialOf(url: string | undefined): Credential {
-  return isPlatformPath(url) ? plataforma : restaurante
+function credentialOf(destino: RequestTarget): Credential {
+  return isPlatformPath(destino) ? plataforma : restaurante
 }
 
 /** Qué hacer cuando el servidor rechaza la credencial de una petición de restaurante. */
@@ -163,7 +207,7 @@ function registrarFallo(error: unknown): void {
 
 api.interceptors.request.use((config) => {
   config.headers.set(REQUEST_ID_HEADER, nuevoIdDePeticion())
-  const token = tokenFor(config.url, { restaurant: restaurante.token, platform: plataforma.token })
+  const token = tokenFor(config, { restaurant: restaurante.token, platform: plataforma.token })
   if (token !== null) {
     config.headers.set('Authorization', `Bearer ${token}`)
   }
@@ -196,7 +240,7 @@ api.interceptors.response.use(
       error.response?.status === UNAUTHORIZED &&
       error.config?.headers.has('Authorization') === true
     ) {
-      credentialOf(error.config.url).alVencer?.()
+      credentialOf(error.config).alVencer?.()
     }
     throw error
   },

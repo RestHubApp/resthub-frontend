@@ -153,8 +153,9 @@ aparte: el celular del mesero nunca baja este código.
 
 - **Otra sesión, no otro rol.** `store/platformSession.ts` guarda su token en
   `resthub.platform-session.v1`, aparte de `resthub.session.v2`. El cliente
-  HTTP (`services/api.ts`) elige la credencial por ruta: a `/platform/*` va
-  solo el token de plataforma y al resto solo el de restaurante, y un 401
+  HTTP (`services/api.ts`) elige la credencial por la dirección final de la
+  petición: a `/api/v1/platform/*` va solo el token de plataforma, al resto
+  del API solo el de restaurante y a otro origen ninguno, y un 401
   cierra solo la sesión dueña de esa ruta. Abrir, cerrar o dejar vencer una no
   toca la otra; cerrar la de restaurante vacía el caché salvo las consultas y
   mutaciones `['platform', …]`, y cerrar la de plataforma vacía solo esas. Las

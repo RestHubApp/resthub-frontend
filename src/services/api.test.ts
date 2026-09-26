@@ -15,6 +15,10 @@ const T_RESTAURANTE = 'tok-restaurante'
 const T_PLATAFORMA = 'tok-plataforma'
 const TOKENS = { restaurant: T_RESTAURANTE, platform: T_PLATAFORMA }
 const RESTAURANTES = '/platform/restaurants'
+// Direcciones que engañan a quien mira solo el texto de la ruta.
+const SIN_BARRA = 'platform/restaurants'
+const SALE_DE_PLATAFORMA = '/platform/../orders'
+const OTRO_ORIGEN = '//evil.com/platform'
 
 // Responde sin red con la cabecera que llevó la petición.
 function eco(config: InternalAxiosRequestConfig): Promise<AxiosResponse<string | null>> {
@@ -58,12 +62,35 @@ describe('isPlatformPath', () => {
     expect(isPlatformPath('/auth/me')).toBe(false)
     expect(isPlatformPath(undefined)).toBe(false)
   })
+
+  it('mira la dirección final y no el texto de la ruta', () => {
+    expect(isPlatformPath(SIN_BARRA)).toBe(true)
+    expect(isPlatformPath(SALE_DE_PLATAFORMA)).toBe(false)
+    expect(isPlatformPath('/orders/../platform/restaurants')).toBe(true)
+    expect(isPlatformPath({ url: '/restaurants', baseURL: '/api/v1/platform' })).toBe(true)
+  })
+
+  it('una dirección de otro origen no es de plataforma', () => {
+    expect(isPlatformPath(`https://evil.com/api/v1${RESTAURANTES}`)).toBe(false)
+    expect(isPlatformPath(OTRO_ORIGEN)).toBe(false)
+  })
 })
 
 describe('tokenFor', () => {
   it('manda el token de plataforma solo a /platform/*', () => {
     expect(tokenFor('/platform/restaurants', TOKENS)).toBe(T_PLATAFORMA)
     expect(tokenFor('/orders', TOKENS)).toBe(T_RESTAURANTE)
+  })
+
+  it('a otro origen no manda ninguno', () => {
+    for (const ajena of [`https://evil.com/api/v1${RESTAURANTES}`, 'https://evil.com/orders', OTRO_ORIGEN]) {
+      expect(tokenFor(ajena, TOKENS)).toBeNull()
+    }
+  })
+
+  it('una ruta sin barra o con `..` lleva el token de su destino real', () => {
+    expect(tokenFor(SIN_BARRA, TOKENS)).toBe(T_PLATAFORMA)
+    expect(tokenFor(SALE_DE_PLATAFORMA, TOKENS)).toBe(T_RESTAURANTE)
   })
 
   it('sin la sesión de la ruta no manda ninguno, aunque la otra esté abierta', () => {
@@ -78,6 +105,16 @@ describe('cabecera Authorization de cada petición', () => {
     setPlatformAuthToken('p1')
     expect(await cabeceraDe('/orders')).toBe('Bearer r1')
     expect(await cabeceraDe(RESTAURANTES)).toBe('Bearer p1')
+  })
+
+  it('no sale ninguna credencial hacia otro origen', async () => {
+    setAuthToken('r1')
+    setPlatformAuthToken('p1')
+    expect(await cabeceraDe('https://evil.com/api/v1/platform/restaurants')).toBeNull()
+    expect(await cabeceraDe(OTRO_ORIGEN)).toBeNull()
+    expect(await cabeceraDe('https://evil.com/orders')).toBeNull()
+    expect(await cabeceraDe(SIN_BARRA)).toBe('Bearer p1')
+    expect(await cabeceraDe(SALE_DE_PLATAFORMA)).toBe('Bearer r1')
   })
 
   it('cerrar una sesión no toca la otra', async () => {
