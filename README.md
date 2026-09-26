@@ -249,6 +249,13 @@ cargarse (`services/tabStorage.ts`):
   tiene con qué enviarse. Salir con pedidos sin enviar se confirma antes.
 - Sin sesión, una pestaña de vista previa no ofrece el acceso normal: dice que
   la vista previa venció o terminó.
+- **Duplicar la pestaña** copia su `sessionStorage`: la copia es otra pestaña
+  de vista previa con la misma sesión y una copia de la cola. Desde ahí cada
+  una sigue por su lado (lo que una encola o descarta no lo ve la otra) y las
+  dos vencen a la vez, con el mismo token; salir en una no cierra la otra.
+- **Un enlace abierto en una pestaña nueva** (Ctrl o clic central) no hereda
+  el `sessionStorage`: es una pestaña normal, sin la vista previa, que usa la
+  sesión real del navegador (o muestra el acceso).
 
 ## Comprobantes electrónicos
 
