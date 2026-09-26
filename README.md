@@ -2,7 +2,8 @@
 
 Interfaz web de RestHub: pedidos desde el celular del mesero, tablero de cocina
 y caja, menú, mesas, inventario, personal, roles y panel BI desde la laptop
-del encargado. Consume el API de [resthub-backend](https://github.com/RestHubApp/resthub-backend)
+del encargado, y el área de administración del sistema para el equipo de
+RestHub. Consume el API de [resthub-backend](https://github.com/RestHubApp/resthub-backend)
 bajo `/api/v1`. La documentación del producto vive en Notion.
 
 ## Stack
@@ -14,7 +15,7 @@ bajo `/api/v1`. La documentación del producto vive en Notion.
 - Axios como cliente HTTP, con tipos generados por openapi-typescript.
 - PWA instalable con vite-plugin-pwa; sin señal, el mesero puede tomar pedidos nuevos (ver abajo).
 - ESLint estricto (typescript-eslint, sonarjs, límites de arquitectura), Husky y lint-staged.
-- Vitest para las reglas puras (cuentas del cobro, opciones, compras, horas).
+- Vitest para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones).
 - pnpm 12 (fijado en `packageManager`).
 
 ## Cómo correrlo
@@ -30,7 +31,8 @@ pnpm dev                     # http://localhost:5173
 `pnpm dev` reenvía `/api` a `http://localhost:8000`, así que el backend tiene que
 estar corriendo para que las pantallas tengan datos. Con la semilla de desarrollo
 del backend se entra con `admin@resthub.dev` o `mesero@resthub.dev` y la
-contraseña `resthub123`.
+contraseña `resthub123`; al área de administración del sistema
+(`/plataforma/acceso`), con `plataforma@resthub.dev` y la misma contraseña.
 
 | Comando | Qué hace |
 |---|---|
@@ -64,17 +66,21 @@ El script lee la variable de la terminal, no de `.env.local`. Después de
 regenerar, `pnpm build` señala cada pantalla que quedó desalineada con el contrato.
 Nadie edita el archivo generado: los alias legibles están en `src/api/types.ts`.
 
+Los del API de plataforma (`/platform/*`) siguen la misma regla: sus esquemas
+llevan `Platform` delante cuando el nombre chocaría con uno del restaurante
+(`PlatformUpdateRestaurantRequest`).
+
 ## Estructura
 
 ```
 src/
-  api/          contrato generado, alias de tipos y funciones por recurso (auth, staff…)
+  api/          contrato generado, alias de tipos y funciones por recurso (auth, staff, platform…)
   components/   piezas compartidas; components/ui es código del CLI de shadcn
-  features/     una carpeta por módulo: auth, shell, staff…
+  features/     una carpeta por módulo: auth, shell, staff, platform…
   hooks/        hooks compartidos sin dominio
   router/       rutas y guardas por permiso
   services/     cliente HTTP, logger, caché de consultas, reglas de campos
-  store/        estado de cliente con Zustand (sesión, avisos)
+  store/        estado de cliente con Zustand (sesión, sesión de plataforma, avisos)
   main.tsx      raíz de composición
 ```
 
@@ -128,6 +134,49 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
   tiene el rol le llega el aviso `permissions`, que relee su sesión mientras
   mira una pantalla en vivo (pedidos, tablero, cocina); en las demás, la
   sesión se relee cada cinco minutos.
+
+## Administración del sistema (`/plataforma`)
+
+El equipo de RestHub no pertenece a ningún restaurante: da de alta locales y
+su primer encargado, y los activa o desactiva. Todo vive en
+`features/platform`, con su propio armazón (una franja oscura que dice
+«Administración del sistema», para no confundirlo con un local) y se descarga
+aparte: el celular del mesero nunca baja este código.
+
+| Ruta | Pantalla |
+|---|---|
+| `/plataforma/acceso` | Acceso propio (correo y contraseña). El acceso normal lleva un enlace discreto «Administración del sistema». |
+| `/plataforma` | Restaurantes, los más nuevos primero, con búsqueda por nombre o identificador y paginación del servidor (25 por página). |
+| `/plataforma/restaurantes/nuevo` | Alta del restaurante (nombre, identificador, zona horaria) y de su primer encargado. |
+| `/plataforma/restaurantes/:id` | Ficha: nombre y zona horaria editables, activar o desactivar, encargados y «Agregar encargado». |
+| `/plataforma/bitacora` | Bitácora de lo que hizo cada administrador. |
+
+- **Otra sesión, no otro rol.** `store/platformSession.ts` guarda su token en
+  `resthub.platform-session.v1`, aparte de `resthub.session.v2`. El cliente
+  HTTP (`services/api.ts`) elige la credencial por la dirección final de la
+  petición: a `/api/v1/platform/*` va solo el token de plataforma, al resto
+  del API solo el de restaurante y a otro origen ninguno, y un 401
+  cierra solo la sesión dueña de esa ruta. Abrir, cerrar o dejar vencer una no
+  toca la otra; cerrar la de restaurante vacía el caché salvo las consultas y
+  mutaciones `['platform', …]`, y cerrar la de plataforma vacía solo esas. Las
+  mutaciones que llevan una contraseña (acceso, alta, nuevo encargado) salen
+  del caché en cuanto nadie mira su resultado (`gcTime: 0`).
+- Vence y se renueva como la del restaurante (`hooks/useTokenRenewal.ts`,
+  `POST /platform/auth/refresh` cinco minutos antes). Sin sesión, la guarda
+  lleva a `/plataforma/acceso`, que explica si venció.
+- **Identificador (slug):** se sugiere del nombre (minúsculas, sin tildes,
+  guiones) y sigue al nombre hasta que alguien lo edita; se valida como el
+  backend, `^[a-z0-9]+(-[a-z0-9]+)*$`, hasta 60 caracteres. No se cambia
+  después del alta.
+- **Zona horaria:** una lista de zonas IANA comunes con Lima primero
+  (`timeZones.ts`); la ficha agrega la zona guardada si no está en la lista.
+  La valida `Intl` (con sus alias, como `GMT` o `EST5EDT`), y en la ficha solo
+  si cambió: una zona guardada que el navegador no conoce no impide renombrar.
+- **Ficha:** sigue a la relectura sin perder lo que se está escribiendo, y al
+  guardar manda solo los campos que se editaron: no pisa lo que otro
+  administrador cambió mientras tanto.
+- Desactivar se confirma y explica que corta al instante el acceso de todo el
+  personal del local; activar va directo. Las horas del área son las de Lima.
 
 ## Comprobantes electrónicos
 

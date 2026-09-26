@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { useLocation, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 
 import { login } from '../../api/auth'
@@ -12,7 +12,7 @@ import TextField from '../../components/TextField'
 import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
-import { correoRule } from '../../services/fieldRules'
+import { correoRule, MAX_PASSWORD } from '../../services/fieldRules'
 import { useSession } from '../../store/session'
 import AuthAside from './AuthAside'
 import AuthCard from './AuthCard'
@@ -20,9 +20,13 @@ import SessionExpiredNotice from './SessionExpiredNotice'
 
 const esquema = z.object({
   email: correoRule,
-  // Al entrar no se exige la longitud: la respuesta del servidor ya dice si
-  // la contrasena no coincide, y repetir aca la regla no agrega nada.
-  password: z.string().min(1, 'Escribe tu contraseña'),
+  // Al entrar no se exige el minimo: la respuesta del servidor ya dice si
+  // la contrasena no coincide, y repetir aca la regla no agrega nada. El
+  // maximo si, porque el servidor rechaza una mas larga antes de mirarla.
+  password: z
+    .string()
+    .min(1, 'Escribe tu contraseña')
+    .max(MAX_PASSWORD, `Usa como máximo ${String(MAX_PASSWORD)} caracteres`),
 })
 
 type Formulario = z.infer<typeof esquema>
@@ -37,6 +41,17 @@ const PANEL = (
     ]}
     note="Tu cuenta la crea el encargado del restaurante. Si olvidaste tu contraseña, pídele que la restablezca."
   />
+)
+
+// Discreto a propósito: es la puerta del equipo de RestHub, no la del
+// personal, y lleva a otra sesión que no toca la de este acceso.
+const PLATAFORMA = (
+  <Link
+    to="/plataforma/acceso"
+    className="inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+  >
+    Administración del sistema
+  </Link>
 )
 
 /**
@@ -72,7 +87,7 @@ export default function LoginView() {
   })
 
   return (
-    <AuthCard title="Iniciar sesión" aside={PANEL}>
+    <AuthCard title="Iniciar sesión" aside={PANEL} footer={PLATAFORMA}>
       <form
         noValidate
         className="flex flex-col gap-5"

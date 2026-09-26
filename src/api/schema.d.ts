@@ -1302,6 +1302,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Movimientos de la plataforma */
+        get: operations["read_activity_api_v1_platform_activity_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Obtener un token de la administración del sistema */
+        post: operations["login_api_v1_platform_auth_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cuenta de plataforma que pregunta */
+        get: operations["read_current_admin_api_v1_platform_auth_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Renovar el token de la administración del sistema */
+        post: operations["refresh_token_api_v1_platform_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/restaurants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar los restaurantes */
+        get: operations["list_restaurants_api_v1_platform_restaurants_get"];
+        put?: never;
+        /** Dar de alta un restaurante y su primer encargado */
+        post: operations["create_restaurant_api_v1_platform_restaurants_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/restaurants/{restaurant_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ficha de un restaurante */
+        get: operations["read_restaurant_api_v1_platform_restaurants__restaurant_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Editar, activar o desactivar un restaurante */
+        patch: operations["update_restaurant_api_v1_platform_restaurants__restaurant_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/platform/restaurants/{restaurant_id}/owners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Agregar un encargado a un restaurante */
+        post: operations["add_owner_api_v1_platform_restaurants__restaurant_id__owners_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/reservations": {
         parameters: {
             query?: never;
@@ -1980,6 +2101,16 @@ export interface components {
             /** Supplier Id */
             supplier_id: number;
         };
+        /** CreateRestaurantRequest */
+        CreateRestaurantRequest: {
+            /** Name */
+            name: string;
+            owner: components["schemas"]["NewOwnerRequest"];
+            /** Slug */
+            slug: string;
+            /** Timezone */
+            timezone: string;
+        };
         /** CreateTableRequest */
         CreateTableRequest: {
             /** Label */
@@ -2588,6 +2719,18 @@ export interface components {
              */
             quantity: number;
         };
+        /** NewOwnerRequest */
+        NewOwnerRequest: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Full Name */
+            full_name: string;
+            /** Password */
+            password: string;
+        };
         /** NoteClassificationResponse */
         NoteClassificationResponse: {
             /** Allergy Probability */
@@ -2819,6 +2962,17 @@ export interface components {
          * @enum {string}
          */
         OrderType: "dine_in" | "takeaway" | "delivery";
+        /** OwnerResponse */
+        OwnerResponse: {
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name: string;
+            /** Id */
+            id: number;
+            /** Is Active */
+            is_active: boolean;
+        };
         /**
          * PaymentMethod
          * @enum {string}
@@ -2926,6 +3080,78 @@ export interface components {
             group: string;
             /** Label */
             label: string;
+        };
+        /** PlatformAccessTokenResponse */
+        PlatformAccessTokenResponse: {
+            /** Access Token */
+            access_token: string;
+            admin: components["schemas"]["PlatformAdminResponse"];
+            /** Expires In */
+            expires_in: number;
+            /**
+             * Token Type
+             * @default bearer
+             */
+            token_type: string;
+        };
+        /** PlatformActivityPageResponse */
+        PlatformActivityPageResponse: {
+            /** Items */
+            items: components["schemas"]["PlatformActivityResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** PlatformActivityResponse */
+        PlatformActivityResponse: {
+            /** Admin Id */
+            admin_id: number;
+            /** Admin Name */
+            admin_name: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Detail */
+            detail: string;
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Kind Label */
+            kind_label: string;
+        };
+        /** PlatformAdminResponse */
+        PlatformAdminResponse: {
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name: string;
+            /** Id */
+            id: number;
+        };
+        /** PlatformLoginRequest */
+        PlatformLoginRequest: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+        };
+        /** PlatformSessionResponse */
+        PlatformSessionResponse: {
+            admin: components["schemas"]["PlatformAdminResponse"];
+        };
+        /** PlatformUpdateRestaurantRequest */
+        PlatformUpdateRestaurantRequest: {
+            /** Is Active */
+            is_active?: boolean | null;
+            /** Name */
+            name?: string | null;
+            /** Timezone */
+            timezone?: string | null;
         };
         /** PreviousTotals */
         PreviousTotals: {
@@ -3225,6 +3451,37 @@ export interface components {
             /** New Password */
             new_password: string;
         };
+        /** RestaurantDetailResponse */
+        RestaurantDetailResponse: {
+            /** Active Staff Count */
+            active_staff_count: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Is Active */
+            is_active: boolean;
+            /** Name */
+            name: string;
+            /** Owners */
+            owners: components["schemas"]["OwnerResponse"][];
+            /** Slug */
+            slug: string;
+            /** Staff Count */
+            staff_count: number;
+            /** Timezone */
+            timezone: string;
+        };
+        /** RestaurantPageResponse */
+        RestaurantPageResponse: {
+            /** Items */
+            items: components["schemas"]["RestaurantSummaryResponse"][];
+            /** Total */
+            total: number;
+        };
         /** RestaurantResponse */
         RestaurantResponse: {
             /** Auto Out Of Stock */
@@ -3244,6 +3501,28 @@ export interface components {
             name: string;
             /** Slug */
             slug: string;
+            /** Timezone */
+            timezone: string;
+        };
+        /** RestaurantSummaryResponse */
+        RestaurantSummaryResponse: {
+            /** Active Staff Count */
+            active_staff_count: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Is Active */
+            is_active: boolean;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Staff Count */
+            staff_count: number;
             /** Timezone */
             timezone: string;
         };
@@ -6561,6 +6840,279 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PermissionResponse"][];
+                };
+            };
+        };
+    };
+    read_activity_api_v1_platform_activity_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformActivityPageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_api_v1_platform_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlatformLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformAccessTokenResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_current_admin_api_v1_platform_auth_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformSessionResponse"];
+                };
+            };
+        };
+    };
+    refresh_token_api_v1_platform_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformAccessTokenResponse"];
+                };
+            };
+        };
+    };
+    list_restaurants_api_v1_platform_restaurants_get: {
+        parameters: {
+            query?: {
+                /** @description Busca en nombre e identificador */
+                search?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantPageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_restaurant_api_v1_platform_restaurants_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRestaurantRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_restaurant_api_v1_platform_restaurants__restaurant_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurant_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_restaurant_api_v1_platform_restaurants__restaurant_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurant_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlatformUpdateRestaurantRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantDetailResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_owner_api_v1_platform_restaurants__restaurant_id__owners_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurant_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewOwnerRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnerResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

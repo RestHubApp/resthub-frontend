@@ -167,3 +167,25 @@ export type CustomerRequest = components['schemas']['CustomerRequest']
 export type Reservation = components['schemas']['ReservationResponse']
 export type ReservationRequest = components['schemas']['ReservationRequest']
 export type ReservationStatus = components['schemas']['ReservationStatus']
+
+// Administración del sistema (`/platform`): el equipo de RestHub, sus
+// restaurantes, sus encargados y la bitácora.
+export type PlatformAdmin = components['schemas']['PlatformAdminResponse']
+export type PlatformLoginRequest = components['schemas']['PlatformLoginRequest']
+export type PlatformTokenResponse = components['schemas']['PlatformAccessTokenResponse']
+export type PlatformMeResponse = components['schemas']['PlatformSessionResponse']
+export type PlatformRestaurantSummary = components['schemas']['RestaurantSummaryResponse']
+export type PlatformRestaurantPage = components['schemas']['RestaurantPageResponse']
+export type PlatformRestaurantListParams = NonNullable<
+  operations['list_restaurants_api_v1_platform_restaurants_get']['parameters']['query']
+>
+export type PlatformRestaurantDetail = components['schemas']['RestaurantDetailResponse']
+export type PlatformOwner = components['schemas']['OwnerResponse']
+export type PlatformOwnerRequest = components['schemas']['NewOwnerRequest']
+export type CreatePlatformRestaurantRequest = components['schemas']['CreateRestaurantRequest']
+export type UpdatePlatformRestaurantRequest = components['schemas']['PlatformUpdateRestaurantRequest']
+export type PlatformActivityEntry = components['schemas']['PlatformActivityResponse']
+export type PlatformActivityPage = components['schemas']['PlatformActivityPageResponse']
+export type PlatformActivityParams = NonNullable<
+  operations['read_activity_api_v1_platform_activity_get']['parameters']['query']
+>

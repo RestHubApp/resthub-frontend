@@ -86,8 +86,39 @@ function conPermiso({ path, load, permission }: LazyScreen): RouteObject {
   }
 }
 
+/** Una pantalla del área de plataforma, que se descarga recién al abrirla. */
+function plataforma(load: () => Promise<{ default: ComponentType }>) {
+  return { hydrateFallbackElement: CARGANDO, lazy: { Component: async () => (await load()).default } } as const
+}
+
+/**
+ * El área del administrador del sistema, aparte del armazón de un restaurante.
+ *
+ * Cada pantalla va en su propio archivo: el celular del mesero nunca baja este
+ * código ni la sesión de plataforma. La guarda mira solo esa sesión; una
+ * sesión de restaurante abierta no entra.
+ */
+const PLATAFORMA: RouteObject = {
+  path: '/plataforma',
+  ...plataforma(() => import('../features/platform/PlatformShell')),
+  children: [
+    { path: 'acceso', ...plataforma(() => import('../features/platform/PlatformLoginView')) },
+    {
+      ...plataforma(() => import('../features/platform/RequirePlatformSession')),
+      children: [
+        { index: true, ...plataforma(() => import('../features/platform/RestaurantsView')) },
+        { path: 'restaurantes/nuevo', ...plataforma(() => import('../features/platform/NewRestaurantView')) },
+        { path: 'restaurantes/:restaurantId', ...plataforma(() => import('../features/platform/RestaurantDetailView')) },
+        { path: 'bitacora', ...plataforma(() => import('../features/platform/ActivityView')) },
+      ],
+    },
+    { path: '*', element: <Navigate to="/plataforma" replace /> },
+  ],
+}
+
 const router = createBrowserRouter(
   [
+    PLATAFORMA,
     {
       path: '/',
       element: <AppShell screens={PRECARGAS} />,

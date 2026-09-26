@@ -1,4 +1,4 @@
-import axios, { type InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 
 import { logger } from './logger'
 
@@ -21,13 +21,104 @@ const TIMEOUT_MS = 15_000
 /** El plazo de lo que tarda de verdad: la IA decidiendo o el proveedor de comprobantes. */
 export const SLOW_TIMEOUT_MS = 60_000
 
-// Lo registra el almacen de sesion: los servicios son la capa mas baja y no
-// pueden importarlo.
-const sesion: { alVencer: (() => void) | null } = { alVencer: null }
+// Las dos sesiones que pueden estar abiertas en el mismo navegador: la de una
+// cuenta de restaurante y la del administrador del sistema. Las registran sus
+// almacenes; los servicios son la capa mas baja y no pueden importarlos.
+interface Credential {
+  token: string | null
+  alVencer: (() => void) | null
+}
 
-/** Qué hacer cuando el servidor rechaza la credencial de una petición. */
+const restaurante: Credential = { token: null, alVencer: null }
+const plataforma: Credential = { token: null, alVencer: null }
+
+/** El prefijo de las rutas del administrador del sistema, relativo a `/api/v1`. */
+export const PLATFORM_PREFIX = '/platform'
+
+/** Lo que decide adónde va una petición: la ruta y, si la hay, su propia base o sus parámetros. */
+export type RequestTarget = string | undefined | AxiosRequestConfig
+
+type Destino = 'restaurant' | 'platform' | 'foreign'
+
+// Sin navegador (las pruebas) no hay origen de la página: se usa uno fijo.
+function origenDeLaPagina(): string {
+  return typeof window === 'undefined' ? 'http://localhost' : window.location.origin
+}
+
+function urlDe(destino: RequestTarget): URL | null {
+  const config = typeof destino === 'object' ? destino : { url: destino ?? '' }
+  try {
+    // `getUri` junta la base, la ruta y los parámetros como lo hará Axios al
+    // enviar; `URL` resuelve los `..` y una ruta sin barra inicial.
+    return new URL(api.getUri(config), origenDeLaPagina())
+  } catch {
+    return null
+  }
+}
+
+/**
+ * A quién pertenece la petición, mirando la dirección final y no el texto de
+ * la ruta: `platform/x` sin barra es de plataforma, `/platform/../orders` no,
+ * y una dirección de otro origen (`https://otro.com/…`, `//otro.com/…`) no
+ * es de ninguna sesión.
+ */
+function destinoDe(destino: RequestTarget): Destino {
+  const base = urlDe({ url: '' })
+  const url = base === null ? null : urlDe(destino)
+  if (base === null || url?.origin !== base.origin) {
+    return 'foreign'
+  }
+  const plataforma = `${base.pathname.replace(/\/$/u, '')}${PLATFORM_PREFIX}`
+  return url.pathname === plataforma || url.pathname.startsWith(`${plataforma}/`) ? 'platform' : 'restaurant'
+}
+
+/**
+ * Si una petición es del administrador del sistema.
+ *
+ * Solo cuenta el prefijo completo: `/platformas` o `/restaurant/platform` no
+ * lo son. La consulta (`?search=`) no cambia a quien pertenece la ruta.
+ */
+export function isPlatformPath(destino: RequestTarget): boolean {
+  return destinoDe(destino) === 'platform'
+}
+
+/** Los tokens abiertos en este momento, por sesion. */
+export interface SessionTokens {
+  readonly restaurant: string | null
+  readonly platform: string | null
+}
+
+/**
+ * El token que acompaña a una petición.
+ *
+ * Cada sesión viaja solo a sus rutas: el token de plataforma nunca sale hacia
+ * un endpoint de restaurante ni el de restaurante hacia `/platform/*`. El
+ * servidor rechazaría la mezcla con 401, pero ademas no tiene por que verla.
+ * Una petición a otro origen que el del API no lleva ninguno.
+ */
+export function tokenFor(destino: RequestTarget, tokens: SessionTokens): string | null {
+  switch (destinoDe(destino)) {
+    case 'platform':
+      return tokens.platform
+    case 'restaurant':
+      return tokens.restaurant
+    case 'foreign':
+      return null
+  }
+}
+
+function credentialOf(destino: RequestTarget): Credential {
+  return isPlatformPath(destino) ? plataforma : restaurante
+}
+
+/** Qué hacer cuando el servidor rechaza la credencial de una petición de restaurante. */
 export function setUnauthorizedHandler(handler: (() => void) | null): void {
-  sesion.alVencer = handler
+  restaurante.alVencer = handler
+}
+
+/** Lo mismo, para las peticiones del administrador del sistema. */
+export function setPlatformUnauthorizedHandler(handler: (() => void) | null): void {
+  plataforma.alVencer = handler
 }
 
 /**
@@ -116,6 +207,10 @@ function registrarFallo(error: unknown): void {
 
 api.interceptors.request.use((config) => {
   config.headers.set(REQUEST_ID_HEADER, nuevoIdDePeticion())
+  const token = tokenFor(config, { restaurant: restaurante.token, platform: plataforma.token })
+  if (token !== null) {
+    config.headers.set('Authorization', `Bearer ${token}`)
+  }
   inicios.set(config, performance.now())
   return config
 })
@@ -138,31 +233,38 @@ api.interceptors.response.use(
     // Un 401 de una petición que llevaba credencial es una sesión vencida o
     // revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
     // y el acceso explica qué pasó. Un 401 sin credencial, como una contraseña
-    // equivocada al entrar, lo resuelve su propio formulario.
+    // equivocada al entrar, lo resuelve su propio formulario. Se cierra solo
+    // la sesión dueña de la ruta: la otra sigue abierta.
     if (
       axios.isAxiosError(error) &&
       error.response?.status === UNAUTHORIZED &&
       error.config?.headers.has('Authorization') === true
     ) {
-      sesion.alVencer?.()
+      credentialOf(error.config).alVencer?.()
     }
     throw error
   },
 )
 
 /**
- * Pone o quita la credencial que acompana a cada peticion.
+ * Pone o quita la credencial que acompana a cada peticion de restaurante.
  *
  * La llama el almacen de sesion, nunca al reves: los servicios son la capa mas
  * baja y no pueden conocer el estado de cliente. Asi el token vive en un solo
  * lugar y ninguna pantalla tiene que acordarse de adjuntarlo.
  */
 export function setAuthToken(token: string | null): void {
-  if (token === null) {
-    delete api.defaults.headers.common.Authorization
-    return
-  }
-  api.defaults.headers.common.Authorization = `Bearer ${token}`
+  restaurante.token = token
+}
+
+/** La credencial de las peticiones a `/platform/*`. La llama el almacen de la sesion de plataforma. */
+export function setPlatformAuthToken(token: string | null): void {
+  plataforma.token = token
+}
+
+/** El token de restaurante abierto, para lo que no viaja por Axios (el canal de avisos). */
+export function currentAuthToken(): string | null {
+  return restaurante.token
 }
 
 /**

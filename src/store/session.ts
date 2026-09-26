@@ -3,7 +3,8 @@ import { create } from 'zustand'
 import { setAuthToken, setUnauthorizedHandler } from '../services/api'
 import { DEFAULT_TIME_ZONE } from '../services/format'
 import { logger } from '../services/logger'
-import { queryClient } from '../services/queryClient'
+import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
+import { clearQueriesExcept, PLATFORM_QUERY_ROOT } from '../services/queryClient'
 import type { CurrentUserResponse, PermissionCode } from '../api/types'
 
 // La version va en la clave: si cambia la forma de lo guardado, una sesion
@@ -11,7 +12,6 @@ import type { CurrentUserResponse, PermissionCode } from '../api/types'
 const STORAGE_KEY = 'resthub.session.v2'
 // Las versiones anteriores ya no se leen; tampoco se dejan con un token adentro.
 const OLD_STORAGE_KEYS = ['resthub.session.v1'] as const
-const MS_POR_SEGUNDO = 1000
 
 interface StoredSession {
   token: string
@@ -27,8 +27,12 @@ interface SessionState {
   signIn: (token: string, account: CurrentUserResponse) => void
   /** Aplica una lectura nueva de `GET /auth/me`: nombre, restaurante o permisos. */
   refresh: (account: CurrentUserResponse) => void
-  /** Cambia el token por uno renovado sin cerrar la sesion. */
-  renew: (token: string, account: CurrentUserResponse) => void
+  /**
+   * Cambia el token `origin` por uno renovado sin cerrar la sesion. Si la
+   * sesion ya no es la de `origin` (se cerro o entro otra cuenta mientras
+   * viajaba la renovacion), la respuesta se descarta.
+   */
+  renew: (origin: string, token: string, account: CurrentUserResponse) => void
   signOut: () => void
   /** Cierra la sesion porque el servidor ya no acepta el token. */
   expire: () => void
@@ -73,58 +77,23 @@ function writeStoredSession(session: StoredSession | null): void {
   }
 }
 
-/**
- * Cuando vence el token, en milisegundos, o `null` si no se puede leer.
- *
- * Solo se lee la fecha de vencimiento para no mostrar pantallas que igual van a
- * responder 401. La firma la comprueba el servidor, que es quien decide.
- */
-export function venceEn(token: string): number | null {
-  try {
-    const carga = token.split('.')[1] ?? ''
-    const datos = JSON.parse(atob(carga.replaceAll('-', '+').replaceAll('_', '/'))) as {
-      exp?: unknown
-    }
-    return typeof datos.exp === 'number' ? datos.exp * MS_POR_SEGUNDO : null
-  } catch {
-    return null
-  }
-}
-
-function estaVencido(token: string): boolean {
-  const vencimiento = venceEn(token)
-  return vencimiento !== null && vencimiento <= Date.now()
-}
-
-const temporizador: { id: ReturnType<typeof setTimeout> | undefined } = { id: undefined }
-
-// Cierra la sesion en el momento en que vence, en vez de esperar a que una
-// pantalla se quede sin datos por un 401.
-function programarVencimiento(token: string | null): void {
-  clearTimeout(temporizador.id)
-  const vencimiento = token === null ? null : venceEn(token)
-  if (vencimiento === null) {
-    return
-  }
-  temporizador.id = setTimeout(
-    () => {
-      useSession.getState().expire()
-    },
-    Math.max(vencimiento - Date.now(), 0),
-  )
-}
+// Cierra la sesion en el momento en que vence su token.
+const programarVencimiento = expiryTimer(() => {
+  useSession.getState().expire()
+})
 
 function limpiarSesion(): void {
   setAuthToken(null)
   writeStoredSession(null)
   programarVencimiento(null)
-  // Nada de la cuenta anterior queda en el cache para la siguiente.
-  queryClient.clear()
+  // Nada de la cuenta anterior queda en el cache para la siguiente. Lo del
+  // administrador del sistema es de otra sesion y se queda.
+  clearQueriesExcept(PLATFORM_QUERY_ROOT)
 }
 
 forgetOldSessions()
 const guardada = readStoredSession()
-const restored = guardada !== null && !estaVencido(guardada.token) ? guardada : null
+const restored = guardada !== null && !isTokenExpired(guardada.token) ? guardada : null
 if (guardada !== null && restored === null) {
   writeStoredSession(null)
 }
@@ -155,8 +124,8 @@ export const useSession = create<SessionState>((set, get) => ({
     set({ account })
   },
 
-  renew: (token, account) => {
-    if (get().token === null) {
+  renew: (origin, token, account) => {
+    if (get().token !== origin) {
       return
     }
     setAuthToken(token)
