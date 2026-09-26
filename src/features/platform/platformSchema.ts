@@ -4,7 +4,7 @@ import type {
   CreatePlatformRestaurantRequest,
   PlatformRestaurantDetail,
   UpdatePlatformRestaurantRequest,
-} from '../../api/platformTypes'
+} from '../../api/types'
 import { DEFAULT_TIME_ZONE } from '../../services/format'
 import {
   correoRule,

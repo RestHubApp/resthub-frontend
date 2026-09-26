@@ -1,5 +1,5 @@
 import { PLATFORM_PAGE_SIZE } from '../../api/platform'
-import type { PlatformActivityParams, PlatformRestaurantListParams } from '../../api/platformTypes'
+import type { PlatformActivityParams, PlatformRestaurantListParams } from '../../api/types'
 
 /** Una página del servidor, desde cero. Sin texto de búsqueda no se manda el filtro. */
 export function restaurantListParams(search: string, page: number): PlatformRestaurantListParams {

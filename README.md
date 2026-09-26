@@ -66,13 +66,10 @@ El script lee la variable de la terminal, no de `.env.local`. Después de
 regenerar, `pnpm build` señala cada pantalla que quedó desalineada con el contrato.
 Nadie edita el archivo generado: los alias legibles están en `src/api/types.ts`.
 
-**Excepción provisional:** los tipos del API de plataforma (`/platform/*`) están
-escritos a mano en `src/api/platformTypes.ts`, copiados del contrato, porque
-ese API todavía no estaba en el OpenAPI versionado. Cuando el backend lo
-publique: `pnpm generate:api`, cada tipo de ese archivo pasa a ser un alias de
-`components['schemas'][...]` en `src/api/types.ts`, se cambian los `import`
-de `src/api/platform.ts` y `features/platform` a `./types`, y se borra
-`platformTypes.ts`. `pnpm build` señala lo que quede desalineado.
+Los del API de plataforma (`/platform/*`) siguen la misma regla. El backend
+tiene dos esquemas `UpdateRestaurantRequest` (el del restaurante propio y el de
+la plataforma) y el OpenAPI los publica con el nombre del módulo delante; sus
+alias se toman del cuerpo de la operación para no depender de ese nombre.
 
 ## Estructura
 

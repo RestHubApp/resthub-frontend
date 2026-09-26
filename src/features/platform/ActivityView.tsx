@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { platformActivityQuery } from '../../api/platform'
-import type { PlatformActivityEntry } from '../../api/platformTypes'
+import type { PlatformActivityEntry } from '../../api/types'
 import DataTable, { type DataColumn } from '../../components/DataTable'
 import PageHeader from '../../components/PageHeader'
 import SectionCard from '../../components/SectionCard'

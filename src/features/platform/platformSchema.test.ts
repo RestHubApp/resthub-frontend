@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { PlatformRestaurantDetail } from '../../api/platformTypes'
+import type { PlatformRestaurantDetail } from '../../api/types'
 import {
   createRestaurantPayload,
   createRestaurantSchema,

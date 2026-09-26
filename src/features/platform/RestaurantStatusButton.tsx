@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { updatePlatformRestaurant } from '../../api/platform'
-import type { PlatformRestaurantDetail } from '../../api/platformTypes'
+import type { PlatformRestaurantDetail } from '../../api/types'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'

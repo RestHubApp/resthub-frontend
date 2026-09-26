@@ -15,7 +15,7 @@ import type {
   PlatformRestaurantPage,
   PlatformTokenResponse,
   UpdatePlatformRestaurantRequest,
-} from './platformTypes'
+} from './types'
 
 // El administrador del sistema: el equipo de RestHub, que da de alta los
 // restaurantes y los activa o desactiva. Todas sus rutas van bajo

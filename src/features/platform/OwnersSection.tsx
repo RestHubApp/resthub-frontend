@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import type { PlatformRestaurantDetail } from '../../api/platformTypes'
+import type { PlatformRestaurantDetail } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import FormDialog from '../../components/FormDialog'
 import Icon from '../../components/Icon'

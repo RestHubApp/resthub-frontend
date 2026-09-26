@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 import { updatePlatformRestaurant } from '../../api/platform'
-import type { PlatformRestaurantDetail } from '../../api/platformTypes'
+import type { PlatformRestaurantDetail } from '../../api/types'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import TextField from '../../components/TextField'

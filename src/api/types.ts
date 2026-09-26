@@ -68,7 +68,13 @@ export type CloseCashRequest = components['schemas']['CloseCashRequest']
 
 // El restaurante propio, con el tope de descuento del mesero.
 export type OwnRestaurant = components['schemas']['RestaurantResponse']
-export type UpdateRestaurantRequest = components['schemas']['UpdateRestaurantRequest']
+// El backend tiene dos esquemas llamados `UpdateRestaurantRequest` (el del
+// restaurante propio y el de la plataforma) y el OpenAPI los publica con el
+// nombre del módulo delante. Se toman del cuerpo de su operación para no
+// depender de ese nombre.
+export type UpdateRestaurantRequest = NonNullable<
+  operations['update_restaurant_api_v1_restaurant_patch']['requestBody']
+>['content']['application/json']
 export type OrderListParams = NonNullable<
   operations['list_orders_api_v1_orders_get']['parameters']['query']
 >
@@ -167,3 +173,27 @@ export type CustomerRequest = components['schemas']['CustomerRequest']
 export type Reservation = components['schemas']['ReservationResponse']
 export type ReservationRequest = components['schemas']['ReservationRequest']
 export type ReservationStatus = components['schemas']['ReservationStatus']
+
+// Administración del sistema (`/platform`): el equipo de RestHub, sus
+// restaurantes, sus encargados y la bitácora.
+export type PlatformAdmin = components['schemas']['PlatformAdminResponse']
+export type PlatformLoginRequest = components['schemas']['PlatformLoginRequest']
+export type PlatformTokenResponse = components['schemas']['PlatformAccessTokenResponse']
+export type PlatformMeResponse = components['schemas']['PlatformSessionResponse']
+export type PlatformRestaurantSummary = components['schemas']['RestaurantSummaryResponse']
+export type PlatformRestaurantPage = components['schemas']['RestaurantPageResponse']
+export type PlatformRestaurantListParams = NonNullable<
+  operations['list_restaurants_api_v1_platform_restaurants_get']['parameters']['query']
+>
+export type PlatformRestaurantDetail = components['schemas']['RestaurantDetailResponse']
+export type PlatformOwner = components['schemas']['OwnerResponse']
+export type PlatformOwnerRequest = components['schemas']['NewOwnerRequest']
+export type CreatePlatformRestaurantRequest = components['schemas']['CreateRestaurantRequest']
+export type UpdatePlatformRestaurantRequest = NonNullable<
+  operations['update_restaurant_api_v1_platform_restaurants__restaurant_id__patch']['requestBody']
+>['content']['application/json']
+export type PlatformActivityEntry = components['schemas']['PlatformActivityResponse']
+export type PlatformActivityPage = components['schemas']['PlatformActivityPageResponse']
+export type PlatformActivityParams = NonNullable<
+  operations['read_activity_api_v1_platform_activity_get']['parameters']['query']
+>

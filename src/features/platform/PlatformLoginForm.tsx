@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 import { platformLogin } from '../../api/platform'
-import type { PlatformAdmin } from '../../api/platformTypes'
+import type { PlatformAdmin } from '../../api/types'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import PasswordField from '../../components/PasswordField'

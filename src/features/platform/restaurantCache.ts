@@ -5,7 +5,7 @@ import {
   platformRestaurantQueryKey,
   platformRestaurantsQueryKey,
 } from '../../api/platform'
-import type { PlatformOwner, PlatformRestaurantDetail } from '../../api/platformTypes'
+import type { PlatformOwner, PlatformRestaurantDetail } from '../../api/types'
 
 function releer(queryClient: QueryClient): void {
   // Las listas, los conteos de personal y la bitácora cambian con cada alta

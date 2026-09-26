@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 import { platformQueryKey } from '../api/platform'
-import type { PlatformAdmin } from '../api/platformTypes'
+import type { PlatformAdmin } from '../api/types'
 import { setPlatformAuthToken, setPlatformUnauthorizedHandler } from '../services/api'
 import { logger } from '../services/logger'
 import { queryClient } from '../services/queryClient'

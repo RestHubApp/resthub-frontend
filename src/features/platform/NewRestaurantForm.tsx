@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { type FieldErrors, useForm } from 'react-hook-form'
 
 import { createPlatformRestaurant } from '../../api/platform'
-import type { PlatformRestaurantDetail } from '../../api/platformTypes'
+import type { PlatformRestaurantDetail } from '../../api/types'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import SectionCard from '../../components/SectionCard'

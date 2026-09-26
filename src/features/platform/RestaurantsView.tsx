@@ -3,7 +3,7 @@ import { useDeferredValue, useState } from 'react'
 import { Link } from 'react-router'
 
 import { platformRestaurantsQuery } from '../../api/platform'
-import type { PlatformRestaurantSummary } from '../../api/platformTypes'
+import type { PlatformRestaurantSummary } from '../../api/types'
 import DataTable, { type DataColumn } from '../../components/DataTable'
 import Icon from '../../components/Icon'
 import PageHeader from '../../components/PageHeader'
