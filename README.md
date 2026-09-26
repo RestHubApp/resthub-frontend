@@ -96,6 +96,15 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
   pantallas del encargado (tablero, historial, menú, mesas, inventario,
   personal, perfil y panel) se descargan al abrirlas (`lazy` en
   `src/router/index.tsx`).
+- Con la sesión abierta, el armazón baja en ratos libres
+  (`requestIdleCallback`) los archivos de las pantallas que la cuenta puede
+  abrir. Al pasar el puntero, enfocar o tocar un enlace del menú, adelanta
+  además la consulta principal de esa pantalla. Las rutas y la precarga salen
+  de la misma lista de `import()` del router; cada consulta se define una vez
+  con `queryOptions` en `src/api/` y la usan la vista y la precarga.
+- Después de guardar, las pantallas ponen en el caché lo que devolvió el
+  servidor y releen de fondo, sin esperar ese segundo viaje para mostrar el
+  cambio. Mientras carga una lista se ve su silueta, no un «Cargando…».
 
 ## Tema oscuro (preparado, no activo)
 
