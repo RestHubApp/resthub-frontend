@@ -10,6 +10,7 @@ import TextField from '../../components/TextField'
 import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
 import { onSubmit } from '../../hooks/formSubmit'
+import { withTable } from './tableCache'
 import { MAX_LABEL, tableSchema, type TableValues } from './tableSchema'
 import { useTableMutation } from './useTableMutation'
 
@@ -31,6 +32,7 @@ export default function TableFormDialog({ table, open, onOpenChange }: TableForm
       table === null ? createTable(valores) : updateTable(table.id, valores),
     failure: 'No se pudo guardar la mesa.',
     success: table === null ? 'Mesa creada.' : 'Mesa renombrada.',
+    updateCache: withTable,
     onSuccess: () => {
       reset()
       onOpenChange(false)

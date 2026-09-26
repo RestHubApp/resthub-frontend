@@ -12,6 +12,7 @@ import SectionCard from '../../components/SectionCard'
 import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
 import TableAdminRow from './TableAdminRow'
+import { withOrder } from './tableCache'
 import TableFormDialog from './TableFormDialog'
 import { useTableMutation } from './useTableMutation'
 
@@ -33,7 +34,11 @@ export default function TablesView() {
   const mesas = useQuery(tablesQuery(true))
   // `undefined` cerrada; `null` para crear; una mesa para renombrarla.
   const [editando, setEditando] = useState<TableState | null | undefined>(undefined)
-  const orden = useTableMutation({ mutationFn: reorderTables, failure: 'No se pudo cambiar el orden.' })
+  const orden = useTableMutation({
+    mutationFn: reorderTables,
+    failure: 'No se pudo cambiar el orden.',
+    updateCache: withOrder,
+  })
   const lista = mesas.data ?? []
 
   return (

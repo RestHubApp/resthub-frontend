@@ -2,6 +2,7 @@ import { tableName, updateTable } from '../../api/tables'
 import type { TableState } from '../../api/types'
 import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
+import { withTable } from './tableCache'
 import { useTableMutation } from './useTableMutation'
 
 interface TableStatusButtonProps {
@@ -19,6 +20,7 @@ export default function TableStatusButton({ table }: TableStatusButtonProps) {
   const estado = useTableMutation({
     mutationFn: () => updateTable(table.id, { is_active: !table.is_active }),
     failure: 'No se pudo cambiar la mesa.',
+    updateCache: withTable,
     success: table.is_active ? `${tableName(table.label)} desactivada.` : `${tableName(table.label)} activada.`,
   })
   const bloqueada = table.is_active && table.active_order !== null
