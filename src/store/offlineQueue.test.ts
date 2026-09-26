@@ -42,6 +42,16 @@ async function cola(inicial: Record<string, string> = {}) {
   return { ...(await import('./offlineQueue')), storage }
 }
 
+// Una pestaña de vista previa: ya abrió su sesión y quedó marcada.
+async function colaDeVistaPrevia() {
+  const local = fakeStorage()
+  const pestana = fakeStorage({ 'resthub.vista-previa.pestana.v1': '1' })
+  vi.stubGlobal('localStorage', local)
+  vi.stubGlobal('sessionStorage', pestana)
+  vi.resetModules()
+  return { ...(await import('./offlineQueue')), local, pestana }
+}
+
 beforeEach(() => {
   vi.unstubAllGlobals()
 })
@@ -119,10 +129,60 @@ describe('varias pestañas', () => {
     subscribeQueue(aviso)
 
     storage.datos.set(V2, JSON.stringify([pedido('a', mesero), pedido('b', mesero)]))
-    ventana.dispatchEvent(Object.assign(new Event('storage'), { key: V2 }))
+    ventana.dispatchEvent(Object.assign(new Event('storage'), { key: V2, storageArea: storage }))
 
     expect(aviso).toHaveBeenCalled()
     expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a', 'Mesa b'])
+  })
+})
+
+describe('en una vista previa', () => {
+  it('la cola vive en el sessionStorage de la pestaña y no toca localStorage', async () => {
+    const { enqueueOrder, queuedOrders, local, pestana } = await colaDeVistaPrevia()
+    local.datos.set(V2, JSON.stringify([pedido('real', mesero)]))
+
+    enqueueOrder(pedido('muestra', mesero))
+
+    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa muestra'])
+    expect(JSON.parse(local.datos.get(V2) ?? '[]')).toEqual([pedido('real', mesero)])
+    expect(JSON.parse(pestana.datos.get(V2) ?? '[]')).toEqual([pedido('muestra', mesero)])
+  })
+
+  it('un cambio en la cola real de otra pestaña no le llega', async () => {
+    const ventana = new EventTarget()
+    vi.stubGlobal('window', ventana)
+    const { subscribeQueue, local } = await colaDeVistaPrevia()
+    const aviso = vi.fn()
+    subscribeQueue(aviso)
+
+    ventana.dispatchEvent(Object.assign(new Event('storage'), { key: V2, storageArea: local }))
+
+    expect(aviso).not.toHaveBeenCalled()
+  })
+})
+
+describe('discardPreviewQueue', () => {
+  it('en una vista previa vacía la cola entera de la pestaña, de cualquier cuenta', async () => {
+    const { enqueueOrder, discardPreviewQueue, queuedOrders, local, pestana } = await colaDeVistaPrevia()
+    local.datos.set(V2, JSON.stringify([pedido('real', mesero)]))
+    enqueueOrder(pedido('a', mesero))
+    enqueueOrder(pedido('b', otroMesero))
+
+    discardPreviewQueue()
+
+    expect(queuedOrders(mesero)).toEqual([])
+    expect(queuedOrders(otroMesero)).toEqual([])
+    expect(pestana.datos.has(V2)).toBe(false)
+    expect(JSON.parse(local.datos.get(V2) ?? '[]')).toEqual([pedido('real', mesero)])
+  })
+
+  it('en una pestaña normal no toca la cola del navegador', async () => {
+    const { enqueueOrder, discardPreviewQueue, queuedOrders } = await cola()
+    enqueueOrder(pedido('a', mesero))
+
+    discardPreviewQueue()
+
+    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a'])
   })
 })
 

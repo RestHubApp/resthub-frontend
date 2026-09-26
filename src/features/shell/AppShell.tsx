@@ -1,10 +1,13 @@
 import { Outlet } from 'react-router'
 
 import AccessibilityWidget from '../../components/AccessibilityWidget'
-import { useSession } from '../../store/session'
+import { isPreviewTab } from '../../services/tabStorage'
+import { usePreview, useSession } from '../../store/session'
 import BottomNav from './BottomNav'
 import Brand from './Brand'
 import { entriesFor } from './navigation'
+import PreviewBanner from './PreviewBanner'
+import PreviewEndedView from './PreviewEndedView'
 import RestaurantName from './RestaurantName'
 import { type ScreenPreload, ScreenPreloadContext } from './screenPreload'
 import SideNav from './SideNav'
@@ -41,10 +44,15 @@ interface AppShellProps {
  */
 export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
   const account = useSession((state) => state.account)
+  const preview = usePreview()
   useAccountRefresh()
   useSessionRenewal()
   useIdlePreload(screens)
 
+  // Una pestaña de vista previa sin sesión no ofrece el acceso normal.
+  if (account === null && isPreviewTab()) {
+    return <PreviewEndedView />
+  }
   if (account === null) {
     return (
       <div className="flex min-h-dvh flex-col bg-background">
@@ -64,6 +72,7 @@ export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
 
   return (
     <ScreenPreloadContext value={screens}>
+      {preview ? <PreviewBanner account={account} /> : null}
       <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
         {SKIP_LINK}
         <AccessibilityWidget />
@@ -71,7 +80,7 @@ export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
         <SideNav entries={entries} account={account} />
 
         <div className="flex min-h-dvh min-w-0 flex-col">
-          <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-card px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 lg:hidden">
+          <header className="sticky top-[var(--preview-banner-h,0px)] z-30 flex items-center gap-3 border-b bg-card px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 lg:hidden">
             <Brand to="/" compact />
             <RestaurantName name={account.restaurant.name} variant="header" />
           </header>

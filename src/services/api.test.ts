@@ -138,6 +138,26 @@ describe('cabecera Authorization de cada petición', () => {
     expect(alVencerRestaurante).not.toHaveBeenCalled()
   })
 
+  it('`withoutCredential` no manda ningún token aunque haya sesiones abiertas', async () => {
+    setAuthToken('r1')
+    setPlatformAuthToken('p1')
+    const sinCredencial = async (url: string) =>
+      (await api.post<string | null>(url, {}, { adapter: eco, withoutCredential: true })).data
+    expect(await sinCredencial('/auth/preview')).toBeNull()
+    expect(await sinCredencial(RESTAURANTES)).toBeNull()
+    // Las demás peticiones siguen con su credencial.
+    expect(await cabeceraDe('/orders')).toBe('Bearer r1')
+  })
+
+  it('un 401 de una petición `withoutCredential` no cierra la sesión abierta', async () => {
+    const alVencerRestaurante = vi.fn()
+    setUnauthorizedHandler(alVencerRestaurante)
+    setAuthToken('r1')
+
+    await expect(api.post('/auth/preview', {}, { adapter: rechazo, withoutCredential: true })).rejects.toThrow()
+    expect(alVencerRestaurante).not.toHaveBeenCalled()
+  })
+
   it('un 401 sin credencial (contraseña equivocada) no cierra nada', async () => {
     const alVencerPlataforma = vi.fn()
     setPlatformUnauthorizedHandler(alVencerPlataforma)

@@ -72,6 +72,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Canjear un código de vista previa por una sesión del local de muestra
+         * @description Lo llama la pestaña nueva que abre la administración del sistema.
+         *
+         *     Sin autenticación previa: el código es la credencial. Sirve una sola vez y
+         *     por 60 segundos; el token que entrega dura 30 minutos y no se renueva.
+         */
+        post: operations["exchange_preview_code_api_v1_auth_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/refresh": {
         parameters: {
             query?: never;
@@ -88,6 +111,9 @@ export interface paths {
          *     El celular del mesero lo pide antes de que venza el actual, así el turno
          *     no se corta cada hora. Una cuenta desactivada no llega acá: el principal
          *     ya se validó contra la base.
+         *
+         *     Una vista previa no se renueva: vence a los 30 minutos y se vuelve a abrir
+         *     desde la plataforma, que la deja otra vez en su bitácora.
          */
         post: operations["refresh_token_api_v1_auth_refresh_post"];
         delete?: never;
@@ -1370,6 +1396,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Código de un solo uso para ver la aplicación como encargado o mesero de muestra */
+        post: operations["start_preview_api_v1_platform_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/restaurants": {
         parameters: {
             query?: never;
@@ -1417,6 +1460,40 @@ export interface paths {
         put?: never;
         /** Agregar un encargado a un restaurante */
         post: operations["add_owner_api_v1_platform_restaurants__restaurant_id__owners_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/sandbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El local de muestra vigente */
+        get: operations["read_sandbox_api_v1_platform_sandbox_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/sandbox/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archivar el local de muestra y crear uno nuevo con los datos de muestra */
+        post: operations["reset_sandbox_api_v1_platform_sandbox_reset_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1669,6 +1746,8 @@ export interface components {
             expires_in: number;
             /** Permissions */
             permissions: components["schemas"]["Permission"][];
+            /** Preview */
+            preview: boolean;
             restaurant: components["schemas"]["SessionRestaurantResponse"];
             /**
              * Token Type
@@ -3153,6 +3232,31 @@ export interface components {
             /** Timezone */
             timezone?: string | null;
         };
+        /**
+         * PreviewAs
+         * @description Como quién se abre la vista previa: la cuenta de muestra de ese tipo de rol.
+         * @enum {string}
+         */
+        PreviewAs: "owner" | "waiter";
+        /**
+         * PreviewCodeResponse
+         * @description Se canjea una sola vez en `POST /api/v1/auth/preview`, dentro de `expires_in` segundos.
+         */
+        PreviewCodeResponse: {
+            /** Code */
+            code: string;
+            /** Expires In */
+            expires_in: number;
+        };
+        /** PreviewExchangeRequest */
+        PreviewExchangeRequest: {
+            /** Code */
+            code: string;
+        };
+        /** PreviewRequest */
+        PreviewRequest: {
+            as: components["schemas"]["PreviewAs"];
+        };
         /** PreviousTotals */
         PreviousTotals: {
             /** Average Ticket */
@@ -3656,6 +3760,20 @@ export interface components {
             /** Sales Change Percent */
             sales_change_percent: string | null;
         };
+        /** SandboxAccountResponse */
+        SandboxAccountResponse: {
+            /** Full Name */
+            full_name: string;
+            kind: components["schemas"]["RoleKind"];
+            /** Role Label */
+            role_label: string;
+        };
+        /** SandboxResponse */
+        SandboxResponse: {
+            /** Accounts */
+            accounts: components["schemas"]["SandboxAccountResponse"][];
+            restaurant: components["schemas"]["RestaurantSummaryResponse"] | null;
+        };
         /**
          * SessionResponse
          * @description La cuenta propia, su restaurante y lo que su rol le deja hacer.
@@ -3666,6 +3784,8 @@ export interface components {
         SessionResponse: {
             /** Permissions */
             permissions: components["schemas"]["Permission"][];
+            /** Preview */
+            preview: boolean;
             restaurant: components["schemas"]["SessionRestaurantResponse"];
             user: components["schemas"]["SessionUserResponse"];
         };
@@ -4141,6 +4261,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exchange_preview_code_api_v1_auth_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewExchangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessTokenResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -6949,6 +7102,39 @@ export interface operations {
             };
         };
     };
+    start_preview_api_v1_platform_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviewCodeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_restaurants_api_v1_platform_restaurants_get: {
         parameters: {
             query?: {
@@ -7113,6 +7299,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_sandbox_api_v1_platform_sandbox_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SandboxResponse"];
+                };
+            };
+        };
+    };
+    reset_sandbox_api_v1_platform_sandbox_reset_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SandboxResponse"];
                 };
             };
         };
