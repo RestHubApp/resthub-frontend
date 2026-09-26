@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { activeOrdersQueryKey, fetchActiveOrders } from '../../../api/orders'
+import { activeOrdersQuery } from '../../../api/orders'
 import EmptyState from '../../../components/EmptyState'
 import QueryError from '../QueryError'
 import OrderList from './OrderList'
 
 /** Los pedidos para llevar que todavia no se cobran, de todos los meseros. */
 export default function TakeawayPanel() {
-  const activos = useQuery({ queryKey: activeOrdersQueryKey, queryFn: fetchActiveOrders })
+  const activos = useQuery(activeOrdersQuery)
 
   if (activos.isPending) {
     return <EmptyState title="Cargando pedidos…" />

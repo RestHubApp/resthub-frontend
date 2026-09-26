@@ -1,3 +1,5 @@
+import { queryOptions } from '@tanstack/react-query'
+
 import { api } from '../services/api'
 import type { CreateTableRequest, TableResponse, TableState, UpdateTableRequest } from './types'
 
@@ -29,6 +31,14 @@ export async function fetchTables(includeInactive = false): Promise<TableState[]
     params: includeInactive ? { include_inactive: true } : undefined,
   })
   return data
+}
+
+/** La consulta de las mesas, la misma para la pantalla y para precargarla. */
+export function tablesQuery(includeInactive: boolean) {
+  return queryOptions({
+    queryKey: tablesListQueryKey(includeInactive),
+    queryFn: () => fetchTables(includeInactive),
+  })
 }
 
 export async function createTable(payload: CreateTableRequest): Promise<TableResponse> {

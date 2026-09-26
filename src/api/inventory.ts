@@ -1,3 +1,5 @@
+import { queryOptions } from '@tanstack/react-query'
+
 import { api } from '../services/api'
 import type {
   AdjustmentRequest,
@@ -47,6 +49,12 @@ export async function fetchIngredients(includeInactive = false): Promise<Ingredi
   return data
 }
 
+/** Los insumos activos, que comparten la tabla, las recetas y la precarga. */
+export const ingredientsQuery = queryOptions({
+  queryKey: ingredientsQueryKey,
+  queryFn: () => fetchIngredients(),
+})
+
 export async function createIngredient(payload: CreateIngredientRequest): Promise<Ingredient> {
   const { data } = await api.post<Ingredient>('/inventory/ingredients', payload)
   return data
@@ -66,6 +74,8 @@ export async function fetchLowStock(): Promise<Ingredient[]> {
   const { data } = await api.get<Ingredient[]>('/inventory/alerts/low-stock')
   return data
 }
+
+export const lowStockQuery = queryOptions({ queryKey: lowStockQueryKey, queryFn: fetchLowStock })
 
 export async function fetchMovements(params: MovementListParams): Promise<MovementPage> {
   // El tipo es una lista: FastAPI la espera como `kind=a&kind=b`, sin corchetes.
@@ -97,6 +107,8 @@ export async function fetchDishCosts(): Promise<DishCost[]> {
   const { data } = await api.get<DishCost[]>('/inventory/recipes')
   return data
 }
+
+export const dishCostsQuery = queryOptions({ queryKey: dishCostsQueryKey, queryFn: fetchDishCosts })
 
 export async function fetchRecipe(menuItemId: number): Promise<Recipe> {
   const { data } = await api.get<Recipe>(recipePath(menuItemId))

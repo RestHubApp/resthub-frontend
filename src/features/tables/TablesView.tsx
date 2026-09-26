@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { fetchTables, reorderTables, tablesListQueryKey } from '../../api/tables'
+import { reorderTables, tablesQuery } from '../../api/tables'
 import type { TableState } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import FormMessage from '../../components/FormMessage'
@@ -29,7 +29,7 @@ function moved(tables: readonly TableState[], index: number, direction: -1 | 1):
  * siga el recorrido del salon.
  */
 export default function TablesView() {
-  const mesas = useQuery({ queryKey: tablesListQueryKey(true), queryFn: () => fetchTables(true) })
+  const mesas = useQuery(tablesQuery(true))
   // `undefined` cerrada; `null` para crear; una mesa para renombrarla.
   const [editando, setEditando] = useState<TableState | null | undefined>(undefined)
   const orden = useTableMutation({ mutationFn: reorderTables, failure: 'No se pudo cambiar el orden.' })

@@ -1,3 +1,5 @@
+import { queryOptions } from '@tanstack/react-query'
+
 import { api } from '../services/api'
 import type {
   ChangeItemRequest,
@@ -41,6 +43,8 @@ export async function fetchOrderMenu(): Promise<OrderMenu> {
   return data
 }
 
+export const orderMenuQuery = queryOptions({ queryKey: orderMenuQueryKey, queryFn: fetchOrderMenu })
+
 export async function fetchOrders(params: OrderListParams = {}): Promise<OrderPageResponse> {
   // El estado es una lista: FastAPI la espera como `status=a&status=b`.
   const { data } = await api.get<OrderPageResponse>('/orders', {
@@ -55,6 +59,11 @@ export async function fetchActiveOrders(): Promise<OrderResponse[]> {
   const { data } = await api.get<OrderResponse[]>('/orders/active')
   return data
 }
+
+export const activeOrdersQuery = queryOptions({
+  queryKey: activeOrdersQueryKey,
+  queryFn: fetchActiveOrders,
+})
 
 export async function fetchOrder(orderId: number): Promise<OrderResponse> {
   const { data } = await api.get<OrderResponse>(orderPath(orderId))

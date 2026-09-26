@@ -1,4 +1,4 @@
-import { fetchSalesSummary } from '../../api/insights'
+import { salesSummaryQuery } from '../../api/insights'
 import HourlySection from './HourlySection'
 import KpiRow from './KpiRow'
 import LowStockSection from './LowStockSection'
@@ -24,7 +24,7 @@ import { useTimeZone } from '../../store/session'
 export default function InsightsView() {
   const zona = useTimeZone()
   const range = useInsightsRange(zona)
-  const summary = useInsightsReport('summary', range.params, fetchSalesSummary)
+  const summary = useInsightsReport(salesSummaryQuery(range.params))
   const periodo = summary.data?.period
 
   return (

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
-import { activeOrdersQueryKey, fetchActiveOrders } from '../../api/orders'
+import { activeOrdersQuery } from '../../api/orders'
 import type { OrderResponse, OrderStatus } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import Icon from '../../components/Icon'
@@ -37,7 +37,7 @@ function contar(orders: readonly OrderResponse[]): Record<TypeFilterValue, numbe
 export default function BoardView() {
   const live = useLiveUpdates()
   const now = useNow()
-  const activos = useQuery({ queryKey: activeOrdersQueryKey, queryFn: fetchActiveOrders })
+  const activos = useQuery(activeOrdersQuery)
   const [tipo, setTipo] = useState<TypeFilterValue>('all')
   const [cobrar, setCobrar] = useState<OrderResponse | null>(null)
   const [cancelar, setCancelar] = useState<OrderResponse | null>(null)

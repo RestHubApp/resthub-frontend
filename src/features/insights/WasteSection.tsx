@@ -1,4 +1,4 @@
-import { fetchWasteReport } from '../../api/insights'
+import { fetchWasteReport, insightsReportQuery } from '../../api/insights'
 import type { InsightsRangeParams, WasteByIngredient } from '../../api/types'
 import ChartCard from './charts/ChartCard'
 import DataGrid from './charts/DataGrid'
@@ -22,7 +22,7 @@ const COLUMNS = [
 
 /** Lo que se perdió, por qué y en qué insumos. La causa la clasifica la IA. */
 export default function WasteSection({ range }: WasteSectionProps) {
-  const report = useInsightsReport(WASTE_REPORT, range, fetchWasteReport)
+  const report = useInsightsReport(insightsReportQuery(WASTE_REPORT, range, fetchWasteReport))
 
   return (
     <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar las mermas.">

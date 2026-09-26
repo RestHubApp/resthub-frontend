@@ -1,4 +1,4 @@
-import { fetchPaymentMix } from '../../api/insights'
+import { fetchPaymentMix, insightsReportQuery } from '../../api/insights'
 import type { InsightsRangeParams, PaymentShare } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import BarList from './charts/BarList'
@@ -24,7 +24,7 @@ const COLUMNS = [
  * cerca, y una torta no deja comparar ángulos parecidos.
  */
 export default function PaymentsSection({ range }: PaymentsSectionProps) {
-  const report = useInsightsReport('payments', range, fetchPaymentMix)
+  const report = useInsightsReport(insightsReportQuery('payments', range, fetchPaymentMix))
 
   return (
     <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar los medios de pago.">

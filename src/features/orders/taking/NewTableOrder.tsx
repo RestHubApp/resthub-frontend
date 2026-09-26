@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { fetchTables, tableName, tablesListQueryKey } from '../../../api/tables'
+import { tableName, tablesQuery } from '../../../api/tables'
 import EmptyState from '../../../components/EmptyState'
 import { Button } from '../../../components/ui/button'
 import OccupiedNotice from './OccupiedNotice'
@@ -13,7 +13,7 @@ interface NewTableOrderProps {
 
 /** Un pedido nuevo en una mesa. El nombre de la mesa sale del estado del salon. */
 export default function NewTableOrder({ tableId }: NewTableOrderProps) {
-  const mesas = useQuery({ queryKey: tablesListQueryKey(false), queryFn: () => fetchTables() })
+  const mesas = useQuery(tablesQuery(false))
   const mesa = mesas.data?.find((item) => item.id === tableId)
 
   if (mesas.isSuccess && mesa === undefined) {

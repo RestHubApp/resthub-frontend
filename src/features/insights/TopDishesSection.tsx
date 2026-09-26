@@ -1,4 +1,4 @@
-import { fetchTopDishes } from '../../api/insights'
+import { fetchTopDishes, insightsReportQuery } from '../../api/insights'
 import type { InsightsRangeParams, TopDish } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import BarList from './charts/BarList'
@@ -20,7 +20,7 @@ const COLUMNS = [
 
 /** Los diez platos que más salieron, por porciones vendidas. */
 export default function TopDishesSection({ range }: TopDishesSectionProps) {
-  const report = useInsightsReport('dishes-top', range, fetchTopDishes)
+  const report = useInsightsReport(insightsReportQuery('dishes-top', range, fetchTopDishes))
 
   return (
     <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar los platos más vendidos.">

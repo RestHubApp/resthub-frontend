@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useDeferredValue, useMemo, useState } from 'react'
 
-import { fetchOrderMenu, orderMenuQueryKey } from '../../../api/orders'
+import { orderMenuQuery } from '../../../api/orders'
 import type { OrderMenuItem } from '../../../api/types'
 import EmptyState from '../../../components/EmptyState'
 import QueryError from '../QueryError'
@@ -19,7 +19,7 @@ interface MenuPickerProps {
 
 /** La carta para elegir platos: busqueda, categorias y la lista. */
 export default function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) {
-  const carta = useQuery({ queryKey: orderMenuQueryKey, queryFn: fetchOrderMenu })
+  const carta = useQuery(orderMenuQuery)
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState<number | null>(null)
   const termino = useDeferredValue(busqueda)

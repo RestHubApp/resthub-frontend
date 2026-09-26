@@ -1,3 +1,5 @@
+import { queryOptions } from '@tanstack/react-query'
+
 import { api } from '../services/api'
 import type {
   CreateCategoryRequest,
@@ -23,6 +25,13 @@ export async function fetchMenu(includeInactive = false): Promise<MenuResponse> 
     params: includeInactive ? { include_inactive: true } : undefined,
   })
   return data
+}
+
+export function menuQuery(includeInactive: boolean) {
+  return queryOptions({
+    queryKey: menuListQueryKey(includeInactive),
+    queryFn: () => fetchMenu(includeInactive),
+  })
 }
 
 function categoryPath(categoryId: number, action = ''): string {

@@ -1,4 +1,4 @@
-import { fetchDishMargins } from '../../api/insights'
+import { fetchDishMargins, insightsReportQuery } from '../../api/insights'
 import type { InsightsRangeParams } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import SectionCard from '../../components/SectionCard'
@@ -12,7 +12,7 @@ interface MarginsSectionProps {
 
 /** Cuánto deja cada plato: precio menos receta, y la ganancia bruta del período. */
 export default function MarginsSection({ range }: MarginsSectionProps) {
-  const report = useInsightsReport('dishes-margins', range, fetchDishMargins)
+  const report = useInsightsReport(insightsReportQuery('dishes-margins', range, fetchDishMargins))
   const sinReceta = report.data?.dishes.filter((dish) => dish.recipe_cost === null).length ?? 0
 
   return (

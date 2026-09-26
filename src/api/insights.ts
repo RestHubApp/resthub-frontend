@@ -1,3 +1,5 @@
+import { queryOptions } from '@tanstack/react-query'
+
 import { api } from '../services/api'
 import type {
   AiDecisionPage,
@@ -27,6 +29,15 @@ export function insightsReportKey(report: string, range: InsightsRangeParams) {
   return [...insightsQueryKey, report, range] as const
 }
 
+/** Un reporte del rango: la clave y la petición salen juntas para que no diverjan. */
+export function insightsReportQuery<T>(
+  report: string,
+  range: InsightsRangeParams,
+  fetcher: (range: InsightsRangeParams) => Promise<T>,
+) {
+  return queryOptions({ queryKey: insightsReportKey(report, range), queryFn: () => fetcher(range) })
+}
+
 export const restockQueryKey = [...insightsQueryKey, 'restock'] as const
 export const aiDecisionsQueryKey = [...insightsQueryKey, 'ai-decisions'] as const
 export const orderNotesQueryKey = [...insightsQueryKey, 'order-notes'] as const
@@ -38,6 +49,11 @@ async function report<T>(path: string, range: InsightsRangeParams, extra = {}): 
 
 export function fetchSalesSummary(range: InsightsRangeParams): Promise<SalesSummary> {
   return report('/summary', range)
+}
+
+/** El resumen del período, lo primero que muestra el panel. */
+export function salesSummaryQuery(range: InsightsRangeParams) {
+  return insightsReportQuery('summary', range, fetchSalesSummary)
 }
 
 export function fetchDailySales(range: InsightsRangeParams): Promise<DailySales> {

@@ -1,4 +1,4 @@
-import { fetchHourlySales } from '../../api/insights'
+import { fetchHourlySales, insightsReportQuery } from '../../api/insights'
 import type { HourlyCell, InsightsRangeParams } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import ChartCard from './charts/ChartCard'
@@ -37,7 +37,7 @@ function describe(cell: HourlyCell) {
 
 /** Cuándo se llena el local: día de la semana por hora, con la hora pico escrita. */
 export default function HourlySection({ range }: HourlySectionProps) {
-  const report = useInsightsReport('sales-hourly', range, fetchHourlySales)
+  const report = useInsightsReport(insightsReportQuery('sales-hourly', range, fetchHourlySales))
 
   return (
     <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el mapa por hora.">

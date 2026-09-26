@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { dishCostsQueryKey, fetchDishCosts } from '../../api/inventory'
+import { dishCostsQuery } from '../../api/inventory'
 import type { DishCost } from '../../api/types'
 import DataTable, { type DataColumn } from '../../components/DataTable'
 import FormMessage from '../../components/FormMessage'
@@ -77,7 +77,7 @@ function avisoSinReceta(cantidad: number): string {
 
 /** Cuánto cuesta preparar cada plato y cuánto deja, según su receta. */
 export default function RecipesPanel({ canManage }: RecipesPanelProps) {
-  const costos = useQuery({ queryKey: dishCostsQueryKey, queryFn: fetchDishCosts })
+  const costos = useQuery(dishCostsQuery)
 
   if (costos.isError) {
     return (

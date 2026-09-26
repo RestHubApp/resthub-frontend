@@ -1,3 +1,5 @@
+import { queryOptions } from '@tanstack/react-query'
+
 import { api } from '../services/api'
 import type {
   CreateStaffRequest,
@@ -31,6 +33,10 @@ export async function fetchStaff(params: StaffListParams = {}): Promise<StaffLis
     paramsSerializer: { indexes: null },
   })
   return data
+}
+
+export function staffQuery(params: StaffListParams) {
+  return queryOptions({ queryKey: staffListQueryKey(params), queryFn: () => fetchStaff(params) })
 }
 
 export async function createStaff(payload: CreateStaffRequest): Promise<StaffResponse> {

@@ -1,4 +1,4 @@
-import { fetchDailySales } from '../../api/insights'
+import { fetchDailySales, insightsReportQuery } from '../../api/insights'
 import type { DailySalesPoint, InsightsRangeParams } from '../../api/types'
 import ChartCard from './charts/ChartCard'
 import DataGrid from './charts/DataGrid'
@@ -20,7 +20,7 @@ const COLUMNS = [
 
 /** Ventas por día: la tendencia del período. */
 export default function SalesTrendSection({ range }: SalesTrendSectionProps) {
-  const report = useInsightsReport('sales-daily', range, fetchDailySales)
+  const report = useInsightsReport(insightsReportQuery('sales-daily', range, fetchDailySales))
 
   return (
     <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar las ventas por día.">

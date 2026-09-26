@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { fetchStaff, MAX_STAFF_PAGE, staffListQueryKey } from '../../api/staff'
 import type { StaffResponse } from '../../api/types'
 import DataTable, { type DataColumn } from '../../components/DataTable'
 import FormDialog from '../../components/FormDialog'
@@ -14,6 +13,7 @@ import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
 import { useSession } from '../../store/session'
 import StaffCreateForm from './StaffCreateForm'
+import { STAFF_LIST_QUERY } from './staffList'
 import StaffRowActions from './StaffRowActions'
 
 function columnas(propiaId: number | undefined): DataColumn<StaffResponse>[] {
@@ -43,16 +43,9 @@ function columnas(propiaId: number | undefined): DataColumn<StaffResponse>[] {
   ]
 }
 
-// Un restaurante pequeno tiene pocas cuentas: se piden todas en una pagina
-// del servidor y la tabla pagina en el navegador.
-const CONSULTA = { limit: MAX_STAFF_PAGE, ordering: 'full_name' } as const
-
 /** Las cuentas de meseros y encargados del restaurante. */
 export default function StaffView() {
-  const personal = useQuery({
-    queryKey: staffListQueryKey(CONSULTA),
-    queryFn: () => fetchStaff(CONSULTA),
-  })
+  const personal = useQuery(STAFF_LIST_QUERY)
   const propiaId = useSession((state) => state.account?.user.id)
   const [creando, setCreando] = useState(false)
 
