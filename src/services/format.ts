@@ -191,6 +191,24 @@ export function formatMinutes(minutes: number): string {
   return `${String(Math.floor(minutes / MINUTES_PER_HOUR))} h ${rest} min`
 }
 
+const SECONDS_PER_MINUTE = 60
+
+/**
+ * Lo que falta para un vencimiento, como un reloj: `29:59`, `0:05`, `1:02:03`.
+ *
+ * Se redondea hacia arriba: mientras quede algo, no se lee `0:00`.
+ */
+export function formatCountdown(ms: number): string {
+  const segundos = Math.max(0, Math.ceil(ms / THOUSAND))
+  const minutos = Math.floor(segundos / SECONDS_PER_MINUTE)
+  const ss = String(segundos % SECONDS_PER_MINUTE).padStart(2, '0')
+  if (minutos < MINUTES_PER_HOUR) {
+    return `${String(minutos)}:${ss}`
+  }
+  const mm = String(minutos % MINUTES_PER_HOUR).padStart(2, '0')
+  return `${String(Math.floor(minutos / MINUTES_PER_HOUR))}:${mm}:${ss}`
+}
+
 // Las horas que se escriben (una reserva a las 20:00) son del reloj del local,
 // no del navegador: quien reserva desde otra zona igual escribe la hora de acá.
 

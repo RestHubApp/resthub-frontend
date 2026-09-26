@@ -15,7 +15,7 @@ export default function SideNav({ entries, account }: SideNavProps) {
   return (
     // La columna pinta el fondo de punta a punta; adentro, el menú queda fijo al desplazarse.
     <div className="hidden border-r bg-card lg:block">
-      <aside className="sticky top-0 flex h-screen flex-col gap-5 p-4">
+      <aside className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-5 p-4">
         <div className="px-1 pt-1">
           <Brand to="/" />
         </div>
