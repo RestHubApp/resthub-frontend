@@ -12,22 +12,13 @@ import { NativeSelect, NativeSelectOption } from '../../../components/ui/native-
 import { errorMessage } from '../../../services/api'
 import { formatMoney, toCents } from '../../../services/format'
 import CustomerFields from './CustomerFields'
+import { customerComplete, documentOptions, effectiveDocument } from './invoiceDocument'
 
 interface InvoiceDialogProps {
   readonly order: OrderResponse
   readonly open: boolean
   readonly onClose: () => void
 }
-
-// Sobre este monto una boleta necesita el documento del cliente (SUNAT).
-const LIMITE_ANONIMA = 70000
-
-const DOCUMENTOS: readonly { value: DocumentType; label: string }[] = [
-  { value: 'none', label: 'Sin documento (clientes varios)' },
-  { value: 'dni', label: 'DNI' },
-  { value: 'ce', label: 'Carné de extranjería' },
-  { value: 'ruc', label: 'RUC' },
-]
 
 /**
  * Emitir la boleta o la factura de un pedido pagado.
@@ -50,8 +41,8 @@ export default function InvoiceDialog({ order, open, onClose }: InvoiceDialogPro
       onClose()
     },
   })
-  const tipo = kind === 'factura' ? 'ruc' : doc
-  const exigeDocumento = kind === 'factura' || toCents(order.total) > LIMITE_ANONIMA
+  const total = toCents(order.total)
+  const tipo = effectiveDocument(kind, doc, total)
 
   return (
     <FormDialog
@@ -76,10 +67,10 @@ export default function InvoiceDialog({ order, open, onClose }: InvoiceDialogPro
       {kind === 'boleta' ? (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="comprobante-documento">Documento del cliente</Label>
-          <NativeSelect id="comprobante-documento" className="w-full" value={doc} onChange={(e) => {
+          <NativeSelect id="comprobante-documento" className="w-full" value={tipo} onChange={(e) => {
             setDoc(e.target.value as DocumentType)
           }}>
-            {DOCUMENTOS.filter((d) => !exigeDocumento || d.value !== 'none').map((d) => (
+            {documentOptions(kind, total).map((d) => (
               <NativeSelectOption key={d.value} value={d.value}>{d.label}</NativeSelectOption>
             ))}
           </NativeSelect>
@@ -100,7 +91,7 @@ export default function InvoiceDialog({ order, open, onClose }: InvoiceDialogPro
         <Button type="button" variant="outline" onClick={onClose}>
           Cancelar
         </Button>
-        <Button type="button" disabled={emitir.isPending} onClick={() => {
+        <Button type="button" disabled={emitir.isPending || !customerComplete(tipo, numero, nombre)} onClick={() => {
           emitir.mutate({
             order_id: order.id,
             kind,
