@@ -152,6 +152,7 @@ aparte: el celular del mesero nunca baja este código.
 | `/plataforma/restaurantes/:id` | Ficha: nombre y zona horaria editables, activar o desactivar, encargados y «Agregar encargado». |
 | `/plataforma/bitacora` | Bitácora de lo que hizo cada administrador. |
 | `/plataforma/vista-previa` | El local de muestra y «Ver como encargado» / «Ver como mesero» (ver abajo). |
+| `/plataforma/observabilidad` | Panel de observabilidad: tráfico, errores, latencias, rutas y logs del backend (ver abajo). |
 
 - **Otra sesión, no otro rol.** `store/platformSession.ts` guarda su token en
   `resthub.platform-session.v1`, aparte de `resthub.session.v2`. El cliente
@@ -257,6 +258,50 @@ cargarse (`services/tabStorage.ts`):
 - **Un enlace abierto en una pestaña nueva** (Ctrl o clic central) no hereda
   el `sessionStorage`: es una pestaña normal, sin la vista previa, que usa la
   sesión real del navegador (o muestra el acceso).
+
+### Panel de observabilidad
+
+`/plataforma/observabilidad` muestra cómo anda la aplicación con lo que el
+backend guarda de sí mismo (`/platform/observability/*`, token de plataforma;
+sin servicios externos). Vive en `features/platform/observability` y se
+descarga aparte, como el resto del área.
+
+- **Ventana y restaurante.** 1 h, 6 h, 24 h (por omisión) o 7 d hasta ahora, y
+  un restaurante o todos (la lista son los 100 más nuevos de
+  `GET /platform/restaurants`). Acá el cliente sí manda `restaurant_id`: es un
+  filtro de la plataforma, que mira a todos los locales, como
+  `/platform/restaurants/{id}`; la regla de no mandarlo es de la sesión de un
+  restaurante.
+- **Indicadores:** peticiones, tasa de error (5xx sobre el total; el API la da
+  de 0 a 1), p95, p99 y tiempo medio de base; «Eventos perdidos» aparece solo
+  si el proceso perdió filas, y «Muestreado» cuando la ventana pasa de
+  200 000 peticiones y los percentiles salen de una muestra.
+- **Gráficos:** peticiones y errores 5xx en el mismo eje, el p95 en su propio
+  gráfico (milisegundos) y las respuestas por estado. Son los SVG del panel BI,
+  ahora en `components/charts`; cada uno tiene su nombre accesible, su lectura
+  con teclado y su vista de tabla. Los cubos (1 min, 5 min, 15 min o 2 h) se
+  rotulan en hora de Lima; con cubos de horas el eje lleva también el día.
+- **Rutas:** las 20 primeras por peticiones, p95 o errores. Ordenar pide al
+  servidor las 20 de esa columna (no son las mismas) y, mientras llegan,
+  reordena lo que se ve. Cada ruta enlaza a sus peticiones.
+- **Logs:** advertencias y errores, los más nuevos primero, con filtro por
+  nivel, búsqueda (hasta 120 caracteres, en el evento y sus campos) y
+  `request_id`. «Cargar más» pide las anteriores con `before_id` (páginas de
+  clave, de 50). «Ver detalle» trae la entrada con sus campos como JSON con
+  sangría y su traceback en un bloque de ancho fijo que se desplaza; los dos
+  van como texto en un `<pre>`, nunca como HTML. Desde ahí se va a las
+  peticiones de ese `request_id`, y desde cada petición a sus logs.
+- **Peticiones:** una por una, filtrables desde un estado (4xx y 5xx o solo
+  5xx), por plantilla de ruta exacta y por `request_id`.
+- **Filtros en la dirección** (`?ventana=6h&restaurante=3&peticion=…`): un
+  enlace lleva al mismo panel; cambiar un filtro reemplaza la entrada del
+  historial y los enlaces entre logs y peticiones la apilan y llevan el foco a
+  la sección. Los textos se aplican con «Buscar», no con cada letra.
+- **Actualización:** cada 30 s solo con la pestaña a la vista
+  (`document.visibilityState`, `hooks/usePageVisibility.ts`); al volver a la
+  pestaña se relee lo vencido. «Pausar» la detiene del todo y «Actualizar
+  ahora» relee el panel entero. Las claves cuelgan de `['platform',
+  'observability', …]`: cerrar la sesión de plataforma las saca del caché.
 
 ## Comprobantes electrónicos
 
