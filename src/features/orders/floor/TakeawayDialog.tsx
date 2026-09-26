@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
-import { saveCustomer } from '../../../api/customers'
 import DialogFormActions from '../../../components/DialogFormActions'
 import FormDialog from '../../../components/FormDialog'
 import Icon from '../../../components/Icon'
@@ -11,36 +10,13 @@ import { Button } from '../../../components/ui/button'
 import { onSubmit } from '../../../hooks/formSubmit'
 import CustomerLookup from './CustomerLookup'
 import TakeawayFields from './TakeawayFields'
+import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, fromCustomer, newOrderPath, takeawaySchema, type TakeawayValues } from './takeawaySchema'
 
 const MODOS: readonly { value: TakeawayValues['mode']; label: string }[] = [
   { value: 'takeaway', label: 'Recoge en local' },
   { value: 'delivery', label: 'Delivery' },
 ]
-
-/**
- * Un delivery a alguien que no está en la libreta lo agrega, así la próxima
- * vez no dicta su dirección. Si ya estaba (mismo teléfono) o no hay señal, se
- * sigue igual: el servidor lo reconoce por el teléfono al abrir el pedido.
- */
-async function withCustomer(values: TakeawayValues): Promise<TakeawayValues> {
-  if (values.mode !== 'delivery' || values.customer_id !== null || values.phone === '') {
-    return values
-  }
-  try {
-    const nuevo = await saveCustomer({
-      name: values.customer_name,
-      phone: values.phone,
-      email: '',
-      address: values.address,
-      reference: values.reference,
-      notes: '',
-    })
-    return { ...values, customer_id: nuevo.id }
-  } catch {
-    return values
-  }
-}
 
 /**
  * "Para llevar": pide los datos del cliente y lleva a la toma del pedido.
@@ -105,7 +81,7 @@ export default function TakeawayDialog() {
             }}>
               Cancelar
             </Button>
-            <Button type="submit" size="lg" className="h-11 px-4">
+            <Button type="submit" size="lg" className="h-11 px-4" disabled={form.formState.isSubmitting}>
               <span>Elegir platos</span>
             </Button>
           </DialogFormActions>

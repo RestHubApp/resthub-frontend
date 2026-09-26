@@ -27,10 +27,15 @@ export function customerQuery(customerId: number) {
   })
 }
 
-export async function saveCustomer(payload: CustomerRequest, customerId?: number): Promise<Customer> {
+/** `timeout` acorta el plazo cuando quien llama puede seguir sin la respuesta. */
+export async function saveCustomer(
+  payload: CustomerRequest,
+  customerId?: number,
+  options: { readonly timeout?: number } = {},
+): Promise<Customer> {
   const { data } =
     customerId === undefined
-      ? await api.post<Customer>('/customers', payload)
-      : await api.put<Customer>(`/customers/${String(customerId)}`, payload)
+      ? await api.post<Customer>('/customers', payload, options)
+      : await api.put<Customer>(`/customers/${String(customerId)}`, payload, options)
   return data
 }
