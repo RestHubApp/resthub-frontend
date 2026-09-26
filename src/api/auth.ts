@@ -42,11 +42,15 @@ export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Prom
 /**
  * Canjea el codigo de vista previa por una sesion del local de muestra.
  *
- * Sale sin credencial: la pestana de vista previa todavia no tiene sesion, y
- * nunca manda la real del navegador. Un codigo invalido, vencido o ya usado
- * responde 401.
+ * Sale sin credencial siempre: la pestana de vista previa nunca manda la
+ * sesion real del navegador, y si ya muestra otra vista previa (se pego un
+ * enlace nuevo en su barra) tampoco manda esa, asi el 401 de un codigo
+ * invalido, vencido o ya usado no cierra la vista previa que sigue abierta.
+ *
+ * `login` y el acceso de plataforma no lo necesitan: sus formularios solo se
+ * muestran sin sesion abierta, asi que salen sin token.
  */
 export async function exchangePreviewCode(payload: PreviewExchangeRequest): Promise<AccessTokenResponse> {
-  const { data } = await api.post<AccessTokenResponse>('/auth/preview', payload)
+  const { data } = await api.post<AccessTokenResponse>('/auth/preview', payload, { withoutCredential: true })
   return data
 }

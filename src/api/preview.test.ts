@@ -41,10 +41,10 @@ describe('API de la vista previa', () => {
     expect(platformMutationKeys.resetSandbox[0]).toBe(PLATFORM_QUERY_ROOT)
   })
 
-  it('canjea el código en la ruta de restaurante, no en la de plataforma', async () => {
+  it('canjea el código en la ruta de restaurante, sin credencial', async () => {
     post.mockResolvedValue({ data: {} })
     await exchangePreviewCode({ code: 'abc' })
-    expect(post).toHaveBeenCalledWith('/auth/preview', { code: 'abc' })
+    expect(post).toHaveBeenCalledWith('/auth/preview', { code: 'abc' }, { withoutCredential: true })
   })
 
   it('la sesión conserva la marca de vista previa', () => {
