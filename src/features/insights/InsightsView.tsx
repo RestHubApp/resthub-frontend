@@ -1,4 +1,5 @@
 import { salesSummaryQuery } from '../../api/insights'
+import ListSkeleton from '../../components/ListSkeleton'
 import HourlySection from './HourlySection'
 import KpiRow from './KpiRow'
 import LowStockSection from './LowStockSection'
@@ -14,6 +15,15 @@ import { useInsightsReport } from './useInsightsReport'
 import WaitersSection from './WaitersSection'
 import WasteSection from './WasteSection'
 import { useTimeZone } from '../../store/session'
+
+const KPI_CARGANDO = (
+  <ListSkeleton
+    label="Cargando el resumen…"
+    count={4}
+    className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+    itemClassName="h-28 rounded-xl"
+  />
+)
 
 /**
  * El panel del encargado: cómo va el negocio en el período elegido.
@@ -32,7 +42,7 @@ export default function InsightsView() {
       <PanelHeader description="Ventas, platos, márgenes y mermas del período. Los montos son de pedidos cobrados." />
       <RangeFilter range={range} period={periodo} timeZone={zona} />
       <div className={`transition-opacity ${summary.refreshing ? 'opacity-50' : ''}`}>
-        <ReportState data={summary.data} error={summary.error} errorText="No se pudo cargar el resumen del período.">
+        <ReportState data={summary.data} error={summary.error} errorText="No se pudo cargar el resumen del período." skeleton={KPI_CARGANDO}>
           {(data) => <KpiRow summary={data} />}
         </ReportState>
       </div>

@@ -4,6 +4,7 @@ import { useDeferredValue, useMemo, useState } from 'react'
 import { orderMenuQuery } from '../../../api/orders'
 import type { OrderMenuItem } from '../../../api/types'
 import EmptyState from '../../../components/EmptyState'
+import ListSkeleton from '../../../components/ListSkeleton'
 import QueryError from '../QueryError'
 import CategoryChips from './CategoryChips'
 import DishRow from './DishRow'
@@ -33,7 +34,7 @@ export default function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) 
   )
 
   if (carta.isPending) {
-    return <EmptyState title="Cargando la carta…" />
+    return <ListSkeleton label="Cargando la carta…" count={6} />
   }
   if (carta.isError) {
     return (

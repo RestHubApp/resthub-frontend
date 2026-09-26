@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { activeOrdersQuery } from '../../../api/orders'
 import EmptyState from '../../../components/EmptyState'
+import ListSkeleton from '../../../components/ListSkeleton'
 import QueryError from '../QueryError'
 import OrderList from './OrderList'
 
@@ -10,7 +11,7 @@ export default function TakeawayPanel() {
   const activos = useQuery(activeOrdersQuery)
 
   if (activos.isPending) {
-    return <EmptyState title="Cargando pedidos…" />
+    return <ListSkeleton label="Cargando pedidos…" count={3} itemClassName="h-20 rounded-xl" />
   }
   if (activos.isError) {
     return (

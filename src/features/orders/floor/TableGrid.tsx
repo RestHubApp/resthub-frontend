@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 
 import { tablesQuery } from '../../../api/tables'
 import EmptyState from '../../../components/EmptyState'
+import ListSkeleton from '../../../components/ListSkeleton'
 import { Button } from '../../../components/ui/button'
 import { useCan } from '../../../store/session'
 import QueryError from '../QueryError'
@@ -14,7 +15,14 @@ export default function TableGrid() {
   const canManage = useCan('tables.manage')
 
   if (mesas.isPending) {
-    return <EmptyState title="Cargando mesas…" />
+    return (
+      <ListSkeleton
+        label="Cargando mesas…"
+        count={8}
+        className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4"
+        itemClassName="h-28 rounded-xl"
+      />
+    )
   }
   if (mesas.isError) {
     return (

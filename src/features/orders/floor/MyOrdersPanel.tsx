@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { fetchOrders, MAX_ORDERS_PAGE, orderListQueryKey } from '../../../api/orders'
 import EmptyState from '../../../components/EmptyState'
+import ListSkeleton from '../../../components/ListSkeleton'
 import { useSession, useTimeZone } from '../../../store/session'
 import { isActive } from '../orderLabels'
 import QueryError from '../QueryError'
@@ -21,7 +22,7 @@ export default function MyOrdersPanel() {
   })
 
   if (pedidos.isPending) {
-    return <EmptyState title="Cargando tus pedidos…" />
+    return <ListSkeleton label="Cargando tus pedidos…" count={3} itemClassName="h-20 rounded-xl" />
   }
   if (pedidos.isError) {
     return (

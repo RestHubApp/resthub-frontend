@@ -7,6 +7,7 @@ import PageHeader from '../../components/PageHeader'
 import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
 import CategorySection from './CategorySection'
+import MenuSkeleton from './MenuSkeleton'
 import NewMenuDialogs, { type NewMenuDialog } from './NewMenuDialogs'
 import TodaySummary from './TodaySummary'
 import { useMenuData } from './useMenuData'
@@ -57,7 +58,7 @@ export default function MenuView() {
         }
       />
 
-      {menu.isPending ? <EmptyState title="Cargando la carta…" /> : null}
+      {menu.isPending ? <MenuSkeleton /> : null}
       {menu.isError ? (
         <FormMessage tone="error">
           {errorMessage(menu.error, 'No se pudo cargar la carta.')}

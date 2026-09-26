@@ -1,6 +1,7 @@
 import { cn } from 'cn'
 
 import Icon from '../../components/Icon'
+import ListSkeleton from '../../components/ListSkeleton'
 import { Button } from '../../components/ui/button'
 import { useLowStock } from './useLowStock'
 
@@ -32,6 +33,9 @@ function titular(bajos: number, negativos: number): string {
  */
 export default function LowStockSummary({ onShowAlerts }: LowStockSummaryProps) {
   const alertas = useLowStock()
+  if (alertas.isPending) {
+    return <ListSkeleton label="Revisando el stock…" count={1} itemClassName="h-19 rounded-xl" />
+  }
   if (alertas.data === undefined) {
     return null
   }

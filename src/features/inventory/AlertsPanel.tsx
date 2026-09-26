@@ -1,6 +1,7 @@
 import EmptyState from '../../components/EmptyState'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
+import ListSkeleton from '../../components/ListSkeleton'
 import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
 import IngredientStatus from './IngredientStatus'
@@ -25,7 +26,14 @@ export default function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
     )
   }
   if (alertas.isPending) {
-    return <EmptyState title="Cargando alertas…" />
+    return (
+      <ListSkeleton
+        label="Cargando alertas…"
+        count={2}
+        className="grid gap-3 md:grid-cols-2"
+        itemClassName="h-36 rounded-xl"
+      />
+    )
   }
   if (alertas.data.length === 0) {
     return (

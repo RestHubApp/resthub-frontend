@@ -4,13 +4,13 @@ import { Link } from 'react-router'
 
 import { activeOrdersQuery } from '../../api/orders'
 import type { OrderResponse, OrderStatus } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
 import Icon from '../../components/Icon'
 import PageHeader from '../../components/PageHeader'
 import { Button } from '../../components/ui/button'
 import { useOrderNoteFlags } from '../../hooks/useOrderNoteFlags'
 import { useCan } from '../../store/session'
 import BoardColumn from './board/BoardColumn'
+import BoardSkeleton from './board/BoardSkeleton'
 import TypeFilter, { type TypeFilterValue } from './board/TypeFilter'
 import CancelOrderDialog from './CancelOrderDialog'
 import ChargeDialog from './charge/ChargeDialog'
@@ -67,7 +67,7 @@ export default function BoardView() {
         }
       />
       <TypeFilter value={tipo} counts={contar(pedidos)} onChange={setTipo} />
-      {activos.isPending ? <EmptyState title="Cargando pedidos…" /> : null}
+      {activos.isPending ? <BoardSkeleton titles={COLUMNAS.map((columna) => STATUS_LABELS[columna])} /> : null}
       {activos.isError ? (
         <QueryError error={activos.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void activos.refetch()} />
       ) : null}
