@@ -65,11 +65,18 @@ describe('ownerSchema', () => {
 })
 
 describe('platformLoginSchema', () => {
-  it('no exige el largo de la contraseña al entrar', () => {
-    expect(platformLoginSchema.safeParse({ email: 'plataforma@resthub.dev', password: 'x' }).success).toBe(true)
-    expect(mensajes(platformLoginSchema.safeParse({ email: 'plataforma@resthub.dev', password: '' }))).toEqual([
+  const correo = 'plataforma@resthub.dev'
+
+  it('no exige el mínimo de la contraseña al entrar', () => {
+    expect(platformLoginSchema.safeParse({ email: correo, password: 'x' }).success).toBe(true)
+    expect(mensajes(platformLoginSchema.safeParse({ email: correo, password: '' }))).toEqual([
       'password',
     ])
+  })
+
+  it('rechaza una contraseña más larga de lo que acepta el servidor', () => {
+    expect(platformLoginSchema.safeParse({ email: correo, password: 'x'.repeat(128) }).success).toBe(true)
+    expect(mensajes(platformLoginSchema.safeParse({ email: correo, password: 'x'.repeat(129) }))).toEqual(['password'])
   })
 })
 

@@ -1,6 +1,9 @@
 import { PLATFORM_PAGE_SIZE } from '../../api/platform'
 import type { PlatformActivityParams, PlatformRestaurantListParams } from '../../api/types'
 
+/** El largo máximo de la búsqueda que acepta el backend. */
+export const MAX_RESTAURANT_SEARCH = 120
+
 /** Una página del servidor, desde cero. Sin texto de búsqueda no se manda el filtro. */
 export function restaurantListParams(search: string, page: number): PlatformRestaurantListParams {
   const texto = search.trim()

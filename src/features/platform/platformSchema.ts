@@ -9,6 +9,7 @@ import { DEFAULT_TIME_ZONE } from '../../services/format'
 import {
   correoRule,
   MAX_NOMBRE_COMPLETO,
+  MAX_PASSWORD,
   nombreRule,
   passwordRule,
 } from '../../services/fieldRules'
@@ -21,8 +22,12 @@ export const MAX_RESTAURANT_NAME = 120
 
 export const platformLoginSchema = z.object({
   email: correoRule,
-  // Al entrar no se exige la longitud: el servidor ya dice si no coincide.
-  password: z.string().min(1, 'Escribe tu contraseña'),
+  // Al entrar no se exige el mínimo: el servidor ya dice si no coincide. El
+  // máximo sí, porque el servidor rechaza una más larga antes de mirarla.
+  password: z
+    .string()
+    .min(1, 'Escribe tu contraseña')
+    .max(MAX_PASSWORD, `Usa como máximo ${String(MAX_PASSWORD)} caracteres`),
 })
 
 export type PlatformLoginValues = z.infer<typeof platformLoginSchema>

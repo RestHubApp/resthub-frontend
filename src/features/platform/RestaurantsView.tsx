@@ -14,7 +14,7 @@ import { Input } from '../../components/ui/input'
 import { formatDateTime } from '../../services/format'
 import PlatformQueryError from './PlatformQueryError'
 import { PLATFORM_TIME_ZONE } from './platformTime'
-import { pageCount, restaurantListParams, staffSummary } from './restaurantList'
+import { MAX_RESTAURANT_SEARCH, pageCount, restaurantListParams, staffSummary } from './restaurantList'
 import RestaurantStatusBadge from './RestaurantStatusBadge'
 
 const COLUMNAS: DataColumn<PlatformRestaurantSummary>[] = [
@@ -72,6 +72,7 @@ export default function RestaurantsView() {
           aria-label="Buscar por nombre o identificador"
           placeholder="Buscar por nombre o identificador"
           className="h-11"
+          maxLength={MAX_RESTAURANT_SEARCH}
           value={texto}
           onChange={(evento) => {
             setTexto(evento.target.value)

@@ -12,7 +12,7 @@ import TextField from '../../components/TextField'
 import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
-import { correoRule } from '../../services/fieldRules'
+import { correoRule, MAX_PASSWORD } from '../../services/fieldRules'
 import { useSession } from '../../store/session'
 import AuthAside from './AuthAside'
 import AuthCard from './AuthCard'
@@ -20,9 +20,13 @@ import SessionExpiredNotice from './SessionExpiredNotice'
 
 const esquema = z.object({
   email: correoRule,
-  // Al entrar no se exige la longitud: la respuesta del servidor ya dice si
-  // la contrasena no coincide, y repetir aca la regla no agrega nada.
-  password: z.string().min(1, 'Escribe tu contraseña'),
+  // Al entrar no se exige el minimo: la respuesta del servidor ya dice si
+  // la contrasena no coincide, y repetir aca la regla no agrega nada. El
+  // maximo si, porque el servidor rechaza una mas larga antes de mirarla.
+  password: z
+    .string()
+    .min(1, 'Escribe tu contraseña')
+    .max(MAX_PASSWORD, `Usa como máximo ${String(MAX_PASSWORD)} caracteres`),
 })
 
 type Formulario = z.infer<typeof esquema>
