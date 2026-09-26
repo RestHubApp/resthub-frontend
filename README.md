@@ -198,10 +198,20 @@ vista previa se usa de verdad (tomar pedidos, cobrar, encolar sin señal).
    no viaja al servidor que sirve la aplicación y no queda en sus registros.
    Con `noopener` el navegador no dice si bloqueó la pestaña, así que queda
    un enlace de repuesto mientras el código vale.
-3. `/vista-previa` (fuera de las guardas, `features/auth/previewEntry.ts`) lee
-   el código, lo borra de la barra con `history.replaceState` y lo canjea con
-   `POST /auth/preview`, sin credencial. Es el `loader` de la ruta y no un
+3. Al cargar la página, antes de crear el router (`services/tabStorage.ts`,
+   importado primero en `main.tsx`), una pestaña cargada en `/vista-previa`
+   saca el fragmento de la barra con `history.replaceState` y lo guarda en
+   memoria: si el archivo de la pantalla de canje no llega, el código igual
+   deja la barra y el historial. La ruta se reconoce como la compara React
+   Router (sin distinguir mayúsculas, decodificada, con o sin barra final:
+   `/Vista-Previa/` o `/vista%2Dprevia` cuentan) y queda escrita como
+   `/vista-previa`. El `loader` de la ruta (`features/auth/previewEntry.ts`,
+   fuera de las guardas) toma el código de memoria y lo canjea con
+   `POST /auth/preview`, sin credencial (`withoutCredential`): tampoco manda
+   la de una vista previa ya abierta en esa pestaña. Es el `loader` y no un
    efecto: corre una vez por carga, aunque el modo estricto repita los efectos.
+   Si se llegó navegando desde una pestaña normal, carga una sola vez
+   `/vista-previa` con el fragmento (`location.replace`), nunca `reload()`.
    Si el servidor lo acepta (`preview: true`), entra al armazón normal; si no,
    explica por qué (inválido, vencido o ya usado; sin conexión) y enlaza a la
    administración.

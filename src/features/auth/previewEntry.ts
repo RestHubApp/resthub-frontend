@@ -3,7 +3,7 @@ import { redirect } from 'react-router'
 import { exchangePreviewCode, sessionOf } from '../../api/auth'
 import { errorStatus } from '../../services/api'
 import { logger } from '../../services/logger'
-import { isPreviewTab, previewEntryUrl } from '../../services/tabStorage'
+import { isPreviewTab, previewEntryUrl, takeEntryFragment } from '../../services/tabStorage'
 import { useSession } from '../../store/session'
 import { failureOf, previewCodeFrom, type PreviewEntryFailure, withoutHash } from './previewCode'
 
@@ -15,9 +15,10 @@ export type PreviewEntryResult = PreviewEntryFailure | 'reloading'
  *
  * Es el `loader` de `/vista-previa` y no un efecto de la pantalla: corre una
  * sola vez por carga (el modo estricto de React repite los efectos, y un
- * código de un solo uso canjeado dos veces falla la segunda). El código sale
- * de la barra de direcciones antes de mandarlo, para que no quede en el
- * historial ni se vea en la pantalla.
+ * código de un solo uso canjeado dos veces falla la segunda). El código ya
+ * salió de la barra al cargar la página, antes de bajar este archivo, para
+ * que no quede en el historial ni se vea en la pantalla aunque el archivo no
+ * llegue.
  */
 export async function previewEntryLoader(): Promise<PreviewEntryResult | Response> {
   // Solo una pestaña cargada en esta ruta guarda la sesión en su
@@ -31,8 +32,13 @@ export async function previewEntryLoader(): Promise<PreviewEntryResult | Respons
     return 'reloading'
   }
 
-  const codigo = previewCodeFrom(window.location.hash)
-  window.history.replaceState(window.history.state, '', withoutHash(window.location))
+  // El código se sacó de la barra al cargar la página (`tabStorage`). Si esta
+  // pestaña de vista previa llegó acá navegando, puede seguir en la dirección.
+  const fragmento = takeEntryFragment() ?? window.location.hash
+  if (window.location.hash !== '') {
+    window.history.replaceState(window.history.state, '', withoutHash(window.location))
+  }
+  const codigo = previewCodeFrom(fragmento)
 
   if (codigo === null) {
     return useSession.getState().account?.preview === true ? redirect('/') : 'missing'

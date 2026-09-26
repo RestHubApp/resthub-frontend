@@ -154,8 +154,60 @@ function entornoActual(): TabEnvironment {
   }
 }
 
+/** Lo que se usa de la página para sacar el código de la barra. */
+export interface EntryPage {
+  readonly location: { readonly pathname: string; readonly search: string; readonly hash: string }
+  readonly history: { readonly state: unknown; replaceState: (state: unknown, unused: string, url: string) => void }
+}
+
+/**
+ * Si la página se cargó en la ruta de canje, saca el fragmento (con el código
+ * de vista previa) de la barra y lo devuelve; si no, `null`.
+ *
+ * Corre al cargar la página, antes de crear el router y de bajar el archivo
+ * de la pantalla de canje: si ese archivo no llega, el código ya no queda en
+ * la barra ni en el historial. De paso deja la ruta escrita como la escribe
+ * la aplicación (`/Vista-Previa/` pasa a `/vista-previa`).
+ */
+export function captureEntryFragment(page: EntryPage, base: string): string | null {
+  if (!isPreviewEntry(page.location.pathname, base)) {
+    return null
+  }
+  const fragmento = page.location.hash
+  try {
+    page.history.replaceState(page.history.state, '', `${previewEntryUrl(base)}${page.location.search}`)
+  } catch {
+    // Sin historial que reescribir, el canje igual toma el código de acá.
+  }
+  return fragmento
+}
+
 /** El almacenamiento de esta pestaña, elegido al cargar la página. */
 export const tabStorage: TabStorage = chooseTabStorage(entornoActual())
+
+function paginaActual(): EntryPage | null {
+  const global = globalThis as { location?: EntryPage['location']; history?: EntryPage['history'] }
+  return global.location === undefined || global.history === undefined
+    ? null
+    : { location: global.location, history: global.history }
+}
+
+// El fragmento que traía la dirección al cargar, hasta que el canje lo toma.
+const pagina = paginaActual()
+const fragmentoDeEntrada: { value: string | null } = {
+  value: pagina === null ? null : captureEntryFragment(pagina, import.meta.env.BASE_URL),
+}
+
+/**
+ * El fragmento de la dirección con que se cargó la ruta de canje (`#codigo=…`),
+ * una sola vez: la segunda llamada devuelve `null`. `null` también si la
+ * página no se cargó en esa ruta.
+ */
+export function takeEntryFragment(): string | null {
+  const fragmento = fragmentoDeEntrada.value
+  fragmentoDeEntrada.value = null
+  return fragmento
+}
 
 /** Si esta pestaña es de vista previa. */
 export function isPreviewTab(): boolean {

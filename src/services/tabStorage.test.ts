@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   appPath,
+  captureEntryFragment,
   chooseTabStorage,
   isPreviewEntry,
   previewEntryUrl,
@@ -12,6 +13,8 @@ import {
 } from './tabStorage'
 
 const ENTRADA = '/vista-previa'
+const ENTRADA_CON_BASE = '/app/vista-previa'
+const FRAGMENTO = '#codigo=abc'
 
 function memoria(inicial: Record<string, string> = {}): KeyValueStorage {
   const datos = new Map(Object.entries(inicial))
@@ -33,7 +36,7 @@ describe('isPreviewEntry', () => {
   })
 
   it('respeta la base de la aplicación, como el router', () => {
-    expect(isPreviewEntry('/app/vista-previa', '/app/')).toBe(true)
+    expect(isPreviewEntry(ENTRADA_CON_BASE, '/app/')).toBe(true)
     expect(isPreviewEntry('/APP/vista-previa', '/app/')).toBe(true)
     expect(isPreviewEntry('/app/pedidos', '/app/')).toBe(false)
     // Fuera de la base el router no muestra ninguna ruta.
@@ -76,7 +79,7 @@ describe('previewEntryUrl', () => {
       expect(isPreviewEntry(url, base)).toBe(true)
       expect(chooseTabStorage({ pathname: url, base, local: memoria(), tab: memoria() }).kind).toBe('preview')
     }
-    expect(previewEntryUrl('/app/')).toBe('/app/vista-previa')
+    expect(previewEntryUrl('/app/')).toBe(ENTRADA_CON_BASE)
   })
 })
 
@@ -117,5 +120,59 @@ describe('chooseTabStorage', () => {
       },
     }
     expect(chooseTabStorage({ pathname: '/', base: '/', local: memoria(), tab: rota }).kind).toBe('restaurant')
+  })
+})
+
+function paginaEn(url: string) {
+  const { pathname, search, hash } = new URL(url, 'http://localhost')
+  return { location: { pathname, search, hash }, history: { state: { idx: 0 }, replaceState: vi.fn() } }
+}
+
+describe('captureEntryFragment', () => {
+  it('en la ruta de canje saca el fragmento de la barra y deja la ruta de la aplicación', () => {
+    const pagina = paginaEn('/Vista-Previa/?a=1#codigo=abc')
+
+    expect(captureEntryFragment(pagina, '/')).toBe(FRAGMENTO)
+    expect(pagina.history.replaceState).toHaveBeenCalledExactlyOnceWith({ idx: 0 }, '', '/vista-previa?a=1')
+  })
+
+  it('con base, la respeta', () => {
+    const pagina = paginaEn('/app/vista%2Dprevia#codigo=abc')
+    expect(captureEntryFragment(pagina, '/app/')).toBe(FRAGMENTO)
+    expect(pagina.history.replaceState).toHaveBeenCalledWith({ idx: 0 }, '', ENTRADA_CON_BASE)
+  })
+
+  it('en otra ruta no toca nada', () => {
+    const pagina = paginaEn('/pedidos#codigo=abc')
+    expect(captureEntryFragment(pagina, '/')).toBeNull()
+    expect(pagina.history.replaceState).not.toHaveBeenCalled()
+  })
+
+  it('si no se puede reescribir el historial, igual devuelve el fragmento', () => {
+    const pagina = paginaEn('/vista-previa#codigo=abc')
+    pagina.history.replaceState.mockImplementation(() => {
+      throw new Error('bloqueado')
+    })
+    expect(captureEntryFragment(pagina, '/')).toBe(FRAGMENTO)
+  })
+})
+
+describe('takeEntryFragment', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('al cargar la página ya sacó el código de la barra, y lo entrega una sola vez', async () => {
+    const pagina = paginaEn('/vista-previa#codigo=abc')
+    vi.stubGlobal('location', pagina.location)
+    vi.stubGlobal('history', pagina.history)
+    vi.resetModules()
+
+    // Solo cargar el módulo, sin router ni pantalla de canje.
+    const { takeEntryFragment } = await import('./tabStorage')
+
+    expect(pagina.history.replaceState).toHaveBeenCalledWith({ idx: 0 }, '', '/vista-previa')
+    expect(takeEntryFragment()).toBe(FRAGMENTO)
+    expect(takeEntryFragment()).toBeNull()
   })
 })
