@@ -41,6 +41,7 @@ contraseña `resthub123`; al área de administración del sistema
 | `pnpm typecheck` | Verificación de tipos |
 | `pnpm test` | Pruebas unitarias y de componentes con Jest (`*.test.ts(x)` junto al código) |
 | `pnpm test:coverage` | Las mismas pruebas con cobertura sobre todo `src` (informe HTML en `coverage/lcov-report/`) |
+| `pnpm test:contract` | Pruebas de contrato del consumidor con Pact (`src/api/contract/*.pact.ts`): escriben `pacts/`, que el backend verifica |
 | `pnpm test:mutation` | Pruebas de mutación con Stryker sobre la lógica de negocio (informe en `reports/mutation/index.html`; no corre en el CI) |
 | `pnpm build` | Tipos y compilación de producción en `dist/` |
 | `pnpm preview` | Sirve la compilación de producción |

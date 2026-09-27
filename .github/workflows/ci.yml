@@ -20,13 +20,13 @@ jobs:
     name: Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Instalar pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
       - name: Instalar Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -42,3 +42,96 @@ jobs:
 
       - name: Verificación de tipos y compilación
         run: pnpm build
+
+  # Pruebas de contrato del consumidor (Pact): las funciones reales de src/api
+  # contra el servidor simulado de Pact. Generan el pact que el backend
+  # verifica en su propio CI (tests/contract/pacts/ en resthub-backend).
+  contract:
+    name: Contrato con el backend (Pact, consumidor)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Instalar Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Pruebas de contrato del consumidor
+        run: pnpm test:contract
+
+      - name: Guardar el pact generado
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pact-resthub-frontend-resthub-backend
+          path: pacts/
+
+      # Aviso, no bloqueo: el backend verifica la copia que versiona. Si el pact
+      # cambió, esa copia hay que actualizarla en un PR del backend.
+      - name: Comparar con la copia que verifica el backend
+        env:
+          BACKEND_PACT: https://raw.githubusercontent.com/RestHubApp/resthub-backend/develop/tests/contract/pacts/resthub-frontend-resthub-backend.json
+        run: |
+          if ! curl -fsSL "$BACKEND_PACT" -o /tmp/pact-backend.json; then
+            echo "::warning::El backend todavía no versiona el pact en develop."
+          elif ! diff -q /tmp/pact-backend.json pacts/resthub-frontend-resthub-backend.json; then
+            echo "::warning::El pact cambió: copia pacts/resthub-frontend-resthub-backend.json a tests/contract/pacts/ del backend."
+          fi
+
+  # Tipos generados desde el OpenAPI del backend. Si el backend cambió un campo
+  # que el frontend usa, `tsc -b` con los tipos regenerados falla en la pantalla
+  # afectada; si solo cambió el esquema, schema.d.ts quedó desactualizado y el
+  # diff lo señala.
+  api-types:
+    name: Tipos del API al día con el backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Traer el backend (develop)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: RestHubApp/resthub-backend
+          ref: develop
+          path: backend
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          python-version: '3.13'
+
+      - name: Exportar el OpenAPI del backend
+        working-directory: backend
+        env:
+          DEBUG: 'true'
+        run: uv run --no-dev python scripts/export_openapi.py "$GITHUB_WORKSPACE/openapi.json"
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Instalar Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerar src/api/schema.d.ts
+        run: pnpm exec openapi-typescript openapi.json -o src/api/schema.d.ts
+
+      - name: Verificación de tipos con el contrato regenerado
+        run: pnpm exec tsc -b
+
+      - name: schema.d.ts versionado igual al regenerado
+        if: success() || failure()
+        run: git diff --exit-code -- src/api/schema.d.ts
+

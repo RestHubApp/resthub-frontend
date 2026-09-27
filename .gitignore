@@ -43,3 +43,6 @@ dev-dist
 coverage
 reports/mutation
 .stryker-tmp
+
+# Contrato de Pact que generan las pruebas de consumidor (lo versiona el backend)
+pacts/
