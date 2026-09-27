@@ -20,8 +20,14 @@ function tarjeta(page: Page, titulo: string) {
  * primer render. La prueba pulsa el botón y espera el título de la tarjeta.
  */
 async function mostrar(page: Page, cargar: string, titulo: string): Promise<void> {
-  await page.getByRole('button', { name: cargar }).click()
-  await expect(page.getByRole('heading', { name: titulo, exact: true })).toBeVisible()
+  const tituloLoc = page.getByRole('heading', { name: titulo, exact: true })
+  const boton = page.getByRole('button', { name: cargar, exact: true })
+  // Si la sección ya entró en pantalla, el observer la montó y el botón ya no está.
+  if (await tituloLoc.isVisible()) return
+  await boton.scrollIntoViewIfNeeded()
+  if (await tituloLoc.isVisible()) return
+  if (await boton.isVisible()) await boton.click()
+  await expect(tituloLoc).toBeVisible()
 }
 
 /**
