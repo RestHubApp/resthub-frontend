@@ -4,7 +4,7 @@
 //
 // El local de muestra es uno solo en el backend entero: cada prueba que lo usa
 // toma el candado de `conLocalDeMuestra` y pide su código justo antes de usarlo.
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { cubre } from '../soporte/cobertura'
 import { abrirComoPlataforma, evidencia, expect, test } from '../soporte/fixtures'
@@ -17,6 +17,26 @@ const FRANJA = 'Vista previa'
 const SALIR = 'Salir de la vista previa'
 // El alto de la franja en el celular, con el texto en su propia línea.
 const FRANJA_MAXIMA_PX = 160
+
+/**
+ * Toca un botón que cierra la pestaña de vista previa y espera el cierre.
+ *
+ * `click()` no termina al despachar el toque: después confirma la acción con
+ * la página, y si la pestaña ya se cerró (`window.close()` en el manejador)
+ * falla con «Target page, context or browser has been closed» aunque la
+ * aplicación hizo lo correcto. En el celular emulado el toque tarda un poco
+ * más y la carrera se perdía a veces (PLA-13 en el CI). Se comprueba que el
+ * botón está a la vista y habilitado, se despacha el clic dentro de la
+ * página (la evaluación responde antes de la tarea que cierra la pestaña) y
+ * se espera el evento `close`.
+ */
+async function tocarYEsperarCierre(pagina: Page, boton: Locator): Promise<void> {
+  await expect(boton).toBeVisible()
+  await expect(boton).toBeEnabled()
+  const cerrada = pagina.waitForEvent('close')
+  await boton.dispatchEvent('click')
+  await cerrada
+}
 
 /** Pulsa «Ver como …» y devuelve la pestaña nueva que abre. */
 async function verComo(page: Page, context: BrowserContext, como: 'encargado' | 'mesero'): Promise<Page> {
@@ -82,9 +102,7 @@ test('PLA-12 la vista previa como encargado abre otra pestaña con su franja y t
     await previa.goto('/plataforma')
     await expect(previa.getByText('Estás en una vista previa')).toBeVisible()
     await evidencia(previa, 'pla-12-plataforma-bloqueada')
-    const cerrada = previa.waitForEvent('close')
-    await previa.getByRole('button', { name: SALIR }).click()
-    await cerrada
+    await tocarYEsperarCierre(previa, previa.getByRole('button', { name: SALIR }))
     // La sesión de plataforma de esta pestaña sigue intacta.
     await page.reload()
     await expect(page.getByRole('heading', { name: 'Vista previa', level: 1 })).toBeVisible()
@@ -128,10 +146,8 @@ test('PLA-13 la vista previa como mesero muestra su franja y avisa antes de desc
     await aviso.getByRole('button', { name: 'Cancelar' }).click()
     await expect(aviso).toBeHidden()
     await expect(franja).toBeVisible()
-    const cerrada = previa.waitForEvent('close')
     await previa.getByRole('button', { name: SALIR }).click()
-    await aviso.getByRole('button', { name: 'Salir y descartarlos' }).click()
-    await cerrada
+    await tocarYEsperarCierre(previa, aviso.getByRole('button', { name: 'Salir y descartarlos' }))
   })
 })
 
