@@ -36,6 +36,7 @@ interface NumeroDecimal {
  * S/ 180000 por un plato no es un plato caro, es un error de tipeo.
  */
 export function decimalRule({ max, decimales, unidad, obligatorio = false }: NumeroDecimal) {
+  // eslint-disable-next-line security/detect-non-literal-regexp -- solo interpola un número fijado en el código, nunca texto del usuario
   const formato = new RegExp(`^\\d+(?:[.,]\\d{1,${String(decimales)}})?$`, 'u')
   return z
     .string()

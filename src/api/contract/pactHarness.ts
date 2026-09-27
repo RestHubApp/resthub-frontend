@@ -79,6 +79,7 @@ export function money(example: string) {
 
 /** Fecha y hora ISO 8601 con zona: `new Date()` la lee sin suponer la del navegador. */
 export function isoDatetime(example = '2026-09-26T19:30:00.000000Z') {
+  // eslint-disable-next-line security/detect-unsafe-regex -- los cuantificadores son fijos salvo la fracción opcional, anclada entre literales; el patrón lo evalúa Pact contra respuestas de prueba
   return regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/u, example)
 }
 
@@ -89,6 +90,7 @@ export function isoDate(example = '2026-09-26') {
 
 /** Uno de los valores de un enumerado del API. */
 export function oneOf(values: readonly string[], example: string) {
+  // eslint-disable-next-line security/detect-non-literal-regexp -- los valores son los enumerados que escribe la propia prueba, no datos externos
   return regex(new RegExp(`^(${values.join('|')})$`, 'u'), example)
 }
 

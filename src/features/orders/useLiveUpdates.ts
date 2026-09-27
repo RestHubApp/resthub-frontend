@@ -53,6 +53,7 @@ export function useLiveUpdates(): LiveStatus {
   const [status, setStatus] = useState<LiveStatus>('connecting')
 
   useEffect(() => {
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- compara con null, no con un secreto: el cliente no verifica credenciales
     if (token === null) {
       return undefined
     }

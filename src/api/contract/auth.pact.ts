@@ -40,6 +40,7 @@ function sessionShape() {
     restaurant: like({
       id: integer(1),
       name: string('Restaurante Demo'),
+      // eslint-disable-next-line security/detect-unsafe-regex -- el guion separa grupos de [a-z0-9]: no hay dos formas de repartir la misma cadena, así que no retrocede; además solo valida ejemplos del pact en las pruebas
       slug: regex(/^[a-z0-9]+(-[a-z0-9]+)*$/u, 'restaurante-demo'),
       timezone: string('America/Lima'),
     }),
