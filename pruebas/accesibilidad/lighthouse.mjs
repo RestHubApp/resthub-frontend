@@ -124,7 +124,19 @@ for (const estado of estados) {
 }
 await navegador.disconnect()
 chrome.kill()
-rmSync(perfil, { recursive: true, force: true })
+// Chromium aún escribe en su perfil unos instantes tras `kill()`. Si se
+// borra antes, WSL devuelve ENOTEMPTY y se perdería el resumen ya medido.
+if (proceso.exitCode === null && proceso.signalCode === null) {
+  await Promise.race([
+    new Promise((resolve) => { proceso.once('exit', resolve) }),
+    new Promise((resolve) => { setTimeout(resolve, 5000) }),
+  ])
+}
+try {
+  rmSync(perfil, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 })
+} catch (error) {
+  console.warn(`No se pudo limpiar el perfil temporal ${perfil}: ${error.message}`)
+}
 
 // Resumen combinado con lo que ya había si se midió una parte.
 const rutaResumen = join(dir, 'resumen.json')
