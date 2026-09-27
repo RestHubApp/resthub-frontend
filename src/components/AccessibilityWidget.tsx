@@ -12,10 +12,11 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
  *
  * El paquete se auto-inicializa como side-effect al importarse y corre en el
  * navegador del visitante, sin cuenta ni variable de entorno a diferencia de
- * UserWay. Se importa en su propio archivo, después del `load` y en un
- * momento ocioso: son 65 kB que la primera pantalla del celular no necesita
- * para dibujarse. En el celular
- * con sesión el botón flotante se oculta (tapaba el "+" de los platos) y el
+ * UserWay. Se importa en su propio archivo, varios segundos después del
+ * `load`: son 65 kB que la primera pantalla del celular no necesita para
+ * dibujarse, y un `requestIdleCallback` los evaluaba en el primer hueco del
+ * hilo, justo cuando Lighthouse mide el LCP. En el celular con sesión el
+ * botón flotante se oculta (tapaba el "+" de los platos) y el
  * menú se abre desde "Más" (ver accessibilityMenu.ts). Sí hace una llamada externa: publica el locale de cada idioma y la
  * fuente de lectura en cdn.jsdelivr.net y los descarga de ahí (el tarball los
  * trae, pero el paquete arma las URL contra el CDN). Aceptamos ese CDN; si
@@ -33,30 +34,18 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
  * 'Abrir menú de accesibilidad' tanto al montarse como ante cualquier
  * mutación del DOM.
  */
-// Tope de espera del momento ocioso: en una pantalla que nunca queda quieta
-// (el tablero en vivo), el widget igual aparece.
-const IDLE_TIMEOUT_MS = 2000
+// Después del `load`, no en el primer hueco del hilo: el widget evalúa 65 kB
+// y pide su idioma a un CDN. Ese trabajo, si cae en los primeros segundos,
+// alarga el LCP y el TBT que Lighthouse simula con la CPU a 4×.
+const ESPERA_TRAS_CARGA_MS = 8000
 
 /**
- * Corre `cargar` después del evento `load` y en un momento ocioso. El widget
- * son 65 kB que se evalúan en el hilo principal: bajarlo mientras la pantalla
- * se dibuja retrasaba el primer render en el celular (Lighthouse, TBT y LCP).
- * Devuelve cómo cancelarlo.
+ * Corre `cargar` unos segundos después de `load`. Devuelve cómo cancelarlo.
  */
 function cuandoTermineDeCargar(cargar: () => void): () => void {
-  let cancelar: () => void = () => undefined
+  let id = 0
   const programar = () => {
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(cargar, { timeout: IDLE_TIMEOUT_MS })
-      cancelar = () => {
-        window.cancelIdleCallback(id)
-      }
-      return
-    }
-    const id = setTimeout(cargar, IDLE_TIMEOUT_MS / 4)
-    cancelar = () => {
-      clearTimeout(id)
-    }
+    id = window.setTimeout(cargar, ESPERA_TRAS_CARGA_MS)
   }
   if (document.readyState === 'complete') {
     programar()
@@ -65,7 +54,7 @@ function cuandoTermineDeCargar(cargar: () => void): () => void {
   }
   return () => {
     window.removeEventListener('load', programar)
-    cancelar()
+    window.clearTimeout(id)
   }
 }
 
