@@ -1,0 +1,469 @@
+{
+  "total": 76,
+  "porTipo": {
+    "ruta": 35,
+    "confirmacion": 9,
+    "desplegable": 5,
+    "dialogo": 22,
+    "hoja": 3,
+    "pestanas": 2
+  },
+  "elementos": [
+    {
+      "id": "ruta:/",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /",
+      "origen": "src/router/index.tsx (index: HomeRedirect)"
+    },
+    {
+      "id": "ruta:/*",
+      "tipo": "ruta",
+      "descripcion": "Una ruta que no existe redirige al inicio",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/acceso",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /acceso",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/caja",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /caja",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/clientes",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /clientes",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/cocina",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /cocina",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/comprobantes",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /comprobantes",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/comprobantes/:invoiceId/imprimir",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /comprobantes/:invoiceId/imprimir",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/imprimir/:orderId/:kind",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /imprimir/:orderId/:kind",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/inventario",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /inventario",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/inventario/recetas/:menuItemId",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /inventario/recetas/:menuItemId",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/menu",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /menu",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/mesas",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /mesas",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/panel",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /panel",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/panel/ia",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /panel/ia",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/panel/reposicion",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /panel/reposicion",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/pedidos",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /pedidos",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/pedidos/:orderId",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /pedidos/:orderId",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/pedidos/:orderId/agregar",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /pedidos/:orderId/agregar",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/pedidos/nuevo",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /pedidos/nuevo",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/perfil",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /perfil",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/personal",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /personal",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/plataforma",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /plataforma",
+      "origen": "src/router/index.tsx (index: RestaurantsView)"
+    },
+    {
+      "id": "ruta:/plataforma/*",
+      "tipo": "ruta",
+      "descripcion": "Una ruta que no existe redirige al inicio",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/plataforma/acceso",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /plataforma/acceso",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/plataforma/bitacora",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /plataforma/bitacora",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/plataforma/observabilidad",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /plataforma/observabilidad",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/plataforma/restaurantes/:restaurantId",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /plataforma/restaurantes/:restaurantId",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/plataforma/restaurantes/nuevo",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /plataforma/restaurantes/nuevo",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/plataforma/vista-previa",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /plataforma/vista-previa",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/reservas",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /reservas",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/roles",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /roles",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/tablero",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /tablero",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/tablero/historial",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /tablero/historial",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/vista-previa",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /vista-previa",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "confirmacion:menu/CategoryStatusButton",
+      "tipo": "confirmacion",
+      "descripcion": "`¿Desactivar ${category.name}?`",
+      "origen": "src/features/menu/CategoryStatusButton.tsx"
+    },
+    {
+      "id": "confirmacion:menu/DeleteCategoryButton",
+      "tipo": "confirmacion",
+      "descripcion": "`¿Eliminar ${category.name}?`",
+      "origen": "src/features/menu/DeleteCategoryButton.tsx"
+    },
+    {
+      "id": "confirmacion:menu/MenuItemStatusButton",
+      "tipo": "confirmacion",
+      "descripcion": "`¿Sacar ${item.name} de la carta?`",
+      "origen": "src/features/menu/MenuItemStatusButton.tsx"
+    },
+    {
+      "id": "confirmacion:platform/RestaurantStatusButton",
+      "tipo": "confirmacion",
+      "descripcion": "`¿Desactivar ${restaurant.name}?`",
+      "origen": "src/features/platform/RestaurantStatusButton.tsx"
+    },
+    {
+      "id": "confirmacion:platform/SandboxResetButton",
+      "tipo": "confirmacion",
+      "descripcion": "¿Reiniciar el local de muestra?",
+      "origen": "src/features/platform/SandboxResetButton.tsx"
+    },
+    {
+      "id": "confirmacion:roles/DeleteRoleButton",
+      "tipo": "confirmacion",
+      "descripcion": "`¿Eliminar el rol ${role.name}?`",
+      "origen": "src/features/roles/DeleteRoleButton.tsx"
+    },
+    {
+      "id": "confirmacion:shell/PreviewExitButton",
+      "tipo": "confirmacion",
+      "descripcion": "¿Salir con pedidos sin enviar?",
+      "origen": "src/features/shell/PreviewExitButton.tsx"
+    },
+    {
+      "id": "confirmacion:shell/SessionActions",
+      "tipo": "confirmacion",
+      "descripcion": "¿Cerrar sesión con pedidos sin enviar?",
+      "origen": "src/features/shell/SessionActions.tsx"
+    },
+    {
+      "id": "confirmacion:staff/StaffStatusButton",
+      "tipo": "confirmacion",
+      "descripcion": "`¿Desactivar a ${account.full_name}?`",
+      "origen": "src/features/staff/StaffStatusButton.tsx"
+    },
+    {
+      "id": "desplegable:components/CollapsibleHeading",
+      "tipo": "desplegable",
+      "descripcion": "Sección que se abre y se cierra",
+      "origen": "src/components/CollapsibleHeading.tsx"
+    },
+    {
+      "id": "desplegable:insights/AiDecisionTable",
+      "tipo": "desplegable",
+      "descripcion": "Sección que se abre y se cierra",
+      "origen": "src/features/insights/AiDecisionTable.tsx"
+    },
+    {
+      "id": "desplegable:orders/charge/AdjustmentsPanel",
+      "tipo": "desplegable",
+      "descripcion": "Sección que se abre y se cierra",
+      "origen": "src/features/orders/charge/AdjustmentsPanel.tsx"
+    },
+    {
+      "id": "desplegable:orders/HistoryView",
+      "tipo": "desplegable",
+      "descripcion": "Sección que se abre y se cierra",
+      "origen": "src/features/orders/HistoryView.tsx"
+    },
+    {
+      "id": "desplegable:platform/observability/ExpandButton",
+      "tipo": "desplegable",
+      "descripcion": "Sección que se abre y se cierra",
+      "origen": "src/features/platform/observability/ExpandButton.tsx"
+    },
+    {
+      "id": "dialogo:cash/CashSessionDialog",
+      "tipo": "dialogo",
+      "descripcion": "Cargando el arqueo…",
+      "origen": "src/features/cash/CashSessionDialog.tsx"
+    },
+    {
+      "id": "dialogo:customers/CustomerDialog",
+      "tipo": "dialogo",
+      "descripcion": "customer === null ? 'Nuevo cliente' : `Editar a ${customer.name}`",
+      "origen": "src/features/customers/CustomerDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/PurchaseOrderDialog",
+      "tipo": "dialogo",
+      "descripcion": "Nueva orden de compra",
+      "origen": "src/features/inventory/PurchaseOrderDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/ReceiveOrderDialog",
+      "tipo": "dialogo",
+      "descripcion": "`Recibir la orden ${String(order.number)}`",
+      "origen": "src/features/inventory/ReceiveOrderDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/StockActionDialog",
+      "tipo": "dialogo",
+      "descripcion": "action === null ? '' : titulo(action)",
+      "origen": "src/features/inventory/StockActionDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/SupplierDialog",
+      "tipo": "dialogo",
+      "descripcion": "supplier === null ? 'Nuevo proveedor' : `Editar ${supplier.name}`",
+      "origen": "src/features/inventory/SupplierDialog.tsx"
+    },
+    {
+      "id": "dialogo:menu/CategoryHeader",
+      "tipo": "dialogo",
+      "descripcion": "`Editar ${category.name}`",
+      "origen": "src/features/menu/CategoryHeader.tsx"
+    },
+    {
+      "id": "dialogo:menu/MenuItemRow",
+      "tipo": "dialogo",
+      "descripcion": "`Editar ${item.name}`",
+      "origen": "src/features/menu/MenuItemRow.tsx"
+    },
+    {
+      "id": "dialogo:menu/NewMenuDialogs#1",
+      "tipo": "dialogo",
+      "descripcion": "Nueva categoría",
+      "origen": "src/features/menu/NewMenuDialogs.tsx"
+    },
+    {
+      "id": "dialogo:menu/NewMenuDialogs#2",
+      "tipo": "dialogo",
+      "descripcion": "Nuevo plato",
+      "origen": "src/features/menu/NewMenuDialogs.tsx"
+    },
+    {
+      "id": "dialogo:orders/CancelOrderDialog",
+      "tipo": "dialogo",
+      "descripcion": "`¿Cancelar el pedido #${String(order.number)}?`",
+      "origen": "src/features/orders/CancelOrderDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/charge/ChargeContent",
+      "tipo": "dialogo",
+      "descripcion": "cobrado === null ? `Cobrar pedido #${String(actual.number)}` : 'Cobro registrado'",
+      "origen": "src/features/orders/charge/ChargeContent.tsx"
+    },
+    {
+      "id": "dialogo:orders/detail/ItemNoteDialog",
+      "tipo": "dialogo",
+      "descripcion": "`Nota de ${dish}`",
+      "origen": "src/features/orders/detail/ItemNoteDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/detail/TablePickerDialog",
+      "tipo": "dialogo",
+      "descripcion": "title",
+      "origen": "src/features/orders/detail/TablePickerDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/floor/TakeawayDialog",
+      "tipo": "dialogo",
+      "descripcion": "Pedido para llevar o delivery",
+      "origen": "src/features/orders/floor/TakeawayDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/invoice/InvoiceDialog",
+      "tipo": "dialogo",
+      "descripcion": "`Comprobante del pedido #${String(order.number)}`",
+      "origen": "src/features/orders/invoice/InvoiceDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/taking/ModifierDialog",
+      "tipo": "dialogo",
+      "descripcion": "item.name",
+      "origen": "src/features/orders/taking/ModifierDialog.tsx"
+    },
+    {
+      "id": "dialogo:platform/OwnersSection",
+      "tipo": "dialogo",
+      "descripcion": "Agregar encargado",
+      "origen": "src/features/platform/OwnersSection.tsx"
+    },
+    {
+      "id": "dialogo:reservations/ReservationDialog",
+      "tipo": "dialogo",
+      "descripcion": "reservation === null ? 'Nueva reserva' : `Reserva de ${reservation.customer_name}`",
+      "origen": "src/features/reservations/ReservationDialog.tsx"
+    },
+    {
+      "id": "dialogo:staff/StaffRowActions#1",
+      "tipo": "dialogo",
+      "descripcion": "`Editar a ${account.full_name}`",
+      "origen": "src/features/staff/StaffRowActions.tsx"
+    },
+    {
+      "id": "dialogo:staff/StaffRowActions#2",
+      "tipo": "dialogo",
+      "descripcion": "`Restablecer la contraseña de ${account.full_name}`",
+      "origen": "src/features/staff/StaffRowActions.tsx"
+    },
+    {
+      "id": "dialogo:staff/StaffView",
+      "tipo": "dialogo",
+      "descripcion": "Nueva cuenta",
+      "origen": "src/features/staff/StaffView.tsx"
+    },
+    {
+      "id": "hoja:customers/CustomerSheet",
+      "tipo": "hoja",
+      "descripcion": "{datos?.name ?? 'Cliente'}",
+      "origen": "src/features/customers/CustomerSheet.tsx"
+    },
+    {
+      "id": "hoja:orders/taking/CartSheet",
+      "tipo": "hoja",
+      "descripcion": "{title}",
+      "origen": "src/features/orders/taking/CartSheet.tsx"
+    },
+    {
+      "id": "hoja:shell/MoreSheet",
+      "tipo": "hoja",
+      "descripcion": "{etiqueta}",
+      "origen": "src/features/shell/MoreSheet.tsx"
+    },
+    {
+      "id": "pestanas:inventory/InventoryTabs",
+      "tipo": "pestanas",
+      "descripcion": "",
+      "origen": "src/features/inventory/InventoryTabs.tsx"
+    },
+    {
+      "id": "pestanas:orders/OrdersView",
+      "tipo": "pestanas",
+      "descripcion": "",
+      "origen": "src/features/orders/OrdersView.tsx"
+    }
+  ]
+}

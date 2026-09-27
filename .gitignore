@@ -38,3 +38,8 @@ dev-dist
 .vercel
 .env*
 !.env.example
+
+# Pruebas E2E y visuales de Playwright
+dist-e2e
+e2e/.resultados
+e2e/.reporte

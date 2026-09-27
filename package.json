@@ -13,7 +13,10 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "generate:api": "openapi-typescript \"${VITE_API_URL:-http://localhost:8000}/api/v1/openapi.json\" -o src/api/schema.d.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:e2e": "playwright test --project=cobertura --project=escritorio --project=movil",
+    "test:visual": "playwright test --project=visual-chromium-escritorio --project=visual-chromium-movil --project=visual-firefox-escritorio --project=visual-firefox-movil --project=visual-webkit-escritorio --project=visual-webkit-movil",
+    "e2e:inventario": "node e2e/inventario/generar.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
@@ -40,6 +43,7 @@
   "devDependencies": {
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.0",
     "@eslint/js": "9.39.5",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query-devtools": "^5.102.8",
     "@types/node": "^24.13.4",

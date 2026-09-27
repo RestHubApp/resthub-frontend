@@ -12,7 +12,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts'],
+    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados/**', 'e2e/.reporte/**', 'node_modules/**', 'src/api/schema.d.ts'],
   },
 
   // ---------------------------------------------------------------------
@@ -373,6 +373,27 @@ export default tseslint.config(
     extends: [tseslint.configs.disableTypeChecked],
     rules: {
       'check-file/filename-naming-convention': 'off',
+    },
+  },
+  // ---------------------------------------------------------------------
+  // Pruebas de extremo a extremo y visuales (Playwright, e2e/).
+  //
+  // Corren en Node y describen recorridos largos de la interfaz. Se lintean
+  // con las mismas reglas salvo cuatro: un recorrido es una sola función
+  // larga a propósito (se lee de arriba abajo como la historia que prueba),
+  // los textos de la interfaz se repiten porque son lo que se busca en la
+  // pantalla, los accesorios de Playwright se declaran con `{}` vacío, y
+  // `test.describe` + `test` + `step` suman un nivel más de callbacks.
+  // ---------------------------------------------------------------------
+  {
+    files: ['e2e/**/*.ts'],
+    languageOptions: { globals: globals.node },
+    rules: {
+      'max-lines-per-function': 'off',
+      'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
+      'sonarjs/no-duplicate-string': 'off',
+      'no-empty-pattern': 'off',
+      'max-nested-callbacks': ['error', 4],
     },
   },
 )
