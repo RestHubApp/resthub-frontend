@@ -1,6 +1,10 @@
-import { renderToString } from 'react-dom/server'
-import { createStaticHandler, createStaticRouter, StaticRouterProvider } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+/**
+ * @jest-environment ./jest/nodeEnvironment.cjs
+ */
+// Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
+// como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
+import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 function memoria() {
   const datos = new Map<string, string>()
@@ -17,10 +21,14 @@ function memoria() {
 
 // La pestaña decide al cargarse si es de vista previa: cada prueba parte de módulos nuevos.
 async function pantallaDePlataforma(cargadaEn: string): Promise<string> {
-  vi.stubGlobal('localStorage', memoria())
-  vi.stubGlobal('sessionStorage', memoria())
-  vi.stubGlobal('location', { pathname: cargadaEn, search: '', hash: '' })
-  vi.resetModules()
+  stubGlobal('localStorage', memoria())
+  stubGlobal('sessionStorage', memoria())
+  stubGlobal('location', { pathname: cargadaEn, search: '', hash: '' })
+  jest.resetModules()
+  // React, el router y el renderizador salen del mismo registro de módulos que
+  // el componente: con dos copias de React, los hooks no encuentran su contexto.
+  const { renderToString } = await import('react-dom/server')
+  const { createStaticHandler, createStaticRouter, StaticRouterProvider } = await import('react-router')
   const { default: PreviewPlatformGate } = await import('./PreviewPlatformGate')
   const rutas = [
     { element: <PreviewPlatformGate />, children: [{ path: '/plataforma', element: <p>Área de plataforma</p> }] },
@@ -34,7 +42,7 @@ async function pantallaDePlataforma(cargadaEn: string): Promise<string> {
 }
 
 afterEach(() => {
-  vi.unstubAllGlobals()
+  unstubAllGlobals()
 })
 
 describe('PreviewPlatformGate', () => {

@@ -43,3 +43,11 @@ dev-dist
 dist-e2e
 e2e/.resultados*
 e2e/.reporte*
+
+# Cobertura de Jest y reportes de Stryker (se generan en cada corrida)
+coverage
+reports/mutation
+.stryker-tmp
+
+# Contrato de Pact que generan las pruebas de consumidor (lo versiona el backend)
+pacts/

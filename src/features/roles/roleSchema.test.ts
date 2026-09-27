@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import type { PermissionCode, Role } from '../../api/types'
 import { MAX_ROLE_NAME, rolePayload, roleSchema, valuesOf } from './roleSchema'
