@@ -41,6 +41,7 @@ contraseña `resthub123`; al área de administración del sistema
 | `pnpm typecheck` | Verificación de tipos |
 | `pnpm test` | Pruebas unitarias y de componentes con Jest (`*.test.ts(x)` junto al código) |
 | `pnpm test:coverage` | Las mismas pruebas con cobertura sobre todo `src` (informe HTML en `coverage/lcov-report/`) |
+| `pnpm test:mutation` | Pruebas de mutación con Stryker sobre la lógica de negocio (informe en `reports/mutation/index.html`; no corre en el CI) |
 | `pnpm build` | Tipos y compilación de producción en `dist/` |
 | `pnpm preview` | Sirve la compilación de producción |
 | `pnpm generate:api` | Regenera `src/api/schema.d.ts` desde el OpenAPI del backend |
@@ -55,11 +56,23 @@ está en `jest/`.
 - Las pruebas importan `describe`, `it`, `expect` y `jest` de `@jest/globals`.
 - El entorno por defecto es jsdom, para las pruebas de componentes con React
   Testing Library (`render`, `screen`, `userEvent`) y los matchers de jest-dom.
+- Las pruebas de pantallas usan el arnés `#jest/harness`: `montar(<Vista />)`
+  la abre con un router en memoria y el caché de la aplicación, `entrarComo()`
+  abre una sesión con los permisos dados y `servidor().on('get', '/ruta', datos)`
+  responde el API desde el adaptador de Axios (`llamadas()` dice qué se envió).
+  El canal de avisos (SSE) falso está en `#jest/canal` y los datos de prueba
+  en `jest/fixtures/`.
 - Las pruebas que simulan una pestaña sin DOM (reemplazan `window`, `location`
-  o el almacenamiento) declaran `@jest-environment node` y usan `stubGlobal` y
-  `unstubAllGlobals` de `#jest/globals`.
+  o el almacenamiento) declaran `@jest-environment ./jest/nodeEnvironment.cjs`
+  y usan `stubGlobal` y `unstubAllGlobals` de `#jest/globals`.
 - Si cambia `jest/importMetaEnv.cjs`, hay que vaciar la caché con
   `pnpm exec jest --clearCache`: Jest no la invalida sola.
+
+La mutación (`stryker.config.mjs`) muta `services`, `store` y las utilidades
+puras de `features` (no los componentes, los hooks `use*.ts` ni las precargas),
+con tres procesos y en modo incremental. Falla por debajo de 70 %
+(`thresholds.break`). Tarda del orden de una hora la primera vez, por eso no
+está en el CI.
 
 ### Variables de entorno
 
