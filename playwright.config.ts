@@ -49,7 +49,8 @@ export default defineConfig({
     ['./e2e/soporte/reporteCobertura.ts'],
   ],
   use: {
-    baseURL: FRONT,
+    // E2E_BASE_URL sirve otra compilación sin tocar la de 5201 (la demostración del diff visual).
+    baseURL: process.env.E2E_BASE_URL ?? FRONT,
     locale: 'es-PE',
     timezoneId: 'America/Lima',
     // El service worker de la PWA guarda el armazón; en una prueba solo agrega
