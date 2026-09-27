@@ -30,6 +30,7 @@ export type Parsed<T> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly error: string }
 
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const PRECIO = /^\d{1,4}(?:[.,]\d{1,2})?$/u
 
 function fallo<T>(error: string): Parsed<T> {

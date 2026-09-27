@@ -17,6 +17,7 @@ interface ReceiveOrderDialogProps {
 
 type Recibido = Readonly<Partial<Record<number, { quantity: string; unitCost: string }>>>
 
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const NUMERO = /^\d+(?:[.,]\d+)?$/u
 
 function inicial(order: PurchaseOrder): Recibido {
