@@ -46,22 +46,29 @@ export default function KitchenView() {
       {activos.isError ? (
         <QueryError error={activos.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void activos.refetch()} />
       ) : null}
-      <SectionCard title={`Por preparar (${String(enCocina.length)})`}>
-        {activos.isSuccess && enCocina.length === 0 ? <EmptyState title="Nada pendiente en cocina" /> : null}
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {enCocina.map((order) => (
-            <KitchenCard key={order.id} order={order} now={now} flagFor={notas.flagFor} />
-          ))}
-        </div>
-      </SectionCard>
-      <SectionCard title={`Listos para servir (${String(listos.length)})`} collapsible>
-        {activos.isSuccess && listos.length === 0 ? <EmptyState title="Nada esperando a salir" /> : null}
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {listos.map((order) => (
-            <KitchenCard key={order.id} order={order} now={now} flagFor={notas.flagFor} />
-          ))}
-        </div>
-      </SectionCard>
+      {/* Mientras carga, la silueta ocupa el lugar de las dos secciones; antes se
+          veían las dos a la vez y, al irse la silueta, las secciones saltaban
+          (CLS de 0,58 en el celular). */}
+      {activos.isPending ? null : (
+        <>
+          <SectionCard title={`Por preparar (${String(enCocina.length)})`}>
+            {activos.isSuccess && enCocina.length === 0 ? <EmptyState title="Nada pendiente en cocina" /> : null}
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {enCocina.map((order) => (
+                <KitchenCard key={order.id} order={order} now={now} flagFor={notas.flagFor} />
+              ))}
+            </div>
+          </SectionCard>
+          <SectionCard title={`Listos para servir (${String(listos.length)})`} collapsible>
+            {activos.isSuccess && listos.length === 0 ? <EmptyState title="Nada esperando a salir" /> : null}
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {listos.map((order) => (
+                <KitchenCard key={order.id} order={order} now={now} flagFor={notas.flagFor} />
+              ))}
+            </div>
+          </SectionCard>
+        </>
+      )}
     </div>
   )
 }
