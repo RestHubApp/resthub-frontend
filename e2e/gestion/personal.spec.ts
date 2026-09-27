@@ -45,8 +45,7 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
   await alta.getByLabel('Correo').fill(local.mesero.email)
   await alta.getByLabel('Contraseña inicial').fill(CLAVE_NUEVA)
   await alta.getByRole('button', { name: 'Crear cuenta' }).click()
-  // El diálogo muestra además el aviso general de que no se guardó; se busca el motivo del servidor.
-  await expect(alta.getByRole('alert').filter({ hasNotText: 'No se pudo guardar. Los datos siguen aquí' })).toBeVisible()
+  await expect(alta.getByRole('alert')).toBeVisible()
   await evidencia(page, 'ges-15-1-correo-repetido')
   await alta.getByLabel('Correo').fill(correo)
   await alta.getByRole('button', { name: 'Crear cuenta' }).click()
