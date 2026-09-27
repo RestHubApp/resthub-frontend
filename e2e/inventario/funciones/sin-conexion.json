@@ -1,0 +1,6 @@
+[
+  { "id": "funcion:pedidos.sin-conexion-encolar", "descripcion": "Sin señal, un pedido nuevo queda en la cola del celular con un aviso visible (HU37)" },
+  { "id": "funcion:pedidos.sin-conexion-reenviar", "descripcion": "Al volver la señal, la cola se envía sola a cocina (HU37)" },
+  { "id": "funcion:pedidos.sin-conexion-sin-duplicar", "descripcion": "Un pedido que llegó al servidor pero cuya respuesta se perdió no se duplica al reintentar, y «Reintentar» lo envía (HU37)" },
+  { "id": "estado:pedidos.cola-sin-senal", "tipo": "estado", "descripcion": "Aviso «N pedidos esperan señal» en Pedidos" }
+]
