@@ -11,6 +11,7 @@ import { useLocation } from 'react-router'
 export function useHashFocus(): void {
   const { hash, key } = useLocation()
   useEffect(() => {
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- compara el hash de la URL con '', no con un secreto
     if (hash === '') {
       return
     }

@@ -112,6 +112,7 @@ test('GES-28 el encargado acota el panel con los rangos de siempre y uno persona
   await page.getByLabel('Desde').fill(diaDesdeHoy(-2))
   await page.getByLabel('Hasta').fill(diaDesdeHoy(-1))
   await page.getByRole('button', { name: 'Aplicar' }).click()
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`rango=personalizado&desde=${diaDesdeHoy(-2)}&hasta=${diaDesdeHoy(-1)}`, 'u'))
   await expect(page.getByText(/\(2 días\)\./u)).toBeVisible()
   await expect(kpi('Ventas')).toContainText(soles('0.00'))

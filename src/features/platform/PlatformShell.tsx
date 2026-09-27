@@ -1,6 +1,8 @@
 import { Outlet } from 'react-router'
 
 import AccessibilityWidget from '../../components/AccessibilityWidget'
+import ApiFailureNotice from '../../components/ApiFailureNotice'
+import { useFailedQueries } from '../../hooks/useFailedQueries'
 import PlatformHeader from './PlatformHeader'
 import { usePlatformSessionUpkeep } from './usePlatformSessionUpkeep'
 
@@ -22,12 +24,14 @@ const SKIP_LINK = (
  */
 export default function PlatformShell() {
   usePlatformSessionUpkeep()
+  const failed = useFailedQueries('platform')
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       {SKIP_LINK}
       <AccessibilityWidget />
       <PlatformHeader />
+      <ApiFailureNotice message={failed.message} onRetry={failed.retry} />
       <main
         id="contenido"
         tabIndex={-1}

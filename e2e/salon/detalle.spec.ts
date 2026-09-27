@@ -5,6 +5,7 @@ import { cubre } from '../soporte/cobertura'
 import { abrirComo, aviso, evidencia, expect, test } from '../soporte/fixtures'
 import { api, contarImpresiones, id, impresiones, leerPedido, pedidoAbierto, pedidoEnMesa, pedidoPagado } from '../soporte/salon'
 
+// eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
 const soles = (monto: string) => new RegExp(`S/\\s*${monto.replace('.', '\\.')}`, 'u')
 
 test('SAL-10 el mesero agrega platos a un pedido listo y vuelve a cocina @movil', async ({ page, local }) => {
@@ -23,6 +24,7 @@ test('SAL-10 el mesero agrega platos a un pedido listo y vuelve a cocina @movil'
   await page.getByRole('button', { name: 'Agregar al pedido' }).click()
 
   await expect(aviso(page, 'Platos agregados al pedido #1.')).toBeVisible()
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`/pedidos/${String(pedido.id)}$`, 'u'))
   await expect(page.getByText('En cocina', { exact: true }).first()).toBeVisible()
   await expect(page.getByText(soles('62.00')).first()).toBeVisible()

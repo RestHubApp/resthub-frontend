@@ -16,6 +16,7 @@ import {
   pedidoServido,
 } from '../soporte/salon'
 
+// eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
 const columna = (page: Page, estado: string) => page.getByRole('region', { name: new RegExp(`^${estado}: \\d+$`, 'u') })
 const tarjeta = (page: Page, numero: unknown) => page.getByRole('article', { name: `Pedido #${String(numero)}` })
 
@@ -88,6 +89,7 @@ test('SAL-28 el encargado filtra el tablero por tipo y envía, cobra y cancela d
   expect(await leerPedido(local, id(servido))).toMatchObject({ status: 'paid', payment_method: 'plin' })
 
   await tarjeta(page, llevar.number).getByRole('link', { name: `Pedido #${String(llevar.number)}` }).click()
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`/pedidos/${String(llevar.id)}$`, 'u'))
 })
 

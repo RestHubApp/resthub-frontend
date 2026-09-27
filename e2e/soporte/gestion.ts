@@ -79,6 +79,7 @@ export function api(local: Pick<Local, 'http' | 'encargado'>, quien: Sesion = lo
 
 /** Un monto como lo escribe la aplicación («S/ 164.00»), con cualquier espacio. */
 export function soles(monto: string): RegExp {
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   return new RegExp(`S/\\s*${monto.replaceAll('.', '\\.')}`, 'u')
 }
 

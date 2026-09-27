@@ -14,6 +14,7 @@ import {
   platoConOpciones,
 } from '../soporte/salon'
 
+// eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
 const soles = (monto: string) => new RegExp(`S/\\s*${monto.replace('.', '\\.')}`, 'u')
 
 test('SAL-01 el mesero toma el pedido de una mesa en tres pasos y lo envía a cocina @movil', async ({ page, local }) => {
@@ -195,6 +196,7 @@ test('SAL-05 una mesa que se ocupó mientras se elegía avisa, y una mesa que no
   await expect(page.getByText(`Esta mesa ya tiene el pedido #${String(pedido.number)}.`)).toBeVisible()
   await evidencia(page, 'sal-05-1-ocupada')
   await page.getByRole('link', { name: 'Ver el pedido' }).click()
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`/pedidos/${String(pedido.id)}$`, 'u'))
 
   await page.goto('/pedidos/nuevo?mesa=999999')

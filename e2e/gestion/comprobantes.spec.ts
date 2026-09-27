@@ -60,6 +60,7 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
 
   // La hoja impresa lleva el emisor, el detalle, la base imponible y el IGV.
   await fila.getByRole('link', { name: 'Imprimir' }).click()
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`/comprobantes/${String(boleta.id)}/imprimir$`, 'u'))
   const hoja = page.locator('#hoja-impresa')
   await expect(hoja).toContainText('Restaurante E2E S.A.C.')

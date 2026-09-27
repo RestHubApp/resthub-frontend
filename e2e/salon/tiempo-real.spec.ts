@@ -33,6 +33,7 @@ async function noSeRecargo(page: Page): Promise<boolean> {
   return page.evaluate(() => (window as unknown as { sinRecargar?: boolean }).sinRecargar === true)
 }
 
+// eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
 const columna = (page: Page, estado: string) => page.getByRole('region', { name: new RegExp(`^${estado}: \\d+$`, 'u') })
 
 test('SAL-06 la cocina ve el pedido sin recargar, lo marca listo y el mesero lo sirve @movil', async ({ page, browser, local }) => {

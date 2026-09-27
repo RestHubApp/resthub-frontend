@@ -20,8 +20,10 @@ const RAIZ = join(import.meta.dirname, '..', '..')
 const SRC = join(RAIZ, 'src')
 
 function archivos(carpeta: string): string[] {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
   return readdirSync(carpeta).flatMap((nombre) => {
     const ruta = join(carpeta, nombre)
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     return statSync(ruta).isDirectory() ? archivos(ruta) : [ruta]
   })
 }
@@ -92,10 +94,12 @@ function overlaysDelCodigo(): Elemento[] {
       !ruta.endsWith(join('components', 'ConfirmDialog.tsx')),
   )
   for (const ruta of fuentes) {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     const fuente = readFileSync(ruta, 'utf8')
     const archivo = relative(SRC, ruta).replace(/\\/gu, '/').replace(/^features\//u, '').replace(/\.tsx$/u, '')
     const enArchivo: Elemento[] = []
     for (const { etiqueta, tipo } of OVERLAYS) {
+      // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
       for (const coincidencia of fuente.matchAll(new RegExp(`<${etiqueta}(?=[\\s>])`, 'gu'))) {
         const fragmento = fuente.slice(coincidencia.index, coincidencia.index + 900)
         enArchivo.push({ id: '', tipo, descripcion: titulo(fragmento), origen: `src/${relative(SRC, ruta)}` })
@@ -121,6 +125,7 @@ function funcionesCuradas(): Elemento[] {
     .filter((ruta) => ruta.endsWith('.json'))
     .sort((a, b) => a.localeCompare(b))
     .flatMap((ruta) => {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
       const lista = JSON.parse(readFileSync(ruta, 'utf8')) as { id: string; tipo?: Elemento['tipo']; descripcion: string }[]
       return lista.map((fila) => ({
         id: fila.id,

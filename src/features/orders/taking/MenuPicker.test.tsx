@@ -21,6 +21,7 @@ function abrirCarta(menu: unknown = carta()) {
 }
 
 function plat(nombre: string) {
+  // eslint-disable-next-line security/detect-non-literal-regexp -- el texto lo fija la prueba; se busca por coincidencia parcial del nombre accesible
   return screen.findByRole('button', { name: new RegExp(nombre, 'u') })
 }
 

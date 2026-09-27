@@ -66,11 +66,15 @@ const SUFIJOS: readonly (readonly [RegExp, string])[] = [
 const LISTAS_CON_HORA: readonly RegExp[] = [
   /^\/api\/v1\/orders$/u,
   /^\/api\/v1\/inventory\/movements$/u,
+  // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
   /^\/api\/v1\/cash\/sessions(?:\/\d+)?$/u,
+  // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
   /^\/api\/v1\/billing\/invoices(?:\/\d+)?$/u,
   /^\/api\/v1\/billing\/orders\/\d+\/invoice$/u,
+  // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
   /^\/api\/v1\/customers(?:\/\d+)?$/u,
 ]
+// eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
 const INSTANTE = /"(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})"/gu
 
 // La ficha de un restaurante de plataforma muestra «Alta: <fecha y hora>»: el

@@ -67,6 +67,7 @@ test('PLA-16 el panel de observabilidad muestra indicadores y gráficos, cambia 
 
   // Solo el restaurante de esta prueba: sus peticiones son las del alta y la carga de datos.
   await page.getByRole('combobox', { name: 'Restaurante', exact: true }).selectOption(String(local.id))
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`restaurante=${String(local.id)}`, 'u'))
   await expect(indicadores).not.toHaveAttribute('aria-busy', 'true')
 
@@ -163,6 +164,7 @@ test('PLA-17 los logs y las peticiones se filtran, se paginan y se enlazan por r
   const aLogs = peticiones.getByRole('link', { name: /^Ver los logs de /u }).first()
   const requestId = ((await aLogs.getAttribute('aria-label')) ?? '').replace('Ver los logs de ', '')
   await aLogs.click()
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`log_peticion=${requestId}`, 'u'))
   await expect(logs.getByLabel('request_id')).toHaveValue(requestId)
 

@@ -7,6 +7,7 @@ import { cubre } from '../soporte/cobertura'
 import { abrirComo, evidencia, expect, test } from '../soporte/fixtures'
 import { contarImpresiones, id, impresiones, leerPedido, pedidoServido } from '../soporte/salon'
 
+// eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
 const soles = (monto: string) => new RegExp(`S/\\s*${monto.replace('.', '\\.')}`, 'u')
 
 // Con la ventana de cobro abierta, Radix marca el resto de la página con
@@ -143,6 +144,7 @@ test('SAL-19 el mesero descuenta hasta su tope, y más allá el servidor lo rech
   await expect(ventana.getByText('Invitar un plato (cortesía)')).toHaveCount(0)
 
   await ventana.getByRole('button', { name: 'Aplicar descuento' }).click()
+  // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
   await expect(ventana.getByText(/Hasta 10(\.0+)?\s*%; más, lo aplica el encargado\./u)).toBeVisible()
   await ventana.getByRole('button', { name: 'Aplicar descuento' }).click()
   await expect(ventana.getByText('Escribe el motivo')).toBeVisible()
@@ -154,7 +156,9 @@ test('SAL-19 el mesero descuenta hasta su tope, y más allá el servidor lo rech
 
   await ventana.getByRole('textbox', { name: 'Descuento %' }).fill('10')
   await ventana.getByRole('button', { name: 'Aplicar descuento' }).click()
+  // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
   await expect(avisoTras(page, /Descuento de 10(\.0+)?\s*% aplicado\./u)).toBeVisible()
+  // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
   await expect(ventana).toContainText(/Descuento 10(\.0+)?\s*%\s*− S\/\s*5\.60/u)
   await expect(ventana).toContainText(/Total a cobrar\s*S\/\s*50\.40/u)
   await evidencia(page, 'sal-19-1-descuento')
@@ -213,6 +217,7 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
   await ventana.getByRole('textbox', { name: 'Motivo' }).fill('Cliente frecuente')
   await ventana.getByRole('button', { name: 'Aplicar descuento' }).click()
   await expect(ventana).toContainText(/Total a cobrar\s*S\/\s*24\.00/u)
+  // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
   await expect(ventana.getByRole('button', { name: /Cambiar descuento \(25(\.0+)?\s*%\)/u })).toBeVisible()
 
   await ventana.getByRole('group', { name: 'Montos rápidos' }).getByRole('button', { name: soles('50.00') }).click()
@@ -228,6 +233,7 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
   await expect(hoja).toContainText('Ticket de venta')
   await expect(hoja).toContainText('1 × Chicha morada (cortesía)')
   await expect(hoja).toContainText(/Cortesías\s*− S\/\s*8\.00/u)
+  // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
   await expect(hoja).toContainText(/Descuento 25(\.0+)?\s*%\s*− S\/\s*8\.00/u)
   await expect(hoja).toContainText(/Total\s*S\/\s*24\.00/u)
   await expect(hoja).toContainText(/Vuelto\s*S\/\s*26\.00/u)

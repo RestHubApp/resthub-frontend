@@ -4,8 +4,10 @@ import { tableName, tablesQuery } from '../../../api/tables'
 import type { TableState } from '../../../api/types'
 import EmptyState from '../../../components/EmptyState'
 import FormDialog from '../../../components/FormDialog'
+import RetryQueryError from '../../../components/RetryQueryError'
 import { Button } from '../../../components/ui/button'
 import { formatMoney } from '../../../services/format'
+import { errorMessage } from '../../../services/api'
 
 interface TablePickerDialogProps {
   readonly open: boolean
@@ -49,6 +51,7 @@ export default function TablePickerDialog({
         }
       }}
     >
+      {mesas.isError ? <RetryQueryError message={errorMessage(mesas.error, 'No se pudieron cargar las mesas.')} onRetry={() => { void mesas.refetch() }} /> : null}
       {mesas.isSuccess && opciones.length === 0 ? <EmptyState title={empty} /> : null}
       <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0 sm:grid-cols-3">
         {opciones.map((mesa) => (

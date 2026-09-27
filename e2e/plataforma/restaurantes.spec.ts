@@ -201,6 +201,7 @@ test('PLA-06 la lista de restaurantes se busca por nombre o identificador y se p
 
   await buscar.fill(prefijo)
   await expect(page.getByRole('heading', { name: '2 restaurantes' })).toBeVisible()
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(filas).toHaveText([new RegExp(`${prefijo} 02`, 'u'), new RegExp(`${prefijo} 01`, 'u')])
   await expect(page.getByText(/^Página \d+ de/u)).toBeHidden()
   await evidencia(page, 'pla-06-busqueda')
@@ -209,6 +210,7 @@ test('PLA-06 la lista de restaurantes se busca por nombre o identificador y se p
   await expect(page.getByRole('heading', { name: '1 restaurante', exact: true })).toBeVisible()
   await expect(filas).toContainText(local.slug)
   await filas.getByRole('link', { name: local.nombre }).click()
+  // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`/plataforma/restaurantes/${String(local.id)}$`, 'u'))
   await page.getByRole('link', { name: 'Restaurantes' }).first().click()
 

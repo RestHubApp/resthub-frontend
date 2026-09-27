@@ -10,8 +10,10 @@ import { ARCHIVO_INVENTARIO, type Elemento, inventario } from './inventario/inve
 const E2E = import.meta.dirname
 
 function specs(carpeta: string): string[] {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
   return readdirSync(carpeta).flatMap((nombre) => {
     const ruta = join(carpeta, nombre)
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     if (statSync(ruta).isDirectory()) {
       return nombre.startsWith('.') ? [] : specs(ruta)
     }
@@ -23,6 +25,7 @@ function specs(carpeta: string): string[] {
 function marcados(archivos: readonly string[]): Map<string, string[]> {
   const mapa = new Map<string, string[]>()
   for (const archivo of archivos) {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     const fuente = readFileSync(archivo, 'utf8')
     for (const llamada of fuente.matchAll(/cubre\(([^)]*)\)/gu)) {
       for (const literal of llamada[1].matchAll(/'([^']+)'/gu)) {
@@ -34,6 +37,7 @@ function marcados(archivos: readonly string[]): Map<string, string[]> {
   return mapa
 }
 
+// eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
 const guardado = JSON.parse(readFileSync(ARCHIVO_INVENTARIO, 'utf8')) as { elementos: Elemento[] }
 const actual = inventario()
 const todos = specs(E2E)

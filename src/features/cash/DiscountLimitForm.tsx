@@ -9,6 +9,7 @@ import { errorMessage } from '../../services/api'
 import { formatPercent } from '../../services/format'
 import { useNotifications } from '../../store/notifications'
 
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const PORCENTAJE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
 
 /**

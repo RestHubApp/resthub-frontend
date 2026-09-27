@@ -56,7 +56,9 @@ export default class ReporteCobertura implements Reporter {
       porTipo[elemento.tipo] = fila
     }
     const proyectos = Object.fromEntries([...this.vistos].map(([nombre, ids]) => [nombre, ids.size]))
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     mkdirSync(dirname(SALIDA), { recursive: true })
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     writeFileSync(SALIDA, `${JSON.stringify({ fecha: new Date().toISOString(), proyectos, porTipo }, null, 2)}\n`)
   }
 }

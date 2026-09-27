@@ -75,6 +75,7 @@ test('GES-11 cada pestaña del inventario avisa si el servidor falla', async ({ 
     proveedores: 'No se pudieron cargar los proveedores.',
   }
   for (const [pestana, mensaje] of Object.entries(mensajes)) {
+    // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
     await page.getByRole('tab', { name: new RegExp(pestana, 'iu') }).click()
     await expect(page.getByRole('tabpanel').getByRole('alert')).toHaveText(mensaje)
   }

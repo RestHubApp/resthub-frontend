@@ -33,10 +33,12 @@ const ESPERA_CANDADO_MS = 150_000
 
 function tomarCandado(): boolean {
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     mkdirSync(CANDADO)
     return true
   } catch {
     try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
       if (Date.now() - statSync(CANDADO).mtimeMs > CANDADO_VENCIDO_MS) {
         rmSync(CANDADO, { recursive: true, force: true })
       }
