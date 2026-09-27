@@ -8,15 +8,17 @@ import { fileURLToPath } from 'node:url'
 
 // Las opciones de un transformador no expanden <rootDir>: la ruta va completa.
 const importMetaEnv = fileURLToPath(new URL('./jest/importMetaEnv.cjs', import.meta.url))
+// El entorno va con la ruta completa: Stryker lo carga sin expandir <rootDir>.
+const entornoJsdom = fileURLToPath(new URL('./jest/jsdomEnvironment.cjs', import.meta.url))
 
-// Dependencias que solo traen ESM (React Router 8 y la que usa para cookies).
-const soloEsm = ['react-router', 'cookie-es']
+// Dependencias que solo traen ESM: React Router 8 (y la que usa para cookies) y TanStack Table 9.
+const soloEsm = ['react-router', 'cookie-es', '@tanstack/react-table', '@tanstack/table-core']
 
 /** @type {import('jest').Config} */
 export default {
-  // El DOM de jsdom para las pruebas de componentes. Las de lógica que simulan
+  // El DOM de jsdom (con la API fetch de Node) para las pruebas de componentes. Las de lógica que simulan
   // una pestaña sin DOM (sin `window`) declaran `@jest-environment node`.
-  testEnvironment: 'jsdom',
+  testEnvironment: entornoJsdom,
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.{ts,tsx}'],
   setupFiles: ['<rootDir>/jest/setup.ts'],
@@ -40,12 +42,18 @@ export default {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^#jest/(.*)$': '<rootDir>/jest/$1',
     '^virtual:pwa-register(/.*)?$': '<rootDir>/jest/pwaRegister.cjs',
+    // Widget de accesibilidad de terceros: se importa por su efecto de montar
+    // su propio botón en <body>, fuera de React. No es lógica de RestHub.
+    '^sienna-accessibility$': '<rootDir>/jest/fileMock.cjs',
     '\\.(css|less|scss|svg|png|jpe?g|gif|webp|woff2?)(\\?.*)?$': '<rootDir>/jest/fileMock.cjs',
   },
   // Paquetes publicados solo como ESM: Babel los pasa a CommonJS como al código
   // propio. Con pnpm cada paquete vive en node_modules/.pnpm/<paquete>@…
   transformIgnorePatterns: [`/node_modules/(?!\\.pnpm/|(${soloEsm.join('|')})[@/])`],
   clearMocks: true,
+  // Una pantalla perezosa del router se compila con Babel la primera vez que
+  // se abre; sin caché (en el CI) eso tarda varios segundos.
+  testTimeout: 20_000,
   // Cobertura sobre todo src, no solo sobre lo que importan las pruebas.
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

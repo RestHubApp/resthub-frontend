@@ -40,4 +40,16 @@ if (typeof window !== 'undefined') {
   elemento.hasPointerCapture ??= () => false
   elemento.releasePointerCapture ??= () => undefined
   elemento.scrollIntoView ??= () => undefined
+  // jsdom avisa «Not implemented» y no hace nada: en las pruebas basta con eso, sin el aviso.
+  window.scrollTo = () => undefined
+  window.print = () => undefined
+  // Nada sale a la red: una petición con `fetch` (el canal de avisos) queda
+  // abierta hasta que se aborta, como una conexión que todavía no responde.
+  // Las del API pasan por el adaptador de Axios de cada prueba.
+  window.fetch = (_entrada: RequestInfo | URL, opciones?: RequestInit) =>
+    new Promise<Response>((_resolver, rechazar) => {
+      opciones?.signal?.addEventListener('abort', () => {
+        rechazar(new DOMException('Abortado', 'AbortError'))
+      })
+    })
 }
