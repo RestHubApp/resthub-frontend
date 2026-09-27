@@ -102,7 +102,7 @@ test('GES-07 quien solo puede ver el inventario mira la receta sin editarla y un
   await evidencia(page, 'ges-07-1-solo-lectura')
 
   await page.goto('/inventario/recetas/99999999')
-  await expect(page.getByRole('alert')).toBeVisible()
+  await expect(page.getByRole('main').getByRole('alert')).toBeVisible()
   await expect(page.getByText('Cargando la receta…')).toBeHidden()
   await evidencia(page, 'ges-07-2-no-existe')
 })

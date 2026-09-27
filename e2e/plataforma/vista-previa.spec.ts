@@ -165,7 +165,7 @@ test('PLA-14 el enlace de repuesto abre la vista previa si el navegador bloqueó
     const otra = await context.newPage()
     await otra.goto(direccion ?? '/vista-previa')
     await expect(otra.getByRole('heading', { name: 'No se pudo abrir la vista previa' })).toBeVisible()
-    await expect(otra.getByText('El código de vista previa no vale: venció (dura un minuto) o ya se usó.')).toBeVisible()
+    await expect(otra.getByRole('alert').filter({ hasText: 'El código de vista previa no vale: venció (dura un minuto) o ya se usó.' })).toBeVisible()
     await evidencia(otra, 'pla-14-codigo-usado')
     await otra.getByRole('link', { name: 'Volver a la administración del sistema' }).click()
     await expect(otra).toHaveURL(/\/plataforma\/vista-previa$/u)
@@ -178,13 +178,13 @@ test('PLA-15 el canje avisa si falta el código, si no vale o si no hay conexió
   const titulo = page.getByRole('heading', { name: 'No se pudo abrir la vista previa' })
   await page.goto('/vista-previa')
   await expect(titulo).toBeVisible()
-  await expect(page.getByText('Esta dirección no trae un código de vista previa.')).toBeVisible()
+  await expect(page.getByRole('alert').filter({ hasText: 'Esta dirección no trae un código de vista previa.' })).toBeVisible()
 
   // Cambiar solo el fragmento no recarga la página: se sale antes para que
   // cada código se canjee en una carga nueva, como al abrir el enlace.
   await page.goto('about:blank')
   await page.goto('/vista-previa#codigo=un-codigo-que-no-existe')
-  await expect(page.getByText('El código de vista previa no vale: venció (dura un minuto) o ya se usó.')).toBeVisible()
+  await expect(page.getByRole('alert').filter({ hasText: 'El código de vista previa no vale: venció (dura un minuto) o ya se usó.' })).toBeVisible()
   // El código sale de la barra de direcciones.
   await expect(page).toHaveURL(/\/vista-previa$/u)
   await evidencia(page, 'pla-15-invalido')
@@ -192,7 +192,7 @@ test('PLA-15 el canje avisa si falta el código, si no vale o si no hay conexió
   await page.route('**/api/v1/auth/preview', (ruta) => ruta.abort('internetdisconnected'))
   await page.goto('about:blank')
   await page.goto('/vista-previa#codigo=otro-codigo')
-  await expect(page.getByText('No hubo conexión con el servidor para abrir la vista previa.')).toBeVisible()
+  await expect(page.getByRole('alert').filter({ hasText: 'No hubo conexión con el servidor para abrir la vista previa.' })).toBeVisible()
 
   // Un canje fallido no abre sesión ni marca la pestaña: fuera de
   // /vista-previa vuelve a ser una pestaña normal, con el acceso.

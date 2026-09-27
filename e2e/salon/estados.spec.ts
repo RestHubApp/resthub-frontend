@@ -18,8 +18,8 @@ async function fallar(page: Page, ruta: string): Promise<() => Promise<void>> {
 
 async function reintentar(page: Page, sana: () => Promise<void>): Promise<void> {
   await sana()
-  await page.getByRole('button', { name: 'Reintentar' }).click()
-  await expect(page.getByRole('button', { name: 'Reintentar' })).toHaveCount(0)
+  await page.getByRole('main').getByRole('button', { name: 'Reintentar' }).click()
+  await expect(page.getByRole('main').getByRole('button', { name: 'Reintentar' })).toHaveCount(0)
 }
 
 test('SAL-31 sin mesas activas ni pedidos, cada pestaña del mesero lo dice @movil', async ({ page, local }) => {
@@ -56,20 +56,20 @@ test('SAL-32 si no cargan las mesas, los pedidos para llevar o los del mesero, s
   cubre('estado:pedidos.mesas.error', 'estado:pedidos.llevar.error', 'estado:pedidos.mios.error')
   let sana = await fallar(page, '/tables')
   await abrirComo(page, local.mesero, '/pedidos')
-  await expect(page.getByText('No se pudieron cargar las mesas.')).toBeVisible()
+  await expect(page.getByRole('main').getByText('No se pudieron cargar las mesas.')).toBeVisible()
   await evidencia(page, 'sal-32-1-error-mesas')
   await reintentar(page, sana)
   await expect(page.getByRole('heading', { name: '4 de 4 mesas libres' })).toBeVisible()
 
   sana = await fallar(page, '/orders/active')
   await page.goto('/pedidos?vista=llevar')
-  await expect(page.getByText('No se pudieron cargar los pedidos.')).toBeVisible()
+  await expect(page.getByRole('main').getByText('No se pudieron cargar los pedidos.')).toBeVisible()
   await reintentar(page, sana)
   await expect(page.getByText('No hay pedidos para llevar ni delivery en curso')).toBeVisible()
 
   sana = await fallar(page, '/orders')
   await page.goto('/pedidos?vista=mios')
-  await expect(page.getByText('No se pudieron cargar tus pedidos.')).toBeVisible()
+  await expect(page.getByRole('main').getByText('No se pudieron cargar tus pedidos.')).toBeVisible()
   await reintentar(page, sana)
   await expect(page.getByText('Todavía no tomaste pedidos hoy')).toBeVisible()
 })
@@ -92,8 +92,8 @@ test('SAL-33 si no carga la carta o el pedido, el mesero puede reintentar @movil
 
   // Un pedido que no existe (o es de otro local) se lee como «no existe».
   await page.goto('/pedidos/999999')
-  await expect(page.getByRole('button', { name: 'Reintentar' })).toBeVisible()
-  await expect(page.getByText(/no existe|no se encontr/iu)).toBeVisible()
+  await expect(page.getByRole('main').getByRole('button', { name: 'Reintentar' })).toBeVisible()
+  await expect(page.getByRole('main').getByText(/no existe|no se encontr/iu)).toBeVisible()
   await page.getByRole('link', { name: 'Pedidos', exact: true }).first().click()
   await expect(page).toHaveURL(/\/pedidos$/u)
 })
@@ -119,14 +119,14 @@ test('SAL-35 la cocina y el tablero dicen cuándo no hay pedidos y cuándo no ca
 
   let sana = await fallar(page, '/orders/active')
   await page.goto('/tablero')
-  await expect(page.getByText('No se pudieron cargar los pedidos.')).toBeVisible()
+  await expect(page.getByRole('main').getByText('No se pudieron cargar los pedidos.')).toBeVisible()
   await evidencia(page, 'sal-35-2-tablero-error')
   await reintentar(page, sana)
   await expect(page.getByRole('region', { name: 'Abierto: 0' })).toBeVisible()
 
   sana = await fallar(page, '/orders/active')
   await page.goto('/cocina')
-  await expect(page.getByText('No se pudieron cargar los pedidos.')).toBeVisible()
+  await expect(page.getByRole('main').getByText('No se pudieron cargar los pedidos.')).toBeVisible()
   await reintentar(page, sana)
   await expect(page.getByText('Nada pendiente en cocina')).toBeVisible()
 

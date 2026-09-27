@@ -38,7 +38,8 @@ test('GES-14 el encargado crea, renombra, ordena, desactiva y activa mesas, y un
   await expect(alta.getByText('Escribe el nombre de la mesa')).toBeVisible()
   await alta.getByLabel('Nombre').fill('2')
   await alta.getByRole('button', { name: 'Guardar' }).click()
-  await expect(alta.getByRole('alert')).toBeVisible()
+  // El diálogo muestra además el aviso general de que no se guardó; se busca el motivo del servidor.
+  await expect(alta.getByRole('alert').filter({ hasNotText: 'No se pudo guardar. Los datos siguen aquí' })).toBeVisible()
   await evidencia(page, 'ges-14-1-mesa-repetida')
   await alta.getByLabel('Nombre').fill('Terraza 1')
   await alta.getByRole('button', { name: 'Guardar' }).click()

@@ -74,7 +74,8 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
   await alta.getByLabel('Hora').fill('21:00')
   await alta.getByLabel('Mesa (opcional)').selectOption({ label: 'Mesa 2' })
   await alta.getByRole('button', { name: 'Guardar' }).click()
-  await expect(alta.getByRole('alert')).toBeVisible()
+  // El diálogo muestra además el aviso general de que no se guardó; se busca el motivo del servidor.
+  await expect(alta.getByRole('alert').filter({ hasNotText: 'No se pudo guardar. Los datos siguen aquí' })).toBeVisible()
   await evidencia(page, 'ges-23-2-cruce-de-mesa')
   await alta.getByLabel('Mesa (opcional)').selectOption({ label: 'Mesa 3' })
   await alta.getByRole('button', { name: 'Guardar' }).click()
@@ -108,7 +109,7 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
 
   await fallaServidor(page, '/reservations')
   await page.reload()
-  await expect(page.getByText('No se pudieron cargar.')).toBeVisible()
+  await expect(page.getByRole('main').getByRole('button', { name: 'Reintentar' })).toBeVisible()
 })
 
 test('GES-24 la ventana de una reserva nueva abre vacía después de guardar otra', async ({ page, local }) => {

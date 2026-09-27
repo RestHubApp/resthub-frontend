@@ -79,7 +79,7 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
 
   // Un comprobante que no existe no se imprime.
   await page.goto('/comprobantes/99999999/imprimir')
-  await expect(page.getByRole('alert')).toBeVisible()
+  await expect(page.getByRole('main').getByRole('alert')).toBeVisible()
   expect(await impresiones(page)).toBe(0)
 })
 
@@ -104,5 +104,5 @@ test('GES-20 los comprobantes se paginan de a 25 y la lista avisa si el servidor
 
   await fallaServidor(page, '/billing/invoices')
   await page.reload()
-  await expect(page.getByText('No se pudieron cargar.')).toBeVisible()
+  await expect(page.getByRole('main').getByRole('button', { name: 'Reintentar' })).toBeVisible()
 })

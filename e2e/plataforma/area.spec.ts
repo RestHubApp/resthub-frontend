@@ -54,7 +54,10 @@ test('PLA-08 el acceso de plataforma rechaza credenciales equivocadas y su guard
   await expect(page.getByText('El correo o la contraseña no son correctos.')).toBeVisible()
   await evidencia(page, 'pla-08-error')
   await entrarPorFormulario(page, SEMILLA.plataforma, CLAVE)
-  await expect(page).toHaveURL(/\/plataforma\/bitacora$/u)
+  // El acceso compara la contraseña con bcrypt; con las demás pruebas dando de
+  // alta restaurantes a la vez (cuatro accesos con bcrypt cada una) llegó a
+  // tardar más de 8 s en la máquina compartida.
+  await expect(page).toHaveURL(/\/plataforma\/bitacora$/u, { timeout: 20_000 })
   await expect(page.getByRole('heading', { name: 'Bitácora', level: 1 })).toBeVisible()
   await page.goto('/plataforma/esto-no-existe')
   await expect(page).toHaveURL(/\/plataforma$/u)
@@ -75,7 +78,7 @@ test('PLA-09 la lista, la ficha y la bitácora avisan cuando no cargan y se rein
   await expect(page.getByText('No se pudo cargar la lista.')).toBeVisible()
   await evidencia(page, 'pla-09-lista-error')
   await soltar()
-  await page.getByRole('button', { name: 'Reintentar' }).click()
+  await page.getByRole('main').getByRole('button', { name: 'Reintentar' }).click()
   await expect(page.getByRole('heading', { name: /^\d+ restaurantes?$/u })).toBeVisible()
 
   await page.goto('/plataforma/restaurantes/999999999')
@@ -88,14 +91,14 @@ test('PLA-09 la lista, la ficha y la bitácora avisan cuando no cargan y se rein
   await page.goto(`/plataforma/restaurantes/${String(local.id)}`)
   await expect(page.getByText('No se pudo cargar el restaurante.')).toBeVisible()
   await soltar()
-  await page.getByRole('button', { name: 'Reintentar' }).click()
+  await page.getByRole('main').getByRole('button', { name: 'Reintentar' }).click()
   await expect(page.getByRole('heading', { name: local.nombre, level: 1 })).toBeVisible()
 
   soltar = await fallar(page, '**/api/v1/platform/activity**')
   await page.goto('/plataforma/bitacora')
   await expect(page.getByText('No se pudo cargar la bitácora.')).toBeVisible()
   await soltar()
-  await page.getByRole('button', { name: 'Reintentar' }).click()
+  await page.getByRole('main').getByRole('button', { name: 'Reintentar' }).click()
   await expect(page.getByRole('row').filter({ hasText: 'Inició sesión' }).first()).toBeVisible()
 })
 
@@ -110,7 +113,7 @@ test('PLA-10 la vista previa avisa si el local de muestra no carga o todavía no
   await page.route('**/api/v1/platform/sandbox', (ruta) =>
     ruta.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ restaurant: null, accounts: [] }) }),
   )
-  await page.getByRole('button', { name: 'Reintentar' }).click()
+  await page.getByRole('main').getByRole('button', { name: 'Reintentar' }).click()
   await expect(page.getByText('Todavía no hay local de muestra.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Ver como encargado' })).toBeEnabled()
   await evidencia(page, 'pla-10-sin-muestra')

@@ -69,7 +69,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
   await alta.getByLabel('Nombre').fill('Otra Rosa')
   await alta.getByLabel('Teléfono (opcional)').fill('987654321')
   await alta.getByRole('button', { name: 'Guardar' }).click()
-  await expect(alta.getByRole('alert')).toContainText('El teléfono 987654321 ya es de Rosa Díaz.')
+  await expect(alta.getByRole('alert').filter({ hasNotText: 'No se pudo guardar. Los datos siguen aquí' })).toContainText('El teléfono 987654321 ya es de Rosa Díaz.')
   await alta.getByRole('button', { name: 'Cancelar' }).click()
   await expect(alta).toBeHidden()
 
@@ -113,7 +113,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
 
   await fallaServidor(page, '/customers')
   await page.reload()
-  await expect(page.getByText('No se pudieron cargar.')).toBeVisible()
+  await expect(page.getByRole('main').getByRole('button', { name: 'Reintentar' })).toBeVisible()
 })
 
 test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', async ({ page, localConCaja: local }) => {

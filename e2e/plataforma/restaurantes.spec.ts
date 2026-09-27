@@ -73,7 +73,8 @@ test('PLA-02 el alta rechaza un identificador ya usado y «Cancelar» vuelve a l
   await page.getByLabel('Correo').fill(`luis-${sufijo}@e2e.resthub.dev`)
   await page.getByLabel('Contraseña inicial', { exact: true }).fill(CLAVE_NUEVA)
   await page.getByRole('button', { name: 'Crear restaurante' }).click()
-  await expect(page.getByText(`Ya existe un restaurante con el identificador '${local.slug}'.`)).toBeVisible()
+  // El formulario lo dice en su mensaje y el aviso general de la ventana lo repite.
+  await expect(page.getByText(`Ya existe un restaurante con el identificador '${local.slug}'.`).first()).toBeVisible()
   await expect(page).toHaveURL(/\/plataforma\/restaurantes\/nuevo$/u)
   await evidencia(page, 'pla-02-identificador-repetido')
   await page.getByRole('button', { name: 'Cancelar' }).click()

@@ -125,7 +125,10 @@ test('PLA-17 los logs y las peticiones se filtran, se paginan y se enlazan por r
   await expect(logs.getByText(/^\d+ entradas/u)).not.toHaveText(/^50 entradas/u)
 
   // Filtro por nivel y por texto.
+  // El nivel se aplica al elegirlo; se espera a que quede en la dirección
+  // antes de buscar, para que «Buscar» no lo pise con el filtro anterior.
   await logs.getByLabel('Nivel').selectOption('warning')
+  await expect(page).toHaveURL(/nivel=warning/u)
   await logs.getByLabel('Buscar en el evento y sus campos').fill('auth.login_failed')
   const filtrados = page.waitForResponse((r) => r.url().includes('/observability/logs?') && r.url().includes('search=auth.login_failed'))
   await logs.getByRole('button', { name: 'Buscar' }).click()
