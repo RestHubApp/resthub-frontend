@@ -368,7 +368,7 @@ export default tseslint.config(
   // Archivos de configuracion.
   // ---------------------------------------------------------------------
   {
-    files: ['*.config.{js,ts}', 'eslint.config.js'],
+    files: ['*.config.{js,ts}', 'eslint.config.js', 'jest/**/*.cjs'],
     languageOptions: { globals: globals.node },
     extends: [tseslint.configs.disableTypeChecked],
     rules: {

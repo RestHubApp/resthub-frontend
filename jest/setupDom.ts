@@ -1,0 +1,43 @@
+// Se carga después del entorno (setupFilesAfterEnv): matchers de jest-dom y,
+// en jsdom, lo que el navegador trae y jsdom no.
+import '@testing-library/jest-dom/jest-globals'
+
+import { cleanup } from '@testing-library/react'
+import { afterEach } from '@jest/globals'
+
+afterEach(() => {
+  cleanup()
+})
+
+if (typeof window !== 'undefined') {
+  // Radix y los diseños adaptables preguntan por media queries al montarse.
+  if (!('matchMedia' in window)) {
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        dispatchEvent: () => false,
+      }),
+    })
+  }
+  // Radix mide los elementos con ResizeObserver; jsdom no tiene diseño.
+  if (!('ResizeObserver' in window)) {
+    class ResizeObserverDePrueba {
+      observe = () => undefined
+      unobserve = () => undefined
+      disconnect = () => undefined
+    }
+    Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: ResizeObserverDePrueba })
+  }
+  // Radix Select y los menús usan la captura de puntero y el desplazamiento.
+  const elemento = window.HTMLElement.prototype as unknown as Record<string, unknown>
+  elemento.hasPointerCapture ??= () => false
+  elemento.releasePointerCapture ??= () => undefined
+  elemento.scrollIntoView ??= () => undefined
+}

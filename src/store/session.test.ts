@@ -1,4 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+/**
+ * @jest-environment node
+ */
+// Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
+// como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import type { CurrentUserResponse } from '../api/types'
 
@@ -35,8 +41,8 @@ function fakeStorage() {
 // El almacén lee lo guardado al cargarse: cada prueba parte de módulos nuevos.
 async function cargar() {
   const storage = fakeStorage()
-  vi.stubGlobal('localStorage', storage)
-  vi.resetModules()
+  stubGlobal('localStorage', storage)
+  jest.resetModules()
   const { useSession } = await import('./session')
   return { storage, useSession }
 }
@@ -46,12 +52,12 @@ function guardado(storage: ReturnType<typeof fakeStorage>): unknown {
 }
 
 beforeEach(() => {
-  vi.useFakeTimers()
+  jest.useFakeTimers()
 })
 
 afterEach(() => {
-  vi.useRealTimers()
-  vi.unstubAllGlobals()
+  jest.useRealTimers()
+  unstubAllGlobals()
 })
 
 describe('renovación de la sesión del restaurante', () => {
@@ -110,10 +116,10 @@ async function pestanaDeVistaPrevia(ruta = '/vista-previa', inicial: Record<stri
   for (const [clave, valor] of Object.entries(inicial)) {
     pestana.datos.set(clave, valor)
   }
-  vi.stubGlobal('localStorage', local)
-  vi.stubGlobal('sessionStorage', pestana)
-  vi.stubGlobal('location', { pathname: ruta })
-  vi.resetModules()
+  stubGlobal('localStorage', local)
+  stubGlobal('sessionStorage', pestana)
+  stubGlobal('location', { pathname: ruta })
+  jest.resetModules()
   const { useSession } = await import('./session')
   return { local, pestana, useSession }
 }

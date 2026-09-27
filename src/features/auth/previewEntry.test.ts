@@ -1,12 +1,21 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+/**
+ * @jest-environment node
+ */
+// Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
+// como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
+import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import type * as Auth from '../../api/auth'
 
-const { exchangePreviewCode } = vi.hoisted(() => ({ exchangePreviewCode: vi.fn() }))
+// La fábrica de `jest.mock` corre al importar el módulo, después de esta línea:
+// Jest solo le deja usar variables con prefijo `mock`.
+const mockExchangePreviewCode = jest.fn<typeof Auth.exchangePreviewCode>()
+const exchangePreviewCode = mockExchangePreviewCode
 
-vi.mock('../../api/auth', async (importOriginal) => ({
-  ...(await importOriginal<typeof Auth>()),
-  exchangePreviewCode,
+jest.mock('../../api/auth', () => ({
+  ...jest.requireActual<typeof Auth>('../../api/auth'),
+  exchangePreviewCode: mockExchangePreviewCode,
 }))
 
 function memoria(inicial: Record<string, string> = {}) {
@@ -32,23 +41,23 @@ interface Carga {
 
 // Cada prueba es una página recién cargada: la pestaña elige su almacenamiento al importar.
 async function pagina({ cargadaEn, navegoA }: Carga) {
-  const location = { pathname: '', search: '', hash: '', replace: vi.fn(), reload: vi.fn() }
+  const location = { pathname: '', search: '', hash: '', replace: jest.fn(), reload: jest.fn() }
   const ir = (url: string) => {
     const { pathname, search, hash } = new URL(url, 'http://localhost')
     Object.assign(location, { pathname, search, hash })
   }
   // Como el navegador: reescribir el historial cambia la dirección sin cargar la página.
-  const history = { state: null, replaceState: vi.fn((_: unknown, __: string, url: string) => {
+  const history = { state: null, replaceState: jest.fn((_: unknown, __: string, url: string) => {
       ir(url)
     }),
   }
   ir(cargadaEn)
-  vi.stubGlobal('location', location)
-  vi.stubGlobal('history', history)
-  vi.stubGlobal('window', { location, history, addEventListener: vi.fn() })
-  vi.stubGlobal('localStorage', memoria())
-  vi.stubGlobal('sessionStorage', memoria())
-  vi.resetModules()
+  stubGlobal('location', location)
+  stubGlobal('history', history)
+  stubGlobal('window', { location, history, addEventListener: jest.fn() })
+  stubGlobal('localStorage', memoria())
+  stubGlobal('sessionStorage', memoria())
+  jest.resetModules()
   exchangePreviewCode.mockReset()
   const modulo = await import('./previewEntry')
   if (navegoA !== undefined) {
@@ -58,7 +67,7 @@ async function pagina({ cargadaEn, navegoA }: Carga) {
 }
 
 afterEach(() => {
-  vi.unstubAllGlobals()
+  unstubAllGlobals()
 })
 
 describe('previewEntryLoader', () => {
@@ -68,7 +77,8 @@ describe('previewEntryLoader', () => {
     expect(await previewEntryLoader()).toBe('reloading')
 
     expect(location.reload).not.toHaveBeenCalled()
-    expect(location.replace).toHaveBeenCalledExactlyOnceWith('/vista-previa#codigo=abc')
+    expect(location.replace).toHaveBeenCalledTimes(1)
+    expect(location.replace).toHaveBeenCalledWith('/vista-previa#codigo=abc')
     expect(exchangePreviewCode).not.toHaveBeenCalled()
   })
 
@@ -81,7 +91,8 @@ describe('previewEntryLoader', () => {
 
       expect(location.reload).not.toHaveBeenCalled()
       expect(location.replace).not.toHaveBeenCalled()
-      expect(exchangePreviewCode).toHaveBeenCalledExactlyOnceWith({ code: 'abc' })
+      expect(exchangePreviewCode).toHaveBeenCalledTimes(1)
+      expect(exchangePreviewCode).toHaveBeenCalledWith({ code: 'abc' })
     }
   })
 
@@ -93,6 +104,7 @@ describe('previewEntryLoader', () => {
 
     await previewEntryLoader()
 
-    expect(exchangePreviewCode).toHaveBeenCalledExactlyOnceWith({ code: 'abc' })
+    expect(exchangePreviewCode).toHaveBeenCalledTimes(1)
+    expect(exchangePreviewCode).toHaveBeenCalledWith({ code: 'abc' })
   })
 })

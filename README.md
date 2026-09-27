@@ -15,7 +15,7 @@ bajo `/api/v1`. La documentación del producto vive en Notion.
 - Axios como cliente HTTP, con tipos generados por openapi-typescript.
 - PWA instalable con vite-plugin-pwa; sin señal, el mesero puede tomar pedidos nuevos (ver abajo).
 - ESLint estricto (typescript-eslint, sonarjs, límites de arquitectura), Husky y lint-staged.
-- Vitest para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones).
+- Jest 30 con React Testing Library para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones) y las pantallas.
 - pnpm 12 (fijado en `packageManager`).
 
 ## Cómo correrlo
@@ -39,10 +39,27 @@ contraseña `resthub123`; al área de administración del sistema
 | `pnpm dev` | Servidor de desarrollo |
 | `pnpm lint` | ESLint sobre todo el proyecto |
 | `pnpm typecheck` | Verificación de tipos |
-| `pnpm test` | Pruebas unitarias con Vitest (`*.test.ts` junto al código) |
+| `pnpm test` | Pruebas unitarias y de componentes con Jest (`*.test.ts(x)` junto al código) |
+| `pnpm test:coverage` | Las mismas pruebas con cobertura sobre todo `src` (informe HTML en `coverage/lcov-report/`) |
 | `pnpm build` | Tipos y compilación de producción en `dist/` |
 | `pnpm preview` | Sirve la compilación de producción |
 | `pnpm generate:api` | Regenera `src/api/schema.d.ts` desde el OpenAPI del backend |
+
+### Pruebas
+
+Jest corre sin Vite: Babel compila TypeScript y JSX, y `jest.config.js` resuelve
+lo que en la aplicación resuelve Vite (`import.meta.env`, el alias `@/`, los
+estilos y los módulos virtuales de la PWA). La infraestructura de las pruebas
+está en `jest/`.
+
+- Las pruebas importan `describe`, `it`, `expect` y `jest` de `@jest/globals`.
+- El entorno por defecto es jsdom, para las pruebas de componentes con React
+  Testing Library (`render`, `screen`, `userEvent`) y los matchers de jest-dom.
+- Las pruebas que simulan una pestaña sin DOM (reemplazan `window`, `location`
+  o el almacenamiento) declaran `@jest-environment node` y usan `stubGlobal` y
+  `unstubAllGlobals` de `#jest/globals`.
+- Si cambia `jest/importMetaEnv.cjs`, hay que vaciar la caché con
+  `pnpm exec jest --clearCache`: Jest no la invalida sola.
 
 ### Variables de entorno
 

@@ -1,4 +1,10 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+/**
+ * @jest-environment node
+ */
+// Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
+// como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
+import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import {
   appPath,
@@ -125,7 +131,7 @@ describe('chooseTabStorage', () => {
 
 function paginaEn(url: string) {
   const { pathname, search, hash } = new URL(url, 'http://localhost')
-  return { location: { pathname, search, hash }, history: { state: { idx: 0 }, replaceState: vi.fn() } }
+  return { location: { pathname, search, hash }, history: { state: { idx: 0 }, replaceState: jest.fn() } }
 }
 
 describe('captureEntryFragment', () => {
@@ -133,7 +139,8 @@ describe('captureEntryFragment', () => {
     const pagina = paginaEn('/Vista-Previa/?a=1#codigo=abc')
 
     expect(captureEntryFragment(pagina, '/')).toBe(FRAGMENTO)
-    expect(pagina.history.replaceState).toHaveBeenCalledExactlyOnceWith({ idx: 0 }, '', '/vista-previa?a=1')
+    expect(pagina.history.replaceState).toHaveBeenCalledTimes(1)
+    expect(pagina.history.replaceState).toHaveBeenCalledWith({ idx: 0 }, '', '/vista-previa?a=1')
   })
 
   it('con base, la respeta', () => {
@@ -159,14 +166,14 @@ describe('captureEntryFragment', () => {
 
 describe('takeEntryFragment', () => {
   afterEach(() => {
-    vi.unstubAllGlobals()
+    unstubAllGlobals()
   })
 
   it('al cargar la página ya sacó el código de la barra, y lo entrega una sola vez', async () => {
     const pagina = paginaEn('/vista-previa#codigo=abc')
-    vi.stubGlobal('location', pagina.location)
-    vi.stubGlobal('history', pagina.history)
-    vi.resetModules()
+    stubGlobal('location', pagina.location)
+    stubGlobal('history', pagina.history)
+    jest.resetModules()
 
     // Solo cargar el módulo, sin router ni pantalla de canje.
     const { takeEntryFragment } = await import('./tabStorage')

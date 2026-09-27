@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import type { MenuItem } from '../../api/types'
 import { draftsOf, type GroupDraft, parseGroups } from './modifierDrafts'
