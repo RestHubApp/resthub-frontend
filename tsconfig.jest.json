@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["jest/**/*.ts", "src/vite-env.d.ts"]
+  "include": ["jest/**/*.ts", "src/vite-env.d.ts", "src/api/contract/**/*.ts"]
 }

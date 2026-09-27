@@ -20,6 +20,10 @@ export default defineConfig({
     // a la vista (`features/orders/offline`) que se envia sola al volver.
     VitePWA({
       registerType: 'autoUpdate',
+      // El registro del service worker no tiene que frenar el primer render:
+      // con `script` iba como <script> síncrono en el <head> (Lighthouse lo
+      // marcaba como recurso que bloquea el renderizado).
+      injectRegister: 'script-defer',
       includeAssets: ['favicon.ico', 'favicon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
         name: 'RestHub',
@@ -45,6 +49,28 @@ export default defineConfig({
       workbox: {
         // Una navegacion a /api no es una pantalla: que llegue al servidor.
         navigateFallbackDenylist: [/^\/api\//],
+        // La cola sin señal solo toma pedidos nuevos. Se guardan el armazón,
+        // Pedidos y el formulario nuevo con sus dependencias; el resto de las
+        // pantallas no se descarga durante la instalación del service worker.
+        globIgnores: [
+          ...[
+            'BoardView', 'HistoryView', 'KitchenView', 'PrintView', 'BillingView',
+            'InvoicePrintView', 'ReservationsView', 'CustomersView', 'CashView',
+            'MenuView', 'TablesView', 'InventoryView', 'RecipeEditorView',
+            'StaffView', 'RolesView', 'InsightsView', 'RestockView', 'AiAuditView',
+            'PlatformShell', 'PlatformLoginView', 'RestaurantsView', 'NewRestaurantView',
+            'RestaurantDetailView', 'ActivityView', 'PreviewView', 'ObservabilityView',
+            'DataTable', 'AreaChart', 'RoutesSection', 'LogsSection', 'RequestsSection',
+          ].map((nombre) => `**/assets/${nombre}-*.js`),
+        ],
+        runtimeCaching: [{
+          urlPattern: /^https?:\/\/[^/]+\/assets\/[^/]+\.js$/u,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'resthub-pantallas-visitadas',
+            expiration: { maxEntries: 80, maxAgeSeconds: 30 * 24 * 60 * 60 },
+          },
+        }],
       },
     }),
   ],

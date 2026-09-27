@@ -15,7 +15,6 @@ import { type ScreenPreload, ScreenPreloadContext } from './screenPreload'
 import SideNav from './SideNav'
 import ToastStack from './ToastStack'
 import { useAccountRefresh } from './useAccountRefresh'
-import { useIdlePreload } from './useIdlePreload'
 import { useSessionRenewal } from './useSessionRenewal'
 
 // Es estatico: se crea una vez y no depende de props ni del estado.
@@ -50,7 +49,6 @@ export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
   const failed = useFailedQueries('restaurant')
   useAccountRefresh()
   useSessionRenewal()
-  useIdlePreload(screens)
 
   // Una pestaña de vista previa sin sesión no ofrece el acceso normal.
   if (account === null && isPreviewTab()) {

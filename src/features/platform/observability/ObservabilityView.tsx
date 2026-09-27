@@ -1,16 +1,20 @@
+import { lazy, Suspense } from 'react'
+
 import PageHeader from '../../../components/PageHeader'
+import DeferredSection from './DeferredSection'
 import LatencySection from './LatencySection'
-import LogsSection from './LogsSection'
 import { windowParams } from './obsFilters'
 import ObsToolbar from './ObsToolbar'
-import RequestsSection from './RequestsSection'
-import RoutesSection from './RoutesSection'
 import StatusSection from './StatusSection'
 import SummarySection from './SummarySection'
 import TrafficSection from './TrafficSection'
 import { useHashFocus } from './useHashFocus'
 import { useObsFilters } from './useObsFilters'
 import { useObsRefresh } from './useObsRefresh'
+
+const RoutesSection = lazy(() => import('./RoutesSection'))
+const LogsSection = lazy(() => import('./LogsSection'))
+const RequestsSection = lazy(() => import('./RequestsSection'))
 
 /**
  * Cómo anda la aplicación: tráfico, errores, latencias, rutas y logs de la
@@ -39,9 +43,21 @@ export default function ObservabilityView() {
         <LatencySection params={params} live={live} />
         <StatusSection params={params} live={live} />
       </div>
-      <RoutesSection filters={filters} live={live} />
-      <LogsSection filters={filters} onChange={update} live={live} />
-      <RequestsSection filters={filters} onChange={update} live={live} />
+      <DeferredSection name="Rutas del API">
+        <Suspense fallback={<p role="status">Cargando las rutas…</p>}>
+          <RoutesSection filters={filters} live={live} />
+        </Suspense>
+      </DeferredSection>
+      <DeferredSection name="Logs" anchor="logs">
+        <Suspense fallback={<p role="status">Cargando los logs…</p>}>
+          <LogsSection filters={filters} onChange={update} live={live} />
+        </Suspense>
+      </DeferredSection>
+      <DeferredSection name="Peticiones" anchor="peticiones">
+        <Suspense fallback={<p role="status">Cargando las peticiones…</p>}>
+          <RequestsSection filters={filters} onChange={update} live={live} />
+        </Suspense>
+      </DeferredSection>
     </div>
   )
 }

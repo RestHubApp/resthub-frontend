@@ -13,7 +13,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados*/**', 'e2e/.reporte*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**'],
+    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados*/**', 'e2e/.reporte*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'pruebas/accesibilidad/.wave-ext/**', 'pruebas/accesibilidad/reportes/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -406,6 +406,14 @@ export default tseslint.config(
     rules: {
       'check-file/filename-naming-convention': 'off',
     },
+  },
+  // ---------------------------------------------------------------------
+  // Scripts de medición de accesibilidad (Node, fuera de la aplicación).
+  // ---------------------------------------------------------------------
+  {
+    files: ['pruebas/accesibilidad/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    extends: [tseslint.configs.disableTypeChecked],
   },
   // ---------------------------------------------------------------------
   // Pruebas de extremo a extremo y visuales (Playwright, e2e/).

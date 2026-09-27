@@ -30,12 +30,13 @@ export default function ItemSplitPicker({ order, selected, chargeCents, onChange
           <li key={item.id}>
             <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 ring-1 ring-input has-checked:bg-muted">
               <Checkbox
+                aria-labelledby={`plato-que-paga-${String(item.id)}`}
                 checked={selected.includes(item.id)}
                 onCheckedChange={(estado) => {
                   toggle(item.id, estado === true)
                 }}
               />
-              <span className="flex-1 text-sm">
+              <span id={`plato-que-paga-${String(item.id)}`} className="flex-1 text-sm">
                 {item.quantity} × {item.name}
                 {item.is_courtesy ? <span className="ml-2 text-xs text-muted-foreground">(cortesía)</span> : null}
               </span>

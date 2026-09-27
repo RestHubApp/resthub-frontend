@@ -19,20 +19,55 @@ afterEach(() => {
   unstubAllGlobals()
 })
 
+function espiarConsola() {
+  return {
+    error: jest.spyOn(console, 'error').mockImplementation(() => undefined),
+    warn: jest.spyOn(console, 'warn').mockImplementation(() => undefined),
+    info: jest.spyOn(console, 'info').mockImplementation(() => undefined),
+    debug: jest.spyOn(console, 'debug').mockImplementation(() => undefined),
+  }
+}
+
 describe('nivel de los logs', () => {
-  it('respeta VITE_LOG_LEVEL si es un nivel válido', async () => {
+  it('con nivel error descarta avisos, información y depuración', async () => {
     const { logger } = await loggerCon({ VITE_LOG_LEVEL: 'error' })
-    expect(logger.level).toBe('error')
+    const consola = espiarConsola()
+
+    logger.error('visible')
+    logger.warn('oculto')
+    logger.info('oculto')
+    logger.debug('oculto')
+
+    expect(consola.error).toHaveBeenCalledTimes(1)
+    expect(consola.warn).not.toHaveBeenCalled()
+    expect(consola.info).not.toHaveBeenCalled()
+    expect(consola.debug).not.toHaveBeenCalled()
   })
 
-  it('sin nivel válido, en desarrollo se ve desde debug', async () => {
+  it('sin nivel válido, en desarrollo se ve desde debug y se oculta trace', async () => {
     const { logger } = await loggerCon({ VITE_LOG_LEVEL: 'ruidoso', DEV: true })
-    expect(logger.level).toBe('debug')
+    const consola = espiarConsola()
+
+    logger.debug('visible')
+    logger.trace('oculto')
+
+    expect(consola.debug).toHaveBeenCalledTimes(1)
+    expect(consola.debug).not.toHaveBeenCalledWith(expect.objectContaining({ msg: 'oculto' }))
   })
 
-  it('en producción, solo avisos y errores', async () => {
+  it('en producción descarta información y depuración, y deja avisos y errores', async () => {
     const { logger } = await loggerCon({ VITE_LOG_LEVEL: undefined, DEV: false })
-    expect(logger.level).toBe('warn')
+    const consola = espiarConsola()
+
+    logger.debug('oculto')
+    logger.info('oculto')
+    logger.warn('aviso')
+    logger.error('fallo')
+
+    expect(consola.debug).not.toHaveBeenCalled()
+    expect(consola.info).not.toHaveBeenCalled()
+    expect(consola.warn).toHaveBeenCalledTimes(1)
+    expect(consola.error).toHaveBeenCalledTimes(1)
   })
 })
 

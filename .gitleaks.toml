@@ -1,0 +1,9 @@
+title = "RestHub"
+
+# gitleaks recorre el historial. La semilla de accesibilidad manda una
+# contraseña a propósito incorrecta para generar un log de acceso fallido.
+# No es una clave de ningún servicio.
+[allowlist]
+description = "Contraseña falsa de pruebas/accesibilidad/datos.mjs"
+regexTarget = "line"
+regexes = ['''clave-equivocada-a11y''']

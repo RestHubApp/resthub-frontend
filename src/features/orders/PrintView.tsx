@@ -49,6 +49,8 @@ export default function PrintView() {
   return (
     <div className="flex flex-col items-center gap-4">
       <style>{PRINT_CSS}</style>
+      {/* La hoja no lleva título visible; el lector de pantalla sí lo necesita. */}
+      <h1 className="sr-only">{`${comanda ? 'Comanda' : 'Precuenta'} del pedido #${String(pedido.data.number)}`}</h1>
       <div className="flex w-full max-w-sm items-center justify-between gap-2 print:hidden">
         <BackLink to={`/pedidos/${String(orderId)}`} label="Pedido" />
         <Button type="button" onClick={() => {

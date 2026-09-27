@@ -4,6 +4,12 @@ import { test as base, expect as expectBase, type Page } from '@playwright/test'
 
 import { crearLocal, entrarPlataformaPorApi, nuevoHttp, type Local, type Sesion, type SesionPlataforma } from './api'
 
+declare global {
+  interface Window {
+    __RESTHUB_E2E?: boolean
+  }
+}
+
 const SESION = 'resthub.session.v2'
 const SESION_PLATAFORMA = 'resthub.platform-session.v1'
 
@@ -16,6 +22,12 @@ interface Accesorios {
 }
 
 export const test = base.extend<Accesorios>({
+  page: async ({ page }, usar) => {
+    await page.addInitScript(() => {
+      window.__RESTHUB_E2E = true
+    })
+    await usar(page)
+  },
   local: async ({}, usar) => {
     const local = await crearLocal()
     await usar(local)

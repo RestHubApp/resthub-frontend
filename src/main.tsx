@@ -15,6 +15,17 @@ import './index.css'
 
 logUncaughtErrors()
 
+// Con backend en otro origen, se inicia DNS/TLS mientras React monta la
+// pantalla. No se emite un preconnect vacío en desarrollo (API mismo origen).
+const apiOrigin = import.meta.env.VITE_API_URL
+if (apiOrigin && new URL(apiOrigin).origin !== location.origin) {
+  const preconnect = document.createElement('link')
+  preconnect.rel = 'preconnect'
+  preconnect.href = new URL(apiOrigin).origin
+  preconnect.crossOrigin = 'anonymous'
+  document.head.append(preconnect)
+}
+
 const container = document.getElementById('root')
 
 if (!container) {

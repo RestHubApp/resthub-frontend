@@ -132,16 +132,15 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
   propio `Intl.NumberFormat`.
 - "Hoy" y las horas son las del restaurante (`restaurant.timezone` de
   `GET /auth/me`, con `useTimeZone()`), no las del navegador de quien mira.
-- El acceso y la toma de pedidos del mesero van en el archivo inicial; las
-  pantallas del encargado (tablero, historial, menú, mesas, inventario,
-  personal, roles, perfil y panel) se descargan al abrirlas (`lazy` en
-  `src/router/index.tsx`).
-- Con la sesión abierta, el armazón baja en ratos libres
-  (`requestIdleCallback`) los archivos de las pantallas que la cuenta puede
-  abrir. Al pasar el puntero, enfocar o tocar un enlace del menú, adelanta
-  además la consulta principal de esa pantalla. Las rutas y la precarga salen
-  de la misma lista de `import()` del router; cada consulta se define una vez
-  con `queryOptions` en `src/api/` y la usan la vista y la precarga.
+- Todas las pantallas, incluso acceso y pedidos, se descargan al abrirlas
+  (`lazy` en `src/router/index.tsx`): el archivo inicial no trae formularios
+  de Zod y React Hook Form ni la toma de pedidos.
+- La precarga comienza con intención de navegación: al pasar el puntero,
+  enfocar o tocar un enlace del menú se adelanta el código y la consulta de
+  esa pantalla. No se descargan en segundo plano todas las pantallas al
+  entrar, para dejar CPU y red al primer render. Las rutas y la precarga
+  salen de la misma lista de `import()` del router; cada consulta se define
+  una vez con `queryOptions` en `src/api/` y la usan la vista y la precarga.
 - Después de guardar, las pantallas ponen en el caché lo que devolvió el
   servidor y releen de fondo, sin esperar ese segundo viaje para mostrar el
   cambio. Mientras carga una lista se ve su silueta, no un «Cargando…».

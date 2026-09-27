@@ -54,7 +54,7 @@ export default function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
             className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 ring-foreground/10"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="m-0 text-base font-semibold">{insumo.name}</h3>
+              <h2 className="m-0 text-base font-semibold">{insumo.name}</h2>
               <IngredientStatus ingredient={insumo} />
             </div>
             <p className="m-0 flex flex-wrap gap-x-3 text-sm text-muted-foreground">

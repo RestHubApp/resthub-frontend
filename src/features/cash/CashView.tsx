@@ -58,12 +58,19 @@ export default function CashView() {
           </SectionCard>
         </>
       ) : null}
-      <SectionCard title="Descuentos del mesero" collapsible defaultOpen={false}>
-        <DiscountLimitForm />
-      </SectionCard>
-      <SectionCard title="Turnos anteriores" collapsible>
-        <CashHistory />
-      </SectionCard>
+      {/* Lo de abajo aparece recién con la caja cargada: si no, el turno en
+          curso lo empujaba hacia abajo al llegar (Lighthouse medía un CLS de 0,24
+          en escritorio y 0,46 en el celular). */}
+      {caja.isPending ? null : (
+        <>
+          <SectionCard title="Descuentos del mesero" collapsible defaultOpen={false}>
+            <DiscountLimitForm />
+          </SectionCard>
+          <SectionCard title="Turnos anteriores" collapsible>
+            <CashHistory />
+          </SectionCard>
+        </>
+      )}
     </div>
   )
 }

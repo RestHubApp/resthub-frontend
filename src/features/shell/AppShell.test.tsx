@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 
 import { entrarComo, montarRutas, PERMISOS_ENCARGADO, PERMISOS_MESERO, servidor } from '#jest/harness'
 import type { OpenOrderRequest } from '../../api/types'
@@ -150,19 +150,20 @@ describe('AppShell: sesión y precargas', () => {
     expect((await screen.findAllByText('Picantería Renovada')).length).toBeGreaterThan(0)
   })
 
-  it('en ratos libres baja solo las pantallas que la cuenta puede abrir', async () => {
+  it('no baja pantallas en reposo; al acercarse al enlace baja solo la permitida', async () => {
     servidor()
     entrarComo(PERMISOS_MESERO)
     const caja = jest.fn(() => Promise.resolve())
     const cocina = jest.fn(() => Promise.resolve())
-    abrirArmazon([
+    const { user } = abrirArmazon([
       { path: 'caja', permission: CASH_MANAGE, load: caja },
       { path: 'cocina', permission: ORDERS_TAKE, load: cocina },
     ])
 
-    await waitFor(() => {
-      expect(cocina).toHaveBeenCalledTimes(1)
-    })
+    expect(cocina).not.toHaveBeenCalled()
+    expect(caja).not.toHaveBeenCalled()
+    await user.hover(within(barraLateral()).getByRole('link', { name: 'Cocina' }))
+    expect(cocina).toHaveBeenCalledTimes(1)
     expect(caja).not.toHaveBeenCalled()
   })
 

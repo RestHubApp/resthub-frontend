@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { billingSettingsQuery } from '../../api/billing'
 import PageHeader from '../../components/PageHeader'
+import ListSkeleton from '../../components/ListSkeleton'
 import SectionCard from '../../components/SectionCard'
 import BillingSettingsForm from './BillingSettingsForm'
 import InvoiceList from './InvoiceList'
@@ -24,9 +25,15 @@ export default function BillingView() {
           <BillingSettingsForm settings={ajustes.data} />
         </SectionCard>
       ) : null}
-      <SectionCard title="Emitidos">
-        <InvoiceList />
-      </SectionCard>
+      {/* «Emitidos» espera a los datos fiscales, que van arriba: si no, la
+          tarjeta de datos fiscales la empujaba hacia abajo al llegar (CLS). */}
+      {ajustes.isPending ? (
+        <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" />
+      ) : (
+        <SectionCard title="Emitidos">
+          <InvoiceList />
+        </SectionCard>
+      )}
     </div>
   )
 }

@@ -17,15 +17,6 @@ export interface ScreenPreload {
 /** Las pantallas que se pueden adelantar. Las entrega el router, que es quien las conoce. */
 export const ScreenPreloadContext = createContext<readonly ScreenPreload[]>([])
 
-export function allowedScreens(
-  screens: readonly ScreenPreload[],
-  permissions: readonly PermissionCode[],
-): readonly ScreenPreload[] {
-  return screens.filter(
-    (screen) => screen.permission === undefined || permissions.includes(screen.permission),
-  )
-}
-
 /** Un archivo que no se pudo bajar se vuelve a pedir al abrir la pantalla. */
 export function ignorar(): undefined {
   return undefined

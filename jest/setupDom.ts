@@ -2,8 +2,12 @@
 // en jsdom, lo que el navegador trae y jsdom no.
 import '@testing-library/jest-dom/jest-globals'
 
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach } from '@jest/globals'
+
+// La primera pantalla perezosa se compila con Babel y puede tardar varios
+// segundos. findBy* espera 1 s por defecto, menos que el testTimeout.
+configure({ asyncUtilTimeout: 15_000 })
 
 afterEach(() => {
   cleanup()
@@ -34,6 +38,26 @@ if (typeof window !== 'undefined') {
       disconnect = () => undefined
     }
     Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: ResizeObserverDePrueba })
+  }
+  // jsdom no tiene diseño: las secciones que esperan a entrar en pantalla se
+  // consideran visibles, que es lo que haría el navegador al mostrarlas.
+  if (!('IntersectionObserver' in window)) {
+    class IntersectionObserverDePrueba {
+      readonly root = null
+      readonly rootMargin = ''
+      readonly thresholds = [0]
+      alVer: IntersectionObserverCallback
+      constructor(alVer: IntersectionObserverCallback) {
+        this.alVer = alVer
+      }
+      observe = (objetivo: Element) => {
+        this.alVer([{ isIntersecting: true, target: objetivo } as IntersectionObserverEntry], this as unknown as IntersectionObserver)
+      }
+      unobserve = () => undefined
+      disconnect = () => undefined
+      takeRecords = () => [] as IntersectionObserverEntry[]
+    }
+    Object.defineProperty(window, 'IntersectionObserver', { configurable: true, value: IntersectionObserverDePrueba })
   }
   // Radix Select y los menús usan la captura de puntero y el desplazamiento.
   const elemento = window.HTMLElement.prototype as unknown as Record<string, unknown>

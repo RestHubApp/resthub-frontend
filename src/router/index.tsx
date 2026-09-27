@@ -2,29 +2,19 @@ import type { ComponentType } from 'react'
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
 import EmptyState from '../components/EmptyState'
-import LoginView from '../features/auth/LoginView'
 import PreviewEntryPending from '../features/auth/PreviewEntryPending'
-import { prefetchCash } from '../features/cash/prefetchCash'
-import { prefetchInsights } from '../features/insights/prefetchInsights'
-import { prefetchInventory } from '../features/inventory/prefetchInventory'
-import { prefetchMenu } from '../features/menu/prefetchMenu'
-import AddItemsView from '../features/orders/AddItemsView'
-import NewOrderView from '../features/orders/NewOrderView'
-import OrderDetailView from '../features/orders/OrderDetailView'
-import OrdersView from '../features/orders/OrdersView'
-import { prefetchBoard, prefetchFloor, prefetchKitchen } from '../features/orders/prefetchOrders'
-import { prefetchRoles } from '../features/roles/prefetchRoles'
 import AppShell from '../features/shell/AppShell'
 import HomeRedirect from '../features/shell/HomeRedirect'
 import PreviewPlatformGate from '../features/shell/PreviewPlatformGate'
 import RequireSession from '../features/shell/RequireSession'
 import type { ScreenPreload } from '../features/shell/screenPreload'
-import { prefetchStaff } from '../features/staff/prefetchStaff'
-import { prefetchTables } from '../features/tables/prefetchTables'
 
 const PANEL = 'insights.read'
 // Lo que hace el mesero: tomar pedidos, ver la cocina, imprimir.
 const MESERO = 'orders.take'
+const consultar = (cargar: () => Promise<Record<string, (() => void) | undefined>>, nombre: string) => () => {
+  void cargar().then((modulo) => { modulo[nombre]?.() })
+}
 
 // Al abrir la aplicacion directo en una pantalla perezosa (recargar el
 // tablero), esto se ve dentro del armazon mientras llega su archivo.
@@ -40,35 +30,34 @@ type LazyScreen = Omit<ScreenPreload, 'load'> & { readonly load: () => Promise<{
  * armazón adelanta, así que una pantalla nueva no puede quedar en una y
  * faltar en la otra.
  *
- * Las pantallas del encargado van en su propio archivo: el celular del
- * mesero arranca con el acceso y la toma de pedidos, y nunca baja el tablero,
- * el inventario ni el panel.
+ * Cada pantalla se carga al abrirla; ni el acceso, ni la toma de pedidos, ni
+ * el tablero, el inventario o el panel forman parte del archivo inicial.
  */
 const PANTALLAS: readonly LazyScreen[] = [
   { path: 'perfil', load: () => import('../features/auth/ProfileView') },
-  { path: 'tablero', permission: 'orders.read_all', load: () => import('../features/orders/BoardView'), prefetch: prefetchBoard },
+  { path: 'tablero', permission: 'orders.read_all', load: () => import('../features/orders/BoardView'), prefetch: consultar(() => import('../features/orders/prefetchOrders'), 'prefetchBoard') },
   { path: 'tablero/historial', permission: 'orders.read_all', load: () => import('../features/orders/HistoryView') },
-  { path: 'cocina', permission: MESERO, load: () => import('../features/orders/KitchenView'), prefetch: prefetchKitchen },
+  { path: 'cocina', permission: MESERO, load: () => import('../features/orders/KitchenView'), prefetch: consultar(() => import('../features/orders/prefetchOrders'), 'prefetchKitchen') },
   { path: 'imprimir/:orderId/:kind', permission: MESERO, load: () => import('../features/orders/PrintView') },
   { path: 'comprobantes', permission: 'billing.manage', load: () => import('../features/billing/BillingView') },
   { path: 'comprobantes/:invoiceId/imprimir', permission: 'billing.issue', load: () => import('../features/billing/InvoicePrintView') },
   { path: 'reservas', permission: 'reservations.read', load: () => import('../features/reservations/ReservationsView') },
   { path: 'clientes', permission: 'customers.read', load: () => import('../features/customers/CustomersView') },
-  { path: 'caja', permission: 'cash.manage', load: () => import('../features/cash/CashView'), prefetch: prefetchCash },
-  { path: 'menu', permission: 'menu.manage', load: () => import('../features/menu/MenuView'), prefetch: prefetchMenu },
-  { path: 'mesas', permission: 'tables.manage', load: () => import('../features/tables/TablesView'), prefetch: prefetchTables },
-  { path: 'inventario', permission: 'inventory.read', load: () => import('../features/inventory/InventoryView'), prefetch: prefetchInventory },
+  { path: 'caja', permission: 'cash.manage', load: () => import('../features/cash/CashView'), prefetch: consultar(() => import('../features/cash/prefetchCash'), 'prefetchCash') },
+  { path: 'menu', permission: 'menu.manage', load: () => import('../features/menu/MenuView'), prefetch: consultar(() => import('../features/menu/prefetchMenu'), 'prefetchMenu') },
+  { path: 'mesas', permission: 'tables.manage', load: () => import('../features/tables/TablesView'), prefetch: consultar(() => import('../features/tables/prefetchTables'), 'prefetchTables') },
+  { path: 'inventario', permission: 'inventory.read', load: () => import('../features/inventory/InventoryView'), prefetch: consultar(() => import('../features/inventory/prefetchInventory'), 'prefetchInventory') },
   { path: 'inventario/recetas/:menuItemId', permission: 'inventory.read', load: () => import('../features/inventory/RecipeEditorView') },
-  { path: 'personal', permission: 'staff.manage', load: () => import('../features/staff/StaffView'), prefetch: prefetchStaff },
-  { path: 'roles', permission: 'roles.manage', load: () => import('../features/roles/RolesView'), prefetch: prefetchRoles },
-  { path: 'panel', permission: PANEL, load: () => import('../features/insights/InsightsView'), prefetch: prefetchInsights },
+  { path: 'personal', permission: 'staff.manage', load: () => import('../features/staff/StaffView'), prefetch: consultar(() => import('../features/staff/prefetchStaff'), 'prefetchStaff') },
+  { path: 'roles', permission: 'roles.manage', load: () => import('../features/roles/RolesView'), prefetch: consultar(() => import('../features/roles/prefetchRoles'), 'prefetchRoles') },
+  { path: 'panel', permission: PANEL, load: () => import('../features/insights/InsightsView'), prefetch: consultar(() => import('../features/insights/prefetchInsights'), 'prefetchInsights') },
   { path: 'panel/reposicion', permission: PANEL, load: () => import('../features/insights/RestockView') },
   { path: 'panel/ia', permission: PANEL, load: () => import('../features/insights/AiAuditView') },
 ]
 
-/** Pedidos va en el archivo inicial: de esa pantalla solo se adelantan los datos. */
+/** Pedidos también se precarga con intención de navegar, sin descargarse al arrancar. */
 const PRECARGAS: readonly ScreenPreload[] = [
-  { path: 'pedidos', permission: MESERO, prefetch: prefetchFloor },
+  { path: 'pedidos', permission: MESERO, load: () => import('../features/orders/OrdersView'), prefetch: consultar(() => import('../features/orders/prefetchOrders'), 'prefetchFloor') },
   ...PANTALLAS,
 ]
 
@@ -146,14 +135,14 @@ const router = createBrowserRouter(
       element: <AppShell screens={PRECARGAS} />,
       children: [
         { index: true, Component: HomeRedirect },
-        { path: 'acceso', Component: LoginView },
+        { path: 'acceso', ...plataforma(() => import('../features/auth/LoginView')) },
         {
           element: <RequireSession permission="orders.take" />,
           children: [
-            { path: 'pedidos', Component: OrdersView },
-            { path: 'pedidos/nuevo', Component: NewOrderView },
-            { path: 'pedidos/:orderId', Component: OrderDetailView },
-            { path: 'pedidos/:orderId/agregar', Component: AddItemsView },
+            { path: 'pedidos', ...plataforma(() => import('../features/orders/OrdersView')) },
+            { path: 'pedidos/nuevo', ...plataforma(() => import('../features/orders/NewOrderView')) },
+            { path: 'pedidos/:orderId', ...plataforma(() => import('../features/orders/OrderDetailView')) },
+            { path: 'pedidos/:orderId/agregar', ...plataforma(() => import('../features/orders/AddItemsView')) },
           ],
         },
         ...PANTALLAS.map(conPermiso),

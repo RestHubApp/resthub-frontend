@@ -43,7 +43,7 @@ export default function InventoryTabs({ value, onChange, panels, alertCount }: I
         </TabsList>
       </div>
       {SECTIONS.map((seccion) => (
-        <TabsContent key={seccion.value} value={seccion.value} className="outline-none">
+        <TabsContent key={seccion.value} value={seccion.value}>
           {panels[seccion.value]}
         </TabsContent>
       ))}

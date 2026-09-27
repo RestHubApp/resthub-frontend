@@ -43,6 +43,8 @@ export default function InvoicePrintView() {
   return (
     <div className="flex flex-col items-center gap-4">
       <style>{PRINT_CSS}</style>
+      {/* La hoja no lleva título visible; el lector de pantalla sí lo necesita. */}
+      <h1 className="sr-only">{`Comprobante ${comprobante.data.code}`}</h1>
       <Button type="button" className="print:hidden" onClick={() => {
         window.print()
       }}>

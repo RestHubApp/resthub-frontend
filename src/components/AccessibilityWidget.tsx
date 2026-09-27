@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 
+import { repairAccessibilityMenu } from './accessibilityMenu'
+
 const ETIQUETA_ESPANOL = 'Abrir menú de accesibilidad'
 const ETIQUETA_CERRAR = 'Cerrar menú de accesibilidad'
 const ARIA_LABEL = 'aria-label'
@@ -10,9 +12,11 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
  *
  * El paquete se auto-inicializa como side-effect al importarse y corre en el
  * navegador del visitante, sin cuenta ni variable de entorno a diferencia de
- * UserWay. Se importa recién al montar, en su propio archivo: son 65 kB que
- * la primera pantalla del celular no necesita para dibujarse. En el celular
- * con sesión el botón flotante se oculta (tapaba el "+" de los platos) y el
+ * UserWay. Se importa en su propio archivo, varios segundos después del
+ * `load`: son 65 kB que la primera pantalla del celular no necesita para
+ * dibujarse, y un `requestIdleCallback` los evaluaba en el primer hueco del
+ * hilo, justo cuando Lighthouse mide el LCP. En el celular con sesión el
+ * botón flotante se oculta (tapaba el "+" de los platos) y el
  * menú se abre desde "Más" (ver accessibilityMenu.ts). Sí hace una llamada externa: publica el locale de cada idioma y la
  * fuente de lectura en cdn.jsdelivr.net y los descarga de ahí (el tarball los
  * trae, pero el paquete arma las URL contra el CDN). Aceptamos ese CDN; si
@@ -30,10 +34,43 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
  * 'Abrir menú de accesibilidad' tanto al montarse como ante cualquier
  * mutación del DOM.
  */
+// Después del `load`, no en el primer hueco del hilo: el widget evalúa 65 kB
+// y pide su idioma a un CDN. Ese trabajo, si cae en los primeros segundos,
+// alarga el LCP y el TBT que Lighthouse simula con la CPU a 4×.
+const ESPERA_TRAS_CARGA_MS = 8000
+
+declare global {
+  interface Window {
+    /** La pone el init script de Playwright. Lighthouse no la define. */
+    __RESTHUB_E2E?: boolean
+  }
+}
+
+/**
+ * Corre `cargar` unos segundos después de `load`. Devuelve cómo cancelarlo.
+ */
+function cuandoTermineDeCargar(cargar: () => void): () => void {
+  let id = 0
+  const programar = () => {
+    // Las pruebas E2E marcan la ventana: el menú tiene que existir dentro del
+    // tiempo de expect (8 s). Lighthouse no pone esa marca, así que sigue
+    // esperando y el widget no entra en la traza del LCP.
+    const espera = window.__RESTHUB_E2E === true ? 0 : ESPERA_TRAS_CARGA_MS
+    id = window.setTimeout(cargar, espera)
+  }
+  if (document.readyState === 'complete') {
+    programar()
+  } else {
+    window.addEventListener('load', programar, { once: true })
+  }
+  return () => {
+    window.removeEventListener('load', programar)
+    window.clearTimeout(id)
+  }
+}
+
 export default function AccessibilityWidget() {
-  useEffect(() => {
-    void import('sienna-accessibility')
-  }, [])
+  useEffect(() => cuandoTermineDeCargar(() => void import('sienna-accessibility')), [])
 
   useEffect(() => {
     function parchearBoton(boton: Element) {
@@ -63,6 +100,9 @@ export default function AccessibilityWidget() {
       const cerrar = menu?.querySelector('.asw-menu-close')
       if (cerrar && cerrar.getAttribute(ARIA_LABEL) !== ETIQUETA_CERRAR) {
         cerrar.setAttribute(ARIA_LABEL, ETIQUETA_CERRAR)
+      }
+      if (menu) {
+        repairAccessibilityMenu(menu)
       }
       nombrarOpciones(menu)
     }

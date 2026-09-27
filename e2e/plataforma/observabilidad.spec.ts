@@ -16,6 +16,21 @@ function tarjeta(page: Page, titulo: string) {
 }
 
 /**
+ * Rutas, logs y peticiones se montan al pedirlos, para no bajar su JS en el
+ * primer render. La prueba pulsa el botón y espera el título de la tarjeta.
+ */
+async function mostrar(page: Page, cargar: string, titulo: string): Promise<void> {
+  const tituloLoc = page.getByRole('heading', { name: titulo, exact: true })
+  if (await tituloLoc.isVisible()) return
+  const boton = page.getByRole('button', { name: cargar, exact: true })
+  // Al acercar el botón, el observer monta la sección y lo quita del DOM.
+  await boton.scrollIntoViewIfNeeded()
+  const montada = await tituloLoc.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true, () => false)
+  if (!montada) await boton.click()
+  await expect(tituloLoc).toBeVisible()
+}
+
+/**
  * Deja al menos una página y media de advertencias en los logs: accesos
  * fallidos con correos que no existen (cada uno cuenta aparte en el límite de
  * intentos, así que ninguno llega al bloqueo).
@@ -79,6 +94,7 @@ test('PLA-16 el panel de observabilidad muestra indicadores y gráficos, cambia 
   await expect(trafico.getByRole('columnheader', { name: 'Cubo' })).toBeHidden()
 
   // Las rutas se ordenan en el servidor por la columna elegida.
+  await mostrar(page, 'Cargar rutas del api', 'Rutas')
   const rutas = tarjeta(page, 'Rutas')
   const porP95 = page.waitForResponse((r) => r.url().includes('/observability/routes') && r.url().includes('sort=p95'))
   await rutas.getByRole('button', { name: /^p95/u }).click()
@@ -87,6 +103,7 @@ test('PLA-16 el panel de observabilidad muestra indicadores y gráficos, cambia 
   await evidencia(page, 'pla-16-rutas-por-p95')
 
   // Una ruta lleva a sus peticiones, filtradas por su plantilla.
+  await mostrar(page, 'Cargar peticiones', 'Peticiones')
   const primera = rutas.getByRole('link', { name: /^Ver peticiones de /u }).first()
   const nombre = (await primera.getAttribute('aria-label')) ?? ''
   const plantilla = nombre.replace(/^Ver peticiones de \S+ /u, '')
@@ -119,6 +136,7 @@ test('PLA-17 los logs y las peticiones se filtran, se paginan y se enlazan por r
   await asegurarLogs(plataforma)
   await abrirComoPlataforma(page, plataforma, OBS)
 
+  await mostrar(page, 'Cargar logs', 'Logs')
   const logs = tarjeta(page, 'Logs')
   await expect(logs.getByText(/^50 entradas; hay más$/u)).toBeVisible()
   await logs.getByRole('button', { name: 'Cargar más' }).click()
@@ -152,6 +170,7 @@ test('PLA-17 los logs y las peticiones se filtran, se paginan y se enlazan por r
   await expect(logs.getByText('No hay logs con esos filtros en esta ventana.')).toBeHidden()
 
   // Peticiones: paginación, filtro por estado y el enlace a sus logs.
+  await mostrar(page, 'Cargar peticiones', 'Peticiones')
   const peticiones = tarjeta(page, 'Peticiones')
   await expect(peticiones.getByText(/^50 peticiones; hay más$/u)).toBeVisible()
   await peticiones.getByRole('button', { name: 'Cargar más' }).click()
