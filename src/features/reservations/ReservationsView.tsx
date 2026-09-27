@@ -5,10 +5,10 @@ import { reservationsOfDayQuery } from '../../api/reservations'
 import { tableName, tablesQuery } from '../../api/tables'
 import type { Reservation } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
-import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import ListSkeleton from '../../components/ListSkeleton'
 import PageHeader from '../../components/PageHeader'
+import RetryQueryError from '../../components/RetryQueryError'
 import SectionCard from '../../components/SectionCard'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -67,7 +67,7 @@ export default function ReservationsView() {
         }
       >
         {reservas.isPending ? <ListSkeleton label="Cargando reservas…" count={3} itemClassName="h-16 rounded-lg" /> : null}
-        {reservas.isError ? <FormMessage tone="error">{errorMessage(reservas.error, 'No se pudieron cargar.')}</FormMessage> : null}
+        {reservas.isError ? <RetryQueryError message={errorMessage(reservas.error, 'No se pudieron cargar las reservas.')} onRetry={() => { void reservas.refetch() }} /> : null}
         {reservas.isSuccess && lista.length === 0 ? <EmptyState title="No hay reservas para este día" /> : null}
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {lista.map((reserva) => (

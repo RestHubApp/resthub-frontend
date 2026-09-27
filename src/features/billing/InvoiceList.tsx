@@ -3,8 +3,8 @@ import { useState } from 'react'
 
 import { invoicesQuery } from '../../api/billing'
 import EmptyState from '../../components/EmptyState'
-import FormMessage from '../../components/FormMessage'
 import ListSkeleton from '../../components/ListSkeleton'
+import RetryQueryError from '../../components/RetryQueryError'
 import TablePagination from '../../components/TablePagination'
 import { errorMessage } from '../../services/api'
 import { useTimeZone } from '../../store/session'
@@ -25,7 +25,7 @@ export default function InvoiceList() {
   return (
     <>
       {emitidos.isPending ? <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
-      {emitidos.isError ? <FormMessage tone="error">{errorMessage(emitidos.error, 'No se pudieron cargar.')}</FormMessage> : null}
+      {emitidos.isError ? <RetryQueryError message={errorMessage(emitidos.error, 'No se pudieron cargar los comprobantes.')} onRetry={() => { void emitidos.refetch() }} /> : null}
       {emitidos.isSuccess && lista.length === 0 ? <EmptyState title="Todavía no se emitió ningún comprobante" /> : null}
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {lista.map((invoice) => (
