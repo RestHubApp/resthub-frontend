@@ -83,7 +83,7 @@ export class Cliente {
   }
 
   private cabeceras() {
-    return { Authorization: `Bearer ${this.token}` }
+    return { Authorization: `Bearer ${this.token}`, Connection: 'close' }
   }
 
   async get(ruta: string): Promise<Json> {
@@ -111,8 +111,10 @@ export class Cliente {
   }
 }
 
+// Sin reusar conexiones: uvicorn cierra una conexión inactiva a los 5 s y una
+// prueba que pasa más tiempo en la pantalla caía en ese cierre («socket hang up»).
 export async function nuevoHttp(): Promise<APIRequestContext> {
-  return request.newContext()
+  return request.newContext({ extraHTTPHeaders: { Connection: 'close' } })
 }
 
 export async function entrarPorApi(http: APIRequestContext, email: string, password = CLAVE): Promise<Sesion> {
