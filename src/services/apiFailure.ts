@@ -24,6 +24,11 @@ export function clearApiFailure(): void {
   avisar()
 }
 
+/** Una lectura de ese ámbito respondió: el corte que se recordaba ya pasó. */
+export function clearApiFailureOf(scope: ApiFailureScope): void {
+  if (actual?.scope === scope) clearApiFailure()
+}
+
 export function subscribeApiFailure(oyente: () => void): () => void {
   oyentes.add(oyente)
   return () => {

@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 
-import { noteApiFailure, type ApiFailureScope } from './apiFailure'
+import { clearApiFailureOf, noteApiFailure, type ApiFailureScope } from './apiFailure'
 import { logger } from './logger'
 
 const API_PREFIX = '/api/v1'
@@ -243,6 +243,7 @@ api.interceptors.response.use(
       },
       'http.request_completed',
     )
+    olvidarFalloDeTransporte(response.config)
     return response
   },
   (error: unknown) => {
@@ -302,9 +303,24 @@ function esFalloDeTransporte(error: AxiosError): boolean {
   return estado !== undefined && estado >= SERVER_ERROR
 }
 
+// Solo las lecturas: una escritura que falla la avisa su propio formulario o
+// su aviso emergente, y recordarla dejaba el mensaje en el armazón después de
+// cerrar la ventana.
+function ambitoDe(url: string | undefined): ApiFailureScope {
+  return (url ?? '').includes('/platform/') ? 'platform' : 'restaurant'
+}
+
+// Una lectura que responde (por ejemplo, el «Reintentar» de la pantalla)
+// descarta el corte recordado: si no, el aviso de respaldo del armazón
+// aparecía justo cuando la pantalla ya se había recuperado.
+function olvidarFalloDeTransporte(config: InternalAxiosRequestConfig): void {
+  if ((config.method ?? 'get').toLowerCase() === 'get') clearApiFailureOf(ambitoDe(config.url))
+}
+
 function recordarFalloDeTransporte(error: unknown): void {
   if (!axios.isAxiosError(error) || !esFalloDeTransporte(error)) return
-  const ambito: ApiFailureScope = (error.config?.url ?? '').includes('/platform/') ? 'platform' : 'restaurant'
+  if ((error.config?.method ?? 'get').toLowerCase() !== 'get') return
+  const ambito = ambitoDe(error.config?.url)
   noteApiFailure(
     ambito,
     errorMessage(error, 'No se pudieron cargar los datos. Comprueba la conexión e inténtalo de nuevo.'),
