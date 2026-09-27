@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -b",
-    "test": "vitest run",
+    "test": "vitest run --dir src",
     "generate:api": "openapi-typescript \"${VITE_API_URL:-http://localhost:8000}/api/v1/openapi.json\" -o src/api/schema.d.ts",
     "prepare": "husky",
     "test:e2e": "playwright test --project=cobertura --project=escritorio --project=movil",
