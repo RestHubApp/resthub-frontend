@@ -23,9 +23,14 @@ const WEBKIT = webkitLanzador === undefined ? {} : { launchOptions: { executable
 
 const VISUAL = /visual\/.*\.spec\.ts/u
 
+// Cada corrida limpia su carpeta de resultados: dos corridas a la vez (por
+// ejemplo, la E2E y la visual) necesitan carpetas distintas.
+const SALIDA = process.env.E2E_SALIDA ?? './e2e/.resultados'
+const REPORTE = process.env.E2E_REPORTE ?? './e2e/.reporte'
+
 export default defineConfig({
   testDir: './e2e',
-  outputDir: './e2e/.resultados',
+  outputDir: SALIDA,
   fullyParallel: true,
   forbidOnly: enCI,
   // Una prueba intermitente se arregla, no se reintenta.
@@ -39,8 +44,8 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/visual/lineas-base/{projectName}/{arg}{ext}',
   reporter: [
     ['list'],
-    ['html', { outputFolder: './e2e/.reporte', open: 'never' }],
-    ['json', { outputFile: './e2e/.reporte/resultados.json' }],
+    ['html', { outputFolder: REPORTE, open: 'never' }],
+    ['json', { outputFile: `${REPORTE}-json/resultados.json` }],
     ['./e2e/soporte/reporteCobertura.ts'],
   ],
   use: {

@@ -12,7 +12,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados/**', 'e2e/.reporte/**', 'node_modules/**', 'src/api/schema.d.ts'],
+    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados*/**', 'e2e/.reporte*/**', 'node_modules/**', 'src/api/schema.d.ts'],
   },
 
   // ---------------------------------------------------------------------

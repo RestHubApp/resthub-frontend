@@ -41,5 +41,5 @@ dev-dist
 
 # Pruebas E2E y visuales de Playwright
 dist-e2e
-e2e/.resultados
-e2e/.reporte
+e2e/.resultados*
+e2e/.reporte*
