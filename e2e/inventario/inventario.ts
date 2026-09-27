@@ -85,8 +85,10 @@ function overlaysDelCodigo(): Elemento[] {
       ruta.endsWith('.tsx') &&
       !ruta.endsWith('.test.tsx') &&
       !ruta.includes(join('components', 'ui')) &&
-      !ruta.endsWith('FormDialog.tsx') &&
-      !ruta.endsWith('ConfirmDialog.tsx'),
+      // Las dos envolturas compartidas, no las ventanas que las usan
+      // (`TableFormDialog`, `RoleFormDialog`).
+      !ruta.endsWith(join('components', 'FormDialog.tsx')) &&
+      !ruta.endsWith(join('components', 'ConfirmDialog.tsx')),
   )
   for (const ruta of fuentes) {
     const fuente = readFileSync(ruta, 'utf8')

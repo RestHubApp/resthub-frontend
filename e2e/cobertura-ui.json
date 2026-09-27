@@ -1,12 +1,15 @@
 {
-  "total": 76,
+  "total": 419,
   "porTipo": {
     "ruta": 35,
     "confirmacion": 9,
-    "desplegable": 5,
-    "dialogo": 22,
+    "desplegable": 6,
+    "dialogo": 24,
     "hoja": 3,
-    "pestanas": 2
+    "pestanas": 2,
+    "funcion": 257,
+    "estado": 77,
+    "rol": 6
   },
   "elementos": [
     {
@@ -418,6 +421,12 @@
       "origen": "src/features/reservations/ReservationDialog.tsx"
     },
     {
+      "id": "dialogo:roles/RoleFormDialog",
+      "tipo": "dialogo",
+      "descripcion": "titulo(role, access)",
+      "origen": "src/features/roles/RoleFormDialog.tsx"
+    },
+    {
       "id": "dialogo:staff/StaffRowActions#1",
       "tipo": "dialogo",
       "descripcion": "`Editar a ${account.full_name}`",
@@ -434,6 +443,12 @@
       "tipo": "dialogo",
       "descripcion": "Nueva cuenta",
       "origen": "src/features/staff/StaffView.tsx"
+    },
+    {
+      "id": "dialogo:tables/TableFormDialog",
+      "tipo": "dialogo",
+      "descripcion": "table === null ? 'Nueva mesa' : `Renombrar ${tableName(table.label)}`",
+      "origen": "src/features/tables/TableFormDialog.tsx"
     },
     {
       "id": "hoja:customers/CustomerSheet",
@@ -464,6 +479,2052 @@
       "tipo": "pestanas",
       "descripcion": "",
       "origen": "src/features/orders/OrdersView.tsx"
+    },
+    {
+      "id": "funcion:caja.abrir",
+      "tipo": "funcion",
+      "descripcion": "Abrir la caja con el efectivo inicial y una nota",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.validar-monto",
+      "tipo": "funcion",
+      "descripcion": "El monto inicial vacío o con letras se rechaza con su mensaje",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.arqueo-en-curso",
+      "tipo": "funcion",
+      "descripcion": "El arqueo del turno en curso: ventas, pedidos, propinas, efectivo esperado, por medio y por mesero, al día con los cobros",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.diferencia-en-vivo",
+      "tipo": "funcion",
+      "descripcion": "Al contar el efectivo se ve si sobra, falta o cuadra antes de cerrar",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.cerrar",
+      "tipo": "funcion",
+      "descripcion": "Cerrar la caja con el efectivo contado y una nota",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.aviso-pedidos-sin-cobrar",
+      "tipo": "funcion",
+      "descripcion": "Al cerrar con pedidos abiertos se avisa que pasan al turno siguiente",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.sin-caja-no-se-cobra",
+      "tipo": "funcion",
+      "descripcion": "Con la caja cerrada el servidor rechaza los cobros",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.historial",
+      "tipo": "funcion",
+      "descripcion": "Los turnos cerrados aparecen en el historial con su esperado y su diferencia",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.ver-turno",
+      "tipo": "funcion",
+      "descripcion": "Abrir un turno cerrado muestra su arqueo firmado, el contado, la diferencia y la nota",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.historial-paginar",
+      "tipo": "funcion",
+      "descripcion": "El historial de turnos se pagina de a 10",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:caja.tope-descuento",
+      "tipo": "funcion",
+      "descripcion": "Cambiar el descuento máximo del mesero (con validación del porcentaje)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:caja.historial-vacio",
+      "tipo": "estado",
+      "descripcion": "Sin turnos cerrados, el historial lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:caja.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, la caja muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:caja.historial-error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, el historial de turnos muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.nuevo-insumo",
+      "tipo": "funcion",
+      "descripcion": "Dar de alta un insumo con su unidad, mínimo y costo (con validación)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.editar-insumo",
+      "tipo": "funcion",
+      "descripcion": "Editar el mínimo y el costo de un insumo; la unidad no cambia",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.compra",
+      "tipo": "funcion",
+      "descripcion": "Registrar una compra por costo unitario o por total pagado, con la vista previa del stock",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.compra-desde-alerta",
+      "tipo": "funcion",
+      "descripcion": "Registrar la compra desde la tarjeta de la alerta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.merma",
+      "tipo": "funcion",
+      "descripcion": "Registrar una merma con su motivo obligatorio",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.ajuste-conteo",
+      "tipo": "funcion",
+      "descripcion": "Ajustar el stock escribiendo lo contado",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.ajuste-diferencia",
+      "tipo": "funcion",
+      "descripcion": "Ajustar el stock con la diferencia que sobra o falta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.cancelar-accion",
+      "tipo": "funcion",
+      "descripcion": "Cancelar la ventana de una acción sin registrar nada",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.buscar",
+      "tipo": "funcion",
+      "descripcion": "Buscar insumos por nombre, sin importar mayúsculas",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.solo-bajo-minimo",
+      "tipo": "funcion",
+      "descripcion": "Filtrar solo los insumos bajo el mínimo",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.paginar",
+      "tipo": "funcion",
+      "descripcion": "La tabla de insumos se pagina de a 30",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.ver-alertas",
+      "tipo": "funcion",
+      "descripcion": "El resumen de stock bajo lleva a la pestaña de alertas",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.alerta-desaparece-al-reponer",
+      "tipo": "funcion",
+      "descripcion": "Al reponer, la alerta y el aviso de stock bajo desaparecen solos",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:inventario.agotar-sin-insumos",
+      "tipo": "funcion",
+      "descripcion": "Encender o apagar la regla que agota solos los platos sin insumos",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:inventario.sin-resultados",
+      "tipo": "estado",
+      "descripcion": "Una búsqueda sin coincidencias lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:inventario.alertas-vacio",
+      "tipo": "estado",
+      "descripcion": "Sin nada bajo el mínimo, las alertas dicen «Nada por reponer»",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:inventario.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin insumos, la tabla lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:recetas.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin platos en la carta, la pestaña Recetas lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:inventario.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, la tabla de insumos muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:inventario.alertas-error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, las alertas muestran el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:movimientos.kardex",
+      "tipo": "funcion",
+      "descripcion": "El libro de movimientos muestra cada entrada y salida con su motivo",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:movimientos.filtrar-insumo",
+      "tipo": "funcion",
+      "descripcion": "Filtrar el libro por insumo",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:movimientos.filtrar-tipo",
+      "tipo": "funcion",
+      "descripcion": "Filtrar el libro por tipo de movimiento",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:movimientos.paginar",
+      "tipo": "funcion",
+      "descripcion": "El libro de movimientos se pagina de a 20",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:movimientos.sin-resultados",
+      "tipo": "estado",
+      "descripcion": "Sin movimientos para los filtros, lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:movimientos.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, el libro muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:recetas.costos-por-plato",
+      "tipo": "funcion",
+      "descripcion": "La pestaña Recetas muestra costo, margen y porcentaje de cada plato",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:recetas.crear",
+      "tipo": "funcion",
+      "descripcion": "Armar la receta de un plato agregando insumos y cantidades",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:recetas.costo-en-vivo",
+      "tipo": "funcion",
+      "descripcion": "El costo por porción y el margen se recalculan mientras se escribe",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:recetas.quitar-insumo",
+      "tipo": "funcion",
+      "descripcion": "Quitar un insumo de la receta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:recetas.borrar",
+      "tipo": "funcion",
+      "descripcion": "Borrar la receta dejándola sin insumos",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:recetas.volver",
+      "tipo": "funcion",
+      "descripcion": "Volver a las recetas o al menú según desde dónde se abrió",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:recetas.solo-lectura",
+      "tipo": "funcion",
+      "descripcion": "Quien solo ve el inventario mira la receta sin poder cambiarla",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:recetas.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, la pestaña Recetas muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:receta.error",
+      "tipo": "estado",
+      "descripcion": "La receta de un plato que no existe muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:proveedores.crear",
+      "tipo": "funcion",
+      "descripcion": "Dar de alta un proveedor con contacto, teléfono y nota",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:proveedores.editar",
+      "tipo": "funcion",
+      "descripcion": "Editar un proveedor",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:proveedores.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin proveedores, la pestaña lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:proveedores.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, los proveedores muestran el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:compras.orden-desde-sugerencias",
+      "tipo": "funcion",
+      "descripcion": "Armar una orden de compra cargando las sugerencias de reposición",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:compras.orden-a-mano",
+      "tipo": "funcion",
+      "descripcion": "Armar una orden de compra a mano, agregando y quitando líneas",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:compras.enviar",
+      "tipo": "funcion",
+      "descripcion": "Marcar enviada una orden de compra",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:compras.recibir",
+      "tipo": "funcion",
+      "descripcion": "Recibir una orden corrigiendo cantidad y costo real; entra al stock",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:compras.cancelar",
+      "tipo": "funcion",
+      "descripcion": "Cancelar una orden de compra",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:compras.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin órdenes de compra, la pestaña lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:compras.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, las órdenes muestran el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.nueva-categoria",
+      "tipo": "funcion",
+      "descripcion": "Crear una categoría (con validación del nombre)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.editar-categoria",
+      "tipo": "funcion",
+      "descripcion": "Renombrar una categoría",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.desactivar-categoria",
+      "tipo": "funcion",
+      "descripcion": "Desactivar una categoría con confirmación",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.activar-categoria",
+      "tipo": "funcion",
+      "descripcion": "Volver a activar una categoría",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.eliminar-categoria",
+      "tipo": "funcion",
+      "descripcion": "Eliminar una categoría vacía con confirmación",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.ordenar-categorias",
+      "tipo": "funcion",
+      "descripcion": "Subir y bajar una categoría",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.nuevo-plato",
+      "tipo": "funcion",
+      "descripcion": "Crear un plato con precio y categoría (con validación)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.agregar-plato-en-categoria",
+      "tipo": "funcion",
+      "descripcion": "Agregar un plato desde su categoría, con la categoría ya elegida",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.opciones-del-plato",
+      "tipo": "funcion",
+      "descripcion": "Definir grupos de opciones y extras del plato",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.editar-plato",
+      "tipo": "funcion",
+      "descripcion": "Editar nombre, precio y descripción de un plato",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.disponible-hoy",
+      "tipo": "funcion",
+      "descripcion": "Marcar un plato como agotado o disponible hoy",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.desactivar-plato",
+      "tipo": "funcion",
+      "descripcion": "Sacar un plato de la carta con confirmación",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.activar-plato",
+      "tipo": "funcion",
+      "descripcion": "Devolver un plato a la carta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.ordenar-platos",
+      "tipo": "funcion",
+      "descripcion": "Subir y bajar un plato dentro de su categoría",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:menu.margen-y-receta",
+      "tipo": "funcion",
+      "descripcion": "El plato muestra su costo y margen, y lleva a su receta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:menu.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin categorías, la carta vacía lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:menu.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, el menú muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:mesas.crear",
+      "tipo": "funcion",
+      "descripcion": "Crear una mesa (con validación del nombre)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:mesas.renombrar",
+      "tipo": "funcion",
+      "descripcion": "Renombrar una mesa",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:mesas.ordenar",
+      "tipo": "funcion",
+      "descripcion": "Subir y bajar una mesa en el orden del salón",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:mesas.desactivar",
+      "tipo": "funcion",
+      "descripcion": "Desactivar una mesa libre",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:mesas.activar",
+      "tipo": "funcion",
+      "descripcion": "Volver a activar una mesa",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:mesas.ocupada-no-se-desactiva",
+      "tipo": "funcion",
+      "descripcion": "Una mesa con un pedido en curso no se puede desactivar",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:mesas.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin mesas, la pantalla lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:mesas.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, las mesas muestran el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.crear",
+      "tipo": "funcion",
+      "descripcion": "Crear una cuenta con nombre, correo, rol y contraseña inicial (con validación)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.correo-repetido",
+      "tipo": "funcion",
+      "descripcion": "Un correo ya usado se rechaza al crear la cuenta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.editar",
+      "tipo": "funcion",
+      "descripcion": "Cambiar el nombre y el rol de una cuenta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.restablecer-contrasena",
+      "tipo": "funcion",
+      "descripcion": "Restablecer la contraseña de otra cuenta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.desactivar",
+      "tipo": "funcion",
+      "descripcion": "Desactivar una cuenta con confirmación; ya no puede entrar",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.activar",
+      "tipo": "funcion",
+      "descripcion": "Volver a activar una cuenta",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.cuenta-propia",
+      "tipo": "funcion",
+      "descripcion": "La cuenta propia no cambia su rol ni se desactiva",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.roles-que-puede-dar",
+      "tipo": "funcion",
+      "descripcion": "Solo se ofrecen los roles con permisos que la cuenta tiene",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:personal.paginar",
+      "tipo": "funcion",
+      "descripcion": "La tabla del personal se pagina de a 15",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:personal.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, el personal muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:roles.crear",
+      "tipo": "funcion",
+      "descripcion": "Crear un rol con nombre y permisos",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:roles.editar-permisos",
+      "tipo": "funcion",
+      "descripcion": "Cambiar los permisos de un rol",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:roles.eliminar",
+      "tipo": "funcion",
+      "descripcion": "Eliminar un rol que nadie tiene, con confirmación",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:roles.no-se-borra-con-personas",
+      "tipo": "funcion",
+      "descripcion": "Un rol con personas no ofrece eliminarse",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:roles.encargado-fijo",
+      "tipo": "funcion",
+      "descripcion": "El rol del encargado solo se mira",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:roles.mesero-sin-renombrar",
+      "tipo": "funcion",
+      "descripcion": "El rol del mesero cambia sus permisos pero no su nombre",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:roles.permisos-que-no-tiene",
+      "tipo": "funcion",
+      "descripcion": "Quien arma roles no puede dar permisos que no tiene",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:roles.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, los roles muestran el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:comprobantes.datos-fiscales",
+      "tipo": "funcion",
+      "descripcion": "Guardar RUC, razón social, dirección, IGV y series",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:comprobantes.validar-datos-fiscales",
+      "tipo": "funcion",
+      "descripcion": "Un RUC o una serie inválidos se rechazan con su mensaje",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:comprobantes.lista",
+      "tipo": "funcion",
+      "descripcion": "Los comprobantes emitidos con número, monto, cliente y estado ante SUNAT",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:comprobantes.reenviar",
+      "tipo": "funcion",
+      "descripcion": "Reenviar un comprobante sin enviar; sin proveedor queda simulado",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:comprobantes.imprimir",
+      "tipo": "funcion",
+      "descripcion": "Imprimir la representación del comprobante con los datos del emisor",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:comprobantes.paginar",
+      "tipo": "funcion",
+      "descripcion": "Los comprobantes se paginan de a 25",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:comprobantes.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin comprobantes, la lista lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:comprobantes.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, la lista de comprobantes muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:comprobante-impreso.error",
+      "tipo": "estado",
+      "descripcion": "Un comprobante que no existe no se imprime y muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:clientes.crear",
+      "tipo": "funcion",
+      "descripcion": "Dar de alta un cliente (con validación)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:clientes.telefono-repetido",
+      "tipo": "funcion",
+      "descripcion": "Un teléfono que ya es de otro cliente se rechaza",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:clientes.buscar",
+      "tipo": "funcion",
+      "descripcion": "Buscar clientes por nombre o teléfono",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:clientes.ver-ficha",
+      "tipo": "funcion",
+      "descripcion": "La ficha del cliente con visitas, gasto, ticket promedio y últimos pedidos",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:clientes.frecuente",
+      "tipo": "funcion",
+      "descripcion": "Desde tres visitas el cliente se marca frecuente",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:clientes.editar",
+      "tipo": "funcion",
+      "descripcion": "Editar los datos del cliente desde su ficha",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:clientes.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin clientes, la libreta lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:clientes.sin-resultados",
+      "tipo": "estado",
+      "descripcion": "Una búsqueda sin coincidencias lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:clientes.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, la libreta muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reservas.crear",
+      "tipo": "funcion",
+      "descripcion": "Tomar una reserva con mesa, día, hora, personas y duración (con validación)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reservas.cruce-de-mesa",
+      "tipo": "funcion",
+      "descripcion": "Dos reservas de la misma mesa a la misma hora se rechazan",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reservas.editar",
+      "tipo": "funcion",
+      "descripcion": "Corregir una reserva",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reservas.llegaron",
+      "tipo": "funcion",
+      "descripcion": "Marcar que el grupo llegó",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reservas.no-vinieron",
+      "tipo": "funcion",
+      "descripcion": "Marcar que no vinieron",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reservas.cancelar",
+      "tipo": "funcion",
+      "descripcion": "Cancelar una reserva",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reservas.cambiar-dia",
+      "tipo": "funcion",
+      "descripcion": "Ver las reservas de otro día",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:reservas.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin reservas para el día, lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:reservas.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, las reservas muestran el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.indicadores",
+      "tipo": "funcion",
+      "descripcion": "Ventas, pedidos pagados, ticket promedio y cancelados del período",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.secciones",
+      "tipo": "funcion",
+      "descripcion": "Ventas por día, mapa por hora, platos más vendidos, medios de pago, meseros y mermas",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.rango-predefinido",
+      "tipo": "funcion",
+      "descripcion": "Elegir hoy, 7 días, 30 días o este mes",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.rango-personalizado",
+      "tipo": "funcion",
+      "descripcion": "Elegir un rango personalizado de fechas",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.rango-invalido",
+      "tipo": "funcion",
+      "descripcion": "Un rango personalizado inválido se rechaza con su mensaje",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.ver-tabla",
+      "tipo": "funcion",
+      "descripcion": "Cambiar un gráfico por su tabla y volver",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.ordenar-margenes",
+      "tipo": "funcion",
+      "descripcion": "Ordenar la tabla de margen por plato tocando una cabecera",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.bajo-minimo",
+      "tipo": "funcion",
+      "descripcion": "Los insumos bajo el mínimo en el panel, con el enlace a la reposición",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:panel.clasificar-mermas",
+      "tipo": "funcion",
+      "descripcion": "Clasificar las mermas pendientes (por reglas, sin clave de IA)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:panel.sin-ventas",
+      "tipo": "estado",
+      "descripcion": "Sin ventas en el rango, cada sección lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:panel.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, cada sección del panel muestra su error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reposicion.recomendaciones",
+      "tipo": "funcion",
+      "descripcion": "Qué comprar y cuándo por insumo, con explicación, urgencia y motor",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reposicion.actualizar",
+      "tipo": "funcion",
+      "descripcion": "Actualizar las recomendaciones (decide el motor por reglas sin clave de IA)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reposicion.filtrar-accion",
+      "tipo": "funcion",
+      "descripcion": "Filtrar por acción tocando una tarjeta del resumen",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:reposicion.ver-en-espera",
+      "tipo": "funcion",
+      "descripcion": "Mostrar también los insumos que pueden esperar",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:reposicion.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin insumos, la reposición lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:reposicion.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, la reposición muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:ia.decisiones",
+      "tipo": "funcion",
+      "descripcion": "La bitácora de decisiones con fecha, tipo, asunto, decisión, motor y confianza",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:ia.filtrar-tipo",
+      "tipo": "funcion",
+      "descripcion": "Filtrar las decisiones por tipo",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:ia.filtrar-motor",
+      "tipo": "funcion",
+      "descripcion": "Filtrar las decisiones por motor",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:ia.ver-json",
+      "tipo": "funcion",
+      "descripcion": "Ver y ocultar la entrada y la salida de una decisión",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:ia.paginar",
+      "tipo": "funcion",
+      "descripcion": "Las decisiones se paginan de a 20",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:ia.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin decisiones para los filtros, lo dice",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "estado:ia.error",
+      "tipo": "estado",
+      "descripcion": "Si falla el servidor, la auditoría muestra el error",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:perfil.ver-datos",
+      "tipo": "funcion",
+      "descripcion": "Ver nombre, correo, rol y restaurante de la cuenta propia",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:perfil.cambiar-contrasena",
+      "tipo": "funcion",
+      "descripcion": "Cambiar la contraseña propia; la nueva sirve para entrar y la vieja no",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:perfil.validar-contrasena",
+      "tipo": "funcion",
+      "descripcion": "Contraseñas que no coinciden, cortas o iguales a la actual se rechazan",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:perfil.contrasena-actual-incorrecta",
+      "tipo": "funcion",
+      "descripcion": "Con la contraseña actual equivocada no se cambia nada",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "rol:encargado",
+      "tipo": "rol",
+      "descripcion": "Vista del encargado: todas las secciones del local en la navegación",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "rol:mesero",
+      "tipo": "rol",
+      "descripcion": "Vista del mesero: Pedidos, Cocina, Reservas y Clientes; sin Tablero, Caja ni Inventario",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "rol:cocina",
+      "tipo": "rol",
+      "descripcion": "Vista del rol Cocinero: Tablero e Inventario; sin Pedidos ni Caja",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "rol:plataforma",
+      "tipo": "rol",
+      "descripcion": "Vista del administrador del sistema: Restaurantes, Bitácora, Vista previa y Observabilidad",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "rol:vista-previa-encargado",
+      "tipo": "rol",
+      "descripcion": "Vista previa como encargado del local de muestra, con su franja",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "rol:vista-previa-mesero",
+      "tipo": "rol",
+      "descripcion": "Vista previa como mesero del local de muestra, con su franja",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:acceso.entrar",
+      "tipo": "funcion",
+      "descripcion": "Iniciar sesión con correo y contraseña por el formulario",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:acceso.validar",
+      "tipo": "funcion",
+      "descripcion": "El formulario de acceso avisa del correo inválido y de la contraseña vacía sin enviar",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:acceso.error",
+      "tipo": "estado",
+      "descripcion": "Contraseña equivocada: mensaje de error y sin sesión",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:acceso.restaurante-desactivado",
+      "tipo": "estado",
+      "descripcion": "El personal de un restaurante desactivado no puede entrar",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:acceso.volver-a-destino",
+      "tipo": "funcion",
+      "descripcion": "Tras entrar, se vuelve a la pantalla que se quiso abrir sin sesión",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:acceso.mostrar-contrasena",
+      "tipo": "funcion",
+      "descripcion": "Mostrar y ocultar la contraseña escrita",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:acceso.ir-a-plataforma",
+      "tipo": "funcion",
+      "descripcion": "Enlace «Administración del sistema» del acceso y vuelta al acceso de restaurantes",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:sesion.cerrar",
+      "tipo": "funcion",
+      "descripcion": "Cerrar sesión desde la barra lateral o la hoja «Cuenta»",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:sesion.cerrar-con-pendientes",
+      "tipo": "funcion",
+      "descripcion": "Cerrar sesión con pedidos sin enviar: se avisa, se puede cancelar y la cola se conserva",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:permisos.navegacion-por-rol",
+      "tipo": "funcion",
+      "descripcion": "La navegación muestra solo las secciones que permite el rol",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:permisos.ruta-prohibida",
+      "tipo": "funcion",
+      "descripcion": "Una ruta sin permiso (/inventario, /caja) lleva al inicio de la cuenta",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:permisos.sin-sesion",
+      "tipo": "funcion",
+      "descripcion": "Una pantalla privada sin sesión lleva al acceso",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:inicio.redirige-por-rol",
+      "tipo": "funcion",
+      "descripcion": "La raíz lleva a la primera pantalla de cada cuenta",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:shell.saltar-al-contenido",
+      "tipo": "funcion",
+      "descripcion": "El enlace «Saltar al contenido» lleva el foco al contenido principal",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:shell.mas-navegar",
+      "tipo": "funcion",
+      "descripcion": "Hoja «Más» del celular: abrir una pantalla que no entró en la barra",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:shell.mas-accesibilidad",
+      "tipo": "funcion",
+      "descripcion": "Hoja «Más» del celular: abrir el menú de accesibilidad",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:shell.mas-perfil",
+      "tipo": "funcion",
+      "descripcion": "Hoja «Cuenta» del celular: ir al perfil propio",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "desplegable:components/AccessibilityWidget",
+      "tipo": "desplegable",
+      "descripcion": "Menú del widget de accesibilidad: abrir, activar una opción, restablecer y cerrar",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:accesibilidad.opcion",
+      "tipo": "funcion",
+      "descripcion": "Activar una opción del widget (alto contraste) y restablecerla",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:perfil.ver-datos",
+      "tipo": "funcion",
+      "descripcion": "Mi perfil muestra nombre, correo, rol y restaurante",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:perfil.cambiar-contrasena",
+      "tipo": "funcion",
+      "descripcion": "Cambiar la contraseña propia y entrar con la nueva",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:perfil.contrasena-error",
+      "tipo": "estado",
+      "descripcion": "Contraseña actual equivocada o nuevas que no coinciden: no se cambia",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:vista-previa.canjear",
+      "tipo": "funcion",
+      "descripcion": "La pestaña nueva canjea el código y entra al local de muestra",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:vista-previa.codigo-invalido",
+      "tipo": "estado",
+      "descripcion": "Código inválido o ya usado: no se abre la vista previa",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:vista-previa.sin-codigo",
+      "tipo": "estado",
+      "descripcion": "La dirección no trae código de vista previa",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:vista-previa.sin-conexion",
+      "tipo": "estado",
+      "descripcion": "Sin conexión al canjear el código",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:vista-previa.volver-a-plataforma",
+      "tipo": "funcion",
+      "descripcion": "«Volver a la administración del sistema» desde un canje fallido",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:vista-previa.salir",
+      "tipo": "funcion",
+      "descripcion": "«Salir de la vista previa» cierra la pestaña",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:vista-previa.salir-con-pendientes",
+      "tipo": "funcion",
+      "descripcion": "Salir de la vista previa con pedidos sin enviar: se avisa y se descartan",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:vista-previa.plataforma-bloqueada",
+      "tipo": "funcion",
+      "descripcion": "En una pestaña de vista previa, /plataforma muestra un aviso en vez del área",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:vista-previa.terminada",
+      "tipo": "estado",
+      "descripcion": "Pestaña de vista previa sin sesión: aviso y «Cerrar la vista previa»",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:vista-previa.sin-cerrar-sesion",
+      "tipo": "funcion",
+      "descripcion": "En la vista previa no se ofrece «Cerrar sesión» ni cambiar la contraseña",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.entrar",
+      "tipo": "funcion",
+      "descripcion": "Acceso del administrador del sistema por su formulario",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.acceso-error",
+      "tipo": "estado",
+      "descripcion": "Credenciales equivocadas en el acceso de plataforma",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.cerrar-sesion",
+      "tipo": "funcion",
+      "descripcion": "Cerrar la sesión de plataforma",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.sin-sesion",
+      "tipo": "funcion",
+      "descripcion": "Una pantalla de plataforma sin sesión lleva a su acceso y vuelve después de entrar",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.sesion-separada",
+      "tipo": "funcion",
+      "descripcion": "La sesión de un restaurante no entra al área de plataforma",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.buscar",
+      "tipo": "funcion",
+      "descripcion": "Buscar restaurantes por nombre o identificador",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.paginar",
+      "tipo": "funcion",
+      "descripcion": "Paginación de la lista de restaurantes",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.restaurantes.vacio",
+      "tipo": "estado",
+      "descripcion": "Ningún restaurante coincide con la búsqueda",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.restaurantes.error",
+      "tipo": "estado",
+      "descripcion": "La lista de restaurantes no carga: error y «Reintentar»",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.crear",
+      "tipo": "funcion",
+      "descripcion": "Dar de alta un restaurante con su primer encargado, que luego entra",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.identificador-sugerido",
+      "tipo": "funcion",
+      "descripcion": "El identificador sigue al nombre mientras no se edite",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.validar-alta",
+      "tipo": "funcion",
+      "descripcion": "El alta avisa de los campos que faltan o no valen",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.restaurantes.alta-error",
+      "tipo": "estado",
+      "descripcion": "El servidor rechaza el alta: identificador ya usado",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.cancelar-alta",
+      "tipo": "funcion",
+      "descripcion": "Cancelar el alta vuelve a la lista",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurante.editar",
+      "tipo": "funcion",
+      "descripcion": "Editar el nombre y la zona horaria de un restaurante",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurante.desactivar",
+      "tipo": "funcion",
+      "descripcion": "Desactivar un restaurante (con confirmación) corta el acceso de su personal",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurante.activar",
+      "tipo": "funcion",
+      "descripcion": "Activar un restaurante devuelve el acceso",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurante.agregar-encargado",
+      "tipo": "funcion",
+      "descripcion": "Agregar otro encargado desde la ficha, que luego entra",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.restaurante.encargado-error",
+      "tipo": "estado",
+      "descripcion": "Agregar un encargado con un correo ya usado: error del servidor",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.restaurante.no-existe",
+      "tipo": "estado",
+      "descripcion": "La ficha de un restaurante que no existe",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.restaurante.error",
+      "tipo": "estado",
+      "descripcion": "La ficha no carga: error y «Reintentar»",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.bitacora.ver",
+      "tipo": "funcion",
+      "descripcion": "La bitácora lista lo que hizo cada administrador",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.bitacora.paginar",
+      "tipo": "funcion",
+      "descripcion": "Paginación de la bitácora",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.bitacora.error",
+      "tipo": "estado",
+      "descripcion": "La bitácora no carga: error y «Reintentar»",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.vista-previa.reiniciar",
+      "tipo": "funcion",
+      "descripcion": "Reiniciar el local de muestra (con confirmación)",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.vista-previa.como-encargado",
+      "tipo": "funcion",
+      "descripcion": "«Ver como encargado» abre una pestaña nueva con la vista previa",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.vista-previa.como-mesero",
+      "tipo": "funcion",
+      "descripcion": "«Ver como mesero» abre una pestaña nueva con la vista previa",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:plataforma.vista-previa.enlace-de-repuesto",
+      "tipo": "funcion",
+      "descripcion": "El enlace de repuesto del aviso abre la vista previa y se quita",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.vista-previa.sin-muestra",
+      "tipo": "estado",
+      "descripcion": "Todavía no hay local de muestra",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:plataforma.vista-previa.error",
+      "tipo": "estado",
+      "descripcion": "El local de muestra no carga: error y «Reintentar»",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.ventana",
+      "tipo": "funcion",
+      "descripcion": "Elegir la ventana (1 h, 6 h, 24 h, 7 d)",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.restaurante",
+      "tipo": "funcion",
+      "descripcion": "Filtrar el panel por un restaurante",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.indicadores",
+      "tipo": "funcion",
+      "descripcion": "Los indicadores de la ventana (peticiones, errores, latencias)",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.ver-tabla",
+      "tipo": "funcion",
+      "descripcion": "Cambiar cada gráfico a su vista de tabla y volver",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.rutas-ordenar",
+      "tipo": "funcion",
+      "descripcion": "Ordenar las rutas por peticiones, errores o p95",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.ruta-a-peticiones",
+      "tipo": "funcion",
+      "descripcion": "Una ruta lleva a sus peticiones",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.logs-filtrar",
+      "tipo": "funcion",
+      "descripcion": "Filtrar los logs por nivel, texto y request_id, y quitar los filtros",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.logs-detalle",
+      "tipo": "funcion",
+      "descripcion": "«Ver detalle» de un log y su enlace a las peticiones",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.logs-cargar-mas",
+      "tipo": "funcion",
+      "descripcion": "«Cargar más» logs",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.peticiones-filtrar",
+      "tipo": "funcion",
+      "descripcion": "Filtrar las peticiones por estado, ruta y request_id, y quitar los filtros",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.peticiones-cargar-mas",
+      "tipo": "funcion",
+      "descripcion": "«Cargar más» peticiones",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.peticion-a-logs",
+      "tipo": "funcion",
+      "descripcion": "El request_id de una petición lleva a sus logs",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.pausar",
+      "tipo": "funcion",
+      "descripcion": "Pausar y reanudar la actualización automática",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:observabilidad.actualizar",
+      "tipo": "funcion",
+      "descripcion": "«Actualizar ahora» relee el panel",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:observabilidad.vacio",
+      "tipo": "estado",
+      "descripcion": "Sin logs ni peticiones con esos filtros",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "estado:observabilidad.error",
+      "tipo": "estado",
+      "descripcion": "Una lectura del panel falla: error y «Reintentar»",
+      "origen": "e2e/inventario/funciones/plataforma.json"
+    },
+    {
+      "id": "funcion:pedidos.ver-mesas",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Mesas: ver cuántas mesas están libres y el estado, número, total y mesero de cada mesa ocupada",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.en-vivo",
+      "tipo": "funcion",
+      "descripcion": "Pedidos: el indicador «En vivo» y la pantalla que cambia sola cuando la cocina marca listo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.pestana-llevar",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Llevar y delivery: lista de los pedidos para llevar y delivery en curso",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.pestana-mis-pedidos",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Mis pedidos: lo que tomó el mesero hoy y volver a la misma pestaña desde el pedido",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.para-llevar",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Para llevar / Delivery: pedido para recoger en el local, con nombre opcional; cancelar la ventana",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.delivery",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Delivery: exige nombre, teléfono y dirección antes de elegir platos",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.buscar-cliente-frecuente",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Delivery: buscar al cliente frecuente por nombre o teléfono y llenar sus datos",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.cliente-nuevo-a-libreta",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Delivery: un cliente que no estaba se agrega a la libreta y queda ligado al pedido",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedidos.cliente-no-encontrado",
+      "tipo": "estado",
+      "descripcion": "Pedidos › Delivery: la búsqueda sin coincidencias pide escribir los datos",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedidos.mesas.vacio",
+      "tipo": "estado",
+      "descripcion": "Pedidos › Mesas: sin mesas activas (con el atajo «Crear mesas» para el encargado)",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.atajo-crear-mesas",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Mesas: sin mesas activas, el encargado ve el atajo «Crear mesas» que lleva a /mesas",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedidos.mesas.error",
+      "tipo": "estado",
+      "descripcion": "Pedidos › Mesas: las mesas no cargan y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedidos.llevar.vacio",
+      "tipo": "estado",
+      "descripcion": "Pedidos › Llevar y delivery: sin pedidos en curso",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedidos.llevar.error",
+      "tipo": "estado",
+      "descripcion": "Pedidos › Llevar y delivery: los pedidos no cargan y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedidos.mios.vacio",
+      "tipo": "estado",
+      "descripcion": "Pedidos › Mis pedidos: el mesero todavía no tomó pedidos hoy",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedidos.mios.error",
+      "tipo": "estado",
+      "descripcion": "Pedidos › Mis pedidos: la lista no carga y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.agregar-plato",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo: tocar un plato lo suma al pedido y la barra muestra platos y total",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.cambiar-cantidad",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo: el más y el menos de un plato elegido",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.buscar-plato",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo: buscar un plato por nombre",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.filtrar-categoria",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo: filtrar la carta por categoría y volver a «Toda la carta»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.resumen-y-notas",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo › Resumen: cantidades y nota para cocina de cada plato, seguir eligiendo y enviar desde el resumen",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.enviar-a-cocina",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo: «Enviar a cocina» crea el pedido, lo manda y ocupa la mesa",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.plato-agotado",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo: un plato agotado hoy se ve «Agotado» y no se puede elegir; al reponerlo vuelve en vivo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.plato-sin-insumos",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo: un plato cuya receta no alcanza se ve «Sin insumos» y no se puede elegir",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.opciones-del-plato",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo › Opciones: grupo obligatorio, extras con precio y máximo de elecciones antes de sumar el plato",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.mesa-ocupada",
+      "tipo": "funcion",
+      "descripcion": "Pedido nuevo: aviso de que la mesa ya tiene un pedido, con el enlace a ese pedido",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedido-nuevo.mesa-inexistente",
+      "tipo": "estado",
+      "descripcion": "Pedido nuevo: la mesa no existe o está desactivada",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedido-nuevo.sin-resultados",
+      "tipo": "estado",
+      "descripcion": "Pedido nuevo: ningún plato coincide con la búsqueda",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedido-nuevo.error",
+      "tipo": "estado",
+      "descripcion": "Pedido nuevo: la carta no carga y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.enviar-pendiente",
+      "tipo": "funcion",
+      "descripcion": "Detalle: un pedido abierto que no se envió se manda a cocina desde el detalle",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.editar-plato",
+      "tipo": "funcion",
+      "descripcion": "Detalle de un pedido abierto: cambiar la cantidad de un plato",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.quitar-plato",
+      "tipo": "funcion",
+      "descripcion": "Detalle de un pedido abierto: quitar un plato",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.marcar-listo",
+      "tipo": "funcion",
+      "descripcion": "Detalle: el encargado marca listo un pedido en cocina",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.marcar-servido",
+      "tipo": "funcion",
+      "descripcion": "Detalle: el mesero marca servido un pedido listo y aparece «Cobrar»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.cobrar-solo-lo-suyo",
+      "tipo": "funcion",
+      "descripcion": "Detalle: el mesero no ve «Cobrar» en un pedido que tomó otro",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.cancelar",
+      "tipo": "funcion",
+      "descripcion": "Detalle: el encargado cancela con motivo obligatorio; la mesa queda libre y se ve el motivo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.cancelar-sin-permiso",
+      "tipo": "funcion",
+      "descripcion": "Detalle: el mesero no ve «Cancelar pedido»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.cambiar-mesa",
+      "tipo": "funcion",
+      "descripcion": "Detalle: cambiar el pedido a una mesa libre",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.unir-mesa",
+      "tipo": "funcion",
+      "descripcion": "Detalle: unir otra mesa del mesero a este pedido; sin otras mesas lo dice",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.imprimir-comanda",
+      "tipo": "funcion",
+      "descripcion": "Detalle › Imprimir comanda: hoja de cocina sin precios, con notas y opciones",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.imprimir-precuenta",
+      "tipo": "funcion",
+      "descripcion": "Detalle › Imprimir precuenta: la cuenta antes de pagar, con el total",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.imprimir-ticket",
+      "tipo": "funcion",
+      "descripcion": "Detalle › Imprimir ticket: el ticket pagado con cortesías, descuento, pagos y vuelto",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.opciones-impresas",
+      "tipo": "funcion",
+      "descripcion": "Comanda y precuenta: las opciones elegidas de un plato aparecen impresas y suman al total",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.datos-delivery",
+      "tipo": "funcion",
+      "descripcion": "Detalle de un delivery: dirección, referencia y el teléfono para llamar",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedido.alergia-resaltada",
+      "tipo": "funcion",
+      "descripcion": "Detalle: «Con alergia» en el encabezado cuando una nota menciona una alergia (visto por el encargado)",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedido.error",
+      "tipo": "estado",
+      "descripcion": "Detalle: el pedido no carga y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:pedido.no-existe",
+      "tipo": "estado",
+      "descripcion": "Detalle: el pedido no existe (o es de otro local) y se vuelve a Pedidos",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:agregar.agregar-platos",
+      "tipo": "funcion",
+      "descripcion": "Agregar platos a un pedido enviado; si estaba listo o servido vuelve a cocina",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:agregar.pedido-cerrado",
+      "tipo": "funcion",
+      "descripcion": "Agregar platos: un pedido pagado o cancelado avisa que no admite más platos",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.todo-junto",
+      "tipo": "funcion",
+      "descripcion": "Cobro: toda la cuenta junta en efectivo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.partes-iguales",
+      "tipo": "funcion",
+      "descripcion": "Cobro: dividir en partes iguales; tras cada pago queda la siguiente persona con el saldo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.por-platos",
+      "tipo": "funcion",
+      "descripcion": "Cobro: cada persona paga sus platos; los ya pagados no se ofrecen",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.pago-mixto",
+      "tipo": "funcion",
+      "descripcion": "Cobro: la cuenta se cierra con medios distintos (efectivo y Yape) y queda «Mixto»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.vuelto",
+      "tipo": "funcion",
+      "descripcion": "Cobro en efectivo: montos rápidos y vuelto en vivo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.monto-exacto",
+      "tipo": "funcion",
+      "descripcion": "Cobro en efectivo: el atajo «Monto exacto»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.monto-insuficiente",
+      "tipo": "funcion",
+      "descripcion": "Cobro en efectivo: un monto menor a lo que se cobra se rechaza",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.propina",
+      "tipo": "funcion",
+      "descripcion": "Cobro: propina con los atajos, aparte de la venta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.descuento",
+      "tipo": "funcion",
+      "descripcion": "Cobro › Descuento: el mesero aplica un porcentaje con motivo dentro de su tope",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.descuento-sobre-tope",
+      "tipo": "funcion",
+      "descripcion": "Cobro › Descuento: sobre el tope del mesero el servidor lo rechaza y se avisa",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.descuento-sin-tope",
+      "tipo": "funcion",
+      "descripcion": "Cobro › Descuento: el encargado descuenta sin tope y puede cambiarlo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.quitar-descuento",
+      "tipo": "funcion",
+      "descripcion": "Cobro › Descuento: quitar el descuento aplicado",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.cortesia",
+      "tipo": "funcion",
+      "descripcion": "Cobro › Invitar un plato: el encargado invita un plato con motivo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cobro.quitar-cortesia",
+      "tipo": "funcion",
+      "descripcion": "Cobro › Invitar un plato: volver a cobrar un plato invitado",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:cobro.caja-cerrada",
+      "tipo": "estado",
+      "descripcion": "Cobro: con la caja cerrada avisa y no deja confirmar",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:comprobante.boleta-sin-documento",
+      "tipo": "funcion",
+      "descripcion": "Comprobante: boleta a «clientes varios» hasta S/ 700 (el DNI es opcional)",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:comprobante.boleta-sobre-tope",
+      "tipo": "funcion",
+      "descripcion": "Comprobante: una boleta de más de S/ 700 exige DNI, CE o RUC",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:comprobante.documento-invalido",
+      "tipo": "funcion",
+      "descripcion": "Comprobante: un DNI inválido se rechaza con el mensaje del servidor",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:comprobante.factura",
+      "tipo": "funcion",
+      "descripcion": "Comprobante: factura con RUC, razón social y dirección fiscal",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:comprobante.factura-ruc-invalido",
+      "tipo": "funcion",
+      "descripcion": "Comprobante: una factura con RUC inválido se rechaza",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:comprobante.simulado",
+      "tipo": "funcion",
+      "descripcion": "Comprobante: sin proveedor configurado queda «Sin enviar (sin proveedor)» y ya no se ofrece emitir otro",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cocina.por-preparar",
+      "tipo": "funcion",
+      "descripcion": "Cocina: los pedidos por preparar llegan solos, sin precios, con cantidades y notas",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cocina.marcar-listo",
+      "tipo": "funcion",
+      "descripcion": "Cocina: quien tiene permiso marca «Listo» y el pedido pasa a «Listos para servir»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:cocina.solo-mirar",
+      "tipo": "funcion",
+      "descripcion": "Cocina: el mesero ve la pantalla sin el botón «Listo»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:cocina.vacio",
+      "tipo": "estado",
+      "descripcion": "Cocina: nada pendiente y nada esperando a salir",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:cocina.error",
+      "tipo": "estado",
+      "descripcion": "Cocina: los pedidos no cargan y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:imprimir.reimprimir",
+      "tipo": "funcion",
+      "descripcion": "Hoja de impresión: se imprime sola al abrir y el botón «Imprimir» saca otra copia",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:imprimir.error",
+      "tipo": "estado",
+      "descripcion": "Hoja de impresión: el pedido no carga y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:tablero.tiempo-real",
+      "tipo": "funcion",
+      "descripcion": "Tablero: un pedido nuevo aparece en otro navegador sin recargar, con «Nuevo»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:tablero.filtrar-tipo",
+      "tipo": "funcion",
+      "descripcion": "Tablero: filtrar por en mesa, para llevar y delivery, con la cuenta de cada uno",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:tablero.enviar-a-cocina",
+      "tipo": "funcion",
+      "descripcion": "Tablero: enviar a cocina un pedido abierto desde su tarjeta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:tablero.marcar-listo",
+      "tipo": "funcion",
+      "descripcion": "Tablero: la cocina (rol Cocinero) marca listo desde la tarjeta y no ve «Cobrar»",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:tablero.cobrar",
+      "tipo": "funcion",
+      "descripcion": "Tablero: cobrar un pedido servido desde su tarjeta; el recibo sigue a la vista",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:tablero.cancelar",
+      "tipo": "funcion",
+      "descripcion": "Tablero: cancelar un pedido desde su tarjeta con motivo",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:tablero.ir-al-pedido",
+      "tipo": "funcion",
+      "descripcion": "Tablero: el número de la tarjeta lleva al detalle del pedido",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:tablero.alergia-resaltada",
+      "tipo": "funcion",
+      "descripcion": "Tablero y cocina: una nota con alergia lleva «Con alergia» y el distintivo «Alergia» (regla por palabras clave)",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:tablero.vacio",
+      "tipo": "estado",
+      "descripcion": "Tablero: cada columna sin pedidos",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:tablero.error",
+      "tipo": "estado",
+      "descripcion": "Tablero: los pedidos no cargan y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:historial.filtrar-fecha",
+      "tipo": "funcion",
+      "descripcion": "Historial: filtrar por fecha desde y hasta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:historial.filtrar-estado",
+      "tipo": "funcion",
+      "descripcion": "Historial: filtrar por estado",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:historial.filtrar-tipo",
+      "tipo": "funcion",
+      "descripcion": "Historial: filtrar por tipo de pedido",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:historial.filtrar-mesero",
+      "tipo": "funcion",
+      "descripcion": "Historial: filtrar por mesero",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:historial.ver-detalle",
+      "tipo": "funcion",
+      "descripcion": "Historial: desplegar y ocultar el detalle de una fila (platos, pago o motivo de cancelación)",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:historial.paginar",
+      "tipo": "funcion",
+      "descripcion": "Historial: páginas de 25 con anterior y siguiente",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:historial.vacio",
+      "tipo": "estado",
+      "descripcion": "Historial: ningún pedido coincide con los filtros",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "estado:historial.error",
+      "tipo": "estado",
+      "descripcion": "Historial: la lista no carga y se reintenta",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.sin-conexion-encolar",
+      "tipo": "funcion",
+      "descripcion": "Sin señal, un pedido nuevo queda en la cola del celular con un aviso visible (HU37)",
+      "origen": "e2e/inventario/funciones/sin-conexion.json"
+    },
+    {
+      "id": "funcion:pedidos.sin-conexion-reenviar",
+      "tipo": "funcion",
+      "descripcion": "Al volver la señal, la cola se envía sola a cocina (HU37)",
+      "origen": "e2e/inventario/funciones/sin-conexion.json"
+    },
+    {
+      "id": "funcion:pedidos.sin-conexion-sin-duplicar",
+      "tipo": "funcion",
+      "descripcion": "Un pedido que llegó al servidor pero cuya respuesta se perdió no se duplica al reintentar, y «Reintentar» lo envía (HU37)",
+      "origen": "e2e/inventario/funciones/sin-conexion.json"
+    },
+    {
+      "id": "estado:pedidos.cola-sin-senal",
+      "tipo": "estado",
+      "descripcion": "Aviso «N pedidos esperan señal» en Pedidos",
+      "origen": "e2e/inventario/funciones/sin-conexion.json"
     }
   ]
 }
