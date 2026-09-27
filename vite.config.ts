@@ -60,7 +60,7 @@ export default defineConfig({
             'StaffView', 'RolesView', 'InsightsView', 'RestockView', 'AiAuditView',
             'PlatformShell', 'PlatformLoginView', 'RestaurantsView', 'NewRestaurantView',
             'RestaurantDetailView', 'ActivityView', 'PreviewView', 'ObservabilityView',
-            'DataTable', 'AreaChart',
+            'DataTable', 'AreaChart', 'RoutesSection', 'LogsSection', 'RequestsSection',
           ].map((nombre) => `**/assets/${nombre}-*.js`),
         ],
         runtimeCaching: [{
