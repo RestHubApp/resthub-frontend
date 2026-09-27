@@ -85,7 +85,8 @@ test('PLA-16 el panel de observabilidad muestra indicadores y gráficos, cambia 
   const primera = rutas.getByRole('link', { name: /^Ver peticiones de /u }).first()
   const nombre = (await primera.getAttribute('aria-label')) ?? ''
   const plantilla = nombre.replace(/^Ver peticiones de \S+ /u, '')
-  await primera.click()
+  // La tabla puede reordenarse al llegar la relectura: se toca la ruta leída, no «la primera».
+  await rutas.getByRole('link', { name: nombre, exact: true }).first().click()
   await expect(page).toHaveURL(/ruta=/u)
   await expect(page.getByLabel('Ruta (plantilla)')).toHaveValue(plantilla)
 
