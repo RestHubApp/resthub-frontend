@@ -20,4 +20,14 @@ describe('withRole', () => {
     const mesero = { ...role(2, 'waiter', 'Mesero'), member_count: 7 }
     expect(withRole(LISTA, mesero)[1]?.member_count).toBe(7)
   })
+
+  it('un rol owner o waiter se ubica según la prioridad de tipo', () => {
+    const sinOwner = [role(2, 'waiter', 'Mesero'), role(4, 'custom', 'Cocina')]
+    const conOwner = withRole(sinOwner, role(1, 'owner', 'Administrador'))
+    expect(conOwner[0]?.kind).toBe('owner')
+
+    const sinWaiter = [role(1, 'owner', 'Encargado'), role(4, 'custom', 'Cocina')]
+    const conWaiter = withRole(sinWaiter, role(2, 'waiter', 'Atención'))
+    expect(conWaiter[1]?.kind).toBe('waiter')
+  })
 })
