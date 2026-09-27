@@ -6,6 +6,7 @@
     "module": "ESNext",
     "types": ["node", "vite/client", "@testing-library/jest-dom/jest-globals"],
     "jsx": "react-jsx",
+    "paths": { "@/*": ["./src/*"] },
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -22,5 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["jest/**/*.ts"]
+  "include": ["jest/**/*.ts", "src/vite-env.d.ts"]
 }

@@ -9,8 +9,8 @@ import { fileURLToPath } from 'node:url'
 // Las opciones de un transformador no expanden <rootDir>: la ruta va completa.
 const importMetaEnv = fileURLToPath(new URL('./jest/importMetaEnv.cjs', import.meta.url))
 
-// Dependencias que solo traen ESM (React Router 8 y la que usa para cookies).
-const soloEsm = ['react-router', 'cookie-es']
+// Dependencias que solo traen ESM: React Router 8 (y la que usa para cookies) y TanStack Table 9.
+const soloEsm = ['react-router', 'cookie-es', '@tanstack/react-table', '@tanstack/table-core']
 
 /** @type {import('jest').Config} */
 export default {

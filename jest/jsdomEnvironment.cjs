@@ -11,7 +11,6 @@ const DE_NODE = [
   'Request',
   'Response',
   'Headers',
-  'FormData',
   'AbortController',
   'AbortSignal',
   'ReadableStream',
