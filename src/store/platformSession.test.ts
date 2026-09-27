@@ -1,5 +1,11 @@
+/**
+ * @jest-environment ./jest/nodeEnvironment.cjs
+ */
+// Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
+// como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
 import { AxiosError, type InternalAxiosRequestConfig } from 'axios'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 const CLAVE = 'resthub.platform-session.v1'
 const CLAVE_RESTAURANTE = 'resthub.session.v2'
@@ -27,8 +33,8 @@ function fakeStorage(inicial: Record<string, string> = {}) {
 // El almacén lee lo guardado al cargarse: cada prueba parte de módulos nuevos.
 async function cargar(inicial: Record<string, string> = {}) {
   const storage = fakeStorage(inicial)
-  vi.stubGlobal('localStorage', storage)
-  vi.resetModules()
+  stubGlobal('localStorage', storage)
+  jest.resetModules()
   const { usePlatformSession } = await import('./platformSession')
   const { api, setAuthToken } = await import('../services/api')
   const { queryClient } = await import('../services/queryClient')
@@ -36,12 +42,12 @@ async function cargar(inicial: Record<string, string> = {}) {
 }
 
 beforeEach(() => {
-  vi.useFakeTimers()
+  jest.useFakeTimers()
 })
 
 afterEach(() => {
-  vi.useRealTimers()
-  vi.unstubAllGlobals()
+  jest.useRealTimers()
+  unstubAllGlobals()
 })
 
 describe('sesión de plataforma', () => {
@@ -74,7 +80,7 @@ describe('sesión de plataforma', () => {
     const { usePlatformSession } = await cargar()
     usePlatformSession.getState().signIn(tokenQueVence(60), ADMIN)
 
-    await vi.advanceTimersByTimeAsync(61_000)
+    await jest.advanceTimersByTimeAsync(61_000)
 
     expect(usePlatformSession.getState()).toMatchObject({ token: null, expired: true })
   })
@@ -165,10 +171,10 @@ describe('renovación de la sesión de plataforma', () => {
 // Una pestaña de vista previa recién cargada, con la sesión real de plataforma en localStorage.
 async function cargarEnVistaPrevia(token: string) {
   const storage = fakeStorage({ [CLAVE]: JSON.stringify({ token, admin: ADMIN }) })
-  vi.stubGlobal('localStorage', storage)
-  vi.stubGlobal('sessionStorage', fakeStorage())
-  vi.stubGlobal('location', { pathname: '/vista-previa', search: '', hash: '' })
-  vi.resetModules()
+  stubGlobal('localStorage', storage)
+  stubGlobal('sessionStorage', fakeStorage())
+  stubGlobal('location', { pathname: '/vista-previa', search: '', hash: '' })
+  jest.resetModules()
   const { usePlatformSession } = await import('./platformSession')
   const { api } = await import('../services/api')
   return { storage, usePlatformSession, api }

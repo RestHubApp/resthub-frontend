@@ -1,4 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+/**
+ * @jest-environment ./jest/nodeEnvironment.cjs
+ */
+// Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
+// como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import type { OpenOrderRequest } from '../api/types'
 import type { QueuedOrder } from './offlineQueue'
@@ -37,8 +43,8 @@ function fakeStorage(inicial: Record<string, string> = {}) {
 // La cola guarda su lectura en memoria: cada prueba parte de un módulo nuevo.
 async function cola(inicial: Record<string, string> = {}) {
   const storage = fakeStorage(inicial)
-  vi.stubGlobal('localStorage', storage)
-  vi.resetModules()
+  stubGlobal('localStorage', storage)
+  jest.resetModules()
   return { ...(await import('./offlineQueue')), storage }
 }
 
@@ -46,14 +52,14 @@ async function cola(inicial: Record<string, string> = {}) {
 async function colaDeVistaPrevia() {
   const local = fakeStorage()
   const pestana = fakeStorage({ 'resthub.vista-previa.pestana.v1': '1' })
-  vi.stubGlobal('localStorage', local)
-  vi.stubGlobal('sessionStorage', pestana)
-  vi.resetModules()
+  stubGlobal('localStorage', local)
+  stubGlobal('sessionStorage', pestana)
+  jest.resetModules()
   return { ...(await import('./offlineQueue')), local, pestana }
 }
 
 beforeEach(() => {
-  vi.unstubAllGlobals()
+  unstubAllGlobals()
 })
 
 describe('queuedOrders', () => {
@@ -122,10 +128,10 @@ describe('varias pestañas', () => {
 
   it('un cambio en otra pestaña se ve sin recargar', async () => {
     const ventana = new EventTarget()
-    vi.stubGlobal('window', ventana)
+    stubGlobal('window', ventana)
     const { enqueueOrder, queuedOrders, subscribeQueue, storage } = await cola()
     enqueueOrder(pedido('a', mesero))
-    const aviso = vi.fn()
+    const aviso = jest.fn()
     subscribeQueue(aviso)
 
     storage.datos.set(V2, JSON.stringify([pedido('a', mesero), pedido('b', mesero)]))
@@ -150,9 +156,9 @@ describe('en una vista previa', () => {
 
   it('un cambio en la cola real de otra pestaña no le llega', async () => {
     const ventana = new EventTarget()
-    vi.stubGlobal('window', ventana)
+    stubGlobal('window', ventana)
     const { subscribeQueue, local } = await colaDeVistaPrevia()
-    const aviso = vi.fn()
+    const aviso = jest.fn()
     subscribeQueue(aviso)
 
     ventana.dispatchEvent(Object.assign(new Event('storage'), { key: V2, storageArea: local }))

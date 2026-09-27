@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import type { Role } from '../../api/types'
 import { withRole } from './roleCache'
