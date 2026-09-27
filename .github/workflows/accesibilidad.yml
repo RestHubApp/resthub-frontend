@@ -1,0 +1,54 @@
+# Accesibilidad automática de las pantallas sin sesión (acceso, acceso de
+# plataforma y vista previa sin código) con axe-core sobre el build de
+# producción. Las pantallas con sesión necesitan el backend y la semilla: se
+# miden en local con `pnpm a11y` (ver la cabecera de pruebas/accesibilidad/todo.mjs).
+name: Accesibilidad
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  axe:
+    name: axe-core (pantallas sin sesión)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Instalar Chromium de Playwright
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Compilar
+        run: pnpm build
+
+      - name: axe-core sobre las pantallas sin sesión
+        env:
+          A11Y_SOLO: acceso,raiz,plataforma-acceso,vista-previa-sin-codigo
+          A11Y_ESTRICTO: '1'
+        run: |
+          pnpm preview --port 5202 --strictPort &
+          until curl -sf http://localhost:5202/acceso > /dev/null; do sleep 1; done
+          node pruebas/accesibilidad/axe.mjs
+
+      - name: Guardar el reporte
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-sin-sesion
+          path: pruebas/accesibilidad/reportes/axe/

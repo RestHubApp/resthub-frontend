@@ -12,7 +12,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts'],
+    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts', 'pruebas/accesibilidad/.wave-ext/**', 'pruebas/accesibilidad/reportes/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -374,5 +374,14 @@ export default tseslint.config(
     rules: {
       'check-file/filename-naming-convention': 'off',
     },
+  },
+
+  // ---------------------------------------------------------------------
+  // Scripts de medición de accesibilidad (Node, fuera de la aplicación).
+  // ---------------------------------------------------------------------
+  {
+    files: ['pruebas/accesibilidad/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    extends: [tseslint.configs.disableTypeChecked],
   },
 )

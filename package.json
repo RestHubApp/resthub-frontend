@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "test": "vitest run",
+    "a11y": "node pruebas/accesibilidad/todo.mjs",
     "generate:api": "openapi-typescript \"${VITE_API_URL:-http://localhost:8000}/api/v1/openapi.json\" -o src/api/schema.d.ts",
     "prepare": "husky"
   },
@@ -38,6 +39,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.0",
     "@eslint/js": "9.39.5",
     "@tailwindcss/vite": "^4.3.3",
@@ -57,8 +59,11 @@
     "eslint-plugin-sonarjs": "^4.2.0",
     "globals": "^17.12.0",
     "husky": "^9.1.7",
+    "lighthouse": "^13.5.0",
     "lint-staged": "^17.5.1",
     "openapi-typescript": "^7.13.0",
+    "playwright": "1.63.0",
+    "puppeteer-core": "25.12.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.0",
