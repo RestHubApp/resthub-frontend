@@ -28,6 +28,10 @@ if [[ "${E2E_DB_PREPARADA:-0}" != "1" ]]; then
   rm -f "$DB" "$DB-journal" "$DB-wal" "$DB-shm"
   uv run --frozen alembic upgrade head
   uv run --frozen python scripts/seed_dev.py
+  # Modo WAL: una lectura larga (el canal de avisos, un listado) no bloquea a
+  # quien escribe. Con el diario por omisión, varias pruebas en paralelo
+  # terminaban en «database is locked». El modo queda guardado en el archivo.
+  uv run --frozen python -c "import sqlite3, sys; sqlite3.connect(sys.argv[1]).execute('PRAGMA journal_mode=WAL')" "$DB"
 fi
 if [[ "${1:-}" == "--preparar" ]]; then
   exit 0
