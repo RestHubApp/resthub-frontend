@@ -50,7 +50,7 @@ jobs:
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       E2E_BACKEND_DIR: resthub-backend
       E2E_DB: ${{ github.workspace }}/.e2e/e2e.db
