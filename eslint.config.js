@@ -12,7 +12,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts'],
+    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -374,5 +374,10 @@ export default tseslint.config(
     rules: {
       'check-file/filename-naming-convention': 'off',
     },
+  },
+  {
+    // Lo que Jest carga como CommonJS: el entorno, el plugin de Babel y los módulos sustitutos.
+    files: ['jest/**/*.cjs'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
 )
