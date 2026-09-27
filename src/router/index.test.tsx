@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { beforeAll, describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
 import { entrarAPlataforma, entrarComo, montarRutas, PERMISOS_ENCARGADO, PERMISOS_MESERO, servidor } from '#jest/harness'
@@ -8,6 +8,7 @@ const PERFIL = '/perfil'
 const CAJA = '/caja'
 const BITACORA = '/plataforma/bitacora'
 const PLATAFORMA = /^\/platform\//u
+const YO_EN_PLATAFORMA = { admin: { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' } }
 
 function abrir(en: string) {
   return montarRutas(router.routes, en).router
@@ -18,6 +19,13 @@ async function llegaA(enMemoria: ReturnType<typeof abrir>, ruta: string) {
     expect(enMemoria.state.location.pathname).toBe(ruta)
   })
 }
+
+// Las pantallas perezosas se compilan con Babel la primera vez que se abren;
+// con la cobertura encendida y la máquina ocupada eso pasaba del plazo de una
+// prueba. Se compilan antes, fuera del tiempo de cada caso.
+beforeAll(async () => {
+  await Promise.all([import('../features/cash/CashView'), import('../features/insights/InsightsView'), import('../features/auth/ProfileView')])
+}, 120_000)
 
 describe('guardas de las rutas del restaurante', () => {
   it('sin sesión, una pantalla protegida lleva al acceso', async () => {
@@ -67,13 +75,13 @@ describe('guarda del área de plataforma', () => {
   })
 
   it('con la sesión de plataforma abre la pantalla pedida', async () => {
-    servidor().on('get', PLATAFORMA, { items: [], total: 0 })
+    servidor().on('get', PLATAFORMA, { items: [], total: 0 }).on('get', '/platform/auth/me', YO_EN_PLATAFORMA)
     entrarAPlataforma()
     await llegaA(abrir(BITACORA), BITACORA)
   })
 
   it('una ruta desconocida del área vuelve a su inicio', async () => {
-    servidor().on('get', PLATAFORMA, { items: [], total: 0 })
+    servidor().on('get', PLATAFORMA, { items: [], total: 0 }).on('get', '/platform/auth/me', YO_EN_PLATAFORMA)
     entrarAPlataforma()
     await llegaA(abrir('/plataforma/cualquier-cosa'), '/plataforma')
   })
