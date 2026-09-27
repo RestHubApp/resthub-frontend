@@ -67,3 +67,18 @@ export async function abrirComoPlataforma(page: Page, sesion: SesionPlataforma, 
 export function aviso(page: Page, texto: string | RegExp) {
   return page.getByRole('status').filter({ hasText: texto }).or(page.getByRole('alert').filter({ hasText: texto }))
 }
+
+const EVIDENCIAS = process.env.E2E_EVIDENCIAS
+
+/**
+ * Guarda una captura de un paso para la documentación, solo si se pidió con
+ * `E2E_EVIDENCIAS=<carpeta>` y en la primera repetición del proyecto de escritorio
+ * (o del móvil, si la prueba es solo del celular).
+ */
+export async function evidencia(page: Page, nombre: string): Promise<void> {
+  const info = base.info()
+  if (EVIDENCIAS === undefined || info.repeatEachIndex > 0) {
+    return
+  }
+  await page.screenshot({ path: `${EVIDENCIAS}/${info.project.name}-${nombre}.png`, fullPage: false })
+}
