@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment ./jest/nodeEnvironment.cjs
  */
 // Sin DOM: `window` es un doble con `close`, `setTimeout` y `location.replace`.
 import { afterEach, describe, expect, it, jest } from '@jest/globals'

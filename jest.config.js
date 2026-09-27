@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url'
 
 // Las opciones de un transformador no expanden <rootDir>: la ruta va completa.
 const importMetaEnv = fileURLToPath(new URL('./jest/importMetaEnv.cjs', import.meta.url))
+// El entorno va con la ruta completa: Stryker lo carga sin expandir <rootDir>.
+const entornoJsdom = fileURLToPath(new URL('./jest/jsdomEnvironment.cjs', import.meta.url))
 
 // Dependencias que solo traen ESM: React Router 8 (y la que usa para cookies) y TanStack Table 9.
 const soloEsm = ['react-router', 'cookie-es', '@tanstack/react-table', '@tanstack/table-core']
@@ -16,7 +18,7 @@ const soloEsm = ['react-router', 'cookie-es', '@tanstack/react-table', '@tanstac
 export default {
   // El DOM de jsdom (con la API fetch de Node) para las pruebas de componentes. Las de lógica que simulan
   // una pestaña sin DOM (sin `window`) declaran `@jest-environment node`.
-  testEnvironment: '<rootDir>/jest/jsdomEnvironment.cjs',
+  testEnvironment: entornoJsdom,
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.{ts,tsx}'],
   setupFiles: ['<rootDir>/jest/setup.ts'],

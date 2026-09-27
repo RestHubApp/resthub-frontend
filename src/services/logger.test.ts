@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment ./jest/nodeEnvironment.cjs
  */
 // Cada prueba carga el logger de nuevo con otras variables de entorno de Vite.
 import { afterEach, describe, expect, it, jest } from '@jest/globals'

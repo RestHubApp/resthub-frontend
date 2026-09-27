@@ -12,7 +12,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**'],
+    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -368,7 +368,7 @@ export default tseslint.config(
   // Archivos de configuracion.
   // ---------------------------------------------------------------------
   {
-    files: ['*.config.{js,ts}', 'eslint.config.js', 'jest/**/*.cjs'],
+    files: ['*.config.{js,ts,mjs}', 'eslint.config.js', 'jest/**/*.cjs'],
     languageOptions: { globals: globals.node },
     extends: [tseslint.configs.disableTypeChecked],
     rules: {

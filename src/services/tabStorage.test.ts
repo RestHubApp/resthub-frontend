@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment ./jest/nodeEnvironment.cjs
  */
 // Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
 // como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
