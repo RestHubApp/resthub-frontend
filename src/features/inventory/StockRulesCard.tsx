@@ -13,6 +13,14 @@ import { useNotifications } from '../../store/notifications'
  * insumos» y no se puede pedir. Conviene apagarlo mientras el local todavía no
  * registra sus compras: si no, la carta entera figuraría agotada.
  */
+// La casilla de Radix es un <button>: se nombra con aria-labelledby, porque
+// algunos validadores (WAVE) no toman el texto del <label> que la envuelve, y
+// la etiqueta apunta a la casilla con `htmlFor` en vez de envolverla (un
+// <label> que envuelve un <button> queda «huérfano» para WAVE).
+const CASILLA_ID = 'regla-agotado'
+const TITULO_ID = 'regla-agotado-titulo'
+const DETALLE_ID = 'regla-agotado-detalle'
+
 export default function StockRulesCard() {
   const restaurante = useQuery(restaurantQuery)
   const queryClient = useQueryClient()
@@ -38,8 +46,11 @@ export default function StockRulesCard() {
   }
 
   return (
-    <label className="flex items-start gap-3 rounded-lg bg-muted px-4 py-3 text-sm">
+    <div className="flex items-start gap-3 rounded-lg bg-muted px-4 py-3 text-sm">
       <Checkbox
+        id={CASILLA_ID}
+        aria-labelledby={TITULO_ID}
+        aria-describedby={DETALLE_ID}
         className="mt-0.5"
         checked={restaurante.data.auto_out_of_stock}
         disabled={cambiar.isPending}
@@ -47,12 +58,12 @@ export default function StockRulesCard() {
           cambiar.mutate(estado === true)
         }}
       />
-      <span>
-        <span className="font-medium">Agotar solos los platos sin insumos</span>
-        <span className="block text-muted-foreground">
+      <label htmlFor={CASILLA_ID} className="cursor-pointer">
+        <span id={TITULO_ID} className="font-medium">Agotar solos los platos sin insumos</span>
+        <span id={DETALLE_ID} className="block text-muted-foreground">
           Si la receta de un plato pide más de lo que hay en stock, el mesero lo ve «Sin insumos» y no lo puede pedir.
         </span>
-      </span>
-    </label>
+      </label>
+    </div>
   )
 }

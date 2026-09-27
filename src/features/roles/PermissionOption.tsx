@@ -24,31 +24,38 @@ export default function PermissionOption({
 }: PermissionOptionProps) {
   const id = useId()
   const notaId = `${id}-nota`
+  const nombreId = `${id}-nombre`
   const explicar = missing && !readOnly
   const apagado = missing || readOnly
 
   return (
-    <li className="flex min-h-11 items-center gap-3 py-1">
-      <Checkbox
-        id={id}
-        className="size-5"
-        checked={checked}
-        disabled={apagado}
-        aria-describedby={explicar ? notaId : undefined}
-        onCheckedChange={(valor) => {
-          onCheckedChange(valor === true)
-        }}
-      />
-      <div className="flex min-w-0 flex-col gap-1">
-        <Label htmlFor={id} className={`leading-snug ${apagado ? '' : 'cursor-pointer'}`}>
-          {permission.label}
-        </Label>
-        {explicar ? (
-          <span id={notaId} className="text-xs text-muted-foreground">
-            Tu cuenta no tiene este permiso, así que no puedes darlo.
+    <li className="py-1">
+      {/* La etiqueta envuelve la casilla: así nombra también el <input> oculto
+          que Radix agrega dentro de un formulario. El botón se nombra con
+          aria-labelledby, que es lo que leen todos los validadores. */}
+      <Label className={`flex min-h-11 items-center gap-3 font-normal ${apagado ? '' : 'cursor-pointer'}`}>
+        <Checkbox
+          id={id}
+          className="size-5"
+          checked={checked}
+          disabled={apagado}
+          aria-labelledby={nombreId}
+          aria-describedby={explicar ? notaId : undefined}
+          onCheckedChange={(valor) => {
+            onCheckedChange(valor === true)
+          }}
+        />
+        <span className="flex min-w-0 flex-col gap-1">
+          <span id={nombreId} className="leading-snug font-medium">
+            {permission.label}
           </span>
-        ) : null}
-      </div>
+          {explicar ? (
+            <span id={notaId} className="text-xs text-muted-foreground">
+              Tu cuenta no tiene este permiso, así que no puedes darlo.
+            </span>
+          ) : null}
+        </span>
+      </Label>
     </li>
   )
 }

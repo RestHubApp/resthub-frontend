@@ -48,13 +48,14 @@ export default function IngredientFilters({
         <div className="flex min-h-11 items-center gap-2.5">
           <Checkbox
             id={bajosId}
+            aria-labelledby={`${bajosId}-texto`}
             className="size-5"
             checked={onlyLow}
             onCheckedChange={(valor) => {
               onOnlyLow(valor === true)
             }}
           />
-          <Label htmlFor={bajosId} className="cursor-pointer">
+          <Label id={`${bajosId}-texto`} htmlFor={bajosId} className="cursor-pointer">
             Solo bajo mínimo
           </Label>
         </div>
