@@ -21,12 +21,12 @@ function tarjeta(page: Page, titulo: string) {
  */
 async function mostrar(page: Page, cargar: string, titulo: string): Promise<void> {
   const tituloLoc = page.getByRole('heading', { name: titulo, exact: true })
+  if (await tituloLoc.isVisible()) return
   const boton = page.getByRole('button', { name: cargar, exact: true })
-  // Si la sección ya entró en pantalla, el observer la montó y el botón ya no está.
-  if (await tituloLoc.isVisible()) return
+  // Al acercar el botón, el observer monta la sección y lo quita del DOM.
   await boton.scrollIntoViewIfNeeded()
-  if (await tituloLoc.isVisible()) return
-  if (await boton.isVisible()) await boton.click()
+  const montada = await tituloLoc.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true, () => false)
+  if (!montada) await boton.click()
   await expect(tituloLoc).toBeVisible()
 }
 
