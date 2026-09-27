@@ -6,13 +6,14 @@ import checkFile from 'eslint-plugin-check-file'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import security from 'eslint-plugin-security'
 import sonarjs from 'eslint-plugin-sonarjs'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts'],
+    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -88,6 +89,37 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': ['error', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Seguridad (SAST).
+  //
+  // eslint-plugin-security trae sus reglas como avisos; aqui son errores para
+  // que el CI las haga cumplir. De sonarjs se encienden las reglas de
+  // seguridad que su preset recomendado deja apagadas y que aplican a una PWA:
+  // registrar datos confidenciales, pedir permisos intrusivos del navegador,
+  // Web SQL y expresiones regulares Unicode sin la bandera u. Un falso
+  // positivo se suprime en su linea con el motivo, nunca aqui.
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { security },
+    rules: {
+      ...Object.fromEntries(
+        Object.keys(security.configs.recommended.rules).map((rule) => [rule, 'error']),
+      ),
+      // La unica regla apagada. No usa tipos: marca todo `objeto[clave]`, y en
+      // la primera corrida dio 67 avisos, todos lecturas de un Record con una
+      // clave de tipo union literal o de un arreglo con indice numerico. El
+      // riesgo que busca, la contaminacion del prototipo con una clave que
+      // escribe el usuario, ya lo cierra el tipo de la clave. Revision en
+      // RestHub_Pruebas/07-seguridad/sast.md.
+      'security/detect-object-injection': 'off',
+      'sonarjs/confidential-information-logging': 'error',
+      'sonarjs/no-intrusive-permissions': 'error',
+      'sonarjs/web-sql-database': 'error',
+      'sonarjs/unicode-aware-regex': 'error',
     },
   },
 
@@ -368,11 +400,16 @@ export default tseslint.config(
   // Archivos de configuracion.
   // ---------------------------------------------------------------------
   {
-    files: ['*.config.{js,ts}', 'eslint.config.js'],
+    files: ['*.config.{js,ts,mjs}', 'eslint.config.js', 'jest/**/*.cjs'],
     languageOptions: { globals: globals.node },
     extends: [tseslint.configs.disableTypeChecked],
     rules: {
       'check-file/filename-naming-convention': 'off',
     },
+  },
+  {
+    // Lo que Jest carga como CommonJS: el entorno, el plugin de Babel y los módulos sustitutos.
+    files: ['jest/**/*.cjs'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
 )

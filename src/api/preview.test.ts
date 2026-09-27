@@ -1,12 +1,20 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 
-const { get, post } = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }))
+import { PLATFORM_QUERY_ROOT } from '../services/queryClient'
+import { exchangePreviewCode, sessionOf } from './auth'
+import { platformMutationKeys, platformSandboxQuery, resetPlatformSandbox, startPlatformPreview } from './platform'
 
-vi.mock('../services/api', () => ({ api: { get, post }, debeReintentar: () => false }))
+// Jest sube `jest.mock` por encima de los import; la fábrica solo puede usar
+// variables con prefijo `mock`, que se leen cuando se llama a la función.
+const mockGet = jest.fn<(...args: unknown[]) => Promise<unknown>>()
+const mockPost = jest.fn<(...args: unknown[]) => Promise<unknown>>()
+const get = mockGet
+const post = mockPost
 
-const { exchangePreviewCode, sessionOf } = await import('./auth')
-const { platformMutationKeys, platformSandboxQuery, resetPlatformSandbox, startPlatformPreview } = await import('./platform')
-const { PLATFORM_QUERY_ROOT } = await import('../services/queryClient')
+jest.mock('../services/api', () => ({
+  api: { get: (...args: unknown[]) => mockGet(...args), post: (...args: unknown[]) => mockPost(...args) },
+  debeReintentar: () => false,
+}))
 
 beforeEach(() => {
   get.mockReset()

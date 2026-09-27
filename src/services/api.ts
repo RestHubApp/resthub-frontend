@@ -224,6 +224,7 @@ api.interceptors.request.use((config) => {
     config.withoutCredential === true
       ? null
       : tokenFor(config, { restaurant: restaurante.token, platform: plataforma.token })
+  // eslint-disable-next-line security/detect-possible-timing-attacks -- compara con null, no con un secreto: el cliente no verifica credenciales
   if (token !== null) {
     config.headers.set('Authorization', `Bearer ${token}`)
   }

@@ -1,13 +1,19 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+/**
+ * @jest-environment ./jest/nodeEnvironment.cjs
+ */
+// Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
+// como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import { saveCustomer } from '../../../api/customers'
 import type { Customer } from '../../../api/types'
 import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, type TakeawayValues } from './takeawaySchema'
 
-vi.mock('../../../api/customers', () => ({ saveCustomer: vi.fn() }))
+jest.mock('../../../api/customers', () => ({ saveCustomer: jest.fn() }))
 
-const guardar = vi.mocked(saveCustomer)
+const guardar = jest.mocked(saveCustomer)
 
 const delivery: TakeawayValues = {
   ...EMPTY_TAKEAWAY,
@@ -18,7 +24,7 @@ const delivery: TakeawayValues = {
 }
 
 function conSenal(onLine: boolean) {
-  vi.stubGlobal('navigator', { onLine })
+  stubGlobal('navigator', { onLine })
 }
 
 beforeEach(() => {
@@ -27,7 +33,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  vi.unstubAllGlobals()
+  unstubAllGlobals()
 })
 
 describe('withCustomer', () => {
@@ -35,7 +41,7 @@ describe('withCustomer', () => {
     guardar.mockResolvedValue({ id: 9 } as Customer)
     await expect(withCustomer(delivery)).resolves.toMatchObject({ customer_id: 9 })
     expect(guardar).toHaveBeenCalledWith(expect.objectContaining({ phone: '987654321' }), undefined, {
-      timeout: expect.any(Number) as number,
+      timeout: expect.any(Number) as unknown as number,
     })
   })
 

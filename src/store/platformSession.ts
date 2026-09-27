@@ -107,6 +107,7 @@ export const usePlatformSession = create<PlatformSessionState>((set, get) => ({
 
   refresh: (admin) => {
     const token = get().token
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- compara con null, no con un secreto: el cliente no verifica credenciales
     if (token === null) {
       return
     }

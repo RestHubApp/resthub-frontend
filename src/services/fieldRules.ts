@@ -14,7 +14,9 @@ export const MAX_TELEFONO = 20
 
 // Letras de cualquier idioma, con tildes y enie, separadas por un espacio, un
 // guion o un apostrofo: "María José", "Pérez-Luna", "O'Brien".
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const PALABRAS = /^\p{L}+(?:[ '-]\p{L}+)*$/u
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const TELEFONO = /^\+?\d+(?: \d+)*$/u
 const MIN_DIGITOS_TELEFONO = 7
 const MAX_DIGITOS_TELEFONO = 15

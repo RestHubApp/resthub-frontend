@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import { newOrderPath } from '../floor/takeawaySchema'
 import { draftKey, openRequest } from './orderTarget'

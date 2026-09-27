@@ -10,6 +10,7 @@ const MAX_MOTIVO = 200
 const MAX_CANTIDAD = 100_000
 const MAX_COSTO = 100_000
 
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const CANTIDAD = /^\d+(?:[.,]\d{1,3})?$/u
 
 /** Una cantidad escrita en la unidad elegida, con hasta tres decimales. */
@@ -32,6 +33,7 @@ export const ingredientSchema = z.object({
     .min(1, 'Escribe el nombre del insumo')
     .max(MAX_NOMBRE, `Usa como máximo ${String(MAX_NOMBRE)} caracteres`),
   unit: z.enum(['g', 'ml', 'unit'], 'Elige cómo se mide'),
+  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
   min_stock: z.string().trim().regex(/^(?:\d+(?:[.,]\d{1,3})?)?$/u, 'Escribe un número con hasta 3 decimales'),
   min_stock_unit: z.string(),
   unit_cost: decimalRule({ max: MAX_COSTO, decimales: 3, unidad: 'soles' }),

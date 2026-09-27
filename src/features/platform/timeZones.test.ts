@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import { COMMON_TIME_ZONES, isValidTimeZone, timeZoneLabel, timeZoneOptions } from './timeZones'
 
