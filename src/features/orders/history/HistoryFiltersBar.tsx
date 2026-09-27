@@ -47,7 +47,7 @@ export default function HistoryFiltersBar({ value, onChange }: HistoryFiltersBar
           <NativeSelectOption key={opcion.value} value={opcion.value}>{opcion.label}</NativeSelectOption>
         ))}
       </FilterSelect>
-      <FilterSelect id="historial-tipo" label="Tipo" anyLabel="En mesa y para llevar" value={value.type} onChange={(type) => {
+      <FilterSelect id="historial-tipo" label="Tipo" anyLabel="En mesa y para llevar" className="col-span-2 md:col-span-1" value={value.type} onChange={(type) => {
         cambiar({ type: TYPE_OPTIONS.find((opcion) => opcion.value === type)?.value ?? '' })
       }}>
         {TYPE_OPTIONS.map((opcion) => (

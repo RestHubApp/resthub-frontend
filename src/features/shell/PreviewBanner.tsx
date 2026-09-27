@@ -56,7 +56,7 @@ export default function PreviewBanner({ account }: PreviewBannerProps) {
       className="sticky top-0 z-40 bg-warning text-white pt-[env(safe-area-inset-top)]"
     >
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-1.5 sm:px-6">
-        <p className="m-0 flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold">
+        <p className="m-0 flex min-w-0 flex-[1_1_16rem] items-center gap-2 text-sm font-semibold">
           <Icon name="ver" size={18} />
           <span className="min-w-0 break-words">
             Vista previa · {account.restaurant.name} · como {account.user.role_label}

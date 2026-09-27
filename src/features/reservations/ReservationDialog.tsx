@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -36,6 +37,16 @@ export default function ReservationDialog({ open, reservation, day, onClose }: R
     resolver: zodResolver(reservationSchema),
     values: reservationDefaults(reservation, day, timeZone),
   })
+  // Al guardar, la ventana se cierra sin pasar por `onOpenChange` y el
+  // formulario conservaba lo escrito: «Nueva reserva» volvía a abrir con el
+  // teléfono, las personas y la mesa de la anterior. Cada vez que se abre,
+  // arranca de sus valores.
+  const { reset } = form
+  useEffect(() => {
+    if (open) {
+      reset(reservationDefaults(reservation, day, timeZone))
+    }
+  }, [open, reservation, day, timeZone, reset])
   const guardar = useSaveReservation(reservation?.id, onClose)
 
   return (

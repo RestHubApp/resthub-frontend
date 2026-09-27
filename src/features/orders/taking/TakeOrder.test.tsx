@@ -26,6 +26,7 @@ function tomarPedidoEnMesa() {
 }
 
 async function elegir(user: ReturnType<typeof tomarPedidoEnMesa>['user'], nombre: string) {
+  // eslint-disable-next-line security/detect-non-literal-regexp -- el texto lo fija la prueba; se busca por coincidencia parcial del nombre accesible
   await user.click(await screen.findByRole('button', { name: new RegExp(nombre, 'u') }))
 }
 

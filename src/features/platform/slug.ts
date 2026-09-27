@@ -4,6 +4,7 @@
 // sigue siendo quien decide.
 
 export const MAX_SLUG = 60
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
 
 function sinTildes(valor: string): string {

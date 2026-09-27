@@ -1,14 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
 import { closeCash } from '../../api/cash'
 import type { CashSession, CloseCashRequest } from '../../api/types'
-import Icon from '../../components/Icon'
 import TextField from '../../components/TextField'
-import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { centsToApi, formatCents, toCents } from '../../services/format'
 import { cashAmountForApi, closeCashSchema, type CloseCashValues, MAX_CASH_NOTES } from './cashSchema'
+import { differenceLabel } from './cashDifference'
+import CloseCashButton from './CloseCashButton'
 import { useCashMutation } from './useCashMutation'
 
 interface CloseCashFormProps {
@@ -16,21 +17,15 @@ interface CloseCashFormProps {
   readonly onClosed: (session: CashSession) => void
 }
 
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const MONTO = /^\d{1,8}(?:[.,]\d{1,2})?$/u
-
-/** "Sobran S/ 2.00", "Faltan S/ 4.00" o "Cuadra". */
-function differenceLabel(cents: number): string {
-  if (cents === 0) {
-    return 'Cuadra'
-  }
-  return cents > 0 ? `Sobran ${formatCents(cents)}` : `Faltan ${formatCents(-cents)}`
-}
 
 /**
  * Cerrar el turno: se cuenta el efectivo del cajón y se compara con lo esperado.
  *
  * La diferencia se ve mientras se escribe, antes de confirmar: si no cuadra,
- * conviene volver a contar antes de firmar el arqueo.
+ * conviene volver a contar antes de firmar el arqueo. Cerrar mueve dinero y
+ * no se deshace, así que se confirma con el monto y la diferencia a la vista.
  */
 export default function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
   const esperado = toCents(session.summary?.expected_cash ?? '0')
@@ -47,13 +42,17 @@ export default function CloseCashForm({ session, onClosed }: CloseCashFormProps)
     onSuccess: onClosed,
   })
 
+  // Cerrar mueve dinero y no se deshace: un monto válido abre la confirmación
+  // y solo al confirmarla sale el cierre. Enter en el monto hace lo mismo.
+  const [porConfirmar, setPorConfirmar] = useState<CloseCashRequest | null>(null)
+
   return (
     <form
       noValidate
       className="flex flex-col gap-4"
       onSubmit={onSubmit(
         handleSubmit((valores) => {
-          cerrar.mutate({ counted_cash: cashAmountForApi(valores.counted_cash), notes: valores.notes })
+          setPorConfirmar({ counted_cash: cashAmountForApi(valores.counted_cash), notes: valores.notes })
         }),
       )}
     >
@@ -91,10 +90,21 @@ export default function CloseCashForm({ session, onClosed }: CloseCashFormProps)
         </span>
       </p>
       <div className="flex justify-end">
-        <Button type="submit" size="lg" variant="destructive" className="h-11 px-5" disabled={cerrar.isPending}>
-          <Icon name="caja" size={18} />
-          <span>{cerrar.isPending ? 'Cerrando…' : 'Cerrar caja'}</span>
-        </Button>
+        <CloseCashButton
+          pending={cerrar.isPending}
+          expected={esperado}
+          difference={diferencia}
+          open={porConfirmar !== null}
+          onCancel={() => {
+            setPorConfirmar(null)
+          }}
+          onConfirm={() => {
+            if (porConfirmar !== null) {
+              cerrar.mutate(porConfirmar)
+            }
+            setPorConfirmar(null)
+          }}
+        />
       </div>
     </form>
   )

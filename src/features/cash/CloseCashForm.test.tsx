@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals'
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 
 import { resumenDeCaja, turnoDeCaja } from '#jest/fixtures/cash'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
@@ -8,6 +8,13 @@ import CloseCashForm from './CloseCashForm'
 
 const CONTADO = 'Efectivo contado'
 const CERRAR = { name: 'Cerrar caja' }
+
+/** «Cerrar caja» y, en la confirmación, «Cerrar caja» otra vez. */
+async function cerrarYConfirmar(user: ReturnType<typeof montar>['user']) {
+  await user.click(screen.getByRole('button', CERRAR))
+  const confirmacion = await screen.findByRole('alertdialog', { name: '¿Cerrar la caja?' })
+  await user.click(within(confirmacion).getByRole('button', CERRAR))
+}
 const CERRAR_URL = '/cash/close'
 
 function cerrarTurno(turno: CashSession = turnoDeCaja({ summary: resumenDeCaja({ expected_cash: '200.00' }) })) {
@@ -43,7 +50,7 @@ describe('CloseCashForm', () => {
 
     await user.type(screen.getByLabelText(CONTADO), '196,00')
     await user.type(screen.getByLabelText('Nota (opcional)'), 'Faltó sencillo')
-    await user.click(screen.getByRole('button', CERRAR))
+    await cerrarYConfirmar(user)
 
     expect(await screen.findByText('Caja cerrada. Faltan S/ 4.00.')).toBeInTheDocument()
     expect(api.llamadas('post', CERRAR_URL)[0]?.body).toEqual({ counted_cash: '196.00', notes: 'Faltó sencillo' })
@@ -74,7 +81,7 @@ describe('CloseCashForm', () => {
     api.on('post', CERRAR_URL, new RespuestaDeError(409, 'La caja ya estaba cerrada'))
 
     await user.type(screen.getByLabelText(CONTADO), '200')
-    await user.click(screen.getByRole('button', CERRAR))
+    await cerrarYConfirmar(user)
 
     expect(await screen.findByText('La caja ya estaba cerrada')).toBeInTheDocument()
     expect(onClosed).not.toHaveBeenCalled()

@@ -17,6 +17,7 @@ function abrir(cambios: Record<string, unknown> = {}) {
 }
 
 function seccion(titulo: string): HTMLElement {
+  // eslint-disable-next-line security/detect-non-literal-regexp -- el texto lo fija la prueba; se busca por coincidencia parcial del nombre accesible
   const encabezado = screen.getByRole('heading', { name: new RegExp(titulo, 'u') })
   const tarjeta = encabezado.closest('[data-slot="card"]')
   if (!(tarjeta instanceof HTMLElement)) {

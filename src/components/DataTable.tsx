@@ -125,7 +125,7 @@ export default function DataTable<TData extends RowData>({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="px-3">
+                <TableHead key={header.id} className={`px-3 ${cellClasses.get(header.column.id) ?? ''}`}>
                   {flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
