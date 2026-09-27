@@ -8,7 +8,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+/* Español y símbolos de la interfaz: se carga solo Latin. El paquete incluye
+ * cuatro subsets adicionales (cirílico, vietnamita y Latin Extended), que
+ * el frontend no necesita y aumentaban el CSS de la primera carga. */
+@font-face {
+    font-family: 'Geist Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2');
+}
 @custom-variant dark (&:is(.dark *));
 @theme inline {
     --font-heading: var(--font-sans);
