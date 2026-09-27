@@ -112,7 +112,6 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
 })
 
 test('GES-24 la ventana de una reserva nueva abre vacía después de guardar otra', async ({ page, local }) => {
-  test.fail(true, 'HALLAZGO-gestion-2: «Nueva reserva» abre con los datos de la última reserva guardada')
   await abrirComo(page, local.encargado, '/reservas')
   await page.getByRole('main').getByLabel('Día', { exact: true }).fill(diaDesdeHoy(1))
   await page.getByRole('button', { name: 'Nueva reserva' }).click()
@@ -124,9 +123,9 @@ test('GES-24 la ventana de una reserva nueva abre vacía después de guardar otr
   await alta.getByRole('button', { name: 'Guardar' }).click()
   await expect(aviso(page, 'Reserva de Familia Quispe guardada.')).toBeVisible()
   await page.getByRole('button', { name: 'Nueva reserva' }).click()
-  await evidencia(page, 'ges-24-1-reserva-con-datos-previos')
-  await expect(alta.getByLabel('A nombre de')).toHaveValue('', { timeout: 2000 })
-  await expect(alta.getByLabel('Teléfono (opcional)')).toHaveValue('', { timeout: 2000 })
-  await expect(alta.getByLabel('Personas')).toHaveValue('2', { timeout: 2000 })
-  await expect(alta.getByLabel('Notas (opcional)')).toHaveValue('', { timeout: 2000 })
+  await evidencia(page, 'ges-24-1-reserva-nueva-vacia')
+  await expect(alta.getByLabel('A nombre de')).toHaveValue('')
+  await expect(alta.getByLabel('Teléfono (opcional)')).toHaveValue('')
+  await expect(alta.getByLabel('Personas')).toHaveValue('2')
+  await expect(alta.getByLabel('Notas (opcional)')).toHaveValue('')
 })

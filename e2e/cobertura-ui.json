@@ -1,8 +1,8 @@
 {
-  "total": 419,
+  "total": 420,
   "porTipo": {
     "ruta": 35,
-    "confirmacion": 9,
+    "confirmacion": 10,
     "desplegable": 6,
     "dialogo": 24,
     "hoja": 3,
@@ -221,6 +221,12 @@
       "tipo": "ruta",
       "descripcion": "Pantalla /vista-previa",
       "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "confirmacion:cash/CloseCashButton",
+      "tipo": "confirmacion",
+      "descripcion": "¿Cerrar la caja?",
+      "origen": "src/features/cash/CloseCashButton.tsx"
     },
     {
       "id": "confirmacion:menu/CategoryStatusButton",

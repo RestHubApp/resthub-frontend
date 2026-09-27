@@ -253,7 +253,6 @@ test('SAL-40 el rechazo de un descuento se anuncia aunque la ventana de cobro es
   page,
   localConCaja: local,
 }) => {
-  test.fail(true, 'HALLAZGO-salon-1: con un diálogo abierto, Radix oculta los avisos con aria-hidden y quedan bajo el velo')
   const pedido = await pedidoServido(local, local.mesa('1'), [{ plato: local.plato('Ceviche clásico') }])
   await abrirComo(page, local.mesero, `/pedidos/${String(pedido.id)}`)
   const ventana = await abrirCobro(page, 1)
@@ -262,7 +261,6 @@ test('SAL-40 el rechazo de un descuento se anuncia aunque la ventana de cobro es
   await ventana.getByRole('textbox', { name: 'Motivo' }).fill('Demora en cocina')
   await ventana.getByRole('button', { name: 'Aplicar descuento' }).click()
   await expect(avisoTras(page, /Tu descuento máximo es 10/u)).toBeVisible()
-  await expect(page.getByRole('status', { name: 'Avisos del sistema' })).toContainText('Tu descuento máximo es 10', {
-    timeout: 3000,
-  })
+  await expect(page.getByRole('status', { name: 'Avisos del sistema' })).toContainText('Tu descuento máximo es 10')
+  await evidencia(page, 'sal-40-aviso-sobre-el-velo')
 })

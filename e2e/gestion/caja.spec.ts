@@ -12,6 +12,7 @@ test.beforeEach(() => {
 
 test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con el arqueo y revisa el turno en el historial', async ({ page, local }) => {
   cubre(
+    'confirmacion:cash/CloseCashButton',
     'ruta:/caja',
     'dialogo:cash/CashSessionDialog',
     'funcion:caja.abrir',
@@ -68,7 +69,16 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
   await expect(diferencia).toContainText(/Faltan S\/\s*1\.50/u)
   await page.getByLabel('Nota (opcional)').fill('Faltó sencillo')
   await evidencia(page, 'ges-01-3-diferencia')
+  // Cerrar mueve dinero: se confirma con el monto y la diferencia a la vista.
   await page.getByRole('button', { name: 'Cerrar caja' }).click()
+  const confirmar = page.getByRole('alertdialog', { name: '¿Cerrar la caja?' })
+  await expect(confirmar).toContainText(/S\/\s*183\.50 contados \(Faltan S\/\s*1\.50\)/u)
+  await evidencia(page, 'ges-01-4-confirmar-cierre')
+  await confirmar.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(confirmar).toBeHidden()
+  await expect(page.getByRole('heading', { name: 'Turno en curso' })).toBeVisible()
+  await page.getByRole('button', { name: 'Cerrar caja' }).click()
+  await confirmar.getByRole('button', { name: 'Cerrar caja' }).click()
   await expect(aviso(page, /Caja cerrada\. Faltan S\/\s*1\.50\./u)).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Abrir caja' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Turno en curso' })).toBeHidden()
@@ -147,6 +157,7 @@ test('GES-02 el encargado valida el monto inicial, cambia el tope de descuento d
   await page.getByLabel('Efectivo contado').fill('80.50')
   await expect(page.getByText('Cuadra')).toBeVisible()
   await page.getByRole('button', { name: 'Cerrar caja' }).click()
+  await page.getByRole('alertdialog', { name: '¿Cerrar la caja?' }).getByRole('button', { name: 'Cerrar caja' }).click()
   await expect(aviso(page, 'Caja cerrada. Cuadra.')).toBeVisible()
   await expect(page.getByRole('button', { name: /Cerró Encargada Prueba/u })).toContainText('Cuadró')
 })

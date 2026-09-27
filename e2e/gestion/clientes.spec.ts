@@ -117,7 +117,6 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
 })
 
 test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', async ({ page, localConCaja: local }) => {
-  test.fail(true, 'HALLAZGO-gestion-1: los últimos pedidos de la ficha muestran el código «dine_in» o «delivery» en vez de «En mesa» o «Delivery»')
   const cliente = await api(local).post('/customers', { name: 'Julio Paz', phone: '912345678', email: '', address: '', reference: '', notes: '' })
   await pedidoDe(local, id(cliente), 'dine_in')
   await abrirComo(page, local.encargado, '/clientes')
@@ -125,11 +124,10 @@ test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', asyn
   const pedido = page.getByRole('dialog', { name: 'Julio Paz' }).getByRole('link', { name: /#1/u })
   await expect(pedido).toBeVisible()
   await evidencia(page, 'ges-22-1-tipo-de-pedido')
-  await expect(pedido).toContainText('En mesa', { timeout: 2000 })
+  await expect(pedido).toContainText('En mesa')
 })
 
 test('GES-25 la ventana de un cliente nuevo abre vacía después de guardar otro', async ({ page, local }) => {
-  test.fail(true, 'HALLAZGO-gestion-2: «Nuevo cliente» abre con los datos del último cliente guardado')
   await abrirComo(page, local.encargado, '/clientes')
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
   const alta = page.getByRole('dialog', { name: 'Nuevo cliente' })
@@ -139,8 +137,8 @@ test('GES-25 la ventana de un cliente nuevo abre vacía después de guardar otro
   await alta.getByRole('button', { name: 'Guardar' }).click()
   await expect(aviso(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  await evidencia(page, 'ges-25-1-cliente-con-datos-previos')
-  await expect(alta.getByLabel('Nombre')).toHaveValue('', { timeout: 2000 })
-  await expect(alta.getByLabel('Teléfono (opcional)')).toHaveValue('', { timeout: 2000 })
-  await expect(alta.getByLabel('Notas (opcional)')).toHaveValue('', { timeout: 2000 })
+  await evidencia(page, 'ges-25-1-cliente-nuevo-vacio')
+  await expect(alta.getByLabel('Nombre')).toHaveValue('')
+  await expect(alta.getByLabel('Teléfono (opcional)')).toHaveValue('')
+  await expect(alta.getByLabel('Notas (opcional)')).toHaveValue('')
 })
