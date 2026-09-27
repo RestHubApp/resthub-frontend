@@ -7,6 +7,21 @@
 // se prueban con React Testing Library, los hooks de React (`use*.ts`) y las
 // precargas (`prefetch*.ts`), que solo encadenan consultas.
 
+const area = process.env.STRYKER_AREA;
+const defaultExcludes = [
+  '!src/**/*.test.ts',
+  '!src/**/*.d.ts',
+  '!src/features/**/use*.ts',
+  '!src/features/**/prefetch*.ts',
+];
+
+const defaultMutate = [
+  'src/services/**/*.ts',
+  'src/store/**/*.ts',
+  'src/features/**/*.ts',
+  ...defaultExcludes,
+];
+
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 export default {
   packageManager: 'pnpm',
@@ -22,25 +37,19 @@ export default {
   // Un mutante que no compila se descarta sin correr las pruebas.
   checkers: ['typescript'],
   tsconfigFile: 'tsconfig.app.json',
-  mutate: [
-    'src/services/**/*.ts',
-    'src/store/**/*.ts',
-    'src/features/**/*.ts',
-    '!src/**/*.test.ts',
-    '!src/**/*.d.ts',
-    '!src/features/**/use*.ts',
-    '!src/features/**/prefetch*.ts',
-  ],
+  mutate: process.env.STRYKER_MUTATE
+    ? [...process.env.STRYKER_MUTATE.split(','), ...defaultExcludes]
+    : defaultMutate,
   coverageAnalysis: 'perTest',
-  // La máquina se comparte con otras suites de pruebas.
-  concurrency: 3,
+  // La máquina se comparte con otras suites de pruebas (concurrency: 2 para no agotar memoria).
+  concurrency: 2,
   // Reutiliza los resultados de la corrida anterior para lo que no cambió.
   incremental: true,
-  incrementalFile: 'reports/mutation/stryker-incremental.json',
+  incrementalFile: area ? `reports/mutation/${area}/stryker-incremental.json` : 'reports/mutation/stryker-incremental.json',
   timeoutMS: 20_000,
   reporters: ['clear-text', 'progress', 'html', 'json'],
-  htmlReporter: { fileName: 'reports/mutation/index.html' },
-  jsonReporter: { fileName: 'reports/mutation/mutation.json' },
+  htmlReporter: { fileName: area ? `reports/mutation/${area}/index.html` : 'reports/mutation/index.html' },
+  jsonReporter: { fileName: area ? `reports/mutation/${area}/mutation.json` : 'reports/mutation/mutation.json' },
   thresholds: { high: 80, low: 70, break: 70 },
   tempDirName: '.stryker-tmp',
   cleanTempDir: 'always',
