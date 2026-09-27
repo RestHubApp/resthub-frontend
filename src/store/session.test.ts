@@ -60,6 +60,76 @@ afterEach(() => {
   unstubAllGlobals()
 })
 
+describe('sesión normal y ciclo de vida', () => {
+  it('arranca vacía y no expirada si no hay nada guardado', async () => {
+    const { useSession } = await cargar()
+    expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
+  })
+
+  it('restaura una sesión válida guardada', async () => {
+    const storage = fakeStorage()
+    const token = tokenQueVence(3600)
+    storage.datos.set(CLAVE, JSON.stringify({ token, account: cuenta(1) }))
+    stubGlobal('localStorage', storage)
+    jest.resetModules()
+    const { useSession } = await import('./session')
+    expect(useSession.getState()).toMatchObject({ token, account: cuenta(1), expired: false })
+  })
+
+  it('marca expirada y limpia storage si la sesión guardada ya venció', async () => {
+    const storage = fakeStorage()
+    const token = tokenQueVence(-10)
+    storage.datos.set(CLAVE, JSON.stringify({ token, account: cuenta(1) }))
+    stubGlobal('localStorage', storage)
+    jest.resetModules()
+    const { useSession } = await import('./session')
+    expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: true })
+    expect(storage.datos.has(CLAVE)).toBe(false)
+  })
+
+  it('iniciar sesión guarda en storage y programa el vencimiento automático', async () => {
+    const { storage, useSession } = await cargar()
+    const token = tokenQueVence(10)
+    useSession.getState().signIn(token, cuenta(1))
+
+    expect(useSession.getState()).toMatchObject({ token, account: cuenta(1), expired: false })
+    expect(guardado(storage)).toEqual({ token, account: cuenta(1) })
+
+    jest.advanceTimersByTime(11_000)
+    expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: true })
+    expect(storage.datos.has(CLAVE)).toBe(false)
+  })
+
+  it('cerrar sesión limpia la sesión y no marca expired', async () => {
+    const { storage, useSession } = await cargar()
+    const token = tokenQueVence(3600)
+    useSession.getState().signIn(token, cuenta(1))
+
+    useSession.getState().signOut()
+    expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
+    expect(storage.datos.has(CLAVE)).toBe(false)
+  })
+
+  it('refresh actualiza la cuenta en la sesión y en storage', async () => {
+    const { storage, useSession } = await cargar()
+    const token = tokenQueVence(3600)
+    useSession.getState().signIn(token, cuenta(1))
+
+    const actualizada = { ...cuenta(1), permissions: ['orders.take'] } as unknown as CurrentUserResponse
+    useSession.getState().refresh(actualizada)
+
+    expect(useSession.getState().account).toEqual(actualizada)
+    expect(guardado(storage)).toEqual({ token, account: actualizada })
+  })
+
+  it('refresh no hace nada si no hay sesión activa', async () => {
+    const { storage, useSession } = await cargar()
+    useSession.getState().refresh(cuenta(2))
+    expect(useSession.getState().account).toBeNull()
+    expect(storage.datos.size).toBe(0)
+  })
+})
+
 describe('renovación de la sesión del restaurante', () => {
   it('cambia el token de la sesión que pidió la renovación', async () => {
     const { storage, useSession } = await cargar()
