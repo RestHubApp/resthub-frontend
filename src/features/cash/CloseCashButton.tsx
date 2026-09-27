@@ -1,5 +1,14 @@
-import ConfirmDialog from '../../components/ConfirmDialog'
 import Icon from '../../components/Icon'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog'
 import { Button } from '../../components/ui/button'
 import { formatCents } from '../../services/format'
 import { differenceLabel } from './cashDifference'
@@ -10,27 +19,48 @@ interface CloseCashButtonProps {
   readonly expected: number
   /** Contado menos esperado, en céntimos, o `null` si todavía no hay un monto válido. */
   readonly difference: number | null
+  /** La confirmación se abre cuando el formulario validó el monto. */
+  readonly open: boolean
+  readonly onCancel: () => void
   readonly onConfirm: () => void
 }
 
 /**
- * «Cerrar caja», con su confirmación: cerrar el turno mueve dinero y el
- * arqueo no se cambia después, así que se confirma con el monto contado y la
- * diferencia a la vista.
+ * «Cerrar caja» (envía el formulario) y su confirmación: cerrar el turno
+ * mueve dinero y el arqueo no se cambia después, así que se confirma con el
+ * monto contado y la diferencia a la vista. Sin un monto válido, el
+ * formulario muestra su error y la confirmación no se abre.
  */
-export default function CloseCashButton({ pending, expected, difference, onConfirm }: CloseCashButtonProps) {
+export default function CloseCashButton({ pending, expected, difference, open, onCancel, onConfirm }: CloseCashButtonProps) {
   return (
-    <ConfirmDialog
-      trigger={
-        <Button type="button" size="lg" variant="destructive" className="h-11 px-5" disabled={pending || difference === null}>
-          <Icon name="caja" size={18} />
-          <span>{pending ? 'Cerrando…' : 'Cerrar caja'}</span>
-        </Button>
-      }
-      title="¿Cerrar la caja?"
-      description={`Se cierra el turno con ${formatCents(expected + (difference ?? 0))} contados (${differenceLabel(difference ?? 0)}). El arqueo no se puede cambiar después.`}
-      confirmLabel="Cerrar caja"
-      onConfirm={onConfirm}
-    />
+    <>
+      <Button type="submit" size="lg" variant="destructive" className="h-11 px-5" disabled={pending}>
+        <Icon name="caja" size={18} />
+        <span>{pending ? 'Cerrando…' : 'Cerrar caja'}</span>
+      </Button>
+      <AlertDialog
+        open={open}
+        onOpenChange={(abierta) => {
+          if (!abierta) {
+            onCancel()
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Cerrar la caja?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Se cierra el turno con ${formatCents(expected + (difference ?? 0))} contados (${differenceLabel(difference ?? 0)}). El arqueo no se puede cambiar después.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={onConfirm}>
+              Cerrar caja
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
 import { closeCash } from '../../api/cash'
@@ -40,16 +41,19 @@ export default function CloseCashForm({ session, onClosed }: CloseCashFormProps)
     onSuccess: onClosed,
   })
 
-  const enviar = handleSubmit((valores) => {
-    cerrar.mutate({ counted_cash: cashAmountForApi(valores.counted_cash), notes: valores.notes })
-  })
+  // Cerrar mueve dinero y no se deshace: un monto válido abre la confirmación
+  // y solo al confirmarla sale el cierre. Enter en el monto hace lo mismo.
+  const [porConfirmar, setPorConfirmar] = useState<CloseCashRequest | null>(null)
 
   return (
     <form
       noValidate
       className="flex flex-col gap-4"
-      // Enter en el monto solo valida: cerrar pasa siempre por la confirmación.
-      onSubmit={onSubmit(handleSubmit(() => undefined))}
+      onSubmit={onSubmit(
+        handleSubmit((valores) => {
+          setPorConfirmar({ counted_cash: cashAmountForApi(valores.counted_cash), notes: valores.notes })
+        }),
+      )}
     >
       {session.open_orders > 0 ? (
         <p role="status" className="m-0 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
@@ -89,8 +93,15 @@ export default function CloseCashForm({ session, onClosed }: CloseCashFormProps)
           pending={cerrar.isPending}
           expected={esperado}
           difference={diferencia}
+          open={porConfirmar !== null}
+          onCancel={() => {
+            setPorConfirmar(null)
+          }}
           onConfirm={() => {
-            void enviar()
+            if (porConfirmar !== null) {
+              cerrar.mutate(porConfirmar)
+            }
+            setPorConfirmar(null)
           }}
         />
       </div>
