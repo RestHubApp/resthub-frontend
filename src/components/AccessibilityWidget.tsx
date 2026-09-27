@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 
+import { repairAccessibilityMenu } from './accessibilityMenu'
+
 const ETIQUETA_ESPANOL = 'Abrir menú de accesibilidad'
 const ETIQUETA_CERRAR = 'Cerrar menú de accesibilidad'
 const ARIA_LABEL = 'aria-label'
@@ -10,8 +12,9 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
  *
  * El paquete se auto-inicializa como side-effect al importarse y corre en el
  * navegador del visitante, sin cuenta ni variable de entorno a diferencia de
- * UserWay. Se importa recién al montar, en su propio archivo: son 65 kB que
- * la primera pantalla del celular no necesita para dibujarse. En el celular
+ * UserWay. Se importa en su propio archivo, después del `load` y en un
+ * momento ocioso: son 65 kB que la primera pantalla del celular no necesita
+ * para dibujarse. En el celular
  * con sesión el botón flotante se oculta (tapaba el "+" de los platos) y el
  * menú se abre desde "Más" (ver accessibilityMenu.ts). Sí hace una llamada externa: publica el locale de cada idioma y la
  * fuente de lectura en cdn.jsdelivr.net y los descarga de ahí (el tarball los
@@ -30,10 +33,44 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
  * 'Abrir menú de accesibilidad' tanto al montarse como ante cualquier
  * mutación del DOM.
  */
+// Tope de espera del momento ocioso: en una pantalla que nunca queda quieta
+// (el tablero en vivo), el widget igual aparece.
+const IDLE_TIMEOUT_MS = 2000
+
+/**
+ * Corre `cargar` después del evento `load` y en un momento ocioso. El widget
+ * son 65 kB que se evalúan en el hilo principal: bajarlo mientras la pantalla
+ * se dibuja retrasaba el primer render en el celular (Lighthouse, TBT y LCP).
+ * Devuelve cómo cancelarlo.
+ */
+function cuandoTermineDeCargar(cargar: () => void): () => void {
+  let cancelar: () => void = () => undefined
+  const programar = () => {
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(cargar, { timeout: IDLE_TIMEOUT_MS })
+      cancelar = () => {
+        window.cancelIdleCallback(id)
+      }
+      return
+    }
+    const id = setTimeout(cargar, IDLE_TIMEOUT_MS / 4)
+    cancelar = () => {
+      clearTimeout(id)
+    }
+  }
+  if (document.readyState === 'complete') {
+    programar()
+  } else {
+    window.addEventListener('load', programar, { once: true })
+  }
+  return () => {
+    window.removeEventListener('load', programar)
+    cancelar()
+  }
+}
+
 export default function AccessibilityWidget() {
-  useEffect(() => {
-    void import('sienna-accessibility')
-  }, [])
+  useEffect(() => cuandoTermineDeCargar(() => void import('sienna-accessibility')), [])
 
   useEffect(() => {
     function parchearBoton(boton: Element) {
@@ -63,6 +100,9 @@ export default function AccessibilityWidget() {
       const cerrar = menu?.querySelector('.asw-menu-close')
       if (cerrar && cerrar.getAttribute(ARIA_LABEL) !== ETIQUETA_CERRAR) {
         cerrar.setAttribute(ARIA_LABEL, ETIQUETA_CERRAR)
+      }
+      if (menu) {
+        repairAccessibilityMenu(menu)
       }
     }
 
