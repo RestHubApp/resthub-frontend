@@ -42,3 +42,65 @@ jobs:
 
       - name: Verificación de tipos y compilación
         run: pnpm build
+
+  # Pruebas de extremo a extremo con Playwright (solo Chromium) contra el
+  # backend de develop, con una base SQLite propia migrada y sembrada. La
+  # regresión visual no corre aquí: sus líneas base dependen del sistema
+  # operativo (se corre en local con `pnpm test:visual`).
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      E2E_BACKEND_DIR: resthub-backend
+      E2E_DB: ${{ github.workspace }}/.e2e/e2e.db
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Traer el backend (develop)
+        uses: actions/checkout@v4
+        with:
+          repository: RestHubApp/resthub-backend
+          ref: develop
+          path: resthub-backend
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: |
+          pnpm install --frozen-lockfile
+          uv sync --frozen --directory resthub-backend
+
+      - name: Migrar y sembrar la base de pruebas
+        run: bash e2e/servidor/backend.sh --preparar
+
+      - name: Instalar Chromium de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas E2E (escritorio y celular a 390 px)
+        env:
+          E2E_DB_PREPARADA: '1'
+        run: pnpm test:e2e
+
+      - name: Subir el reporte de Playwright
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-playwright
+          path: |
+            e2e/.reporte
+            e2e/.reporte-cobertura-ui.json
+            e2e/.resultados
+          retention-days: 14
