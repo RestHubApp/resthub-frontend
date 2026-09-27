@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { cashQueryKey, currentCashQuery } from '../../api/cash'
-import FormMessage from '../../components/FormMessage'
 import ListSkeleton from '../../components/ListSkeleton'
 import PageHeader from '../../components/PageHeader'
+import RetryQueryError from '../../components/RetryQueryError'
 import SectionCard from '../../components/SectionCard'
 import { useServerEvent } from '../../hooks/useServerEvent'
 import { errorMessage } from '../../services/api'
@@ -39,7 +39,7 @@ export default function CashView() {
         description="Un turno a la vez: se abre con el efectivo inicial y se cierra contando el cajón."
       />
       {caja.isPending ? <ListSkeleton label="Cargando la caja…" count={3} itemClassName="h-16 rounded-lg" /> : null}
-      {caja.isError ? <FormMessage tone="error">{errorMessage(caja.error, 'No se pudo cargar la caja.')}</FormMessage> : null}
+      {caja.isError ? <RetryQueryError message={errorMessage(caja.error, 'No se pudo cargar la caja.')} onRetry={() => { void caja.refetch() }} /> : null}
       {caja.data?.is_open === false ? (
         <SectionCard title="Abrir caja" description="Sin caja abierta, nadie puede cobrar.">
           <OpenCashForm />

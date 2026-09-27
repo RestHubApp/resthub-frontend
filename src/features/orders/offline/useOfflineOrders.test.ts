@@ -1,5 +1,5 @@
 import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import { isOffline } from './useOfflineOrders'
 

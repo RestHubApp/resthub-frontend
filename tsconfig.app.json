@@ -4,7 +4,7 @@
     "target": "ES2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "@testing-library/jest-dom/jest-globals"],
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -25,5 +25,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["src/api/contract/**"]
 }

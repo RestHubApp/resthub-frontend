@@ -2540,6 +2540,8 @@ export interface components {
          *     OpenAPI describa los campos y el frontend derive el tipo exacto.
          */
         HealthResponse: {
+            /** Database */
+            database: string;
             /** Service */
             service: string;
             /** Status */
@@ -5171,6 +5173,15 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

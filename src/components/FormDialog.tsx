@@ -1,5 +1,7 @@
-import { type ReactNode, useRef } from 'react'
+import { useMutationState } from '@tanstack/react-query'
+import { type ReactNode, useRef, useState } from 'react'
 
+import FormMessage from './FormMessage'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
 
 interface FormDialogProps {
@@ -34,6 +36,12 @@ export default function FormDialog({
   // Radix no sabe a dónde devolver el foco. Se recuerda lo que lo tenía al
   // abrir: quien usa teclado vuelve al botón que la abrió y no al inicio.
   const retorno = useRef<HTMLElement | null>(null)
+  const [abiertaDesde, setAbiertaDesde] = useState(0)
+  const fallos = useMutationState({
+    filters: { status: 'error' },
+    select: (mutation) => mutation.state.submittedAt,
+  })
+  const falloEnEsteDialogo = open && fallos.some((momento) => momento >= abiertaDesde)
   // Sin descripción, Radix pide decirlo explícitamente para no anunciar un vacío.
   const sinDescripcion = description === undefined ? { 'aria-describedby': undefined } : {}
 
@@ -44,6 +52,7 @@ export default function FormDialog({
         className={`max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto p-5 sm:p-6 ${ANCHOS[size]}`}
         onOpenAutoFocus={() => {
           retorno.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+          setAbiertaDesde(Date.now())
         }}
         onCloseAutoFocus={(evento) => {
           if (retorno.current?.isConnected === true) {
@@ -56,6 +65,9 @@ export default function FormDialog({
           <DialogTitle className="text-lg leading-tight font-semibold">{title}</DialogTitle>
           {description === undefined ? null : <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
+        {falloEnEsteDialogo ? (
+          <FormMessage tone="error">No se pudo guardar. Los datos siguen aquí; vuelve a intentarlo cuando el servicio responda.</FormMessage>
+        ) : null}
         {children}
       </DialogContent>
     </Dialog>

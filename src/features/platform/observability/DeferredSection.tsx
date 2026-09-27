@@ -13,7 +13,7 @@ export default function DeferredSection({ name, anchor, children }: Props) {
   const [visible, setVisible] = useState(false)
   const target = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (visible || !target.current) return undefined
+    if (visible || !target.current || typeof IntersectionObserver !== 'function') return undefined
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) setVisible(true)
     }, { rootMargin: '250px 0px' })

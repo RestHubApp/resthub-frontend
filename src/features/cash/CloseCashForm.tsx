@@ -16,6 +16,7 @@ interface CloseCashFormProps {
   readonly onClosed: (session: CashSession) => void
 }
 
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const MONTO = /^\d{1,8}(?:[.,]\d{1,2})?$/u
 
 /** "Sobran S/ 2.00", "Faltan S/ 4.00" o "Cuadra". */

@@ -4,10 +4,10 @@ import { useState } from 'react'
 import { reorderTables, tablesQuery } from '../../api/tables'
 import type { TableState } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
-import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import ListSkeleton from '../../components/ListSkeleton'
 import PageHeader from '../../components/PageHeader'
+import RetryQueryError from '../../components/RetryQueryError'
 import SectionCard from '../../components/SectionCard'
 import { Button } from '../../components/ui/button'
 import { errorMessage } from '../../services/api'
@@ -66,7 +66,7 @@ export default function TablesView() {
       />
       <SectionCard title="Salón" description={mesas.isSuccess ? `${String(lista.filter((mesa) => mesa.is_active).length)} activas de ${String(lista.length)}` : undefined}>
         {mesas.isPending ? <ListSkeleton label="Cargando mesas…" count={5} itemClassName="h-14 rounded-lg" /> : null}
-        {mesas.isError ? <FormMessage tone="error">{errorMessage(mesas.error, 'No se pudieron cargar las mesas.')}</FormMessage> : null}
+        {mesas.isError ? <RetryQueryError message={errorMessage(mesas.error, 'No se pudieron cargar las mesas.')} onRetry={() => { void mesas.refetch() }} /> : null}
         {mesas.isSuccess && lista.length === 0 ? (
           <EmptyState title="Todavía no hay mesas" description="Crea la primera con «Nueva mesa»." />
         ) : null}

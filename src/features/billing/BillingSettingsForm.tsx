@@ -13,9 +13,11 @@ import { errorMessage } from '../../services/api'
 import { useNotifications } from '../../store/notifications'
 
 const schema = z.object({
+  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
   ruc: z.string().trim().regex(/^(?:(?:10|15|17|20)\d{9})?$/u, 'El RUC tiene 11 dígitos y empieza en 10 o 20'),
   legal_name: z.string().trim().max(100, 'Usa como máximo 100 caracteres'),
   address: z.string().trim().max(200, 'Usa como máximo 200 caracteres'),
+  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
   igv_rate: z.string().trim().regex(/^\d{1,2}(?:[.,]\d{1,2})?$/u, 'Escribe un porcentaje como 18 o 10.5'),
   boleta_series: z.string().trim().toUpperCase().regex(/^B[A-Z0-9]{3}$/u, 'Cuatro caracteres, empieza con B'),
   factura_series: z.string().trim().toUpperCase().regex(/^F[A-Z0-9]{3}$/u, 'Cuatro caracteres, empieza con F'),

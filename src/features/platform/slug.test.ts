@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import { followSlug, isValidSlug, MAX_SLUG, sanitizeSlugInput, suggestSlug } from './slug'
 

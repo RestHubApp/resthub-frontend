@@ -55,27 +55,42 @@ export async function readEventStream({
   signal,
   onEvent,
 }: ReadEventStreamOptions): Promise<void> {
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
-    cache: 'no-store',
-    signal,
-  })
-  if (!response.ok || response.body === null) {
-    throw new EventStreamError(response.status)
+  // El servidor envía pings cada 15 s. Un proxy/NAT puede dejar el socket
+  // medio abierto: fetch nunca termina y el cliente no intenta reconectar.
+  const idle = new AbortController()
+  const timeout = 35_000
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const renovar = () => {
+    clearTimeout(timer)
+    timer = setTimeout(() => { idle.abort() }, timeout)
   }
-
-  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
-  let pendiente = ''
-  let terminado = false
-  while (!terminado) {
-    const { value, done } = await reader.read()
-    terminado = done
-    pendiente += (value ?? '').replaceAll('\r\n', '\n')
-    let corte = pendiente.indexOf('\n\n')
-    while (corte !== -1) {
-      despachar(pendiente.slice(0, corte), onEvent)
-      pendiente = pendiente.slice(corte + 2)
-      corte = pendiente.indexOf('\n\n')
+  renovar()
+  try {
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
+      cache: 'no-store',
+      signal: AbortSignal.any([signal, idle.signal]),
+    })
+    if (!response.ok || response.body === null) {
+      throw new EventStreamError(response.status)
     }
+
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
+    let pendiente = ''
+    let terminado = false
+    while (!terminado) {
+      const { value, done } = await reader.read()
+      terminado = done
+      if (!done) renovar()
+      pendiente += (value ?? '').replaceAll('\r\n', '\n')
+      let corte = pendiente.indexOf('\n\n')
+      while (corte !== -1) {
+        despachar(pendiente.slice(0, corte), onEvent)
+        pendiente = pendiente.slice(corte + 2)
+        corte = pendiente.indexOf('\n\n')
+      }
+    }
+  } finally {
+    clearTimeout(timer)
   }
 }

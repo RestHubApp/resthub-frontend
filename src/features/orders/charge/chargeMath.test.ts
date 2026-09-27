@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import type { OrderItemResponse, OrderResponse } from '../../../api/types'
 import { chargeCents, equalPartCents, itemsCents, unpaidItems } from './chargeMath'

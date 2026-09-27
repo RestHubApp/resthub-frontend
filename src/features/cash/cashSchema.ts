@@ -4,6 +4,7 @@ import { textoOpcional } from '../../components/formRules'
 
 // El tope del servidor para la nota de la caja.
 export const MAX_CASH_NOTES = 300
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const MONTO = /^\d{1,8}(?:[.,]\d{1,2})?$/u
 const FORMATO = 'Escribe un monto como 150 o 150.50'
 

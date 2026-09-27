@@ -1,5 +1,5 @@
 import { AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
 import {
   api,
@@ -126,15 +126,15 @@ describe('cabecera Authorization de cada petición', () => {
   })
 
   it('un 401 cierra solo la sesión dueña de la ruta', async () => {
-    const alVencerRestaurante = vi.fn()
-    const alVencerPlataforma = vi.fn()
+    const alVencerRestaurante = jest.fn()
+    const alVencerPlataforma = jest.fn()
     setUnauthorizedHandler(alVencerRestaurante)
     setPlatformUnauthorizedHandler(alVencerPlataforma)
     setAuthToken('r1')
     setPlatformAuthToken('p1')
 
     await expect(api.get(RESTAURANTES, { adapter: rechazo })).rejects.toThrow()
-    expect(alVencerPlataforma).toHaveBeenCalledOnce()
+    expect(alVencerPlataforma).toHaveBeenCalledTimes(1)
     expect(alVencerRestaurante).not.toHaveBeenCalled()
   })
 
@@ -150,7 +150,7 @@ describe('cabecera Authorization de cada petición', () => {
   })
 
   it('un 401 de una petición `withoutCredential` no cierra la sesión abierta', async () => {
-    const alVencerRestaurante = vi.fn()
+    const alVencerRestaurante = jest.fn()
     setUnauthorizedHandler(alVencerRestaurante)
     setAuthToken('r1')
 
@@ -159,7 +159,7 @@ describe('cabecera Authorization de cada petición', () => {
   })
 
   it('un 401 sin credencial (contraseña equivocada) no cierra nada', async () => {
-    const alVencerPlataforma = vi.fn()
+    const alVencerPlataforma = jest.fn()
     setPlatformUnauthorizedHandler(alVencerPlataforma)
 
     await expect(api.post('/platform/auth/login', {}, { adapter: rechazo })).rejects.toThrow()

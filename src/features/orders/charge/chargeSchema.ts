@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { toCents } from '../../../services/format'
 
 
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const MONTO = /^\d{1,6}(?:[.,]\d{1,2})?$/u
 const FORMATO = 'Escribe un monto como 100 o 100.50'
 
