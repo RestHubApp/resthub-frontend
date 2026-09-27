@@ -13,6 +13,13 @@ interface CustomerDetailProps {
 }
 
 /** Las cifras de un cliente, su dirección, sus notas y sus últimos pedidos. */
+// El tipo de pedido con el mismo nombre que usan el tablero y el historial.
+const TIPOS: Record<Customer['recent_orders'][number]['type'], string> = {
+  dine_in: 'En mesa',
+  takeaway: 'Para llevar',
+  delivery: 'Delivery',
+}
+
 export default function CustomerDetail({ customer, timeZone, canEdit, onEdit }: CustomerDetailProps) {
   const cifras = [
     { label: 'Visitas', value: String(customer.visits) },
@@ -46,7 +53,7 @@ export default function CustomerDetail({ customer, timeZone, canEdit, onEdit }: 
               className="flex min-h-11 items-center justify-between gap-2 rounded-md px-2 hover:bg-muted"
             >
               <span>
-                #{pedido.number} · {pedido.type}
+                #{pedido.number} · {TIPOS[pedido.type]}
               </span>
               <span className="text-sm text-muted-foreground">
                 {formatMoney(pedido.total)} · {formatDateTime(pedido.created_at, timeZone)}
