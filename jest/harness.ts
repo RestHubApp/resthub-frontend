@@ -15,6 +15,7 @@ import ToastStack from '../src/features/shell/ToastStack'
 import { api, setAuthToken } from '../src/services/api'
 import { queryClient } from '../src/services/queryClient'
 import { useNotifications } from '../src/store/notifications'
+import { usePlatformSession } from '../src/store/platformSession'
 import { useSession } from '../src/store/session'
 
 export type Metodo = 'get' | 'post' | 'put' | 'patch' | 'delete'
@@ -188,6 +189,11 @@ export function cuenta(permisos: readonly PermissionCode[], cambios: Partial<Cur
   }
 }
 
+/** Abre la sesión del administrador del sistema sin pasar por su acceso. */
+export function entrarAPlataforma(): void {
+  usePlatformSession.getState().signIn('token-de-plataforma', { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' })
+}
+
 /** Abre una sesión de restaurante sin pasar por el acceso. */
 export function entrarComo(permisos: readonly PermissionCode[] = PERMISOS_ENCARGADO, cambios: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
   const account = cuenta(permisos, cambios)
@@ -265,5 +271,8 @@ afterEach(() => {
   servidorActual = null
   setAuthToken(null)
   useSession.setState({ token: null, account: null, expired: false })
+  if (usePlatformSession.getState().token !== null) {
+    usePlatformSession.getState().signOut()
+  }
   useNotifications.setState({ toasts: [] })
 })
