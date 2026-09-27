@@ -27,7 +27,7 @@ export default function InventoryTabs({ value, onChange, panels, alertCount }: I
       }}
       className="gap-4"
     >
-      <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <div className="-mx-4 overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_85%,transparent)] sm:mx-0 sm:px-0 sm:[mask-image:none]">
         <TabsList className="group-data-horizontal/tabs:h-auto">
           {SECTIONS.map((seccion) => (
             <TabsTrigger key={seccion.value} value={seccion.value} className="h-11 flex-none px-3.5">

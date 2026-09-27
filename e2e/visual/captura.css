@@ -1,0 +1,12 @@
+/* Hoja que se aplica solo al tomar las capturas de regresión visual (ver captura.ts). */
+
+/* El botón flotante del widget de accesibilidad aparece cuando termina de bajar su archivo. */
+.asw-menu-btn,
+.asw-container {
+  visibility: hidden !important;
+}
+
+/* Los avisos emergentes se van solos a los pocos segundos. */
+[aria-label="Avisos del sistema"] {
+  visibility: hidden !important;
+}

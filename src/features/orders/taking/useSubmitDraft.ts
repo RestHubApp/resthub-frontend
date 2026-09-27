@@ -84,6 +84,11 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
     ])
 
   return useMutation({
+    // Sin señal, TanStack Query pausa las mutaciones (`networkMode: 'online'`)
+    // y el botón quedaba en «Enviando…» hasta que volviera la conexión, sin
+    // llegar nunca a la cola. Esta mutación decide ella misma qué hacer sin
+    // señal: un pedido nuevo va a la cola y agregar platos avisa que falló.
+    networkMode: 'always',
     mutationFn: (lines: readonly DraftLine[]) => {
       const items = toNewItems(lines)
       return target.kind === 'add'

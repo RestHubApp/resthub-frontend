@@ -23,10 +23,10 @@ export default function PurchaseLineEditor({ index, line, ingredients, onChange,
   const enUnidad = unidad === undefined ? '' : ` en ${UNIT_LABELS[unidad]}`
 
   return (
-    <li className="grid grid-cols-[1fr_auto] gap-2 rounded-lg p-2 ring-1 ring-input sm:grid-cols-[1fr_8rem_8rem_auto]">
+    <li className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 rounded-lg p-2 ring-1 ring-input sm:grid-cols-[1fr_8rem_8rem_auto]">
       <NativeSelect
         aria-label={`Insumo de la línea ${String(index + 1)}`}
-        className="w-full"
+        className="col-span-2 w-full sm:col-span-1"
         value={line.ingredientId}
         onChange={(evento) => {
           onChange({ ...line, ingredientId: evento.target.value })

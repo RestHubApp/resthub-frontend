@@ -13,7 +13,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'pruebas/accesibilidad/.wave-ext/**', 'pruebas/accesibilidad/reportes/**'],
+    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados*/**', 'e2e/.reporte*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'pruebas/accesibilidad/.wave-ext/**', 'pruebas/accesibilidad/reportes/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -407,7 +407,6 @@ export default tseslint.config(
       'check-file/filename-naming-convention': 'off',
     },
   },
-
   // ---------------------------------------------------------------------
   // Scripts de medición de accesibilidad (Node, fuera de la aplicación).
   // ---------------------------------------------------------------------
@@ -415,6 +414,27 @@ export default tseslint.config(
     files: ['pruebas/accesibilidad/**/*.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
     extends: [tseslint.configs.disableTypeChecked],
+  },
+  // ---------------------------------------------------------------------
+  // Pruebas de extremo a extremo y visuales (Playwright, e2e/).
+  //
+  // Corren en Node y describen recorridos largos de la interfaz. Se lintean
+  // con las mismas reglas salvo cuatro: un recorrido es una sola función
+  // larga a propósito (se lee de arriba abajo como la historia que prueba),
+  // los textos de la interfaz se repiten porque son lo que se busca en la
+  // pantalla, los accesorios de Playwright se declaran con `{}` vacío, y
+  // `test.describe` + `test` + `step` suman un nivel más de callbacks.
+  // ---------------------------------------------------------------------
+  {
+    files: ['e2e/**/*.ts'],
+    languageOptions: { globals: globals.node },
+    rules: {
+      'max-lines-per-function': 'off',
+      'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
+      'sonarjs/no-duplicate-string': 'off',
+      'no-empty-pattern': 'off',
+      'max-nested-callbacks': ['error', 4],
+    },
   },
   {
     // Lo que Jest carga como CommonJS: el entorno, el plugin de Babel y los módulos sustitutos.

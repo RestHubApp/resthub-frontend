@@ -93,6 +93,20 @@ export default function AccessibilityWidget() {
       if (menu) {
         repairAccessibilityMenu(menu)
       }
+      nombrarOpciones(menu)
+    }
+
+    // Las opciones muestran su texto en español («Alto contraste») pero el
+    // widget les deja un `aria-label` fijo en inglés («High Contrast»): un
+    // lector de pantalla o el control por voz no las encuentran por lo que se
+    // ve (WCAG 2.5.3). El nombre pasa a ser el texto visible.
+    function nombrarOpciones(menu: HTMLElement | null) {
+      for (const opcion of menu?.querySelectorAll('button[aria-label]') ?? []) {
+        const visible = opcion.textContent.trim()
+        if (visible !== '' && opcion.getAttribute(ARIA_LABEL) !== visible) {
+          opcion.setAttribute(ARIA_LABEL, visible)
+        }
+      }
     }
 
     // El widget se importa después de montar y agrega su botón y su menú al
