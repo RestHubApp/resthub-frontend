@@ -5,9 +5,11 @@ import { useNavigate } from 'react-router'
 
 import DialogFormActions from '../../../components/DialogFormActions'
 import FormDialog from '../../../components/FormDialog'
+import FormMessage from '../../../components/FormMessage'
 import Icon from '../../../components/Icon'
 import { Button } from '../../../components/ui/button'
 import { onSubmit } from '../../../hooks/formSubmit'
+import { errorMessage } from '../../../services/api'
 import CustomerLookup from './CustomerLookup'
 import TakeawayFields from './TakeawayFields'
 import { withCustomer } from './takeawayCustomer'
@@ -27,6 +29,7 @@ const MODOS: readonly { value: TakeawayValues['mode']; label: string }[] = [
  */
 export default function TakeawayDialog() {
   const [open, setOpen] = useState(false)
+  const [fallo, setFallo] = useState<string | null>(null)
   const navigate = useNavigate()
   const form = useForm<TakeawayValues>({ resolver: zodResolver(takeawaySchema), defaultValues: EMPTY_TAKEAWAY })
   const mode = useWatch({ control: form.control, name: 'mode' })
@@ -50,7 +53,13 @@ export default function TakeawayDialog() {
         <form
           noValidate
           className="flex flex-col gap-5"
-          onSubmit={onSubmit(form.handleSubmit(async (valores) => navigate(newOrderPath(await withCustomer(valores)))))}
+          onSubmit={onSubmit(form.handleSubmit(async (valores) => {
+            try {
+              void navigate(newOrderPath(await withCustomer(valores)))
+            } catch (error) {
+              setFallo(errorMessage(error, 'No se pudo guardar. Los datos siguen aquí; vuelve a intentarlo.'))
+            }
+          }))}
         >
           <div role="radiogroup" aria-label="Cómo se entrega" className="grid grid-cols-2 gap-2">
             {MODOS.map((modo) => (
@@ -75,6 +84,7 @@ export default function TakeawayDialog() {
             form.reset(fromCustomer(cliente, form.getValues('mode')))
           }} />
           <TakeawayFields form={form} delivery={mode === 'delivery'} />
+          {fallo === null ? null : <FormMessage tone="error">{fallo}</FormMessage>}
           <DialogFormActions>
             <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={() => {
               cambiar(false)

@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import type { OrderMenuItem } from '../../../api/types'
 import FormDialog from '../../../components/FormDialog'
+import FormMessage from '../../../components/FormMessage'
 import { Button } from '../../../components/ui/button'
 import { formatCents, formatMoney, toCents } from '../../../services/format'
 import ModifierOptionButton from './ModifierOptionButton'
@@ -10,7 +11,7 @@ import type { DraftModifier } from './useOrderDraft'
 interface ModifierDialogProps {
   /** El plato a configurar; `null` cierra la ventana. */
   readonly item: OrderMenuItem | null
-  readonly onConfirm: (item: OrderMenuItem, modifiers: DraftModifier[]) => void
+  readonly onConfirm: (item: OrderMenuItem, modifiers: DraftModifier[]) => boolean | Promise<boolean | undefined>
   readonly onClose: () => void
 }
 
@@ -34,6 +35,7 @@ function toggle(elegidas: Elegidas, grupo: string, opcion: string, maximo: numbe
  */
 export default function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps) {
   const [elegidas, setElegidas] = useState<Elegidas>({})
+  const [fallo, setFallo] = useState(false)
   if (item === null) {
     return null
   }
@@ -88,14 +90,23 @@ export default function ModifierDialog({ item, onConfirm, onClose }: ModifierDia
           </div>
         </fieldset>
       ))}
+      {fallo ? (
+        <FormMessage tone="error">No se pudo agregar el plato. Las opciones siguen elegidas; vuelve a intentarlo.</FormMessage>
+      ) : null}
       <Button
         type="button"
         size="lg"
         className="h-12 text-base"
         disabled={faltan.length > 0}
         onClick={() => {
-          onConfirm(item, modifiers)
-          setElegidas({})
+          void Promise.resolve(onConfirm(item, modifiers)).then((aceptado) => {
+            if (aceptado === false) {
+              setFallo(true)
+              return
+            }
+            setFallo(false)
+            setElegidas({})
+          })
         }}
       >
         {faltan.length > 0 ? `Elige ${faltan[0]?.name.toLowerCase() ?? ''}` : `Agregar · ${formatCents(total)}`}

@@ -4,7 +4,7 @@ import { cashSessionQueryKey, fetchCashSession } from '../../api/cash'
 import type { CashSession } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import FormDialog from '../../components/FormDialog'
-import FormMessage from '../../components/FormMessage'
+import RetryQueryError from '../../components/RetryQueryError'
 import { errorMessage } from '../../services/api'
 import { formatMoney } from '../../services/format'
 import CashSummaryView from './CashSummaryView'
@@ -48,7 +48,7 @@ export default function CashSessionDialog({ sessionId, onClose }: CashSessionDia
       description={countedLabel(datos)}
     >
       {turno.isPending ? <EmptyState title="Cargando el arqueo…" /> : null}
-      {turno.isError ? <FormMessage tone="error">{errorMessage(turno.error, 'No se pudo cargar el turno.')}</FormMessage> : null}
+      {turno.isError ? <RetryQueryError message={errorMessage(turno.error, 'No se pudo cargar el turno.')} onRetry={() => { void turno.refetch() }} /> : null}
       {datos?.summary ? <CashSummaryView session={datos} summary={datos.summary} /> : null}
       {datos?.closing_notes ? <p className="m-0 text-sm">Nota: {datos.closing_notes}</p> : null}
     </FormDialog>

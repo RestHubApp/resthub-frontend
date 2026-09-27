@@ -44,13 +44,9 @@ export default function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) 
   if (carta.isPending) {
     return <ListSkeleton label="Cargando la carta…" count={6} />
   }
-  if (carta.isError) {
+  if (carta.isError && carta.data === undefined) {
     return (
-      <QueryError
-        error={carta.error}
-        fallback="No se pudo cargar la carta."
-        onRetry={() => void carta.refetch()}
-      />
+      <QueryError error={carta.error} fallback="No se pudo cargar la carta." onRetry={() => void carta.refetch()} />
     )
   }
 
@@ -95,9 +91,12 @@ export default function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) 
       ))}
       <ModifierDialog
         item={configurando}
-        onConfirm={(item, modifiers) => {
+        onConfirm={async (item, modifiers) => {
+          const fresco = await carta.refetch()
+          if (fresco.isError || fresco.data === undefined) return false
           onAdd(item, modifiers)
           setConfigurando(null)
+          return true
         }}
         onClose={() => {
           setConfigurando(null)

@@ -3,8 +3,8 @@ import { useDeferredValue, useState } from 'react'
 
 import { customerSearchQuery } from '../../api/customers'
 import EmptyState from '../../components/EmptyState'
-import FormMessage from '../../components/FormMessage'
 import ListSkeleton from '../../components/ListSkeleton'
+import RetryQueryError from '../../components/RetryQueryError'
 import SectionCard from '../../components/SectionCard'
 import { Input } from '../../components/ui/input'
 import { errorMessage } from '../../services/api'
@@ -39,7 +39,7 @@ export default function CustomerList({ onOpen }: CustomerListProps) {
         }}
       />
       {clientes.isPending ? <ListSkeleton label="Cargando clientes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
-      {clientes.isError ? <FormMessage tone="error">{errorMessage(clientes.error, 'No se pudieron cargar.')}</FormMessage> : null}
+      {clientes.isError ? <RetryQueryError message={errorMessage(clientes.error, 'No se pudieron cargar los clientes.')} onRetry={() => { void clientes.refetch() }} /> : null}
       {clientes.isSuccess && lista.length === 0 ? <EmptyState title={vacio} /> : null}
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {lista.map((cliente) => (
