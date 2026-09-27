@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 
-import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
 import { useNotifications } from '../../store/notifications'
+import ShellIcon from './ShellIcon'
 
 const AUTO_DISMISS_MS = 8_000
 
@@ -35,7 +35,7 @@ export default function ToastItem({ id, tone, message }: ToastItemProps) {
 
   return (
     <div className="flex items-start gap-3 rounded-xl bg-card p-3 text-sm text-card-foreground shadow-lg ring-1 ring-foreground/10">
-      <Icon name={ICON_TONE[tone].name} size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone].className}`} />
+      <ShellIcon name={ICON_TONE[tone].name} size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone].className}`} />
       <p className="m-0 flex-1">{message}</p>
       <Button
         type="button"
@@ -47,7 +47,7 @@ export default function ToastItem({ id, tone, message }: ToastItemProps) {
           dismiss(id)
         }}
       >
-        <Icon name="cancelar" size={16} />
+        <ShellIcon name="cancelar" size={16} />
       </Button>
     </div>
   )

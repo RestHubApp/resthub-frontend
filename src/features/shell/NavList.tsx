@@ -1,4 +1,4 @@
-import Icon from '../../components/Icon'
+import ShellIcon from './ShellIcon'
 import type { NavEntry } from './navigation'
 import PreloadLink from './PreloadLink'
 
@@ -30,7 +30,7 @@ export default function NavList({ entries, onNavigate }: NavListProps) {
       {entries.map((entry) => (
         <li key={entry.to}>
           <PreloadLink to={entry.to} className={linkClass} onClick={onNavigate}>
-            <Icon name={entry.icon} size={18} />
+            <ShellIcon name={entry.icon} size={18} />
             <span>{entry.label}</span>
           </PreloadLink>
         </li>

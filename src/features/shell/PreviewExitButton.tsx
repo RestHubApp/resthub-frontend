@@ -1,9 +1,9 @@
 import ConfirmDialog from '../../components/ConfirmDialog'
-import Icon from '../../components/Icon'
 import { Button } from '../../components/ui/button'
 import { useQueuedOrders } from '../../store/offlineQueue'
 import { useSession } from '../../store/session'
 import { leavePreview } from './leavePreview'
+import ShellIcon from './ShellIcon'
 
 // En la franja, blanco sobre su color; en una pantalla, el botón principal de siempre.
 const ESTILOS = {
@@ -27,7 +27,7 @@ export default function PreviewExitButton({ tone = 'banner' }: PreviewExitButton
 
   const boton = (onClick?: () => void) => (
     <Button type="button" size={tone === 'page' ? 'lg' : 'default'} className={ESTILOS[tone]} onClick={onClick}>
-      <Icon name="salir" size={18} />
+      <ShellIcon name="salir" size={18} />
       <span>Salir de la vista previa</span>
     </Button>
   )

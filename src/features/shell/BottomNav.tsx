@@ -1,4 +1,4 @@
-import Icon from '../../components/Icon'
+import ShellIcon from './ShellIcon'
 import type { CurrentUserResponse } from '../../api/types'
 import MoreSheet from './MoreSheet'
 import type { NavEntry } from './navigation'
@@ -40,7 +40,7 @@ export default function BottomNav({ entries, account }: BottomNavProps) {
         {visibles.map((entry) => (
           <li key={entry.to} className="flex flex-1">
             <PreloadLink to={entry.to} className={tabClass}>
-              <Icon name={entry.icon} size={22} />
+              <ShellIcon name={entry.icon} size={22} />
               <span className="max-w-full truncate">{entry.label}</span>
             </PreloadLink>
           </li>

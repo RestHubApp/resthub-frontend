@@ -151,6 +151,13 @@ export default tseslint.config(
   // de shadcn/ui y solo pueden usarse dentro de src/components/ui y, en el
   // caso de Lucide, en el registro; el resto de la aplicacion usa el registro
   // y los componentes ya tematizados.
+  //
+  // La unica excepcion es src/features/shell/ShellIcon.tsx: el registro
+  // completo (unos 90 iconos) se carga siempre porque el armazon (la barra de
+  // navegacion, "Más", la sesion) lo usa, aunque cada pantalla dibuje solo un
+  // puñado. ShellIcon tiene su propio registro chico, del mismo tamaño fijo
+  // que el armazon, para que el resto de los iconos llegue con la pantalla
+  // que los usa.
   // ---------------------------------------------------------------------
   {
     files: [
@@ -158,7 +165,7 @@ export default tseslint.config(
       'src/components/*.{ts,tsx}',
       'src/main.tsx',
     ],
-    ignores: ['src/components/icons.ts'],
+    ignores: ['src/components/icons.ts', 'src/features/shell/ShellIcon.tsx'],
     rules: {
       'no-restricted-imports': [
         'error',
