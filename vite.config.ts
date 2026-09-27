@@ -20,6 +20,10 @@ export default defineConfig({
     // a la vista (`features/orders/offline`) que se envia sola al volver.
     VitePWA({
       registerType: 'autoUpdate',
+      // El registro del service worker no tiene que frenar el primer render:
+      // con `script` iba como <script> síncrono en el <head> (Lighthouse lo
+      // marcaba como recurso que bloquea el renderizado).
+      injectRegister: 'script-defer',
       includeAssets: ['favicon.ico', 'favicon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
         name: 'RestHub',
