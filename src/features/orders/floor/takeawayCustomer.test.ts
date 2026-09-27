@@ -45,9 +45,9 @@ describe('withCustomer', () => {
     expect(guardar).not.toHaveBeenCalled()
   })
 
-  it('si falla o vence el plazo, sigue sin el cliente', async () => {
+  it('si falla o vence el plazo, el formulario se entera y no pierde los datos', async () => {
     guardar.mockRejectedValue(new Error('timeout of 4000ms exceeded'))
-    await expect(withCustomer(delivery)).resolves.toBe(delivery)
+    await expect(withCustomer(delivery)).rejects.toThrow('timeout of 4000ms exceeded')
   })
 
   it('para llevar o con un cliente ya elegido no guarda nada', async () => {

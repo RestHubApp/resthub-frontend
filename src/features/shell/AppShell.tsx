@@ -1,6 +1,8 @@
 import { Outlet } from 'react-router'
 
 import AccessibilityWidget from '../../components/AccessibilityWidget'
+import ApiFailureNotice from '../../components/ApiFailureNotice'
+import { useFailedQueries } from '../../hooks/useFailedQueries'
 import { isPreviewTab } from '../../services/tabStorage'
 import { usePreview, useSession } from '../../store/session'
 import BottomNav from './BottomNav'
@@ -45,6 +47,7 @@ interface AppShellProps {
 export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
   const account = useSession((state) => state.account)
   const preview = usePreview()
+  const failed = useFailedQueries('restaurant')
   useAccountRefresh()
   useSessionRenewal()
   useIdlePreload(screens)
@@ -84,6 +87,7 @@ export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
             <Brand to="/" compact />
             <RestaurantName name={account.restaurant.name} variant="header" />
           </header>
+          <ApiFailureNotice message={failed.message} onRetry={failed.retry} />
           <main
             id="contenido"
             tabIndex={-1}

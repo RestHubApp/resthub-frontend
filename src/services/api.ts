@@ -1,5 +1,6 @@
-import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 
+import { noteApiFailure, type ApiFailureScope } from './apiFailure'
 import { logger } from './logger'
 
 const API_PREFIX = '/api/v1'
@@ -245,6 +246,7 @@ api.interceptors.response.use(
   },
   (error: unknown) => {
     registrarFallo(error)
+    recordarFalloDeTransporte(error)
     // Un 401 de una petición que llevaba credencial es una sesión vencida o
     // revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
     // y el acceso explica qué pasó. Un 401 sin credencial, como una contraseña
@@ -290,6 +292,22 @@ export function currentAuthToken(): string | null {
  */
 interface ApiErrorBody {
   detail?: string | { msg?: string }[]
+}
+
+function esFalloDeTransporte(error: AxiosError): boolean {
+  const estado = error.response?.status
+  if (estado === UNAUTHORIZED) return false
+  if (error.response === undefined || estado === 409) return true
+  return estado !== undefined && estado >= SERVER_ERROR
+}
+
+function recordarFalloDeTransporte(error: unknown): void {
+  if (!axios.isAxiosError(error) || !esFalloDeTransporte(error)) return
+  const ambito: ApiFailureScope = (error.config?.url ?? '').includes('/platform/') ? 'platform' : 'restaurant'
+  noteApiFailure(
+    ambito,
+    errorMessage(error, 'No se pudieron cargar los datos. Comprueba la conexión e inténtalo de nuevo.'),
+  )
 }
 
 export function errorMessage(error: unknown, fallback: string): string {
