@@ -104,5 +104,5 @@ test('GES-20 los comprobantes se paginan de a 25 y la lista avisa si el servidor
 
   await fallaServidor(page, '/billing/invoices')
   await page.reload()
-  await expect(page.getByRole('main').getByRole('button', { name: 'Reintentar' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Reintentar' })).toBeVisible()
 })

@@ -16,10 +16,14 @@ async function fallar(page: Page, ruta: string): Promise<() => Promise<void>> {
   }
 }
 
+// Un aviso por falla: el de la pantalla, sin el de respaldo del armazón
+// (los localizadores por rol no ven lo oculto, así que dos avisos visibles
+// harían fallar el modo estricto).
 async function reintentar(page: Page, sana: () => Promise<void>): Promise<void> {
+  await expect(page.getByRole('alert')).toHaveCount(1)
   await sana()
-  await page.getByRole('main').getByRole('button', { name: 'Reintentar' }).click()
-  await expect(page.getByRole('main').getByRole('button', { name: 'Reintentar' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Reintentar' }).click()
+  await expect(page.getByRole('button', { name: 'Reintentar' })).toHaveCount(0)
 }
 
 test('SAL-31 sin mesas activas ni pedidos, cada pestaña del mesero lo dice @movil', async ({ page, local }) => {
@@ -92,7 +96,7 @@ test('SAL-33 si no carga la carta o el pedido, el mesero puede reintentar @movil
 
   // Un pedido que no existe (o es de otro local) se lee como «no existe».
   await page.goto('/pedidos/999999')
-  await expect(page.getByRole('main').getByRole('button', { name: 'Reintentar' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Reintentar' })).toBeVisible()
   await expect(page.getByRole('main').getByText(/no existe|no se encontr/iu)).toBeVisible()
   await page.getByRole('link', { name: 'Pedidos', exact: true }).first().click()
   await expect(page).toHaveURL(/\/pedidos$/u)

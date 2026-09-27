@@ -34,7 +34,7 @@ test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', a
 
   const secciones = page.getByRole('navigation', { name: 'Secciones del panel' })
   await secciones.getByRole('link', { name: 'Reposición' }).click()
-  await expect(page.getByRole('heading', { level: 3, name: 'Culantro' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2, name: 'Culantro' })).toBeVisible()
   await capturar(page, 'panel-reposicion')
 
   await secciones.getByRole('link', { name: 'Auditoría de IA' }).click()

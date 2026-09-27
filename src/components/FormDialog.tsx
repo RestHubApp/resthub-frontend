@@ -66,7 +66,12 @@ export default function FormDialog({
           {description === undefined ? null : <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {falloEnEsteDialogo ? (
-          <FormMessage tone="error">No se pudo guardar. Los datos siguen aquí; vuelve a intentarlo cuando el servicio responda.</FormMessage>
+          // De respaldo: si el formulario ya dice por qué no se guardó, no se repite.
+          <div className="[[role=dialog]:has([data-falla=propia])_&]:hidden">
+            <FormMessage tone="error" fallback>
+              No se pudo guardar. Los datos siguen aquí; vuelve a intentarlo cuando el servicio responda.
+            </FormMessage>
+          </div>
         ) : null}
         {children}
       </DialogContent>
