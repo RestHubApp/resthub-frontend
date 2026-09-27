@@ -99,6 +99,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reporte-playwright
+          # Las carpetas del reporte empiezan con punto (e2e/.reporte): sin
+          # esto, upload-artifact v4 las descarta como ocultas.
+          include-hidden-files: true
           path: |
             e2e/.reporte
             e2e/.reporte-cobertura-ui.json
