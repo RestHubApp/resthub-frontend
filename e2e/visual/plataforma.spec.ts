@@ -62,6 +62,15 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
   await capturar(page, 'plataforma-bitacora')
 
   await page.getByRole('link', { name: 'Observabilidad' }).click()
+  // La sección de rutas no pide datos hasta entrar en pantalla (el observador
+  // la carga sola con 250 px de margen): se desplaza hasta su marcador en un
+  // solo paso, en vez de tocar el botón, que el propio observador puede
+  // desprender del DOM a medio clic (la pestaña de scroll-y-clic quedaba
+  // esperando un botón que ya no estaba).
+  await page
+    .getByText('Rutas del API', { exact: true })
+    .evaluate((el) => { el.scrollIntoView({ block: 'center' }) })
+    .catch(() => undefined)
   await expect(page.getByRole('heading', { name: 'Rutas' })).toBeVisible()
   await expect(page.getByText('orders.open_failed')).toBeVisible()
   await capturar(page, 'plataforma-observabilidad')
