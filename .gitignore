@@ -38,3 +38,8 @@ dev-dist
 .vercel
 .env*
 !.env.example
+
+# Cobertura de Jest y reportes de Stryker (se generan en cada corrida)
+coverage
+reports/mutation
+.stryker-tmp

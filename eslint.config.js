@@ -12,7 +12,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts'],
+    ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -368,11 +368,16 @@ export default tseslint.config(
   // Archivos de configuracion.
   // ---------------------------------------------------------------------
   {
-    files: ['*.config.{js,ts}', 'eslint.config.js'],
+    files: ['*.config.{js,ts,mjs}', 'eslint.config.js', 'jest/**/*.cjs'],
     languageOptions: { globals: globals.node },
     extends: [tseslint.configs.disableTypeChecked],
     rules: {
       'check-file/filename-naming-convention': 'off',
     },
+  },
+  {
+    // Lo que Jest carga como CommonJS: el entorno, el plugin de Babel y los módulos sustitutos.
+    files: ['jest/**/*.cjs'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
 )

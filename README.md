@@ -15,7 +15,7 @@ bajo `/api/v1`. La documentación del producto vive en Notion.
 - Axios como cliente HTTP, con tipos generados por openapi-typescript.
 - PWA instalable con vite-plugin-pwa; sin señal, el mesero puede tomar pedidos nuevos (ver abajo).
 - ESLint estricto (typescript-eslint, sonarjs, límites de arquitectura), Husky y lint-staged.
-- Vitest para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones).
+- Jest 30 con React Testing Library para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones) y las pantallas.
 - pnpm 12 (fijado en `packageManager`).
 
 ## Cómo correrlo
@@ -39,10 +39,40 @@ contraseña `resthub123`; al área de administración del sistema
 | `pnpm dev` | Servidor de desarrollo |
 | `pnpm lint` | ESLint sobre todo el proyecto |
 | `pnpm typecheck` | Verificación de tipos |
-| `pnpm test` | Pruebas unitarias con Vitest (`*.test.ts` junto al código) |
+| `pnpm test` | Pruebas unitarias y de componentes con Jest (`*.test.ts(x)` junto al código) |
+| `pnpm test:coverage` | Las mismas pruebas con cobertura sobre todo `src` (informe HTML en `coverage/lcov-report/`) |
+| `pnpm test:mutation` | Pruebas de mutación con Stryker sobre la lógica de negocio (informe en `reports/mutation/index.html`; no corre en el CI) |
 | `pnpm build` | Tipos y compilación de producción en `dist/` |
 | `pnpm preview` | Sirve la compilación de producción |
 | `pnpm generate:api` | Regenera `src/api/schema.d.ts` desde el OpenAPI del backend |
+
+### Pruebas
+
+Jest corre sin Vite: Babel compila TypeScript y JSX, y `jest.config.js` resuelve
+lo que en la aplicación resuelve Vite (`import.meta.env`, el alias `@/`, los
+estilos y los módulos virtuales de la PWA). La infraestructura de las pruebas
+está en `jest/`.
+
+- Las pruebas importan `describe`, `it`, `expect` y `jest` de `@jest/globals`.
+- El entorno por defecto es jsdom, para las pruebas de componentes con React
+  Testing Library (`render`, `screen`, `userEvent`) y los matchers de jest-dom.
+- Las pruebas de pantallas usan el arnés `#jest/harness`: `montar(<Vista />)`
+  la abre con un router en memoria y el caché de la aplicación, `entrarComo()`
+  abre una sesión con los permisos dados y `servidor().on('get', '/ruta', datos)`
+  responde el API desde el adaptador de Axios (`llamadas()` dice qué se envió).
+  El canal de avisos (SSE) falso está en `#jest/canal` y los datos de prueba
+  en `jest/fixtures/`.
+- Las pruebas que simulan una pestaña sin DOM (reemplazan `window`, `location`
+  o el almacenamiento) declaran `@jest-environment ./jest/nodeEnvironment.cjs`
+  y usan `stubGlobal` y `unstubAllGlobals` de `#jest/globals`.
+- Si cambia `jest/importMetaEnv.cjs`, hay que vaciar la caché con
+  `pnpm exec jest --clearCache`: Jest no la invalida sola.
+
+La mutación (`stryker.config.mjs`) muta `services`, `store` y las utilidades
+puras de `features` (no los componentes, los hooks `use*.ts` ni las precargas),
+con tres procesos y en modo incremental. Falla por debajo de 70 %
+(`thresholds.break`). Tarda del orden de una hora la primera vez, por eso no
+está en el CI.
 
 ### Variables de entorno
 

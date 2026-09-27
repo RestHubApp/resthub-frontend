@@ -8,8 +8,11 @@ el `README.md`; esto es lo que un agente necesita además.
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm typecheck && pnpm lint && pnpm build
+pnpm typecheck && pnpm lint && pnpm test && pnpm build
 ```
+
+Las pruebas son de Jest (no de Vitest): importan de `@jest/globals` y las de
+componentes usan React Testing Library. Los detalles están en el `README.md`.
 
 Commits en Conventional Commits en español (`feat(pedidos): …`). El hook
 `.husky/commit-msg` comprueba la forma y que no haya líneas `Co-authored-by`;

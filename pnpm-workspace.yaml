@@ -8,6 +8,9 @@ allowBuilds:
   # importaciones sin extensión. Sin su compilación, los límites de arquitectura
   # no resuelven módulos y las reglas quedan inertes.
   unrs-resolver: true
+  # Observador de archivos de jest-haste-map: trae binarios precompilados y
+  # solo lo usa `jest --watch`. Su script de compilación no hace falta.
+  '@parcel/watcher': false
 
 minimumReleaseAgeExclude:
   - '@types/node@22.20.2 || 24.13.4'
