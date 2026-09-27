@@ -61,6 +61,7 @@ function rutasDelRouter(): Elemento[] {
 const OVERLAYS = [
   { etiqueta: 'FormDialog', tipo: 'dialogo' },
   { etiqueta: 'ConfirmDialog', tipo: 'confirmacion' },
+  { etiqueta: 'AlertDialog', tipo: 'confirmacion' },
   { etiqueta: 'Sheet', tipo: 'hoja' },
   { etiqueta: 'Tabs', tipo: 'pestanas' },
 ] as const

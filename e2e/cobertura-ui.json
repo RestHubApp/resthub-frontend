@@ -225,7 +225,7 @@
     {
       "id": "confirmacion:cash/CloseCashButton",
       "tipo": "confirmacion",
-      "descripcion": "¿Cerrar la caja?",
+      "descripcion": "",
       "origen": "src/features/cash/CloseCashButton.tsx"
     },
     {
