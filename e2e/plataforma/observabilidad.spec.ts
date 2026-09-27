@@ -22,12 +22,16 @@ function tarjeta(page: Page, titulo: string) {
  */
 async function asegurarLogs(plataforma: SesionPlataforma): Promise<void> {
   const http = await nuevoHttp()
-  const logs = await new Cliente(http, plataforma.token).lista('/platform/observability/logs?window=24h&limit=100')
-  for (let i = logs.length; i < PAGINA + 5; i += 1) {
+  const api = new Cliente(http, plataforma.token)
+  const contar = async () => (await api.lista('/platform/observability/logs?window=24h&limit=100')).length
+  for (let i = await contar(); i < PAGINA + 5; i += 1) {
     await http.post(`${API_ORIGIN}/api/v1/auth/login`, {
       data: { email: `nadie-${unico()}@e2e.resthub.dev`, password: unico() },
     })
   }
+  // La telemetría se guarda en segundo plano: en una base recién creada (el
+  // CI) los logs tardan un momento en aparecer.
+  await expect.poll(contar, { timeout: 30_000 }).toBeGreaterThan(PAGINA)
   await http.dispose()
 }
 
