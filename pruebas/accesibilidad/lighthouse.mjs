@@ -13,7 +13,7 @@
 // rendimiento se mediría con ruido. Variables: A11Y_SOLO, A11Y_PRESETS=escritorio,movil,
 // A11Y_REPETIR=n (corridas por página; se informa la mediana de rendimiento).
 import { spawn } from 'node:child_process'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { loadavg, tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -63,7 +63,13 @@ for (const estado of estados) {
   for (const preset of presets) {
     const url = `${BASE_URL}${await resolverRuta(estado.ruta)}`
     const corridas = []
-    for (let i = 0; i < repetir; i += 1) {
+    // A11Y_REANUDAR=1: si la corrida se cortó, lo que ya tiene reporte no se vuelve a medir.
+    const previo = join(dir, `${estado.id}--${preset}.report.json`)
+    if (process.env.A11Y_REANUDAR && existsSync(previo)) {
+      const lhr = JSON.parse(readFileSync(previo, 'utf8'))
+      corridas.push({ lhr, report: null, carga: Number.NaN })
+    }
+    for (let i = corridas.length > 0 ? repetir : 0; i < repetir; i += 1) {
       const pagina = await navegador.newPage()
       if (estado.cuenta) await pagina.evaluateOnNewDocument(guionDeSesion(almacenes.get(estado.cuenta)))
       try {
@@ -84,8 +90,10 @@ for (const estado of estados) {
     const rend = corridas.map((c) => c.lhr.categories.performance.score)
     const elegida = corridas.find((c) => c.lhr.categories.performance.score === mediana(rend))
     const base = join(dir, `${estado.id}--${preset}`)
-    await writeFile(`${base}.report.html`, elegida.report[0])
-    await writeFile(`${base}.report.json`, elegida.report[1])
+    if (elegida.report) {
+      await writeFile(`${base}.report.html`, elegida.report[0])
+      await writeFile(`${base}.report.json`, elegida.report[1])
+    }
     const lhr = elegida.lhr
     const puntaje = (c) => Math.round((lhr.categories[c].score ?? 0) * 100)
     const fallidas = (c) =>
@@ -106,7 +114,7 @@ for (const estado of estados) {
       // Carga de la máquina (promedio de 1 min) al empezar cada corrida y el
       // índice de CPU que midió Lighthouse: con otros agentes corriendo, el
       // rendimiento simulado baja aunque la aplicación no cambie.
-      cargaMaquina: corridas.map((c) => Number(c.carga.toFixed(1))),
+      cargaMaquina: corridas.map((c) => (Number.isNaN(c.carga) ? null : Number(c.carga.toFixed(1)))),
       benchmarkIndex: lhr.environment.benchmarkIndex,
     }
     filas.push(fila)
@@ -119,7 +127,6 @@ chrome.kill()
 rmSync(perfil, { recursive: true, force: true })
 
 // Resumen combinado con lo que ya había si se midió una parte.
-const { existsSync } = await import('node:fs')
 const rutaResumen = join(dir, 'resumen.json')
 const previo = existsSync(rutaResumen) && (process.env.A11Y_SOLO || process.env.A11Y_PRESETS) ? await leerJson(rutaResumen) : { filas: [] }
 const nuevas = new Set(filas.map((f) => `${f.id}--${f.preset}`))

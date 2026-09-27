@@ -194,6 +194,11 @@ async function ejecutarPaso(pagina, paso) {
   if (paso.boton) return primero(pagina.getByRole('button', { name: paso.boton, exact: typeof paso.boton === 'string' })).click()
   if (paso.pestana) return primero(pagina.getByRole('tab', { name: paso.pestana, exact: typeof paso.pestana === 'string' })).click()
   if (paso.opcion) return pagina.getByRole('radio', { name: paso.opcion }).first().check({ force: true })
+  if (paso.fecha) {
+    // Una fecha relativa a hoy, en días (-7: hace una semana), en el campo con esa etiqueta.
+    const dia = new Date(Date.now() - 5 * 3600_000 + paso.dias * 86_400_000).toISOString().slice(0, 10)
+    return pagina.getByLabel(paso.fecha, { exact: true }).fill(dia)
+  }
   if (paso.enlace) return primero(pagina.getByRole('link', { name: paso.enlace })).click()
   if (paso.resumen) return primero(pagina.locator('summary', { hasText: paso.resumen })).click()
   if (paso.clic) return primero(pagina.locator(paso.clic)).click()

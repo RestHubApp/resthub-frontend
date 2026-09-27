@@ -9,6 +9,7 @@
 //   { pestana: 'Nombre' }           clic en la pestaña (role=tab)
 //   { enlace: 'Nombre' }            clic en el enlace
 //   { opcion: 'Nombre' }            marca la opción (role=radio)
+//   { fecha: 'Etiqueta', dias: -7 } pone en ese campo la fecha de hace 7 días
 //   { resumen: 'Texto' }            abre un <details> por su <summary>
 //   { clic: 'selector css' }        clic en el primer elemento visible
 //   { sinConexion: true }           corta la red del contexto
@@ -111,7 +112,7 @@ export const OVERLAYS = [
   { id: 'o-unir-mesa', nombre: 'Diálogo «Unir otra mesa»', tipo: 'Dialog', ruta: '/pedidos/:pedidoPorCobrar', cuenta: 'encargado', pasos: [{ boton: 'Unir otra mesa' }] },
   { id: 'o-comprobante', nombre: 'Diálogo «Emitir boleta o factura»', tipo: 'Dialog', ruta: '/pedidos/:pedidoSinComprobante', cuenta: 'encargado', pasos: [{ boton: 'Emitir boleta o factura' }] },
   { id: 'o-tablero-cancelar', nombre: 'Cancelar desde el tablero', tipo: 'Dialog', ruta: '/tablero', cuenta: 'encargado', pasos: [{ boton: /^Cancelar pedido #/ }] },
-  { id: 'd-historial', nombre: 'Historial: detalle desplegado', tipo: 'Desplegable', ruta: '/tablero/historial', cuenta: 'encargado', pasos: [{ boton: /^Ver el detalle del pedido/ }], espera: 'main' },
+  { id: 'd-historial', nombre: 'Historial: detalle desplegado', tipo: 'Desplegable', ruta: '/tablero/historial', cuenta: 'encargado', pasos: [{ fecha: 'Desde', dias: -7 }, { boton: /^Ver el detalle del pedido/ }], espera: 'main' },
 
   // Caja y comprobantes.
   { id: 'o-turno', nombre: 'Diálogo del turno de caja', tipo: 'Dialog', ruta: '/caja', cuenta: 'encargado', pasos: [{ boton: /Cerró/ }] },
