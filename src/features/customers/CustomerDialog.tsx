@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -26,10 +27,18 @@ interface CustomerDialogProps {
 export default function CustomerDialog({ open, customer, onClose }: CustomerDialogProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const { register, handleSubmit, formState } = useForm<CustomerValues>({
+  const { register, handleSubmit, formState, reset } = useForm<CustomerValues>({
     resolver: zodResolver(customerSchema),
     values: customerDefaults(customer),
   })
+  // Al guardar, la ventana se cierra sin pasar por `onOpenChange` y el
+  // formulario conservaba lo escrito: «Nuevo cliente» volvía a abrir con los
+  // datos del anterior. Cada vez que se abre, arranca de sus valores.
+  useEffect(() => {
+    if (open) {
+      reset(customerDefaults(customer))
+    }
+  }, [open, customer, reset])
   const guardar = useMutation({
     mutationFn: (values: CustomerValues) => saveCustomer(customerRequest(values), customer?.id),
     onSuccess: async (saved) => {

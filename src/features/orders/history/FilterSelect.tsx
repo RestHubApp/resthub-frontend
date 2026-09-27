@@ -11,12 +11,14 @@ interface FilterSelectProps {
   /** El texto de la opcion vacia, la que no filtra. */
   readonly anyLabel: string
   readonly children: ReactNode
+  /** Clases extra del contenedor, por ejemplo para ocupar la fila entera en el celular. */
+  readonly className?: string
 }
 
 /** Una lista de un filtro, con su etiqueta visible. */
-export default function FilterSelect({ id, label, value, onChange, anyLabel, children }: FilterSelectProps) {
+export default function FilterSelect({ id, label, value, onChange, anyLabel, children, className = '' }: FilterSelectProps) {
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
+    <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
       <Label htmlFor={id}>{label}</Label>
       <NativeSelect
         id={id}

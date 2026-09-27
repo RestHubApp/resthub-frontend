@@ -19,6 +19,9 @@ import StaffCreateForm from './StaffCreateForm'
 import { STAFF_LIST_QUERY } from './staffList'
 import StaffRowActions from './StaffRowActions'
 
+// Una columna que en el celular se lee bajo el nombre.
+const SOLO_ANCHA = 'hidden sm:table-cell'
+
 function columnas(
   propiaId: number | undefined,
   puedeGestionar: (cuenta: StaffResponse) => boolean,
@@ -27,13 +30,23 @@ function columnas(
     {
       id: 'nombre',
       header: 'Nombre',
-      cell: (cuenta) => (cuenta.id === propiaId ? `${cuenta.full_name} (tú)` : cuenta.full_name),
+      // En el celular el correo, el rol y el estado van bajo el nombre: la tabla de cinco
+      // columnas dejaba las acciones fuera de la vista a 390 px.
+      cell: (cuenta) => (
+        <span className="flex flex-col">
+          <span>{cuenta.id === propiaId ? `${cuenta.full_name} (tú)` : cuenta.full_name}</span>
+          <span className="text-xs break-all text-muted-foreground sm:hidden">
+            {cuenta.email} · {cuenta.role_label} · {cuenta.is_active ? 'Activa' : 'Inactiva'}
+          </span>
+        </span>
+      ),
     },
-    { id: 'correo', header: 'Correo', cell: (cuenta) => cuenta.email },
-    { id: 'rol', header: 'Rol', cell: (cuenta) => cuenta.role_label },
+    { id: 'correo', header: 'Correo', className: SOLO_ANCHA, cell: (cuenta) => cuenta.email },
+    { id: 'rol', header: 'Rol', className: SOLO_ANCHA, cell: (cuenta) => cuenta.role_label },
     {
       id: 'estado',
       header: 'Estado',
+      className: SOLO_ANCHA,
       cell: (cuenta) => (
         <StatusBadge
           label={cuenta.is_active ? 'Activa' : 'Inactiva'}
