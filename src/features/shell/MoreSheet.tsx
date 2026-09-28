@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLocation } from 'react-router'
 
 import { openAccessibilityMenu } from '../../components/accessibilityMenu'
-import Icon from '../../components/Icon'
+import ShellIcon from './ShellIcon'
 import { Button } from '../../components/ui/button'
 import type { CurrentUserResponse } from '../../api/types'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '../../components/ui/sheet'
@@ -43,7 +43,7 @@ export default function MoreSheet({ entries, account }: MoreSheetProps) {
           type="button"
           className={adentro ? TAB_ACTIVE : TAB_IDLE}
         >
-          <Icon name={entries.length > 0 ? 'mas' : 'perfil'} size={22} />
+          <ShellIcon name={entries.length > 0 ? 'mas' : 'perfil'} size={22} />
           <span>{etiqueta}</span>
         </button>
       </SheetTrigger>
@@ -66,7 +66,7 @@ export default function MoreSheet({ entries, account }: MoreSheetProps) {
             window.setTimeout(openAccessibilityMenu, SHEET_CLOSE_MS)
           }}
         >
-          <Icon name="accesibilidad" size={18} />
+          <ShellIcon name="accesibilidad" size={18} />
           <span>Accesibilidad</span>
         </Button>
         <SessionActions

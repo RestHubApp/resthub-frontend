@@ -1,11 +1,11 @@
 import { type RefObject, useEffect, useRef } from 'react'
 
 import type { CurrentUserResponse } from '../../api/types'
-import Icon from '../../components/Icon'
 import { tokenExpiresAt } from '../../services/tokenExpiry'
 import { useSession } from '../../store/session'
 import { previewTimeLeft } from './previewCountdown'
 import PreviewExitButton from './PreviewExitButton'
+import ShellIcon from './ShellIcon'
 import { useSecondTick } from './useSecondTick'
 
 // El alto de la franja, para que la barra lateral y la cabecera del celular,
@@ -57,7 +57,7 @@ export default function PreviewBanner({ account }: PreviewBannerProps) {
     >
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-1.5 sm:px-6">
         <p className="m-0 flex min-w-0 flex-[1_1_16rem] items-center gap-2 text-sm font-semibold">
-          <Icon name="ver" size={18} />
+          <ShellIcon name="ver" size={18} />
           <span className="min-w-0 break-words">
             Vista previa · {account.restaurant.name} · como {account.user.role_label}
           </span>

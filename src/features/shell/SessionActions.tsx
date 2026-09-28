@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router'
 
 import ConfirmDialog from '../../components/ConfirmDialog'
-import Icon from '../../components/Icon'
+import ShellIcon from './ShellIcon'
 import { Button } from '../../components/ui/button'
 import { useQueuedOrders } from '../../store/offlineQueue'
 import { usePreview, useSession } from '../../store/session'
@@ -37,7 +37,7 @@ export default function SessionActions({ fullName, roleLabel, onNavigate }: Sess
     pendientes.length === 1 ? 'Un pedido tuyo espera' : `${String(pendientes.length)} pedidos tuyos esperan`
   const salir = (onClick?: () => void) => (
     <Button type="button" variant="ghost" className="h-11 justify-start gap-3 px-3" onClick={onClick}>
-      <Icon name="salir" size={18} />
+      <ShellIcon name="salir" size={18} />
       <span>Cerrar sesión</span>
     </Button>
   )
@@ -62,7 +62,7 @@ export default function SessionActions({ fullName, roleLabel, onNavigate }: Sess
     <div className="flex flex-col gap-1 border-t pt-3">
       <Button asChild variant="ghost" className="h-auto min-h-11 justify-start gap-3 px-3 py-2">
         <Link to="/perfil" onClick={onNavigate}>
-          <Icon name="perfil" size={18} />
+          <ShellIcon name="perfil" size={18} />
           <span className="flex min-w-0 flex-col items-start leading-tight">
             <span className="max-w-full truncate">{fullName}</span>
             <span className="text-xs font-normal text-muted-foreground">{roleLabel}</span>

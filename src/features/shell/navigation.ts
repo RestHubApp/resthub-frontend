@@ -1,10 +1,10 @@
-import type { IconName } from '../../components/icons'
 import type { PermissionCode } from '../../api/types'
+import type { ShellIconName } from './ShellIcon'
 
 export interface NavEntry {
   readonly to: string
   readonly label: string
-  readonly icon: IconName
+  readonly icon: ShellIconName
   /** Para que sirve la pantalla. Lo muestra el aviso de "Próximamente". */
   readonly description: string
   /** Permiso que la muestra. El mismo que exige la ruta. */
