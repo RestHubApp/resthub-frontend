@@ -50,6 +50,7 @@ describe('newOrderPath', () => {
       address: 'Calle 1',
       reference: '',
       customer_id: 3,
+      consent: false,
     })
     const params = new URLSearchParams(ruta.split('?')[1])
     expect(params.get('tipo')).toBe('delivery')

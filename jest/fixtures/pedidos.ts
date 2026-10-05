@@ -197,6 +197,8 @@ export function cliente(cambios: Partial<Customer> = {}): Customer {
     last_visit: CREADO,
     recent_orders: [],
     created_at: CREADO,
+    consent_at: CREADO,
+    consent_version: '2026-10',
     ...cambios,
   }
 }

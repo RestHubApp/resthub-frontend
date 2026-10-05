@@ -115,12 +115,14 @@ describe('CustomersView: ficha y edición', () => {
     await user.click(within(ventana).getByRole('button', { name: 'Guardar' }))
     expect(await within(ventana).findByText('Escribe el nombre')).toBeInTheDocument()
     expect(within(ventana).getByText('Escribe un correo válido')).toBeInTheDocument()
+    expect(within(ventana).getByText('Sin su consentimiento no se puede guardar al cliente en la libreta.')).toBeInTheDocument()
 
     await user.type(within(ventana).getByLabelText(NOMBRE), 'Pedro')
     await user.clear(within(ventana).getByLabelText('Correo (opcional)'))
+    await user.click(within(ventana).getByRole('checkbox', { name: /Ley N\.º 29733/u }))
     await user.click(within(ventana).getByRole('button', { name: 'Guardar' }))
 
     expect(await within(ventana).findByText('Ya hay un cliente con ese teléfono')).toBeInTheDocument()
-    expect(api.llamadas('post', LISTA)[0]?.body).toEqual({ name: 'Pedro', phone: '', email: '', address: '', reference: '', notes: '' })
+    expect(api.llamadas('post', LISTA)[0]?.body).toEqual({ name: 'Pedro', phone: '', email: '', address: '', reference: '', notes: '', consent: true })
   })
 })

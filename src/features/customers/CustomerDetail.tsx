@@ -42,6 +42,8 @@ export default function CustomerDetail({ customer, timeZone, canEdit, onEdit }: 
         ))}
       </dl>
       {customer.is_frequent ? <StatusBadge label="Cliente frecuente" tone="completed" /> : null}
+      {/* Guardado antes de pedir el consentimiento: al editarlo se puede anotar. */}
+      {customer.consent_at === null ? <StatusBadge label="Sin consentimiento registrado" tone="pending" /> : null}
       {direccion.length > 0 ? <p className="m-0 text-sm">{direccion.join(' · ')}</p> : null}
       {customer.notes === '' ? null : <p className="m-0 rounded-md bg-muted p-3 text-sm">{customer.notes}</p>}
       <h3 className="m-0 text-sm font-semibold">Últimos pedidos</h3>
