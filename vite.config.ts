@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import tailwindcss from '@tailwindcss/vite'
@@ -9,6 +10,25 @@ import { VitePWA } from 'vite-plugin-pwa'
 // y con `--primary` de index.css, o la barra del sistema cambia de tono al
 // abrir la aplicacion instalada.
 const THEME_COLOR = '#9a3412'
+
+// Las cabeceras de seguridad que pone Vercel (CSP incluida), también en
+// `vite preview`: así una CSP que rompe algo se ve en local y no en producción.
+// connect-src admite cualquier origen https porque el API cambia por entorno
+// (VITE_API_URL); `script-src 'self'` es lo que frena una inyección. El widget
+// de accesibilidad pide 'unsafe-inline' en estilos y fuentes de jsDelivr.
+interface VercelConfig {
+  readonly headers: readonly { readonly headers: readonly { readonly key: string; readonly value: string }[] }[]
+}
+// eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta fija del repositorio, armada con import.meta.url
+const vercel = JSON.parse(readFileSync(new URL('vercel.json', import.meta.url), 'utf8')) as VercelConfig
+// En local el API va por http (localhost:8000, o 8201 en las E2E), que la CSP
+// de producción no deja conectar: solo aquí se le suma.
+const SECURITY_HEADERS = Object.fromEntries(
+  vercel.headers.flatMap((regla) => regla.headers.map(({ key, value }) => [
+    key,
+    key === 'Content-Security-Policy' ? value.replace("connect-src 'self' https:", "connect-src 'self' https: http://localhost:* http://127.0.0.1:*") : value,
+  ])),
+)
 
 export default defineConfig({
   plugins: [
@@ -92,6 +112,9 @@ export default defineConfig({
         },
       },
     },
+  },
+  preview: {
+    headers: SECURITY_HEADERS,
   },
   server: {
     port: 5173,

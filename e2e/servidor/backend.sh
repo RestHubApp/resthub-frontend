@@ -19,6 +19,8 @@ export DATABASE_URL="sqlite+aiosqlite:///$DB"
 export DEBUG=true LOG_JSON=false
 export JWT_SECRET_KEY="pruebas-locales-solo-desarrollo-000000000000"
 export OPENROUTER_API_KEY="" TYPESAFE_API_KEY=""
+# Todas las pruebas salen de la misma IP: el límite por IP del backend las cortaría.
+export RATE_LIMIT_PER_MINUTE=0
 export CORS_ALLOWED_ORIGINS="[\"$FRONT\"]"
 export FRONTEND_BASE_URL="$FRONT"
 
