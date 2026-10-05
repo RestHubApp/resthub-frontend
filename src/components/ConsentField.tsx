@@ -22,17 +22,18 @@ interface ConsentFieldProps {
 /**
  * La casilla del consentimiento informado del cliente.
  *
- * Toda la fila es la etiqueta: en el celular se marca tocando el texto, no
- * solo el cuadrito.
+ * Como en `StockRulesCard`: la casilla de Radix es un <button>, así que se
+ * nombra con `aria-labelledby` y la etiqueta apunta a ella con `htmlFor` en vez
+ * de envolverla (WAVE da por huérfano un <label> que envuelve un <button>).
+ * Tocar el texto también la marca: en el celular no hace falta atinarle al
+ * cuadrito.
  */
 export default function ConsentField({ id, checked, onChange, error }: ConsentFieldProps) {
   const { errorId, describedBy } = fieldIds(id, undefined, error)
+  const textoId = `${id}-texto`
   return (
     <div className="flex flex-col gap-1">
-      <label
-        htmlFor={id}
-        className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md border border-input p-3 text-sm"
-      >
+      <div className="flex min-h-11 items-start gap-3 rounded-md border border-input p-3 text-sm">
         <Checkbox
           id={id}
           className="mt-0.5"
@@ -40,11 +41,14 @@ export default function ConsentField({ id, checked, onChange, error }: ConsentFi
           onCheckedChange={(valor) => {
             onChange(valor === true)
           }}
+          aria-labelledby={textoId}
           aria-invalid={error === undefined ? undefined : true}
           aria-describedby={describedBy}
         />
-        <span>{CONSENT_TEXT}</span>
-      </label>
+        <label id={textoId} htmlFor={id} className="cursor-pointer">
+          {CONSENT_TEXT}
+        </label>
+      </div>
       <FieldError id={errorId} message={error} />
     </div>
   )
