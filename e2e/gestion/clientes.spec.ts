@@ -32,6 +32,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
     'dialogo:customers/CustomerDialog',
     'hoja:customers/CustomerSheet',
     'funcion:clientes.crear',
+    'funcion:clientes.consentimiento',
     'funcion:clientes.telefono-repetido',
     'funcion:clientes.buscar',
     'funcion:clientes.ver-ficha',
@@ -51,12 +52,15 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
   await alta.getByRole('button', { name: 'Guardar' }).click()
   await expect(alta.getByText('Escribe el nombre')).toBeVisible()
   await expect(alta.getByText('Escribe un correo válido')).toBeVisible()
-  await alta.getByLabel('Nombre').fill('Rosa Díaz')
+  // Ley N.º 29733: sin el consentimiento del cliente no se guarda.
+  await expect(alta.getByText('Sin su consentimiento no se puede guardar al cliente en la libreta.')).toBeVisible()
+  await alta.getByLabel('Nombre', { exact: true }).fill('Rosa Díaz')
   await alta.getByLabel('Teléfono (opcional)').fill('987654321')
   await alta.getByLabel('Correo (opcional)').fill('rosa@correo.pe')
   await alta.getByLabel('Dirección (opcional)').fill('Av. Sol 123')
   await alta.getByLabel('Referencia (opcional)').fill('Frente al parque')
   await alta.getByLabel('Notas (opcional)').fill('Sin cebolla')
+  await alta.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
   await evidencia(page, 'ges-21-1-nuevo-cliente')
   await alta.getByRole('button', { name: 'Guardar' }).click()
   await expect(aviso(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
@@ -66,8 +70,9 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
 
   // El teléfono identifica al cliente: no se repite.
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  await alta.getByLabel('Nombre').fill('Otra Rosa')
+  await alta.getByLabel('Nombre', { exact: true }).fill('Otra Rosa')
   await alta.getByLabel('Teléfono (opcional)').fill('987654321')
+  await alta.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
   await alta.getByRole('button', { name: 'Guardar' }).click()
   await expect(alta.getByRole('alert')).toContainText('El teléfono 987654321 ya es de Rosa Díaz.')
   await alta.getByRole('button', { name: 'Cancelar' }).click()
@@ -117,7 +122,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
 })
 
 test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', async ({ page, localConCaja: local }) => {
-  const cliente = await api(local).post('/customers', { name: 'Julio Paz', phone: '912345678', email: '', address: '', reference: '', notes: '' })
+  const cliente = await api(local).post('/customers', { name: 'Julio Paz', phone: '912345678', email: '', address: '', reference: '', notes: '', consent: true })
   await pedidoDe(local, id(cliente), 'dine_in')
   await abrirComo(page, local.encargado, '/clientes')
   await page.getByRole('button', { name: /Julio Paz/u }).click()
@@ -131,14 +136,16 @@ test('GES-25 la ventana de un cliente nuevo abre vacía después de guardar otro
   await abrirComo(page, local.encargado, '/clientes')
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
   const alta = page.getByRole('dialog', { name: 'Nuevo cliente' })
-  await alta.getByLabel('Nombre').fill('Rosa Díaz')
+  await alta.getByLabel('Nombre', { exact: true }).fill('Rosa Díaz')
   await alta.getByLabel('Teléfono (opcional)').fill('987654321')
   await alta.getByLabel('Notas (opcional)').fill('Sin cebolla')
+  await alta.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
   await alta.getByRole('button', { name: 'Guardar' }).click()
   await expect(aviso(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
   await evidencia(page, 'ges-25-1-cliente-nuevo-vacio')
-  await expect(alta.getByLabel('Nombre')).toHaveValue('')
+  await expect(alta.getByRole('checkbox', { name: /Ley N\.º 29733/u })).not.toBeChecked()
+  await expect(alta.getByLabel('Nombre', { exact: true })).toHaveValue('')
   await expect(alta.getByLabel('Teléfono (opcional)')).toHaveValue('')
   await expect(alta.getByLabel('Notas (opcional)')).toHaveValue('')
 })
