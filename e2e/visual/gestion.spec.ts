@@ -108,6 +108,7 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
     table_id: local.mesa('2').id,
   })
   await api(local).post('/customers', {
+    consent: true,
     name: 'Ana Torres',
     phone: '999888777',
     email: 'ana@correo.pe',

@@ -11,6 +11,7 @@ import { Button } from '../../../components/ui/button'
 import { onSubmit } from '../../../hooks/formSubmit'
 import { errorMessage } from '../../../services/api'
 import CustomerLookup from './CustomerLookup'
+import TakeawayConsent from './TakeawayConsent'
 import TakeawayFields from './TakeawayFields'
 import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, fromCustomer, newOrderPath, takeawaySchema, type TakeawayValues } from './takeawaySchema'
@@ -86,6 +87,7 @@ export default function TakeawayDialog() {
             form.reset(fromCustomer(cliente, form.getValues('mode')))
           }} />
           <TakeawayFields form={form} delivery={mode === 'delivery'} />
+          <TakeawayConsent form={form} />
           {fallo === null ? null : <FormMessage tone="error">{fallo}</FormMessage>}
           <DialogFormActions>
             <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={() => {

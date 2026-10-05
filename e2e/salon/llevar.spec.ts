@@ -85,6 +85,8 @@ test('SAL-23 un delivery exige nombre, teléfono y dirección, y el cliente nuev
   await ventana.getByRole('textbox', { name: 'Teléfono' }).fill('912345678')
   await ventana.getByRole('textbox', { name: 'Dirección de entrega' }).fill('Jr. Huallaga 450, Cercado')
   await ventana.getByRole('textbox', { name: 'Referencia (opcional)' }).fill('Puerta verde')
+  // Ley N.º 29733: el cliente acepta quedar en la libreta.
+  await ventana.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
   await ventana.getByRole('button', { name: 'Elegir platos' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Delivery · Luis Quispe' })).toBeVisible()
   await expect(page.getByText('Nuevo delivery a Jr. Huallaga 450, Cercado.')).toBeVisible()
@@ -103,6 +105,27 @@ test('SAL-23 un delivery exige nombre, teléfono y dirección, y el cliente nuev
   await evidencia(page, 'sal-23-2-detalle-delivery')
 })
 
+test('SAL-23B sin el consentimiento del cliente, el delivery sale igual y no queda en la libreta @movil', async ({
+  page,
+  local,
+}) => {
+  cubre('funcion:pedidos.delivery-sin-consentimiento')
+  await abrirComo(page, local.mesero, '/pedidos')
+  const ventana = await abrirParaLlevar(page)
+  await ventana.getByRole('radio', { name: 'Delivery' }).click()
+  await ventana.getByRole('textbox', { name: 'Nombre de quien recibe' }).fill('Marta Rojas')
+  await ventana.getByRole('textbox', { name: 'Teléfono' }).fill('934567812')
+  await ventana.getByRole('textbox', { name: 'Dirección de entrega' }).fill('Av. Grau 300, Barranco')
+  await expect(ventana.getByRole('checkbox', { name: /Ley N\.º 29733/u })).not.toBeChecked()
+  await ventana.getByRole('button', { name: 'Elegir platos' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Delivery · Marta Rojas' })).toBeVisible()
+  await enviarUnPlato(page, /^Ají de gallina/u)
+
+  expect(await api(local).lista('/customers?q=934567812')).toEqual([])
+  const [pedido] = await api(local, local.mesero).lista('/orders/active')
+  expect(pedido).toMatchObject({ type: 'delivery', customer_phone: '934567812', customer_id: null })
+})
+
 test('SAL-24 el mesero encuentra al cliente frecuente por nombre y no le vuelve a pedir los datos @movil', async ({
   page,
   local,
@@ -115,6 +138,7 @@ test('SAL-24 el mesero encuentra al cliente frecuente por nombre y no le vuelve 
     address: 'Av. Brasil 1200, Magdalena',
     reference: 'Edificio azul',
     notes: '',
+    consent: true,
   })
   await abrirComo(page, local.mesero, '/pedidos')
   const ventana = await abrirParaLlevar(page)

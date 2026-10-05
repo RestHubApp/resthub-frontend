@@ -478,6 +478,10 @@
     "descripcion": "Dar de alta un cliente (con validación)"
   },
   {
+    "id": "funcion:clientes.consentimiento",
+    "descripcion": "Clientes › el alta exige el consentimiento del cliente para tratar sus datos (Ley N.º 29733)"
+  },
+  {
     "id": "funcion:clientes.telefono-repetido",
     "descripcion": "Un teléfono que ya es de otro cliente se rechaza"
   },

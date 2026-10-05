@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
 import { useNotifications } from '../../store/notifications'
+import CustomerConsent from './CustomerConsent'
 import { customerDefaults, customerRequest, customerSchema, type CustomerValues, LIMITES } from './customerSchema'
 
 interface CustomerDialogProps {
@@ -27,8 +28,10 @@ interface CustomerDialogProps {
 export default function CustomerDialog({ open, customer, onClose }: CustomerDialogProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const { register, handleSubmit, formState, reset } = useForm<CustomerValues>({
-    resolver: zodResolver(customerSchema),
+  // El alta exige el consentimiento; un cliente guardado antes de pedirlo
+  // puede darlo al editarse; uno que ya lo dio no lo vuelve a dar.
+  const { register, handleSubmit, formState, reset, control } = useForm<CustomerValues>({
+    resolver: zodResolver(customerSchema(customer === null)),
     values: customerDefaults(customer),
   })
   // Al guardar, la ventana se cierra sin pasar por `onOpenChange` y el
@@ -68,6 +71,9 @@ export default function CustomerDialog({ open, customer, onClose }: CustomerDial
         <TextField id="customer-address" label="Dirección (opcional)" icon="ubicacion" maxLength={LIMITES.address} field={register('address')} error={errors.address?.message} />
         <TextField id="customer-reference" label="Referencia (opcional)" icon="nota" maxLength={LIMITES.reference} field={register('reference')} error={errors.reference?.message} />
         <TextareaField id="customer-notes" label="Notas (opcional)" rows={2} placeholder="Alergias, preferencias, cómo pide" maxLength={LIMITES.notes} field={register('notes')} error={errors.notes?.message} />
+        <div className="sm:col-span-2">
+          <CustomerConsent control={control} customer={customer} errors={errors} />
+        </div>
         {guardar.isError ? (
           <div className="sm:col-span-2">
             <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudo guardar el cliente.')}</FormMessage>

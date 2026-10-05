@@ -1,5 +1,5 @@
 {
-  "total": 420,
+  "total": 422,
   "porTipo": {
     "ruta": 35,
     "confirmacion": 10,
@@ -7,7 +7,7 @@
     "dialogo": 24,
     "hoja": 3,
     "pestanas": 2,
-    "funcion": 257,
+    "funcion": 259,
     "estado": 77,
     "rol": 6
   },
@@ -1165,6 +1165,12 @@
       "origen": "e2e/inventario/funciones/gestion.json"
     },
     {
+      "id": "funcion:clientes.consentimiento",
+      "tipo": "funcion",
+      "descripcion": "Clientes › el alta exige el consentimiento del cliente para tratar sus datos (Ley N.º 29733)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
       "id": "funcion:clientes.telefono-repetido",
       "tipo": "funcion",
       "descripcion": "Un teléfono que ya es de otro cliente se rechaza",
@@ -1984,6 +1990,12 @@
       "id": "funcion:pedidos.cliente-nuevo-a-libreta",
       "tipo": "funcion",
       "descripcion": "Pedidos › Delivery: un cliente que no estaba se agrega a la libreta y queda ligado al pedido",
+      "origen": "e2e/inventario/funciones/salon.json"
+    },
+    {
+      "id": "funcion:pedidos.delivery-sin-consentimiento",
+      "tipo": "funcion",
+      "descripcion": "Pedidos › Delivery: sin el consentimiento del cliente el pedido sale igual y el cliente no queda en la libreta",
       "origen": "e2e/inventario/funciones/salon.json"
     },
     {

@@ -27,3 +27,19 @@ minimumReleaseAgeExclude:
   - scheduler@0.28.0
   - vite@8.3.0
   - zod@4.6.1
+
+# Avisos de seguridad en dependencias transitivas de las herramientas de
+# desarrollo (eslint, jest, workbox), que no llegan al navegador.
+overrides:
+  # GHSA-qhr7-859c-m2p7 y el de parseCommaParts: cada rama mayor a su versión corregida.
+  brace-expansion@<1.1.20: 1.1.20
+  brace-expansion@>=2.0.0 <2.1.6: 2.1.6
+  brace-expansion@>=4.0.0 <5.0.11: 5.0.11
+
+auditConfig:
+  ignoreGhsas:
+    # braces <=3.0.3 todavía no tiene versión corregida. Solo lo usan micromatch
+    # y fast-glob dentro de eslint-plugin-boundaries, eslint-plugin-check-file y
+    # la CLI de shadcn, sobre patrones del propio repositorio. Quitar en cuanto
+    # salga la corrección.
+    - GHSA-vfj7-8cjw-p6xm

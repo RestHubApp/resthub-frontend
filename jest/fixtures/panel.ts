@@ -69,6 +69,8 @@ export function cliente(cambios: Partial<Customer> = {}): Customer {
     is_frequent: true,
     last_visit: '2026-09-20T19:00:00Z',
     created_at: '2026-05-01T12:00:00Z',
+    consent_at: '2026-05-01T12:00:00Z',
+    consent_version: '2026-10',
     recent_orders: [],
     ...cambios,
   }

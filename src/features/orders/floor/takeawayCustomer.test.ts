@@ -23,6 +23,7 @@ const delivery: TakeawayValues = {
   customer_name: 'Ana',
   phone: '987654321',
   address: 'Av. Larco 123',
+  consent: true,
 }
 
 function conSenal(onLine: boolean) {
@@ -42,9 +43,14 @@ describe('withCustomer', () => {
   it('agrega a la libreta al cliente nuevo de un delivery, con un plazo corto', async () => {
     guardar.mockResolvedValue({ id: 9 } as Customer)
     await expect(withCustomer(delivery)).resolves.toMatchObject({ customer_id: 9 })
-    expect(guardar).toHaveBeenCalledWith(expect.objectContaining({ phone: '987654321' }), undefined, {
+    expect(guardar).toHaveBeenCalledWith(expect.objectContaining({ phone: '987654321', consent: true }), undefined, {
       timeout: expect.any(Number) as unknown as number,
     })
+  })
+
+  it('sin el consentimiento del cliente no lo guarda y el pedido sigue', async () => {
+    await expect(withCustomer({ ...delivery, consent: false })).resolves.toMatchObject({ customer_id: null })
+    expect(guardar).not.toHaveBeenCalled()
   })
 
   it('sin señal ni lo intenta', async () => {

@@ -17,6 +17,8 @@ export const takeawaySchema = z
     address: textoOpcional(MAX_DIRECCION),
     reference: textoOpcional(MAX_REFERENCIA),
     customer_id: z.number().int().positive().nullable(),
+    // El cliente nuevo de un delivery aceptó quedar en la libreta (Ley N.º 29733).
+    consent: z.boolean(),
   })
   .superRefine((values, ctx) => {
     if (values.mode === 'takeaway') {
@@ -44,6 +46,7 @@ export const EMPTY_TAKEAWAY: TakeawayValues = {
   address: '',
   reference: '',
   customer_id: null,
+  consent: false,
 }
 
 /** Los datos de un cliente de la libreta, listos para el formulario. */
@@ -55,6 +58,7 @@ export function fromCustomer(customer: Customer, mode: TakeawayValues['mode']): 
     address: customer.address,
     reference: customer.reference,
     customer_id: customer.id,
+    consent: false,
   }
 }
 

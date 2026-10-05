@@ -2362,6 +2362,11 @@ export interface components {
              */
             address: string;
             /**
+             * Consent
+             * @default false
+             */
+            consent: boolean;
+            /**
              * Email
              * @default
              */
@@ -2390,6 +2395,10 @@ export interface components {
             address: string;
             /** Average Ticket */
             average_ticket: string;
+            /** Consent At */
+            consent_at: string | null;
+            /** Consent Version */
+            consent_version: string | null;
             /**
              * Created At
              * Format: date-time

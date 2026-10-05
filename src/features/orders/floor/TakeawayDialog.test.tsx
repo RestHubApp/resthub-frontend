@@ -5,6 +5,8 @@ import { cliente, ultimoCuerpo } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, servidor, sinRespuesta } from '#jest/harness'
 import TakeawayDialog from './TakeawayDialog'
 
+const DIRECCION = 'Dirección de entrega'
+const AREQUIPA = 'Av. Arequipa 500'
 const ELEGIR = { name: 'Elegir platos' }
 const RECIBE = 'Nombre de quien recibe'
 const CLIENTES = '/customers'
@@ -69,13 +71,29 @@ describe('TakeawayDialog', () => {
     await montaje.user.click(within(ventana).getByRole('radio', { name: 'Delivery' }))
     await montaje.user.type(within(ventana).getByLabelText(RECIBE), 'Ana')
     await montaje.user.type(within(ventana).getByLabelText('Teléfono'), '912345678')
-    await montaje.user.type(within(ventana).getByLabelText('Dirección de entrega'), 'Av. Arequipa 500')
+    await montaje.user.type(within(ventana).getByLabelText(DIRECCION), AREQUIPA)
+    await montaje.user.click(within(ventana).getByRole('checkbox', { name: /Ley N\.º 29733/u }))
     await montaje.user.click(within(ventana).getByRole('button', ELEGIR))
 
     await screen.findByRole('status', RUTA_ACTUAL)
-    expect(ultimoCuerpo(montaje.api.llamadas('post', CLIENTES))).toMatchObject({ name: 'Ana', phone: '912345678' })
+    expect(ultimoCuerpo(montaje.api.llamadas('post', CLIENTES))).toMatchObject({ name: 'Ana', phone: '912345678', consent: true })
     expect(destino().searchParams.get('clienteId')).toBe('55')
-    expect(destino().searchParams.get('direccion')).toBe('Av. Arequipa 500')
+    expect(destino().searchParams.get('direccion')).toBe(AREQUIPA)
+  })
+
+  it('sin el consentimiento del cliente, el delivery sale igual pero no queda en la libreta', async () => {
+    const montaje = abrir()
+    const ventana = await abrirVentana(montaje)
+    await montaje.user.click(within(ventana).getByRole('radio', { name: 'Delivery' }))
+    await montaje.user.type(within(ventana).getByLabelText(RECIBE), 'Ana')
+    await montaje.user.type(within(ventana).getByLabelText('Teléfono'), '912345678')
+    await montaje.user.type(within(ventana).getByLabelText(DIRECCION), AREQUIPA)
+    await montaje.user.click(within(ventana).getByRole('button', ELEGIR))
+
+    await screen.findByRole('status', RUTA_ACTUAL)
+    expect(montaje.api.llamadas('post', CLIENTES)).toHaveLength(0)
+    expect(destino().searchParams.get('clienteId')).toBeNull()
+    expect(destino().searchParams.get('telefono')).toBe('912345678')
   })
 
   it('elegir un cliente frecuente llena sus datos', async () => {
@@ -87,7 +105,7 @@ describe('TakeawayDialog', () => {
     await montaje.user.click(await within(ventana).findByRole('button', { name: /Rosa Quispe/u }))
 
     expect(within(ventana).getByLabelText(RECIBE)).toHaveValue('Rosa Quispe')
-    expect(within(ventana).getByLabelText('Dirección de entrega')).toHaveValue('Jr. Cusco 120')
+    expect(within(ventana).getByLabelText(DIRECCION)).toHaveValue('Jr. Cusco 120')
     expect(montaje.api.llamadas('get', CLIENTES).at(-1)?.params).toMatchObject({ q: 'Rosa' })
   })
 

@@ -32,6 +32,10 @@
     "descripcion": "Pedidos › Delivery: un cliente que no estaba se agrega a la libreta y queda ligado al pedido"
   },
   {
+    "id": "funcion:pedidos.delivery-sin-consentimiento",
+    "descripcion": "Pedidos › Delivery: sin el consentimiento del cliente el pedido sale igual y el cliente no queda en la libreta"
+  },
+  {
     "id": "estado:pedidos.cliente-no-encontrado",
     "tipo": "estado",
     "descripcion": "Pedidos › Delivery: la búsqueda sin coincidencias pide escribir los datos"
