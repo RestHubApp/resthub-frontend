@@ -97,6 +97,7 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
     'ruta:/clientes',
     'dialogo:customers/CustomerDialog',
     'hoja:customers/CustomerSheet',
+    'confirmacion:customers/CustomerRights',
   )
   await api(local).post('/reservations', {
     customer_name: 'Lucía Paredes',
@@ -142,4 +143,10 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
   const ficha = page.getByRole('dialog', { name: 'Ana Torres' })
   await expect(ficha.getByText('Prefiere la mesa de la ventana')).toBeVisible()
   await capturarVentana(ficha, 'hoja-cliente')
+
+  await ficha.getByRole('button', { name: 'Borrar sus datos' }).click()
+  const borrar = page.getByRole('alertdialog', { name: '¿Borrar los datos de Ana Torres?' })
+  await capturarVentana(borrar, 'confirmacion-borrar-cliente')
+  await borrar.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(borrar).toBeHidden()
 })

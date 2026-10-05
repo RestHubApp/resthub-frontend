@@ -1,13 +1,13 @@
 {
-  "total": 423,
+  "total": 426,
   "porTipo": {
     "ruta": 36,
-    "confirmacion": 10,
+    "confirmacion": 11,
     "desplegable": 6,
     "dialogo": 24,
     "hoja": 3,
     "pestanas": 2,
-    "funcion": 259,
+    "funcion": 261,
     "estado": 77,
     "rol": 6
   },
@@ -233,6 +233,12 @@
       "tipo": "confirmacion",
       "descripcion": "",
       "origen": "src/features/cash/CloseCashButton.tsx"
+    },
+    {
+      "id": "confirmacion:customers/CustomerRights",
+      "tipo": "confirmacion",
+      "descripcion": "`¿Borrar los datos de ${customer.name}?`",
+      "origen": "src/features/customers/CustomerRights.tsx"
     },
     {
       "id": "confirmacion:menu/CategoryStatusButton",
@@ -1174,6 +1180,18 @@
       "id": "funcion:clientes.consentimiento",
       "tipo": "funcion",
       "descripcion": "Clientes › el alta exige el consentimiento del cliente para tratar sus datos (Ley N.º 29733)",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:clientes.exportar-datos",
+      "tipo": "funcion",
+      "descripcion": "Clientes › derecho de acceso: el encargado descarga lo que se guarda del cliente",
+      "origen": "e2e/inventario/funciones/gestion.json"
+    },
+    {
+      "id": "funcion:clientes.borrar-datos",
+      "tipo": "funcion",
+      "descripcion": "Clientes › derecho de cancelación: el encargado borra los datos del cliente de la ficha, sus pedidos y sus reservas",
       "origen": "e2e/inventario/funciones/gestion.json"
     },
     {

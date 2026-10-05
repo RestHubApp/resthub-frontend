@@ -353,6 +353,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customers/{customer_id}/anonymize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Borrar los datos de un cliente (derecho de cancelación)
+         * @description No se deshace: borra sus datos de la ficha, sus pedidos y sus reservas.
+         *
+         *     Los comprobantes se conservan, como pide la ley tributaria. 409 si tiene
+         *     pedidos en curso.
+         */
+        post: operations["anonymize_customer_api_v1_customers__customer_id__anonymize_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/{customer_id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exportar todo lo que se guarda de un cliente (derecho de acceso) */
+        get: operations["export_customer_api_v1_customers__customer_id__export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/events": {
         parameters: {
             query?: never;
@@ -1960,7 +2000,7 @@ export interface components {
          *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
          * @enum {string}
          */
-        ActivityKind: "signed_in" | "password_changed" | "terms_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "billing_settings_updated" | "customer_created" | "customer_updated" | "reservation_created" | "reservation_updated";
+        ActivityKind: "signed_in" | "password_changed" | "terms_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "reservation_created" | "reservation_updated";
         /** ActivityPageResponse */
         ActivityPageResponse: {
             /** Items */
@@ -2361,6 +2401,42 @@ export interface components {
             is_open: boolean;
             session: components["schemas"]["CashSessionResponse"] | null;
         };
+        /**
+         * CustomerExportResponse
+         * @description Derecho de acceso: todo lo que el local guarda de un cliente.
+         */
+        CustomerExportResponse: {
+            /** Address */
+            address: string;
+            /** Consent At */
+            consent_at: string | null;
+            /** Consent Version */
+            consent_version: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Email */
+            email: string;
+            /**
+             * Exported At
+             * Format: date-time
+             */
+            exported_at: string;
+            /** Name */
+            name: string;
+            /** Notes */
+            notes: string;
+            /** Orders */
+            orders: components["schemas"]["ExportedOrderResponse"][];
+            /** Phone */
+            phone: string;
+            /** Reference */
+            reference: string;
+            /** Reservations */
+            reservations: components["schemas"]["ExportedReservationResponse"][];
+        };
         /** CustomerOrderResponse */
         CustomerOrderResponse: {
             /**
@@ -2562,6 +2638,50 @@ export interface components {
          * @enum {string}
          */
         Engine: "jev" | "rules";
+        /** ExportedOrderResponse */
+        ExportedOrderResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Customer Name */
+            customer_name: string;
+            /** Customer Phone */
+            customer_phone: string;
+            /** Delivery Address */
+            delivery_address: string;
+            /** Delivery Reference */
+            delivery_reference: string;
+            /** Notes */
+            notes: string;
+            /** Number */
+            number: number;
+            /** Status */
+            status: string;
+            /** Total */
+            total: string;
+            /** Type */
+            type: string;
+        };
+        /** ExportedReservationResponse */
+        ExportedReservationResponse: {
+            /** Customer Name */
+            customer_name: string;
+            /** Notes */
+            notes: string;
+            /** Party Size */
+            party_size: number;
+            /** Phone */
+            phone: string;
+            /**
+             * Reserved For
+             * Format: date-time
+             */
+            reserved_for: string;
+            /** Status */
+            status: string;
+        };
         /**
          * FallbackReason
          * @description Por qué decidieron las reglas y no Jev.
@@ -3413,7 +3533,7 @@ export interface components {
          * Permission
          * @enum {string}
          */
-        Permission: "menu.read" | "menu.manage" | "tables.read" | "tables.manage" | "orders.take" | "orders.read_all" | "orders.manage" | "orders.charge" | "orders.discount_any" | "cash.manage" | "billing.issue" | "billing.manage" | "customers.read" | "customers.manage" | "reservations.read" | "reservations.manage" | "inventory.read" | "inventory.manage" | "staff.manage" | "restaurant.manage" | "insights.read" | "activity.read" | "roles.manage";
+        Permission: "menu.read" | "menu.manage" | "tables.read" | "tables.manage" | "orders.take" | "orders.read_all" | "orders.manage" | "orders.charge" | "orders.discount_any" | "cash.manage" | "billing.issue" | "billing.manage" | "customers.read" | "customers.manage" | "customers.erase" | "reservations.read" | "reservations.manage" | "inventory.read" | "inventory.manage" | "staff.manage" | "restaurant.manage" | "insights.read" | "activity.read" | "roles.manage";
         /** PermissionResponse */
         PermissionResponse: {
             code: components["schemas"]["Permission"];
@@ -5211,6 +5331,66 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CustomerResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    anonymize_customer_api_v1_customers__customer_id__anonymize_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_customer_api_v1_customers__customer_id__export_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerExportResponse"];
                 };
             };
             /** @description Validation Error */

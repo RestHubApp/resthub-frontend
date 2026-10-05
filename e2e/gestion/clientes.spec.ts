@@ -1,13 +1,15 @@
 // HU36: la libreta de clientes. Alta, búsqueda por nombre o teléfono, la
 // ficha con visitas, gasto y ticket promedio (frecuente desde tres visitas) y
 // la edición desde la ficha.
+import { readFile } from 'node:fs/promises'
+
 import type { Local } from '../soporte/api'
 import { cubre } from '../soporte/cobertura'
 import { abrirComo, aviso, evidencia, expect, test } from '../soporte/fixtures'
 import { api, fallaServidor, id, soles } from '../soporte/gestion'
 
 /** Un pedido del cliente de principio a fin, cobrado con Yape. */
-async function pedidoDe(local: Local, clienteId: number, tipo: 'delivery' | 'dine_in'): Promise<void> {
+async function pedidoDe(local: Local, clienteId: number, tipo: 'delivery' | 'dine_in'): Promise<number> {
   const mesero = api(local, local.mesero)
   const datos = tipo === 'delivery'
     ? { type: 'delivery', customer_id: clienteId, customer_name: 'Rosa Díaz', customer_phone: '987654321', delivery_address: 'Av. Sol 123' }
@@ -18,6 +20,7 @@ async function pedidoDe(local: Local, clienteId: number, tipo: 'delivery' | 'din
   await api(local, local.cocina).post(`${ruta}/ready`)
   await mesero.post(`${ruta}/served`)
   await mesero.post(`${ruta}/charge`, { payment_method: 'yape', tip: '0' })
+  return id(pedido)
 }
 
 // Cada prueba es un recorrido largo de la pantalla con datos preparados por el
@@ -148,4 +151,39 @@ test('GES-25 la ventana de un cliente nuevo abre vacía después de guardar otro
   await expect(alta.getByLabel('Nombre', { exact: true })).toHaveValue('')
   await expect(alta.getByLabel('Teléfono (opcional)')).toHaveValue('')
   await expect(alta.getByLabel('Notas (opcional)')).toHaveValue('')
+})
+
+test('GES-34 el encargado descarga los datos de un cliente y, a su pedido, los borra', async ({ page, localConCaja: local }) => {
+  cubre('confirmacion:customers/CustomerRights', 'funcion:clientes.exportar-datos', 'funcion:clientes.borrar-datos')
+  const cliente = await api(local).post('/customers', {
+    name: 'Rosa Díaz', phone: '987654321', email: '', address: 'Av. Sol 123', reference: '', notes: 'Alérgica al maní', consent: true,
+  })
+  const pedidoId = await pedidoDe(local, id(cliente), 'delivery')
+  await abrirComo(page, local.encargado, '/clientes')
+  await page.getByRole('button', { name: /Rosa Díaz/u }).click()
+  const ficha = page.getByRole('dialog', { name: 'Rosa Díaz' })
+
+  // Derecho de acceso: un archivo con lo que se guarda de ella.
+  const [descarga] = await Promise.all([
+    page.waitForEvent('download'),
+    ficha.getByRole('button', { name: 'Descargar sus datos' }).click(),
+  ])
+  expect(descarga.suggestedFilename()).toBe(`cliente-${String(id(cliente))}-datos.json`)
+  const ruta = await descarga.path()
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- la ruta la entrega Playwright para su propia descarga
+  const datos = JSON.parse(await readFile(ruta, 'utf8')) as { notes: string; orders: { delivery_address: string }[] }
+  expect(datos.notes).toBe('Alérgica al maní')
+  expect(datos.orders.map((pedido) => pedido.delivery_address)).toEqual(['Av. Sol 123'])
+
+  // Derecho de cancelación: se confirma porque no se deshace.
+  await ficha.getByRole('button', { name: 'Borrar sus datos' }).click()
+  const confirmar = page.getByRole('alertdialog', { name: '¿Borrar los datos de Rosa Díaz?' })
+  await expect(confirmar).toContainText('No se puede deshacer.')
+  await evidencia(page, 'ges-34-1-confirmar-borrado')
+  await confirmar.getByRole('button', { name: 'Borrar sus datos' }).click()
+  await expect(aviso(page, 'Los datos del cliente se borraron.')).toBeVisible()
+  await expect(ficha).toBeHidden()
+  await expect(page.getByText('Todavía no hay clientes')).toBeVisible()
+  const pedido = await api(local).get(`/orders/${String(pedidoId)}`)
+  expect(pedido).toMatchObject({ customer_name: 'Cliente eliminado', customer_phone: '', delivery_address: '' })
 })
