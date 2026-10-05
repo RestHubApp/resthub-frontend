@@ -15,6 +15,7 @@ const FALLBACKS: Record<FallbackReason, string> = {
   not_configured: 'sin configurar',
   unavailable: 'no disponible',
   low_confidence: 'confianza baja',
+  disabled: 'IA externa apagada',
 }
 
 const ENGINES: Record<DecisionEngine, { readonly name: string; readonly title: string }> = {

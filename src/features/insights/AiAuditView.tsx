@@ -7,7 +7,9 @@ import FormMessage from '../../components/FormMessage'
 import SectionCard from '../../components/SectionCard'
 import TablePagination from '../../components/TablePagination'
 import { errorMessage } from '../../services/api'
+import { useCan } from '../../store/session'
 import AiDecisionTable from './AiDecisionTable'
+import ExternalAiCard from './ExternalAiCard'
 import FilterSelect from './FilterSelect'
 import PanelHeader from './PanelHeader'
 
@@ -41,6 +43,8 @@ export default function AiAuditView() {
   const [kind, setKind] = useState<DecisionKind | ''>('')
   const [engine, setEngine] = useState<DecisionEngine | ''>('')
   const [pagina, setPagina] = useState(0)
+  // Encender o apagar la IA externa es una preferencia del local.
+  const canManageRestaurant = useCan('restaurant.manage')
   const params = queryParams(kind, engine, pagina)
   const decisiones = useQuery({
     queryKey: [...aiDecisionsQueryKey, params],
@@ -53,6 +57,7 @@ export default function AiAuditView() {
   return (
     <div className="flex flex-col gap-6">
       <PanelHeader description="Cada decisión de la IA queda guardada: qué datos vio, qué respondió, con qué confianza y qué motor la tomó." />
+      {canManageRestaurant ? <ExternalAiCard /> : null}
       <SectionCard
         title="Decisiones"
         description={decisiones.isPending ? 'Cargando…' : `${String(total)} en total con estos filtros.`}

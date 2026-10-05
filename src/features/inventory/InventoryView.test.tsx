@@ -24,6 +24,7 @@ function local(autoOutOfStock = false) {
     is_active: true,
     auto_out_of_stock: autoOutOfStock,
     max_waiter_discount_percent: '10.00',
+    external_ai_enabled: true,
     created_at: '2026-09-26T13:00:00Z',
   }
 }

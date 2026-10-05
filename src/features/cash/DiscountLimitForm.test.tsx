@@ -19,6 +19,7 @@ function restaurante(cambios: Partial<OwnRestaurant> = {}): OwnRestaurant {
     auto_out_of_stock: false,
     created_at: '2026-01-01T00:00:00Z',
     max_waiter_discount_percent: '10.00',
+    external_ai_enabled: true,
     ...cambios,
   }
 }
