@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { entrarComo, montar, montarRutas, PERMISOS_ENCARGADO, servidor } from '#jest/harness'
+import { cuenta, entrarComo, montar, montarRutas, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
 import { useSession } from '../../store/session'
 import AppShell from './AppShell'
 import ComingSoonView from './ComingSoonView'
@@ -127,5 +127,50 @@ describe('franja de la vista previa', () => {
     abrirVistaPrevia(60)
 
     expect(screen.getByRole('timer')).toHaveClass('bg-white')
+  })
+})
+
+describe('RequireSession: términos y privacidad', () => {
+  const TERMINOS = '/auth/me/terms'
+
+  function abrirProtegida() {
+    const rutas = [{ element: <RequireSession />, children: [{ path: '/pedidos', element: <p>Pedidos</p> }] }]
+    return montarRutas(rutas, '/pedidos')
+  }
+
+  it('sin aceptar los términos vigentes no se trabaja, y al aceptarlos se entra', async () => {
+    const api = servidor()
+    const aceptada = cuenta(PERMISOS_ENCARGADO, { terms_accepted: true })
+    api.on('post', TERMINOS, aceptada)
+    entrarComo(PERMISOS_ENCARGADO, { terms_accepted: false })
+    const { user } = abrirProtegida()
+
+    expect(screen.getByRole('heading', { name: 'Antes de empezar' })).toBeInTheDocument()
+    expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /términos de uso y la política de privacidad/u })).toHaveAttribute('href', '/privacidad')
+    await user.click(screen.getByRole('button', { name: 'Acepto los términos' }))
+
+    expect(await screen.findByText('Pedidos')).toBeInTheDocument()
+    expect(api.llamadas('post', TERMINOS)[0]?.body).toEqual({ version: '2026-10' })
+  })
+
+  it('si la versión cambió mientras se leía, la relee y la vuelve a pedir', async () => {
+    const api = servidor()
+    api.on('post', TERMINOS, new RespuestaDeError(409, 'Los términos cambiaron.'))
+    api.on('get', '/auth/me', cuenta(PERMISOS_ENCARGADO, { terms_accepted: false, terms_version: '2027-01' }))
+    entrarComo(PERMISOS_ENCARGADO, { terms_accepted: false })
+    const { user } = abrirProtegida()
+
+    await user.click(screen.getByRole('button', { name: 'Acepto los términos' }))
+
+    expect(await screen.findByRole('link', { name: /versión 2027-01/u })).toBeInTheDocument()
+  })
+
+  it('una vista previa no los pide: quien mira no es el dueño de la cuenta', () => {
+    servidor()
+    entrarComo(PERMISOS_ENCARGADO, { terms_accepted: false, preview: true })
+    abrirProtegida()
+
+    expect(screen.getByText('Pedidos')).toBeInTheDocument()
   })
 })

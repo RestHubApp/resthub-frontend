@@ -21,6 +21,15 @@ test('VIS-01 acceso del restaurante y de plataforma, con errores de validación'
   await capturar(page, 'plataforma-acceso')
 })
 
+test('VIS-15 términos de uso y política de privacidad', async ({ page }) => {
+  plazo(60_000)
+  cubre('ruta:/privacidad')
+
+  await page.goto('/privacidad')
+  await expect(page.getByRole('heading', { name: 'Términos de uso y política de privacidad', level: 1 })).toBeVisible()
+  await capturar(page, 'privacidad')
+})
+
 test('VIS-02 el inicio y una ruta que no existe llevan a la pantalla de cada cuenta', async ({ page, local }) => {
   plazo(60_000)
   cubre('ruta:/', 'ruta:/*')

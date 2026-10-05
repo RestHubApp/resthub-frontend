@@ -46,13 +46,17 @@ const PANEL = (
 
 // Discreto a propósito: es la puerta del equipo de RestHub, no la del
 // personal, y lleva a otra sesión que no toca la de este acceso.
+const ENLACE =
+  'inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
 const PLATAFORMA = (
-  <Link
-    to="/plataforma/acceso"
-    className="inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
-  >
-    Administración del sistema
-  </Link>
+  <>
+    <Link to="/privacidad" className={ENLACE}>
+      Privacidad
+    </Link>
+    <Link to="/plataforma/acceso" className={ENLACE}>
+      Administración del sistema
+    </Link>
+  </>
 )
 
 /**

@@ -57,6 +57,11 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
   // El encargado nuevo entra por el acceso de siempre y ve su local.
   await page.goto('/acceso')
   await entrarPorFormulario(page, correo, CLAVE_NUEVA)
+  // Su primer acceso: acepta los términos y la política de privacidad (Ley N.º 29733).
+  await expect(page.getByRole('heading', { name: 'Antes de empezar' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /términos de uso y la política de privacidad/u })).toHaveAttribute('href', '/privacidad')
+  await evidencia(page, 'pla-01-terminos')
+  await page.getByRole('button', { name: 'Acepto los términos' }).click()
   await expect(page).toHaveURL(/\/pedidos$/u)
   await expect(page.getByText(nombre).first()).toBeVisible()
   await expect(navegacion(page).getByRole('link', { name: 'Personal' })).toBeVisible()

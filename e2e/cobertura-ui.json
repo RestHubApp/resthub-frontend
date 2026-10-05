@@ -1,7 +1,7 @@
 {
-  "total": 422,
+  "total": 423,
   "porTipo": {
-    "ruta": 35,
+    "ruta": 36,
     "confirmacion": 10,
     "desplegable": 6,
     "dialogo": 24,
@@ -190,6 +190,12 @@
       "id": "ruta:/plataforma/vista-previa",
       "tipo": "ruta",
       "descripcion": "Pantalla /plataforma/vista-previa",
+      "origen": "src/router/index.tsx"
+    },
+    {
+      "id": "ruta:/privacidad",
+      "tipo": "ruta",
+      "descripcion": "Pantalla /privacidad",
       "origen": "src/router/index.tsx"
     },
     {
