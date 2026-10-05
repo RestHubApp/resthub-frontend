@@ -118,17 +118,28 @@ export async function nuevoHttp(): Promise<APIRequestContext> {
 }
 
 export async function entrarPorApi(http: APIRequestContext, email: string, password = CLAVE): Promise<Sesion> {
-  const datos = await cuerpo(
+  const acceso = await cuerpo(
     await http.post(`${API}/auth/login`, { data: { email, password } }),
     `acceso de ${email}`,
   )
-  const { user, restaurant, permissions, preview } = datos
+  const token = String(acceso.access_token)
+  // Como la persona al entrar por primera vez: acepta los términos vigentes
+  // (Ley N.º 29733). Su pantalla tiene sus propias pruebas; las demás entran
+  // con la cuenta ya al día.
+  const datos = acceso.terms_accepted === true ? acceso : await cuerpo(
+    await http.post(`${API}/auth/me/terms`, {
+      data: { version: acceso.terms_version },
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+    `términos de ${email}`,
+  )
+  const { user, restaurant, permissions, preview, terms_version, terms_accepted } = datos
   return {
     email,
     password,
     nombre: String((user as Json).full_name),
-    token: String(datos.access_token),
-    cuenta: { user, restaurant, permissions, preview },
+    token,
+    cuenta: { user, restaurant, permissions, preview, terms_version, terms_accepted },
   }
 }
 

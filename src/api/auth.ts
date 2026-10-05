@@ -1,5 +1,6 @@
 import { api } from '../services/api'
 import type {
+  AcceptTermsRequest,
   AccessTokenResponse,
   ChangeOwnPasswordRequest,
   CurrentUserResponse,
@@ -14,8 +15,8 @@ export const currentUserQueryKey = ['auth', 'me'] as const
  * permisos y si es una vista previa. Es lo mismo que devuelve `GET /auth/me`.
  */
 export function sessionOf(response: AccessTokenResponse): CurrentUserResponse {
-  const { user, restaurant, permissions, preview } = response
-  return { user, restaurant, permissions, preview }
+  const { user, restaurant, permissions, preview, terms_version, terms_accepted } = response
+  return { user, restaurant, permissions, preview, terms_version, terms_accepted }
 }
 
 /** El token y, en la misma respuesta, la cuenta, su restaurante y sus permisos. */
@@ -32,6 +33,12 @@ export async function renewSession(): Promise<AccessTokenResponse> {
 
 export async function fetchCurrentUser(): Promise<CurrentUserResponse> {
   const { data } = await api.get<CurrentUserResponse>('/auth/me')
+  return data
+}
+
+/** Acepta los términos y la política de privacidad leídos; devuelve la sesión al día. */
+export async function acceptTerms(version: AcceptTermsRequest['version']): Promise<CurrentUserResponse> {
+  const { data } = await api.post<CurrentUserResponse>('/auth/me/terms', { version })
   return data
 }
 

@@ -136,6 +136,8 @@ const router = createBrowserRouter(
       children: [
         { index: true, Component: HomeRedirect },
         { path: 'acceso', ...plataforma(() => import('../features/auth/LoginView')) },
+        // Pública: se lee antes de entrar o desde la pantalla que pide aceptarla.
+        { path: 'privacidad', ...plataforma(() => import('../features/legal/PrivacyView')) },
         {
           element: <RequireSession permission="orders.take" />,
           children: [

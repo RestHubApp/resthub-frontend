@@ -3,7 +3,7 @@
 // Las cuentas de la semilla entran por el formulario de verdad (HU01). Los
 // errores de contraseña se prueban con cuentas del restaurante propio de cada
 // prueba, para no acercarse al límite de intentos fallidos de la semilla.
-import { CLAVE, SEMILLA } from '../soporte/api'
+import { CLAVE, entrarPorApi, nuevoHttp, SEMILLA } from '../soporte/api'
 import { cubre } from '../soporte/cobertura'
 import { abrirComo, evidencia, expect, test } from '../soporte/fixtures'
 import {
@@ -15,6 +15,17 @@ import {
   secciones,
   sinEnvioDePedidos,
 } from '../soporte/plataforma'
+
+// Las cuentas de la semilla ya aceptaron los términos: así estas pruebas miden
+// la navegación por rol y no dependen de cuál entra primero. La pantalla de
+// términos se prueba con el encargado recién creado (PLA-01).
+test.beforeAll(async () => {
+  const http = await nuevoHttp()
+  for (const email of [SEMILLA.encargado, SEMILLA.mesero, SEMILLA.cocina]) {
+    await entrarPorApi(http, email, CLAVE)
+  }
+  await http.dispose()
+})
 
 const TODAS = [
   'Pedidos',
@@ -227,4 +238,14 @@ test('ACC-10 la hoja «Más» del celular abre las otras pantallas, la accesibil
   await hoja.getByRole('link', { name: /Encargada Prueba/u }).click()
   await expect(page).toHaveURL(/\/perfil$/u)
   await expect(hoja).toBeHidden()
+})
+
+test('ACC-11 la política de privacidad se lee sin sesión desde el acceso @movil', async ({ page }) => {
+  cubre('ruta:/privacidad')
+  await page.goto('/acceso')
+  await page.getByRole('link', { name: 'Privacidad' }).click()
+  await expect(page).toHaveURL(/\/privacidad$/u)
+  await expect(page.getByRole('heading', { name: 'Términos de uso y política de privacidad', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tus derechos (ARCO)', level: 2 })).toBeVisible()
+  await evidencia(page, 'acc-privacidad')
 })
