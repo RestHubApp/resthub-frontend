@@ -126,6 +126,19 @@ describe('CustomersView: ficha y edición', () => {
     expect(await within(ventana).findByText('Ya hay un cliente con ese teléfono')).toBeInTheDocument()
     expect(api.llamadas('post', LISTA)[0]?.body).toEqual({ name: 'Pedro', phone: '', email: '', address: '', reference: '', notes: '', consent: true })
   })
+
+  it('la etiqueta del consentimiento nombra también el <input> oculto de la casilla (WAVE)', async () => {
+    const { user } = abrir()
+
+    await user.click(screen.getByRole('button', { name: NUEVO }))
+    const ventana = await screen.findByRole('dialog', { name: NUEVO })
+    const casilla = within(ventana).getByRole('checkbox', { name: /Ley N\.º 29733/u })
+    // Dentro de un formulario, Radix agrega un <input> oculto junto a su botón.
+    const oculto = casilla.parentElement?.querySelector('input[type="checkbox"]')
+
+    expect(oculto?.closest('label')).toBe(casilla.closest('label'))
+    expect(casilla.closest('label')).not.toBeNull()
+  })
 })
 
 describe('CustomersView: derechos ARCO', () => {
