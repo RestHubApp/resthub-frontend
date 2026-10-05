@@ -15,4 +15,12 @@ describe('PrivacyView', () => {
       expect(screen.getByRole('heading', { level: 2, name: seccion })).toBeInTheDocument()
     }
   })
+
+  it('no abre otro <main>: el armazón ya tiene el suyo', () => {
+    servidor()
+    montar(<PrivacyView />, { path: '/privacidad' })
+
+    expect(screen.queryByRole('main')).not.toBeInTheDocument()
+    expect(screen.getByRole('article')).toBeInTheDocument()
+  })
 })

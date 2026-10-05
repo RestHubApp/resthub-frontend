@@ -73,7 +73,8 @@ const SECCIONES: readonly Seccion[] = [
  */
 export default function PrivacyView() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
+    // Se dibuja dentro del armazón, que ya tiene su <main>: un artículo y no otro.
+    <article className="mx-auto flex w-full max-w-3xl flex-col gap-6 py-2">
       <header className="flex flex-col gap-2">
         <h1 className="m-0 font-heading text-2xl font-bold sm:text-3xl">Términos de uso y política de privacidad</h1>
         <p className="m-0 text-sm text-muted-foreground">
@@ -95,6 +96,6 @@ export default function PrivacyView() {
           Volver a RestHub
         </Link>
       </p>
-    </main>
+    </article>
   )
 }
