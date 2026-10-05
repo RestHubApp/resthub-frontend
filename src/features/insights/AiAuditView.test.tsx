@@ -107,3 +107,42 @@ describe('AiAuditView', () => {
     expect(await screen.findByText('Solo el encargado ve la auditoría')).toBeInTheDocument()
   })
 })
+
+describe('AiAuditView: IA externa', () => {
+  const RESTAURANTE = '/restaurant'
+  const local = (activa: boolean) => ({
+    id: 1,
+    name: 'La Picantería',
+    slug: 'la-picanteria',
+    timezone: 'America/Lima',
+    is_active: true,
+    auto_out_of_stock: true,
+    max_waiter_discount_percent: '10.00',
+    external_ai_enabled: activa,
+    created_at: '2026-09-26T13:00:00Z',
+  })
+
+  it('el encargado la apaga y nada sale del sistema', async () => {
+    const api = servidor().on('get', RUTA, { items: [], total: 0 }).on('get', RESTAURANTE, local(true))
+    api.on('patch', RESTAURANTE, local(false))
+    entrarComo()
+    const { user } = montar(<AiAuditView />, { path: '/panel/ia' })
+
+    const casilla = await screen.findByRole('checkbox', { name: 'Usar la IA externa' })
+    expect(casilla).toBeChecked()
+    await user.click(casilla)
+
+    expect(await screen.findByText('La IA externa quedó apagada: deciden las reglas y nada sale del sistema.')).toBeInTheDocument()
+    expect(api.llamadas('patch', RESTAURANTE)[0]?.body).toEqual({ external_ai_enabled: false })
+  })
+
+  it('quien solo ve el panel no la puede cambiar', async () => {
+    const api = servidor().on('get', RUTA, { items: [], total: 0 })
+    entrarComo(['insights.read'])
+    montar(<AiAuditView />, { path: '/panel/ia' })
+
+    expect(await screen.findByText('0 en total con estos filtros.')).toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: 'Usar la IA externa' })).not.toBeInTheDocument()
+    expect(api.llamadas('get', RESTAURANTE)).toHaveLength(0)
+  })
+})

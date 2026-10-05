@@ -2535,7 +2535,7 @@ export interface components {
          * @description Por qué decidieron las reglas y no Jev.
          * @enum {string}
          */
-        FallbackReason: "not_configured" | "unavailable" | "low_confidence";
+        FallbackReason: "not_configured" | "unavailable" | "low_confidence" | "disabled";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -3865,6 +3865,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** External Ai Enabled */
+            external_ai_enabled: boolean;
             /** Id */
             id: number;
             /** Is Active */
@@ -4343,6 +4345,8 @@ export interface components {
         UpdateRestaurantRequest: {
             /** Auto Out Of Stock */
             auto_out_of_stock?: boolean | null;
+            /** External Ai Enabled */
+            external_ai_enabled?: boolean | null;
             /** Max Waiter Discount Percent */
             max_waiter_discount_percent?: number | string | null;
             /** Name */
