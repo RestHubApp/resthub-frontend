@@ -482,6 +482,14 @@
     "descripcion": "Clientes › el alta exige el consentimiento del cliente para tratar sus datos (Ley N.º 29733)"
   },
   {
+    "id": "funcion:clientes.exportar-datos",
+    "descripcion": "Clientes › derecho de acceso: el encargado descarga lo que se guarda del cliente"
+  },
+  {
+    "id": "funcion:clientes.borrar-datos",
+    "descripcion": "Clientes › derecho de cancelación: el encargado borra los datos del cliente de la ficha, sus pedidos y sus reservas"
+  },
+  {
     "id": "funcion:clientes.telefono-repetido",
     "descripcion": "Un teléfono que ya es de otro cliente se rechaza"
   },

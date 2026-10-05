@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import { api } from '../services/api'
-import type { Customer, CustomerPage, CustomerRequest } from './types'
+import type { Customer, CustomerExport, CustomerPage, CustomerRequest } from './types'
 
 // La libreta de clientes del local.
 
@@ -38,4 +38,15 @@ export async function saveCustomer(
       ? await api.post<Customer>('/customers', payload, options)
       : await api.put<Customer>(`/customers/${String(customerId)}`, payload, options)
   return data
+}
+
+/** Derecho de acceso (Ley N.º 29733): lo que el local guarda de un cliente, completo. */
+export async function exportCustomer(customerId: number): Promise<CustomerExport> {
+  const { data } = await api.get<CustomerExport>(`/customers/${String(customerId)}/export`)
+  return data
+}
+
+/** Derecho de cancelación: borra sus datos de la ficha, sus pedidos y sus reservas. No se deshace. */
+export async function anonymizeCustomer(customerId: number): Promise<void> {
+  await api.post(`/customers/${String(customerId)}/anonymize`)
 }

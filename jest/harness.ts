@@ -168,7 +168,7 @@ export function servidor(): ServidorFalso {
 export const PERMISOS_ENCARGADO: readonly PermissionCode[] = [
   'menu.read', 'menu.manage', 'tables.read', 'tables.manage', 'orders.take', 'orders.read_all',
   'orders.manage', 'orders.charge', 'orders.discount_any', 'cash.manage', 'billing.issue',
-  'billing.manage', 'customers.read', 'customers.manage', 'reservations.read', 'reservations.manage',
+  'billing.manage', 'customers.read', 'customers.manage', 'customers.erase', 'reservations.read', 'reservations.manage',
   'inventory.read', 'inventory.manage', 'staff.manage', 'restaurant.manage', 'insights.read',
   'activity.read', 'roles.manage',
 ]

@@ -1,5 +1,5 @@
-import { describe, expect, it } from '@jest/globals'
-import { screen, within } from '@testing-library/react'
+import { describe, expect, it, jest } from '@jest/globals'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { cliente } from '#jest/fixtures/panel'
 import { entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
@@ -11,6 +11,7 @@ const BUSCAR = 'Buscar por nombre o teléfono'
 const NOMBRE = 'Nombre'
 const ROSA = '/customers/11'
 const NUEVO = 'Nuevo cliente'
+const ROSA_QUISPE = 'Rosa Quispe'
 const EDITADA = 'Rosa Q. Mamani'
 
 function abrir(clientes: Customer[] = [cliente()], permisos?: Parameters<typeof entrarComo>[0]) {
@@ -35,7 +36,7 @@ describe('CustomersView: lista', () => {
 
   it('busca por teléfono y avisa cuando nadie coincide', async () => {
     const { api, user } = abrir([cliente()])
-    await screen.findByText('Rosa Quispe')
+    await screen.findByText(ROSA_QUISPE)
 
     await user.type(screen.getByLabelText(BUSCAR), '999')
 
@@ -69,7 +70,7 @@ describe('CustomersView: ficha y edición', () => {
 
     await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
 
-    const ficha = await screen.findByRole('dialog', { name: 'Rosa Quispe' })
+    const ficha = await screen.findByRole('dialog', { name: ROSA_QUISPE })
     expect(await within(ficha).findByText('987654321 · rosa@correo.pe')).toBeInTheDocument()
     expect(within(ficha).getByText('Jr. Unión 450 · Ref.: Frente al parque')).toBeInTheDocument()
     expect(within(ficha).getByText('Alérgica al maní')).toBeInTheDocument()
@@ -124,5 +125,72 @@ describe('CustomersView: ficha y edición', () => {
 
     expect(await within(ventana).findByText('Ya hay un cliente con ese teléfono')).toBeInTheDocument()
     expect(api.llamadas('post', LISTA)[0]?.body).toEqual({ name: 'Pedro', phone: '', email: '', address: '', reference: '', notes: '', consent: true })
+  })
+})
+
+describe('CustomersView: derechos ARCO', () => {
+  const BORRAR_DATOS = 'Borrar sus datos'
+  const EXPORTAR = '/customers/11/export'
+  const BORRAR = '/customers/11/anonymize'
+
+  it('el encargado descarga los datos del cliente', async () => {
+    const { api, user } = abrir()
+    api.on('get', ROSA, cliente())
+    api.on('get', EXPORTAR, { name: ROSA_QUISPE, orders: [], reservations: [] })
+    const crear = jest.fn(() => 'blob:datos')
+    const soltar = jest.fn()
+    Object.assign(URL, { createObjectURL: crear, revokeObjectURL: soltar })
+
+    await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
+    const ficha = await screen.findByRole('dialog', { name: ROSA_QUISPE })
+    await user.click(within(ficha).getByRole('button', { name: 'Descargar sus datos' }))
+
+    await waitFor(() => {
+      expect(soltar).toHaveBeenCalledWith('blob:datos')
+    })
+    expect(api.llamadas('get', EXPORTAR)).toHaveLength(1)
+  })
+
+  it('borrar pide confirmación, cierra la ficha y lo avisa', async () => {
+    const { api, user } = abrir()
+    api.on('get', ROSA, cliente())
+    api.on('post', BORRAR, null)
+
+    await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
+    const ficha = await screen.findByRole('dialog', { name: ROSA_QUISPE })
+    await user.click(within(ficha).getByRole('button', { name: BORRAR_DATOS }))
+    const confirmar = await screen.findByRole('alertdialog', { name: '¿Borrar los datos de Rosa Quispe?' })
+    expect(api.llamadas('post', BORRAR)).toHaveLength(0)
+    await user.click(within(confirmar).getByRole('button', { name: BORRAR_DATOS }))
+
+    expect(await screen.findByText('Los datos del cliente se borraron.')).toBeInTheDocument()
+    expect(api.llamadas('post', BORRAR)).toHaveLength(1)
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: ROSA_QUISPE })).not.toBeInTheDocument()
+    })
+  })
+
+  it('con pedidos en curso, el servidor lo rechaza y la ficha lo dice', async () => {
+    const { api, user } = abrir()
+    api.on('get', ROSA, cliente())
+    api.on('post', BORRAR, new RespuestaDeError(409, 'El cliente tiene pedidos en curso.'))
+
+    await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
+    const ficha = await screen.findByRole('dialog', { name: ROSA_QUISPE })
+    await user.click(within(ficha).getByRole('button', { name: BORRAR_DATOS }))
+    await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: BORRAR_DATOS }))
+
+    expect(await within(ficha).findByText('El cliente tiene pedidos en curso.')).toBeInTheDocument()
+  })
+
+  it('el mesero no ve cómo exportar ni borrar', async () => {
+    const { api, user } = abrir([cliente()], PERMISOS_MESERO)
+    api.on('get', ROSA, cliente())
+
+    await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
+    const ficha = await screen.findByRole('dialog')
+    await within(ficha).findByText(ROSA_QUISPE)
+    expect(within(ficha).queryByRole('button', { name: BORRAR_DATOS })).not.toBeInTheDocument()
+    expect(within(ficha).queryByRole('button', { name: 'Descargar sus datos' })).not.toBeInTheDocument()
   })
 })
