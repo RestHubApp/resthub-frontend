@@ -6,6 +6,8 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
+import { AxiosError, AxiosHeaders } from 'axios'
+
 import { saveCustomer } from '../../../api/customers'
 import type { Customer } from '../../../api/types'
 import { withCustomer } from './takeawayCustomer'
@@ -54,6 +56,20 @@ describe('withCustomer', () => {
   it('si falla o vence el plazo, el formulario se entera y no pierde los datos', async () => {
     guardar.mockRejectedValue(new Error('timeout of 4000ms exceeded'))
     await expect(withCustomer(delivery)).rejects.toThrow('timeout of 4000ms exceeded')
+  })
+
+  it('si el teléfono ya está en la libreta, sigue sin el alta y el servidor lo reconoce', async () => {
+    const config = { headers: new AxiosHeaders() }
+    guardar.mockRejectedValue(
+      new AxiosError('conflicto', 'ERR_BAD_REQUEST', config, undefined, {
+        status: 409,
+        statusText: 'Conflict',
+        headers: {},
+        config,
+        data: { detail: 'El teléfono 987654321 ya es de Ana.' },
+      }),
+    )
+    await expect(withCustomer(delivery)).resolves.toBe(delivery)
   })
 
   it('para llevar o con un cliente ya elegido no guarda nada', async () => {

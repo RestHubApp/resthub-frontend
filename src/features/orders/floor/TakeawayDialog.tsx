@@ -36,6 +36,7 @@ export default function TakeawayDialog() {
 
   const cambiar = (abierto: boolean) => {
     setOpen(abierto)
+    setFallo(null)
     if (!abierto) {
       form.reset(EMPTY_TAKEAWAY)
     }
@@ -54,6 +55,7 @@ export default function TakeawayDialog() {
           noValidate
           className="flex flex-col gap-5"
           onSubmit={onSubmit(form.handleSubmit(async (valores) => {
+            setFallo(null)
             try {
               void navigate(newOrderPath(await withCustomer(valores)))
             } catch (error) {
