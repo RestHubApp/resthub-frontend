@@ -1,9 +1,9 @@
 /**
  * @jest-environment node
  */
-import { afterEach, expect, it, jest } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 
-import { readEventStream } from './eventStream'
+import { cualquieraDe, readEventStream } from './eventStream'
 
 const originalFetch = globalThis.fetch
 
@@ -41,4 +41,35 @@ it('abandona un canal SSE congelado y permite que el llamador reconecte', async 
   // `instanceof Error`: se compara por nombre.
   expect(await reading).toMatchObject({ name: 'AbortError' })
   expect(cancel).toHaveBeenCalled()
+})
+
+describe('cualquieraDe sin AbortSignal.any (Safari antes de 17.4)', () => {
+  const original = Object.getOwnPropertyDescriptor(AbortSignal, 'any')
+
+  beforeEach(() => {
+    // @ts-expect-error -- se quita para simular un navegador viejo
+    delete AbortSignal.any
+  })
+
+  afterEach(() => {
+    if (original !== undefined) {
+      Object.defineProperty(AbortSignal, 'any', original)
+    }
+  })
+
+  it('se aborta con la primera de las dos y conserva su motivo', () => {
+    const a = new AbortController()
+    const b = new AbortController()
+    const combinada = cualquieraDe(a.signal, b.signal)
+    expect(combinada.aborted).toBe(false)
+    b.abort('inactivo')
+    expect(combinada.aborted).toBe(true)
+    expect(combinada.reason).toBe('inactivo')
+  })
+
+  it('nace abortada si una ya lo estaba', () => {
+    const a = new AbortController()
+    a.abort('cerrado')
+    expect(cualquieraDe(a.signal, new AbortController().signal).reason).toBe('cerrado')
+  })
 })

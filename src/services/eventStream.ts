@@ -44,6 +44,31 @@ function despachar(bloque: string, onEvent: (event: StreamEvent) => void): void 
 }
 
 /**
+ * Una señal que se aborta cuando se aborta cualquiera de las dos.
+ *
+ * `AbortSignal.any` no existe antes de Safari 17.4 ni de Chrome 116, y en el
+ * celular viejo de un mesero el canal de avisos fallaba al conectar y se
+ * quedaba reintentando sin abrir nunca. Ahí se combinan a mano.
+ */
+export function cualquieraDe(a: AbortSignal, b: AbortSignal): AbortSignal {
+  if (typeof AbortSignal.any === 'function') {
+    return AbortSignal.any([a, b])
+  }
+  const combinada = new AbortController()
+  const abortar = (origen: AbortSignal) => () => {
+    combinada.abort(origen.reason)
+  }
+  for (const senal of [a, b]) {
+    if (senal.aborted) {
+      combinada.abort(senal.reason)
+      break
+    }
+    senal.addEventListener('abort', abortar(senal), { once: true, signal: combinada.signal })
+  }
+  return combinada.signal
+}
+
+/**
  * Lee el canal hasta que el servidor lo cierra o se aborta la senal.
  *
  * Rechaza con `EventStreamError` si el servidor responde con un error, para
@@ -69,7 +94,7 @@ export async function readEventStream({
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
       cache: 'no-store',
-      signal: AbortSignal.any([signal, idle.signal]),
+      signal: cualquieraDe(signal, idle.signal),
     })
     if (!response.ok || response.body === null) {
       throw new EventStreamError(response.status)
