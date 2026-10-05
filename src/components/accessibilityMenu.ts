@@ -1,10 +1,38 @@
 // En el celular el boton flotante del widget se oculta (index.css): tapaba el
 // "+" de los platos al tomar un pedido. El menu se abre desde "Más" con esto.
 
-/** Abre el menú del widget de accesibilidad como si se tocara su botón. */
+const BOTON_DEL_WIDGET = '.asw-menu-btn'
+// Cuánto se espera a que el widget recién importado dibuje su botón.
+const ESPERA_BOTON_MS = 5000
+const PASO_MS = 50
+
+/**
+ * Abre el menú del widget de accesibilidad como si se tocara su botón.
+ *
+ * El widget se carga unos segundos después de `load` (AccessibilityWidget.tsx).
+ * Si la persona toca «Accesibilidad» antes, se importa en ese momento y el menú
+ * se abre en cuanto aparece el botón: antes el toque no hacía nada.
+ */
 export function openAccessibilityMenu(): void {
-  const boton = document.querySelector<HTMLElement>('.asw-menu-btn')
-  boton?.click()
+  const boton = document.querySelector<HTMLElement>(BOTON_DEL_WIDGET)
+  if (boton) {
+    boton.click()
+    return
+  }
+  void import('sienna-accessibility').then(() => {
+    abrirCuandoAparezca(Date.now() + ESPERA_BOTON_MS)
+  })
+}
+
+function abrirCuandoAparezca(limite: number): void {
+  const boton = document.querySelector<HTMLElement>(BOTON_DEL_WIDGET)
+  if (boton) {
+    boton.click()
+  } else if (Date.now() < limite) {
+    window.setTimeout(() => {
+      abrirCuandoAparezca(limite)
+    }, PASO_MS)
+  }
 }
 
 const ETIQUETA = 'aria-label'
