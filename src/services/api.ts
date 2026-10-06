@@ -39,6 +39,12 @@ declare module 'axios' {
      * muestra otra vista previa no manda el token de esa vista previa.
      */
     withoutCredential?: boolean
+    /**
+     * Una lectura de fondo (la cuenta que se refresca cada tanto): si falla,
+     * no deja el aviso de corte en el armazón, porque nada en pantalla depende
+     * de ella y se vuelve a pedir sola.
+     */
+    background?: boolean
   }
 }
 
@@ -320,6 +326,7 @@ function olvidarFalloDeTransporte(config: InternalAxiosRequestConfig): void {
 function recordarFalloDeTransporte(error: unknown): void {
   if (!axios.isAxiosError(error) || !esFalloDeTransporte(error)) return
   if ((error.config?.method ?? 'get').toLowerCase() !== 'get') return
+  if (error.config?.background === true) return
   const ambito = ambitoDe(error.config?.url)
   noteApiFailure(
     ambito,

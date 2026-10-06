@@ -22,10 +22,15 @@ export function useAccountRefresh(): void {
 
   const cuenta = useQuery({
     queryKey: currentUserQueryKey,
-    queryFn: () => fetchCurrentUser(),
+    queryFn: () => fetchCurrentUser({ background: true }),
     enabled: token !== null,
     staleTime: REFRESH_MS,
     refetchInterval: REFRESH_MS,
+    // Es de fondo: si falla, la cuenta guardada sigue sirviendo y se vuelve a
+    // pedir sola. No muestra el aviso del armazón (ver useFailedQueries), que
+    // obligaba a reintentar dos veces tras un corte: una por la pantalla y
+    // otra por esta lectura.
+    meta: { background: true },
   })
 
   useEffect(() => {

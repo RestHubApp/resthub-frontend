@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
-import { entrarComo, montarRutas, PERMISOS_ENCARGADO, PERMISOS_MESERO, servidor } from '#jest/harness'
+import { entrarComo, montarRutas, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { currentUserQueryKey } from '../../api/auth'
+import { queryClient } from '../../services/queryClient'
 import type { OpenOrderRequest } from '../../api/types'
 import { enqueueOrder, removeQueued } from '../../store/offlineQueue'
 import { useSession } from '../../store/session'
@@ -56,6 +58,18 @@ afterEach(() => {
 })
 
 describe('AppShell', () => {
+  it('si falla la actualización de la cuenta en segundo plano, no avisa: la sesión guardada sigue sirviendo', async () => {
+    servidor().on('get', '/auth/me', new RespuestaDeError(503, 'No hay conexión con la base de datos.'))
+    entrarComo(PERMISOS_MESERO)
+    abrirArmazon()
+
+    await waitFor(() => {
+      expect(queryClient.getQueryState(currentUserQueryKey)?.status).toBe('error')
+    })
+    expect(screen.queryByText('No hay conexión con la base de datos.')).not.toBeInTheDocument()
+    expect(screen.getByText('Pantalla de inicio')).toBeInTheDocument()
+  })
+
   it('el mesero solo ve en el menú las pantallas de sus permisos', () => {
     servidor()
     entrarComo(PERMISOS_MESERO)
