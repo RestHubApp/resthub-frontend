@@ -12,7 +12,8 @@ interface PlatformQueryErrorProps {
 /** Una lectura que falló, con lo que dijo el servidor y cómo volver a intentarlo. */
 export default function PlatformQueryError({ error, fallback, onRetry }: PlatformQueryErrorProps) {
   return (
-    <div className="flex flex-col items-start gap-3">
+    // `data-reintento`: esta falla ya ofrece reintentar (ver `ApiFailureNotice`).
+    <div className="flex flex-col items-start gap-3" data-reintento="">
       <FormMessage tone="error">{errorMessage(error, fallback)}</FormMessage>
       <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onRetry}>
         <Icon name="reintentar" size={16} />

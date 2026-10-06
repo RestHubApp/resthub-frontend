@@ -11,7 +11,8 @@ interface RetryQueryErrorProps {
 /** Un error de lectura con una acción explícita para repetirla al recuperar señal. */
 export default function RetryQueryError({ message, onRetry, fallback = false }: RetryQueryErrorProps) {
   return (
-    <div className="flex flex-col items-start gap-3">
+    // `data-reintento`: esta falla ya ofrece reintentar (ver `ApiFailureNotice`).
+    <div className="flex flex-col items-start gap-3" data-reintento={fallback ? undefined : ''}>
       <FormMessage tone="error" fallback={fallback}>{message}</FormMessage>
       <Button type="button" variant="outline" onClick={onRetry}>Reintentar</Button>
     </div>
