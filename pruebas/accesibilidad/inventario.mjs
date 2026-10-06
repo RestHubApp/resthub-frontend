@@ -24,13 +24,15 @@ const DIALOGO = '[role="dialog"], [role="alertdialog"]'
 const PESTANA = '[role="tabpanel"][data-state="active"]'
 const IMPRESO = '#hoja-impresa, article'
 
-/** Las 35 rutas del router, más las variantes por rol. */
+/** Las 36 rutas del router, más las variantes por rol. */
 export const RUTAS = [
   // Sin sesión.
   { id: 'acceso', nombre: 'Acceso', ruta: '/acceso', patron: '/acceso', cuenta: null },
   { id: 'raiz', nombre: 'Raíz (redirige al acceso sin sesión)', ruta: '/', patron: '/', cuenta: null, redireccion: true },
   { id: 'plataforma-acceso', nombre: 'Plataforma: acceso', ruta: '/plataforma/acceso', patron: '/plataforma/acceso', cuenta: null },
   { id: 'vista-previa-sin-codigo', nombre: 'Vista previa sin código válido', ruta: '/vista-previa', patron: '/vista-previa', cuenta: null },
+  { id: 'privacidad', nombre: 'Política de privacidad (pública)', ruta: '/privacidad', patron: '/privacidad', cuenta: null },
+  { id: 'terminos', nombre: 'Aceptar los términos antes de empezar', ruta: '/', patron: '/', cuenta: 'sin-terminos' },
 
   // Mesero (celular).
   { id: 'pedidos', nombre: 'Pedidos: mesas del mesero', ruta: '/pedidos', patron: '/pedidos', cuenta: 'mesero' },
@@ -164,6 +166,7 @@ export const OVERLAYS = [
   { id: 'o-nuevo-cliente', nombre: 'Diálogo «Nuevo cliente»', tipo: 'Dialog', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: 'Nuevo cliente' }] },
   { id: 'o-ficha-cliente', nombre: 'Sheet con la ficha del cliente', tipo: 'Sheet', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: /Lucía Quispe/ }] },
   { id: 'o-editar-cliente', nombre: 'Diálogo «Editar cliente» desde la ficha', tipo: 'Dialog', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: /Lucía Quispe/ }, { esperar: DIALOGO }, { boton: 'Editar datos' }], espera: '[role="dialog"] form' },
+  { id: 'o-borrar-cliente', nombre: 'Confirmación «Borrar sus datos» del cliente', tipo: 'AlertDialog', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: /Lucía Quispe/ }, { esperar: DIALOGO }, { boton: 'Borrar sus datos' }], espera: '[role="alertdialog"]' },
 
   // Panel BI.
   { id: 'e-panel-personalizado', nombre: 'Panel: rango personalizado', tipo: 'Estado', ruta: '/panel', cuenta: 'encargado', pasos: [{ boton: 'Personalizado' }], espera: 'main input[type="date"]' },
@@ -175,7 +178,7 @@ export const OVERLAYS = [
   { id: 'o-desactivar-restaurante', nombre: 'Confirmar desactivar restaurante', tipo: 'AlertDialog', ruta: '/plataforma/restaurantes/:restaurante', cuenta: 'plataforma', pasos: [{ boton: 'Desactivar restaurante' }] },
   { id: 'o-reiniciar-muestra', nombre: 'Confirmar reiniciar el local de muestra', tipo: 'AlertDialog', ruta: '/plataforma/vista-previa', cuenta: 'plataforma', pasos: [{ boton: 'Reiniciar local de muestra' }] },
   { id: 'e-obs-tabla', nombre: 'Observabilidad: gráfico como tabla', tipo: 'Estado', ruta: '/plataforma/observabilidad', cuenta: 'plataforma', pasos: [{ boton: 'Ver tabla' }], espera: 'main table' },
-  { id: 'e-obs-detalle', nombre: 'Observabilidad: detalle de un registro', tipo: 'Desplegable', ruta: '/plataforma/observabilidad', cuenta: 'plataforma', pasos: [{ boton: 'Ver detalle' }], espera: 'main' },
+  { id: 'e-obs-detalle', nombre: 'Observabilidad: detalle de un registro', tipo: 'Desplegable', ruta: '/plataforma/observabilidad', cuenta: 'plataforma', pasos: [{ boton: 'Cargar logs' }, { boton: 'Ver detalle' }], espera: 'main' },
 ]
 
 /** Todos los estados, como una sola lista con su clase. */
@@ -191,5 +194,5 @@ export const RUTAS_DEL_ROUTER = [
   '/comprobantes/:invoiceId/imprimir', '/reservas', '/clientes', '/caja', '/menu', '/mesas', '/inventario',
   '/inventario/recetas/:menuItemId', '/personal', '/roles', '/panel', '/panel/reposicion', '/panel/ia', '*',
   '/plataforma/acceso', '/plataforma', '/plataforma/restaurantes/nuevo', '/plataforma/restaurantes/:restaurantId',
-  '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/plataforma/*', '/vista-previa',
+  '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/plataforma/*', '/vista-previa', '/privacidad',
 ]

@@ -26,8 +26,29 @@ async function token(cuenta, plataforma = false) {
 
 const hoyLima = () => new Date(Date.now() - 5 * 3600_000).toISOString().slice(0, 10)
 
+// Las cuentas de la semilla aceptan los términos vigentes (Ley N.º 29733): si
+// no, cada pantalla mediría la puerta «Antes de empezar». La cuenta
+// `sin-terminos` se crea aparte y nunca los acepta, para medir esa puerta.
+async function aceptarTerminos() {
+  for (const cuenta of ['encargado', 'mesero', 'cocina']) {
+    const r = await llamar(null, 'POST', '/auth/login', { email: CUENTAS[cuenta].correo, password: CLAVE })
+    if (!r.terms_accepted) await llamar(r.access_token, 'POST', '/auth/me/terms', { version: r.terms_version })
+  }
+}
+
+async function cuentaSinTerminos(t) {
+  const mesero = await llamar(null, 'POST', '/auth/login', { email: CUENTAS.mesero.correo, password: CLAVE })
+  await llamar(t, 'POST', '/staff', {
+    email: CUENTAS['sin-terminos'].correo, full_name: 'Mesero nuevo (pruebas a11y)', password: CLAVE, role_id: mesero.user.role_id,
+  }).catch((error) => {
+    if (!String(error.message).includes('409')) throw error
+  })
+}
+
 export async function prepararDatos() {
+  await aceptarTerminos()
   const t = await token('encargado')
+  await cuentaSinTerminos(t)
   const ids = {}
 
   // Cliente y reserva.
@@ -36,6 +57,7 @@ export async function prepararDatos() {
   cliente ??= await llamar(t, 'POST', '/customers', {
     name: 'Lucía Quispe (pruebas a11y)', phone: '987654321', email: 'lucia@example.com',
     address: 'Av. Arequipa 123', reference: 'Frente al parque', notes: 'Cliente de las pruebas de accesibilidad',
+    consent: true,
   })
   ids.cliente = cliente.id
   const dia = hoyLima()

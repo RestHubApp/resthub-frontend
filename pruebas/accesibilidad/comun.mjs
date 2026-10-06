@@ -24,6 +24,8 @@ export const CUENTAS = {
   mesero: { correo: 'mesero@resthub.dev', acceso: '/acceso' },
   cocina: { correo: 'cocina@resthub.dev', acceso: '/acceso' },
   plataforma: { correo: 'plataforma@resthub.dev', acceso: '/plataforma/acceso' },
+  // Un mesero que todavía no aceptó los términos: ve la puerta «Antes de empezar».
+  'sin-terminos': { correo: 'nuevo-a11y@resthub.dev', acceso: '/acceso' },
   // La pestaña que abre «Ver como…» desde el área de plataforma.
   'vp-encargado': { vistaPrevia: 'owner' },
   'vp-mesero': { vistaPrevia: 'waiter' },

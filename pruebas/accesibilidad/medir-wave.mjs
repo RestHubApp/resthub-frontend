@@ -23,10 +23,24 @@ for (const vista of Object.keys(VISTAS)) {
   const { contexto, cerrar } = await abrirNavegadorWave({ viewport: { width, height }, ...resto })
   for (const estado of deLaVista) {
     let pagina
+    let paso = 'abrir'
     try {
-      pagina = await abrirEstado(navegadorSesiones, contexto, estado)
-      const { conteos, items } = await analizarConWave(pagina)
-      await capturarWave(pagina, join(capturas, `${clave(estado, vista)}.png`))
+      // Un estado que se traba (la extensión no responde) no detiene a los demás.
+      const medir = async () => {
+        pagina = await abrirEstado(navegadorSesiones, contexto, estado)
+        paso = 'analizar'
+        const resultado = await analizarConWave(pagina)
+        paso = 'capturar'
+        await capturarWave(pagina, join(capturas, `${clave(estado, vista)}.png`))
+        return resultado
+      }
+      let limite
+      const { conteos, items } = await Promise.race([
+        medir(),
+        new Promise((_, rechazar) => {
+          limite = setTimeout(() => rechazar(new Error(`sin respuesta en 120 s (paso: ${paso})`)), 120_000)
+        }),
+      ]).finally(() => clearTimeout(limite))
       const fila = { id: estado.id, nombre: estado.nombre, clase: estado.clase, tipo: estado.tipo, vista, url: pagina.url(), conteos, items: items.map(({ xpaths, ...i }) => ({ ...i, xpaths: xpaths.slice(0, 5) })) }
       await escribirJson(join(dir, `${clave(estado, vista)}.json`), fila)
       filas.push(fila)
@@ -36,7 +50,7 @@ for (const vista of Object.keys(VISTAS)) {
       filas.push({ id: estado.id, nombre: estado.nombre, clase: estado.clase, tipo: estado.tipo, vista, error: error.message.split('\n')[0] })
       console.log(`${clave(estado, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
     }
-    await pagina?.close().catch(() => undefined)
+    await Promise.race([pagina?.close().catch(() => undefined), new Promise((r) => setTimeout(r, 10_000))])
     // El paso «sin conexión» corta la red de todo el contexto persistente.
     await contexto.setOffline(false)
   }
