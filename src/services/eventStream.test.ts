@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment ./jest/nodeEnvironment.cjs
  */
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 

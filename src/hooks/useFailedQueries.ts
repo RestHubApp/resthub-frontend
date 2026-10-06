@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { type Query, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useSyncExternalStore } from 'react'
 
 import { errorMessage } from '../services/api'
@@ -18,14 +18,18 @@ export function useFailedQueries(scope: 'platform' | 'restaurant') {
   }, [cache])
   const belongs = useCallback((key: readonly unknown[]) =>
     (key[0] === 'platform') === (scope === 'platform'), [scope])
+  // Una lectura de fondo (`meta.background`) que falla no avisa: no hay nada
+  // en pantalla que dependa de ella. El reintento sí la vuelve a pedir.
+  const visible = useCallback((query: Query) =>
+    belongs(query.queryKey) && query.isActive() && query.state.status === 'error' && query.meta?.background !== true, [belongs])
   const snapshot = useCallback(() => {
     const activas = cache.getAll()
-      .filter((query) => belongs(query.queryKey) && query.isActive() && query.state.status === 'error')
+      .filter(visible)
       .map((query) => `${query.queryHash}:${String(query.state.errorUpdatedAt)}`).join('|')
     return `${activas}#${apiFailureMessage(scope) ?? ''}`
-  }, [cache, belongs, scope])
+  }, [cache, visible, scope])
   const failed = useSyncExternalStore(subscribe, snapshot, snapshot)
-  const first = failed.startsWith('#') ? undefined : cache.getAll().find((query) => belongs(query.queryKey) && query.isActive() && query.state.status === 'error')
+  const first = failed.startsWith('#') ? undefined : cache.getAll().find(visible)
   const latente = apiFailureMessage(scope)
   return {
     message: first

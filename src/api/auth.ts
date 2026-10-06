@@ -31,8 +31,9 @@ export async function renewSession(): Promise<AccessTokenResponse> {
   return data
 }
 
-export async function fetchCurrentUser(): Promise<CurrentUserResponse> {
-  const { data } = await api.get<CurrentUserResponse>('/auth/me')
+/** La sesión al día. `background`: si falla, no avisa en el armazón (ver `useAccountRefresh`). */
+export async function fetchCurrentUser({ background = false } = {}): Promise<CurrentUserResponse> {
+  const { data } = await api.get<CurrentUserResponse>('/auth/me', { background })
   return data
 }
 

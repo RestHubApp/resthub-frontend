@@ -6,11 +6,12 @@ interface ApiFailureNoticeProps {
 }
 
 // Un aviso por falla. El del armazón es de respaldo: se calla si la pantalla
-// (el `main` que le sigue) o una ventana abierta ya muestran su propio error,
-// que dice más porque está junto a lo que falló. Queda para las lecturas que
-// ninguna pantalla muestra, así ninguna ruta se queda en blanco.
+// (el `main` que le sigue) ya muestra su propio error con «Reintentar»
+// (`data-reintento`), que dice más porque está junto a lo que falló, o si hay
+// una ventana abierta con su error. Un error de la pantalla sin «Reintentar» no
+// lo calla: si no, esa pantalla quedaba sin forma de volver a pedir los datos.
 const CALLA_SI_HAY_OTRO =
-  '[&:has(~_#contenido_[data-falla=propia])]:hidden [body:has([role=dialog]_[data-falla])_&]:hidden'
+  '[&:has(~_#contenido_[data-reintento])]:hidden [body:has([role=dialog]_[data-falla])_&]:hidden'
 
 /** El mismo error con reintento de las lecturas, en el armazón de cada área. */
 export default function ApiFailureNotice({ message, onRetry }: ApiFailureNoticeProps) {
