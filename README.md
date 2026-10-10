@@ -79,7 +79,7 @@ está en el CI.
 
 | Variable | Uso |
 |---|---|
-| `VITE_API_URL` | Origen del backend en producción, sin `/api/v1` (por ejemplo `https://api.resthub.pe`). Vacía en desarrollo. |
+| `VITE_API_URL` | Origen del backend en producción, sin `/api/v1` (por ejemplo `https://api.resthub.pe`). Vacía en desarrollo. Al compilar con ella, la CSP limita `connect-src` a la propia aplicación y a ese origen. **Defínela en Vercel** o `connect-src` queda abierto a cualquier https. |
 | `VITE_LOG_LEVEL` | Nivel mínimo de los logs del navegador. Por defecto `debug` en desarrollo y `warn` en producción. |
 
 ## Tipos del API
@@ -90,7 +90,7 @@ para que el frontend compile sin el backend a mano.
 
 ```bash
 pnpm generate:api                                      # contra el backend local
-VITE_API_URL=https://api.resthub.pe pnpm generate:api  # contra otro backend
+VITE_API_URL=https://api.resthub.pe pnpm generate:api  # contra otro backend con DEBUG=true (con DEBUG=false el esquema no se publica)
 ```
 
 El script lee la variable de la terminal, no de `.env.local`. Después de

@@ -17,12 +17,12 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
  * dibujarse, y un `requestIdleCallback` los evaluaba en el primer hueco del
  * hilo, justo cuando Lighthouse mide el LCP. En el celular con sesión el
  * botón flotante se oculta (tapaba el "+" de los platos) y el
- * menú se abre desde "Más" (ver accessibilityMenu.ts). Sí hace una llamada externa: publica el locale de cada idioma y la
- * fuente de lectura en cdn.jsdelivr.net y los descarga de ahí (el tarball los
- * trae, pero el paquete arma las URL contra el CDN). Aceptamos ese CDN; si
- * está bloqueado, el widget cae al inglés. Al definir una CSP hay que permitir
- * `connect-src` y `font-src https://cdn.jsdelivr.net` y `style-src
- * 'unsafe-inline'` (inyecta su hoja de estilos en el documento).
+ * menú se abre desde "Más" (ver accessibilityMenu.ts). El paquete arma las URL de
+ * su idioma y de la fuente de lectura contra cdn.jsdelivr.net; `vite.config.ts`
+ * (`siennaAutoalojado`) las reescribe a `/sienna/` y publica esos archivos con
+ * la aplicación, así que no hay tercero en ejecución ni hace falta abrirle la
+ * CSP. Solo está el español: en otro idioma el widget cae al inglés. Sí pide
+ * `style-src 'unsafe-inline'` (inyecta su hoja de estilos en el documento).
  *
  * Localización del botón:
  * En sienna-accessibility@2.2.333, la función Oe() crea el botón flotante
