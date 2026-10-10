@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
 import { activeOrdersQuery } from '../../api/orders'
@@ -12,13 +12,15 @@ import { useCan } from '../../store/session'
 import BoardColumn from './board/BoardColumn'
 import BoardSkeleton from './board/BoardSkeleton'
 import TypeFilter, { type TypeFilterValue } from './board/TypeFilter'
-import CancelOrderDialog from './CancelOrderDialog'
-import ChargeDialog from './charge/ChargeDialog'
 import LiveIndicator from './LiveIndicator'
 import QueryError from './QueryError'
 import { useLiveUpdates } from './useLiveUpdates'
 import { STATUS_LABELS } from './orderLabels'
 import { useNow } from './useNow'
+
+// Los diálogos traen react-hook-form y zod: se bajan al abrirlos, no con el tablero.
+const CancelOrderDialog = lazy(() => import('./CancelOrderDialog'))
+const ChargeDialog = lazy(() => import('./charge/ChargeDialog'))
 
 const COLUMNAS: readonly OrderStatus[] = ['open', 'in_kitchen', 'ready', 'served']
 
@@ -86,12 +88,14 @@ export default function BoardView() {
           ))}
         </div>
       ) : null}
-      <ChargeDialog order={cobrar} onClose={() => {
-        setCobrar(null)
-      }} />
-      <CancelOrderDialog order={cancelar} onClose={() => {
-        setCancelar(null)
-      }} />
+      <Suspense fallback={null}>
+        {cobrar === null ? null : <ChargeDialog order={cobrar} onClose={() => {
+          setCobrar(null)
+        }} />}
+        {cancelar === null ? null : <CancelOrderDialog order={cancelar} onClose={() => {
+          setCancelar(null)
+        }} />}
+      </Suspense>
     </div>
   )
 }
