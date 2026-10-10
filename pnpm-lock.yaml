@@ -161,9 +161,6 @@ importers:
       react-router:
         specifier: ^8.3.1
         version: 8.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      shadcn:
-        specifier: ^4.21.0
-        version: 4.21.0(supports-color@10.2.2)(typescript@6.0.3)
       sienna-accessibility:
         specifier: 2.2.333
         version: 2.2.333
@@ -309,6 +306,9 @@ importers:
       puppeteer-core:
         specifier: 25.12.0
         version: 25.12.0
+      shadcn:
+        specifier: ^4.21.0
+        version: 4.21.0(supports-color@10.2.2)(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
