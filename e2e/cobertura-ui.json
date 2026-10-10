@@ -409,10 +409,10 @@
       "origen": "src/features/orders/detail/TablePickerDialog.tsx"
     },
     {
-      "id": "dialogo:orders/floor/TakeawayDialog",
+      "id": "dialogo:orders/floor/TakeawayForm",
       "tipo": "dialogo",
       "descripcion": "Pedido para llevar o delivery",
-      "origen": "src/features/orders/floor/TakeawayDialog.tsx"
+      "origen": "src/features/orders/floor/TakeawayForm.tsx"
     },
     {
       "id": "dialogo:orders/invoice/InvoiceDialog",

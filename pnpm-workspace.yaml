@@ -42,6 +42,11 @@ overrides:
   proxy-addr@>=1.1.0 <2.0.8: 2.0.8
   # GHSA-68fv-2mgg-jv7q (alto): source-map-js de postcss, solo al compilar.
   source-map-js@>=1.0.0 <1.2.2: 1.2.2
+  # GHSA-8r5x-fm3f-whwj y el de la propiedad propia (críticos): handlebars de
+  # eslint-plugin-boundaries, solo al correr el lint.
+  handlebars@>=4.0.0 <4.7.10: 4.7.10
+  # OAuth del SDK de MCP (alto): lo trae la CLI de shadcn, que no corre en la app.
+  '@modelcontextprotocol/sdk@<1.31.0': 1.31.0
 
 auditConfig:
   ignoreGhsas:
