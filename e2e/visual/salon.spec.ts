@@ -11,7 +11,7 @@ test('VIS-03 mesas, llevar y delivery, y la toma de pedido con opciones y resume
   cubre(
     'ruta:/pedidos',
     'pestanas:orders/OrdersView',
-    'dialogo:orders/floor/TakeawayDialog',
+    'dialogo:orders/floor/TakeawayForm',
     'ruta:/pedidos/nuevo',
     'dialogo:orders/taking/ModifierDialog',
     'hoja:orders/taking/CartSheet',

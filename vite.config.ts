@@ -6,6 +6,8 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+import { acotarConexiones, precargarFuente, siennaAutoalojado } from './vite.plugins'
+
 // El color de la marca. Tiene que coincidir con el `theme-color` de index.html
 // y con `--primary` de index.css, o la barra del sistema cambia de tono al
 // abrir la aplicacion instalada.
@@ -14,8 +16,9 @@ const THEME_COLOR = '#9a3412'
 // Las cabeceras de seguridad que pone Vercel (CSP incluida), también en
 // `vite preview`: así una CSP que rompe algo se ve en local y no en producción.
 // connect-src admite cualquier origen https porque el API cambia por entorno
-// (VITE_API_URL); `script-src 'self'` es lo que frena una inyección. El widget
-// de accesibilidad pide 'unsafe-inline' en estilos y fuentes de jsDelivr.
+// (VITE_API_URL); `acotarConexiones` lo cierra al compilar con esa variable.
+// `script-src 'self'` es lo que frena una inyección. El widget de accesibilidad
+// pide 'unsafe-inline' en estilos.
 interface VercelConfig {
   readonly headers: readonly { readonly headers: readonly { readonly key: string; readonly value: string }[] }[]
 }
@@ -34,6 +37,9 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    precargarFuente(),
+    siennaAutoalojado(),
+    acotarConexiones(),
     // Instalable: el service worker solo guarda el armazon de la aplicacion
     // (HTML, JS, CSS e iconos). Ninguna respuesta del API se guarda en cache.
     // Sin senal, lo unico que espera es un pedido nuevo del mesero, en una cola
