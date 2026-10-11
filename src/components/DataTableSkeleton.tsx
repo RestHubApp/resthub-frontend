@@ -3,16 +3,17 @@ import { Skeleton } from './ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 
 interface DataTableSkeletonProps {
+  readonly label: string
   /** Las cabeceras reales: se leen desde el primer momento y fijan el ancho de las columnas. */
   readonly headers: readonly string[]
   readonly rows: number
 }
 
 /** La tabla con sus cabeceras y filas vacías mientras llegan los datos. */
-export function DataTableSkeleton({ headers, rows }: DataTableSkeletonProps) {
+export function DataTableSkeleton({ label, headers, rows }: DataTableSkeletonProps) {
   return (
     <LoadingRegion label="Cargando…" className="rounded-xl bg-card ring-1 ring-foreground/10">
-      <Table>
+      <Table label={label}>
         <TableHeader>
           <TableRow>
             {headers.map((header) => (

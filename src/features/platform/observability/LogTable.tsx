@@ -43,6 +43,7 @@ const COLUMNS: DataColumn<ObsLogEntry>[] = [
 export function LogTable({ entries, isLoading, filters }: LogTableProps) {
   return (
     <DataTable
+      label="Logs"
       columns={COLUMNS}
       data={entries}
       isLoading={isLoading}

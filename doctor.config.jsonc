@@ -4,7 +4,7 @@
   "ignore": {
     // Compilaciones locales (producción, E2E y la medición de carbono): código
     // minificado de terceros, no el del proyecto.
-    "files": ["dist/**", "dist-e2e/**", "dist-carbon/**"],
+    "files": ["dist/**", "dist-e2e/**", "dist-a11y/**", "dist-carbon/**"],
     "overrides": [
       {
         // Herramientas de línea de comandos, no código de la aplicación. Esperar

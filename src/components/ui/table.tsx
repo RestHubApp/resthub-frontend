@@ -3,15 +3,17 @@
 import * as React from "react"
 import { cn } from "cn"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({ className, label, ...props }: React.ComponentProps<"table"> & { label: string }) {
   return (
     // Región desplazable y enfocable: en pantallas angostas la tabla se
     // desplaza de costado, y sin foco quien usa teclado no podría hacerlo
     // (WCAG 2.1.1). El rol `region` es el que admite jsx-a11y para un
-    // contenedor con tabIndex.
+    // contenedor con tabIndex, y necesita nombre propio (axe `landmark-unique`):
+    // `label` dice de qué es la tabla.
     <div
       data-slot="table-container"
       role="region"
+      aria-label={label}
       tabIndex={0}
       className="relative w-full overflow-x-auto rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >

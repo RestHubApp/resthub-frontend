@@ -277,3 +277,24 @@ El aislamiento lo garantiza el backend; el frontend no debe abrirle huecos.
 ### Accesibilidad
 
 - Todo control tiene nombre accesible, el foco se ve y el contraste cumple AA.
+- **axe en el CI** (`.github/workflows/accessibility.yml`): el job `axe-core
+  (pantallas sin sesión)` y el job `con-sesion` (`pnpm a11y axe keyboard` contra
+  el backend de develop con `seed_dev` y `seed_history`, cada ruta y modal con
+  la cuenta de su rol, escritorio y celular) fallan ante una violación serious
+  o critical (`A11Y_STRICT=1`) o un estado que no se pueda abrir. Los reportes
+  quedan como artefacto. Se arregla en el código; no se desactiva una regla de
+  axe salvo un falso positivo documentado. Localmente: backend con
+  `E2E_BACKEND_PORT=8202 E2E_FRONT_ORIGIN=http://localhost:5202 E2E_SEED_HISTORY=1 bash e2e/server/backend.sh`,
+  `vite build --outDir dist-a11y` con `VITE_API_URL=http://localhost:8202`,
+  `vite preview --outDir dist-a11y --port 5202` y `pnpm a11y axe keyboard`.
+- Una tabla (`Table`, `DataTable`) lleva `label`: su región desplazable necesita
+  nombre. Los encabezados de tabla o grilla (`columnheader`) llevan texto,
+  aunque sea solo para el lector de pantalla (`sr-only`).
+- **Regresión visual en el CI** (job `visual` de `ci.yml`): Chromium de
+  escritorio y celular, dentro de `mcr.microsoft.com/playwright:v<versión>-noble`,
+  con los umbrales de `playwright.config.ts` (no se suben para que pase). Un
+  cambio visual aprobado exige regenerar las líneas base en ese mismo entorno
+  (`pnpm test:visual:update` o el workflow «Líneas base visuales») y revisar
+  las imágenes antes de versionarlas. Al subir la versión de `playwright`,
+  cambia también la imagen en `ci.yml` y `visual-baselines.yml` (un paso del
+  job lo comprueba). Firefox y WebKit se corren en local.

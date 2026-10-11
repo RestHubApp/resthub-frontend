@@ -57,6 +57,8 @@ function toColumnDef<TData extends RowData>(
 const ROWS_LOADING = 6
 
 interface DataTableProps<TData extends RowData> {
+  /** De qué es la tabla: nombra su región desplazable. */
+  readonly label: string
   readonly columns: readonly DataColumn<TData>[]
   readonly data: readonly TData[]
   readonly isLoading: boolean
@@ -78,6 +80,7 @@ interface DataTableProps<TData extends RowData> {
  * al lector de pantalla.
  */
 export function DataTable<TData extends RowData>({
+  label,
   columns,
   data,
   isLoading,
@@ -103,7 +106,7 @@ export function DataTable<TData extends RowData>({
   })
 
   if (isLoading) {
-    return <DataTableSkeleton headers={columns.map((column) => column.header)} rows={Math.min(pageSize ?? ROWS_LOADING, ROWS_LOADING)} />
+    return <DataTableSkeleton label={label} headers={columns.map((column) => column.header)} rows={Math.min(pageSize ?? ROWS_LOADING, ROWS_LOADING)} />
   }
   if (data.length === 0) {
     return <EmptyState title={emptyMessage} />
@@ -112,7 +115,7 @@ export function DataTable<TData extends RowData>({
   return (
     <div className="flex flex-col gap-3">
     <div className="rounded-xl bg-card ring-1 ring-foreground/10">
-      <Table>
+      <Table label={label}>
         <DataTableHeader table={table} cellClasses={cellClasses} />
         <TableBody>
           {table.getRowModel().rows.map((row) => (

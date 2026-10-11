@@ -56,7 +56,7 @@ export function PurchaseLineEditor({ index, line, ingredients, onChange, onRemov
         id={`${id}-costo`}
         aria-label="Costo por unidad"
         inputMode="decimal"
-        placeholder="S/ por unidad"
+        placeholder="S/ por unid."
         value={line.unitCost}
         onChange={(event) => {
           onChange({ ...line, unitCost: event.target.value })

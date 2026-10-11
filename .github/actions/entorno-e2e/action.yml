@@ -1,0 +1,42 @@
+# Deja listo el entorno que comparten los jobs con backend (E2E, accesibilidad
+# con sesión y regresión visual): backend de develop, pnpm, Node, uv, las
+# dependencias de ambos repositorios y la base SQLite migrada y sembrada.
+# Requiere que el job ya haya hecho checkout de este repositorio y defina
+# E2E_BACKEND_DIR y E2E_DB en su `env`.
+name: Entorno E2E
+description: Backend de develop con su base sembrada y las dependencias del frontend.
+
+
+runs:
+  using: composite
+  steps:
+    - name: Traer el backend (develop)
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        repository: RestHubApp/resthub-backend
+        ref: develop
+        path: ${{ env.E2E_BACKEND_DIR }}
+
+    - name: Instalar pnpm
+      uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+
+    - name: Instalar Node
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      with:
+        node-version: '24'
+        cache: pnpm
+
+    - name: Instalar uv
+      uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      with:
+        python-version: '3.12'
+
+    - name: Instalar dependencias
+      shell: bash
+      run: |
+        pnpm install --frozen-lockfile
+        uv sync --frozen --directory "$E2E_BACKEND_DIR"
+
+    - name: Migrar y sembrar la base de pruebas
+      shell: bash
+      run: bash e2e/server/backend.sh --prepare

@@ -2,7 +2,7 @@
 //
 // La lista de restaurantes, la bitácora, el local de muestra y la
 // observabilidad muestran lo que hacen todas las pruebas a la vez: reciben
-// datos fijos (`datos.ts`, ver `captura.ts`). El detalle del restaurante es
+// datos fijos (`data.ts`, ver `capture.ts`). El detalle del restaurante es
 // el de esta prueba.
 import type { APIRequestContext, Page } from '@playwright/test'
 

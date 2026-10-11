@@ -30,6 +30,7 @@ export function HistoryView() {
           <QueryError error={history.error} fallback="No se pudo cargar el historial." onRetry={() => void history.refetch()} />
         ) : (
           <DataTable
+            label="Historial de pedidos"
             columns={columns}
             data={history.data?.items ?? []}
             isLoading={history.isPending}

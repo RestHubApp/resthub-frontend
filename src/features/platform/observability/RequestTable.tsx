@@ -72,6 +72,7 @@ export function RequestTable({ entries, isLoading, filters }: RequestTableProps)
   const tableColumns = useMemo(() => columns(filters), [filters])
   return (
     <DataTable
+      label="Peticiones"
       columns={tableColumns}
       data={entries}
       isLoading={isLoading}

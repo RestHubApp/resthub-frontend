@@ -1,0 +1,67 @@
+# Regenera las líneas base de la regresión visual de Chromium (escritorio y
+# celular) en el mismo entorno del job `visual` de ci.yml: la imagen oficial de
+# Playwright. Se corre a mano desde la rama del cambio visual aprobado
+# (Actions > Líneas base visuales > Run workflow). Siempre deja las imágenes
+# como artefacto; con «commit» activo también las sube como un commit a la rama.
+# Alternativa local: `pnpm test:visual:update` (docker o podman).
+name: Líneas base visuales
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Subir las líneas base como un commit a esta rama
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  regenerar:
+    name: Regenerar (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    env:
+      E2E_BACKEND_DIR: resthub-backend
+      E2E_DB: ${{ github.workspace }}/.e2e/e2e.db
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Entorno (backend, dependencias y base sembrada)
+        uses: ./.github/actions/entorno-e2e
+
+      - name: Regenerar las líneas base
+        env:
+          E2E_DB_PREPARED: '1'
+        run: pnpm test:visual:ci --update-snapshots
+
+      - name: Subir las líneas base
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lineas-base-visuales
+          path: |
+            e2e/visual/baselines/visual-chromium-desktop
+            e2e/visual/baselines/visual-chromium-mobile
+          retention-days: 14
+
+      - name: Subir un commit con las líneas base
+        if: ${{ inputs.commit }}
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/visual/baselines
+          if git diff --cached --quiet; then
+            echo "Las líneas base ya estaban al día."
+          else
+            git commit -m "test(visual): regenerar líneas base de Chromium en la imagen de Playwright"
+            git push
+          fi

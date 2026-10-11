@@ -30,7 +30,7 @@ export function RoutesTable({ routes, sort, onSort, filters }: RoutesTableProps)
   const [requests, p95Col, errors] = ROUTE_SORTS
   return (
     <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
-      <Table>
+      <Table label="Rutas">
         <caption className="sr-only">Rutas de la ventana, ordenadas por {ROUTE_SORTS.find((s) => s.value === sort)?.label}</caption>
         <TableHeader>
           <TableRow>

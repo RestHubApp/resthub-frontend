@@ -158,7 +158,7 @@ const siblingFolderZones = folders(FEATURES_DIR).flatMap((feature) => {
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.results*/**', 'e2e/.report*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'checks/accessibility/.wave-ext/**', 'dist-carbon/**', 'checks/accessibility/reports/**'],
+    ignores: ['dist/**', 'dist-e2e/**', 'dist-a11y/**', 'e2e/.results*/**', 'e2e/.report*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'checks/accessibility/.wave-ext/**', 'dist-carbon/**', 'checks/accessibility/reports/**'],
   },
 
   // ---------------------------------------------------------------------

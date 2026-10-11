@@ -27,6 +27,7 @@ export function StaffTeamCard() {
         </FormMessage>
       ) : (
         <DataTable
+          label="Personal"
           columns={staffColumns({ ownId, canManage })}
           data={staff.data?.items ?? []}
           isLoading={staff.isPending}

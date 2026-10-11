@@ -56,6 +56,7 @@ export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps)
         total={all.length}
       />
       <DataTable
+        label="Insumos"
         columns={cols}
         data={visible}
         isLoading={ingredients.isPending}

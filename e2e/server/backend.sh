@@ -5,6 +5,9 @@
 # E2E_BACKEND_DIR  carpeta del repositorio resthub-backend (por omisión, ../resthub-backend)
 # E2E_DB           archivo SQLite que se borra y se vuelve a crear en cada arranque
 #
+# E2E_SEED_HISTORY=1 agrega sesenta días de historia sintética (`seed_history.py`)
+# para que el panel de indicadores tenga gráficos; lo usa la revisión de accesibilidad.
+#
 # `backend.sh --prepare` solo migra y siembra; con E2E_DB_PREPARED=1 el
 # arranque usa esa base tal cual (así lo hace el CI, en pasos separados).
 set -euo pipefail
@@ -30,6 +33,7 @@ if [[ "${E2E_DB_PREPARED:-0}" != "1" ]]; then
   rm -f "$DB" "$DB-journal" "$DB-wal" "$DB-shm"
   uv run --frozen alembic upgrade head
   uv run --frozen python scripts/seed_dev.py
+  if [[ "${E2E_SEED_HISTORY:-0}" == "1" ]]; then uv run --frozen python scripts/seed_history.py; fi
   # Modo WAL: una lectura larga (el canal de avisos, un listado) no bloquea a
   # quien escribe. Con el diario por omisión, varias pruebas en paralelo
   # terminaban en «database is locked». El modo queda guardado en el archivo.
