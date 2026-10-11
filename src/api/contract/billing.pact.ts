@@ -24,7 +24,7 @@ import {
 const pact = newPact()
 const EXAMPLE_ORDER = 31
 // Lo que manda el diálogo de emisión para una boleta a «clientes varios».
-const BOLETA: IssueInvoiceRequest = {
+const SALES_RECEIPT: IssueInvoiceRequest = {
   order_id: EXAMPLE_ORDER,
   kind: 'boleta',
   customer_document_type: 'none',
@@ -74,12 +74,12 @@ describe('Contrato: comprobantes', () => {
       .withRequest('POST', `${API_PREFIX}/billing/invoices`, (req) =>
         req
           .headers({ ...bearer(), ...JSON_HEADERS })
-          .jsonBody({ ...BOLETA, order_id: fromProviderState('${orderId}', EXAMPLE_ORDER) }),
+          .jsonBody({ ...SALES_RECEIPT, order_id: fromProviderState('${orderId}', EXAMPLE_ORDER) }),
       )
       .willRespondWith(201, (res) => res.jsonBody(invoiceShape()))
       .executeTest(async (mockServer) => {
         connectTo(mockServer)
-        const invoice = await issueInvoice(BOLETA)
+        const invoice = await issueInvoice(SALES_RECEIPT)
         expect(invoice.order_id).toBe(EXAMPLE_ORDER)
         expect(invoice.code).toMatch(/^B/u)
       })
