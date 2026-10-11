@@ -7,9 +7,6 @@
 name: Líneas base visuales
 
 on:
-  # TEMPORAL: arranque de las primeras líneas base desde la rama (se quita después).
-  push:
-    branches: [ci/a11y-y-visual]
   workflow_dispatch:
     inputs:
       commit:
