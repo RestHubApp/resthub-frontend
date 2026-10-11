@@ -35,7 +35,7 @@ export type OrderMenuItem = components['schemas']['MenuItemResponse']
 
 export type TableState = components['schemas']['TableStateResponse']
 export type TableResponse = components['schemas']['TableResponse']
-export type ActiveOrderSummary = components['schemas']['ActiveOrderSummary']
+export type ActiveOrderSummary = components['schemas']['ActiveOrderSummaryResponse']
 export type CreateTableRequest = components['schemas']['CreateTableRequest']
 export type UpdateTableRequest = components['schemas']['UpdateTableRequest']
 
@@ -103,7 +103,7 @@ export type InsightsRangeParams = NonNullable<
 >
 export type SalesSummary = components['schemas']['SalesSummaryResponse']
 export type DailySales = components['schemas']['DailySalesResponse']
-export type DailySalesPoint = components['schemas']['DailySalesPoint']
+export type DailySalesPoint = components['schemas']['DailySalesPointResponse']
 export type HourlySales = components['schemas']['HourlySalesResponse']
 export type HourlyCell = components['schemas']['HourlyCellResponse']
 export type PaymentMix = components['schemas']['PaymentMixResponse']

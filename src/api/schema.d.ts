@@ -1961,10 +1961,10 @@ export interface components {
             user: components["schemas"]["SessionUserResponse"];
         };
         /**
-         * ActiveOrderSummary
+         * ActiveOrderSummaryResponse
          * @description Lo justo para pintar la tarjeta de una mesa ocupada.
          */
-        ActiveOrderSummary: {
+        ActiveOrderSummaryResponse: {
             /** Balance */
             balance: string;
             /**
@@ -2227,8 +2227,8 @@ export interface components {
             /** Tips */
             tips: string;
         };
-        /** CauseCount */
-        CauseCount: {
+        /** CauseCountResponse */
+        CauseCountResponse: {
             cause: components["schemas"]["WasteCause"];
             /** Count */
             count: number;
@@ -2297,7 +2297,7 @@ export interface components {
         /** ClassifyWasteResponse */
         ClassifyWasteResponse: {
             /** By Cause */
-            by_cause: components["schemas"]["CauseCount"][];
+            by_cause: components["schemas"]["CauseCountResponse"][];
             /** Classified */
             classified: number;
             /** Remaining */
@@ -2366,7 +2366,7 @@ export interface components {
              */
             is_available: boolean;
             /** Modifier Groups */
-            modifier_groups?: components["schemas"]["ModifierGroupSchema-Input"][];
+            modifier_groups?: components["schemas"]["ModifierGroupRequest-Input"][];
             /** Name */
             name: string;
             /** Price */
@@ -2542,8 +2542,8 @@ export interface components {
             /** Visits */
             visits: number;
         };
-        /** DailySalesPoint */
-        DailySalesPoint: {
+        /** DailySalesPointResponse */
+        DailySalesPointResponse: {
             /** Average Ticket */
             average_ticket: string;
             /**
@@ -2559,7 +2559,7 @@ export interface components {
         /** DailySalesResponse */
         DailySalesResponse: {
             /** Days */
-            days: components["schemas"]["DailySalesPoint"][];
+            days: components["schemas"]["DailySalesPointResponse"][];
             period: components["schemas"]["PeriodResponse"];
         };
         /**
@@ -2991,7 +2991,7 @@ export interface components {
             /** Is Available */
             is_available: boolean;
             /** Modifier Groups */
-            modifier_groups: components["schemas"]["ModifierGroupSchema-Output"][];
+            modifier_groups: components["schemas"]["ModifierGroupRequest-Output"][];
             /** Name */
             name: string;
             /** Out Of Stock */
@@ -3041,8 +3041,8 @@ export interface components {
             /** Tips */
             tips: string;
         };
-        /** ModifierGroupSchema */
-        "ModifierGroupSchema-Input": {
+        /** ModifierGroupRequest */
+        "ModifierGroupRequest-Input": {
             /**
              * Max Choices
              * @default 1
@@ -3056,10 +3056,10 @@ export interface components {
             /** Name */
             name: string;
             /** Options */
-            options: components["schemas"]["ModifierOptionSchema-Input"][];
+            options: components["schemas"]["ModifierOptionRequest-Input"][];
         };
-        /** ModifierGroupSchema */
-        "ModifierGroupSchema-Output": {
+        /** ModifierGroupRequest */
+        "ModifierGroupRequest-Output": {
             /**
              * Max Choices
              * @default 1
@@ -3073,10 +3073,10 @@ export interface components {
             /** Name */
             name: string;
             /** Options */
-            options: components["schemas"]["ModifierOptionSchema-Output"][];
+            options: components["schemas"]["ModifierOptionRequest-Output"][];
         };
-        /** ModifierOptionSchema */
-        "ModifierOptionSchema-Input": {
+        /** ModifierOptionRequest */
+        "ModifierOptionRequest-Input": {
             /** Name */
             name: string;
             /**
@@ -3085,8 +3085,8 @@ export interface components {
              */
             price: number | string;
         };
-        /** ModifierOptionSchema */
-        "ModifierOptionSchema-Output": {
+        /** ModifierOptionRequest */
+        "ModifierOptionRequest-Output": {
             /** Name */
             name: string;
             /**
@@ -4388,7 +4388,7 @@ export interface components {
         };
         /** TableStateResponse */
         TableStateResponse: {
-            active_order: components["schemas"]["ActiveOrderSummary"] | null;
+            active_order: components["schemas"]["ActiveOrderSummaryResponse"] | null;
             /**
              * Created At
              * Format: date-time
@@ -4485,7 +4485,7 @@ export interface components {
             /** Is Available */
             is_available?: boolean | null;
             /** Modifier Groups */
-            modifier_groups?: components["schemas"]["ModifierGroupSchema-Input"][] | null;
+            modifier_groups?: components["schemas"]["ModifierGroupRequest-Input"][] | null;
             /** Name */
             name?: string | null;
             /** Price */
