@@ -5,7 +5,7 @@ function alFinal(): boolean {
   return false
 }
 
-const LIBRE: Pick<TableState, 'status' | 'status_label' | 'active_order'> = {
+const FREE: Pick<TableState, 'status' | 'status_label' | 'active_order'> = {
   status: 'free',
   status_label: 'Libre',
   active_order: null,
@@ -19,15 +19,15 @@ const LIBRE: Pick<TableState, 'status' | 'status_label' | 'active_order'> = {
  * trae la etiqueta del estado tal como la escribe el servidor.
  */
 export function withTable(tables: readonly TableState[], table: TableResponse): TableState[] {
-  const estado = tables.find((actual) => actual.id === table.id) ?? LIBRE
-  return upsertInList(tables, { ...estado, ...table }, alFinal)
+  const status = tables.find((actual) => actual.id === table.id) ?? FREE
+  return upsertInList(tables, { ...status, ...table }, alFinal)
 }
 
 /** Las mesas en el orden que confirmó el servidor. */
 export function withOrder(tables: readonly TableState[], ordered: readonly TableResponse[]): TableState[] {
-  const porId = new Map(tables.map((table) => [table.id, table]))
+  const byId = new Map(tables.map((table) => [table.id, table]))
   return ordered.flatMap((table) => {
-    const previa = porId.get(table.id)
-    return previa === undefined ? [] : [{ ...previa, ...table }]
+    const preview = byId.get(table.id)
+    return preview === undefined ? [] : [{ ...preview, ...table }]
   })
 }

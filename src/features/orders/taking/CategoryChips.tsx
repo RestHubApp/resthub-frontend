@@ -19,7 +19,7 @@ const IDLE = `${CHIP} bg-card text-foreground ring-1 ring-foreground/15 hover:bg
  * el lector de pantalla dice cual esta elegida sin prometer paneles.
  */
 export function CategoryChips({ sections, selected, onSelect }: CategoryChipsProps) {
-  const opciones = [{ id: null, name: 'Toda la carta' }, ...sections.map(({ id, name }) => ({ id, name }))]
+  const options = [{ id: null, name: 'Toda la carta' }, ...sections.map(({ id, name }) => ({ id, name }))]
 
   return (
     <div
@@ -27,17 +27,17 @@ export function CategoryChips({ sections, selected, onSelect }: CategoryChipsPro
       aria-label="Categorías"
       className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0"
     >
-      {opciones.map((opcion) => (
+      {options.map((option) => (
         <button
-          key={opcion.id ?? 'carta'}
+          key={option.id ?? 'carta'}
           type="button"
-          aria-pressed={selected === opcion.id}
-          className={selected === opcion.id ? ACTIVE : IDLE}
+          aria-pressed={selected === option.id}
+          className={selected === option.id ? ACTIVE : IDLE}
           onClick={() => {
-            onSelect(opcion.id)
+            onSelect(option.id)
           }}
         >
-          {opcion.name}
+          {option.name}
         </button>
       ))}
     </div>

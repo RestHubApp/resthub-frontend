@@ -26,16 +26,16 @@ interface ReadEventStreamOptions {
   readonly onEvent: (event: StreamEvent) => void
 }
 
-function despachar(bloque: string, onEvent: (event: StreamEvent) => void): void {
+function dispatch(block: string, onEvent: (event: StreamEvent) => void): void {
   let type = 'message'
   const data: string[] = []
-  for (const linea of bloque.split('\n')) {
+  for (const line of block.split('\n')) {
     // Una linea que empieza con ":" es un comentario: el servidor los usa de
     // ping para que un proxy no corte la conexion por inactividad.
-    if (linea.startsWith('event:')) {
-      type = linea.slice('event:'.length).trim()
-    } else if (linea.startsWith('data:')) {
-      data.push(linea.slice('data:'.length).trimStart())
+    if (line.startsWith('event:')) {
+      type = line.slice('event:'.length).trim()
+    } else if (line.startsWith('data:')) {
+      data.push(line.slice('data:'.length).trimStart())
     }
   }
   if (data.length > 0) {
@@ -50,22 +50,22 @@ function despachar(bloque: string, onEvent: (event: StreamEvent) => void): void 
  * celular viejo de un mesero el canal de avisos fallaba al conectar y se
  * quedaba reintentando sin abrir nunca. Ahí se combinan a mano.
  */
-export function cualquieraDe(a: AbortSignal, b: AbortSignal): AbortSignal {
+export function anyOf(a: AbortSignal, b: AbortSignal): AbortSignal {
   if (typeof AbortSignal.any === 'function') {
     return AbortSignal.any([a, b])
   }
-  const combinada = new AbortController()
-  const abortar = (origen: AbortSignal) => () => {
-    combinada.abort(origen.reason)
+  const combined = new AbortController()
+  const abort = (origin: AbortSignal) => () => {
+    combined.abort(origin.reason)
   }
-  for (const senal of [a, b]) {
-    if (senal.aborted) {
-      combinada.abort(senal.reason)
+  for (const signal of [a, b]) {
+    if (signal.aborted) {
+      combined.abort(signal.reason)
       break
     }
-    senal.addEventListener('abort', abortar(senal), { once: true, signal: combinada.signal })
+    signal.addEventListener('abort', abort(signal), { once: true, signal: combined.signal })
   }
-  return combinada.signal
+  return combined.signal
 }
 
 /**
@@ -85,34 +85,34 @@ export async function readEventStream({
   const idle = new AbortController()
   const timeout = 35_000
   let timer: ReturnType<typeof setTimeout> | undefined
-  const renovar = () => {
+  const renew = () => {
     clearTimeout(timer)
     timer = setTimeout(() => { idle.abort() }, timeout)
   }
-  renovar()
+  renew()
   try {
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
       cache: 'no-store',
-      signal: cualquieraDe(signal, idle.signal),
+      signal: anyOf(signal, idle.signal),
     })
     if (!response.ok || response.body === null) {
       throw new EventStreamError(response.status)
     }
 
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
-    let pendiente = ''
-    let terminado = false
-    while (!terminado) {
-      const { value, done } = await reader.read()
-      terminado = done
-      if (!done) renovar()
-      pendiente += (value ?? '').replaceAll('\r\n', '\n')
-      let corte = pendiente.indexOf('\n\n')
-      while (corte !== -1) {
-        despachar(pendiente.slice(0, corte), onEvent)
-        pendiente = pendiente.slice(corte + 2)
-        corte = pendiente.indexOf('\n\n')
+    let pending = ''
+    let isFinished = false
+    while (!isFinished) {
+      const { value, done: isDone } = await reader.read()
+      isFinished = isDone
+      if (!isDone) renew()
+      pending += (value ?? '').replaceAll('\r\n', '\n')
+      let cutoff = pending.indexOf('\n\n')
+      while (cutoff !== -1) {
+        dispatch(pending.slice(0, cutoff), onEvent)
+        pending = pending.slice(cutoff + 2)
+        cutoff = pending.indexOf('\n\n')
       }
     }
   } finally {

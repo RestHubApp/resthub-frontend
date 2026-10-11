@@ -43,7 +43,7 @@ describe('openRequest', () => {
 
 describe('newOrderPath', () => {
   it('lleva los datos del delivery en la URL', () => {
-    const ruta = newOrderPath({
+    const route = newOrderPath({
       mode: 'delivery',
       customer_name: 'Ana',
       phone: '987',
@@ -52,7 +52,7 @@ describe('newOrderPath', () => {
       customer_id: 3,
       consent: false,
     })
-    const params = new URLSearchParams(ruta.split('?')[1])
+    const params = new URLSearchParams(route.split('?')[1])
     expect(params.get('tipo')).toBe('delivery')
     expect(params.get('clienteId')).toBe('3')
     expect(params.get('direccion')).toBe('Calle 1')

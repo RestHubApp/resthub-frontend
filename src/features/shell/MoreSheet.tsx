@@ -29,30 +29,30 @@ interface MoreSheetProps {
  * perfil y la salida. Se marca activo cuando la pantalla actual vive adentro.
  */
 export function MoreSheet({ entries, account }: MoreSheetProps) {
-  const [open, setOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const { pathname } = useLocation()
   const close = () => {
-    setOpen(false)
+    setIsOpen(false)
   }
-  const etiqueta = entries.length > 0 ? 'Más' : 'Cuenta'
-  const adentro = pathname === paths.profile || entries.some((entry) => entry.to === pathname)
+  const label = entries.length > 0 ? 'Más' : 'Cuenta'
+  const isInside = pathname === paths.profile || entries.some((entry) => entry.to === pathname)
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <button
           type="button"
-          className={adentro ? TAB_ACTIVE : TAB_IDLE}
+          className={isInside ? TAB_ACTIVE : TAB_IDLE}
         >
-          <ShellIcon name={entries.length > 0 ? 'mas' : 'perfil'} size={22} />
-          <span>{etiqueta}</span>
+          <ShellIcon name={entries.length > 0 ? 'more' : 'profile'} size={22} />
+          <span>{label}</span>
         </button>
       </SheetTrigger>
       <SheetContent
         side="bottom"
         className="max-h-[85dvh] gap-3 overflow-y-auto rounded-t-2xl px-4 pt-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
-        <SheetTitle className="m-0 px-3 font-heading text-lg font-semibold">{etiqueta}</SheetTitle>
+        <SheetTitle className="m-0 px-3 font-heading text-lg font-semibold">{label}</SheetTitle>
         <SheetDescription className="sr-only">
           Otras pantallas, accesibilidad, tu perfil y la salida.
         </SheetDescription>
@@ -67,7 +67,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
             window.setTimeout(openAccessibilityMenu, SHEET_CLOSE_MS)
           }}
         >
-          <ShellIcon name="accesibilidad" size={18} />
+          <ShellIcon name="accessibility" size={18} />
           <span>Accesibilidad</span>
         </Button>
         <SessionActions

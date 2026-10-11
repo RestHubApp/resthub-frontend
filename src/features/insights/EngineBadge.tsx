@@ -32,7 +32,7 @@ export function EngineBadge({ engine, fallbackReason, fallbackLabel }: EngineBad
         title={motor.title}
         className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium text-foreground"
       >
-        <Icon name={engine === 'jev' ? 'ia' : 'reglas'} size={14} />
+        <Icon name={engine === 'jev' ? 'ai' : 'rules'} size={14} />
         {motor.name}
       </span>
       {fallbackReason === null || fallbackReason === undefined ? null : (

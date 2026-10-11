@@ -27,35 +27,35 @@ interface WasteFormProps {
  * se pierde plata y qué conviene cambiar.
  */
 export function WasteForm({ ingredient, onDone }: WasteFormProps) {
-  const unidades = inputUnits(ingredient.unit)
+  const units = inputUnits(ingredient.unit)
   const { register, handleSubmit, formState, control } = useForm<WasteValues>({
     resolver: zodResolver(wasteSchema),
     // Una merma suele ser poca cosa: se propone la unidad chica.
     defaultValues: { quantity: '', quantity_unit: ingredient.unit, reason: '' },
   })
-  const [cantidad, unidad] = useWatch({ control, name: ['quantity', 'quantity_unit'] })
-  const base = parseDecimal(cantidad) * findInputUnit(ingredient.unit, unidad).factor
+  const [quantity, unit] = useWatch({ control, name: ['quantity', 'quantity_unit'] })
+  const base = parseDecimal(quantity) * findInputUnit(ingredient.unit, unit).factor
 
-  const merma = useInventoryChange({
-    send: (datos: WasteValues) =>
+  const waste = useInventoryChange({
+    send: (data: WasteValues) =>
       registerWaste({
         ingredient_id: ingredient.id,
-        quantity: toBaseQuantity(datos.quantity, findInputUnit(ingredient.unit, datos.quantity_unit).factor),
-        reason: datos.reason,
+        quantity: toBaseQuantity(data.quantity, findInputUnit(ingredient.unit, data.quantity_unit).factor),
+        reason: data.reason,
       }),
-    success: (resultado) =>
-      `Merma registrada: ${ingredient.name} queda en ${formatQuantity(resultado.ingredient.stock, ingredient.unit)}`,
+    success: (result) =>
+      `Merma registrada: ${ingredient.name} queda en ${formatQuantity(result.ingredient.stock, ingredient.unit)}`,
     onDone,
   })
-  const errores = formState.errors
+  const errors = formState.errors
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((datos) => {
-          merma.mutate(datos)
+        handleSubmit((data) => {
+          waste.mutate(data)
         }),
       )}
     >
@@ -64,8 +64,8 @@ export function WasteForm({ ingredient, onDone }: WasteFormProps) {
         label="Cantidad perdida"
         amount={register('quantity')}
         unit={register('quantity_unit')}
-        units={unidades}
-        error={errores.quantity?.message}
+        units={units}
+        error={errors.quantity?.message}
       />
       <TextareaField
         id="waste-reason"
@@ -74,16 +74,16 @@ export function WasteForm({ ingredient, onDone }: WasteFormProps) {
         placeholder="Se venció, se quemó en la plancha, lo devolvió un cliente…"
         hint="Con tus palabras. Sirve para ver después por qué se pierde."
         field={register('reason')}
-        error={errores.reason?.message}
+        error={errors.reason?.message}
       />
       <StockPreview ingredient={ingredient} delta={base > 0 ? -base : null} />
 
-      {merma.isError ? (
+      {waste.isError ? (
         <FormMessage tone="error">
-          {errorMessage(merma.error, 'No se pudo registrar la merma.')}
+          {errorMessage(waste.error, 'No se pudo registrar la merma.')}
         </FormMessage>
       ) : null}
-      <FormButtons label="Registrar merma" icon="merma" pending={merma.isPending} onCancel={onDone} />
+      <FormButtons label="Registrar merma" icon="waste" pending={waste.isPending} onCancel={onDone} />
     </form>
   )
 }

@@ -15,7 +15,7 @@ interface RoleRowProps {
 
 /** Un rol en la lista: nombre, clase, cuántos lo tienen y qué pueden hacer. */
 export function RoleRow({ role, groups, access, onOpen }: RoleRowProps) {
-  const editable = access === 'edit'
+  const isEditable = access === 'edit'
 
   return (
     <li className="flex flex-col gap-3 border-b py-4 last:border-b-0 sm:flex-row sm:items-center">
@@ -36,13 +36,13 @@ export function RoleRow({ role, groups, access, onOpen }: RoleRowProps) {
           type="button"
           variant="outline"
           className="h-11 px-3"
-          aria-label={editable ? `Editar el rol ${role.name}` : `Ver permisos del rol ${role.name}`}
+          aria-label={isEditable ? `Editar el rol ${role.name}` : `Ver permisos del rol ${role.name}`}
           onClick={onOpen}
         >
-          <Icon name={editable ? 'editar' : 'ver'} size={16} />
-          <span>{editable ? 'Editar' : 'Ver permisos'}</span>
+          <Icon name={isEditable ? 'edit' : 'view'} size={16} />
+          <span>{isEditable ? 'Editar' : 'Ver permisos'}</span>
         </Button>
-        {editable && role.is_deletable ? <DeleteRoleButton role={role} /> : null}
+        {isEditable && role.is_deletable ? <DeleteRoleButton role={role} /> : null}
       </div>
     </li>
   )

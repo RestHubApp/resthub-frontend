@@ -3,11 +3,11 @@ import { describe, expect, it } from '@jest/globals'
 import { appUrl } from './leaveTab'
 
 describe('appUrl', () => {
-  const PLATAFORMA = '/plataforma'
+  const PLATFORM = '/plataforma'
 
   it('antepone la base de la aplicación', () => {
-    expect(appUrl(PLATAFORMA, '/')).toBe(PLATAFORMA)
-    expect(appUrl(PLATAFORMA, '/app/')).toBe(`/app${PLATAFORMA}`)
+    expect(appUrl(PLATFORM, '/')).toBe(PLATFORM)
+    expect(appUrl(PLATFORM, '/app/')).toBe(`/app${PLATFORM}`)
   })
 
   it('acepta una ruta sin barra inicial y una base sin barra final', () => {

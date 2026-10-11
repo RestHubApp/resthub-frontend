@@ -4,16 +4,16 @@ import { logger } from '@/services/logger'
 import { tokenExpiresAt } from '@/services/tokenExpiry'
 
 // Se renueva unos minutos antes de que venza, con margen para un celular lento.
-const MARGEN_MS = 5 * 60_000
+const MARGIN_MS = 5 * 60_000
 // Solo se renueva si alguien usó la pantalla hace poco: una tablet olvidada
 // en la barra no tiene por qué quedar con la sesión abierta para siempre.
-const INACTIVIDAD_MS = 30 * 60_000
-const EVENTOS = ['pointerdown', 'keydown', 'visibilitychange'] as const
+const INACTIVITY_MS = 30 * 60_000
+const EVENTS = ['pointerdown', 'keydown', 'visibilitychange'] as const
 
-const actividad = { ultima: Date.now() }
+const activity = { last: Date.now() }
 
-function marcarActividad(): void {
-  actividad.ultima = Date.now()
+function markActivity(): void {
+  activity.last = Date.now()
 }
 
 /**
@@ -29,39 +29,39 @@ function marcarActividad(): void {
  * la sesión abierta y el almacén la descarta.
  */
 export function useTokenRenewal(token: string | null, renew: (origin: string) => Promise<void>): void {
-  const renovarRef = useRef(renew)
+  const renewRef = useRef(renew)
   useEffect(() => {
-    renovarRef.current = renew
+    renewRef.current = renew
   })
 
   useEffect(() => {
-    for (const evento of EVENTOS) {
-      window.addEventListener(evento, marcarActividad, { passive: true })
+    for (const event of EVENTS) {
+      window.addEventListener(event, markActivity, { passive: true })
     }
     return () => {
-      for (const evento of EVENTOS) {
-        window.removeEventListener(evento, marcarActividad)
+      for (const event of EVENTS) {
+        window.removeEventListener(event, markActivity)
       }
     }
   }, [])
 
   useEffect(() => {
-    const origen = token
-    const vencimiento = origen === null ? null : tokenExpiresAt(origen)
-    if (origen === null || vencimiento === null) {
+    const origin = token
+    const expiry = origin === null ? null : tokenExpiresAt(origin)
+    if (origin === null || expiry === null) {
       return
     }
-    const renovar = async () => {
-      if (Date.now() - actividad.ultima > INACTIVIDAD_MS) {
+    const handleRenew = async () => {
+      if (Date.now() - activity.last > INACTIVITY_MS) {
         return
       }
       try {
-        await renovarRef.current(origen)
+        await renewRef.current(origin)
       } catch (error) {
         logger.warn({ error: String(error) }, 'auth.renew_failed')
       }
     }
-    const timer = window.setTimeout(() => void renovar(), Math.max(vencimiento - Date.now() - MARGEN_MS, 0))
+    const timer = window.setTimeout(() => void handleRenew(), Math.max(expiry - Date.now() - MARGIN_MS, 0))
     return () => {
       window.clearTimeout(timer)
     }

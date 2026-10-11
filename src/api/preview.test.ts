@@ -13,7 +13,7 @@ const post = mockPost
 
 jest.mock('@/services/api', () => ({
   api: { get: (...args: unknown[]) => mockGet(...args), post: (...args: unknown[]) => mockPost(...args) },
-  debeReintentar: () => false,
+  shouldRetry: () => false,
 }))
 
 beforeEach(() => {
@@ -23,11 +23,11 @@ beforeEach(() => {
 
 describe('API de la vista previa', () => {
   it('lee el local de muestra bajo la raíz de plataforma', async () => {
-    const muestra = { restaurant: null, accounts: [] }
-    get.mockResolvedValue({ data: muestra })
+    const sample = { restaurant: null, accounts: [] }
+    get.mockResolvedValue({ data: sample })
 
     const queryFn = platformSandboxQuery.queryFn as () => Promise<unknown>
-    await expect(queryFn()).resolves.toBe(muestra)
+    await expect(queryFn()).resolves.toBe(sample)
     expect(get).toHaveBeenCalledWith('/platform/sandbox')
     expect(platformSandboxQuery.queryKey[0]).toBe(PLATFORM_QUERY_ROOT)
   })
@@ -56,7 +56,7 @@ describe('API de la vista previa', () => {
   })
 
   it('la sesión conserva la marca de vista previa', () => {
-    const respuesta = {
+    const response = {
       access_token: 't',
       expires_in: 1800,
       token_type: 'bearer',
@@ -65,6 +65,6 @@ describe('API de la vista previa', () => {
       permissions: [],
       preview: true,
     } as unknown as Parameters<typeof sessionOf>[0]
-    expect(sessionOf(respuesta)).toEqual({ user: { id: 1 }, restaurant: { id: 2 }, permissions: [], preview: true })
+    expect(sessionOf(response)).toEqual({ user: { id: 1 }, restaurant: { id: 2 }, permissions: [], preview: true })
   })
 })

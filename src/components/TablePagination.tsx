@@ -5,7 +5,7 @@ interface TablePaginationProps {
   /** Página actual, desde cero. */
   readonly actual: number
   readonly total: number
-  readonly onChange: (pagina: number) => void
+  readonly onChange: (page: number) => void
 }
 
 /** Anterior y siguiente, con la página en la que se está anunciada al cambiar. */
@@ -25,7 +25,7 @@ export function TablePagination({ actual, total, onChange }: TablePaginationProp
             onChange(actual - 1)
           }}
         >
-          <Icon name="anterior" size={14} />
+          <Icon name="previous" size={14} />
           <span>Anterior</span>
         </Button>
         <Button
@@ -38,7 +38,7 @@ export function TablePagination({ actual, total, onChange }: TablePaginationProp
           }}
         >
           <span>Siguiente</span>
-          <Icon name="siguiente" size={14} />
+          <Icon name="next" size={14} />
         </Button>
       </div>
     </nav>

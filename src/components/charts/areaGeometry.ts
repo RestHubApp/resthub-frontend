@@ -47,13 +47,13 @@ export function areaGeometry(
   const plotRight = Math.max(plotLeft + 1, width - AREA_MARGIN.right)
   const plotTop = AREA_MARGIN.top
   const plotBottom = height - AREA_MARGIN.bottom
-  const maximo = Math.max(0, ...points.map((point) => point.value), ...overlay)
-  const ticks = niceTicks(maximo)
-  const tope = ticks.at(-1) ?? 1
+  const max = Math.max(0, ...points.map((point) => point.value), ...overlay)
+  const ticks = niceTicks(max)
+  const cap = ticks.at(-1) ?? 1
   const step = points.length > 1 ? (plotRight - plotLeft) / (points.length - 1) : 0
 
   const x = (index: number) => plotLeft + index * step
-  const y = (value: number) => plotBottom - (value / tope) * (plotBottom - plotTop)
+  const y = (value: number) => plotBottom - (value / cap) * (plotBottom - plotTop)
 
   const linePath = pathOf(
     points.map((point) => point.value),
@@ -65,7 +65,7 @@ export function areaGeometry(
       ? ''
       : `${linePath} L${x(points.length - 1).toFixed(1)},${String(plotBottom)} L${String(plotLeft)},${String(plotBottom)} Z`
   const maxIndex = points.reduce(
-    (mejor, point, index) => (point.value > (points[mejor]?.value ?? 0) ? index : mejor),
+    (best, point, index) => (point.value > (points[best]?.value ?? 0) ? index : best),
     0,
   )
 

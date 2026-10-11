@@ -57,24 +57,24 @@ export function BillingSettingsForm({ settings }: BillingSettingsFormProps) {
     resolver: zodResolver(schema),
     defaultValues: valuesOf(settings),
   })
-  const errorDe = (campo: keyof Values): string | undefined => formState.errors[campo]?.message
-  const guardar = useMutation({
-    mutationFn: (valores: Values) =>
+  const errorDe = (field: keyof Values): string | undefined => formState.errors[field]?.message
+  const save = useMutation({
+    mutationFn: (values: Values) =>
       updateBillingSettings({
-        ...valores,
-        igv_rate: valores.igv_rate.replace(',', '.'),
-        provider_token: valores.provider_token === '' ? null : valores.provider_token,
+        ...values,
+        igv_rate: values.igv_rate.replace(',', '.'),
+        provider_token: values.provider_token === '' ? null : values.provider_token,
       }),
-    onSuccess: (guardado) => {
-      queryClient.setQueryData(billingSettingsQueryKey, guardado)
+    onSuccess: (saved) => {
+      queryClient.setQueryData(billingSettingsQueryKey, saved)
       void queryClient.invalidateQueries({ queryKey: billingQueryKey })
       push({ tone: 'info', message: 'Datos fiscales guardados.' })
     },
   })
 
   return (
-    <form noValidate className="flex flex-col gap-4" onSubmit={onSubmit(handleSubmit((valores) => {
-      guardar.mutate(valores)
+    <form noValidate className="flex flex-col gap-4" onSubmit={onSubmit(handleSubmit((values) => {
+      save.mutate(values)
     }))}>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField id="fiscal-ruc" label="RUC del local" inputMode="numeric" field={register('ruc')} error={errorDe('ruc')} />
@@ -90,9 +90,9 @@ export function BillingSettingsForm({ settings }: BillingSettingsFormProps) {
         <TextField id="fiscal-url" label="Ruta del proveedor (Nubefact)" placeholder="https://api.nubefact.com/api/v1/…" field={register('provider_url')} error={errorDe('provider_url')} />
         <TextField id="fiscal-token" label="Token del proveedor" type="password" autoComplete="off" hint={settings.has_provider_token ? 'Cargado. Déjalo vacío para no cambiarlo.' : 'Todavía no cargado.'} field={register('provider_token')} error={errorDe('provider_token')} />
       </div>
-      {guardar.isError ? <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudieron guardar los datos.')}</FormMessage> : null}
-      <Button type="submit" className="self-end" disabled={guardar.isPending}>
-        {guardar.isPending ? 'Guardando…' : 'Guardar datos fiscales'}
+      {save.isError ? <FormMessage tone="error">{errorMessage(save.error, 'No se pudieron guardar los datos.')}</FormMessage> : null}
+      <Button type="submit" className="self-end" disabled={save.isPending}>
+        {save.isPending ? 'Guardando…' : 'Guardar datos fiscales'}
       </Button>
     </form>
   )

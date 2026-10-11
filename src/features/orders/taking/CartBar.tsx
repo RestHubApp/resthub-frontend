@@ -20,7 +20,7 @@ interface CartBarProps {
  * `data-cart-bar` lo usa index.css para subir el boton de accesibilidad.
  */
 export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartBarProps) {
-  const { platos, count, total } = cartTotals(lines)
+  const { dishes, count, total } = cartTotals(lines)
 
   return (
     <div
@@ -31,17 +31,17 @@ export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartB
         <button
           type="button"
           aria-haspopup="dialog"
-          disabled={platos === 0}
+          disabled={dishes === 0}
           onClick={onOpen}
           className="flex min-h-12 flex-1 flex-col justify-center rounded-lg px-2 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default"
         >
           <span aria-live="polite" className="text-sm text-muted-foreground">
-            {platos === 0 ? 'Toca un plato' : `${count} · Ver y anotar`}
+            {dishes === 0 ? 'Toca un plato' : `${count} · Ver y anotar`}
           </span>
           <span className="text-lg font-bold tabular-nums">{total}</span>
         </button>
-        <Button type="button" size="lg" className="h-12 px-4 text-base" disabled={platos === 0 || pending} onClick={onSubmit}>
-          <Icon name="enviar" size={18} />
+        <Button type="button" size="lg" className="h-12 px-4 text-base" disabled={dishes === 0 || pending} onClick={onSubmit}>
+          <Icon name="send" size={18} />
           <span>{pending ? 'Enviando…' : submitLabel}</span>
         </Button>
       </div>

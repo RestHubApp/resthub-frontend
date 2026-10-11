@@ -17,38 +17,38 @@ interface MenuItemStatusButtonProps {
  * carta del mesero hasta que alguien lo vuelva a activar. Por eso se confirma.
  */
 export function MenuItemStatusButton({ item }: MenuItemStatusButtonProps) {
-  const estado = useMenuAction({
+  const status = useMenuAction({
     send: () => updateMenuItem(item.id, { is_active: !item.is_active }),
     updateCache: withItem,
     failure: `No se pudo actualizar ${item.name}.`,
   })
-  const cambiar = () => {
-    estado.mutate()
+  const change = () => {
+    status.mutate()
   }
 
-  const boton = (
+  const button = (
     <Button
       type="button"
       variant={item.is_active ? 'ghost' : 'success'}
       className="h-11 px-3"
-      disabled={estado.isPending}
-      onClick={item.is_active ? undefined : cambiar}
+      disabled={status.isPending}
+      onClick={item.is_active ? undefined : change}
     >
-      <Icon name="encender" size={16} />
+      <Icon name="turnOn" size={16} />
       <span>{item.is_active ? 'Desactivar' : 'Activar'}</span>
     </Button>
   )
 
   if (!item.is_active) {
-    return boton
+    return button
   }
   return (
     <ConfirmDialog
-      trigger={boton}
+      trigger={button}
       title={`¿Sacar ${item.name} de la carta?`}
       description="El mesero deja de verlo hasta que lo vuelvas a activar. Si solo no hay hoy, usa «Disponible hoy»."
       confirmLabel="Desactivar"
-      onConfirm={cambiar}
+      onConfirm={change}
     />
   )
 }

@@ -22,7 +22,7 @@ interface AuthCardProps {
  * formulario.
  */
 export function AuthCard({ title, description, children, footer, aside }: AuthCardProps) {
-  const tarjeta = (
+  const card = (
     <Card className="w-full gap-6 py-6 shadow-sm">
       <CardHeader className="gap-2 px-6 sm:px-8">
         <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-foreground sm:text-3xl">
@@ -40,12 +40,12 @@ export function AuthCard({ title, description, children, footer, aside }: AuthCa
   )
 
   if (aside === undefined) {
-    return <div className="mx-auto w-full max-w-md my-auto">{tarjeta}</div>
+    return <div className="mx-auto w-full max-w-md my-auto">{card}</div>
   }
 
   return (
     <div className="mx-auto grid w-full max-w-5xl gap-6 my-auto lg:grid-cols-[minmax(0,1fr)_32rem] lg:items-start lg:gap-10">
-      <div className="mx-auto w-full max-w-lg lg:order-2 lg:max-w-none">{tarjeta}</div>
+      <div className="mx-auto w-full max-w-lg lg:order-2 lg:max-w-none">{card}</div>
       <div className="mx-auto w-full max-w-lg lg:order-1 lg:max-w-none">{aside}</div>
     </div>
   )

@@ -71,8 +71,8 @@ function positiveInt(raw: string | null, max = Number.MAX_SAFE_INTEGER): number 
   if (raw === null || !/^\d+$/u.test(raw)) {
     return null
   }
-  const numero = Number(raw)
-  return numero >= 1 && numero <= max ? numero : null
+  const number = Number(raw)
+  return number >= 1 && number <= max ? number : null
 }
 
 function text(raw: string | null, max: number): string {
@@ -80,18 +80,18 @@ function text(raw: string | null, max: number): string {
 }
 
 function statusMin(raw: string | null): number | null {
-  const numero = positiveInt(raw, MAX_STATUS)
-  return numero !== null && numero >= MIN_STATUS ? numero : null
+  const number = positiveInt(raw, MAX_STATUS)
+  return number !== null && number >= MIN_STATUS ? number : null
 }
 
 /** Los filtros de la dirección; lo que no se entiende queda en su valor por omisión. */
 export function parseObsFilters(search: URLSearchParams): ObsFilters {
-  const ventana = WINDOWS.find((option) => option.value === search.get(PARAM.window))
-  const nivel = LEVELS.find((level) => level === search.get(PARAM.logLevel))
+  const window = WINDOWS.find((option) => option.value === search.get(PARAM.window))
+  const level = LEVELS.find((level) => level === search.get(PARAM.logLevel))
   return {
-    window: ventana?.value ?? DEFAULT_WINDOW,
+    window: window?.value ?? DEFAULT_WINDOW,
     restaurantId: positiveInt(search.get(PARAM.restaurantId)),
-    logLevel: nivel ?? null,
+    logLevel: level ?? null,
     logSearch: text(search.get(PARAM.logSearch), MAX_LOG_SEARCH),
     logRequestId: text(search.get(PARAM.logRequestId), MAX_REQUEST_ID),
     statusMin: statusMin(search.get(PARAM.statusMin)),
@@ -106,7 +106,7 @@ export function parseObsFilters(search: URLSearchParams): ObsFilters {
  */
 export function obsSearch(filters: ObsFilters): URLSearchParams {
   const params = new URLSearchParams()
-  const valores: Record<keyof ObsFilters, string> = {
+  const values: Record<keyof ObsFilters, string> = {
     window: filters.window === DEFAULT_WINDOW ? '' : filters.window,
     restaurantId: filters.restaurantId === null ? '' : String(filters.restaurantId),
     logLevel: filters.logLevel ?? '',
@@ -116,9 +116,9 @@ export function obsSearch(filters: ObsFilters): URLSearchParams {
     route: filters.route.trim(),
     requestId: filters.requestId.trim(),
   }
-  for (const [clave, valor] of Object.entries(valores) as [keyof ObsFilters, string][]) {
-    if (valor !== '') {
-      params.set(PARAM[clave], valor)
+  for (const [key, value] of Object.entries(values) as [keyof ObsFilters, string][]) {
+    if (value !== '') {
+      params.set(PARAM[key], value)
     }
   }
   return params
@@ -153,7 +153,7 @@ export function windowParams(filters: ObsFilters): ObsWindowParams {
 // Un filtro vacío no viaja: la clave de caché de «sin filtro» es una sola.
 function withoutEmpty<T extends object>(params: T): T {
   return Object.fromEntries(
-    Object.entries(params).filter(([, valor]) => valor !== null && valor !== undefined && valor !== ''),
+    Object.entries(params).filter(([, value]) => value !== null && value !== undefined && value !== ''),
   ) as T
 }
 

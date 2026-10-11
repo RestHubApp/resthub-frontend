@@ -20,7 +20,7 @@ export function useAccountRefresh(): void {
   const token = useSession((state) => state.token)
   const refresh = useSession((state) => state.refresh)
 
-  const cuenta = useQuery({
+  const account = useQuery({
     ...currentUserQuery,
     enabled: token !== null,
     staleTime: REFRESH_MS,
@@ -33,8 +33,8 @@ export function useAccountRefresh(): void {
   })
 
   useEffect(() => {
-    if (cuenta.data !== undefined) {
-      refresh(cuenta.data)
+    if (account.data !== undefined) {
+      refresh(account.data)
     }
-  }, [cuenta.data, refresh])
+  }, [account.data, refresh])
 }

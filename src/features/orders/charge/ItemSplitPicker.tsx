@@ -17,23 +17,23 @@ interface ItemSplitPickerProps {
  * pedido ya aplicado, igual que lo va a calcular.
  */
 export function ItemSplitPicker({ order, selected, chargeCents, onChange }: ItemSplitPickerProps) {
-  const pendientes = unpaidItems(order)
-  const toggle = (itemId: number, marcado: boolean) => {
-    onChange(marcado ? [...selected, itemId] : selected.filter((id) => id !== itemId))
+  const pending = unpaidItems(order)
+  const toggle = (itemId: number, marked: boolean) => {
+    onChange(marked ? [...selected, itemId] : selected.filter((id) => id !== itemId))
   }
 
   return (
     <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
       <legend className="mb-2 text-sm font-medium">Platos que paga</legend>
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
-        {pendientes.map((item) => (
+        {pending.map((item) => (
           <li key={item.id}>
             <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 ring-1 ring-input has-checked:bg-muted">
               <Checkbox
                 aria-labelledby={`plato-que-paga-${String(item.id)}`}
                 checked={selected.includes(item.id)}
-                onCheckedChange={(estado) => {
-                  toggle(item.id, estado === true)
+                onCheckedChange={(status) => {
+                  toggle(item.id, status === true)
                 }}
               />
               <span id={`plato-que-paga-${String(item.id)}`} className="flex-1 text-sm">

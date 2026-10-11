@@ -18,14 +18,14 @@ export function TimeZoneField({ id, field, error, current }: TimeZoneFieldProps)
     <SelectField
       id={id}
       label="Zona horaria"
-      icon="horario"
+      icon="schedule"
       hint="Con ella se cuentan el día, la caja y las horas de los pedidos del local."
       field={field}
       error={error}
     >
-      {timeZoneOptions(current).map((zona) => (
-        <NativeSelectOption key={zona.value} value={zona.value}>
-          {timeZoneLabel(zona)}
+      {timeZoneOptions(current).map((zone) => (
+        <NativeSelectOption key={zone.value} value={zone.value}>
+          {timeZoneLabel(zone)}
         </NativeSelectOption>
       ))}
     </SelectField>

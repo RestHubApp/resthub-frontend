@@ -15,19 +15,19 @@ import { InvoiceList } from './InvoiceList'
  * mientras falte algo para enviar a SUNAT.
  */
 export function BillingView() {
-  const ajustes = useQuery(billingSettingsQuery)
+  const settings = useQuery(billingSettingsQuery)
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Comprobantes" description="Boletas y facturas electrónicas enviadas a SUNAT por el proveedor autorizado." />
-      {ajustes.data ? (
-        <SectionCard title="Datos fiscales" collapsible defaultOpen={!ajustes.data.is_ready}>
-          <BillingSettingsForm settings={ajustes.data} />
+      {settings.data ? (
+        <SectionCard title="Datos fiscales" collapsible defaultOpen={!settings.data.is_ready}>
+          <BillingSettingsForm settings={settings.data} />
         </SectionCard>
       ) : null}
       {/* «Emitidos» espera a los datos fiscales, que van arriba: si no, la
           tarjeta de datos fiscales la empujaba hacia abajo al llegar (CLS). */}
-      {ajustes.isPending ? (
+      {settings.isPending ? (
         <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" />
       ) : (
         <SectionCard title="Emitidos">

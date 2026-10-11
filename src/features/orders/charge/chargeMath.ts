@@ -46,14 +46,14 @@ export function unpaidItems(order: OrderResponse): OrderItemResponse[] {
  * la cuenta con el redondeo, igual que en el servidor.
  */
 export function itemsCents(order: OrderResponse, itemIds: readonly number[]): number {
-  const elegidos = new Set(itemIds)
-  const pendientes = unpaidItems(order)
-  if (pendientes.length > 0 && pendientes.every((item) => elegidos.has(item.id))) {
+  const selected = new Set(itemIds)
+  const pending = unpaidItems(order)
+  if (pending.length > 0 && pending.every((item) => selected.has(item.id))) {
     return balanceCents(order)
   }
-  const due = pendientes
-    .filter((item) => elegidos.has(item.id))
-    .reduce((suma, item) => suma + (item.is_courtesy ? 0 : toCents(item.subtotal)), 0)
+  const due = pending
+    .filter((item) => selected.has(item.id))
+    .reduce((sum, item) => sum + (item.is_courtesy ? 0 : toCents(item.subtotal)), 0)
   return due - discountOf(due, Number(order.discount_percent))
 }
 

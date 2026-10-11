@@ -27,14 +27,14 @@ export function isOffline(error: unknown): boolean {
 }
 
 /** Abre el pedido y lo manda a cocina; si ya estaba en cocina, el 409 vale como hecho. */
-async function sendQueued(pedido: QueuedOrder): Promise<number> {
-  const abierto = await openOrder(pedido.request)
-  await advanceOrder(abierto.id, 'send').catch((error: unknown) => {
+async function sendQueued(order: QueuedOrder): Promise<number> {
+  const open = await openOrder(order.request)
+  await advanceOrder(open.id, 'send').catch((error: unknown) => {
     if (errorStatus(error) !== CONFLICT) {
       throw error
     }
   })
-  return abierto.number
+  return open.number
 }
 
 /**
@@ -45,28 +45,28 @@ async function sendQueued(pedido: QueuedOrder): Promise<number> {
  * rechazo de verdad (plato agotado, mesa ocupada) se avisa y sale de la cola.
  */
 export function useOfflineOrders() {
-  const pendientes = useQueuedOrders(useSession((state) => state.account))
+  const pending = useQueuedOrders(useSession((state) => state.account))
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const enviando = useRef(false)
+  const sending = useRef(false)
 
-  const enviar = useCallback(async () => {
+  const send = useCallback(async () => {
     const owner = ownerOf(useSession.getState().account)
-    if (enviando.current || queuedOrders(owner).length === 0) {
+    if (sending.current || queuedOrders(owner).length === 0) {
       return
     }
-    enviando.current = true
+    sending.current = true
     try {
-      for (const pedido of queuedOrders(owner)) {
+      for (const order of queuedOrders(owner)) {
         // Si la sesión se cerró o cambió de cuenta a mitad de la cola, el
         // token ya no es el de quien tomó el pedido.
-        if (!belongsTo(pedido, ownerOf(useSession.getState().account))) {
+        if (!belongsTo(order, ownerOf(useSession.getState().account))) {
           break
         }
-        const siguio = await sendQueued(pedido).then(
-          (numero) => {
-            removeQueued(pedido.request.client_request_id ?? '')
-            push({ tone: 'info', message: `${pedido.label}: pedido #${String(numero)} enviado a cocina.` })
+        const wasFollowed = await sendQueued(order).then(
+          (number) => {
+            removeQueued(order.request.client_request_id ?? '')
+            push({ tone: 'info', message: `${order.label}: pedido #${String(number)} enviado a cocina.` })
             return true
           },
           (error: unknown) => {
@@ -75,34 +75,34 @@ export function useOfflineOrders() {
             if (isOffline(error) || errorStatus(error) === UNAUTHORIZED) {
               return false
             }
-            removeQueued(pedido.request.client_request_id ?? '')
-            push({ tone: 'warning', message: `${pedido.label}: ${errorMessage(error, 'no se pudo enviar.')}` })
+            removeQueued(order.request.client_request_id ?? '')
+            push({ tone: 'warning', message: `${order.label}: ${errorMessage(error, 'no se pudo enviar.')}` })
             return true
           },
         )
-        if (!siguio) {
+        if (!wasFollowed) {
           break
         }
       }
     } finally {
-      enviando.current = false
+      sending.current = false
       void queryClient.invalidateQueries({ queryKey: ordersQueryKey })
       void queryClient.invalidateQueries({ queryKey: tablesQueryKey })
     }
   }, [push, queryClient])
 
   useEffect(() => {
-    void enviar()
-    const alVolver = () => {
-      void enviar()
+    void send()
+    const onBack = () => {
+      void send()
     }
-    window.addEventListener('online', alVolver)
-    const timer = window.setInterval(alVolver, RETRY_MS)
+    window.addEventListener('online', onBack)
+    const timer = window.setInterval(onBack, RETRY_MS)
     return () => {
-      window.removeEventListener('online', alVolver)
+      window.removeEventListener('online', onBack)
       window.clearInterval(timer)
     }
-  }, [enviar])
+  }, [send])
 
-  return { pendientes, enviar }
+  return { pending, send }
 }

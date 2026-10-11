@@ -27,7 +27,7 @@ export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProp
     defaultValues: { email: '', password: '' },
   })
 
-  const acceder = useMutation({
+  const access = useMutation({
     mutationKey: platformMutationKeys.login,
     mutationFn: platformLogin,
     gcTime: PASSWORD_MUTATION_GC_TIME,
@@ -41,8 +41,8 @@ export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProp
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          acceder.mutate(valores)
+        handleSubmit((values) => {
+          access.mutate(values)
         }),
       )}
     >
@@ -68,14 +68,14 @@ export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProp
         field={register('password')}
         error={formState.errors.password?.message}
       />
-      {acceder.isError ? (
+      {access.isError ? (
         <FormMessage tone="error">
-          {errorMessage(acceder.error, 'No se pudo iniciar sesión. Inténtalo de nuevo.')}
+          {errorMessage(access.error, 'No se pudo iniciar sesión. Inténtalo de nuevo.')}
         </FormMessage>
       ) : null}
-      <Button type="submit" size="lg" className="h-11 w-full" disabled={acceder.isPending || acceder.isSuccess}>
-        <Icon name="entrar" size={18} />
-        <span>{acceder.isPending ? 'Entrando…' : 'Entrar'}</span>
+      <Button type="submit" size="lg" className="h-11 w-full" disabled={access.isPending || access.isSuccess}>
+        <Icon name="signIn" size={18} />
+        <span>{access.isPending ? 'Entrando…' : 'Entrar'}</span>
       </Button>
     </form>
   )

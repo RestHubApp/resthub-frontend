@@ -21,7 +21,7 @@ export function OpenCashForm() {
     resolver: zodResolver(openCashSchema),
     defaultValues: { opening_amount: '', notes: '' },
   })
-  const abrir = useCashMutation({
+  const open = useCashMutation({
     mutationFn: (payload: OpenCashRequest) => openCash(payload),
     success: (session) => `Caja abierta con ${formatMoney(session.opening_amount)}. Ya se puede cobrar.`,
     failure: 'No se pudo abrir la caja.',
@@ -32,8 +32,8 @@ export function OpenCashForm() {
       noValidate
       className="flex flex-col gap-4"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          abrir.mutate({ opening_amount: cashAmountForApi(valores.opening_amount), notes: valores.notes })
+        handleSubmit((values) => {
+          open.mutate({ opening_amount: cashAmountForApi(values.opening_amount), notes: values.notes })
         }),
       )}
     >
@@ -41,7 +41,7 @@ export function OpenCashForm() {
         <TextField
           id="caja-inicial"
           label="Efectivo inicial"
-          icon="pago"
+          icon="payment"
           inputMode="decimal"
           autoComplete="off"
           placeholder="150.00"
@@ -59,9 +59,9 @@ export function OpenCashForm() {
         />
       </div>
       <div className="flex justify-end">
-        <Button type="submit" size="lg" variant="success" className="h-11 px-5" disabled={abrir.isPending}>
-          <Icon name="caja" size={18} />
-          <span>{abrir.isPending ? 'Abriendo…' : 'Abrir caja'}</span>
+        <Button type="submit" size="lg" variant="success" className="h-11 px-5" disabled={open.isPending}>
+          <Icon name="cashRegister" size={18} />
+          <span>{open.isPending ? 'Abriendo…' : 'Abrir caja'}</span>
         </Button>
       </div>
     </form>

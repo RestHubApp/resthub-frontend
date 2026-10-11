@@ -40,24 +40,24 @@ interface PlatformSessionState {
 // navegador: vive solo en su memoria (y el área de plataforma no se muestra
 // ahí). Si no, un 401 o un «Salir» en esa pestaña cerraría la sesión real del
 // administrador en todas las demás.
-function almacen(): Storage | null {
+function getStorage(): Storage | null {
   return isPreviewTab() ? null : localStorage
 }
 
 // Una lectura o escritura puede fallar en una ventana privada o con el
 // almacenamiento bloqueado: se trata como «no hay sesión guardada».
 function readStored(): StoredPlatformSession | null {
-  const lectura = leer()
-  return lectura.ok ? lectura.session : null
+  const read = readStoredResult()
+  return read.ok ? read.session : null
 }
 
-type Lectura = { readonly ok: true; readonly session: StoredPlatformSession | null } | { readonly ok: false }
+type Read = { readonly ok: true; readonly session: StoredPlatformSession | null } | { readonly ok: false }
 
 // Distingue «no hay sesión guardada» de «no se pudo leer»: sin almacenamiento
 // no se sabe qué hizo otra pestaña, y eso no alcanza para cerrar esta.
-function leer(): Lectura {
+function readStoredResult(): Read {
   try {
-    const storage = almacen()
+    const storage = getStorage()
     if (storage === null) {
       return { ok: false }
     }
@@ -70,18 +70,18 @@ function leer(): Lectura {
 
 // El token que esta pestaña logró guardar (o restauró). Solo se compara lo
 // guardado con lo que esta pestaña escribió.
-const persistencia: { token: string | null } = { token: null }
+const persistence: { token: string | null } = { token: null }
 
 function writeStored(session: StoredPlatformSession | null): void {
-  persistencia.token = null
+  persistence.token = null
   try {
-    const storage = almacen()
+    const storage = getStorage()
     if (session === null) {
       storage?.removeItem(PLATFORM_STORAGE_KEY)
       return
     }
     storage?.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(session))
-    persistencia.token = storage === null ? null : session.token
+    persistence.token = storage === null ? null : session.token
   } catch {
     // Sin almacenamiento la sesión dura lo que dure la pestaña.
   }
@@ -92,58 +92,58 @@ function writeStored(session: StoredPlatformSession | null): void {
  * `token` (la cerró, entró otro administrador o ya la renovó): esta no debe
  * escribir encima.
  */
-function otraPestanaLaCambio(token: string): boolean {
+function otherTabChange(token: string): boolean {
   // Compara tokens para saber cuál sesión escribió esta pestaña, no para verificar un secreto.
-  const escritaPorEsta = persistencia.token === token
-  if (!escritaPorEsta) {
+  const wasWrittenByThis = persistence.token === token
+  if (!wasWrittenByThis) {
     return false
   }
-  const lectura = leer()
-  return lectura.ok && lectura.session?.token !== token
+  const read = readStoredResult()
+  return read.ok && read.session?.token !== token
 }
 
-const programarVencimiento = expiryTimer(() => {
+const scheduleExpiry = expiryTimer(() => {
   usePlatformSession.getState().expire()
 })
 
-function limpiar(): void {
+function clean(): void {
   setPlatformAuthToken(null)
   writeStored(null)
-  programarVencimiento(null)
+  scheduleExpiry(null)
   // Solo lo de plataforma, consultas y mutaciones (con las contraseñas de los
   // encargados dados de alta): lo del restaurante es de otra sesión.
   clearQueriesOf(PLATFORM_QUERY_ROOT)
 }
 
 /** Cierra la sesión solo en esta pestaña, sin tocar lo guardado, que ya es de otra. */
-function soltar(): void {
+function drop(): void {
   setPlatformAuthToken(null)
-  persistencia.token = null
-  programarVencimiento(null)
+  persistence.token = null
+  scheduleExpiry(null)
   clearQueriesOf(PLATFORM_QUERY_ROOT)
 }
 
-function abrir(token: string, admin: PlatformAdmin): void {
+function open(token: string, admin: PlatformAdmin): void {
   setPlatformAuthToken(token)
   writeStored({ token, admin })
-  programarVencimiento(token)
+  scheduleExpiry(token)
 }
 
-const guardada = readStored()
-const restored = guardada !== null && !isTokenExpired(guardada.token) ? guardada : null
-if (guardada !== null && restored === null) {
+const saved = readStored()
+const restored = saved !== null && !isTokenExpired(saved.token) ? saved : null
+if (saved !== null && restored === null) {
   writeStored(null)
 }
-persistencia.token = restored?.token ?? null
+persistence.token = restored?.token ?? null
 setPlatformAuthToken(restored?.token ?? null)
 
 export const usePlatformSession = create<PlatformSessionState>((set, get) => ({
   token: restored?.token ?? null,
   admin: restored?.admin ?? null,
-  expired: guardada !== null && restored === null,
+  expired: saved !== null && restored === null,
 
   signIn: (token, admin) => {
-    abrir(token, admin)
+    open(token, admin)
     set({ token, admin, expired: false })
     logger.info({ adminId: admin.id }, 'platform.signed_in')
   },
@@ -154,7 +154,7 @@ export const usePlatformSession = create<PlatformSessionState>((set, get) => ({
     if (token === null) {
       return
     }
-    if (otraPestanaLaCambio(token)) {
+    if (otherTabChange(token)) {
       syncWithStoredPlatformSession()
       return
     }
@@ -168,17 +168,17 @@ export const usePlatformSession = create<PlatformSessionState>((set, get) => ({
     }
     // Otra pestaña cerró la sesión o entró otro administrador mientras esta
     // renovaba: escribir encima la resucitaría o pisaría la del otro.
-    if (otraPestanaLaCambio(origin)) {
+    if (otherTabChange(origin)) {
       syncWithStoredPlatformSession()
       return
     }
-    abrir(token, admin)
+    open(token, admin)
     set({ token, admin })
     logger.info('platform.renewed')
   },
 
   signOut: () => {
-    limpiar()
+    clean()
     set({ token: null, admin: null, expired: false })
     logger.info('platform.signed_out')
   },
@@ -187,13 +187,13 @@ export const usePlatformSession = create<PlatformSessionState>((set, get) => ({
     if (get().token === null) {
       return
     }
-    limpiar()
+    clean()
     set({ token: null, admin: null, expired: true })
     logger.warn('platform.session_expired')
   },
 }))
 
-programarVencimiento(restored?.token ?? null)
+scheduleExpiry(restored?.token ?? null)
 setPlatformUnauthorizedHandler(() => {
   usePlatformSession.getState().expire()
 })
@@ -206,27 +206,27 @@ setPlatformUnauthorizedHandler(() => {
  * de vista previa no guarda la sesión de plataforma y no se sincroniza.
  */
 function syncWithStoredPlatformSession(): void {
-  const lectura = leer()
-  if (!lectura.ok) {
+  const read = readStoredResult()
+  if (!read.ok) {
     return
   }
-  const actual = lectura.session
-  const estado = usePlatformSession.getState()
-  if (actual !== null && actual.token === estado.token) {
+  const actual = read.session
+  const status = usePlatformSession.getState()
+  if (actual !== null && actual.token === status.token) {
     return
   }
-  if (actual !== null && !isTokenExpired(actual.token) && (estado.admin === null || estado.admin.id === actual.admin.id)) {
+  if (actual !== null && !isTokenExpired(actual.token) && (status.admin === null || status.admin.id === actual.admin.id)) {
     setPlatformAuthToken(actual.token)
-    persistencia.token = actual.token
-    programarVencimiento(actual.token)
+    persistence.token = actual.token
+    scheduleExpiry(actual.token)
     usePlatformSession.setState({ token: actual.token, admin: actual.admin, expired: false })
     logger.info('platform.synced_from_other_tab')
     return
   }
-  if (estado.token === null) {
+  if (status.token === null) {
     return
   }
-  soltar()
+  drop()
   usePlatformSession.setState({ token: null, admin: null, expired: false })
   logger.info('platform.signed_out_in_other_tab')
 }
@@ -235,7 +235,7 @@ function syncWithStoredPlatformSession(): void {
 // `key === null` es que se vació el almacenamiento entero.
 if (typeof window !== 'undefined' && !isPreviewTab()) {
   window.addEventListener('storage', (event: StorageEvent) => {
-    if (event.storageArea !== null && event.storageArea !== almacen()) {
+    if (event.storageArea !== null && event.storageArea !== getStorage()) {
       return
     }
     if (event.key === PLATFORM_STORAGE_KEY || event.key === null) {

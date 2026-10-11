@@ -13,14 +13,14 @@ interface MarginsSectionProps {
 /** Cuánto deja cada plato: precio menos receta, y la ganancia bruta del período. */
 export function MarginsSection({ range }: MarginsSectionProps) {
   const report = useInsightsReport(insightsReportQuery('dishes-margins', range, fetchDishMargins))
-  const sinReceta = report.data?.dishes.filter((dish) => dish.recipe_cost === null).length ?? 0
+  const withoutRecipe = report.data?.dishes.filter((dish) => dish.recipe_cost === null).length ?? 0
 
   return (
     <SectionCard
       title="Margen por plato"
       description={
-        sinReceta > 0
-          ? `El costo sale de la receta. ${String(sinReceta)} platos no tienen receta: su margen no se puede calcular.`
+        withoutRecipe > 0
+          ? `El costo sale de la receta. ${String(withoutRecipe)} platos no tienen receta: su margen no se puede calcular.`
           : 'El costo sale de la receta de cada plato y del costo actual de sus insumos.'
       }
     >

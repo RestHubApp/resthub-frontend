@@ -18,12 +18,12 @@ export function MoveButtons({ label, isFirst, isLast, disabled, onMove }: MoveBu
       <Button type="button" variant="outline" className={ICON_BUTTON} aria-label={`Subir ${label}`} disabled={isFirst || disabled} onClick={() => {
         onMove(-1)
       }}>
-        <Icon name="subir" size={18} />
+        <Icon name="up" size={18} />
       </Button>
       <Button type="button" variant="outline" className={ICON_BUTTON} aria-label={`Bajar ${label}`} disabled={isLast || disabled} onClick={() => {
         onMove(1)
       }}>
-        <Icon name="bajar" size={18} />
+        <Icon name="down" size={18} />
       </Button>
     </div>
   )

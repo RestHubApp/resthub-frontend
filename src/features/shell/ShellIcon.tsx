@@ -36,28 +36,28 @@ import {
  * `components/icons.ts`, que es donde se agrega uno nuevo.
  */
 const SHELL_ICONS = {
-  pedido: ClipboardList,
-  tablero: ChefHat,
-  cocina: CookingPot,
-  reservas: CalendarClock,
-  clientes: BookUser,
-  caja: Wallet,
-  receta: ScrollText,
-  carta: UtensilsCrossed,
-  mesa: Armchair,
-  inventario: Boxes,
-  personal: UsersRound,
+  order: ClipboardList,
+  board: ChefHat,
+  kitchen: CookingPot,
+  reservations: CalendarClock,
+  customers: BookUser,
+  cashRegister: Wallet,
+  recipe: ScrollText,
+  menu: UtensilsCrossed,
+  table: Armchair,
+  inventory: Boxes,
+  staff: UsersRound,
   roles: ShieldCheck,
-  indicadores: ChartColumnIncreasing,
-  mas: Ellipsis,
-  perfil: UserRound,
-  accesibilidad: Accessibility,
-  salir: LogOut,
-  ver: Eye,
-  restaurante: Store,
-  correcto: CircleCheck,
-  alerta: CircleAlert,
-  cancelar: CircleX,
+  indicators: ChartColumnIncreasing,
+  more: Ellipsis,
+  profile: UserRound,
+  accessibility: Accessibility,
+  signOut: LogOut,
+  view: Eye,
+  restaurant: Store,
+  correct: CircleCheck,
+  alert: CircleAlert,
+  cancel: CircleX,
 } as const satisfies Record<string, LucideIcon>
 
 export type ShellIconName = keyof typeof SHELL_ICONS
@@ -76,7 +76,7 @@ const STROKE_WIDTH = 1.75
 
 /** La misma pinta que `Icon`, para el puñado de iconos que dibuja el armazón. */
 export function ShellIcon({ name, size = DEFAULT_SIZE, label, className }: ShellIconProps) {
-  const nombrado = label !== undefined && label !== ''
+  const isNamed = label !== undefined && label !== ''
   const Glyph = SHELL_ICONS[name]
 
   return (
@@ -84,9 +84,9 @@ export function ShellIcon({ name, size = DEFAULT_SIZE, label, className }: Shell
       className={className}
       size={size}
       strokeWidth={STROKE_WIDTH}
-      role={nombrado ? 'img' : undefined}
+      role={isNamed ? 'img' : undefined}
       aria-label={label}
-      aria-hidden={nombrado ? undefined : true}
+      aria-hidden={isNamed ? undefined : true}
       focusable="false"
     />
   )

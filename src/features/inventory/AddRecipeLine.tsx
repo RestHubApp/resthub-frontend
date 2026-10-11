@@ -16,7 +16,7 @@ interface AddRecipeLineProps {
 /** Elegir un insumo y sumarlo a la receta; la cantidad se escribe en su línea. */
 export function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
   const id = useId()
-  const [elegido, setElegido] = useState('')
+  const [selected, selectedSet] = useState('')
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -25,15 +25,15 @@ export function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
         <NativeSelect
           id={id}
           className="w-full [&_select]:h-11"
-          value={elegido}
-          onChange={(evento) => {
-            setElegido(evento.target.value)
+          value={selected}
+          onChange={(event) => {
+            selectedSet(event.target.value)
           }}
         >
           <NativeSelectOption value="">Elige un insumo</NativeSelectOption>
-          {options.map((insumo) => (
-            <NativeSelectOption key={insumo.id} value={String(insumo.id)}>
-              {`${insumo.name} (${baseUnitLabel(insumo.unit)})`}
+          {options.map((ingredient) => (
+            <NativeSelectOption key={ingredient.id} value={String(ingredient.id)}>
+              {`${ingredient.name} (${baseUnitLabel(ingredient.unit)})`}
             </NativeSelectOption>
           ))}
         </NativeSelect>
@@ -42,13 +42,13 @@ export function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
         type="button"
         variant="secondary"
         className="h-11 px-4"
-        disabled={elegido === ''}
+        disabled={selected === ''}
         onClick={() => {
-          onAdd(Number(elegido))
-          setElegido('')
+          onAdd(Number(selected))
+          selectedSet('')
         }}
       >
-        <Icon name="agregar" size={16} />
+        <Icon name="add" size={16} />
         <span>Agregar</span>
       </Button>
     </div>

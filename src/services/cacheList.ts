@@ -7,7 +7,7 @@ interface Identified {
   readonly id: number
 }
 
-function siempre(): boolean {
+function always(): boolean {
   return true
 }
 
@@ -22,15 +22,15 @@ export function upsertInList<T extends Identified>(
   list: readonly T[],
   item: T,
   before: (item: T, other: T) => boolean,
-  stays: (previous: T) => boolean = siempre,
+  stays: (previous: T) => boolean = always,
 ): T[] {
-  const previo = list.find((actual) => actual.id === item.id)
-  if (previo !== undefined && stays(previo)) {
+  const previous = list.find((actual) => actual.id === item.id)
+  if (previous !== undefined && stays(previous)) {
     return list.map((actual) => (actual.id === item.id ? item : actual))
   }
-  const resto = list.filter((actual) => actual.id !== item.id)
-  const donde = resto.findIndex((actual) => before(item, actual))
-  return donde < 0 ? [...resto, item] : [...resto.slice(0, donde), item, ...resto.slice(donde)]
+  const rest = list.filter((actual) => actual.id !== item.id)
+  const where = rest.findIndex((actual) => before(item, actual))
+  return where < 0 ? [...rest, item] : [...rest.slice(0, where), item, ...rest.slice(where)]
 }
 
 export function removeFromList<T extends Identified>(list: readonly T[], id: number): T[] {

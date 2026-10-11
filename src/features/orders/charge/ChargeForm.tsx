@@ -40,26 +40,26 @@ function changeFor(dueCents: number, amount: string): number | null {
  * formulario queda listo para la siguiente, con el saldo actualizado.
  */
 export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
-  const caja = useQuery(currentCashQuery)
-  const pago = usePaymentForm(order, onPaid)
-  const { register, formState, setValue, control } = pago.form
-  const metodo = useWatch({ control, name: 'payment_method' })
-  const monto = useWatch({ control, name: 'amount_received' })
-  const propina = tipCents(useWatch({ control, name: 'tip' })) ?? 0
-  const cerrada = caja.data?.is_open === false
-  const aCobrar = pago.parte + propina
+  const cashRegister = useQuery(currentCashQuery)
+  const payment = usePaymentForm(order, onPaid)
+  const { register, formState, setValue, control } = payment.form
+  const method = useWatch({ control, name: 'payment_method' })
+  const amount = useWatch({ control, name: 'amount_received' })
+  const tip = tipCents(useWatch({ control, name: 'tip' })) ?? 0
+  const isClosed = cashRegister.data?.is_open === false
+  const toCharge = payment.part + tip
 
   return (
     <div className="flex flex-col gap-5">
-      {cerrada ? <CashClosedNotice /> : null}
+      {isClosed ? <CashClosedNotice /> : null}
       <BillSummary order={order} />
       <PaymentsDone order={order} />
       {/* Fuera del formulario del pago: el descuento tiene el suyo, y un
           formulario dentro de otro no es válido. */}
       <AdjustmentsPanel order={order} />
-      <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(pago.enviar)}>
-        <SplitModePicker value={pago.modo} onChange={pago.setModo} />
-        <SplitDetails order={order} draft={pago} />
+      <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(payment.send)}>
+        <SplitModePicker value={payment.mode} onChange={payment.setMode} />
+        <SplitDetails order={order} draft={payment} />
         <PaymentMethodPicker field={register('payment_method')} />
         <TipField
           field={register('tip')}
@@ -68,12 +68,12 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
             setValue('tip', amount, { shouldValidate: true })
           }}
         />
-        {metodo === 'cash' ? (
+        {method === 'cash' ? (
           <CashAmountField
             field={register('amount_received')}
             error={formState.errors.amount_received?.message}
-            totalCents={aCobrar}
-            changeCents={changeFor(aCobrar, monto)}
+            totalCents={toCharge}
+            changeCents={changeFor(toCharge, amount)}
             onQuick={(amount) => {
               setValue('amount_received', amount, { shouldValidate: true })
             }}
@@ -88,10 +88,10 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
             size="lg"
             variant="success"
             className="h-11 px-5 text-base"
-            disabled={cerrada || !pago.puedeCobrar}
+            disabled={isClosed || !payment.canCharge}
           >
-            <Icon name="pago" size={18} />
-            <span>{pago.pago.isPending ? 'Cobrando…' : 'Confirmar pago'}</span>
+            <Icon name="payment" size={18} />
+            <span>{payment.payment.isPending ? 'Cobrando…' : 'Confirmar pago'}</span>
           </Button>
         </DialogFormActions>
       </form>

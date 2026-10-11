@@ -29,9 +29,9 @@ export function useInventoryChange<TVars, TResult extends IngredientResult>({
 
   return useMutation({
     mutationFn: send,
-    onSuccess: (resultado) => {
-      saveIngredient(queryClient, resultado)
-      push({ tone: 'info', message: success(resultado) })
+    onSuccess: (result) => {
+      saveIngredient(queryClient, result)
+      push({ tone: 'info', message: success(result) })
       onDone()
     },
   })

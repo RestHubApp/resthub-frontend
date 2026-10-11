@@ -16,14 +16,14 @@ interface PrintLinksProps {
  * cualquier momento (antes de pagar es la precuenta, después el ticket).
  */
 export function PrintLinks({ order }: PrintLinksProps) {
-  const enCocina = order.status !== 'open' && order.status !== 'cancelled'
+  const isInKitchen = order.status !== 'open' && order.status !== 'cancelled'
 
   return (
     <div className="flex flex-wrap gap-2">
-      {enCocina ? (
+      {isInKitchen ? (
         <Button asChild variant="ghost" size="sm">
           <Link to={paths.orders.print(order.id, 'comanda')}>
-            <Icon name="imprimir" size={16} />
+            <Icon name="print" size={16} />
             <span>Imprimir comanda</span>
           </Link>
         </Button>
@@ -31,7 +31,7 @@ export function PrintLinks({ order }: PrintLinksProps) {
       {order.status === 'cancelled' ? null : (
         <Button asChild variant="ghost" size="sm">
           <Link to={paths.orders.print(order.id, 'cuenta')}>
-            <Icon name="imprimir" size={16} />
+            <Icon name="print" size={16} />
             <span>{order.status === 'paid' ? 'Imprimir ticket' : 'Imprimir precuenta'}</span>
           </Link>
         </Button>

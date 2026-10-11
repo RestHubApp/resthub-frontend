@@ -10,8 +10,8 @@ module.exports = function importMetaEnv({ types: t, template }) {
     "({ env: globalThis.__VITE_ENV__, url: require('node:url').pathToFileURL(__filename).href })",
     { placeholderPattern: false },
   )
-  const esImportMeta = (nodo) =>
-    t.isMetaProperty(nodo) && nodo.meta.name === 'import' && nodo.property.name === 'meta'
+  const esImportMeta = (node) =>
+    t.isMetaProperty(node) && node.meta.name === 'import' && node.property.name === 'meta'
   return {
     name: 'resthub-import-meta-env',
     visitor: {

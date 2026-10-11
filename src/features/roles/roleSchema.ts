@@ -12,7 +12,7 @@ export const roleSchema = z.object({
     .min(1, 'Escribe el nombre del rol')
     .max(MAX_ROLE_NAME, `Usa como máximo ${String(MAX_ROLE_NAME)} caracteres`),
   // Los códigos salen del catálogo del servidor, que es quien los valida.
-  permissions: z.array(z.custom<PermissionCode>((valor) => typeof valor === 'string')),
+  permissions: z.array(z.custom<PermissionCode>((value) => typeof value === 'string')),
 })
 
 export type RoleValues = z.infer<typeof roleSchema>

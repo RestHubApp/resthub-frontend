@@ -35,25 +35,25 @@ export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormP
     defaultValues: identityOf(account),
   })
 
-  const guardar = useMutation({
+  const save = useMutation({
     // La cuenta propia no manda el rol: el servidor responde 409 si lo intenta.
-    mutationFn: (valores: StaffIdentityValues) =>
-      updateStaff(account.id, isSelf ? { full_name: valores.full_name } : identityPayload(valores)),
-    onSuccess: (cuenta) => {
-      saveStaffMember(queryClient, cuenta)
+    mutationFn: (values: StaffIdentityValues) =>
+      updateStaff(account.id, isSelf ? { full_name: values.full_name } : identityPayload(values)),
+    onSuccess: (updatedAccount) => {
+      saveStaffMember(queryClient, updatedAccount)
       onDone()
     },
   })
 
-  const errores = formState.errors
+  const errors = formState.errors
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          guardar.mutate(valores)
+        handleSubmit((values) => {
+          save.mutate(values)
         }),
       )}
     >
@@ -63,17 +63,17 @@ export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormP
           role_id: register('role_id'),
         }}
         errors={{
-          full_name: errores.full_name?.message,
-          role_id: errores.role_id?.message,
+          full_name: errors.full_name?.message,
+          role_id: errors.role_id?.message,
         }}
         roles={roles}
         fixedEmail={account.email}
         lockedRoleLabel={isSelf ? account.role_label : undefined}
       />
 
-      {guardar.isError ? (
+      {save.isError ? (
         <FormMessage tone="error">
-          {errorMessage(guardar.error, 'No se pudieron guardar los cambios.')}
+          {errorMessage(save.error, 'No se pudieron guardar los cambios.')}
         </FormMessage>
       ) : null}
 
@@ -81,9 +81,9 @@ export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormP
         <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
           Cancelar
         </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={guardar.isPending}>
-          <Icon name="confirmar" size={16} />
-          <span>{guardar.isPending ? 'Guardando…' : 'Guardar'}</span>
+        <Button type="submit" size="lg" className="h-10 px-4" disabled={save.isPending}>
+          <Icon name="confirm" size={16} />
+          <span>{save.isPending ? 'Guardando…' : 'Guardar'}</span>
         </Button>
       </DialogFormActions>
     </form>

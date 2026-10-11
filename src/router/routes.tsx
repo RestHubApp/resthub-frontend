@@ -13,17 +13,17 @@ import { SCREENS, type Screen } from './screens'
 
 // Al abrir la aplicacion directo en una pantalla perezosa (recargar el
 // tablero), esto se ve dentro del armazon mientras llega su archivo.
-const CARGANDO = <EmptyState title="Cargando…" />
+const LOADING = <EmptyState title="Cargando…" />
 
 type LoadScreen = () => Promise<{ default: ComponentType }>
 
 /** Una ruta cuya pantalla se descarga recién al abrirla. */
 function lazyRoute(load: LoadScreen) {
-  return { hydrateFallbackElement: CARGANDO, lazy: { Component: async () => (await load()).default } } as const
+  return { hydrateFallbackElement: LOADING, lazy: { Component: async () => (await load()).default } } as const
 }
 
 /** Una pantalla del área de plataforma, que se descarga recién al abrirla. */
-function plataforma<K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) {
+function platform<K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) {
   return lazyRoute(asDefault(load, name))
 }
 
@@ -47,22 +47,22 @@ function screenRoute({ path, load, permission, public: isPublic }: Screen): Rout
  * código ni la sesión de plataforma. La guarda mira solo esa sesión; una
  * sesión de restaurante abierta no entra.
  */
-const PLATAFORMA: RouteObject = {
+const PLATFORM: RouteObject = {
   path: routePatterns.platform,
-  ...plataforma(() => import('@/features/platform/PlatformShell'), 'PlatformShell'),
+  ...platform(() => import('@/features/platform/PlatformShell'), 'PlatformShell'),
   children: [
-    { path: routePatterns.platformLogin, ...plataforma(() => import('@/features/platform/PlatformLoginView'), 'PlatformLoginView') },
+    { path: routePatterns.platformLogin, ...platform(() => import('@/features/platform/PlatformLoginView'), 'PlatformLoginView') },
     {
-      ...plataforma(() => import('@/features/platform/RequirePlatformSession'), 'RequirePlatformSession'),
+      ...platform(() => import('@/features/platform/RequirePlatformSession'), 'RequirePlatformSession'),
       children: [
-        { index: true, ...plataforma(() => import('@/features/platform/RestaurantsView'), 'RestaurantsView') },
-        { path: routePatterns.newRestaurant, ...plataforma(() => import('@/features/platform/NewRestaurantView'), 'NewRestaurantView') },
-        { path: routePatterns.restaurantDetail, ...plataforma(() => import('@/features/platform/RestaurantDetailView'), 'RestaurantDetailView') },
-        { path: routePatterns.activity, ...plataforma(() => import('@/features/platform/ActivityView'), 'ActivityView') },
-        { path: routePatterns.platformPreview, ...plataforma(() => import('@/features/platform/PreviewView'), 'PreviewView') },
+        { index: true, ...platform(() => import('@/features/platform/RestaurantsView'), 'RestaurantsView') },
+        { path: routePatterns.newRestaurant, ...platform(() => import('@/features/platform/NewRestaurantView'), 'NewRestaurantView') },
+        { path: routePatterns.restaurantDetail, ...platform(() => import('@/features/platform/RestaurantDetailView'), 'RestaurantDetailView') },
+        { path: routePatterns.activity, ...platform(() => import('@/features/platform/ActivityView'), 'ActivityView') },
+        { path: routePatterns.platformPreview, ...platform(() => import('@/features/platform/PreviewView'), 'PreviewView') },
         {
           path: routePatterns.observability,
-          ...plataforma(() => import('@/features/platform/observability/ObservabilityView'), 'ObservabilityView'),
+          ...platform(() => import('@/features/platform/observability/ObservabilityView'), 'ObservabilityView'),
         },
       ],
     },
@@ -77,7 +77,7 @@ const PLATAFORMA: RouteObject = {
  * que corre una vez por carga) y lleva al armazón del restaurante con la
  * sesión de vista previa, que vive solo en esta pestaña.
  */
-const VISTA_PREVIA: RouteObject = {
+const PREVIEW: RouteObject = {
   path: routePatterns.previewEntry,
   hydrateFallbackElement: <PreviewEntryPending />,
   lazy: {
@@ -89,8 +89,8 @@ const VISTA_PREVIA: RouteObject = {
 export const router = createBrowserRouter(
   [
     // En una pestaña de vista previa, la puerta muestra un aviso en vez del área.
-    { element: <PreviewPlatformGate />, children: [PLATAFORMA] },
-    VISTA_PREVIA,
+    { element: <PreviewPlatformGate />, children: [PLATFORM] },
+    PREVIEW,
     {
       path: routePatterns.home,
       element: <AppShell screens={SCREENS} />,

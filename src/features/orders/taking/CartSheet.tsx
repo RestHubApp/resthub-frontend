@@ -54,11 +54,11 @@ export function CartSheet({
               <CartLine
                 key={line.lineKey}
                 line={line}
-                onQuantity={(cantidad) => {
-                  onQuantity(line.lineKey, cantidad)
+                onQuantity={(quantity) => {
+                  onQuantity(line.lineKey, quantity)
                 }}
-                onNotes={(nota) => {
-                  onNotes(line.lineKey, nota)
+                onNotes={(note) => {
+                  onNotes(line.lineKey, note)
                 }}
               />
             ))}
@@ -75,7 +75,7 @@ export function CartSheet({
             Seguir eligiendo
           </Button>
           <Button type="button" size="lg" className="h-12 px-5 text-base" disabled={lines.length === 0 || pending} onClick={onSubmit}>
-            <Icon name="enviar" size={18} />
+            <Icon name="send" size={18} />
             <span>{pending ? 'Enviando…' : submitLabel}</span>
           </Button>
         </div>

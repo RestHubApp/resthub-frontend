@@ -12,7 +12,7 @@ import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import { correoRule, MAX_PASSWORD } from '@/services/fieldRules'
+import { emailRule, MAX_PASSWORD } from '@/services/fieldRules'
 import { paths } from '@/services/paths'
 import { isPreviewTab } from '@/services/tabStorage'
 import { useSession } from '@/store/session'
@@ -20,8 +20,8 @@ import { AuthAside } from './AuthAside'
 import { AuthCard } from './AuthCard'
 import { SessionExpiredNotice } from './SessionExpiredNotice'
 
-const esquema = z.object({
-  email: correoRule,
+const schema = z.object({
+  email: emailRule,
   // Al entrar no se exige el minimo: la respuesta del servidor ya dice si
   // la contrasena no coincide, y repetir aca la regla no agrega nada. El
   // maximo si, porque el servidor rechaza una mas larga antes de mirarla.
@@ -31,15 +31,15 @@ const esquema = z.object({
     .max(MAX_PASSWORD, `Usa como máximo ${String(MAX_PASSWORD)} caracteres`),
 })
 
-type Formulario = z.infer<typeof esquema>
+type Form = z.infer<typeof schema>
 
 const PANEL = (
   <AuthAside
     title="Tu restaurante, sin libreta"
     items={[
-      { icon: 'pedido', text: 'Toma los pedidos desde el celular, mesa por mesa o para llevar.' },
-      { icon: 'tablero', text: 'La cocina ve qué preparar y la caja sabe qué cobrar.' },
-      { icon: 'indicadores', text: 'Ventas, inventario y lo que más se pide, al día.' },
+      { icon: 'order', text: 'Toma los pedidos desde el celular, mesa por mesa o para llevar.' },
+      { icon: 'board', text: 'La cocina ve qué preparar y la caja sabe qué cobrar.' },
+      { icon: 'indicators', text: 'Ventas, inventario y lo que más se pide, al día.' },
     ]}
     note="Tu cuenta la crea el encargado del restaurante. Si olvidaste tu contraseña, pídele que la restablezca."
   />
@@ -47,14 +47,14 @@ const PANEL = (
 
 // Discreto a propósito: es la puerta del equipo de RestHub, no la del
 // personal, y lleva a otra sesión que no toca la de este acceso.
-const ENLACE =
+const LINK =
   'inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
-const PLATAFORMA = (
+const PLATFORM = (
   <>
-    <Link to={paths.privacy} className={ENLACE}>
+    <Link to={paths.privacy} className={LINK}>
       Privacidad
     </Link>
-    <Link to={paths.platform.login} className={ENLACE}>
+    <Link to={paths.platform.login} className={LINK}>
       Administración del sistema
     </Link>
   </>
@@ -66,29 +66,29 @@ const PLATAFORMA = (
  * La guarda de rutas deja la pantalla que se quiso abrir: quien vuelve tras una
  * sesión vencida sigue donde estaba en vez de empezar desde el inicio.
  */
-function destinoDe(estado: unknown): string {
-  const desde =
-    typeof estado === 'object' && estado !== null && 'from' in estado ? estado.from : undefined
-  return typeof desde === 'string' && desde.startsWith('/') && desde !== paths.login ? desde : paths.home
+function destinationOf(status: unknown): string {
+  const from =
+    typeof status === 'object' && status !== null && 'from' in status ? status.from : undefined
+  return typeof from === 'string' && from.startsWith('/') && from !== paths.login ? from : paths.home
 }
 
 export function LoginView() {
   const signIn = useSession((state) => state.signIn)
   const navigate = useNavigate()
-  const destino = destinoDe(useLocation().state)
-  const { register, handleSubmit, formState } = useForm<Formulario>({
-    resolver: zodResolver(esquema),
+  const destination = destinationOf(useLocation().state)
+  const { register, handleSubmit, formState } = useForm<Form>({
+    resolver: zodResolver(schema),
     mode: 'onTouched',
     defaultValues: { email: '', password: '' },
   })
 
-  const acceder = useMutation({
+  const access = useMutation({
     mutationFn: login,
     // La respuesta ya trae la cuenta, el restaurante y los permisos: la sesion
     // se abre sin pedir `/auth/me` aparte.
-    onSuccess: (respuesta) => {
-      signIn(respuesta.access_token, sessionOf(respuesta))
-      void navigate(destino, { replace: true })
+    onSuccess: (response) => {
+      signIn(response.access_token, sessionOf(response))
+      void navigate(destination, { replace: true })
     },
   })
 
@@ -99,13 +99,13 @@ export function LoginView() {
   }
 
   return (
-    <AuthCard title="Iniciar sesión" aside={PANEL} footer={PLATAFORMA}>
+    <AuthCard title="Iniciar sesión" aside={PANEL} footer={PLATFORM}>
       <form
         noValidate
         className="flex flex-col gap-5"
         onSubmit={onSubmit(
-          handleSubmit((valores) => {
-            acceder.mutate(valores)
+          handleSubmit((values) => {
+            access.mutate(values)
           }),
         )}
       >
@@ -131,15 +131,15 @@ export function LoginView() {
           error={formState.errors.password?.message}
         />
 
-        {acceder.isError ? (
+        {access.isError ? (
           <FormMessage tone="error">
-            {errorMessage(acceder.error, 'No se pudo iniciar sesión. Inténtalo de nuevo.')}
+            {errorMessage(access.error, 'No se pudo iniciar sesión. Inténtalo de nuevo.')}
           </FormMessage>
         ) : null}
 
-        <Button type="submit" size="lg" className="h-11 w-full" disabled={acceder.isPending}>
-          <Icon name="entrar" size={18} />
-          <span>{acceder.isPending ? 'Entrando…' : 'Entrar'}</span>
+        <Button type="submit" size="lg" className="h-11 w-full" disabled={access.isPending}>
+          <Icon name="signIn" size={18} />
+          <span>{access.isPending ? 'Entrando…' : 'Entrar'}</span>
         </Button>
       </form>
     </AuthCard>

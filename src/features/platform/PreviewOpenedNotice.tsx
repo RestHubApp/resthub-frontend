@@ -29,7 +29,7 @@ export function PreviewOpenedNotice({ label, url, onUsed }: PreviewOpenedNoticeP
         onClick={onUsed}
         className="inline-flex min-h-11 items-center gap-2 rounded-lg px-1 font-medium text-primary underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <Icon name="ver" size={18} />
+        <Icon name="view" size={18} />
         <span>Abrir la vista previa como {label}</span>
       </a>
     </div>

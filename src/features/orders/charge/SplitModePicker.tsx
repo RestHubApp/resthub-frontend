@@ -5,7 +5,7 @@ interface SplitModePickerProps {
   readonly onChange: (mode: SplitMode) => void
 }
 
-const MODOS: readonly { value: SplitMode; label: string }[] = [
+const MODES: readonly { value: SplitMode; label: string }[] = [
   { value: 'all', label: 'Todo junto' },
   { value: 'equal', label: 'Partes iguales' },
   { value: 'items', label: 'Por platos' },
@@ -22,22 +22,22 @@ export function SplitModePicker({ value, onChange }: SplitModePickerProps) {
     <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
       <legend className="mb-2 text-sm font-medium">Cómo pagan</legend>
       <div className="grid grid-cols-3 gap-2">
-        {MODOS.map((modo) => (
+        {MODES.map((mode) => (
           <label
-            key={modo.value}
+            key={mode.value}
             className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg px-2 text-center text-sm font-semibold ring-1 ring-input transition-colors hover:bg-muted has-checked:bg-primary has-checked:text-primary-foreground has-checked:ring-primary has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
           >
             <input
               type="radio"
               name="modo-de-pago"
-              value={modo.value}
-              checked={value === modo.value}
+              value={mode.value}
+              checked={value === mode.value}
               className="sr-only"
               onChange={() => {
-                onChange(modo.value)
+                onChange(mode.value)
               }}
             />
-            {modo.label}
+            {mode.label}
           </label>
         ))}
       </div>

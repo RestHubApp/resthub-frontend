@@ -9,24 +9,24 @@ interface RequestFiltersProps {
   readonly onChange: (patch: Partial<ObsFilters>) => void
 }
 
-const ESTADOS = STATUS_MIN_OPTIONS.map((option) => ({
+const STATUSES = STATUS_MIN_OPTIONS.map((option) => ({
   value: option.value === null ? '' : String(option.value),
   label: option.label,
 }))
 
 // Un estado que llegó por la dirección y no está en la lista se ofrece igual.
-function estados(statusMin: number | null) {
-  if (statusMin === null || ESTADOS.some((option) => option.value === String(statusMin))) {
-    return ESTADOS
+function statuses(statusMin: number | null) {
+  if (statusMin === null || STATUSES.some((option) => option.value === String(statusMin))) {
+    return STATUSES
   }
-  return [...ESTADOS, { value: String(statusMin), label: `Desde ${String(statusMin)}` }]
+  return [...STATUSES, { value: String(statusMin), label: `Desde ${String(statusMin)}` }]
 }
 
 /** Desde qué estado, qué ruta (su plantilla exacta) y qué `request_id`. */
 export function RequestFilters({ filters, onChange }: RequestFiltersProps) {
-  const [ruta, setRuta] = useDraft(filters.route)
-  const [peticion, setPeticion] = useDraft(filters.requestId)
-  const activos = filters.statusMin !== null || filters.route !== '' || filters.requestId !== ''
+  const [route, setRoute] = useDraft(filters.route)
+  const [request, setRequest] = useDraft(filters.requestId)
+  const isActive = filters.statusMin !== null || filters.route !== '' || filters.requestId !== ''
   return (
     <form
       role="search"
@@ -35,8 +35,8 @@ export function RequestFilters({ filters, onChange }: RequestFiltersProps) {
       onSubmit={(event) => {
         event.preventDefault()
         onChange({
-          route: ruta.trim(),
-          requestId: peticion.trim(),
+          route: route.trim(),
+          requestId: request.trim(),
         })
       }}
     >
@@ -44,7 +44,7 @@ export function RequestFilters({ filters, onChange }: RequestFiltersProps) {
         id="peticiones-estado"
         label="Estado"
         value={filters.statusMin === null ? '' : String(filters.statusMin)}
-        options={estados(filters.statusMin)}
+        options={statuses(filters.statusMin)}
         onChange={(value) => {
           onChange({ statusMin: value === '' ? null : Number(value) })
         }}
@@ -54,20 +54,20 @@ export function RequestFilters({ filters, onChange }: RequestFiltersProps) {
         name="ruta"
         label="Ruta (plantilla)"
         placeholder="/api/v1/orders/{order_id}"
-        value={ruta}
-        onChange={setRuta}
+        value={route}
+        onChange={setRoute}
         maxLength={MAX_ROUTE}
       />
       <FilterTextField
         id="peticiones-id"
         name="peticion"
         label="request_id"
-        value={peticion}
-        onChange={setPeticion}
+        value={request}
+        onChange={setRequest}
         maxLength={MAX_REQUEST_ID}
       />
       <FilterActions
-        active={activos}
+        active={isActive}
         onClear={() => {
           onChange({ statusMin: null, route: '', requestId: '' })
         }}

@@ -6,7 +6,7 @@ interface BoardSkeletonProps {
   readonly titles: readonly string[]
 }
 
-const TARJETAS = 2
+const CARDS = 2
 
 /** Las columnas del tablero con tarjetas vacías mientras llegan los pedidos. */
 export function BoardSkeleton({ titles }: BoardSkeletonProps) {
@@ -15,8 +15,8 @@ export function BoardSkeleton({ titles }: BoardSkeletonProps) {
       {titles.map((title) => (
         <div key={title} className="flex min-w-0 flex-col gap-3 rounded-2xl bg-muted/60 p-3">
           <p className="m-0 px-1 text-base font-semibold">{title}</p>
-          {Array.from({ length: TARJETAS }, (_, indice) => (
-            <Skeleton key={indice} className="h-32 rounded-xl bg-card" />
+          {Array.from({ length: CARDS }, (_, index) => (
+            <Skeleton key={index} className="h-32 rounded-xl bg-card" />
           ))}
         </div>
       ))}

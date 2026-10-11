@@ -1,21 +1,21 @@
 import { z } from 'zod'
 
 import type { Customer, CustomerRequest } from '@/api/types'
-import { textoOpcional } from '@/components/formRules'
+import { textOptional } from '@/components/formRules'
 
 // Los topes repiten los del backend (`customers/domain/customers.py`).
-export const LIMITES = { name: 80, phone: 20, email: 120, address: 200, reference: 150, notes: 300 } as const
+export const LIMITS = { name: 80, phone: 20, email: 120, address: 200, reference: 150, notes: 300 } as const
 
 const fields = {
-  name: z.string().trim().min(1, 'Escribe el nombre').max(LIMITES.name, `Usa como máximo ${String(LIMITES.name)} caracteres`),
-  phone: textoOpcional(LIMITES.phone),
-  email: textoOpcional(LIMITES.email).refine(
-    (valor) => valor === '' || z.email().safeParse(valor).success,
+  name: z.string().trim().min(1, 'Escribe el nombre').max(LIMITS.name, `Usa como máximo ${String(LIMITS.name)} caracteres`),
+  phone: textOptional(LIMITS.phone),
+  email: textOptional(LIMITS.email).refine(
+    (value) => value === '' || z.email().safeParse(value).success,
     'Escribe un correo válido',
   ),
-  address: textoOpcional(LIMITES.address),
-  reference: textoOpcional(LIMITES.reference),
-  notes: textoOpcional(LIMITES.notes),
+  address: textOptional(LIMITS.address),
+  reference: textOptional(LIMITS.reference),
+  notes: textOptional(LIMITS.notes),
   consent: z.boolean(),
 }
 

@@ -41,18 +41,18 @@ export function useRoleMutation<TVariables, TResult>({
 }: RoleMutationOptions<TVariables, TResult>) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const propioId = useSession((state) => state.account?.user.role_id)
+  const ownId = useSession((state) => state.account?.user.role_id)
 
   return useMutation({
     mutationFn,
-    onSuccess: (resultado) => {
-      queryClient.setQueryData(rolesQuery().queryKey, (roles) => roles && updateCache(roles, resultado))
+    onSuccess: (result) => {
+      queryClient.setQueryData(rolesQuery().queryKey, (roles) => roles && updateCache(roles, result))
       void queryClient.invalidateQueries({ queryKey: rolesQueryKey })
       void queryClient.invalidateQueries({ queryKey: staffQueryKey })
-      if (roleId !== undefined && roleId === propioId) {
+      if (roleId !== undefined && roleId === ownId) {
         void queryClient.invalidateQueries({ queryKey: currentUserQueryKey })
       }
-      push({ tone: 'info', message: success(resultado) })
+      push({ tone: 'info', message: success(result) })
       onSuccess?.()
     },
     onError: (error) => {

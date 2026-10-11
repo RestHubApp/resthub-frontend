@@ -27,7 +27,7 @@ export const SLOW_TIMEOUT_MS = 60_000
 // almacenes; los servicios son la capa mas baja y no pueden importarlos.
 interface Credential {
   token: string | null
-  alVencer: (() => void) | null
+  onExpire: (() => void) | null
 }
 
 declare module 'axios' {
@@ -48,8 +48,8 @@ declare module 'axios' {
   }
 }
 
-const restaurante: Credential = { token: null, alVencer: null }
-const plataforma: Credential = { token: null, alVencer: null }
+const restaurant: Credential = { token: null, onExpire: null }
+const platform: Credential = { token: null, onExpire: null }
 
 /** El prefijo de las rutas del administrador del sistema, relativo a `/api/v1`. */
 const PLATFORM_PREFIX = '/platform'
@@ -57,19 +57,19 @@ const PLATFORM_PREFIX = '/platform'
 /** Lo que decide adónde va una petición: la ruta y, si la hay, su propia base o sus parámetros. */
 export type RequestTarget = string | undefined | AxiosRequestConfig
 
-type Destino = 'restaurant' | 'platform' | 'foreign'
+type Destination = 'restaurant' | 'platform' | 'foreign'
 
 // Sin navegador (las pruebas) no hay origen de la página: se usa uno fijo.
-function origenDeLaPagina(): string {
+function pageOrigin(): string {
   return typeof window === 'undefined' ? 'http://localhost' : window.location.origin
 }
 
-function urlDe(destino: RequestTarget): URL | null {
-  const config = typeof destino === 'object' ? destino : { url: destino ?? '' }
+function urlDe(destination: RequestTarget): URL | null {
+  const config = typeof destination === 'object' ? destination : { url: destination ?? '' }
   try {
     // `getUri` junta la base, la ruta y los parámetros como lo hará Axios al
     // enviar; `URL` resuelve los `..` y una ruta sin barra inicial.
-    return new URL(api.getUri(config), origenDeLaPagina())
+    return new URL(api.getUri(config), pageOrigin())
   } catch {
     return null
   }
@@ -81,14 +81,14 @@ function urlDe(destino: RequestTarget): URL | null {
  * y una dirección de otro origen (`https://otro.com/…`, `//otro.com/…`) no
  * es de ninguna sesión.
  */
-function destinoDe(destino: RequestTarget): Destino {
+function destinationOf(destination: RequestTarget): Destination {
   const base = urlDe({ url: '' })
-  const url = base === null ? null : urlDe(destino)
+  const url = base === null ? null : urlDe(destination)
   if (base === null || url?.origin !== base.origin) {
     return 'foreign'
   }
-  const plataforma = `${base.pathname.replace(/\/$/u, '')}${PLATFORM_PREFIX}`
-  return url.pathname === plataforma || url.pathname.startsWith(`${plataforma}/`) ? 'platform' : 'restaurant'
+  const platformPath = `${base.pathname.replace(/\/$/u, '')}${PLATFORM_PREFIX}`
+  return url.pathname === platformPath || url.pathname.startsWith(`${platformPath}/`) ? 'platform' : 'restaurant'
 }
 
 /**
@@ -97,8 +97,8 @@ function destinoDe(destino: RequestTarget): Destino {
  * Solo cuenta el prefijo completo: `/platformas` o `/restaurant/platform` no
  * lo son. La consulta (`?search=`) no cambia a quien pertenece la ruta.
  */
-export function isPlatformPath(destino: RequestTarget): boolean {
-  return destinoDe(destino) === 'platform'
+export function isPlatformPath(destination: RequestTarget): boolean {
+  return destinationOf(destination) === 'platform'
 }
 
 /** Los tokens abiertos en este momento, por sesion. */
@@ -115,8 +115,8 @@ export interface SessionTokens {
  * servidor rechazaría la mezcla con 401, pero ademas no tiene por que verla.
  * Una petición a otro origen que el del API no lleva ninguno.
  */
-export function tokenFor(destino: RequestTarget, tokens: SessionTokens): string | null {
-  switch (destinoDe(destino)) {
+export function tokenFor(destination: RequestTarget, tokens: SessionTokens): string | null {
+  switch (destinationOf(destination)) {
     case 'platform':
       return tokens.platform
     case 'restaurant':
@@ -126,18 +126,18 @@ export function tokenFor(destino: RequestTarget, tokens: SessionTokens): string 
   }
 }
 
-function credentialOf(destino: RequestTarget): Credential {
-  return isPlatformPath(destino) ? plataforma : restaurante
+function credentialOf(destination: RequestTarget): Credential {
+  return isPlatformPath(destination) ? platform : restaurant
 }
 
 /** Qué hacer cuando el servidor rechaza la credencial de una petición de restaurante. */
 export function setUnauthorizedHandler(handler: (() => void) | null): void {
-  restaurante.alVencer = handler
+  restaurant.onExpire = handler
 }
 
 /** Lo mismo, para las peticiones del administrador del sistema. */
 export function setPlatformUnauthorizedHandler(handler: (() => void) | null): void {
-  plataforma.alVencer = handler
+  platform.onExpire = handler
 }
 
 /**
@@ -146,12 +146,12 @@ export function setPlatformUnauthorizedHandler(handler: (() => void) | null): vo
  * Un 4xx no cambia por repetir la petición: un 401 de una sesión vencida
  * reintentado solo demora el aviso. Un corte de red o un 5xx, quizá sí.
  */
-export function debeReintentar(fallos: number, error: unknown): boolean {
-  const estado = axios.isAxiosError(error) ? error.response?.status : undefined
-  if (estado !== undefined && estado >= CLIENT_ERROR && estado < SERVER_ERROR) {
+export function shouldRetry(failures: number, error: unknown): boolean {
+  const status = axios.isAxiosError(error) ? error.response?.status : undefined
+  if (status !== undefined && status >= CLIENT_ERROR && status < SERVER_ERROR) {
     return false
   }
-  return fallos < 1
+  return failures < 1
 }
 
 /**
@@ -162,8 +162,8 @@ export function debeReintentar(fallos: number, error: unknown): boolean {
  * origen del backend, que vive en otro dominio.
  */
 function apiBaseUrl(): string {
-  const origen = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/u, '')
-  return `${origen}${API_PREFIX}`
+  const origin = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/u, '')
+  return `${origin}${API_PREFIX}`
 }
 
 export const api = axios.create({
@@ -179,7 +179,7 @@ const httpLogger = logger.child({ module: 'http' })
 
 // Cuando empezo cada peticion, para anotar su duracion. Un WeakMap no retiene
 // la configuracion de una peticion que ya termino.
-const inicios = new WeakMap<InternalAxiosRequestConfig, number>()
+const starts = new WeakMap<InternalAxiosRequestConfig, number>()
 
 /**
  * Un identificador de peticion.
@@ -188,7 +188,7 @@ const inicios = new WeakMap<InternalAxiosRequestConfig, number>()
  * Servida por HTTP en otra direccion, la aplicacion no puede dejar de hacer
  * peticiones por eso, asi que arma uno con `getRandomValues`.
  */
-function nuevoIdDePeticion(): string {
+function newRequestId(): string {
   if (typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
   }
@@ -196,45 +196,45 @@ function nuevoIdDePeticion(): string {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
-function duracionMs(config: InternalAxiosRequestConfig | undefined): number | undefined {
-  const inicio = config === undefined ? undefined : inicios.get(config)
-  return inicio === undefined ? undefined : Math.round(performance.now() - inicio)
+function durationMs(config: InternalAxiosRequestConfig | undefined): number | undefined {
+  const start = config === undefined ? undefined : starts.get(config)
+  return start === undefined ? undefined : Math.round(performance.now() - start)
 }
 
-function registrarFallo(error: unknown): void {
+function registerFailure(error: unknown): void {
   if (!axios.isAxiosError(error)) {
     httpLogger.error({ err: error }, 'http.request_failed')
     return
   }
   const { config, response } = error
-  const datos = {
+  const data = {
     method: config?.method,
     url: config?.url,
     status: response?.status,
     code: error.code,
     requestId: config?.headers.get(REQUEST_ID_HEADER),
-    durationMs: duracionMs(config),
+    durationMs: durationMs(config),
   }
   // Sin respuesta es un corte de red o un servidor caido. Un 4xx es la
   // respuesta esperada a un dato invalido: se anota como aviso, no como error.
   if (response === undefined || response.status >= SERVER_ERROR) {
-    httpLogger.error(datos, 'http.request_failed')
+    httpLogger.error(data, 'http.request_failed')
     return
   }
-  httpLogger.warn(datos, 'http.request_rejected')
+  httpLogger.warn(data, 'http.request_rejected')
 }
 
 api.interceptors.request.use((config) => {
-  config.headers.set(REQUEST_ID_HEADER, nuevoIdDePeticion())
+  config.headers.set(REQUEST_ID_HEADER, newRequestId())
   const token =
     config.withoutCredential === true
       ? null
-      : tokenFor(config, { restaurant: restaurante.token, platform: plataforma.token })
+      : tokenFor(config, { restaurant: restaurant.token, platform: platform.token })
   // eslint-disable-next-line security/detect-possible-timing-attacks -- compara con null, no con un secreto: el cliente no verifica credenciales
   if (token !== null) {
     config.headers.set('Authorization', `Bearer ${token}`)
   }
-  inicios.set(config, performance.now())
+  starts.set(config, performance.now())
   return config
 })
 
@@ -245,16 +245,16 @@ api.interceptors.response.use(
         method: response.config.method,
         url: response.config.url,
         status: response.status,
-        durationMs: duracionMs(response.config),
+        durationMs: durationMs(response.config),
       },
       'http.request_completed',
     )
-    olvidarFalloDeTransporte(response.config)
+    forgetTransportFailure(response.config)
     return response
   },
   (error: unknown) => {
-    registrarFallo(error)
-    recordarFalloDeTransporte(error)
+    registerFailure(error)
+    rememberTransportFailure(error)
     // Un 401 de una petición que llevaba credencial es una sesión vencida o
     // revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
     // y el acceso explica qué pasó. Un 401 sin credencial, como una contraseña
@@ -265,7 +265,7 @@ api.interceptors.response.use(
       error.response?.status === UNAUTHORIZED &&
       error.config?.headers.has('Authorization') === true
     ) {
-      credentialOf(error.config).alVencer?.()
+      credentialOf(error.config).onExpire?.()
     }
     throw error
   },
@@ -279,17 +279,17 @@ api.interceptors.response.use(
  * lugar y ninguna pantalla tiene que acordarse de adjuntarlo.
  */
 export function setAuthToken(token: string | null): void {
-  restaurante.token = token
+  restaurant.token = token
 }
 
 /** La credencial de las peticiones a `/platform/*`. La llama el almacen de la sesion de plataforma. */
 export function setPlatformAuthToken(token: string | null): void {
-  plataforma.token = token
+  platform.token = token
 }
 
 /** El token de restaurante abierto, para lo que no viaja por Axios (el canal de avisos). */
 export function currentAuthToken(): string | null {
-  return restaurante.token
+  return restaurant.token
 }
 
 /**
@@ -302,34 +302,34 @@ interface ApiErrorBody {
   detail?: string | { msg?: string }[]
 }
 
-function esFalloDeTransporte(error: AxiosError): boolean {
-  const estado = error.response?.status
-  if (estado === UNAUTHORIZED) return false
-  if (error.response === undefined || estado === 409) return true
-  return estado !== undefined && estado >= SERVER_ERROR
+function isTransportFailure(error: AxiosError): boolean {
+  const status = error.response?.status
+  if (status === UNAUTHORIZED) return false
+  if (error.response === undefined || status === 409) return true
+  return status !== undefined && status >= SERVER_ERROR
 }
 
 // Solo las lecturas: una escritura que falla la avisa su propio formulario o
 // su aviso emergente, y recordarla dejaba el mensaje en el armazón después de
 // cerrar la ventana.
-function ambitoDe(url: string | undefined): ApiFailureScope {
+function scopeOf(url: string | undefined): ApiFailureScope {
   return (url ?? '').includes('/platform/') ? 'platform' : 'restaurant'
 }
 
 // Una lectura que responde (por ejemplo, el «Reintentar» de la pantalla)
 // descarta el corte recordado: si no, el aviso de respaldo del armazón
 // aparecía justo cuando la pantalla ya se había recuperado.
-function olvidarFalloDeTransporte(config: InternalAxiosRequestConfig): void {
-  if ((config.method ?? 'get').toLowerCase() === 'get') clearApiFailureOf(ambitoDe(config.url))
+function forgetTransportFailure(config: InternalAxiosRequestConfig): void {
+  if ((config.method ?? 'get').toLowerCase() === 'get') clearApiFailureOf(scopeOf(config.url))
 }
 
-function recordarFalloDeTransporte(error: unknown): void {
-  if (!axios.isAxiosError(error) || !esFalloDeTransporte(error)) return
+function rememberTransportFailure(error: unknown): void {
+  if (!axios.isAxiosError(error) || !isTransportFailure(error)) return
   if ((error.config?.method ?? 'get').toLowerCase() !== 'get') return
   if (error.config?.background === true) return
-  const ambito = ambitoDe(error.config?.url)
+  const scope = scopeOf(error.config?.url)
   noteApiFailure(
-    ambito,
+    scope,
     errorMessage(error, 'No se pudieron cargar los datos. Comprueba la conexión e inténtalo de nuevo.'),
   )
 }

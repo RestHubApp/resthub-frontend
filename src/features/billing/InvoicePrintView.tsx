@@ -17,39 +17,39 @@ import { InvoiceSheet } from './InvoiceSheet'
 export function InvoicePrintView() {
   const invoiceId = Number(useParams()["invoiceId"])
   const timeZone = useTimeZone()
-  const veAjustes = useCan(PERMISSION.billingManage)
-  const comprobante = useQuery({ ...invoiceQuery(invoiceId), enabled: Number.isInteger(invoiceId) })
+  const canViewSettings = useCan(PERMISSION.billingManage)
+  const invoice = useQuery({ ...invoiceQuery(invoiceId), enabled: Number.isInteger(invoiceId) })
   // Los datos del emisor los ve el encargado; el mesero imprime sin encabezado
   // fiscal, que igual está en el PDF oficial del proveedor.
-  const ajustes = useQuery({ ...billingSettingsQuery, enabled: veAjustes })
-  const listo = comprobante.isSuccess
+  const settings = useQuery({ ...billingSettingsQuery, enabled: canViewSettings })
+  const isReady = invoice.isSuccess
 
   useEffect(() => {
-    if (listo) {
+    if (isReady) {
       window.print()
     }
-  }, [listo])
+  }, [isReady])
 
-  if (comprobante.isPending) {
+  if (invoice.isPending) {
     return <EmptyState title="Preparando el comprobante…" />
   }
-  if (comprobante.isError) {
-    return <FormMessage tone="error">{errorMessage(comprobante.error, 'No se pudo cargar el comprobante.')}</FormMessage>
+  if (invoice.isError) {
+    return <FormMessage tone="error">{errorMessage(invoice.error, 'No se pudo cargar el comprobante.')}</FormMessage>
   }
 
   return (
     <div className="flex flex-col items-center gap-4">
       <style>{PRINT_CSS}</style>
       {/* La hoja no lleva título visible; el lector de pantalla sí lo necesita. */}
-      <h1 className="sr-only">{`Comprobante ${comprobante.data.code}`}</h1>
+      <h1 className="sr-only">{`Comprobante ${invoice.data.code}`}</h1>
       <Button type="button" className="print:hidden" onClick={() => {
         window.print()
       }}>
-        <Icon name="imprimir" size={16} />
+        <Icon name="print" size={16} />
         <span>Imprimir</span>
       </Button>
       <article id="hoja-impresa" className="w-[74mm] bg-white p-3 font-mono text-black shadow-md">
-        <InvoiceSheet invoice={comprobante.data} settings={ajustes.data ?? null} timeZone={timeZone} />
+        <InvoiceSheet invoice={invoice.data} settings={settings.data ?? null} timeZone={timeZone} />
       </article>
     </div>
   )

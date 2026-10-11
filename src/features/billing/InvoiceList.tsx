@@ -11,36 +11,36 @@ import { useTimeZone } from '@/store/session'
 import { InvoiceRow } from './InvoiceRow'
 import { useResendInvoice } from './useResendInvoice'
 
-const PAGINA = 25
+const PAGE = 25
 
 /** Los comprobantes emitidos, del más reciente al más antiguo, de a 25. */
 export function InvoiceList() {
   const timeZone = useTimeZone()
-  const [pagina, setPagina] = useState(0)
-  const emitidos = useQuery(invoicesQuery(pagina * PAGINA))
-  const reenviar = useResendInvoice()
-  const lista = emitidos.data?.items ?? []
-  const paginas = Math.ceil((emitidos.data?.total ?? 0) / PAGINA)
+  const [page, setPage] = useState(0)
+  const issued = useQuery(invoicesQuery(page * PAGE))
+  const resend = useResendInvoice()
+  const list = issued.data?.items ?? []
+  const pages = Math.ceil((issued.data?.total ?? 0) / PAGE)
 
   return (
     <>
-      {emitidos.isPending ? <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
-      {emitidos.isError ? <RetryQueryError message={errorMessage(emitidos.error, 'No se pudieron cargar los comprobantes.')} onRetry={() => { void emitidos.refetch() }} /> : null}
-      {emitidos.isSuccess && lista.length === 0 ? <EmptyState title="Todavía no se emitió ningún comprobante" /> : null}
+      {issued.isPending ? <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
+      {issued.isError ? <RetryQueryError message={errorMessage(issued.error, 'No se pudieron cargar los comprobantes.')} onRetry={() => { void issued.refetch() }} /> : null}
+      {issued.isSuccess && list.length === 0 ? <EmptyState title="Todavía no se emitió ningún comprobante" /> : null}
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
-        {lista.map((invoice) => (
+        {list.map((invoice) => (
           <InvoiceRow
             key={invoice.id}
             invoice={invoice}
             timeZone={timeZone}
-            resending={reenviar.isPending}
+            resending={resend.isPending}
             onResend={() => {
-              reenviar.mutate(invoice.id)
+              resend.mutate(invoice.id)
             }}
           />
         ))}
       </ul>
-      {paginas > 1 ? <TablePagination actual={pagina} total={paginas} onChange={setPagina} /> : null}
+      {pages > 1 ? <TablePagination actual={page} total={pages} onChange={setPage} /> : null}
     </>
   )
 }

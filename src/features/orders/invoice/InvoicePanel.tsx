@@ -15,7 +15,7 @@ interface InvoicePanelProps {
   readonly order: OrderResponse
 }
 
-const TONO = {
+const TONE = {
   accepted: 'text-success',
   pending: 'text-warning',
   rejected: 'text-destructive',
@@ -23,7 +23,7 @@ const TONO = {
 } as const
 
 /** El PDF lo da el proveedor: solo se abre si es una dirección https. */
-function esEnlaceSeguro(url: string): boolean {
+function isLinkSafe(url: string): boolean {
   try {
     return new URL(url).protocol === 'https:'
   } catch {
@@ -38,25 +38,25 @@ function esEnlaceSeguro(url: string): boolean {
  * muestra el número, cómo lo recibió SUNAT y el PDF del proveedor.
  */
 export function InvoicePanel({ order }: InvoicePanelProps) {
-  const puede = useCan(PERMISSION.billingIssue)
-  const [emitiendo, setEmitiendo] = useState(false)
-  const comprobante = useQuery({ ...orderInvoiceQuery(order.id), enabled: puede && order.status === 'paid' })
-  if (!puede || order.status !== 'paid' || comprobante.isPending) {
+  const can = useCan(PERMISSION.billingIssue)
+  const [isIssuing, setIsIssuing] = useState(false)
+  const invoice = useQuery({ ...orderInvoiceQuery(order.id), enabled: can && order.status === 'paid' })
+  if (!can || order.status !== 'paid' || invoice.isPending) {
     return null
   }
-  const emitido = comprobante.data
+  const issued = invoice.data
 
-  if (emitido === null || emitido === undefined) {
+  if (issued === null || issued === undefined) {
     return (
       <>
         <Button type="button" variant="outline" className="self-start" onClick={() => {
-          setEmitiendo(true)
+          setIsIssuing(true)
         }}>
-          <Icon name="receta" size={16} />
+          <Icon name="recipe" size={16} />
           <span>Emitir boleta o factura</span>
         </Button>
-        <InvoiceDialog order={order} open={emitiendo} onClose={() => {
-          setEmitiendo(false)
+        <InvoiceDialog order={order} open={isIssuing} onClose={() => {
+          setIsIssuing(false)
         }} />
       </>
     )
@@ -64,16 +64,16 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg px-4 py-3 text-sm ring-1 ring-input">
-      <span className="font-semibold">{emitido.kind_label} {emitido.code}</span>
-      <span className={TONO[emitido.status]}>{emitido.status_label}</span>
-      {!esEnlaceSeguro(emitido.pdf_url) ? null : (
-        <a href={emitido.pdf_url} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+      <span className="font-semibold">{issued.kind_label} {issued.code}</span>
+      <span className={TONE[issued.status]}>{issued.status_label}</span>
+      {!isLinkSafe(issued.pdf_url) ? null : (
+        <a href={issued.pdf_url} target="_blank" rel="noopener noreferrer" className="text-primary underline">
           PDF
         </a>
       )}
       <Button asChild variant="ghost" size="sm">
-        <Link to={paths.billing.print(emitido.id)}>
-          <Icon name="imprimir" size={14} />
+        <Link to={paths.billing.print(issued.id)}>
+          <Icon name="print" size={14} />
           <span>Imprimir</span>
         </Link>
       </Button>

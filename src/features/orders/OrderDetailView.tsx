@@ -36,27 +36,27 @@ const ChargeDialog = lazyNamed(() => import('./charge/ChargeDialog'), 'ChargeDia
 export function OrderDetailView() {
   const orderId = Number(useParams()['orderId'])
   const live = useLiveUpdates()
-  const pedido = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
+  const orderResult = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
   // Las alergias las ve el encargado; useLiveUpdates ya refresca las notas.
-  const veAlergias = useCan(PERMISSION.insightsRead)
-  const notas = useOrderNoteFlags(Number.isInteger(orderId) ? [orderId] : [], { enabled: veAlergias, live: false })
-  const [dialogo, setDialogo] = useState<'charge' | 'cancel' | null>(null)
-  const cerrar = () => {
-    setDialogo(null)
+  const canViewAllergies = useCan(PERMISSION.insightsRead)
+  const notes = useOrderNoteFlags(Number.isInteger(orderId) ? [orderId] : [], { enabled: canViewAllergies, live: false })
+  const [dialog, setDialog] = useState<'charge' | 'cancel' | null>(null)
+  const close = () => {
+    setDialog(null)
   }
 
-  if (pedido.isPending) {
+  if (orderResult.isPending) {
     return <EmptyState title="Cargando el pedido…" />
   }
-  if (pedido.isError) {
+  if (orderResult.isError) {
     return (
       <div className="flex flex-col gap-4">
         <BackLink to={paths.orders.list} label="Pedidos" />
-        <QueryError error={pedido.error} fallback="No se pudo cargar el pedido." onRetry={() => void pedido.refetch()} />
+        <QueryError error={orderResult.error} fallback="No se pudo cargar el pedido." onRetry={() => void orderResult.refetch()} />
       </div>
     )
   }
-  const order = pedido.data
+  const order = orderResult.data
 
   return (
     <div className="flex flex-col gap-5">
@@ -64,24 +64,24 @@ export function OrderDetailView() {
         <BackLink to={paths.orders.list} label="Pedidos" />
         <LiveIndicator status={live} />
       </div>
-      <OrderHeader order={order} flagFor={notas.flagFor} />
+      <OrderHeader order={order} flagFor={notes.flagFor} />
       <DeliveryCard order={order} />
       <OrderActions
         order={order}
         onCharge={() => {
-          setDialogo('charge')
+          setDialog('charge')
         }}
         onCancel={() => {
-          setDialogo('cancel')
+          setDialog('cancel')
         }}
       />
       {order.type === 'dine_in' && isActive(order.status) ? <TableMoves order={order} /> : null}
       <PrintLinks order={order} />
       <OrderClosedInfo order={order} />
-      <OrderItems order={order} flagFor={notas.flagFor} />
+      <OrderItems order={order} flagFor={notes.flagFor} />
       <Suspense fallback={null}>
-        {dialogo === 'charge' ? <ChargeDialog order={order} onClose={cerrar} /> : null}
-        {dialogo === 'cancel' ? <CancelOrderDialog order={order} onClose={cerrar} /> : null}
+        {dialog === 'charge' ? <ChargeDialog order={order} onClose={close} /> : null}
+        {dialog === 'cancel' ? <CancelOrderDialog order={order} onClose={close} /> : null}
       </Suspense>
     </div>
   )

@@ -35,13 +35,13 @@ export function CloseCashButton({ pending, expected, difference, open, onCancel,
   return (
     <>
       <Button type="submit" size="lg" variant="destructive" className="h-11 px-5" disabled={pending}>
-        <Icon name="caja" size={18} />
+        <Icon name="cashRegister" size={18} />
         <span>{pending ? 'Cerrando…' : 'Cerrar caja'}</span>
       </Button>
       <AlertDialog
         open={open}
-        onOpenChange={(abierta) => {
-          if (!abierta) {
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
             onCancel()
           }
         }}

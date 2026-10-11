@@ -12,13 +12,13 @@ interface HourlySectionProps {
   readonly range: InsightsRangeParams
 }
 
-function franja(cell: HourlyCell): string {
+function slot(cell: HourlyCell): string {
   return `${formatHourOfDay(cell.hour)} a ${formatHourOfDay(cell.hour + 1)}`
 }
 
 const COLUMNS = [
   { header: 'Día', cell: (cell: HourlyCell) => cell.weekday_label },
-  { header: 'Hora', cell: franja },
+  { header: 'Hora', cell: slot },
   { header: 'Pedidos pagados', cell: (cell: HourlyCell) => formatInteger(cell.paid_orders), numeric: true },
   { header: 'Ventas', cell: (cell: HourlyCell) => formatMoney(cell.sales), numeric: true },
   { header: 'Promedio por día', cell: (cell: HourlyCell) => formatMoney(cell.average_sales), numeric: true },
@@ -26,7 +26,7 @@ const COLUMNS = [
 
 function describe(cell: HourlyCell) {
   return {
-    title: `${cell.weekday_label}, ${franja(cell)}`,
+    title: `${cell.weekday_label}, ${slot(cell)}`,
     rows: [
       { label: 'pedidos pagados', value: formatInteger(cell.paid_orders) },
       { label: 'vendido', value: formatMoney(cell.sales) },
@@ -49,7 +49,7 @@ export function HourlySection({ range }: HourlySectionProps) {
               'Pedidos pagados en cada franja de una hora, en la hora del restaurante.'
             ) : (
               <>
-                Hora pico: <strong className="font-semibold text-foreground">{`${peak.weekday_label.toLowerCase()} de ${franja(peak)}`}</strong>,{' '}
+                Hora pico: <strong className="font-semibold text-foreground">{`${peak.weekday_label.toLowerCase()} de ${slot(peak)}`}</strong>,{' '}
                 {formatInteger(peak.paid_orders)} pedidos ({formatMoney(peak.sales)}). Marcada con un anillo.
               </>
             )

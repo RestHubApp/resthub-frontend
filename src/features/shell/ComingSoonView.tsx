@@ -23,7 +23,7 @@ export function ComingSoonView() {
         description="Esta pantalla se está construyendo. Mientras tanto, el resto de RestHub funciona."
       >
         <span className="flex size-12 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-          <Icon name={entry?.icon ?? 'pronto'} size={24} />
+          <Icon name={entry?.icon ?? 'soon'} size={24} />
         </span>
       </EmptyState>
     </div>

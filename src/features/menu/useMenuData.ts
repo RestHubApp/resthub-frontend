@@ -18,14 +18,14 @@ export const MENU_KEY = MENU_QUERY.queryKey
  * carta se muestra igual, solo que sin márgenes.
  */
 export function useMenuData() {
-  const puedeVerCostos = useCan(PERMISSION.inventoryRead)
+  const canViewCosts = useCan(PERMISSION.inventoryRead)
   const menu = useQuery(MENU_QUERY)
-  const costos = useQuery({ ...dishCostsQuery, enabled: puedeVerCostos })
+  const costs = useQuery({ ...dishCostsQuery, enabled: canViewCosts })
 
-  const costoPorPlato = useMemo(
-    () => new Map<number, DishCost>((costos.data ?? []).map((costo) => [costo.menu_item_id, costo])),
-    [costos.data],
+  const costByDish = useMemo(
+    () => new Map<number, DishCost>((costs.data ?? []).map((cost) => [cost.menu_item_id, cost])),
+    [costs.data],
   )
 
-  return { menu, costoPorPlato, puedeVerCostos }
+  return { menu, costByDish, canViewCosts }
 }

@@ -24,7 +24,7 @@ const BASE =
  */
 export function TableCard({ table }: TableCardProps) {
   const order = table.active_order
-  const nombre = tableName(table.label)
+  const name = tableName(table.label)
 
   if (order === null) {
     return (
@@ -32,9 +32,9 @@ export function TableCard({ table }: TableCardProps) {
         to={paths.orders.newForTable(table.id)}
         className={`${BASE} border border-dashed border-input bg-card hover:border-primary hover:bg-secondary/40`}
       >
-        <span className="font-heading text-xl font-bold">{nombre}</span>
+        <span className="font-heading text-xl font-bold">{name}</span>
         <span className="mt-auto flex items-center gap-1.5 text-sm font-medium text-success">
-          <Icon name="agregar" size={16} />
+          <Icon name="add" size={16} />
           Libre
         </span>
       </Link>
@@ -47,7 +47,7 @@ export function TableCard({ table }: TableCardProps) {
       className={`${BASE} bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)] ${order.status === 'ready' ? 'ring-2 ring-success' : 'ring-1 ring-primary/25'}`}
     >
       <span className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
-        <span className="font-heading text-xl font-bold whitespace-nowrap">{nombre}</span>
+        <span className="font-heading text-xl font-bold whitespace-nowrap">{name}</span>
         <OrderStatusBadge status={order.status} />
       </span>
       <span className="text-sm font-semibold tabular-nums">
@@ -55,7 +55,7 @@ export function TableCard({ table }: TableCardProps) {
       </span>
       {order.status === 'ready' ? (
         <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-success">
-          <Icon name="servir" size={16} />
+          <Icon name="serve" size={16} />
           Falta servirlo
         </span>
       ) : (

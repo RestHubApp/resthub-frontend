@@ -12,7 +12,7 @@ interface BottomNavProps {
 
 // Cuatro pantallas y "Más" es lo que entra en un celular de 360 px con
 // etiquetas legibles y blancos de al menos 44 px de ancho.
-const VISIBLES = 4
+const VISIBLE = 4
 
 function tabClass({ isActive }: { isActive: boolean }): string {
   return isActive ? TAB_ACTIVE : TAB_IDLE
@@ -27,8 +27,8 @@ function tabClass({ isActive }: { isActive: boolean }): string {
  * index.css para subir el boton de accesibilidad por encima de la barra.
  */
 export function BottomNav({ entries, account }: BottomNavProps) {
-  const visibles = entries.slice(0, VISIBLES)
-  const resto = entries.slice(VISIBLES)
+  const visible = entries.slice(0, VISIBLE)
+  const rest = entries.slice(VISIBLE)
 
   return (
     <nav
@@ -37,7 +37,7 @@ export function BottomNav({ entries, account }: BottomNavProps) {
       className="fixed inset-x-0 bottom-0 z-40 border-t bg-card px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:hidden"
     >
       <ul className="m-0 flex list-none gap-1 p-0">
-        {visibles.map((entry) => (
+        {visible.map((entry) => (
           <li key={entry.to} className="flex flex-1">
             <PreloadLink to={entry.to} className={tabClass}>
               <ShellIcon name={entry.icon} size={22} />
@@ -46,7 +46,7 @@ export function BottomNav({ entries, account }: BottomNavProps) {
           </li>
         ))}
         <li className="flex flex-1">
-          <MoreSheet entries={resto} account={account} />
+          <MoreSheet entries={rest} account={account} />
         </li>
       </ul>
     </nav>

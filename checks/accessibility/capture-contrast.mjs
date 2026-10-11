@@ -1,0 +1,35 @@
+// Captura, para la evidencia del antes y el después, los elementos que axe
+// marcó por contraste: la fila de pestañas del inventario, una insignia verde
+// («Pagado») y una amarilla («Bajo mínimo» / pendiente). Uso:
+//   node capture-contrast.mjs antes|despues
+import { join } from 'node:path'
+
+import { openStatus, ensureDir, contextOf, launch, REPORTS } from './common.mjs'
+import { STATUSES } from './inventory.mjs'
+
+const stage = process.argv[2] ?? 'despues'
+const dir = await ensureDir(join(REPORTS, 'contraste'))
+const browser = await launch()
+const cases = [
+  { id: 'inventario', selector: '[role="tablist"]', name: 'pestanas' },
+  { id: 'pedido-cobrado', selector: 'main .bg-success\\/10, main [class*="text-success"]', name: 'exito' },
+  { id: 'pedidos-encargado', selector: 'main [class*="text-warning"]', name: 'aviso' },
+]
+for (const testCase of cases) {
+  const context = await browser.newContext({ ...contextOf('desktop'), deviceScaleFactor: 2 })
+  const page = await openStatus(browser, context, STATUSES.find((e) => e.id === testCase.id))
+  const element = page.locator(testCase.selector).first()
+  const colors = await element.evaluate((e) => {
+    const s = getComputedStyle(e)
+    return { color: s.color, background: s.backgroundColor }
+  })
+  const cashRegister = await element.boundingBox()
+  const margin = 24
+  await page.screenshot({
+    path: join(dir, `${testCase.name}-${stage}.png`),
+    clip: { x: Math.max(0, cashRegister.x - margin), y: Math.max(0, cashRegister.y - margin), width: Math.min(900, cashRegister.width + 2 * margin), height: cashRegister.height + 2 * margin },
+  })
+  console.log(testCase.name, stage, colors)
+  await context.close()
+}
+await browser.close()

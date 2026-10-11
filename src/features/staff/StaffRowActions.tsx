@@ -17,17 +17,17 @@ interface StaffRowActionsProps {
   readonly manageable: boolean
 }
 
-type Dialogo = 'editar' | 'contrasena' | null
+type Dialog = 'editar' | 'contrasena' | null
 
 /** Lo que se hace con una cuenta del personal desde el listado. */
 export function StaffRowActions({ account, isSelf, manageable }: StaffRowActionsProps) {
-  const [dialogo, setDialogo] = useState<Dialogo>(null)
-  const cerrar = () => {
-    setDialogo(null)
+  const [dialog, setDialog] = useState<Dialog>(null)
+  const close = () => {
+    setDialog(null)
   }
-  const alCambiar = (abierto: boolean) => {
-    if (!abierto) {
-      cerrar()
+  const onChange = (open: boolean) => {
+    if (!open) {
+      close()
     }
   }
 
@@ -46,10 +46,10 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
         size="sm"
         variant="outline"
         onClick={() => {
-          setDialogo('editar')
+          setDialog('editar')
         }}
       >
-        <Icon name="editar" size={14} />
+        <Icon name="edit" size={14} />
         <span>Editar</span>
       </Button>
       {isSelf ? null : (
@@ -58,27 +58,27 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
           size="sm"
           variant="outline"
           onClick={() => {
-            setDialogo('contrasena')
+            setDialog('contrasena')
           }}
         >
-          <Icon name="llave" size={14} />
+          <Icon name="key" size={14} />
           <span>Contraseña</span>
         </Button>
       )}
       <StaffStatusButton account={account} disabled={isSelf} />
 
-      <FormDialog open={dialogo === 'editar'} onOpenChange={alCambiar} title={`Editar a ${account.full_name}`}>
+      <FormDialog open={dialog === 'editar'} onOpenChange={onChange} title={`Editar a ${account.full_name}`}>
         <RoleOptionsGate currentRoleId={account.role_id}>
-          {(opciones) => <StaffEditForm account={account} roles={opciones} isSelf={isSelf} onDone={cerrar} />}
+          {(options) => <StaffEditForm account={account} roles={options} isSelf={isSelf} onDone={close} />}
         </RoleOptionsGate>
       </FormDialog>
       <FormDialog
-        open={dialogo === 'contrasena'}
-        onOpenChange={alCambiar}
+        open={dialog === 'contrasena'}
+        onOpenChange={onChange}
         title={`Restablecer la contraseña de ${account.full_name}`}
         description="Tu propia contraseña se cambia en Mi perfil."
       >
-        <StaffPasswordForm account={account} onDone={cerrar} />
+        <StaffPasswordForm account={account} onDone={close} />
       </FormDialog>
     </div>
   )

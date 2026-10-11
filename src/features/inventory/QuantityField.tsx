@@ -35,7 +35,7 @@ export function QuantityField({
   hint,
 }: QuantityFieldProps) {
   const ids = fieldIds(id, hint, error)
-  const unica = units.length === 1 ? units[0] : undefined
+  const unique = units.length === 1 ? units[0] : undefined
 
   return (
     <div className="flex flex-col gap-2">
@@ -50,21 +50,21 @@ export function QuantityField({
           aria-describedby={ids.describedBy}
           {...amount}
         />
-        {unica === undefined ? (
+        {unique === undefined ? (
           <NativeSelect
             aria-label={`Unidad de ${label.toLowerCase()}`}
             className="w-24 [&_select]:h-11"
             {...unit}
           >
-            {units.map((opcion) => (
-              <NativeSelectOption key={opcion.value} value={opcion.value}>
-                {opcion.label}
+            {units.map((option) => (
+              <NativeSelectOption key={option.value} value={option.value}>
+                {option.label}
               </NativeSelectOption>
             ))}
           </NativeSelect>
         ) : (
           <span className="flex h-11 min-w-16 items-center justify-center rounded-lg bg-muted px-3 text-sm font-medium">
-            {unica.label}
+            {unique.label}
           </span>
         )}
       </div>

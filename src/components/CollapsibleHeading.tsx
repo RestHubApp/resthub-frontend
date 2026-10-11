@@ -2,9 +2,9 @@ import type { ReactNode } from 'react'
 
 import { Icon } from './Icon'
 
-type Nivel = 'h2' | 'h3' | 'h4'
+type Level = 'h2' | 'h3' | 'h4'
 
-const TAMAÑOS: Record<Nivel, string> = {
+const SIZES: Record<Level, string> = {
   h2: 'text-lg',
   h3: 'text-lg',
   h4: 'text-base',
@@ -12,7 +12,7 @@ const TAMAÑOS: Record<Nivel, string> = {
 
 interface CollapsibleHeadingProps {
   readonly title: string
-  readonly as: Nivel
+  readonly as: Level
   readonly description?: ReactNode
   readonly open: boolean
   readonly onToggle: () => void
@@ -39,7 +39,7 @@ export function CollapsibleHeading({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <Heading className={`m-0 font-heading leading-snug font-semibold text-foreground ${TAMAÑOS[as]}`}>
+      <Heading className={`m-0 font-heading leading-snug font-semibold text-foreground ${SIZES[as]}`}>
         <button
           type="button"
           aria-expanded={open}
@@ -50,7 +50,7 @@ export function CollapsibleHeading({
           <span
             className={`inline-flex shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}
           >
-            <Icon name="siguiente" size={18} />
+            <Icon name="next" size={18} />
           </span>
           <span>{title}</span>
         </button>

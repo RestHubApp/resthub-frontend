@@ -1,0 +1,406 @@
+[
+  {
+    "id": "funcion:pedidos.ver-mesas",
+    "description": "Pedidos › Mesas: ver cuántas mesas están libres y el estado, número, total y mesero de cada mesa ocupada"
+  },
+  {
+    "id": "funcion:pedidos.en-vivo",
+    "description": "Pedidos: el indicador «En vivo» y la pantalla que cambia sola cuando la cocina marca listo"
+  },
+  {
+    "id": "funcion:pedidos.pestana-llevar",
+    "description": "Pedidos › Llevar y delivery: lista de los pedidos para llevar y delivery en curso"
+  },
+  {
+    "id": "funcion:pedidos.pestana-mis-pedidos",
+    "description": "Pedidos › Mis pedidos: lo que tomó el mesero hoy y volver a la misma pestaña desde el pedido"
+  },
+  {
+    "id": "funcion:pedidos.para-llevar",
+    "description": "Pedidos › Para llevar / Delivery: pedido para recoger en el local, con nombre opcional; cancelar la ventana"
+  },
+  {
+    "id": "funcion:pedidos.delivery",
+    "description": "Pedidos › Delivery: exige nombre, teléfono y dirección antes de elegir platos"
+  },
+  {
+    "id": "funcion:pedidos.buscar-cliente-frecuente",
+    "description": "Pedidos › Delivery: buscar al cliente frecuente por nombre o teléfono y llenar sus datos"
+  },
+  {
+    "id": "funcion:pedidos.cliente-nuevo-a-libreta",
+    "description": "Pedidos › Delivery: un cliente que no estaba se agrega a la libreta y queda ligado al pedido"
+  },
+  {
+    "id": "funcion:pedidos.delivery-sin-consentimiento",
+    "description": "Pedidos › Delivery: sin el consentimiento del cliente el pedido sale igual y el cliente no queda en la libreta"
+  },
+  {
+    "id": "estado:pedidos.cliente-no-encontrado",
+    "type": "estado",
+    "description": "Pedidos › Delivery: la búsqueda sin coincidencias pide escribir los datos"
+  },
+  {
+    "id": "estado:pedidos.mesas.vacio",
+    "type": "estado",
+    "description": "Pedidos › Mesas: sin mesas activas (con el atajo «Crear mesas» para el encargado)"
+  },
+  {
+    "id": "funcion:pedidos.atajo-crear-mesas",
+    "description": "Pedidos › Mesas: sin mesas activas, el encargado ve el atajo «Crear mesas» que lleva a /mesas"
+  },
+  {
+    "id": "estado:pedidos.mesas.error",
+    "type": "estado",
+    "description": "Pedidos › Mesas: las mesas no cargan y se reintenta"
+  },
+  {
+    "id": "estado:pedidos.llevar.vacio",
+    "type": "estado",
+    "description": "Pedidos › Llevar y delivery: sin pedidos en curso"
+  },
+  {
+    "id": "estado:pedidos.llevar.error",
+    "type": "estado",
+    "description": "Pedidos › Llevar y delivery: los pedidos no cargan y se reintenta"
+  },
+  {
+    "id": "estado:pedidos.mios.vacio",
+    "type": "estado",
+    "description": "Pedidos › Mis pedidos: el mesero todavía no tomó pedidos hoy"
+  },
+  {
+    "id": "estado:pedidos.mios.error",
+    "type": "estado",
+    "description": "Pedidos › Mis pedidos: la lista no carga y se reintenta"
+  },
+  {
+    "id": "funcion:pedido-nuevo.agregar-plato",
+    "description": "Pedido nuevo: tocar un plato lo suma al pedido y la barra muestra platos y total"
+  },
+  {
+    "id": "funcion:pedido-nuevo.cambiar-cantidad",
+    "description": "Pedido nuevo: el más y el menos de un plato elegido"
+  },
+  {
+    "id": "funcion:pedido-nuevo.buscar-plato",
+    "description": "Pedido nuevo: buscar un plato por nombre"
+  },
+  {
+    "id": "funcion:pedido-nuevo.filtrar-categoria",
+    "description": "Pedido nuevo: filtrar la carta por categoría y volver a «Toda la carta»"
+  },
+  {
+    "id": "funcion:pedido-nuevo.resumen-y-notas",
+    "description": "Pedido nuevo › Resumen: cantidades y nota para cocina de cada plato, seguir eligiendo y enviar desde el resumen"
+  },
+  {
+    "id": "funcion:pedido-nuevo.enviar-a-cocina",
+    "description": "Pedido nuevo: «Enviar a cocina» crea el pedido, lo manda y ocupa la mesa"
+  },
+  {
+    "id": "funcion:pedido-nuevo.plato-agotado",
+    "description": "Pedido nuevo: un plato agotado hoy se ve «Agotado» y no se puede elegir; al reponerlo vuelve en vivo"
+  },
+  {
+    "id": "funcion:pedido-nuevo.plato-sin-insumos",
+    "description": "Pedido nuevo: un plato cuya receta no alcanza se ve «Sin insumos» y no se puede elegir"
+  },
+  {
+    "id": "funcion:pedido-nuevo.opciones-del-plato",
+    "description": "Pedido nuevo › Opciones: grupo obligatorio, extras con precio y máximo de elecciones antes de sumar el plato"
+  },
+  {
+    "id": "funcion:pedido-nuevo.mesa-ocupada",
+    "description": "Pedido nuevo: aviso de que la mesa ya tiene un pedido, con el enlace a ese pedido"
+  },
+  {
+    "id": "estado:pedido-nuevo.mesa-inexistente",
+    "type": "estado",
+    "description": "Pedido nuevo: la mesa no existe o está desactivada"
+  },
+  {
+    "id": "estado:pedido-nuevo.sin-resultados",
+    "type": "estado",
+    "description": "Pedido nuevo: ningún plato coincide con la búsqueda"
+  },
+  {
+    "id": "estado:pedido-nuevo.error",
+    "type": "estado",
+    "description": "Pedido nuevo: la carta no carga y se reintenta"
+  },
+  {
+    "id": "funcion:pedido.enviar-pendiente",
+    "description": "Detalle: un pedido abierto que no se envió se manda a cocina desde el detalle"
+  },
+  {
+    "id": "funcion:pedido.editar-plato",
+    "description": "Detalle de un pedido abierto: cambiar la cantidad de un plato"
+  },
+  {
+    "id": "funcion:pedido.quitar-plato",
+    "description": "Detalle de un pedido abierto: quitar un plato"
+  },
+  {
+    "id": "funcion:pedido.marcar-listo",
+    "description": "Detalle: el encargado marca listo un pedido en cocina"
+  },
+  {
+    "id": "funcion:pedido.marcar-servido",
+    "description": "Detalle: el mesero marca servido un pedido listo y aparece «Cobrar»"
+  },
+  {
+    "id": "funcion:pedido.cobrar-solo-lo-suyo",
+    "description": "Detalle: el mesero no ve «Cobrar» en un pedido que tomó otro"
+  },
+  {
+    "id": "funcion:pedido.cancelar",
+    "description": "Detalle: el encargado cancela con motivo obligatorio; la mesa queda libre y se ve el motivo"
+  },
+  {
+    "id": "funcion:pedido.cancelar-sin-permiso",
+    "description": "Detalle: el mesero no ve «Cancelar pedido»"
+  },
+  {
+    "id": "funcion:pedido.cambiar-mesa",
+    "description": "Detalle: cambiar el pedido a una mesa libre"
+  },
+  {
+    "id": "funcion:pedido.unir-mesa",
+    "description": "Detalle: unir otra mesa del mesero a este pedido; sin otras mesas lo dice"
+  },
+  {
+    "id": "funcion:pedido.imprimir-comanda",
+    "description": "Detalle › Imprimir comanda: hoja de cocina sin precios, con notas y opciones"
+  },
+  {
+    "id": "funcion:pedido.imprimir-precuenta",
+    "description": "Detalle › Imprimir precuenta: la cuenta antes de pagar, con el total"
+  },
+  {
+    "id": "funcion:pedido.imprimir-ticket",
+    "description": "Detalle › Imprimir ticket: el ticket pagado con cortesías, descuento, pagos y vuelto"
+  },
+  {
+    "id": "funcion:pedido.opciones-impresas",
+    "description": "Comanda y precuenta: las opciones elegidas de un plato aparecen impresas y suman al total"
+  },
+  {
+    "id": "funcion:pedido.datos-delivery",
+    "description": "Detalle de un delivery: dirección, referencia y el teléfono para llamar"
+  },
+  {
+    "id": "funcion:pedido.alergia-resaltada",
+    "description": "Detalle: «Con alergia» en el encabezado cuando una nota menciona una alergia (visto por el encargado)"
+  },
+  {
+    "id": "estado:pedido.error",
+    "type": "estado",
+    "description": "Detalle: el pedido no carga y se reintenta"
+  },
+  {
+    "id": "estado:pedido.no-existe",
+    "type": "estado",
+    "description": "Detalle: el pedido no existe (o es de otro local) y se vuelve a Pedidos"
+  },
+  {
+    "id": "funcion:agregar.agregar-platos",
+    "description": "Agregar platos a un pedido enviado; si estaba listo o servido vuelve a cocina"
+  },
+  {
+    "id": "funcion:agregar.pedido-cerrado",
+    "description": "Agregar platos: un pedido pagado o cancelado avisa que no admite más platos"
+  },
+  {
+    "id": "funcion:cobro.todo-junto",
+    "description": "Cobro: toda la cuenta junta en efectivo"
+  },
+  {
+    "id": "funcion:cobro.partes-iguales",
+    "description": "Cobro: dividir en partes iguales; tras cada pago queda la siguiente persona con el saldo"
+  },
+  {
+    "id": "funcion:cobro.por-platos",
+    "description": "Cobro: cada persona paga sus platos; los ya pagados no se ofrecen"
+  },
+  {
+    "id": "funcion:cobro.pago-mixto",
+    "description": "Cobro: la cuenta se cierra con medios distintos (efectivo y Yape) y queda «Mixto»"
+  },
+  {
+    "id": "funcion:cobro.vuelto",
+    "description": "Cobro en efectivo: montos rápidos y vuelto en vivo"
+  },
+  {
+    "id": "funcion:cobro.monto-exacto",
+    "description": "Cobro en efectivo: el atajo «Monto exacto»"
+  },
+  {
+    "id": "funcion:cobro.monto-insuficiente",
+    "description": "Cobro en efectivo: un monto menor a lo que se cobra se rechaza"
+  },
+  {
+    "id": "funcion:cobro.propina",
+    "description": "Cobro: propina con los atajos, aparte de la venta"
+  },
+  {
+    "id": "funcion:cobro.descuento",
+    "description": "Cobro › Descuento: el mesero aplica un porcentaje con motivo dentro de su tope"
+  },
+  {
+    "id": "funcion:cobro.descuento-sobre-tope",
+    "description": "Cobro › Descuento: sobre el tope del mesero el servidor lo rechaza y se avisa"
+  },
+  {
+    "id": "funcion:cobro.descuento-sin-tope",
+    "description": "Cobro › Descuento: el encargado descuenta sin tope y puede cambiarlo"
+  },
+  {
+    "id": "funcion:cobro.quitar-descuento",
+    "description": "Cobro › Descuento: quitar el descuento aplicado"
+  },
+  {
+    "id": "funcion:cobro.cortesia",
+    "description": "Cobro › Invitar un plato: el encargado invita un plato con motivo"
+  },
+  {
+    "id": "funcion:cobro.quitar-cortesia",
+    "description": "Cobro › Invitar un plato: volver a cobrar un plato invitado"
+  },
+  {
+    "id": "estado:cobro.caja-cerrada",
+    "type": "estado",
+    "description": "Cobro: con la caja cerrada avisa y no deja confirmar"
+  },
+  {
+    "id": "funcion:comprobante.boleta-sin-documento",
+    "description": "Comprobante: boleta a «clientes varios» hasta S/ 700 (el DNI es opcional)"
+  },
+  {
+    "id": "funcion:comprobante.boleta-sobre-tope",
+    "description": "Comprobante: una boleta de más de S/ 700 exige DNI, CE o RUC"
+  },
+  {
+    "id": "funcion:comprobante.documento-invalido",
+    "description": "Comprobante: un DNI inválido se rechaza con el mensaje del servidor"
+  },
+  {
+    "id": "funcion:comprobante.factura",
+    "description": "Comprobante: factura con RUC, razón social y dirección fiscal"
+  },
+  {
+    "id": "funcion:comprobante.factura-ruc-invalido",
+    "description": "Comprobante: una factura con RUC inválido se rechaza"
+  },
+  {
+    "id": "funcion:comprobante.simulado",
+    "description": "Comprobante: sin proveedor configurado queda «Sin enviar (sin proveedor)» y ya no se ofrece emitir otro"
+  },
+  {
+    "id": "funcion:cocina.por-preparar",
+    "description": "Cocina: los pedidos por preparar llegan solos, sin precios, con cantidades y notas"
+  },
+  {
+    "id": "funcion:cocina.marcar-listo",
+    "description": "Cocina: quien tiene permiso marca «Listo» y el pedido pasa a «Listos para servir»"
+  },
+  {
+    "id": "funcion:cocina.solo-mirar",
+    "description": "Cocina: el mesero ve la pantalla sin el botón «Listo»"
+  },
+  {
+    "id": "estado:cocina.vacio",
+    "type": "estado",
+    "description": "Cocina: nada pendiente y nada esperando a salir"
+  },
+  {
+    "id": "estado:cocina.error",
+    "type": "estado",
+    "description": "Cocina: los pedidos no cargan y se reintenta"
+  },
+  {
+    "id": "funcion:imprimir.reimprimir",
+    "description": "Hoja de impresión: se imprime sola al abrir y el botón «Imprimir» saca otra copia"
+  },
+  {
+    "id": "estado:imprimir.error",
+    "type": "estado",
+    "description": "Hoja de impresión: el pedido no carga y se reintenta"
+  },
+  {
+    "id": "funcion:tablero.tiempo-real",
+    "description": "Tablero: un pedido nuevo aparece en otro navegador sin recargar, con «Nuevo»"
+  },
+  {
+    "id": "funcion:tablero.filtrar-tipo",
+    "description": "Tablero: filtrar por en mesa, para llevar y delivery, con la cuenta de cada uno"
+  },
+  {
+    "id": "funcion:tablero.enviar-a-cocina",
+    "description": "Tablero: enviar a cocina un pedido abierto desde su tarjeta"
+  },
+  {
+    "id": "funcion:tablero.marcar-listo",
+    "description": "Tablero: la cocina (rol Cocinero) marca listo desde la tarjeta y no ve «Cobrar»"
+  },
+  {
+    "id": "funcion:tablero.cobrar",
+    "description": "Tablero: cobrar un pedido servido desde su tarjeta; el recibo sigue a la vista"
+  },
+  {
+    "id": "funcion:tablero.cancelar",
+    "description": "Tablero: cancelar un pedido desde su tarjeta con motivo"
+  },
+  {
+    "id": "funcion:tablero.ir-al-pedido",
+    "description": "Tablero: el número de la tarjeta lleva al detalle del pedido"
+  },
+  {
+    "id": "funcion:tablero.alergia-resaltada",
+    "description": "Tablero y cocina: una nota con alergia lleva «Con alergia» y el distintivo «Alergia» (regla por palabras clave)"
+  },
+  {
+    "id": "estado:tablero.vacio",
+    "type": "estado",
+    "description": "Tablero: cada columna sin pedidos"
+  },
+  {
+    "id": "estado:tablero.error",
+    "type": "estado",
+    "description": "Tablero: los pedidos no cargan y se reintenta"
+  },
+  {
+    "id": "funcion:historial.filtrar-fecha",
+    "description": "Historial: filtrar por fecha desde y hasta"
+  },
+  {
+    "id": "funcion:historial.filtrar-estado",
+    "description": "Historial: filtrar por estado"
+  },
+  {
+    "id": "funcion:historial.filtrar-tipo",
+    "description": "Historial: filtrar por tipo de pedido"
+  },
+  {
+    "id": "funcion:historial.filtrar-mesero",
+    "description": "Historial: filtrar por mesero"
+  },
+  {
+    "id": "funcion:historial.ver-detalle",
+    "description": "Historial: desplegar y ocultar el detalle de una fila (platos, pago o motivo de cancelación)"
+  },
+  {
+    "id": "funcion:historial.paginar",
+    "description": "Historial: páginas de 25 con anterior y siguiente"
+  },
+  {
+    "id": "estado:historial.vacio",
+    "type": "estado",
+    "description": "Historial: ningún pedido coincide con los filtros"
+  },
+  {
+    "id": "estado:historial.error",
+    "type": "estado",
+    "description": "Historial: la lista no carga y se reintenta"
+  }
+]

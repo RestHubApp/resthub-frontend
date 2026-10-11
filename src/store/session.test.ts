@@ -8,15 +8,15 @@ import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import type { CurrentUserResponse } from '@/api/types'
 
-const CLAVE = 'resthub.session.v2'
+const STORAGE_KEY = 'resthub.session.v2'
 
-function tokenQueVence(segundosDesdeAhora: number): string {
-  const exp = Math.floor(Date.now() / 1000) + segundosDesdeAhora
+function tokenThatExpires(secondsFromNow: number): string {
+  const exp = Math.floor(Date.now() / 1000) + secondsFromNow
   return `cabecera.${btoa(JSON.stringify({ exp }))}.firma`
 }
 
 // Solo lo que el almacén lee de la cuenta.
-function cuenta(userId: number): CurrentUserResponse {
+function account(userId: number): CurrentUserResponse {
   return {
     user: { id: userId, role_id: 1 },
     restaurant: { id: 1, timezone: 'America/Lima' },
@@ -25,21 +25,21 @@ function cuenta(userId: number): CurrentUserResponse {
 }
 
 function fakeStorage() {
-  const datos = new Map<string, string>()
+  const data = new Map<string, string>()
   return {
-    getItem: (clave: string) => datos.get(clave) ?? null,
-    setItem: (clave: string, valor: string) => {
-      datos.set(clave, valor)
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      data.set(key, value)
     },
-    removeItem: (clave: string) => {
-      datos.delete(clave)
+    removeItem: (key: string) => {
+      data.delete(key)
     },
-    datos,
+    data,
   }
 }
 
 // El almacén lee lo guardado al cargarse: cada prueba parte de módulos nuevos.
-async function cargar() {
+async function load() {
   const storage = fakeStorage()
   stubGlobal('localStorage', storage)
   jest.resetModules()
@@ -47,8 +47,8 @@ async function cargar() {
   return { storage, useSession }
 }
 
-function guardado(storage: ReturnType<typeof fakeStorage>): unknown {
-  return JSON.parse(storage.datos.get(CLAVE) ?? 'null')
+function saved(storage: ReturnType<typeof fakeStorage>): unknown {
+  return JSON.parse(storage.data.get(STORAGE_KEY) ?? 'null')
 }
 
 beforeEach(() => {
@@ -62,251 +62,251 @@ afterEach(() => {
 
 describe('sesión normal y ciclo de vida', () => {
   it('arranca vacía y no expirada si no hay nada guardado', async () => {
-    const { useSession } = await cargar()
+    const { useSession } = await load()
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
   })
 
   it('restaura una sesión válida guardada', async () => {
     const storage = fakeStorage()
-    const token = tokenQueVence(3600)
-    storage.datos.set(CLAVE, JSON.stringify({ token, account: cuenta(1) }))
+    const token = tokenThatExpires(3600)
+    storage.data.set(STORAGE_KEY, JSON.stringify({ token, account: account(1) }))
     stubGlobal('localStorage', storage)
     jest.resetModules()
     const { useSession } = await import('./session')
-    expect(useSession.getState()).toMatchObject({ token, account: cuenta(1), expired: false })
+    expect(useSession.getState()).toMatchObject({ token, account: account(1), expired: false })
   })
 
   it('marca expirada y limpia storage si la sesión guardada ya venció', async () => {
     const storage = fakeStorage()
-    const token = tokenQueVence(-10)
-    storage.datos.set(CLAVE, JSON.stringify({ token, account: cuenta(1) }))
+    const token = tokenThatExpires(-10)
+    storage.data.set(STORAGE_KEY, JSON.stringify({ token, account: account(1) }))
     stubGlobal('localStorage', storage)
     jest.resetModules()
     const { useSession } = await import('./session')
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: true })
-    expect(storage.datos.has(CLAVE)).toBe(false)
+    expect(storage.data.has(STORAGE_KEY)).toBe(false)
   })
 
   it('iniciar sesión guarda en storage y programa el vencimiento automático', async () => {
-    const { storage, useSession } = await cargar()
-    const token = tokenQueVence(10)
-    useSession.getState().signIn(token, cuenta(1))
+    const { storage, useSession } = await load()
+    const token = tokenThatExpires(10)
+    useSession.getState().signIn(token, account(1))
 
-    expect(useSession.getState()).toMatchObject({ token, account: cuenta(1), expired: false })
-    expect(guardado(storage)).toEqual({ token, account: cuenta(1) })
+    expect(useSession.getState()).toMatchObject({ token, account: account(1), expired: false })
+    expect(saved(storage)).toEqual({ token, account: account(1) })
 
     jest.advanceTimersByTime(11_000)
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: true })
-    expect(storage.datos.has(CLAVE)).toBe(false)
+    expect(storage.data.has(STORAGE_KEY)).toBe(false)
   })
 
   it('cerrar sesión limpia la sesión y no marca expired', async () => {
-    const { storage, useSession } = await cargar()
-    const token = tokenQueVence(3600)
-    useSession.getState().signIn(token, cuenta(1))
+    const { storage, useSession } = await load()
+    const token = tokenThatExpires(3600)
+    useSession.getState().signIn(token, account(1))
 
     useSession.getState().signOut()
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
-    expect(storage.datos.has(CLAVE)).toBe(false)
+    expect(storage.data.has(STORAGE_KEY)).toBe(false)
   })
 
   it('refresh actualiza la cuenta en la sesión y en storage', async () => {
-    const { storage, useSession } = await cargar()
-    const token = tokenQueVence(3600)
-    useSession.getState().signIn(token, cuenta(1))
+    const { storage, useSession } = await load()
+    const token = tokenThatExpires(3600)
+    useSession.getState().signIn(token, account(1))
 
-    const actualizada = { ...cuenta(1), permissions: ['orders.take'] } as unknown as CurrentUserResponse
-    useSession.getState().refresh(actualizada)
+    const updated = { ...account(1), permissions: ['orders.take'] } as unknown as CurrentUserResponse
+    useSession.getState().refresh(updated)
 
-    expect(useSession.getState().account).toEqual(actualizada)
-    expect(guardado(storage)).toEqual({ token, account: actualizada })
+    expect(useSession.getState().account).toEqual(updated)
+    expect(saved(storage)).toEqual({ token, account: updated })
   })
 
   it('refresh no hace nada si no hay sesión activa', async () => {
-    const { storage, useSession } = await cargar()
-    useSession.getState().refresh(cuenta(2))
+    const { storage, useSession } = await load()
+    useSession.getState().refresh(account(2))
     expect(useSession.getState().account).toBeNull()
-    expect(storage.datos.size).toBe(0)
+    expect(storage.data.size).toBe(0)
   })
 })
 
 describe('renovación de la sesión del restaurante', () => {
   it('cambia el token de la sesión que pidió la renovación', async () => {
-    const { storage, useSession } = await cargar()
-    const viejo = tokenQueVence(3600)
-    const nuevo = tokenQueVence(7200)
-    useSession.getState().signIn(viejo, cuenta(1))
+    const { storage, useSession } = await load()
+    const old = tokenThatExpires(3600)
+    const fresh = tokenThatExpires(7200)
+    useSession.getState().signIn(old, account(1))
 
-    useSession.getState().renew(viejo, nuevo, cuenta(1))
+    useSession.getState().renew(old, fresh, account(1))
 
-    expect(useSession.getState().token).toBe(nuevo)
-    expect(guardado(storage)).toEqual({ token: nuevo, account: cuenta(1) })
+    expect(useSession.getState().token).toBe(fresh)
+    expect(saved(storage)).toEqual({ token: fresh, account: account(1) })
   })
 
   it('descarta la respuesta si mientras viajaba entró otra cuenta', async () => {
-    const { storage, useSession } = await cargar()
-    const viejo = tokenQueVence(3600)
-    const otra = tokenQueVence(3500)
-    useSession.getState().signIn(viejo, cuenta(1))
+    const { storage, useSession } = await load()
+    const old = tokenThatExpires(3600)
+    const other = tokenThatExpires(3500)
+    useSession.getState().signIn(old, account(1))
     useSession.getState().signOut()
-    useSession.getState().signIn(otra, cuenta(2))
+    useSession.getState().signIn(other, account(2))
 
-    useSession.getState().renew(viejo, tokenQueVence(7200), cuenta(1))
+    useSession.getState().renew(old, tokenThatExpires(7200), account(1))
 
-    expect(useSession.getState()).toMatchObject({ token: otra, account: cuenta(2) })
-    expect(guardado(storage)).toEqual({ token: otra, account: cuenta(2) })
+    expect(useSession.getState()).toMatchObject({ token: other, account: account(2) })
+    expect(saved(storage)).toEqual({ token: other, account: account(2) })
   })
 
   it('no revive una sesión que se cerró mientras viajaba', async () => {
-    const { storage, useSession } = await cargar()
-    const viejo = tokenQueVence(3600)
-    useSession.getState().signIn(viejo, cuenta(1))
+    const { storage, useSession } = await load()
+    const old = tokenThatExpires(3600)
+    useSession.getState().signIn(old, account(1))
     useSession.getState().signOut()
 
-    useSession.getState().renew(viejo, tokenQueVence(7200), cuenta(1))
+    useSession.getState().renew(old, tokenThatExpires(7200), account(1))
 
     expect(useSession.getState().token).toBeNull()
-    expect(storage.datos.has(CLAVE)).toBe(false)
+    expect(storage.data.has(STORAGE_KEY)).toBe(false)
   })
 })
 
-const MARCA = 'resthub.vista-previa.pestana.v1'
-const PREVIA = 'resthub.vista-previa.sesion.v1'
-const COLA = 'resthub.pedidos-sin-enviar.v2'
+const MARK = 'resthub.vista-previa.pestana.v1'
+const PREVIEW = 'resthub.vista-previa.sesion.v1'
+const QUEUE = 'resthub.pedidos-sin-enviar.v2'
 
-function cuentaDeMuestra(): CurrentUserResponse {
-  return { ...cuenta(9), preview: true }
+function sampleAccount(): CurrentUserResponse {
+  return { ...account(9), preview: true }
 }
 
 // Una pestaña recién abierta en `/vista-previa`, con una sesión real en localStorage.
-async function pestanaDeVistaPrevia(ruta = '/vista-previa', inicial: Record<string, string> = {}) {
+async function previewTab(route = '/vista-previa', initial: Record<string, string> = {}) {
   const local = fakeStorage()
-  local.datos.set(CLAVE, JSON.stringify({ token: tokenQueVence(3600), account: cuenta(1) }))
-  const pestana = fakeStorage()
-  for (const [clave, valor] of Object.entries(inicial)) {
-    pestana.datos.set(clave, valor)
+  local.data.set(STORAGE_KEY, JSON.stringify({ token: tokenThatExpires(3600), account: account(1) }))
+  const tab = fakeStorage()
+  for (const [key, value] of Object.entries(initial)) {
+    tab.data.set(key, value)
   }
   stubGlobal('localStorage', local)
-  stubGlobal('sessionStorage', pestana)
-  stubGlobal('location', { pathname: ruta })
+  stubGlobal('sessionStorage', tab)
+  stubGlobal('location', { pathname: route })
   jest.resetModules()
   const { useSession } = await import('./session')
-  return { local, pestana, useSession }
+  return { local, tab, useSession }
 }
 
 describe('sesión de vista previa', () => {
   it('no lee la sesión real del navegador', async () => {
-    const { useSession } = await pestanaDeVistaPrevia()
+    const { useSession } = await previewTab()
     expect(useSession.getState().token).toBeNull()
   })
 
   it('se guarda en la pestaña y deja intacta la sesión real', async () => {
-    const { local, pestana, useSession } = await pestanaDeVistaPrevia()
-    const real = local.datos.get(CLAVE)
-    const token = tokenQueVence(1800)
+    const { local, tab, useSession } = await previewTab()
+    const real = local.data.get(STORAGE_KEY)
+    const token = tokenThatExpires(1800)
 
-    useSession.getState().startPreview(token, cuentaDeMuestra())
+    useSession.getState().startPreview(token, sampleAccount())
 
-    expect(local.datos.get(CLAVE)).toBe(real)
-    expect(JSON.parse(pestana.datos.get(PREVIA) ?? 'null')).toEqual({ token, account: cuentaDeMuestra() })
-    expect(pestana.datos.get(MARCA)).toBe('1')
+    expect(local.data.get(STORAGE_KEY)).toBe(real)
+    expect(JSON.parse(tab.data.get(PREVIEW) ?? 'null')).toEqual({ token, account: sampleAccount() })
+    expect(tab.data.get(MARK)).toBe('1')
   })
 
   it('rechaza una sesión que el servidor no marcó como vista previa', async () => {
-    const { useSession } = await pestanaDeVistaPrevia()
+    const { useSession } = await previewTab()
     expect(() => {
-      useSession.getState().startPreview(tokenQueVence(1800), { ...cuenta(9), preview: false })
+      useSession.getState().startPreview(tokenThatExpires(1800), { ...account(9), preview: false })
     }).toThrow()
     expect(useSession.getState().token).toBeNull()
   })
 
   it('en una pestaña normal no se abre', async () => {
-    const { storage, useSession } = await cargar()
+    const { storage, useSession } = await load()
     expect(() => {
-      useSession.getState().startPreview(tokenQueVence(1800), cuentaDeMuestra())
+      useSession.getState().startPreview(tokenThatExpires(1800), sampleAccount())
     }).toThrow()
-    expect(storage.datos.size).toBe(0)
+    expect(storage.data.size).toBe(0)
   })
 
   it('al recargar la pestaña vuelve la vista previa, no la sesión real', async () => {
-    const token = tokenQueVence(1800)
-    const { useSession } = await pestanaDeVistaPrevia('/pedidos', {
-      [MARCA]: '1',
-      [PREVIA]: JSON.stringify({ token, account: cuentaDeMuestra() }),
+    const token = tokenThatExpires(1800)
+    const { useSession } = await previewTab('/pedidos', {
+      [MARK]: '1',
+      [PREVIEW]: JSON.stringify({ token, account: sampleAccount() }),
     })
     expect(useSession.getState().token).toBe(token)
   })
 
   it('al vencer se borra su sesión pero la pestaña sigue siendo de vista previa', async () => {
-    const { local, pestana, useSession } = await pestanaDeVistaPrevia()
-    const real = local.datos.get(CLAVE)
-    useSession.getState().startPreview(tokenQueVence(1800), cuentaDeMuestra())
+    const { local, tab, useSession } = await previewTab()
+    const real = local.data.get(STORAGE_KEY)
+    useSession.getState().startPreview(tokenThatExpires(1800), sampleAccount())
 
     useSession.getState().expire()
 
-    expect(pestana.datos.has(PREVIA)).toBe(false)
-    expect(pestana.datos.get(MARCA)).toBe('1')
-    expect(local.datos.get(CLAVE)).toBe(real)
+    expect(tab.data.has(PREVIEW)).toBe(false)
+    expect(tab.data.get(MARK)).toBe('1')
+    expect(local.data.get(STORAGE_KEY)).toBe(real)
   })
 
   it('salir borra la sesión y la marca, y no toca localStorage', async () => {
-    const { local, pestana, useSession } = await pestanaDeVistaPrevia()
-    const real = local.datos.get(CLAVE)
-    useSession.getState().startPreview(tokenQueVence(1800), cuentaDeMuestra())
+    const { local, tab, useSession } = await previewTab()
+    const real = local.data.get(STORAGE_KEY)
+    useSession.getState().startPreview(tokenThatExpires(1800), sampleAccount())
 
     useSession.getState().exitPreview()
 
-    expect(pestana.datos.size).toBe(0)
-    expect(local.datos.get(CLAVE)).toBe(real)
+    expect(tab.data.size).toBe(0)
+    expect(local.data.get(STORAGE_KEY)).toBe(real)
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
   })
 
   it('salir de la vista previa en una pestaña normal no cierra la sesión', async () => {
-    const { storage, useSession } = await cargar()
-    const token = tokenQueVence(3600)
-    useSession.getState().signIn(token, cuenta(1))
+    const { storage, useSession } = await load()
+    const token = tokenThatExpires(3600)
+    useSession.getState().signIn(token, account(1))
 
     useSession.getState().exitPreview()
 
     expect(useSession.getState().token).toBe(token)
-    expect(guardado(storage)).toEqual({ token, account: cuenta(1) })
+    expect(saved(storage)).toEqual({ token, account: account(1) })
   })
 })
 
 describe('cola de la vista previa', () => {
   it('al vencer o salir se descarta la cola entera de la pestaña', async () => {
-    for (const cerrar of ['expire', 'exitPreview'] as const) {
-      const { local, pestana, useSession } = await pestanaDeVistaPrevia()
-      local.datos.set(COLA, JSON.stringify([{ userId: 1, restaurantId: 1 }]))
-      const real = local.datos.get(COLA)
-      useSession.getState().startPreview(tokenQueVence(1800), cuentaDeMuestra())
+    for (const close of ['expire', 'exitPreview'] as const) {
+      const { local, tab, useSession } = await previewTab()
+      local.data.set(QUEUE, JSON.stringify([{ userId: 1, restaurantId: 1 }]))
+      const real = local.data.get(QUEUE)
+      useSession.getState().startPreview(tokenThatExpires(1800), sampleAccount())
       // Pedidos de dos cuentas del local de muestra, como tras entrar como encargado y luego como mesero.
-      pestana.datos.set(COLA, JSON.stringify([{ userId: 9, restaurantId: 1 }, { userId: 10, restaurantId: 1 }]))
+      tab.data.set(QUEUE, JSON.stringify([{ userId: 9, restaurantId: 1 }, { userId: 10, restaurantId: 1 }]))
 
-      useSession.getState()[cerrar]()
+      useSession.getState()[close]()
 
-      expect(pestana.datos.has(COLA)).toBe(false)
-      expect(local.datos.get(COLA)).toBe(real)
+      expect(tab.data.has(QUEUE)).toBe(false)
+      expect(local.data.get(QUEUE)).toBe(real)
     }
   })
 
   it('al recargarse ya vencida tampoco guarda su cola', async () => {
-    const { pestana } = await pestanaDeVistaPrevia('/pedidos', {
-      [MARCA]: '1',
-      [PREVIA]: JSON.stringify({ token: tokenQueVence(-10), account: cuentaDeMuestra() }),
-      [COLA]: JSON.stringify([{ userId: 9, restaurantId: 1 }]),
+    const { tab } = await previewTab('/pedidos', {
+      [MARK]: '1',
+      [PREVIEW]: JSON.stringify({ token: tokenThatExpires(-10), account: sampleAccount() }),
+      [QUEUE]: JSON.stringify([{ userId: 9, restaurantId: 1 }]),
     })
-    expect(pestana.datos.has(COLA)).toBe(false)
+    expect(tab.data.has(QUEUE)).toBe(false)
   })
 
   it('en una pestaña normal cerrar o vencer la sesión no toca la cola', async () => {
-    const { storage, useSession } = await cargar()
-    const cola = JSON.stringify([{ userId: 1, restaurantId: 1 }])
-    storage.datos.set(COLA, cola)
-    useSession.getState().signIn(tokenQueVence(3600), cuenta(1))
+    const { storage, useSession } = await load()
+    const queue = JSON.stringify([{ userId: 1, restaurantId: 1 }])
+    storage.data.set(QUEUE, queue)
+    useSession.getState().signIn(tokenThatExpires(3600), account(1))
 
     useSession.getState().expire()
 
-    expect(storage.datos.get(COLA)).toBe(cola)
+    expect(storage.data.get(QUEUE)).toBe(queue)
   })
 })

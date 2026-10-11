@@ -23,7 +23,7 @@ interface SectionCardProps {
 }
 
 // Enfocable y con nombre: quien usa teclado tambien puede desplazar el contenido.
-function propsDeDesplazamiento(scrollable: boolean, title: string) {
+function scrollProps(scrollable: boolean, title: string) {
   if (!scrollable) {
     return { className: 'flex flex-col gap-4 px-5' }
   }
@@ -49,8 +49,8 @@ export function SectionCard({
   defaultOpen = true,
   scrollable = false,
 }: SectionCardProps) {
-  const [abierto, setAbierto] = useState(defaultOpen)
-  const contenidoId = useId()
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+  const contentId = useId()
 
   return (
     <Card className="gap-4 py-5 shadow-sm">
@@ -60,10 +60,10 @@ export function SectionCard({
             title={title}
             as={as}
             description={description}
-            open={abierto}
-            controls={contenidoId}
+            open={isOpen}
+            controls={contentId}
             onToggle={() => {
-              setAbierto((valor) => !valor)
+              setIsOpen((value) => !value)
             }}
           />
         ) : (
@@ -74,9 +74,9 @@ export function SectionCard({
         {actions === undefined ? null : <div className="flex flex-wrap gap-2">{actions}</div>}
       </CardHeader>
       <CardContent
-        id={contenidoId}
-        hidden={collapsible && !abierto}
-        {...propsDeDesplazamiento(scrollable, title)}
+        id={contentId}
+        hidden={collapsible && !isOpen}
+        {...scrollProps(scrollable, title)}
       >
         {children}
       </CardContent>

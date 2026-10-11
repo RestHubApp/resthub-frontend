@@ -6,14 +6,14 @@ import { leavePreview } from './leavePreview'
 import { ShellIcon } from './ShellIcon'
 
 // En la franja, blanco sobre su color; en una pantalla, el botón principal de siempre.
-const ESTILOS = {
+const STYLES = {
   banner: 'h-11 gap-2 bg-white px-3 text-warning hover:bg-white/90 focus-visible:ring-white/70',
   page: 'h-11 gap-2 px-4',
 } as const
 
 interface PreviewExitButtonProps {
   /** Dónde va: en la franja de arriba (por omisión) o en una pantalla. */
-  readonly tone?: keyof typeof ESTILOS
+  readonly tone?: keyof typeof STYLES
 }
 
 /**
@@ -23,24 +23,24 @@ interface PreviewExitButtonProps {
  * descartarlos: nada se pierde en silencio, ni siquiera en una prueba.
  */
 export function PreviewExitButton({ tone = 'banner' }: PreviewExitButtonProps) {
-  const pendientes = useQueuedOrders(useSession((state) => state.account))
+  const pending = useQueuedOrders(useSession((state) => state.account))
 
-  const boton = (onClick?: () => void) => (
-    <Button type="button" size={tone === 'page' ? 'lg' : 'default'} className={ESTILOS[tone]} onClick={onClick}>
-      <ShellIcon name="salir" size={18} />
+  const button = (onClick?: () => void) => (
+    <Button type="button" size={tone === 'page' ? 'lg' : 'default'} className={STYLES[tone]} onClick={onClick}>
+      <ShellIcon name="signOut" size={18} />
       <span>Salir de la vista previa</span>
     </Button>
   )
 
-  if (pendientes.length === 0) {
-    return boton(leavePreview)
+  if (pending.length === 0) {
+    return button(leavePreview)
   }
-  const cuantos = pendientes.length === 1 ? 'Un pedido del local de muestra espera' : `${String(pendientes.length)} pedidos del local de muestra esperan`
+  const howMany = pending.length === 1 ? 'Un pedido del local de muestra espera' : `${String(pending.length)} pedidos del local de muestra esperan`
   return (
     <ConfirmDialog
-      trigger={boton()}
+      trigger={button()}
       title="¿Salir con pedidos sin enviar?"
-      description={`${cuantos} señal: ${pendientes.map((pedido) => pedido.label).join(', ')}. Al salir de la vista previa se descartan.`}
+      description={`${howMany} señal: ${pending.map((order) => order.label).join(', ')}. Al salir de la vista previa se descartan.`}
       confirmLabel="Salir y descartarlos"
       onConfirm={leavePreview}
     />

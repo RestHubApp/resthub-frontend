@@ -6,9 +6,9 @@ export const MAX_RESTAURANT_SEARCH = 120
 
 /** Una página del servidor, desde cero. Sin texto de búsqueda no se manda el filtro. */
 export function restaurantListParams(search: string, page: number): PlatformRestaurantListParams {
-  const texto = search.trim()
-  const pagina = { limit: PLATFORM_PAGE_SIZE, offset: page * PLATFORM_PAGE_SIZE }
-  return texto === '' ? pagina : { ...pagina, search: texto }
+  const text = search.trim()
+  const pageParams = { limit: PLATFORM_PAGE_SIZE, offset: page * PLATFORM_PAGE_SIZE }
+  return text === '' ? pageParams : { ...pageParams, search: text }
 }
 
 export function activityParams(page: number): PlatformActivityParams {

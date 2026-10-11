@@ -23,25 +23,25 @@ interface StaffStatusButtonProps {
  */
 export function StaffStatusButton({ account, disabled }: StaffStatusButtonProps) {
   const queryClient = useQueryClient()
-  const estado = useMutation({
+  const status = useMutation({
     mutationFn: () => changeStaffStatus(account.id, !account.is_active),
-    onSuccess: (cuenta) => {
-      saveStaffMember(queryClient, cuenta)
+    onSuccess: (updatedAccount) => {
+      saveStaffMember(queryClient, updatedAccount)
     },
   })
-  const cambiar = () => {
-    estado.mutate()
+  const change = () => {
+    status.mutate()
   }
 
-  const boton = (
+  const button = (
     <Button
       type="button"
       size="sm"
       variant={account.is_active ? 'ghost' : 'success'}
-      disabled={disabled || estado.isPending}
-      onClick={account.is_active ? undefined : cambiar}
+      disabled={disabled || status.isPending}
+      onClick={account.is_active ? undefined : change}
     >
-      <Icon name="encender" size={14} />
+      <Icon name="turnOn" size={14} />
       <span>{account.is_active ? 'Desactivar' : 'Activar'}</span>
     </Button>
   )
@@ -50,18 +50,18 @@ export function StaffStatusButton({ account, disabled }: StaffStatusButtonProps)
     <>
       {account.is_active && !disabled ? (
         <ConfirmDialog
-          trigger={boton}
+          trigger={button}
           title={`¿Desactivar a ${account.full_name}?`}
           description="No podrá entrar a RestHub hasta que vuelvas a activar su cuenta. Sus pedidos y registros se conservan."
           confirmLabel="Desactivar"
-          onConfirm={cambiar}
+          onConfirm={change}
         />
       ) : (
-        boton
+        button
       )}
-      {estado.isError ? (
+      {status.isError ? (
         <FormMessage tone="error">
-          {errorMessage(estado.error, 'No se pudo actualizar la cuenta.')}
+          {errorMessage(status.error, 'No se pudo actualizar la cuenta.')}
         </FormMessage>
       ) : null}
     </>

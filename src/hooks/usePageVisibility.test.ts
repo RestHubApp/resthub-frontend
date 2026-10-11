@@ -4,13 +4,13 @@ import { act, renderHook } from '@testing-library/react'
 import { onSubmit } from './formSubmit'
 import { usePageVisibility } from './usePageVisibility'
 
-function ponerVisibilidad(estado: DocumentVisibilityState) {
-  Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => estado })
+function putVisibility(status: DocumentVisibilityState) {
+  Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => status })
   document.dispatchEvent(new Event('visibilitychange'))
 }
 
 afterEach(() => {
-  ponerVisibilidad('visible')
+  putVisibility('visible')
 })
 
 describe('usePageVisibility', () => {
@@ -19,12 +19,12 @@ describe('usePageVisibility', () => {
     expect(result.current).toBe('visible')
 
     act(() => {
-      ponerVisibilidad('hidden')
+      putVisibility('hidden')
     })
     expect(result.current).toBe('hidden')
 
     act(() => {
-      ponerVisibilidad('visible')
+      putVisibility('visible')
     })
     expect(result.current).toBe('visible')
   })
@@ -32,15 +32,15 @@ describe('usePageVisibility', () => {
 
 describe('onSubmit', () => {
   it('llama al envío de react-hook-form con el evento y no devuelve la promesa', () => {
-    const recibidos: unknown[] = []
-    const envio = (evento: unknown) => {
-      recibidos.push(evento)
+    const received: unknown[] = []
+    const sending = (event: unknown) => {
+      received.push(event)
       return Promise.resolve('enviado')
     }
-    const evento = { preventDefault: jest.fn() } as unknown as Parameters<ReturnType<typeof onSubmit>>[0]
-    const enviar: (e: typeof evento) => unknown = onSubmit(envio)
+    const fakeEvent = { preventDefault: jest.fn() } as unknown as Parameters<ReturnType<typeof onSubmit>>[0]
+    const send: (e: typeof fakeEvent) => unknown = onSubmit(sending)
 
-    expect(enviar(evento)).toBeUndefined()
-    expect(recibidos).toEqual([evento])
+    expect(send(fakeEvent)).toBeUndefined()
+    expect(received).toEqual([fakeEvent])
   })
 })

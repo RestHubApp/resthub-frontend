@@ -22,7 +22,7 @@ export async function withCustomer(values: TakeawayValues): Promise<TakeawayValu
     return values
   }
   try {
-    const nuevo = await saveCustomer(
+    const fresh = await saveCustomer(
       {
         name: values.customer_name,
         phone: values.phone,
@@ -35,7 +35,7 @@ export async function withCustomer(values: TakeawayValues): Promise<TakeawayValu
       undefined,
       { timeout: CUSTOMER_TIMEOUT_MS },
     )
-    return { ...values, customer_id: nuevo.id }
+    return { ...values, customer_id: fresh.id }
   } catch (error) {
     if (errorStatus(error) === PHONE_TAKEN) {
       return values

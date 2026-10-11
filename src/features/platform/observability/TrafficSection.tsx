@@ -25,15 +25,15 @@ function columns(bucketSeconds: number): GridColumn<ObsTimePoint>[] {
 
 /** Peticiones y errores 5xx a lo largo de la ventana. */
 export function TrafficSection({ params, live }: TrafficSectionProps) {
-  const serie = useTimeseries(params, live)
+  const series = useTimeseries(params, live)
 
   return (
-    <ObsQueryState query={serie} errorText="No se pudo cargar el tráfico." loadingLabel="Cargando el tráfico…" skeletonClassName="h-80 rounded-xl">
+    <ObsQueryState query={series} errorText="No se pudo cargar el tráfico." loadingLabel="Cargando el tráfico…" skeletonClassName="h-80 rounded-xl">
       {(data) => (
         <ChartCard
           title="Tráfico"
           description={`Peticiones y errores del servidor por cubo de ${formatBucket(data.bucket_seconds)}. Un cubo sin tráfico cuenta como cero.`}
-          refreshing={serie.isPlaceholderData}
+          refreshing={series.isPlaceholderData}
           chart={<TrafficChart series={data} />}
           table={
             <DataGrid caption="Tráfico por cubo" columns={columns(data.bucket_seconds)} rows={data.points} rowKey={(p) => p.t} />

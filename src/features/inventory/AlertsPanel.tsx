@@ -16,16 +16,16 @@ interface AlertsPanelProps {
 
 /** Los insumos por reponer, con lo que falta para llegar al mínimo y la compra a un toque. */
 export function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
-  const alertas = useLowStock()
+  const alerts = useLowStock()
 
-  if (alertas.isError) {
+  if (alerts.isError) {
     return (
       <FormMessage tone="error">
-        {errorMessage(alertas.error, 'No se pudieron cargar las alertas.')}
+        {errorMessage(alerts.error, 'No se pudieron cargar las alertas.')}
       </FormMessage>
     )
   }
-  if (alertas.isPending) {
+  if (alerts.isPending) {
     return (
       <ListSkeleton
         label="Cargando alertas…"
@@ -35,7 +35,7 @@ export function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
       />
     )
   }
-  if (alertas.data.length === 0) {
+  if (alerts.data.length === 0) {
     return (
       <EmptyState
         title="Nada por reponer"
@@ -46,27 +46,27 @@ export function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
 
   return (
     <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2">
-      {alertas.data.map((insumo) => {
-        const falta = Number(insumo.min_stock) - Number(insumo.stock)
+      {alerts.data.map((ingredient) => {
+        const missing = Number(ingredient.min_stock) - Number(ingredient.stock)
         return (
           <li
-            key={insumo.id}
+            key={ingredient.id}
             className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 ring-foreground/10"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="m-0 text-base font-semibold">{insumo.name}</h2>
-              <IngredientStatus ingredient={insumo} />
+              <h2 className="m-0 text-base font-semibold">{ingredient.name}</h2>
+              <IngredientStatus ingredient={ingredient} />
             </div>
             <p className="m-0 flex flex-wrap gap-x-3 text-sm text-muted-foreground">
               <span>
                 Hay{' '}
-                <strong className={insumo.is_negative ? 'text-destructive' : 'text-foreground'}>
-                  {formatQuantity(insumo.stock, insumo.unit)}
+                <strong className={ingredient.is_negative ? 'text-destructive' : 'text-foreground'}>
+                  {formatQuantity(ingredient.stock, ingredient.unit)}
                 </strong>
               </span>
-              <span>Mínimo {formatQuantity(insumo.min_stock, insumo.unit)}</span>
+              <span>Mínimo {formatQuantity(ingredient.min_stock, ingredient.unit)}</span>
               <span>
-                Faltan <strong className="text-foreground">{formatQuantity(falta, insumo.unit)}</strong>
+                Faltan <strong className="text-foreground">{formatQuantity(missing, ingredient.unit)}</strong>
               </span>
             </p>
             {canManage ? (
@@ -74,12 +74,12 @@ export function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
                 type="button"
                 variant="secondary"
                 className="h-11 self-start px-4"
-                aria-label={`Registrar compra de ${insumo.name}`}
+                aria-label={`Registrar compra de ${ingredient.name}`}
                 onClick={() => {
-                  onAction({ kind: 'purchase', ingredient: insumo })
+                  onAction({ kind: 'purchase', ingredient })
                 }}
               >
-                <Icon name="compra" size={16} />
+                <Icon name="purchase" size={16} />
                 <span>Registrar compra</span>
               </Button>
             ) : null}

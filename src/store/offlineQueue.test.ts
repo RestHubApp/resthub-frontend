@@ -12,12 +12,12 @@ import type { QueuedOrder } from './offlineQueue'
 const V1 = 'resthub.pedidos-sin-enviar.v1'
 const V2 = 'resthub.pedidos-sin-enviar.v2'
 
-const mesero = { userId: 7, restaurantId: 1 }
-const otroMesero = { userId: 8, restaurantId: 1 }
+const waiter = { userId: 7, restaurantId: 1 }
+const otherWaiter = { userId: 8, restaurantId: 1 }
 // El mismo id de usuario puede existir en otro local.
-const otroLocal = { userId: 7, restaurantId: 2 }
+const otherRestaurant = { userId: 7, restaurantId: 2 }
 
-function pedido(id: string, owner: { userId: number; restaurantId: number }): QueuedOrder {
+function order(id: string, owner: { userId: number; restaurantId: number }): QueuedOrder {
   return {
     ...owner,
     request: { client_request_id: id } as OpenOrderRequest,
@@ -26,36 +26,36 @@ function pedido(id: string, owner: { userId: number; restaurantId: number }): Qu
   }
 }
 
-function fakeStorage(inicial: Record<string, string> = {}) {
-  const datos = new Map(Object.entries(inicial))
+function fakeStorage(initial: Record<string, string> = {}) {
+  const data = new Map(Object.entries(initial))
   return {
-    getItem: (clave: string) => datos.get(clave) ?? null,
-    setItem: (clave: string, valor: string) => {
-      datos.set(clave, valor)
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      data.set(key, value)
     },
-    removeItem: (clave: string) => {
-      datos.delete(clave)
+    removeItem: (key: string) => {
+      data.delete(key)
     },
-    datos,
+    data,
   }
 }
 
 // La cola guarda su lectura en memoria: cada prueba parte de un módulo nuevo.
-async function cola(inicial: Record<string, string> = {}) {
-  const storage = fakeStorage(inicial)
+async function queue(initial: Record<string, string> = {}) {
+  const storage = fakeStorage(initial)
   stubGlobal('localStorage', storage)
   jest.resetModules()
   return { ...(await import('./offlineQueue')), storage }
 }
 
 // Una pestaña de vista previa: ya abrió su sesión y quedó marcada.
-async function colaDeVistaPrevia() {
+async function previewQueue() {
   const local = fakeStorage()
-  const pestana = fakeStorage({ 'resthub.vista-previa.pestana.v1': '1' })
+  const tab = fakeStorage({ 'resthub.vista-previa.pestana.v1': '1' })
   stubGlobal('localStorage', local)
-  stubGlobal('sessionStorage', pestana)
+  stubGlobal('sessionStorage', tab)
   jest.resetModules()
-  return { ...(await import('./offlineQueue')), local, pestana }
+  return { ...(await import('./offlineQueue')), local, tab }
 }
 
 beforeEach(() => {
@@ -64,139 +64,139 @@ beforeEach(() => {
 
 describe('queuedOrders', () => {
   it('lista solo los pedidos de la cuenta activa, en su local', async () => {
-    const { enqueueOrder, queuedOrders } = await cola()
-    enqueueOrder(pedido('a', mesero))
-    enqueueOrder(pedido('b', otroMesero))
-    enqueueOrder(pedido('c', otroLocal))
+    const { enqueueOrder, queuedOrders } = await queue()
+    enqueueOrder(order('a', waiter))
+    enqueueOrder(order('b', otherWaiter))
+    enqueueOrder(order('c', otherRestaurant))
 
-    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a'])
-    expect(queuedOrders(otroMesero).map((p) => p.label)).toEqual(['Mesa b'])
-    expect(queuedOrders(otroLocal).map((p) => p.label)).toEqual(['Mesa c'])
+    expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa a'])
+    expect(queuedOrders(otherWaiter).map((p) => p.label)).toEqual(['Mesa b'])
+    expect(queuedOrders(otherRestaurant).map((p) => p.label)).toEqual(['Mesa c'])
   })
 
   it('sin sesión no hay pedidos que mostrar ni enviar', async () => {
-    const { enqueueOrder, queuedOrders } = await cola()
-    enqueueOrder(pedido('a', mesero))
+    const { enqueueOrder, queuedOrders } = await queue()
+    enqueueOrder(order('a', waiter))
     expect(queuedOrders(null)).toEqual([])
   })
 
   it('devuelve la misma lista mientras la cola no cambie', async () => {
-    const { enqueueOrder, queuedOrders } = await cola()
-    enqueueOrder(pedido('a', mesero))
-    const primera = queuedOrders(mesero)
-    expect(queuedOrders(mesero)).toBe(primera)
-    enqueueOrder(pedido('b', mesero))
-    expect(queuedOrders(mesero)).not.toBe(primera)
+    const { enqueueOrder, queuedOrders } = await queue()
+    enqueueOrder(order('a', waiter))
+    const first = queuedOrders(waiter)
+    expect(queuedOrders(waiter)).toBe(first)
+    enqueueOrder(order('b', waiter))
+    expect(queuedOrders(waiter)).not.toBe(first)
   })
 
   it('quitar un pedido enviado no toca los de otras cuentas', async () => {
-    const { enqueueOrder, queuedOrders, removeQueued } = await cola()
-    enqueueOrder(pedido('a', mesero))
-    enqueueOrder(pedido('b', otroMesero))
+    const { enqueueOrder, queuedOrders, removeQueued } = await queue()
+    enqueueOrder(order('a', waiter))
+    enqueueOrder(order('b', otherWaiter))
     removeQueued('a')
-    expect(queuedOrders(mesero)).toEqual([])
-    expect(queuedOrders(otroMesero)).toHaveLength(1)
+    expect(queuedOrders(waiter)).toEqual([])
+    expect(queuedOrders(otherWaiter)).toHaveLength(1)
   })
 
   it('ignora lo guardado sin dueño, sea de la v1 o de la clave nueva', async () => {
-    const sinDueno = JSON.stringify([{ request: { client_request_id: 'x' }, queuedAt: '', label: 'Mesa x' }])
-    const { queuedOrders } = await cola({ [V1]: sinDueno, [V2]: sinDueno })
-    expect(queuedOrders(mesero)).toEqual([])
+    const withoutOwner = JSON.stringify([{ request: { client_request_id: 'x' }, queuedAt: '', label: 'Mesa x' }])
+    const { queuedOrders } = await queue({ [V1]: withoutOwner, [V2]: withoutOwner })
+    expect(queuedOrders(waiter)).toEqual([])
   })
 
   it('guarda en la clave v2 y la lee de nuevo al reabrir la app', async () => {
-    const primera = await cola()
-    primera.enqueueOrder(pedido('a', mesero))
-    const guardado = primera.storage.datos.get(V2) ?? ''
+    const first = await queue()
+    first.enqueueOrder(order('a', waiter))
+    const saved = first.storage.data.get(V2) ?? ''
 
-    const { queuedOrders } = await cola({ [V2]: guardado })
-    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a'])
+    const { queuedOrders } = await queue({ [V2]: saved })
+    expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa a'])
   })
 })
 
 describe('varias pestañas', () => {
   it('encolar no borra lo que encoló otra pestaña', async () => {
-    const { enqueueOrder, queuedOrders, storage } = await cola()
-    enqueueOrder(pedido('a', mesero))
+    const { enqueueOrder, queuedOrders, storage } = await queue()
+    enqueueOrder(order('a', waiter))
     // La otra pestaña leyó la cola antes y le sumó su pedido.
-    storage.datos.set(V2, JSON.stringify([pedido('a', mesero), pedido('b', mesero)]))
+    storage.data.set(V2, JSON.stringify([order('a', waiter), order('b', waiter)]))
 
-    enqueueOrder(pedido('c', mesero))
+    enqueueOrder(order('c', waiter))
 
-    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a', 'Mesa b', 'Mesa c'])
+    expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa a', 'Mesa b', 'Mesa c'])
   })
 
   it('un cambio en otra pestaña se ve sin recargar', async () => {
-    const ventana = new EventTarget()
-    stubGlobal('window', ventana)
-    const { enqueueOrder, queuedOrders, subscribeQueue, storage } = await cola()
-    enqueueOrder(pedido('a', mesero))
-    const aviso = jest.fn()
-    subscribeQueue(aviso)
+    const window = new EventTarget()
+    stubGlobal('window', window)
+    const { enqueueOrder, queuedOrders, subscribeQueue, storage } = await queue()
+    enqueueOrder(order('a', waiter))
+    const notice = jest.fn()
+    subscribeQueue(notice)
 
-    storage.datos.set(V2, JSON.stringify([pedido('a', mesero), pedido('b', mesero)]))
-    ventana.dispatchEvent(Object.assign(new Event('storage'), { key: V2, storageArea: storage }))
+    storage.data.set(V2, JSON.stringify([order('a', waiter), order('b', waiter)]))
+    window.dispatchEvent(Object.assign(new Event('storage'), { key: V2, storageArea: storage }))
 
-    expect(aviso).toHaveBeenCalled()
-    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a', 'Mesa b'])
+    expect(notice).toHaveBeenCalled()
+    expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa a', 'Mesa b'])
   })
 })
 
 describe('en una vista previa', () => {
   it('la cola vive en el sessionStorage de la pestaña y no toca localStorage', async () => {
-    const { enqueueOrder, queuedOrders, local, pestana } = await colaDeVistaPrevia()
-    local.datos.set(V2, JSON.stringify([pedido('real', mesero)]))
+    const { enqueueOrder, queuedOrders, local, tab } = await previewQueue()
+    local.data.set(V2, JSON.stringify([order('real', waiter)]))
 
-    enqueueOrder(pedido('muestra', mesero))
+    enqueueOrder(order('muestra', waiter))
 
-    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa muestra'])
-    expect(JSON.parse(local.datos.get(V2) ?? '[]')).toEqual([pedido('real', mesero)])
-    expect(JSON.parse(pestana.datos.get(V2) ?? '[]')).toEqual([pedido('muestra', mesero)])
+    expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa muestra'])
+    expect(JSON.parse(local.data.get(V2) ?? '[]')).toEqual([order('real', waiter)])
+    expect(JSON.parse(tab.data.get(V2) ?? '[]')).toEqual([order('muestra', waiter)])
   })
 
   it('un cambio en la cola real de otra pestaña no le llega', async () => {
-    const ventana = new EventTarget()
-    stubGlobal('window', ventana)
-    const { subscribeQueue, local } = await colaDeVistaPrevia()
-    const aviso = jest.fn()
-    subscribeQueue(aviso)
+    const window = new EventTarget()
+    stubGlobal('window', window)
+    const { subscribeQueue, local } = await previewQueue()
+    const notice = jest.fn()
+    subscribeQueue(notice)
 
-    ventana.dispatchEvent(Object.assign(new Event('storage'), { key: V2, storageArea: local }))
+    window.dispatchEvent(Object.assign(new Event('storage'), { key: V2, storageArea: local }))
 
-    expect(aviso).not.toHaveBeenCalled()
+    expect(notice).not.toHaveBeenCalled()
   })
 })
 
 describe('discardPreviewQueue', () => {
   it('en una vista previa vacía la cola entera de la pestaña, de cualquier cuenta', async () => {
-    const { enqueueOrder, discardPreviewQueue, queuedOrders, local, pestana } = await colaDeVistaPrevia()
-    local.datos.set(V2, JSON.stringify([pedido('real', mesero)]))
-    enqueueOrder(pedido('a', mesero))
-    enqueueOrder(pedido('b', otroMesero))
+    const { enqueueOrder, discardPreviewQueue, queuedOrders, local, tab } = await previewQueue()
+    local.data.set(V2, JSON.stringify([order('real', waiter)]))
+    enqueueOrder(order('a', waiter))
+    enqueueOrder(order('b', otherWaiter))
 
     discardPreviewQueue()
 
-    expect(queuedOrders(mesero)).toEqual([])
-    expect(queuedOrders(otroMesero)).toEqual([])
-    expect(pestana.datos.has(V2)).toBe(false)
-    expect(JSON.parse(local.datos.get(V2) ?? '[]')).toEqual([pedido('real', mesero)])
+    expect(queuedOrders(waiter)).toEqual([])
+    expect(queuedOrders(otherWaiter)).toEqual([])
+    expect(tab.data.has(V2)).toBe(false)
+    expect(JSON.parse(local.data.get(V2) ?? '[]')).toEqual([order('real', waiter)])
   })
 
   it('en una pestaña normal no toca la cola del navegador', async () => {
-    const { enqueueOrder, discardPreviewQueue, queuedOrders } = await cola()
-    enqueueOrder(pedido('a', mesero))
+    const { enqueueOrder, discardPreviewQueue, queuedOrders } = await queue()
+    enqueueOrder(order('a', waiter))
 
     discardPreviewQueue()
 
-    expect(queuedOrders(mesero).map((p) => p.label)).toEqual(['Mesa a'])
+    expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa a'])
   })
 })
 
 describe('ownerOf', () => {
   it('toma la persona y el local de la sesión', async () => {
-    const { ownerOf } = await cola()
+    const { ownerOf } = await queue()
     const account = { user: { id: 7 }, restaurant: { id: 1 } } as Parameters<typeof ownerOf>[0]
-    expect(ownerOf(account)).toEqual(mesero)
+    expect(ownerOf(account)).toEqual(waiter)
     expect(ownerOf(null)).toBeNull()
   })
 })

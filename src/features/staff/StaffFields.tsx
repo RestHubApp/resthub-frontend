@@ -5,7 +5,7 @@ import { ReadOnlyField } from '@/components/ReadOnlyField'
 import { SelectField } from '@/components/SelectField'
 import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
-import { soloLetras } from '@/services/fieldRules'
+import { onlyLetters } from '@/services/fieldRules'
 
 interface StaffFieldsProps {
   /** Lo que devuelve `register(...)` para cada campo. */
@@ -53,9 +53,9 @@ export function StaffFields({
           id="full_name"
           label="Nombre completo"
           placeholder="María Quispe Rojas"
-          icon="perfil"
+          icon="profile"
           autoComplete="off"
-          sanitize={soloLetras}
+          sanitize={onlyLetters}
           field={fields.full_name}
           error={errors.full_name}
         />
@@ -90,7 +90,7 @@ export function StaffFields({
         <SelectField
           id="role_id"
           label="Rol"
-          icon="tipoDeCuenta"
+          icon="accountType"
           hint="Solo aparecen los roles con permisos que tu cuenta también tiene."
           field={fields.role_id}
           error={errors.role_id}

@@ -21,68 +21,68 @@ interface MenuPickerProps {
 
 /** Cuántas porciones de cada plato hay en el borrador, sumando sus combinaciones. */
 function countByDish(lines: readonly DraftLine[]): Map<number, number> {
-  const cuenta = new Map<number, number>()
+  const account = new Map<number, number>()
   for (const line of lines) {
-    cuenta.set(line.menuItemId, (cuenta.get(line.menuItemId) ?? 0) + line.quantity)
+    account.set(line.menuItemId, (account.get(line.menuItemId) ?? 0) + line.quantity)
   }
-  return cuenta
+  return account
 }
 
 /** La carta para elegir platos: busqueda, categorias y la lista. */
 export function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) {
-  const carta = useQuery(orderMenuQuery)
-  const [busqueda, setBusqueda] = useState('')
-  const [categoria, setCategoria] = useState<number | null>(null)
-  const termino = useDeferredValue(busqueda)
-  const cantidades = useMemo(() => countByDish(lines), [lines])
-  const [configurando, setConfigurando] = useState<OrderMenuItem | null>(null)
-  const secciones = useMemo(
-    () => visibleSections(carta.data?.categories ?? [], termino, categoria),
-    [carta.data, termino, categoria],
+  const menu = useQuery(orderMenuQuery)
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState<number | null>(null)
+  const term = useDeferredValue(search)
+  const quantities = useMemo(() => countByDish(lines), [lines])
+  const [configuring, setConfiguring] = useState<OrderMenuItem | null>(null)
+  const sections = useMemo(
+    () => visibleSections(menu.data?.categories ?? [], term, category),
+    [menu.data, term, category],
   )
 
-  if (carta.isPending) {
+  if (menu.isPending) {
     return <ListSkeleton label="Cargando la carta…" count={6} />
   }
-  if (carta.isError && carta.data === undefined) {
+  if (menu.isError && menu.data === undefined) {
     return (
-      <QueryError error={carta.error} fallback="No se pudo cargar la carta." onRetry={() => void carta.refetch()} />
+      <QueryError error={menu.error} fallback="No se pudo cargar la carta." onRetry={() => void menu.refetch()} />
     )
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <SearchBox value={busqueda} onChange={setBusqueda} />
+      <SearchBox value={search} onChange={setSearch} />
       <CategoryChips
-        sections={carta.data.categories.filter((section) => section.is_active)}
-        selected={categoria}
-        onSelect={setCategoria}
+        sections={menu.data.categories.filter((section) => section.is_active)}
+        selected={category}
+        onSelect={setCategory}
       />
-      {secciones.length === 0 ? (
+      {sections.length === 0 ? (
         <EmptyState
-          title={termino.trim() === '' ? 'No hay platos en la carta' : `Ningún plato coincide con «${termino.trim()}»`}
+          title={term.trim() === '' ? 'No hay platos en la carta' : `Ningún plato coincide con «${term.trim()}»`}
         />
       ) : null}
-      {secciones.map((seccion) => (
-        <section key={seccion.id} aria-labelledby={`categoria-${String(seccion.id)}`} className="flex flex-col gap-2">
-          <h2 id={`categoria-${String(seccion.id)}`} className="m-0 text-base font-semibold">
-            {seccion.name}
+      {sections.map((section) => (
+        <section key={section.id} aria-labelledby={`categoria-${String(section.id)}`} className="flex flex-col gap-2">
+          <h2 id={`categoria-${String(section.id)}`} className="m-0 text-base font-semibold">
+            {section.name}
           </h2>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
-            {seccion.items.map((item) => (
+            {section.items.map((item) => (
               <DishRow
                 key={item.id}
                 item={item}
-                quantity={cantidades.get(item.id) ?? 0}
+                quantity={quantities.get(item.id) ?? 0}
                 onAdd={() => {
                   if (item.modifier_groups.length > 0) {
-                    setConfigurando(item)
+                    setConfiguring(item)
                     return
                   }
                   onAdd(item)
                 }}
-                onChange={(cantidad) => {
-                  onChange(lineKeyFor(item.id), cantidad)
+                onChange={(quantity) => {
+                  onChange(lineKeyFor(item.id), quantity)
                 }}
               />
             ))}
@@ -90,16 +90,16 @@ export function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) {
         </section>
       ))}
       <ModifierDialog
-        item={configurando}
+        item={configuring}
         onConfirm={async (item, modifiers) => {
-          const fresco = await carta.refetch()
-          if (fresco.isError || fresco.data === undefined) return false
+          const fresh = await menu.refetch()
+          if (fresh.isError || fresh.data === undefined) return false
           onAdd(item, modifiers)
-          setConfigurando(null)
+          setConfiguring(null)
           return true
         }}
         onClose={() => {
-          setConfigurando(null)
+          setConfiguring(null)
         }}
       />
     </div>

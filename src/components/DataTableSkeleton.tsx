@@ -23,8 +23,8 @@ export function DataTableSkeleton({ headers, rows }: DataTableSkeletonProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: rows }, (_, fila) => (
-            <TableRow key={fila} className="hover:bg-transparent">
+          {Array.from({ length: rows }, (_, row) => (
+            <TableRow key={row} className="hover:bg-transparent">
               {headers.map((header) => (
                 <TableCell key={header} className="px-3 py-3">
                   <Skeleton className="h-4 w-full max-w-32" />

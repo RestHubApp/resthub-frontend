@@ -4,37 +4,37 @@ import { useForm } from 'react-hook-form'
 
 import { addPayment } from '@/api/orders'
 import type { OrderResponse, PaymentRequest } from '@/api/types'
-import { decimalParaApi } from '@/components/formRules'
+import { decimalForApi } from '@/components/formRules'
 import { centsToApi, formatMoney } from '@/services/format'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { balanceCents, chargeCents, type SplitMode } from './chargeMath'
 import { chargeSchema, type ChargeValues } from './chargeSchema'
 
 // Una cuenta dividida arranca entre dos: es el caso más común.
-const PERSONAS_INICIALES = 2
+const INITIAL_PERSONAS = 2
 
 /** Cómo se divide este pago: el modo, lo que se cobra y los platos elegidos. */
 interface Split {
-  readonly modo: SplitMode
-  readonly parte: number
-  readonly platos: readonly number[]
+  readonly mode: SplitMode
+  readonly part: number
+  readonly dishes: readonly number[]
 }
 
-function payloadFor(order: OrderResponse, valores: ChargeValues, { modo, parte, platos }: Split): PaymentRequest {
-  const efectivo = valores.payment_method === 'cash'
+function payloadFor(order: OrderResponse, values: ChargeValues, { mode, part, dishes }: Split): PaymentRequest {
+  const isCash = values.payment_method === 'cash'
   const base: PaymentRequest = {
-    payment_method: valores.payment_method,
-    amount_received: efectivo ? decimalParaApi(valores.amount_received) : null,
-    tip: decimalParaApi(valores.tip) ?? '0',
+    payment_method: values.payment_method,
+    amount_received: isCash ? decimalForApi(values.amount_received) : null,
+    tip: decimalForApi(values.tip) ?? '0',
     // El saldo que ve quien cobra: si cambió (otro pago, un doble toque), el
     // servidor no cobra dos veces.
     expected_balance: order.balance,
   }
-  if (modo === 'items') {
-    return { ...base, item_ids: [...platos] }
+  if (mode === 'items') {
+    return { ...base, item_ids: [...dishes] }
   }
-  if (modo === 'equal' && parte < balanceCents(order)) {
-    return { ...base, amount: centsToApi(parte) }
+  if (mode === 'equal' && part < balanceCents(order)) {
+    return { ...base, amount: centsToApi(part) }
   }
   return base
 }
@@ -53,43 +53,43 @@ function partialMessage(order: OrderResponse): string {
  * cuando la cuenta se cierra, avisa con `onPaid`.
  */
 export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderResponse) => void) {
-  const [modo, setModo] = useState<SplitMode>('all')
-  const [personas, setPersonas] = useState(PERSONAS_INICIALES)
-  const [platos, setPlatos] = useState<number[]>([])
-  const parte = chargeCents(order, modo, personas, platos)
+  const [mode, setMode] = useState<SplitMode>('all')
+  const [personas, setPersonas] = useState(INITIAL_PERSONAS)
+  const [dishes, setDishes] = useState<number[]>([])
+  const part = chargeCents(order, mode, personas, dishes)
   const form = useForm<ChargeValues>({
-    resolver: zodResolver(chargeSchema(parte)),
+    resolver: zodResolver(chargeSchema(part)),
     defaultValues: { payment_method: 'cash', amount_received: '', tip: '' },
   })
-  const pago = useOrderAction({
+  const payment = useOrderAction({
     mutationFn: (payload: PaymentRequest) => addPayment(order.id, payload),
     success: partialMessage,
     failure: 'No se pudo registrar el pago.',
-    onSuccess: (pagado) => {
-      if (pagado.status === 'paid') {
-        onPaid(pagado)
+    onSuccess: (paid) => {
+      if (paid.status === 'paid') {
+        onPaid(paid)
         return
       }
       form.reset({ payment_method: form.getValues('payment_method'), amount_received: '', tip: '' })
-      setPlatos([])
-      setPersonas((antes) => Math.max(antes - 1, 1))
+      setDishes([])
+      setPersonas((before) => Math.max(before - 1, 1))
     },
   })
-  const sinPlatos = modo === 'items' && platos.length === 0
+  const hasNoDishes = mode === 'items' && dishes.length === 0
 
   return {
     form,
-    modo,
-    setModo,
+    mode,
+    setMode,
     personas,
     setPersonas,
-    platos,
-    setPlatos,
-    parte,
-    pago,
-    puedeCobrar: !sinPlatos && !pago.isPending,
-    enviar: form.handleSubmit((valores) => {
-      pago.mutate(payloadFor(order, valores, { modo, parte, platos }))
+    dishes,
+    setDishes,
+    part,
+    payment,
+    canCharge: !hasNoDishes && !payment.isPending,
+    send: form.handleSubmit((values) => {
+      payment.mutate(payloadFor(order, values, { mode, part, dishes }))
     }),
   }
 }

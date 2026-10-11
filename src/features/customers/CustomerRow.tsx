@@ -7,7 +7,7 @@ interface CustomerRowProps {
   readonly onOpen: () => void
 }
 
-function visitas(count: number): string {
+function visits(count: number): string {
   return count === 1 ? '1 visita' : `${String(count)} visitas`
 }
 
@@ -28,7 +28,7 @@ export function CustomerRow({ customer, onOpen }: CustomerRowProps) {
           <span className="text-xs text-muted-foreground">{customer.phone === '' ? 'Sin teléfono' : customer.phone}</span>
         </span>
         <span className="text-sm text-muted-foreground tabular-nums">
-          {visitas(customer.visits)} · {formatMoney(customer.spent)}
+          {visits(customer.visits)} · {formatMoney(customer.spent)}
         </span>
       </button>
     </li>

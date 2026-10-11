@@ -14,12 +14,12 @@ interface SummarySectionProps {
 
 /** Los indicadores de la ventana: tráfico, errores, latencias y base. */
 export function SummarySection({ params, live }: SummarySectionProps) {
-  const resumen = useQuery({ ...obsSummaryQuery(params), ...live, placeholderData: keepPreviousData })
+  const summaryQuery = useQuery({ ...obsSummaryQuery(params), ...live, placeholderData: keepPreviousData })
 
   return (
-    <ObsQueryState query={resumen} errorText="No se pudo cargar el resumen." loadingLabel="Cargando el resumen…" skeletonClassName="h-28 rounded-xl">
+    <ObsQueryState query={summaryQuery} errorText="No se pudo cargar el resumen." loadingLabel="Cargando el resumen…" skeletonClassName="h-28 rounded-xl">
       {(summary) => (
-        <section aria-label="Indicadores de la ventana" aria-busy={resumen.isPlaceholderData} className="flex flex-col gap-3">
+        <section aria-label="Indicadores de la ventana" aria-busy={summaryQuery.isPlaceholderData} className="flex flex-col gap-3">
           <SummaryTiles summary={summary} />
           {summary.sampled ? (
             <SampledNotice>

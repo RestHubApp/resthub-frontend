@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { grantCourtesy, revokeCourtesy } from '@/api/orders'
 import type { OrderItemResponse, OrderResponse } from '@/api/types'
-import { MIN_TEXTO } from '@/components/formRules'
+import { MIN_TEXT } from '@/components/formRules'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,16 +22,16 @@ interface CourtesyItemProps {
  * del cobro perdería de vista la cuenta.
  */
 export function CourtesyItem({ order, item }: CourtesyItemProps) {
-  const [motivo, setMotivo] = useState<string | null>(null)
-  const cambiar = useOrderAction({
+  const [reason, setReason] = useState<string | null>(null)
+  const change = useOrderAction({
     mutationFn: (reason: string | null) =>
       reason === null ? revokeCourtesy(order.id, item.id) : grantCourtesy(order.id, item.id, reason),
     failure: 'No se pudo cambiar la cortesía.',
     onSuccess: () => {
-      setMotivo(null)
+      setReason(null)
     },
   })
-  const valido = (motivo ?? '').trim().length >= MIN_TEXTO
+  const isValid = (reason ?? '').trim().length >= MIN_TEXT
 
   return (
     <li className="flex flex-col gap-2 rounded-md px-3 py-2 ring-1 ring-input">
@@ -49,9 +49,9 @@ export function CourtesyItem({ order, item }: CourtesyItemProps) {
               type="button"
               size="sm"
               variant="outline"
-              disabled={cambiar.isPending}
+              disabled={change.isPending}
               onClick={() => {
-                cambiar.mutate(null)
+                change.mutate(null)
               }}
             >
               Cobrar
@@ -61,34 +61,34 @@ export function CourtesyItem({ order, item }: CourtesyItemProps) {
               type="button"
               size="sm"
               variant="outline"
-              disabled={motivo !== null}
+              disabled={reason !== null}
               onClick={() => {
-                setMotivo('')
+                setReason('')
               }}
             >
-              <Icon name="cortesia" size={14} />
+              <Icon name="courtesy" size={14} />
               <span>Invitar</span>
             </Button>
           )}
         </span>
       </div>
-      {motivo === null ? null : (
+      {reason === null ? null : (
         <div className="flex gap-2">
           <Input
             aria-label={`Motivo de la cortesía de ${item.name}`}
             placeholder="Error de cocina, cumpleaños…"
             maxLength={MAX_ADJUSTMENT_REASON}
-            value={motivo}
-            onChange={(evento) => {
-              setMotivo(evento.target.value)
+            value={reason}
+            onChange={(event) => {
+              setReason(event.target.value)
             }}
           />
           <Button
             type="button"
             size="sm"
-            disabled={!valido || cambiar.isPending}
+            disabled={!isValid || change.isPending}
             onClick={() => {
-              cambiar.mutate(motivo.trim())
+              change.mutate(reason.trim())
             }}
           >
             Confirmar

@@ -28,24 +28,24 @@ interface BoardCardProps {
  * su primer minuto, para que se note que aparecio sin que nadie recargue.
  */
 export function BoardCard({ order, now, flagFor, onCharge, onCancel }: BoardCardProps) {
-  const tituloId = `pedido-${String(order.id)}`
-  const nuevo = minutesSince(order.created_at, now) < 1
-  const alergia = allergyIn(order, flagFor) !== undefined
+  const titleId = `pedido-${String(order.id)}`
+  const isFresh = minutesSince(order.created_at, now) < 1
+  const hasAllergy = allergyIn(order, flagFor) !== undefined
 
   return (
     <article
-      aria-labelledby={tituloId}
-      className={`flex flex-col gap-3 rounded-xl bg-card p-3.5 shadow-xs ${alergia ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
+      aria-labelledby={titleId}
+      className={`flex flex-col gap-3 rounded-xl bg-card p-3.5 shadow-xs ${hasAllergy ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
     >
       <header className="flex items-start justify-between gap-2">
-        <h3 id={tituloId} className="m-0 font-heading text-2xl leading-none font-black tabular-nums">
+        <h3 id={titleId} className="m-0 font-heading text-2xl leading-none font-black tabular-nums">
           <Link to={paths.orders.detail(order.id)} className="rounded outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50">
             <span className="sr-only">Pedido </span>#{order.number}
           </Link>
         </h3>
         <div className="flex flex-wrap justify-end gap-1">
-          {alergia ? <AllergyAlert /> : null}
-          {nuevo ? (
+          {hasAllergy ? <AllergyAlert /> : null}
+          {isFresh ? (
             <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">Nuevo</span>
           ) : null}
           <ElapsedTime order={order} now={now} />

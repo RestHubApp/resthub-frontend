@@ -35,27 +35,27 @@ export async function previewEntryLoader(): Promise<PreviewEntryResult | Respons
 
   // El código se sacó de la barra al cargar la página (`tabStorage`). Si esta
   // pestaña de vista previa llegó acá navegando, puede seguir en la dirección.
-  const fragmento = takeEntryFragment() ?? window.location.hash
+  const fragment = takeEntryFragment() ?? window.location.hash
   if (window.location.hash !== '') {
     window.history.replaceState(window.history.state, '', withoutHash(window.location))
   }
-  const codigo = previewCodeFrom(fragmento)
+  const code = previewCodeFrom(fragment)
 
-  if (codigo === null) {
+  if (code === null) {
     return useSession.getState().account?.preview === true ? redirect(paths.home) : 'missing'
   }
 
   try {
-    const respuesta = await exchangePreviewCode({ code: codigo })
-    if (!respuesta.preview) {
+    const response = await exchangePreviewCode({ code: code })
+    if (!response.preview) {
       logger.error('auth.preview_not_marked')
       return 'failed'
     }
-    useSession.getState().startPreview(respuesta.access_token, sessionOf(respuesta))
+    useSession.getState().startPreview(response.access_token, sessionOf(response))
     return redirect(paths.home)
   } catch (error) {
-    const motivo = failureOf(errorStatus(error))
-    logger.warn({ reason: motivo }, 'auth.preview_exchange_failed')
-    return motivo
+    const reason = failureOf(errorStatus(error))
+    logger.warn({ reason: reason }, 'auth.preview_exchange_failed')
+    return reason
   }
 }

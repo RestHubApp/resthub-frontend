@@ -3,8 +3,8 @@ import { SectionCard } from '@/components/SectionCard'
 import { usePreview, useSession } from '@/store/session'
 import { ChangePasswordForm } from './ChangePasswordForm'
 
-const TERMINO = 'm-0 text-sm text-muted-foreground'
-const DATO = 'm-0 text-base font-medium break-words'
+const TERM = 'm-0 text-sm text-muted-foreground'
+const DATA = 'm-0 text-base font-medium break-words'
 
 /**
  * La cuenta propia.
@@ -15,17 +15,17 @@ const DATO = 'm-0 text-base font-medium break-words'
  */
 export function ProfileView() {
   const account = useSession((state) => state.account)
-  const preview = usePreview()
+  const isPreview = usePreview()
 
   if (account === null) {
     return null
   }
 
-  const datos = [
-    { termino: 'Nombre', dato: account.user.full_name },
-    { termino: 'Correo', dato: account.user.email },
-    { termino: 'Rol', dato: account.user.role_label },
-    { termino: 'Restaurante', dato: account.restaurant.name },
+  const data = [
+    { term: 'Nombre', data: account.user.full_name },
+    { term: 'Correo', data: account.user.email },
+    { term: 'Rol', data: account.user.role_label },
+    { term: 'Restaurante', data: account.restaurant.name },
   ]
 
   return (
@@ -34,17 +34,17 @@ export function ProfileView() {
 
       <SectionCard title="Tus datos">
         <dl className="m-0 grid gap-4 sm:grid-cols-2">
-          {datos.map((item) => (
-            <div key={item.termino} className="flex flex-col gap-0.5">
-              <dt className={TERMINO}>{item.termino}</dt>
-              <dd className={DATO}>{item.dato}</dd>
+          {data.map((item) => (
+            <div key={item.term} className="flex flex-col gap-0.5">
+              <dt className={TERM}>{item.term}</dt>
+              <dd className={DATA}>{item.data}</dd>
             </div>
           ))}
         </dl>
       </SectionCard>
 
       {/* La cuenta de muestra no tiene contraseña y el servidor rechaza cambiarla. */}
-      {preview ? null : (
+      {isPreview ? null : (
         <SectionCard title="Cambiar contraseña">
           <ChangePasswordForm />
         </SectionCard>

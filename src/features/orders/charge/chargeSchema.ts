@@ -3,12 +3,12 @@ import { toCents } from '@/services/format'
 
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-const MONTO = /^\d{1,6}(?:[.,]\d{1,2})?$/u
-const FORMATO = 'Escribe un monto como 100 o 100.50'
+const AMOUNT = /^\d{1,6}(?:[.,]\d{1,2})?$/u
+const FORMAT = 'Escribe un monto como 100 o 100.50'
 
 export function amountCents(value: string): number | null {
-  const limpio = value.trim()
-  return MONTO.test(limpio) ? toCents(limpio.replace(',', '.')) : null
+  const clean = value.trim()
+  return AMOUNT.test(clean) ? toCents(clean.replace(',', '.')) : null
 }
 
 /** La propina en céntimos; vacía es cero y un texto que no es monto, `null`. */
@@ -30,19 +30,19 @@ export function chargeSchema(chargeCents: number) {
       amount_received: z.string().trim(),
       tip: z.string().trim(),
     })
-    .superRefine((valores, ctx) => {
-      const propina = tipCents(valores.tip)
-      if (propina === null) {
-        ctx.addIssue({ code: 'custom', path: ['tip'], message: FORMATO })
+    .superRefine((values, ctx) => {
+      const tip = tipCents(values.tip)
+      if (tip === null) {
+        ctx.addIssue({ code: 'custom', path: ['tip'], message: FORMAT })
         return
       }
-      if (valores.payment_method !== 'cash' || valores.amount_received === '') {
+      if (values.payment_method !== 'cash' || values.amount_received === '') {
         return
       }
-      const cents = amountCents(valores.amount_received)
+      const cents = amountCents(values.amount_received)
       if (cents === null) {
-        ctx.addIssue({ code: 'custom', path: ['amount_received'], message: FORMATO })
-      } else if (cents < chargeCents + propina) {
+        ctx.addIssue({ code: 'custom', path: ['amount_received'], message: FORMAT })
+      } else if (cents < chargeCents + tip) {
         ctx.addIssue({ code: 'custom', path: ['amount_received'], message: 'El monto no cubre lo que se cobra' })
       }
     })

@@ -28,7 +28,7 @@ const SKIP_LINK = (
   </a>
 )
 
-const SIN_PANTALLAS: readonly ShellScreen[] = []
+const WITHOUT_SCREENS: readonly ShellScreen[] = []
 
 interface AppShellProps {
   /** Las pantallas del registro: de ellas salen el menú y lo que se adelanta al acercarse a un enlace. */
@@ -44,9 +44,9 @@ interface AppShellProps {
  * una barra inferior, y arriba queda el nombre del restaurante; el contenido
  * reserva abajo el alto de esa barra para que nada quede tapado.
  */
-export function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
+export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
   const account = useSession((state) => state.account)
-  const preview = usePreview()
+  const isPreview = usePreview()
   const failed = useFailedQueries('restaurant')
   useAccountRefresh()
   useSessionRenewal()
@@ -74,7 +74,7 @@ export function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
 
   return (
     <ShellScreensContext value={screens}>
-      {preview ? <PreviewBanner account={account} /> : null}
+      {isPreview ? <PreviewBanner account={account} /> : null}
       <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
         {SKIP_LINK}
         <AccessibilityWidget />

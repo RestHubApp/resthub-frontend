@@ -43,12 +43,12 @@ export function AreaChart({ points, label, formatValue, formatTick, describe, ov
   const cursor = useChartCursor(points.length)
   const geometry = areaGeometry(points, width, HEIGHT, overlay.values)
   const { x, y, plotTop, plotBottom, maxIndex } = geometry
-  const maximo = points[maxIndex]
-  const activo = cursor.active === null ? undefined : points[cursor.active]
+  const max = points[maxIndex]
+  const active = cursor.active === null ? undefined : points[cursor.active]
 
   const onPointerMove = (event: PointerEvent<SVGSVGElement>) => {
-    const caja = event.currentTarget.getBoundingClientRect()
-    cursor.setActive(nearestIndex(event.clientX - caja.left, AREA_MARGIN.left, geometry.step, points.length))
+    const cashRegister = event.currentTarget.getBoundingClientRect()
+    cursor.setActive(nearestIndex(event.clientX - cashRegister.left, AREA_MARGIN.left, geometry.step, points.length))
   }
 
   return (
@@ -76,33 +76,33 @@ export function AreaChart({ points, label, formatValue, formatTick, describe, ov
           <path d={geometry.areaPath} fill="var(--chart-area)" />
           <path d={geometry.linePath} fill="none" stroke={SERIES} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
           <path d={geometry.overlayPath} fill="none" stroke={overlay.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-          {maximo === undefined || maximo.value <= 0 ? null : (
+          {max === undefined || max.value <= 0 ? null : (
             <g aria-hidden>
-              <circle cx={x(maxIndex)} cy={y(maximo.value)} r={4} fill={SERIES} stroke="var(--card)" strokeWidth={2} />
+              <circle cx={x(maxIndex)} cy={y(max.value)} r={4} fill={SERIES} stroke="var(--card)" strokeWidth={2} />
               <text
                 x={Math.min(Math.max(x(maxIndex), geometry.plotLeft + 48), geometry.plotRight - 48)}
-                y={y(maximo.value) - 10}
+                y={y(max.value) - 10}
                 textAnchor="middle"
                 className="fill-foreground text-[11px] font-medium tabular-nums"
               >
-                {`Máx. ${formatValue(maximo.value)}`}
+                {`Máx. ${formatValue(max.value)}`}
               </text>
             </g>
           )}
-          {activo === undefined || cursor.active === null ? null : (
+          {active === undefined || cursor.active === null ? null : (
             <g aria-hidden>
               <line x1={x(cursor.active)} x2={x(cursor.active)} y1={plotTop} y2={plotBottom} stroke="var(--muted-foreground)" strokeWidth={1} />
-              <circle cx={x(cursor.active)} cy={y(activo.value)} r={5} fill={SERIES} stroke="var(--card)" strokeWidth={2} />
+              <circle cx={x(cursor.active)} cy={y(active.value)} r={5} fill={SERIES} stroke="var(--card)" strokeWidth={2} />
             </g>
           )}
         </svg>
       ) : (
         <div style={{ height: HEIGHT }} />
       )}
-      {activo === undefined || cursor.active === null ? null : (
+      {active === undefined || cursor.active === null ? null : (
         <ChartTooltip
           x={x(cursor.active)}
-          y={y(activo.value)}
+          y={y(active.value)}
           containerWidth={width}
           {...describe(cursor.active)}
         />

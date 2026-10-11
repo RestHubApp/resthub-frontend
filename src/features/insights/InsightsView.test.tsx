@@ -1,82 +1,82 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { reportesDelPanel, resumenDeVentas } from '#jest/fixtures/panel'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { panelReports, salesSummary } from '#jest/fixtures/panel'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import { todayIn } from '@/services/format'
 import { addDays } from './dateRange'
 import { InsightsView } from './InsightsView'
 
-const RESUMEN = '/insights/summary'
+const SUMMARY = '/insights/summary'
 
-function abrir(en = '/panel', cambios: Record<string, unknown> = {}) {
-  const api = servidor()
-  for (const [ruta, datos] of Object.entries({ ...reportesDelPanel(), ...cambios })) {
-    api.on('get', ruta, datos)
+function open(en = '/panel', changes: Record<string, unknown> = {}) {
+  const api = server()
+  for (const [route, data] of Object.entries({ ...panelReports(), ...changes })) {
+    api.on('get', route, data)
   }
-  entrarComo()
-  return { api, ...montar(<InsightsView />, { path: '/panel', en }) }
+  signInAs()
+  return { api, ...mountScreen(<InsightsView />, { path: '/panel', en }) }
 }
 
-function hoy(): string {
+function today(): string {
   return todayIn('America/Lima')
 }
 
 describe('InsightsView: rango de fechas', () => {
   it('abre con los últimos 30 días del local y lo dice arriba', async () => {
-    const { api } = abrir()
+    const { api } = open()
     expect(await screen.findByText(/Del .* \(30 días\)\./u)).toBeInTheDocument()
-    expect(api.llamadas('get', RESUMEN)[0]?.params).toEqual({ date_from: addDays(hoy(), -29), date_to: hoy() })
+    expect(api.calls('get', SUMMARY)[0]?.params).toEqual({ date_from: addDays(today(), -29), date_to: today() })
     expect(screen.getByRole('button', { name: '30 días' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('elegir «7 días» guarda el rango en la dirección y pide ese período', async () => {
-    const { api, user, router } = abrir()
+    const { api, user, router } = open()
     await screen.findByText('Ventas')
 
     await user.click(screen.getByRole('button', { name: '7 días' }))
 
     expect(router.state.location.search).toBe('?rango=7d')
-    expect(api.llamadas('get', RESUMEN).at(-1)?.params).toEqual({ date_from: addDays(hoy(), -6), date_to: hoy() })
+    expect(api.calls('get', SUMMARY).at(-1)?.params).toEqual({ date_from: addDays(today(), -6), date_to: today() })
   })
 
   it('un rango personalizado se valida antes de aplicarse', async () => {
-    const { api, user, router } = abrir()
+    const { api, user, router } = open()
     await user.click(screen.getByRole('button', { name: 'Personalizado' }))
-    const desde = screen.getByLabelText('Desde')
-    const hasta = screen.getByLabelText('Hasta')
+    const from = screen.getByLabelText('Desde')
+    const until = screen.getByLabelText('Hasta')
 
-    await user.clear(desde)
-    await user.type(desde, '2026-09-10')
-    await user.clear(hasta)
-    await user.type(hasta, '2026-09-01')
+    await user.clear(from)
+    await user.type(from, '2026-09-10')
+    await user.clear(until)
+    await user.type(until, '2026-09-01')
     await user.click(screen.getByRole('button', { name: 'Aplicar' }))
     expect(screen.getByRole('alert')).toHaveTextContent('La fecha de inicio tiene que ser anterior a la de fin.')
 
-    await user.clear(hasta)
-    await user.type(hasta, '2026-09-15')
+    await user.clear(until)
+    await user.type(until, '2026-09-15')
     await user.click(screen.getByRole('button', { name: 'Aplicar' }))
 
     expect(router.state.location.search).toBe('?rango=personalizado&desde=2026-09-10&hasta=2026-09-15')
-    expect(api.llamadas('get', RESUMEN).at(-1)?.params).toEqual({ date_from: '2026-09-10', date_to: '2026-09-15' })
+    expect(api.calls('get', SUMMARY).at(-1)?.params).toEqual({ date_from: '2026-09-10', date_to: '2026-09-15' })
   })
 
   it('un enlace con un rango personalizado inválido vuelve a los 30 días', async () => {
-    const { api } = abrir('/panel?rango=personalizado&desde=2026-09-20&hasta=2026-09-01')
+    const { api } = open('/panel?rango=personalizado&desde=2026-09-20&hasta=2026-09-01')
     await screen.findByText('Ventas')
-    expect(api.llamadas('get', RESUMEN)[0]?.params).toEqual({ date_from: addDays(hoy(), -29), date_to: hoy() })
+    expect(api.calls('get', SUMMARY)[0]?.params).toEqual({ date_from: addDays(today(), -29), date_to: today() })
   })
 
   it('un enlace con «Este mes» empieza el día 1', async () => {
-    const { api } = abrir('/panel?rango=mes')
+    const { api } = open('/panel?rango=mes')
     await screen.findByText('Ventas')
-    expect(api.llamadas('get', RESUMEN)[0]?.params).toEqual({ date_from: `${hoy().slice(0, 8)}01`, date_to: hoy() })
+    expect(api.calls('get', SUMMARY)[0]?.params).toEqual({ date_from: `${today().slice(0, 8)}01`, date_to: today() })
   })
 })
 
 describe('InsightsView: indicadores', () => {
   it('cada KPI dice cuánto cambió, con el tono según si es bueno o malo', async () => {
-    abrir()
+    open()
     const kpis = await screen.findByRole('region', { name: 'Indicadores del período' })
     expect(within(kpis).getByText('S/ 1,234.50')).toBeInTheDocument()
     expect(within(kpis).getByText('+12.5 %').parentElement).toHaveClass('text-success')
@@ -87,9 +87,9 @@ describe('InsightsView: indicadores', () => {
   })
 
   it('sin período anterior lo dice en vez de inventar una variación', async () => {
-    const base = resumenDeVentas()
-    abrir('/panel', {
-      [RESUMEN]: resumenDeVentas({
+    const base = salesSummary()
+    open('/panel', {
+      [SUMMARY]: salesSummary({
         sales_change_percent: null,
         cancelled_amount: '0',
         previous: { ...base.previous, cancelled_orders: 0 },
@@ -101,7 +101,7 @@ describe('InsightsView: indicadores', () => {
   })
 
   it('si el resumen falla lo dice y el resto del panel sigue', async () => {
-    abrir('/panel', { [RESUMEN]: new RespuestaDeError(500, 'El resumen no responde') })
+    open('/panel', { [SUMMARY]: new ErrorResponse(500, 'El resumen no responde') })
     expect(await screen.findByText('El resumen no responde')).toBeInTheDocument()
     expect(await screen.findByText('Platos más vendidos')).toBeInTheDocument()
   })

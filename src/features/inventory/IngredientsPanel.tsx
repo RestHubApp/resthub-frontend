@@ -17,33 +17,33 @@ interface IngredientsPanelProps {
   readonly onAction: (action: StockAction) => void
 }
 
-const NUMERO = 'tabular-nums'
-const SIN_INSUMOS: readonly Ingredient[] = []
+const NUMBER = 'tabular-nums'
+const WITHOUT_INGREDIENTS: readonly Ingredient[] = []
 
-function columnas(
+function columns(
   canManage: boolean,
   onAction: (action: StockAction) => void,
 ): DataColumn<Ingredient>[] {
   const base: DataColumn<Ingredient>[] = [
-    { id: 'nombre', header: 'Insumo', cell: (insumo) => <span className="font-medium">{insumo.name}</span> },
+    { id: 'nombre', header: 'Insumo', cell: (ingredient) => <span className="font-medium">{ingredient.name}</span> },
     {
       id: 'stock',
       header: 'Stock',
-      className: NUMERO,
-      cell: (insumo) => (
-        <span className={insumo.is_negative ? 'font-semibold text-destructive' : 'font-semibold'}>
-          {formatQuantity(insumo.stock, insumo.unit)}
+      className: NUMBER,
+      cell: (ingredient) => (
+        <span className={ingredient.is_negative ? 'font-semibold text-destructive' : 'font-semibold'}>
+          {formatQuantity(ingredient.stock, ingredient.unit)}
         </span>
       ),
     },
-    { id: 'estado', header: 'Estado', cell: (insumo) => <IngredientStatus ingredient={insumo} /> },
-    { id: 'minimo', header: 'Mínimo', className: NUMERO, cell: (insumo) => formatQuantity(insumo.min_stock, insumo.unit) },
+    { id: 'estado', header: 'Estado', cell: (ingredient) => <IngredientStatus ingredient={ingredient} /> },
+    { id: 'minimo', header: 'Mínimo', className: NUMBER, cell: (ingredient) => formatQuantity(ingredient.min_stock, ingredient.unit) },
     {
       id: 'costo',
       header: 'Costo',
-      className: NUMERO,
-      cell: (insumo) =>
-        Number(insumo.unit_cost) > 0 ? formatUnitCost(insumo.unit_cost, insumo.unit) : formatMoney(0),
+      className: NUMBER,
+      cell: (ingredient) =>
+        Number(ingredient.unit_cost) > 0 ? formatUnitCost(ingredient.unit_cost, ingredient.unit) : formatMoney(0),
     },
   ]
   if (!canManage) {
@@ -54,36 +54,36 @@ function columnas(
     {
       id: 'acciones',
       header: 'Acciones',
-      cell: (insumo) => <IngredientRowActions ingredient={insumo} onAction={onAction} />,
+      cell: (ingredient) => <IngredientRowActions ingredient={ingredient} onAction={onAction} />,
     },
   ]
 }
 
-function normalizar(texto: string): string {
-  return texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim()
+function normalize(text: string): string {
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim()
 }
 
 /** Los insumos con su stock, para buscar, revisar y registrar. */
 export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps) {
-  const insumos = useIngredients()
-  const [busqueda, setBusqueda] = useState('')
-  const [soloBajos, setSoloBajos] = useState(false)
-  const todos = insumos.data ?? SIN_INSUMOS
+  const ingredients = useIngredients()
+  const [search, setSearch] = useState('')
+  const [isOnlyLow, setIsOnlyLow] = useState(false)
+  const all = ingredients.data ?? WITHOUT_INGREDIENTS
 
-  const visibles = useMemo(() => {
-    const texto = normalizar(busqueda)
-    return todos.filter(
-      (insumo) =>
-        (!soloBajos || insumo.is_low || insumo.is_negative) &&
-        (texto === '' || normalizar(insumo.name).includes(texto)),
+  const visible = useMemo(() => {
+    const text = normalize(search)
+    return all.filter(
+      (ingredient) =>
+        (!isOnlyLow || ingredient.is_low || ingredient.is_negative) &&
+        (text === '' || normalize(ingredient.name).includes(text)),
     )
-  }, [todos, busqueda, soloBajos])
-  const cols = useMemo(() => columnas(canManage, onAction), [canManage, onAction])
+  }, [all, search, isOnlyLow])
+  const cols = useMemo(() => columns(canManage, onAction), [canManage, onAction])
 
-  if (insumos.isError) {
+  if (ingredients.isError) {
     return (
       <FormMessage tone="error">
-        {errorMessage(insumos.error, 'No se pudieron cargar los insumos.')}
+        {errorMessage(ingredients.error, 'No se pudieron cargar los insumos.')}
       </FormMessage>
     )
   }
@@ -91,19 +91,19 @@ export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps)
   return (
     <div className="flex flex-col gap-4">
       <IngredientFilters
-        search={busqueda}
-        onSearch={setBusqueda}
-        onlyLow={soloBajos}
-        onOnlyLow={setSoloBajos}
-        shown={visibles.length}
-        total={todos.length}
+        search={search}
+        onSearch={setSearch}
+        onlyLow={isOnlyLow}
+        onOnlyLow={setIsOnlyLow}
+        shown={visible.length}
+        total={all.length}
       />
       <DataTable
         columns={cols}
-        data={visibles}
-        isLoading={insumos.isPending}
-        emptyMessage={todos.length === 0 ? 'Todavía no hay insumos.' : 'Ningún insumo coincide con la búsqueda.'}
-        getRowId={(insumo) => String(insumo.id)}
+        data={visible}
+        isLoading={ingredients.isPending}
+        emptyMessage={all.length === 0 ? 'Todavía no hay insumos.' : 'Ningún insumo coincide con la búsqueda.'}
+        getRowId={(ingredient) => String(ingredient.id)}
         pageSize={30}
       />
     </div>

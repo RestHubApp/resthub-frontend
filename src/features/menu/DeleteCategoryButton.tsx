@@ -18,7 +18,7 @@ interface DeleteCategoryButtonProps {
  * lo explica.
  */
 export function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
-  const borrar = useMenuAction({
+  const remove = useMenuAction({
     send: () => deleteCategory(category.id),
     updateCache: (menu) => withoutCategory(menu, category.id),
     failure: `No se pudo eliminar la categoría ${category.name}.`,
@@ -33,9 +33,9 @@ export function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
           variant="destructive"
           className="h-11 px-3"
           aria-label={`Eliminar la categoría ${category.name}`}
-          disabled={borrar.isPending}
+          disabled={remove.isPending}
         >
-          <Icon name="eliminar" size={16} />
+          <Icon name="delete" size={16} />
           <span>Eliminar</span>
         </Button>
       }
@@ -43,7 +43,7 @@ export function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
       description="La categoría está vacía y se borra para siempre."
       confirmLabel="Eliminar"
       onConfirm={() => {
-        borrar.mutate()
+        remove.mutate()
       }}
     />
   )

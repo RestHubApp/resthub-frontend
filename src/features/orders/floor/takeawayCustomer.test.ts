@@ -15,7 +15,7 @@ import { EMPTY_TAKEAWAY, type TakeawayValues } from './takeawaySchema'
 
 jest.mock('@/api/customers', () => ({ saveCustomer: jest.fn() }))
 
-const guardar = jest.mocked(saveCustomer)
+const save = jest.mocked(saveCustomer)
 
 const delivery: TakeawayValues = {
   ...EMPTY_TAKEAWAY,
@@ -26,13 +26,13 @@ const delivery: TakeawayValues = {
   consent: true,
 }
 
-function conSenal(onLine: boolean) {
+function withSignal(onLine: boolean) {
   stubGlobal('navigator', { onLine })
 }
 
 beforeEach(() => {
-  guardar.mockReset()
-  conSenal(true)
+  save.mockReset()
+  withSignal(true)
 })
 
 afterEach(() => {
@@ -41,32 +41,32 @@ afterEach(() => {
 
 describe('withCustomer', () => {
   it('agrega a la libreta al cliente nuevo de un delivery, con un plazo corto', async () => {
-    guardar.mockResolvedValue({ id: 9 } as Customer)
+    save.mockResolvedValue({ id: 9 } as Customer)
     await expect(withCustomer(delivery)).resolves.toMatchObject({ customer_id: 9 })
-    expect(guardar).toHaveBeenCalledWith(expect.objectContaining({ phone: '987654321', consent: true }), undefined, {
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ phone: '987654321', consent: true }), undefined, {
       timeout: expect.any(Number) as unknown as number,
     })
   })
 
   it('sin el consentimiento del cliente no lo guarda y el pedido sigue', async () => {
     await expect(withCustomer({ ...delivery, consent: false })).resolves.toMatchObject({ customer_id: null })
-    expect(guardar).not.toHaveBeenCalled()
+    expect(save).not.toHaveBeenCalled()
   })
 
   it('sin señal ni lo intenta', async () => {
-    conSenal(false)
+    withSignal(false)
     await expect(withCustomer(delivery)).resolves.toBe(delivery)
-    expect(guardar).not.toHaveBeenCalled()
+    expect(save).not.toHaveBeenCalled()
   })
 
   it('si falla o vence el plazo, el formulario se entera y no pierde los datos', async () => {
-    guardar.mockRejectedValue(new Error('timeout of 4000ms exceeded'))
+    save.mockRejectedValue(new Error('timeout of 4000ms exceeded'))
     await expect(withCustomer(delivery)).rejects.toThrow('timeout of 4000ms exceeded')
   })
 
   it('si el teléfono ya está en la libreta, sigue sin el alta y el servidor lo reconoce', async () => {
     const config = { headers: new AxiosHeaders() }
-    guardar.mockRejectedValue(
+    save.mockRejectedValue(
       new AxiosError('conflicto', 'ERR_BAD_REQUEST', config, undefined, {
         status: 409,
         statusText: 'Conflict',
@@ -81,6 +81,6 @@ describe('withCustomer', () => {
   it('para llevar o con un cliente ya elegido no guarda nada', async () => {
     await withCustomer({ ...delivery, mode: 'takeaway' })
     await withCustomer({ ...delivery, customer_id: 3 })
-    expect(guardar).not.toHaveBeenCalled()
+    expect(save).not.toHaveBeenCalled()
   })
 })

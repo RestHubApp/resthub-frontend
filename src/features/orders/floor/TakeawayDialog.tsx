@@ -12,19 +12,19 @@ const TakeawayForm = lazyNamed(() => import('./TakeawayForm'), 'TakeawayForm')
  * datos del cliente es `TakeawayForm` y se carga al abrirlo.
  */
 export function TakeawayDialog() {
-  const [open, setOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   return (
     <>
       <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
-        setOpen(true)
+        setIsOpen(true)
       }}>
-        <Icon name="llevar" size={18} />
+        <Icon name="takeaway" size={18} />
         <span>Para llevar / Delivery</span>
       </Button>
-      {open ? (
+      {isOpen ? (
         <Suspense fallback={null}>
           <TakeawayForm onClose={() => {
-            setOpen(false)
+            setIsOpen(false)
           }} />
         </Suspense>
       ) : null}

@@ -1,6 +1,6 @@
 import { QueryClient, type QueryExecuteOptions, type QueryKey } from '@tanstack/react-query'
 
-import { debeReintentar } from './api'
+import { shouldRetry } from './api'
 
 /**
  * El caché de datos de la aplicación.
@@ -12,7 +12,7 @@ import { debeReintentar } from './api'
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: debeReintentar,
+      retry: shouldRetry,
       staleTime: 30_000,
       refetchOnWindowFocus: false,
     },
@@ -20,7 +20,7 @@ export const queryClient = new QueryClient({
 })
 
 // Una precarga que falla no avisa: la pantalla vuelve a pedir y muestra su error.
-function ignorar(): undefined {
+function ignore(): undefined {
   return undefined
 }
 
@@ -33,7 +33,7 @@ function ignorar(): undefined {
 export function prefetch<TData, TKey extends QueryKey>(
   options: QueryExecuteOptions<TData, Error, TData, TData, TKey>,
 ): void {
-  queryClient.query(options).catch(ignorar)
+  queryClient.query(options).catch(ignore)
 }
 
 /**
@@ -46,9 +46,9 @@ export const PLATFORM_QUERY_ROOT = 'platform'
 // El caché de mutaciones guarda lo que se envió: en un alta, la contraseña del
 // encargado. Se vacía junto con las consultas de la misma sesión.
 function removeMutations(predicate: (mutationKey: readonly unknown[] | undefined) => boolean): void {
-  const mutaciones = queryClient.getMutationCache()
-  for (const mutacion of mutaciones.findAll({ predicate: (m) => predicate(m.options.mutationKey) })) {
-    mutaciones.remove(mutacion)
+  const mutations = queryClient.getMutationCache()
+  for (const mutation of mutations.findAll({ predicate: (m) => predicate(m.options.mutationKey) })) {
+    mutations.remove(mutation)
   }
 }
 

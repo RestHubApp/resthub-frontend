@@ -8,7 +8,7 @@ interface TypeFilterProps {
   readonly onChange: (value: TypeFilterValue) => void
 }
 
-const OPCIONES: readonly { value: TypeFilterValue; label: string }[] = [
+const OPTIONS: readonly { value: TypeFilterValue; label: string }[] = [
   { value: 'all', label: 'Todos' },
   { value: 'dine_in', label: 'En mesa' },
   { value: 'takeaway', label: 'Para llevar' },
@@ -22,21 +22,21 @@ const CHIP =
 export function TypeFilter({ value, counts, onChange }: TypeFilterProps) {
   return (
     <div role="group" aria-label="Filtrar por tipo" className="flex flex-wrap gap-2">
-      {OPCIONES.map((opcion) => (
+      {OPTIONS.map((option) => (
         <button
-          key={opcion.value}
+          key={option.value}
           type="button"
-          aria-pressed={value === opcion.value}
+          aria-pressed={value === option.value}
           className={
-            value === opcion.value
+            value === option.value
               ? `${CHIP} bg-primary text-primary-foreground`
               : `${CHIP} bg-card ring-1 ring-foreground/15 hover:bg-muted`
           }
           onClick={() => {
-            onChange(opcion.value)
+            onChange(option.value)
           }}
         >
-          {opcion.label} <span className="tabular-nums">({counts[opcion.value]})</span>
+          {option.label} <span className="tabular-nums">({counts[option.value]})</span>
         </button>
       ))}
     </div>

@@ -57,15 +57,15 @@ export function isValidTimeZone(zone: string): boolean {
   if (zone === '' || zone.length > MAX_TIME_ZONE) {
     return false
   }
-  let canonica: string
+  let canonical: string
   try {
-    canonica = new Intl.DateTimeFormat('es-PE', { timeZone: zone }).resolvedOptions().timeZone
+    canonical = new Intl.DateTimeFormat('es-PE', { timeZone: zone }).resolvedOptions().timeZone
   } catch {
     return false
   }
-  const soloMayusculas = canonica !== zone && canonica.toLowerCase() === zone.toLowerCase()
-  const desfase = /^[+-]/u.test(canonica)
-  return !soloMayusculas && !desfase
+  const isOnlyUppercase = canonical !== zone && canonical.toLowerCase() === zone.toLowerCase()
+  const hasOffset = /^[+-]/u.test(canonical)
+  return !isOnlyUppercase && !hasOffset
 }
 
 /**
@@ -73,7 +73,7 @@ export function isValidTimeZone(zone: string): boolean {
  * de las comunes: sin ella, la lista mostraría otra y guardar la cambiaría.
  */
 export function timeZoneOptions(current?: string): readonly TimeZoneOption[] {
-  if (current === undefined || current === '' || COMMON_TIME_ZONES.some((zona) => zona.value === current)) {
+  if (current === undefined || current === '' || COMMON_TIME_ZONES.some((zone) => zone.value === current)) {
     return COMMON_TIME_ZONES
   }
   return [{ value: current, label: current }, ...COMMON_TIME_ZONES]

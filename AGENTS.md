@@ -14,7 +14,7 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm build
 Las pruebas son de Jest (no de Vitest): importan de `@jest/globals` y las de
 componentes usan React Testing Library. Los detalles están en el `README.md`.
 
-Commits en Conventional Commits en español (`feat(pedidos): …`). El hook
+Commits en Conventional Commits en español (`feat(orders): …`). El hook
 `.husky/commit-msg` comprueba la forma y rechaza cualquier línea
 `Co-authored-by` y las marcas de IA («Generated with…», 🤖); el español es
 convención del equipo, no lo comprueba el hook. El título y la descripción de
@@ -40,6 +40,29 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip` y
   una ruta perezosa, `asDefault(...)` del mismo archivo.
 - **Sin `index.ts(x)`** (`check-file/no-index`): cada archivo lleva un nombre que
   dice qué es (`router/routes.tsx`, no `router/index.tsx`).
+- **Identificadores en inglés** (`@cspell/spellchecker` con `checkIdentifiers`):
+  variables, funciones, componentes, hooks, tipos, props, claves de objetos
+  internos, claves de `icons`, y nombres de archivos y carpetas van en inglés,
+  con el término del dominio que usa el backend (`order`, `table`, `waiter`,
+  `owner`, `cashRegister`, `salesReceipt`, `taxInvoice`…). Siguen en español los
+  textos de interfaz (JSX, `aria-label`, avisos), los mensajes de error, los
+  comentarios, las descripciones de `describe`/`it`/`test`, los datos de prueba
+  dentro de cadenas y los commits. Los campos del API (`src/api/schema.d.ts` y
+  los cuerpos de petición y respuesta) no se tocan, ni los valores del contrato
+  (`'boleta'`, `'factura'`). Lo que se escribe igual a propósito (siglas
+  legales `ruc`, `igv`, `sunat`, `dni`, `nubefact`, nombres de platos, marcas y
+  nombres propios de los datos de prueba) se agrega a `cspell-terms.txt`; no se
+  silencia con comentarios. Un valor que es un dato en español (el parámetro
+  `?rango=mes` de la URL, el id de una sección) se escribe entre comillas como
+  clave de objeto: `{ 'rango': 'mes' }`.
+- **Convenciones de nombres** (`@typescript-eslint/naming-convention`):
+  camelCase para variables, funciones y parámetros; PascalCase para tipos,
+  interfaces y componentes; UPPER_CASE para las constantes de módulo; un hook
+  empieza con `use` (`useCan`). Un booleano es una pregunta y lleva prefijo
+  `is`, `has`, `can`, `should`, `was` o `will` (`isOpen`, `hasItems`,
+  `canCharge`, `shouldRetry`). Las claves de objetos y de tipos no se revisan
+  (snake_case del API, atributos del DOM, librerías) y lo desestructurado
+  conserva el nombre de quien lo declara.
 - **Pantallas y rutas, una sola fuente**: `src/router/screens.ts` registra cada
   pantalla del restaurante con su ruta, su permiso, su carga perezosa, su
   precarga y su entrada de menú (`nav`). De ahí salen las rutas, las guardas de

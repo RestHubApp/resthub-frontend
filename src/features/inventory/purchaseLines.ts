@@ -10,7 +10,7 @@ export interface LineDraft {
 }
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-const NUMERO = /^\d+(?:[.,]\d+)?$/u
+const NUMBER = /^\d+(?:[.,]\d+)?$/u
 
 export function emptyLine(): LineDraft {
   return { key: crypto.randomUUID(), ingredientId: '', quantity: '', unitCost: '' }
@@ -26,27 +26,27 @@ export function linesFromSuggestions(suggestions: readonly PurchaseSuggestion[])
   }))
 }
 
-function numero(valor: string): string | null {
-  const limpio = valor.trim().replace(',', '.')
-  return NUMERO.test(limpio) ? limpio : null
+function number(value: string): string | null {
+  const clean = value.trim().replace(',', '.')
+  return NUMBER.test(clean) ? clean : null
 }
 
 /** Las líneas completas y válidas, o `null` si alguna está a medias. */
 export function linesForApi(
   lines: readonly LineDraft[],
 ): { ingredient_id: number; quantity: string; unit_cost: string }[] | null {
-  const completas = lines.filter((line) => line.ingredientId !== '')
-  if (completas.length === 0) {
+  const complete = lines.filter((line) => line.ingredientId !== '')
+  if (complete.length === 0) {
     return null
   }
-  const salida = []
-  for (const line of completas) {
-    const cantidad = numero(line.quantity)
-    const costo = numero(line.unitCost === '' ? '0' : line.unitCost)
-    if (cantidad === null || costo === null || Number(cantidad) <= 0) {
+  const output = []
+  for (const line of complete) {
+    const quantity = number(line.quantity)
+    const cost = number(line.unitCost === '' ? '0' : line.unitCost)
+    if (quantity === null || cost === null || Number(quantity) <= 0) {
       return null
     }
-    salida.push({ ingredient_id: Number(line.ingredientId), quantity: cantidad, unit_cost: costo })
+    output.push({ ingredient_id: Number(line.ingredientId), quantity: quantity, unit_cost: cost })
   }
-  return salida
+  return output
 }

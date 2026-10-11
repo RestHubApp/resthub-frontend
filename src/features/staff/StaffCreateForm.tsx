@@ -36,23 +36,23 @@ export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
     defaultValues: emptyCreateStaff(defaultRoleId(roles)),
   })
 
-  const alta = useMutation({
-    mutationFn: (valores: CreateStaffValues) => createStaff(createPayload(valores)),
-    onSuccess: (cuenta) => {
-      saveStaffMember(queryClient, cuenta)
+  const registration = useMutation({
+    mutationFn: (values: CreateStaffValues) => createStaff(createPayload(values)),
+    onSuccess: (account) => {
+      saveStaffMember(queryClient, account)
       onDone()
     },
   })
 
-  const errores = formState.errors
+  const errors = formState.errors
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          alta.mutate(valores)
+        handleSubmit((values) => {
+          registration.mutate(values)
         }),
       )}
     >
@@ -63,9 +63,9 @@ export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
           role_id: register('role_id'),
         }}
         errors={{
-          full_name: errores.full_name?.message,
-          email: errores.email?.message,
-          role_id: errores.role_id?.message,
+          full_name: errors.full_name?.message,
+          email: errors.email?.message,
+          role_id: errors.role_id?.message,
         }}
         roles={roles}
       />
@@ -76,12 +76,12 @@ export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
         autoComplete="new-password"
         hint="Díctasela a la persona y pídele que la cambie en Mi perfil."
         field={register('password')}
-        error={errores.password?.message}
+        error={errors.password?.message}
       />
 
-      {alta.isError ? (
+      {registration.isError ? (
         <FormMessage tone="error">
-          {errorMessage(alta.error, 'No se pudo crear la cuenta.')}
+          {errorMessage(registration.error, 'No se pudo crear la cuenta.')}
         </FormMessage>
       ) : null}
 
@@ -89,9 +89,9 @@ export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
         <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
           Cancelar
         </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={alta.isPending}>
-          <Icon name="agregar" size={16} />
-          <span>{alta.isPending ? 'Creando…' : 'Crear cuenta'}</span>
+        <Button type="submit" size="lg" className="h-10 px-4" disabled={registration.isPending}>
+          <Icon name="add" size={16} />
+          <span>{registration.isPending ? 'Creando…' : 'Crear cuenta'}</span>
         </Button>
       </DialogFormActions>
     </form>

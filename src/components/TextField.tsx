@@ -10,12 +10,12 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 
 // El icono que corresponde por el tipo de dato, cuando el campo no pide otro.
-const ICONO_POR_TIPO: Readonly<Partial<Record<string, IconName>>> = {
-  email: 'correo',
-  tel: 'telefono',
-  date: 'fecha',
-  time: 'horario',
-  number: 'numero',
+const ICON_BY_TYPE: Readonly<Partial<Record<string, IconName>>> = {
+  email: 'email',
+  tel: 'phone',
+  date: 'date',
+  time: 'schedule',
+  number: 'number',
 }
 
 interface TextFieldProps {
@@ -42,7 +42,7 @@ interface TextFieldProps {
    * solo acepta digitos, un nombre que no acepta numeros. La regla del esquema
    * sigue validando, porque un valor pegado o autocompletado tambien pasa.
    */
-  readonly sanitize?: (valor: string) => string
+  readonly sanitize?: (value: string) => string
 }
 
 /**
@@ -64,12 +64,12 @@ export function TextField({
   ...inputProps
 }: TextFieldProps) {
   const ids = fieldIds(id, hint, error)
-  const { onChange, ...registro } = field
+  const { onChange, ...record } = field
 
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <FieldIcon icon={icon ?? ICONO_POR_TIPO[type]}>
+      <FieldIcon icon={icon ?? ICON_BY_TYPE[type]}>
         <Input
           id={id}
           type={type}
@@ -77,12 +77,12 @@ export function TextField({
           aria-invalid={error !== undefined}
           aria-describedby={ids.describedBy}
           {...inputProps}
-          {...registro}
-          onChange={(evento) => {
+          {...record}
+          onChange={(event) => {
             if (sanitize !== undefined) {
-              evento.target.value = sanitize(evento.target.value)
+              event.target.value = sanitize(event.target.value)
             }
-            void onChange(evento)
+            void onChange(event)
           }}
         />
       </FieldIcon>

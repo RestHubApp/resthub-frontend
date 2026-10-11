@@ -1,109 +1,109 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { entrarAPlataforma, fichaDeRestaurante, montarPlataforma, resumenDeRestaurante } from '#jest/fixtures/plataforma'
-import { RespuestaDeError, servidor } from '#jest/harness'
+import { signInToPlatform, restaurantCard, mountPlatform, restaurantSummary } from '#jest/fixtures/platform'
+import { ErrorResponse, server } from '#jest/harness'
 
 // Contraseña de prueba, no una credencial real.
-const CLAVE_DE_PRUEBA = 'clave-segura-1'
+const TEST_SECRET = 'clave-segura-1'
 
 const CAFE_NANDU = 'Café Ñandú'
 const SLUG_CAFE_NANDU = 'cafe-nandu'
-const PLATAFORMA_RESTAURANTES_NUEVO = '/plataforma/restaurantes/nuevo'
-const CREAR_RESTAURANTE = 'Crear restaurante'
+const PLATFORM_NEW_RESTAURANTS = '/plataforma/restaurantes/nuevo'
+const CREATE_RESTAURANT = 'Crear restaurante'
 
-const LISTA = '/platform/restaurants'
-const BUSCAR = 'Buscar por nombre o identificador'
+const LIST = '/platform/restaurants'
+const SEARCH = 'Buscar por nombre o identificador'
 
-function abrirLista(respuesta: unknown = { items: [resumenDeRestaurante()], total: 1 }) {
-  const api = servidor().on('get', LISTA, respuesta)
-  entrarAPlataforma()
-  return { api, ...montarPlataforma('/plataforma') }
+function openList(response: unknown = { items: [restaurantSummary()], total: 1 }) {
+  const api = server().on('get', LIST, response)
+  signInToPlatform()
+  return { api, ...mountPlatform('/plataforma') }
 }
 
 describe('RestaurantsView', () => {
   it('lista los restaurantes con su identificador, personal y estado', async () => {
-    abrirLista()
+    openList()
 
-    const fila = await screen.findByRole('row', { name: /La Esquina de Lucho/u })
-    expect(within(fila).getByText('la-esquina-de-lucho')).toBeInTheDocument()
-    expect(within(fila).getByText('3 de 4 activas')).toBeInTheDocument()
-    expect(within(fila).getByRole('link', { name: 'La Esquina de Lucho' })).toHaveAttribute('href', '/plataforma/restaurantes/4')
+    const row = await screen.findByRole('row', { name: /La Esquina de Lucho/u })
+    expect(within(row).getByText('la-esquina-de-lucho')).toBeInTheDocument()
+    expect(within(row).getByText('3 de 4 activas')).toBeInTheDocument()
+    expect(within(row).getByRole('link', { name: 'La Esquina de Lucho' })).toHaveAttribute('href', '/plataforma/restaurantes/4')
     expect(screen.getByText('1 restaurante')).toBeInTheDocument()
   })
 
   it('busca por nombre en el servidor y desde la primera página', async () => {
-    const { api, user } = abrirLista()
+    const { api, user } = openList()
     await screen.findByRole('row', { name: /La Esquina/u })
-    api.on('get', LISTA, { items: [], total: 0 })
+    api.on('get', LIST, { items: [], total: 0 })
 
-    await user.type(screen.getByRole('searchbox', { name: BUSCAR }), 'pollos')
+    await user.type(screen.getByRole('searchbox', { name: SEARCH }), 'pollos')
 
     expect(await screen.findByText('Ningún restaurante coincide con la búsqueda.')).toBeInTheDocument()
-    expect(api.llamadas('get', LISTA).at(-1)?.params).toEqual({ limit: 25, offset: 0, search: 'pollos' })
+    expect(api.calls('get', LIST).at(-1)?.params).toEqual({ limit: 25, offset: 0, search: 'pollos' })
   })
 
   it('con más de una página ofrece pasar a la siguiente', async () => {
-    const { api, user } = abrirLista({ items: [resumenDeRestaurante()], total: 30 })
+    const { api, user } = openList({ items: [restaurantSummary()], total: 30 })
     await screen.findByText('30 restaurantes')
 
     await user.click(screen.getByRole('button', { name: /siguiente/iu }))
 
     await waitFor(() => {
-      expect(api.llamadas('get', LISTA).at(-1)?.params).toEqual({ limit: 25, offset: 25 })
+      expect(api.calls('get', LIST).at(-1)?.params).toEqual({ limit: 25, offset: 25 })
     })
   })
 
   it('si la lista falla, deja reintentar', async () => {
-    const { api, user } = abrirLista(new RespuestaDeError(500, 'Servidor caído'))
+    const { api, user } = openList(new ErrorResponse(500, 'Servidor caído'))
 
     expect(await screen.findByText('Servidor caído')).toBeInTheDocument()
-    api.on('get', LISTA, { items: [resumenDeRestaurante()], total: 1 })
+    api.on('get', LIST, { items: [restaurantSummary()], total: 1 })
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
 
     expect(await screen.findByRole('row', { name: /La Esquina de Lucho/u })).toBeInTheDocument()
   })
 
   it('sin restaurantes lo dice', async () => {
-    abrirLista({ items: [], total: 0 })
+    openList({ items: [], total: 0 })
 
     expect(await screen.findByText('Todavía no hay restaurantes.')).toBeInTheDocument()
   })
 })
 
 describe('NewRestaurantView', () => {
-  async function llenarAlta(user: ReturnType<typeof montarPlataforma>['user']) {
+  async function fillRegistration(user: ReturnType<typeof mountPlatform>['user']) {
     await user.type(await screen.findByLabelText('Nombre'), CAFE_NANDU)
     await user.type(screen.getByLabelText('Nombre completo'), 'Rosa Díaz')
     await user.type(screen.getByLabelText('Correo'), 'rosa@nandu.pe')
-    await user.type(screen.getByLabelText('Contraseña inicial'), CLAVE_DE_PRUEBA)
+    await user.type(screen.getByLabelText('Contraseña inicial'), TEST_SECRET)
   }
 
   it('sugiere el identificador desde el nombre y crea el local con su encargado', async () => {
-    const api = servidor().on('get', LISTA, { items: [], total: 0 })
-    api.on('post', LISTA, fichaDeRestaurante({ id: 12, name: CAFE_NANDU, slug: SLUG_CAFE_NANDU }))
-    api.on('get', `${LISTA}/12`, fichaDeRestaurante({ id: 12, name: CAFE_NANDU, slug: SLUG_CAFE_NANDU }))
-    entrarAPlataforma()
-    const { user, router } = montarPlataforma(PLATAFORMA_RESTAURANTES_NUEVO)
+    const api = server().on('get', LIST, { items: [], total: 0 })
+    api.on('post', LIST, restaurantCard({ id: 12, name: CAFE_NANDU, slug: SLUG_CAFE_NANDU }))
+    api.on('get', `${LIST}/12`, restaurantCard({ id: 12, name: CAFE_NANDU, slug: SLUG_CAFE_NANDU }))
+    signInToPlatform()
+    const { user, router } = mountPlatform(PLATFORM_NEW_RESTAURANTS)
 
-    await llenarAlta(user)
+    await fillRegistration(user)
     expect(screen.getByLabelText('Identificador')).toHaveValue(SLUG_CAFE_NANDU)
-    await user.click(screen.getByRole('button', { name: CREAR_RESTAURANTE }))
+    await user.click(screen.getByRole('button', { name: CREATE_RESTAURANT }))
 
     expect(await screen.findByText('Restaurante creado. Su encargado ya puede entrar con su correo.')).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/plataforma/restaurantes/12')
-    expect(api.llamadas('post', LISTA)[0]?.body).toEqual({
+    expect(api.calls('post', LIST)[0]?.body).toEqual({
       name: CAFE_NANDU,
       slug: SLUG_CAFE_NANDU,
       timezone: 'America/Lima',
-      owner: { full_name: 'Rosa Díaz', email: 'rosa@nandu.pe', password: CLAVE_DE_PRUEBA },
+      owner: { full_name: 'Rosa Díaz', email: 'rosa@nandu.pe', password: TEST_SECRET },
     })
   })
 
   it('un identificador editado a mano ya no sigue al nombre', async () => {
-    servidor()
-    entrarAPlataforma()
-    const { user } = montarPlataforma(PLATAFORMA_RESTAURANTES_NUEVO)
+    server()
+    signInToPlatform()
+    const { user } = mountPlatform(PLATFORM_NEW_RESTAURANTS)
 
     await user.type(await screen.findByLabelText('Nombre'), 'Pollos')
     await user.clear(screen.getByLabelText('Identificador'))
@@ -114,27 +114,27 @@ describe('NewRestaurantView', () => {
   })
 
   it('si el identificador ya existe, muestra el motivo y no sale del alta', async () => {
-    const api = servidor().on('post', LISTA, new RespuestaDeError(409, 'Ya hay un restaurante con ese identificador.'))
-    entrarAPlataforma()
-    const { user, router } = montarPlataforma(PLATAFORMA_RESTAURANTES_NUEVO)
+    const api = server().on('post', LIST, new ErrorResponse(409, 'Ya hay un restaurante con ese identificador.'))
+    signInToPlatform()
+    const { user, router } = mountPlatform(PLATFORM_NEW_RESTAURANTS)
 
-    await llenarAlta(user)
-    await user.click(screen.getByRole('button', { name: CREAR_RESTAURANTE }))
+    await fillRegistration(user)
+    await user.click(screen.getByRole('button', { name: CREATE_RESTAURANT }))
 
     expect(await screen.findByText('Ya hay un restaurante con ese identificador.')).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe(PLATAFORMA_RESTAURANTES_NUEVO)
-    expect(api.llamadas('post', LISTA)).toHaveLength(1)
+    expect(router.state.location.pathname).toBe(PLATFORM_NEW_RESTAURANTS)
+    expect(api.calls('post', LIST)).toHaveLength(1)
   })
 
   it('valida los datos antes de enviar y cancelar vuelve a la lista', async () => {
-    const api = servidor().on('get', LISTA, { items: [], total: 0 })
-    entrarAPlataforma()
-    const { user, router } = montarPlataforma(PLATAFORMA_RESTAURANTES_NUEVO)
+    const api = server().on('get', LIST, { items: [], total: 0 })
+    signInToPlatform()
+    const { user, router } = mountPlatform(PLATFORM_NEW_RESTAURANTS)
 
-    await user.click(await screen.findByRole('button', { name: CREAR_RESTAURANTE }))
+    await user.click(await screen.findByRole('button', { name: CREATE_RESTAURANT }))
     expect(await screen.findByText('Escribe el nombre del restaurante')).toBeInTheDocument()
     expect(screen.getByText('Escribe el identificador')).toBeInTheDocument()
-    expect(api.llamadas('post', LISTA)).toHaveLength(0)
+    expect(api.calls('post', LIST)).toHaveLength(0)
 
     await user.click(screen.getByRole('button', { name: 'Cancelar' }))
     expect(router.state.location.pathname).toBe('/plataforma')

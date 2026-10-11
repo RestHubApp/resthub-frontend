@@ -9,9 +9,9 @@ import { TakeOrder } from './taking/TakeOrder'
 /** Agregar platos a un pedido que ya existe. */
 export function AddItemsView() {
   const orderId = Number(useParams()['orderId'])
-  const pedido = useQuery(orderQuery(orderId))
-  const order = pedido.data
-  const cerrado = order !== undefined && !isActive(order.status)
+  const orderResult = useQuery(orderQuery(orderId))
+  const order = orderResult.data
+  const isClosed = order !== undefined && !isActive(order.status)
 
   return (
     <TakeOrder
@@ -19,7 +19,7 @@ export function AddItemsView() {
       title={order === undefined ? 'Agregar platos' : `Pedido #${String(order.number)} · ${orderPlace(order)}`}
       description="Agrega platos. Si el pedido ya estaba listo o servido, vuelve a cocina."
       notice={
-        cerrado ? (
+        isClosed ? (
           <FormMessage tone="error">Este pedido ya está {order.status_label.toLowerCase()}: no admite más platos.</FormMessage>
         ) : undefined
       }

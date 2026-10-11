@@ -4,6 +4,6 @@ title = "RestHub"
 # contraseña a propósito incorrecta para generar un log de acceso fallido.
 # No es una clave de ningún servicio.
 [allowlist]
-description = "Contraseña falsa de pruebas/accesibilidad/datos.mjs"
+description = "Contraseña falsa de checks/accessibility/data.mjs"
 regexTarget = "line"
 regexes = ['''clave-equivocada-a11y''']

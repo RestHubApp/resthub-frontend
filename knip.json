@@ -6,8 +6,8 @@
     "jest/**/*.{ts,cjs}",
     "e2e/**/*.ts",
     "src/api/contract/**/*.ts",
-    "pruebas/**/*.mjs",
-    "e2e/visual/captura.css"
+    "checks/**/*.mjs",
+    "e2e/visual/capture.css"
   ],
   "project": [
     "src/**/*.{ts,tsx}",
@@ -20,7 +20,13 @@
   ],
   "ignoreDependencies": [
     "@stryker-mutator/api",
-    "@fontsource-variable/geist"
+    "@fontsource-variable/geist",
+    "@cspell/dict-css",
+    "@cspell/dict-en_us",
+    "@cspell/dict-html",
+    "@cspell/dict-node",
+    "@cspell/dict-software-terms",
+    "@cspell/dict-typescript"
   ],
   "ignoreUnresolved": [
     "\\./jest/nodeEnvironment\\.cjs"

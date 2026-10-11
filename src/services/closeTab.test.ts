@@ -15,14 +15,14 @@ afterEach(() => {
 describe('closeTabOrGo', () => {
   it('intenta cerrar la pestaña y, si sigue abierta, recarga la aplicación en la ruta', () => {
     jest.useFakeTimers()
-    const ventana = { close: jest.fn(), setTimeout, location: { replace: jest.fn() } }
-    stubGlobal('window', ventana)
+    const window = { close: jest.fn(), setTimeout, location: { replace: jest.fn() } }
+    stubGlobal('window', window)
 
     closeTabOrGo('/plataforma')
 
-    expect(ventana.close).toHaveBeenCalledTimes(1)
-    expect(ventana.location.replace).not.toHaveBeenCalled()
+    expect(window.close).toHaveBeenCalledTimes(1)
+    expect(window.location.replace).not.toHaveBeenCalled()
     jest.advanceTimersByTime(200)
-    expect(ventana.location.replace).toHaveBeenCalledWith('/plataforma')
+    expect(window.location.replace).toHaveBeenCalledWith('/plataforma')
   })
 })

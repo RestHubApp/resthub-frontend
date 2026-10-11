@@ -28,11 +28,11 @@ export function CategoryForm({ category, onDone }: CategoryFormProps) {
     defaultValues: { name: category?.name ?? '' },
   })
 
-  const guardar = useMutation({
-    mutationFn: (valores: CategoryValues) =>
-      category === undefined ? createCategory(valores) : updateCategory(category.id, valores),
-    onSuccess: (categoria) => {
-      queryClient.setQueryData(MENU_KEY, (menu) => menu && withCategory(menu, categoria))
+  const save = useMutation({
+    mutationFn: (values: CategoryValues) =>
+      category === undefined ? createCategory(values) : updateCategory(category.id, values),
+    onSuccess: (createdCategory) => {
+      queryClient.setQueryData(MENU_KEY, (menu) => menu && withCategory(menu, createdCategory))
       void queryClient.invalidateQueries({ queryKey: menuQueryKey })
       onDone()
     },
@@ -43,8 +43,8 @@ export function CategoryForm({ category, onDone }: CategoryFormProps) {
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          guardar.mutate(valores)
+        handleSubmit((values) => {
+          save.mutate(values)
         }),
       )}
     >
@@ -57,9 +57,9 @@ export function CategoryForm({ category, onDone }: CategoryFormProps) {
         error={formState.errors.name?.message}
       />
 
-      {guardar.isError ? (
+      {save.isError ? (
         <FormMessage tone="error">
-          {errorMessage(guardar.error, 'No se pudo guardar la categoría.')}
+          {errorMessage(save.error, 'No se pudo guardar la categoría.')}
         </FormMessage>
       ) : null}
 
@@ -67,9 +67,9 @@ export function CategoryForm({ category, onDone }: CategoryFormProps) {
         <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onDone}>
           Cancelar
         </Button>
-        <Button type="submit" size="lg" className="h-11 px-4" disabled={guardar.isPending}>
-          <Icon name={category === undefined ? 'agregar' : 'confirmar'} size={16} />
-          <span>{guardar.isPending ? 'Guardando…' : 'Guardar'}</span>
+        <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
+          <Icon name={category === undefined ? 'add' : 'confirm'} size={16} />
+          <span>{save.isPending ? 'Guardando…' : 'Guardar'}</span>
         </Button>
       </DialogFormActions>
     </form>

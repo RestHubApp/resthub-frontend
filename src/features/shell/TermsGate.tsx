@@ -11,7 +11,7 @@ import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 
 // La versión cambió mientras se leía: se relee la sesión y se pide la nueva.
-const VERSION_CAMBIADA = 409
+const VERSION_CHANGED = 409
 
 /**
  * Ley N.º 29733: antes de trabajar, cada cuenta acepta los términos de uso y
@@ -20,11 +20,11 @@ const VERSION_CAMBIADA = 409
 export function TermsGate({ account }: { readonly account: CurrentUserResponse }) {
   const refresh = useSession((state) => state.refresh)
   const signOut = useSession((state) => state.signOut)
-  const aceptar = useMutation({
+  const accept = useMutation({
     mutationFn: () => acceptTerms(account.terms_version),
     onSuccess: refresh,
     onError: async (error) => {
-      if (errorStatus(error) === VERSION_CAMBIADA) {
+      if (errorStatus(error) === VERSION_CHANGED) {
         refresh(await fetchCurrentUser())
       }
     },
@@ -46,8 +46,8 @@ export function TermsGate({ account }: { readonly account: CurrentUserResponse }
               {`Leer los términos de uso y la política de privacidad (versión ${account.terms_version})`}
             </Link>
           </p>
-          {aceptar.isError ? (
-            <FormMessage tone="error">{errorMessage(aceptar.error, 'No se pudo guardar. Vuelve a intentarlo.')}</FormMessage>
+          {accept.isError ? (
+            <FormMessage tone="error">{errorMessage(accept.error, 'No se pudo guardar. Vuelve a intentarlo.')}</FormMessage>
           ) : null}
         </CardContent>
         <CardFooter className="flex flex-wrap justify-end gap-2 px-6">
@@ -58,12 +58,12 @@ export function TermsGate({ account }: { readonly account: CurrentUserResponse }
             type="button"
             size="lg"
             className="h-11 px-4"
-            disabled={aceptar.isPending}
+            disabled={accept.isPending}
             onClick={() => {
-              aceptar.mutate()
+              accept.mutate()
             }}
           >
-            {aceptar.isPending ? 'Guardando…' : 'Acepto los términos'}
+            {accept.isPending ? 'Guardando…' : 'Acepto los términos'}
           </Button>
         </CardFooter>
       </Card>

@@ -25,9 +25,9 @@ import { useNow } from './useNow'
 const CancelOrderDialog = lazyNamed(() => import('./CancelOrderDialog'), 'CancelOrderDialog')
 const ChargeDialog = lazyNamed(() => import('./charge/ChargeDialog'), 'ChargeDialog')
 
-const COLUMNAS: readonly OrderStatus[] = ['open', 'in_kitchen', 'ready', 'served']
+const COLUMNS: readonly OrderStatus[] = ['open', 'in_kitchen', 'ready', 'served']
 
-function contar(orders: readonly OrderResponse[]): Record<TypeFilterValue, number> {
+function count(orders: readonly OrderResponse[]): Record<TypeFilterValue, number> {
   const de = (type: OrderResponse['type']) => orders.filter((order) => order.type === type).length
   return { all: orders.length, dine_in: de('dine_in'), takeaway: de('takeaway'), delivery: de('delivery') }
 }
@@ -42,17 +42,17 @@ function contar(orders: readonly OrderResponse[]): Record<TypeFilterValue, numbe
 export function BoardView() {
   const live = useLiveUpdates()
   const now = useNow()
-  const activos = useQuery(activeOrdersQuery)
-  const [tipo, setTipo] = useState<TypeFilterValue>('all')
-  const [cobrar, setCobrar] = useState<OrderResponse | null>(null)
-  const [cancelar, setCancelar] = useState<OrderResponse | null>(null)
-  const pedidos = useMemo(() => activos.data ?? [], [activos.data])
-  const ids = useMemo(() => pedidos.map((order) => order.id), [pedidos])
+  const active = useQuery(activeOrdersQuery)
+  const [type, setType] = useState<TypeFilterValue>('all')
+  const [charge, setCharge] = useState<OrderResponse | null>(null)
+  const [cancel, setCancel] = useState<OrderResponse | null>(null)
+  const orders = useMemo(() => active.data ?? [], [active.data])
+  const ids = useMemo(() => orders.map((order) => order.id), [orders])
   // El tablero ya escucha el canal de avisos: el tema `insights` refresca las
   // notas desde useLiveUpdates y no hace falta una segunda conexión.
-  const veAlergias = useCan(PERMISSION.insightsRead)
-  const notas = useOrderNoteFlags(ids, { enabled: veAlergias, live: false })
-  const visibles = tipo === 'all' ? pedidos : pedidos.filter((order) => order.type === tipo)
+  const canViewAllergies = useCan(PERMISSION.insightsRead)
+  const notes = useOrderNoteFlags(ids, { enabled: canViewAllergies, live: false })
+  const visible = type === 'all' ? orders : orders.filter((order) => order.type === type)
 
   return (
     <div className="flex flex-col gap-5">
@@ -64,39 +64,39 @@ export function BoardView() {
             <LiveIndicator status={live} />
             <Button asChild variant="outline" size="lg" className="h-11 px-4">
               <Link to={paths.board.history}>
-                <Icon name="historial" size={18} />
+                <Icon name="history" size={18} />
                 <span>Historial</span>
               </Link>
             </Button>
           </div>
         }
       />
-      <TypeFilter value={tipo} counts={contar(pedidos)} onChange={setTipo} />
-      {activos.isPending ? <BoardSkeleton titles={COLUMNAS.map((columna) => STATUS_LABELS[columna])} /> : null}
-      {activos.isError ? (
-        <QueryError error={activos.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void activos.refetch()} />
+      <TypeFilter value={type} counts={count(orders)} onChange={setType} />
+      {active.isPending ? <BoardSkeleton titles={COLUMNS.map((column) => STATUS_LABELS[column])} /> : null}
+      {active.isError ? (
+        <QueryError error={active.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void active.refetch()} />
       ) : null}
-      {activos.isSuccess ? (
+      {active.isSuccess ? (
         <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {COLUMNAS.map((columna) => (
+          {COLUMNS.map((column) => (
             <BoardColumn
-              key={columna}
-              title={STATUS_LABELS[columna]}
-              orders={visibles.filter((order) => order.status === columna)}
+              key={column}
+              title={STATUS_LABELS[column]}
+              orders={visible.filter((order) => order.status === column)}
               now={now}
-              flagFor={notas.flagFor}
-              onCharge={setCobrar}
-              onCancel={setCancelar}
+              flagFor={notes.flagFor}
+              onCharge={setCharge}
+              onCancel={setCancel}
             />
           ))}
         </div>
       ) : null}
       <Suspense fallback={null}>
-        {cobrar === null ? null : <ChargeDialog order={cobrar} onClose={() => {
-          setCobrar(null)
+        {charge === null ? null : <ChargeDialog order={charge} onClose={() => {
+          setCharge(null)
         }} />}
-        {cancelar === null ? null : <CancelOrderDialog order={cancelar} onClose={() => {
-          setCancelar(null)
+        {cancel === null ? null : <CancelOrderDialog order={cancel} onClose={() => {
+          setCancel(null)
         }} />}
       </Suspense>
     </div>

@@ -1,33 +1,33 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
-import { cuenta, entrarComo, montar, PERMISOS_MESERO, primero, RespuestaDeError, servidor } from '#jest/harness'
+import { buildAccount, signInAs, mountScreen, PERMISSIONS_WAITER, firstOf, ErrorResponse, server } from '#jest/harness'
 import { currentAuthToken } from '@/services/api'
 import { useSession } from '@/store/session'
 import { ProfileView } from './ProfileView'
 import { SessionExpiredNotice } from './SessionExpiredNotice'
 
 // Contraseñas de prueba, no credenciales reales.
-const CLAVE_ACTUAL = 'resthub123'
-const CLAVE_NUEVA = 'una-clave-larga'
+const CURRENT_SECRET = 'resthub123'
+const NEW_SECRET = 'una-clave-larga'
 const ACTUAL = 'Contraseña actual'
-const NUEVA = 'Nueva contraseña'
-const REPETIR = 'Repite la nueva contraseña'
-const CAMBIAR = { name: 'Cambiar contraseña' }
-const CAMBIO = '/auth/me/password'
-const ACCESO = '/auth/login'
-const TOKEN_NUEVO = 'token-nuevo'
-const AVISO = 'Tu contraseña cambió. Vuelve a iniciar sesión.'
+const NEW = 'Nueva contraseña'
+const REPEAT = 'Repite la nueva contraseña'
+const CHANGE = { name: 'Cambiar contraseña' }
+const CHANGE_PASSWORD_URL = '/auth/me/password'
+const ACCESS = '/auth/login'
+const NEW_TOKEN = 'token-nuevo'
+const NOTICE = 'Tu contraseña cambió. Vuelve a iniciar sesión.'
 
-function abrirPerfil(preview = false) {
-  const api = servidor()
-  entrarComo(PERMISOS_MESERO, { preview })
-  return { api, ...montar(<ProfileView />, { path: '/perfil', rutas: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
+function openProfile(preview = false) {
+  const api = server()
+  signInAs(PERMISSIONS_WAITER, { preview })
+  return { api, ...mountScreen(<ProfileView />, { path: '/perfil', routes: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
 }
 
 describe('ProfileView', () => {
   it('muestra los datos de la cuenta sin dejar editarlos', () => {
-    abrirPerfil()
+    openProfile()
 
     expect(screen.getByRole('heading', { name: 'Mi perfil', level: 1 })).toBeInTheDocument()
     expect(screen.getByText('Ana Torres')).toBeInTheDocument()
@@ -36,94 +36,94 @@ describe('ProfileView', () => {
     expect(screen.queryByRole('textbox', { name: 'Nombre' })).not.toBeInTheDocument()
   })
 
-  async function cambiarClave(user: ReturnType<typeof abrirPerfil>['user']) {
-    await user.type(screen.getByLabelText(ACTUAL), CLAVE_ACTUAL)
-    await user.type(screen.getByLabelText(NUEVA), CLAVE_NUEVA)
-    await user.type(screen.getByLabelText(REPETIR), CLAVE_NUEVA)
-    await user.click(screen.getByRole('button', CAMBIAR))
+  async function changePassword(user: ReturnType<typeof openProfile>['user']) {
+    await user.type(screen.getByLabelText(ACTUAL), CURRENT_SECRET)
+    await user.type(screen.getByLabelText(NEW), NEW_SECRET)
+    await user.type(screen.getByLabelText(REPEAT), NEW_SECRET)
+    await user.click(screen.getByRole('button', CHANGE))
   }
 
   it('cambia la contraseña y sigue con el token nuevo, sin un segundo acceso', async () => {
-    const { api, user } = abrirPerfil()
-    api.on('post', CAMBIO, { ...cuenta(PERMISOS_MESERO), access_token: TOKEN_NUEVO, token_type: 'bearer', expires_in: 3600 })
+    const { api, user } = openProfile()
+    api.on('post', CHANGE_PASSWORD_URL, { ...buildAccount(PERMISSIONS_WAITER), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 })
 
-    await cambiarClave(user)
+    await changePassword(user)
 
     expect(await screen.findByText('Contraseña actualizada.')).toBeInTheDocument()
-    expect(api.llamadas('post', CAMBIO)[0]?.body).toEqual({ current_password: CLAVE_ACTUAL, new_password: CLAVE_NUEVA })
-    expect(api.llamadas('post', ACCESO)).toHaveLength(0)
-    expect(useSession.getState().token).toBe(TOKEN_NUEVO)
-    expect(currentAuthToken()).toBe(TOKEN_NUEVO)
+    expect(api.calls('post', CHANGE_PASSWORD_URL)[0]?.body).toEqual({ current_password: CURRENT_SECRET, new_password: NEW_SECRET })
+    expect(api.calls('post', ACCESS)).toHaveLength(0)
+    expect(useSession.getState().token).toBe(NEW_TOKEN)
+    expect(currentAuthToken()).toBe(NEW_TOKEN)
     expect(screen.getByLabelText(ACTUAL)).toHaveValue('')
   })
 
   it('si la respuesta no trae token, cierra la sesión y vuelve al acceso con el aviso', async () => {
-    const { api, user, router } = abrirPerfil()
-    api.on('post', CAMBIO, null, 204)
+    const { api, user, router } = openProfile()
+    api.on('post', CHANGE_PASSWORD_URL, null, 204)
 
-    await cambiarClave(user)
+    await changePassword(user)
 
-    expect(await screen.findByText(AVISO)).toBeVisible()
+    expect(await screen.findByText(NOTICE)).toBeVisible()
     expect(router.state.location.pathname).toBe('/acceso')
     expect(useSession.getState().token).toBeNull()
     expect(useSession.getState().passwordChanged).toBe(true)
-    expect(api.llamadas('post', ACCESO)).toHaveLength(0)
+    expect(api.calls('post', ACCESS)).toHaveLength(0)
   })
 
   it('si otra pestaña entró con otra cuenta mientras tanto, no pisa ni cierra esa sesión', async () => {
-    const { api, user } = abrirPerfil()
-    api.on('post', CAMBIO, () => {
+    const { api, user } = openProfile()
+    api.on('post', CHANGE_PASSWORD_URL, () => {
       useSession.setState({ token: 'token-de-otra-cuenta' })
-      return { ...cuenta(PERMISOS_MESERO), access_token: TOKEN_NUEVO, token_type: 'bearer', expires_in: 3600 }
+      return { ...buildAccount(PERMISSIONS_WAITER), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 }
     })
 
-    await cambiarClave(user)
+    await changePassword(user)
 
-    await waitFor(() => { expect(api.llamadas('post', CAMBIO)).toHaveLength(1); })
-    await new Promise((listo) => setTimeout(listo, 50))
+    await waitFor(() => { expect(api.calls('post', CHANGE_PASSWORD_URL)).toHaveLength(1); })
+    await new Promise((ready) => setTimeout(ready, 50))
     expect(useSession.getState().token).toBe('token-de-otra-cuenta')
     expect(useSession.getState().passwordChanged).toBe(false)
   })
 
   it('no envía si las dos contraseñas nuevas no coinciden o repiten la actual', async () => {
-    const { api, user } = abrirPerfil()
+    const { api, user } = openProfile()
 
-    await user.type(screen.getByLabelText(ACTUAL), CLAVE_NUEVA)
-    await user.type(screen.getByLabelText(NUEVA), CLAVE_NUEVA)
-    await user.type(screen.getByLabelText(REPETIR), 'otra-clave-larga')
-    await user.click(screen.getByRole('button', CAMBIAR))
+    await user.type(screen.getByLabelText(ACTUAL), NEW_SECRET)
+    await user.type(screen.getByLabelText(NEW), NEW_SECRET)
+    await user.type(screen.getByLabelText(REPEAT), 'otra-clave-larga')
+    await user.click(screen.getByRole('button', CHANGE))
 
     expect(await screen.findByText('Las dos contraseñas no coinciden')).toBeInTheDocument()
     expect(screen.getByText('La nueva contraseña tiene que ser distinta de la actual')).toBeInTheDocument()
-    expect(api.llamadas('post', CAMBIO)).toHaveLength(0)
+    expect(api.calls('post', CHANGE_PASSWORD_URL)).toHaveLength(0)
   })
 
   it('si la actual está mal, muestra el motivo del servidor', async () => {
-    const { api, user } = abrirPerfil()
-    api.on('post', CAMBIO, new RespuestaDeError(400, 'La contraseña actual no coincide.'))
+    const { api, user } = openProfile()
+    api.on('post', CHANGE_PASSWORD_URL, new ErrorResponse(400, 'La contraseña actual no coincide.'))
 
     await user.type(screen.getByLabelText(ACTUAL), 'equivocada1')
-    await user.type(screen.getByLabelText(NUEVA), CLAVE_NUEVA)
-    await user.type(screen.getByLabelText(REPETIR), CLAVE_NUEVA)
-    await user.click(screen.getByRole('button', CAMBIAR))
+    await user.type(screen.getByLabelText(NEW), NEW_SECRET)
+    await user.type(screen.getByLabelText(REPEAT), NEW_SECRET)
+    await user.click(screen.getByRole('button', CHANGE))
 
     expect(await screen.findByText('La contraseña actual no coincide.')).toBeInTheDocument()
   })
 
   it('en una vista previa no ofrece cambiar la contraseña de la cuenta de muestra', () => {
-    abrirPerfil(true)
+    openProfile(true)
 
-    expect(screen.queryByRole('button', CAMBIAR)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', CHANGE)).not.toBeInTheDocument()
     expect(screen.getByText('Ana Torres')).toBeInTheDocument()
   })
 
   it('el botón del ojo deja ver lo que se escribe', async () => {
-    const { user } = abrirPerfil()
-    const campo = screen.getByLabelText(ACTUAL)
-    expect(campo).toHaveAttribute('type', 'password')
+    const { user } = openProfile()
+    const field = screen.getByLabelText(ACTUAL)
+    expect(field).toHaveAttribute('type', 'password')
 
-    await user.click(primero(screen.getAllByRole('button', { name: /mostrar/i })))
+    await user.click(firstOf(screen.getAllByRole('button', { name: /mostrar/i })))
 
-    expect(campo).toHaveAttribute('type', 'text')
+    expect(field).toHaveAttribute('type', 'text')
   })
 })

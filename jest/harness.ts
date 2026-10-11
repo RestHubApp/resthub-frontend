@@ -20,13 +20,13 @@ import { usePlatformSession } from '../src/store/platformSession'
 import { useSession } from '../src/store/session'
 
 /** Las pantallas del restaurante tal como las registra el router: de ellas salen el menú y la precarga del armazón. */
-export const PANTALLAS = SCREENS
+export const TEST_SCREENS = SCREENS
 
-export type Metodo = 'get' | 'post' | 'put' | 'patch' | 'delete'
+export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 /** Una petición que llegó al servidor falso. */
-export interface Peticion {
-  readonly method: Metodo
+export interface Request {
+  readonly method: Method
   readonly url: string
   readonly params: Record<string, unknown>
   readonly body: unknown
@@ -34,18 +34,18 @@ export interface Peticion {
 }
 
 /** Lo que responde una ruta a partir de la petición. */
-export type Responder = (peticion: Peticion) => unknown
+export type Respond = (request: Request) => unknown
 
-interface Ruta {
-  readonly method: Metodo
+interface Route {
+  readonly method: Method
   readonly path: string | RegExp
   readonly status: number
-  readonly responder: Responder
-  veces: number | null
+  readonly respond: Respond
+  times: number | null
 }
 
 /** Un error del API con el cuerpo de FastAPI (`{ detail }`). */
-export class RespuestaDeError {
+export class ErrorResponse {
   readonly status: number
   readonly detail: unknown
 
@@ -55,14 +55,14 @@ export class RespuestaDeError {
   }
 }
 
-function coincide(ruta: Ruta, peticion: Peticion): boolean {
-  if (ruta.method !== peticion.method) {
+function coincide(route: Route, request: Request): boolean {
+  if (route.method !== request.method) {
     return false
   }
-  return typeof ruta.path === 'string' ? ruta.path === peticion.url : ruta.path.test(peticion.url)
+  return typeof route.path === 'string' ? route.path === request.url : route.path.test(request.url)
 }
 
-function cuerpoDe(data: unknown): unknown {
+function bodyOf(data: unknown): unknown {
   if (typeof data !== 'string') {
     return data
   }
@@ -73,103 +73,103 @@ function cuerpoDe(data: unknown): unknown {
   }
 }
 
-function cabecerasDe(config: InternalAxiosRequestConfig): Record<string, string> {
-  const planas: Record<string, string> = {}
-  for (const [clave, valor] of Object.entries(AxiosHeaders.from(config.headers).toJSON())) {
-    planas[clave.toLowerCase()] = String(valor)
+function headersOf(config: InternalAxiosRequestConfig): Record<string, string> {
+  const flat: Record<string, string> = {}
+  for (const [key, value] of Object.entries(AxiosHeaders.from(config.headers).toJSON())) {
+    flat[key.toLowerCase()] = String(value)
   }
-  return planas
+  return flat
 }
 
-function responderDe(respuesta: unknown): Responder {
-  return typeof respuesta === 'function' ? (respuesta as Responder) : () => respuesta
+function respondOf(response: unknown): Respond {
+  return typeof response === 'function' ? (response as Respond) : () => response
 }
 
-function peticionDe(config: InternalAxiosRequestConfig): Peticion {
+function requestOf(config: InternalAxiosRequestConfig): Request {
   return {
-    method: (config.method ?? 'get').toLowerCase() as Metodo,
+    method: (config.method ?? 'get').toLowerCase() as Method,
     url: config.url ?? '',
     params: (config.params ?? {}) as Record<string, unknown>,
-    body: cuerpoDe(config.data),
-    headers: cabecerasDe(config),
+    body: bodyOf(config.data),
+    headers: headersOf(config),
   }
 }
 
 /** El servidor falso: las rutas se declaran con `on` y las peticiones quedan en `peticiones`. */
-export class ServidorFalso {
-  readonly peticiones: Peticion[] = []
-  private readonly rutas: Ruta[] = []
+export class FakeServer {
+  readonly requests: Request[] = []
+  private readonly routes: Route[] = []
 
   /**
    * Declara una respuesta: un valor fijo, una función de la petición o un
    * `RespuestaDeError`. Las últimas declaradas tienen prioridad.
    */
-  on(method: Metodo, path: string | RegExp, respuesta: unknown, status = 200): this {
-    this.agregar({ method, path, status, responder: responderDe(respuesta), veces: null })
+  on(method: Method, path: string | RegExp, response: unknown, status = 200): this {
+    this.add({ method, path, status, respond: respondOf(response), times: null })
     return this
   }
 
   /** Igual que `on`, pero solo para la próxima petición que coincida. */
-  once(method: Metodo, path: string | RegExp, respuesta: unknown, status = 200): this {
-    this.agregar({ method, path, status, responder: responderDe(respuesta), veces: 1 })
+  once(method: Method, path: string | RegExp, response: unknown, status = 200): this {
+    this.add({ method, path, status, respond: respondOf(response), times: 1 })
     return this
   }
 
-  private agregar(ruta: Ruta): void {
-    this.rutas.unshift(ruta)
+  private add(route: Route): void {
+    this.routes.unshift(route)
   }
 
   /** Las peticiones con ese método y esa ruta. */
-  llamadas(method: Metodo, path: string | RegExp): Peticion[] {
-    return this.peticiones.filter((p) => coincide({ method, path, status: 0, responder: () => null, veces: null }, p))
+  calls(method: Method, path: string | RegExp): Request[] {
+    return this.requests.filter((p) => coincide({ method, path, status: 0, respond: () => null, times: null }, p))
   }
 
-  private tomarRuta(peticion: Peticion): Ruta | undefined {
-    const ruta = this.rutas.find((r) => (r.veces === null || r.veces > 0) && coincide(r, peticion))
-    if (ruta !== undefined && ruta.veces !== null) {
-      ruta.veces -= 1
+  private takeRoute(request: Request): Route | undefined {
+    const route = this.routes.find((r) => (r.times === null || r.times > 0) && coincide(r, request))
+    if (route !== undefined && route.times !== null) {
+      route.times -= 1
     }
-    return ruta
+    return route
   }
 
   readonly adapter: AxiosAdapter = async (config) => {
-    const peticion = peticionDe(config)
-    this.peticiones.push(peticion)
-    const ruta = this.tomarRuta(peticion)
-    const valor = ruta ? await ruta.responder(peticion) : new RespuestaDeError(404, 'No existe (prueba)')
-    const error = valor instanceof RespuestaDeError ? valor : null
-    const status = error?.status ?? ruta?.status ?? 404
-    const data = error ? { detail: error.detail } : valor
-    const respuesta: AxiosResponse = { data, status, statusText: String(status), headers: {}, config, request: {} }
+    const request = requestOf(config)
+    this.requests.push(request)
+    const route = this.takeRoute(request)
+    const value = route ? await route.respond(request) : new ErrorResponse(404, 'No existe (prueba)')
+    const error = value instanceof ErrorResponse ? value : null
+    const status = error?.status ?? route?.status ?? 404
+    const data = error ? { detail: error.detail } : value
+    const response: AxiosResponse = { data, status, statusText: String(status), headers: {}, config, request: {} }
     if (status >= 400) {
-      throw new AxiosError(`Request failed with status code ${String(status)}`, AxiosError.ERR_BAD_REQUEST, config, {}, respuesta)
+      throw new AxiosError(`Request failed with status code ${String(status)}`, AxiosError.ERR_BAD_REQUEST, config, {}, response)
     }
-    return respuesta
+    return response
   }
 }
 
 /** Una respuesta del API que no llega nunca, para ver el estado de carga. */
-export function sinRespuesta(): Promise<never> {
+export function withoutResponse(): Promise<never> {
   return new Promise<never>(() => undefined)
 }
 
 /** Un corte de red: Axios falla sin respuesta. */
-export function sinRed(): never {
+export function withoutNetwork(): never {
   throw new AxiosError('Network Error', AxiosError.ERR_NETWORK)
 }
 
-const adaptadorOriginal = api.defaults.adapter
-let servidorActual: ServidorFalso | null = null
+const adapterOriginal = api.defaults.adapter
+let currentServer: FakeServer | null = null
 
 /** Instala un servidor falso nuevo para la prueba en curso. */
-export function servidor(): ServidorFalso {
-  servidorActual = new ServidorFalso()
-  api.defaults.adapter = servidorActual.adapter
-  return servidorActual
+export function server(): FakeServer {
+  currentServer = new FakeServer()
+  api.defaults.adapter = currentServer.adapter
+  return currentServer
 }
 
 /** Todos los permisos: la cuenta del encargado. */
-export const PERMISOS_ENCARGADO: readonly PermissionCode[] = [
+export const PERMISSIONS_OWNER: readonly PermissionCode[] = [
   'menu.read', 'menu.manage', 'tables.read', 'tables.manage', 'orders.take', 'orders.read_all',
   'orders.manage', 'orders.charge', 'orders.discount_any', 'cash.manage', 'billing.issue',
   'billing.manage', 'customers.read', 'customers.manage', 'customers.erase', 'reservations.read', 'reservations.manage',
@@ -178,85 +178,85 @@ export const PERMISOS_ENCARGADO: readonly PermissionCode[] = [
 ]
 
 /** Lo del mesero: toma pedidos, cobra los suyos y consulta. */
-export const PERMISOS_MESERO: readonly PermissionCode[] = [
+export const PERMISSIONS_WAITER: readonly PermissionCode[] = [
   'menu.read', 'tables.read', 'orders.take', 'orders.charge', 'customers.read', 'reservations.read',
 ]
 
 /** Una cuenta de restaurante con los permisos dados. */
-export function cuenta(permisos: readonly PermissionCode[], cambios: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
+export function buildAccount(permissions: readonly PermissionCode[], changes: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
   return {
-    permissions: [...permisos],
+    permissions: [...permissions],
     preview: false,
     terms_version: '2026-10',
     terms_accepted: true,
     restaurant: { id: 1, name: 'La Picantería', slug: 'la-picanteria', timezone: 'America/Lima' },
     user: { id: 7, email: 'ana@resthub.dev', full_name: 'Ana Torres', role_id: 1, role_label: 'Encargado' },
-    ...cambios,
+    ...changes,
   }
 }
 
 /** Abre la sesión del administrador del sistema sin pasar por su acceso. */
-export function entrarAPlataforma(): void {
+export function signInToPlatform(): void {
   usePlatformSession.getState().signIn('token-de-plataforma', { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' })
 }
 
 /** Abre una sesión de restaurante sin pasar por el acceso. */
-export function entrarComo(permisos: readonly PermissionCode[] = PERMISOS_ENCARGADO, cambios: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
-  const account = cuenta(permisos, cambios)
+export function signInAs(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, changes: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
+  const account = buildAccount(permissions, changes)
   setAuthToken('token-de-prueba')
   useSession.setState({ token: 'token-de-prueba', account, expired: false, passwordChanged: false })
   return account
 }
 
 // Muestra la ruta actual para comprobar adónde llevó una navegación.
-function DondeEstoy() {
+function WhereAmI() {
   const { pathname, search } = useLocation()
   return createElement('output', { 'aria-label': 'Ruta actual' }, `${pathname}${search}`)
 }
 
-export interface Montaje extends RenderResult {
+export interface Mount extends RenderResult {
   readonly user: UserEvent
   readonly router: ReturnType<typeof createMemoryRouter>
 }
 
-interface OpcionesDeMontaje {
+interface MountOptions {
   /** La ruta con parámetros, como en el router (`/pedidos/:orderId`). */
   readonly path?: string
   /** La dirección en la que se abre (`/pedidos/12`). */
   readonly en?: string
   /** Otras rutas del router, además de la pantalla. */
-  readonly rutas?: RouteObject[]
+  readonly routes?: RouteObject[]
 }
 
 /** Monta una pantalla dentro de un router en memoria y con el caché de la aplicación. */
-export function montar(pantalla: ReactElement, { path = '/', en = path, rutas = [] }: OpcionesDeMontaje = {}): Montaje {
-  return montarRutas([{ path, element: pantalla }, ...rutas], en)
+export function mountScreen(screen: ReactElement, { path = '/', en = path, routes = [] }: MountOptions = {}): Mount {
+  return mountRoutes([{ path, element: screen }, ...routes], en)
 }
 
 // React Router guarda lo que ya cargó de una ruta perezosa usando el objeto de
 // la ruta como clave. Cada router de prueba recibe copias nuevas, o la segunda
 // prueba que abre la misma pantalla la encuentra «cargada» y sin componente.
-function copiar(rutas: readonly RouteObject[]): RouteObject[] {
-  return rutas.map((ruta) => {
-    const copia: RouteObject = { ...ruta }
-    if (typeof ruta.lazy === 'object') {
-      copia.lazy = { ...ruta.lazy }
+function copy(routes: readonly RouteObject[]): RouteObject[] {
+  return routes.map((route) => {
+    const routeCopy: RouteObject = { ...route }
+    if (typeof route.lazy === 'object') {
+      routeCopy.lazy = { ...route.lazy }
     }
-    if (ruta.children) {
-      copia.children = copiar(ruta.children)
+    if (route.children) {
+      routeCopy.children = copy(route.children)
     }
-    return copia
+    return routeCopy
   })
 }
 
 /** Monta un router en memoria con estas rutas (p. ej. las de `src/router`). */
-export function montarRutas(rutas: RouteObject[], en = '/'): Montaje {
-  const router = createMemoryRouter([...copiar(rutas), { path: '*', element: createElement(DondeEstoy) }], {
+export function mountRoutes(routes: RouteObject[], en = '/'): Mount {
+  const router = createMemoryRouter([...copy(routes), { path: '*', element: createElement(WhereAmI) }], {
     initialEntries: [en],
   })
   const user = userEvent.setup()
   // Los avisos (`useNotifications`) se ven como en el armazón de la aplicación.
-  const resultado = render(
+  const result = render(
     createElement(
       QueryClientProvider,
       { client: queryClient },
@@ -264,7 +264,7 @@ export function montarRutas(rutas: RouteObject[], en = '/'): Montaje {
       createElement(ToastStack),
     ),
   )
-  return { ...resultado, user, router }
+  return { ...result, user, router }
 }
 
 beforeEach(() => {
@@ -273,8 +273,8 @@ beforeEach(() => {
 
 afterEach(() => {
   queryClient.clear()
-  api.defaults.adapter = adaptadorOriginal
-  servidorActual = null
+  api.defaults.adapter = adapterOriginal
+  currentServer = null
   setAuthToken(null)
   useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })
   if (usePlatformSession.getState().token !== null) {
@@ -284,19 +284,19 @@ afterEach(() => {
 })
 
 /** El primer elemento de una lista que la prueba da por no vacia; falla con un mensaje claro si no. */
-export function primero<T>(lista: readonly T[]): T {
-  const elemento = lista[0]
-  if (elemento === undefined) {
+export function firstOf<T>(list: readonly T[]): T {
+  const element = list[0]
+  if (element === undefined) {
     throw new Error('Se esperaba al menos un elemento.')
   }
-  return elemento
+  return element
 }
 
 /** El segundo elemento de una lista que la prueba da por tener al menos dos. */
-export function segundo<T>(lista: readonly T[]): T {
-  const elemento = lista[1]
-  if (elemento === undefined) {
+export function second<T>(list: readonly T[]): T {
+  const element = list[1]
+  if (element === undefined) {
     throw new Error('Se esperaban al menos dos elementos.')
   }
-  return elemento
+  return element
 }

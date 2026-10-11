@@ -7,7 +7,7 @@ import { Icon } from '@/components/Icon'
 export function AllergyAlert() {
   return (
     <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive ring-1 ring-destructive/40">
-      <Icon name="alergico" size={14} />
+      <Icon name="allergic" size={14} />
       Con alergia
     </span>
   )

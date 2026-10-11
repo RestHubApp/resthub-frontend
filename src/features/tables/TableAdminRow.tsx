@@ -17,7 +17,7 @@ interface TableAdminRowProps {
 
 /** Una mesa en la administracion: subir, bajar, renombrar, activar o desactivar. */
 export function TableAdminRow({ table, isFirst, isLast, moving, onMove, onRename }: TableAdminRowProps) {
-  const pedido = table.active_order
+  const order = table.active_order
 
   return (
     <li className="flex flex-wrap items-center gap-3 border-b py-3 last:border-b-0">
@@ -26,12 +26,12 @@ export function TableAdminRow({ table, isFirst, isLast, moving, onMove, onRename
         <span className={`text-lg font-semibold ${table.is_active ? '' : 'text-muted-foreground'}`}>{tableName(table.label)}</span>
         <span className="flex flex-wrap gap-1.5">
           <StatusBadge label={table.is_active ? 'Activa' : 'Inactiva'} tone={table.is_active ? 'completed' : undefined} />
-          {pedido === null ? null : <StatusBadge label={`Ocupada · pedido #${String(pedido.number)}`} tone="pending" />}
+          {order === null ? null : <StatusBadge label={`Ocupada · pedido #${String(order.number)}`} tone="pending" />}
         </span>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="ghost" className="h-11 px-3" onClick={onRename}>
-          <Icon name="editar" size={16} />
+          <Icon name="edit" size={16} />
           <span>Renombrar</span>
         </Button>
         <TableStatusButton table={table} />

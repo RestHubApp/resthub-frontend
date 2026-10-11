@@ -23,10 +23,10 @@ const TONE_CLASSES = {
 export function FormMessage({ tone, children, fallback = false }: FormMessageProps) {
   // Una falla se avisa una sola vez: los avisos de respaldo buscan esta marca
   // para no repetir lo que la pantalla ya dice.
-  const falla = tone === 'error' ? { 'data-falla': fallback ? 'respaldo' : 'propia' } : {}
+  const failure = tone === 'error' ? { 'data-falla': fallback ? 'respaldo' : 'propia' } : {}
   return (
     <p
-      {...falla}
+      {...failure}
       role={tone === 'error' ? 'alert' : 'status'}
       className={`m-0 rounded-lg px-3 py-2 text-sm ${TONE_CLASSES[tone]}`}
     >

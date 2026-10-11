@@ -18,9 +18,9 @@ interface PurchaseLineEditorProps {
 
 /** Un insumo de la orden: cuál, cuánto (en su unidad) y a cuánto la unidad. */
 export function PurchaseLineEditor({ index, line, ingredients, onChange, onRemove }: PurchaseLineEditorProps) {
-  const unidad = ingredients.find((ingredient) => String(ingredient.id) === line.ingredientId)?.unit
+  const unit = ingredients.find((ingredient) => String(ingredient.id) === line.ingredientId)?.unit
   const id = `linea-${String(index)}`
-  const enUnidad = unidad === undefined ? '' : ` en ${UNIT_LABELS[unidad]}`
+  const inUnit = unit === undefined ? '' : ` en ${UNIT_LABELS[unit]}`
 
   return (
     <li className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 rounded-lg p-2 ring-1 ring-input sm:grid-cols-[1fr_8rem_8rem_auto]">
@@ -28,8 +28,8 @@ export function PurchaseLineEditor({ index, line, ingredients, onChange, onRemov
         aria-label={`Insumo de la línea ${String(index + 1)}`}
         className="col-span-2 w-full sm:col-span-1"
         value={line.ingredientId}
-        onChange={(evento) => {
-          onChange({ ...line, ingredientId: evento.target.value })
+        onChange={(event) => {
+          onChange({ ...line, ingredientId: event.target.value })
         }}
       >
         <NativeSelectOption value="">Elige un insumo</NativeSelectOption>
@@ -40,16 +40,16 @@ export function PurchaseLineEditor({ index, line, ingredients, onChange, onRemov
         ))}
       </NativeSelect>
       <Button type="button" variant="ghost" size="sm" aria-label={`Quitar la línea ${String(index + 1)}`} className="sm:order-last" onClick={onRemove}>
-        <Icon name="eliminar" size={16} />
+        <Icon name="delete" size={16} />
       </Button>
       <Input
         id={`${id}-cantidad`}
-        aria-label={`Cantidad${enUnidad}`}
+        aria-label={`Cantidad${inUnit}`}
         inputMode="decimal"
-        placeholder={unidad === undefined ? 'Cantidad' : `Cantidad (${UNIT_LABELS[unidad]})`}
+        placeholder={unit === undefined ? 'Cantidad' : `Cantidad (${UNIT_LABELS[unit]})`}
         value={line.quantity}
-        onChange={(evento) => {
-          onChange({ ...line, quantity: evento.target.value })
+        onChange={(event) => {
+          onChange({ ...line, quantity: event.target.value })
         }}
       />
       <Input
@@ -58,8 +58,8 @@ export function PurchaseLineEditor({ index, line, ingredients, onChange, onRemov
         inputMode="decimal"
         placeholder="S/ por unidad"
         value={line.unitCost}
-        onChange={(evento) => {
-          onChange({ ...line, unitCost: evento.target.value })
+        onChange={(event) => {
+          onChange({ ...line, unitCost: event.target.value })
         }}
       />
     </li>

@@ -13,21 +13,21 @@ import { useNotifications } from '@/store/notifications'
  */
 // Como en `StockRulesCard`: la casilla de Radix se nombra con aria-labelledby
 // y la etiqueta apunta a ella con `htmlFor`, sin envolverla.
-const CASILLA_ID = 'ia-externa'
-const TITULO_ID = 'ia-externa-titulo'
-const DETALLE_ID = 'ia-externa-detalle'
+const CHECKBOX_ID = 'ia-externa'
+const TITLE_ID = 'ia-externa-titulo'
+const DETAIL_ID = 'ia-externa-detalle'
 
 export function ExternalAiCard() {
-  const restaurante = useQuery(restaurantQuery)
+  const restaurant = useQuery(restaurantQuery)
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const cambiar = useMutation({
-    mutationFn: (activa: boolean) => updateRestaurant({ external_ai_enabled: activa }),
-    onSuccess: (actualizado) => {
-      queryClient.setQueryData(restaurantQueryKey, actualizado)
+  const change = useMutation({
+    mutationFn: (active: boolean) => updateRestaurant({ external_ai_enabled: active }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(restaurantQueryKey, updated)
       push({
         tone: 'info',
-        message: actualizado.external_ai_enabled
+        message: updated.external_ai_enabled
           ? 'Las notas y mermas vuelven a clasificarse con la IA externa.'
           : 'La IA externa quedó apagada: deciden las reglas y nada sale del sistema.',
       })
@@ -36,26 +36,26 @@ export function ExternalAiCard() {
       push({ tone: 'warning', message: errorMessage(error, 'No se pudo cambiar la preferencia.') })
     },
   })
-  if (!restaurante.isSuccess) {
+  if (!restaurant.isSuccess) {
     return null
   }
 
   return (
     <div className="flex items-start gap-3 rounded-lg bg-muted px-4 py-3 text-sm">
       <Checkbox
-        id={CASILLA_ID}
-        aria-labelledby={TITULO_ID}
-        aria-describedby={DETALLE_ID}
+        id={CHECKBOX_ID}
+        aria-labelledby={TITLE_ID}
+        aria-describedby={DETAIL_ID}
         className="mt-0.5"
-        checked={restaurante.data.external_ai_enabled}
-        disabled={cambiar.isPending}
-        onCheckedChange={(estado) => {
-          cambiar.mutate(estado === true)
+        checked={restaurant.data.external_ai_enabled}
+        disabled={change.isPending}
+        onCheckedChange={(status) => {
+          change.mutate(status === true)
         }}
       />
-      <label htmlFor={CASILLA_ID} className="cursor-pointer">
-        <span id={TITULO_ID} className="font-medium">Usar la IA externa</span>
-        <span id={DETALLE_ID} className="block text-muted-foreground">
+      <label htmlFor={CHECKBOX_ID} className="cursor-pointer">
+        <span id={TITLE_ID} className="font-medium">Usar la IA externa</span>
+        <span id={DETAIL_ID} className="block text-muted-foreground">
           Las notas de los pedidos y los motivos de merma se envían a TypeSafe AI, fuera del Perú, sin nombres,
           teléfonos, correos ni documentos. Apagada, deciden las reglas fijas y nada sale del sistema.
         </span>

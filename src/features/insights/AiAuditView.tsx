@@ -27,12 +27,12 @@ const ENGINES: readonly { value: DecisionEngine; label: string }[] = [
 ]
 
 // Un filtro vacío no viaja: el servidor lo entiende como "todos".
-function queryParams(kind: DecisionKind | '', engine: DecisionEngine | '', pagina: number): AiDecisionParams {
+function queryParams(kind: DecisionKind | '', engine: DecisionEngine | '', page: number): AiDecisionParams {
   return {
     ...(kind === '' ? {} : { kind }),
     ...(engine === '' ? {} : { engine }),
     limit: PAGE_SIZE,
-    offset: pagina * PAGE_SIZE,
+    offset: page * PAGE_SIZE,
   }
 }
 
@@ -43,13 +43,13 @@ function queryParams(kind: DecisionKind | '', engine: DecisionEngine | '', pagin
 export function AiAuditView() {
   const [kind, setKind] = useState<DecisionKind | ''>('')
   const [engine, setEngine] = useState<DecisionEngine | ''>('')
-  const [pagina, setPagina] = useState(0)
+  const [page, setPage] = useState(0)
   // Encender o apagar la IA externa es una preferencia del local.
   const canManageRestaurant = useCan(PERMISSION.restaurantManage)
-  const params = queryParams(kind, engine, pagina)
-  const decisiones = useQuery({ ...aiDecisionsQuery(params), placeholderData: keepPreviousData })
-  const total = decisiones.data?.total ?? 0
-  const paginas = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const params = queryParams(kind, engine, page)
+  const decisions = useQuery({ ...aiDecisionsQuery(params), placeholderData: keepPreviousData })
+  const total = decisions.data?.total ?? 0
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
     <div className="flex flex-col gap-6">
@@ -57,20 +57,20 @@ export function AiAuditView() {
       {canManageRestaurant ? <ExternalAiCard /> : null}
       <SectionCard
         title="Decisiones"
-        description={decisiones.isPending ? 'Cargando…' : `${String(total)} en total con estos filtros.`}
+        description={decisions.isPending ? 'Cargando…' : `${String(total)} en total con estos filtros.`}
       >
         <div className="flex flex-wrap gap-4">
-          <FilterSelect label="Tipo" value={kind} options={KINDS} allLabel="Todos los tipos" onChange={(valor) => { setKind(valor); setPagina(0) }} />
-          <FilterSelect label="Motor" value={engine} options={ENGINES} allLabel="Todos los motores" onChange={(valor) => { setEngine(valor); setPagina(0) }} />
+          <FilterSelect label="Tipo" value={kind} options={KINDS} allLabel="Todos los tipos" onChange={(value) => { setKind(value); setPage(0) }} />
+          <FilterSelect label="Motor" value={engine} options={ENGINES} allLabel="Todos los motores" onChange={(value) => { setEngine(value); setPage(0) }} />
         </div>
-        {decisiones.isError ? (
-          <FormMessage tone="error">{errorMessage(decisiones.error, 'No se pudo cargar la auditoría.')}</FormMessage>
+        {decisions.isError ? (
+          <FormMessage tone="error">{errorMessage(decisions.error, 'No se pudo cargar la auditoría.')}</FormMessage>
         ) : (
-          <div className={`transition-opacity ${decisiones.isPlaceholderData ? 'opacity-50' : ''}`}>
-            <AiDecisionTable decisions={decisiones.data?.items ?? []} isLoading={decisiones.isPending} />
+          <div className={`transition-opacity ${decisions.isPlaceholderData ? 'opacity-50' : ''}`}>
+            <AiDecisionTable decisions={decisions.data?.items ?? []} isLoading={decisions.isPending} />
           </div>
         )}
-        {paginas > 1 ? <TablePagination actual={pagina} total={paginas} onChange={setPagina} /> : null}
+        {pages > 1 ? <TablePagination actual={page} total={pages} onChange={setPage} /> : null}
       </SectionCard>
     </div>
   )

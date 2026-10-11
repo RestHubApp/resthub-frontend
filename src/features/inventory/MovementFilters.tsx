@@ -21,43 +21,43 @@ export function MovementFilters({
   kind,
   onKind,
 }: MovementFiltersProps) {
-  const insumoId = useId()
-  const tipoId = useId()
+  const ingredientFieldId = useId()
+  const typeId = useId()
 
   return (
     <div className="grid gap-3 sm:grid-cols-[minmax(0,18rem)_minmax(0,12rem)]">
       <div className="flex flex-col gap-2">
-        <Label htmlFor={insumoId}>Insumo</Label>
+        <Label htmlFor={ingredientFieldId}>Insumo</Label>
         <NativeSelect
-          id={insumoId}
+          id={ingredientFieldId}
           className="w-full [&_select]:h-11"
           value={ingredientId}
-          onChange={(evento) => {
-            onIngredient(evento.target.value)
+          onChange={(event) => {
+            onIngredient(event.target.value)
           }}
         >
           <NativeSelectOption value="">Todos los insumos</NativeSelectOption>
-          {ingredients.map((insumo) => (
-            <NativeSelectOption key={insumo.id} value={String(insumo.id)}>
-              {insumo.name}
+          {ingredients.map((ingredient) => (
+            <NativeSelectOption key={ingredient.id} value={String(ingredient.id)}>
+              {ingredient.name}
             </NativeSelectOption>
           ))}
         </NativeSelect>
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor={tipoId}>Tipo</Label>
+        <Label htmlFor={typeId}>Tipo</Label>
         <NativeSelect
-          id={tipoId}
+          id={typeId}
           className="w-full [&_select]:h-11"
           value={kind}
-          onChange={(evento) => {
-            onKind(evento.target.value)
+          onChange={(event) => {
+            onKind(event.target.value)
           }}
         >
           <NativeSelectOption value="">Todos los tipos</NativeSelectOption>
-          {KIND_OPTIONS.map((opcion) => (
-            <NativeSelectOption key={opcion.value} value={opcion.value}>
-              {opcion.label}
+          {KIND_OPTIONS.map((option) => (
+            <NativeSelectOption key={option.value} value={option.value}>
+              {option.label}
             </NativeSelectOption>
           ))}
         </NativeSelect>

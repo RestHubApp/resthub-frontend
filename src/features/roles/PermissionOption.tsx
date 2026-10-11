@@ -23,34 +23,34 @@ export function PermissionOption({
   onCheckedChange,
 }: PermissionOptionProps) {
   const id = useId()
-  const notaId = `${id}-nota`
-  const nombreId = `${id}-nombre`
-  const explicar = missing && !readOnly
-  const apagado = missing || readOnly
+  const noteId = `${id}-nota`
+  const nameId = `${id}-nombre`
+  const shouldExplain = missing && !readOnly
+  const isOff = missing || readOnly
 
   return (
     <li className="py-1">
       {/* La etiqueta envuelve la casilla: así nombra también el <input> oculto
           que Radix agrega dentro de un formulario. El botón se nombra con
           aria-labelledby, que es lo que leen todos los validadores. */}
-      <Label className={`flex min-h-11 items-center gap-3 font-normal ${apagado ? '' : 'cursor-pointer'}`}>
+      <Label className={`flex min-h-11 items-center gap-3 font-normal ${isOff ? '' : 'cursor-pointer'}`}>
         <Checkbox
           id={id}
           className="size-5"
           checked={checked}
-          disabled={apagado}
-          aria-labelledby={nombreId}
-          aria-describedby={explicar ? notaId : undefined}
-          onCheckedChange={(valor) => {
-            onCheckedChange(valor === true)
+          disabled={isOff}
+          aria-labelledby={nameId}
+          aria-describedby={shouldExplain ? noteId : undefined}
+          onCheckedChange={(value) => {
+            onCheckedChange(value === true)
           }}
         />
         <span className="flex min-w-0 flex-col gap-1">
-          <span id={nombreId} className="leading-snug font-medium">
+          <span id={nameId} className="leading-snug font-medium">
             {permission.label}
           </span>
-          {explicar ? (
-            <span id={notaId} className="text-xs text-muted-foreground">
+          {shouldExplain ? (
+            <span id={noteId} className="text-xs text-muted-foreground">
               Tu cuenta no tiene este permiso, así que no puedes darlo.
             </span>
           ) : null}

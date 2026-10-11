@@ -10,7 +10,7 @@ interface LogFiltersProps {
   readonly onChange: (patch: Partial<ObsFilters>) => void
 }
 
-const NIVELES = [
+const LEVELS = [
   { value: '', label: 'Todos' },
   { value: 'warning', label: 'Advertencias' },
   { value: 'error', label: 'Errores' },
@@ -18,9 +18,9 @@ const NIVELES = [
 
 /** Nivel, búsqueda en el evento y sus campos, y `request_id`. */
 export function LogFilters({ filters, onChange }: LogFiltersProps) {
-  const [busqueda, setBusqueda] = useDraft(filters.logSearch)
-  const [peticion, setPeticion] = useDraft(filters.logRequestId)
-  const activos = filters.logLevel !== null || filters.logSearch !== '' || filters.logRequestId !== ''
+  const [search, setSearch] = useDraft(filters.logSearch)
+  const [request, setRequest] = useDraft(filters.logRequestId)
+  const isActive = filters.logLevel !== null || filters.logSearch !== '' || filters.logRequestId !== ''
   return (
     <form
       role="search"
@@ -29,8 +29,8 @@ export function LogFilters({ filters, onChange }: LogFiltersProps) {
       onSubmit={(event) => {
         event.preventDefault()
         onChange({
-          logSearch: busqueda.trim(),
-          logRequestId: peticion.trim(),
+          logSearch: search.trim(),
+          logRequestId: request.trim(),
         })
       }}
     >
@@ -38,7 +38,7 @@ export function LogFilters({ filters, onChange }: LogFiltersProps) {
         id="logs-nivel"
         label="Nivel"
         value={filters.logLevel ?? ''}
-        options={NIVELES}
+        options={LEVELS}
         onChange={(value) => {
           onChange({ logLevel: value === '' ? null : (value as ObsLogLevel) })
         }}
@@ -48,20 +48,20 @@ export function LogFilters({ filters, onChange }: LogFiltersProps) {
         name="buscar"
         type="search"
         label="Buscar en el evento y sus campos"
-        value={busqueda}
-        onChange={setBusqueda}
+        value={search}
+        onChange={setSearch}
         maxLength={MAX_LOG_SEARCH}
       />
       <FilterTextField
         id="logs-peticion"
         name="peticion"
         label="request_id"
-        value={peticion}
-        onChange={setPeticion}
+        value={request}
+        onChange={setRequest}
         maxLength={MAX_REQUEST_ID}
       />
       <FilterActions
-        active={activos}
+        active={isActive}
         onClear={() => {
           onChange({ logLevel: null, logSearch: '', logRequestId: '' })
         }}

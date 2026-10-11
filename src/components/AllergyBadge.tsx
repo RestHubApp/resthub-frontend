@@ -15,10 +15,10 @@ interface AllergyBadgeProps {
 const PERCENT = 100
 
 function tooltip(flag: OrderNoteFlag): string {
-  const confianza =
+  const confidence =
     flag.allergy_probability === null ? '' : ` (probabilidad ${String(Math.round(flag.allergy_probability * PERCENT))} %)`
   const motor = flag.engine === 'jev' ? 'la IA' : 'las reglas'
-  return `Según ${motor}, la nota «${flag.note}» menciona una alergia o restricción${confianza}. Confírmalo con el cliente.`
+  return `Según ${motor}, la nota «${flag.note}» menciona una alergia o restricción${confidence}. Confírmalo con el cliente.`
 }
 
 /**
@@ -37,7 +37,7 @@ export function AllergyBadge({ flag, className, withNote = true }: AllergyBadgeP
       title={tooltip(flag)}
       className={`inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive px-2 py-0.5 text-xs font-semibold text-white dark:text-background ${className ?? ''}`}
     >
-      <Icon name="alergico" size={14} />
+      <Icon name="allergic" size={14} />
       Alergia
       {withNote ? <span className="sr-only">{`: ${flag.note}`}</span> : null}
     </span>

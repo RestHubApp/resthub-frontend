@@ -24,15 +24,15 @@ const DE_NODE = [
   'BroadcastChannel',
 ]
 
-class EntornoJsdom extends TestEnvironment {
+class EnvironmentJsdom extends TestEnvironment {
   constructor(config, context) {
     super(config, context)
-    for (const nombre of DE_NODE) {
-      if (nombre in globalThis) {
-        this.global[nombre] = globalThis[nombre]
+    for (const name of DE_NODE) {
+      if (name in globalThis) {
+        this.global[name] = globalThis[name]
       }
     }
   }
 }
 
-module.exports = EntornoJsdom
+module.exports = EnvironmentJsdom

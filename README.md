@@ -61,7 +61,7 @@ está en `jest/`.
   la abre con un router en memoria y el caché de la aplicación, `entrarComo()`
   abre una sesión con los permisos dados y `servidor().on('get', '/ruta', datos)`
   responde el API desde el adaptador de Axios (`llamadas()` dice qué se envió).
-  El canal de avisos (SSE) falso está en `#jest/canal` y los datos de prueba
+  El canal de avisos (SSE) falso está en `#jest/channel` y los datos de prueba
   en `jest/fixtures/`.
 - Las pruebas que simulan una pestaña sin DOM (reemplazan `window`, `location`
   o el almacenamiento) declaran `@jest-environment ./jest/nodeEnvironment.cjs`

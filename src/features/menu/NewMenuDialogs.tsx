@@ -8,8 +8,8 @@ import { MenuItemForm } from './MenuItemForm'
  * una categoría (o sin elegir, desde el botón general).
  */
 export type NewMenuDialog =
-  | { readonly tipo: 'categoria' }
-  | { readonly tipo: 'plato'; readonly categoryId?: number }
+  | { readonly type: 'categoria' }
+  | { readonly type: 'plato'; readonly categoryId?: number }
   | null
 
 interface NewMenuDialogsProps {
@@ -22,11 +22,11 @@ interface NewMenuDialogsProps {
 export function NewMenuDialogs({ dialog, categories, onClose }: NewMenuDialogsProps) {
   return (
     <>
-      <FormDialog open={dialog?.tipo === 'categoria'} onOpenChange={onClose} title="Nueva categoría">
+      <FormDialog open={dialog?.type === 'categoria'} onOpenChange={onClose} title="Nueva categoría">
         <CategoryForm onDone={onClose} />
       </FormDialog>
       <FormDialog
-        open={dialog?.tipo === 'plato'}
+        open={dialog?.type === 'plato'}
         onOpenChange={onClose}
         title="Nuevo plato"
         description="Entra disponible. Después puedes agregarle su receta para conocer su margen."
@@ -34,7 +34,7 @@ export function NewMenuDialogs({ dialog, categories, onClose }: NewMenuDialogsPr
       >
         <MenuItemForm
           categories={categories}
-          defaultCategoryId={dialog?.tipo === 'plato' ? dialog.categoryId : undefined}
+          defaultCategoryId={dialog?.type === 'plato' ? dialog.categoryId : undefined}
           onDone={onClose}
         />
       </FormDialog>

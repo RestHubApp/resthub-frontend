@@ -15,8 +15,8 @@ export function useHashFocus(): void {
     if (hash === '') {
       return
     }
-    const destino = document.getElementById(decodeURIComponent(hash.slice(1)))
-    destino?.scrollIntoView({ block: 'start' })
-    destino?.focus({ preventScroll: true })
+    const destination = document.getElementById(decodeURIComponent(hash.slice(1)))
+    destination?.scrollIntoView({ block: 'start' })
+    destination?.focus({ preventScroll: true })
   }, [hash, key])
 }

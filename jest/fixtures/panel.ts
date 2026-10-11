@@ -11,7 +11,7 @@ import type {
   WasteReport,
 } from '../../src/api/types'
 
-export function ajustesFiscales(cambios: Partial<BillingSettings> = {}): BillingSettings {
+export function taxSettings(changes: Partial<BillingSettings> = {}): BillingSettings {
   return {
     ruc: '20123456789',
     legal_name: 'La Picantería S.A.C.',
@@ -22,11 +22,11 @@ export function ajustesFiscales(cambios: Partial<BillingSettings> = {}): Billing
     provider_url: 'https://api.nubefact.com/api/v1/abc',
     has_provider_token: true,
     is_ready: true,
-    ...cambios,
+    ...changes,
   }
 }
 
-export function comprobante(cambios: Partial<Invoice> = {}): Invoice {
+export function invoice(changes: Partial<Invoice> = {}): Invoice {
   return {
     id: 5,
     order_id: 40,
@@ -50,11 +50,11 @@ export function comprobante(cambios: Partial<Invoice> = {}): Invoice {
     igv_rate: '18.00',
     total: '60.00',
     lines: [{ description: 'Ceviche', quantity: 2, unit_price: '30.00', total: '60.00' }],
-    ...cambios,
+    ...changes,
   }
 }
 
-export function cliente(cambios: Partial<Customer> = {}): Customer {
+export function customer(changes: Partial<Customer> = {}): Customer {
   return {
     id: 11,
     name: 'Rosa Quispe',
@@ -72,11 +72,11 @@ export function cliente(cambios: Partial<Customer> = {}): Customer {
     consent_at: '2026-05-01T12:00:00Z',
     consent_version: '2026-10',
     recent_orders: [],
-    ...cambios,
+    ...changes,
   }
 }
 
-export function reserva(cambios: Partial<Reservation> = {}): Reservation {
+export function reservation(changes: Partial<Reservation> = {}): Reservation {
   return {
     id: 21,
     customer_id: null,
@@ -91,11 +91,11 @@ export function reserva(cambios: Partial<Reservation> = {}): Reservation {
     status: 'booked',
     status_label: 'Reservada',
     created_at: '2026-09-20T12:00:00Z',
-    ...cambios,
+    ...changes,
   }
 }
 
-export function mesa(id: number, label: string): TableState {
+export function table(id: number, label: string): TableState {
   return {
     id,
     label,
@@ -108,11 +108,11 @@ export function mesa(id: number, label: string): TableState {
   }
 }
 
-const PERIODO = { date_from: '2026-08-28', date_to: '2026-09-26', days: 30, timezone: 'America/Lima' }
+const PERIOD = { date_from: '2026-08-28', date_to: '2026-09-26', days: 30, timezone: 'America/Lima' }
 
-export function resumenDeVentas(cambios: Partial<SalesSummary> = {}): SalesSummary {
+export function salesSummary(changes: Partial<SalesSummary> = {}): SalesSummary {
   return {
-    period: PERIODO,
+    period: PERIOD,
     sales: '1234.50',
     sales_change_percent: '12.5',
     paid_orders: 40,
@@ -130,18 +130,18 @@ export function resumenDeVentas(cambios: Partial<SalesSummary> = {}): SalesSumma
       cancelled_orders: 2,
       cancelled_amount: '20.00',
     },
-    ...cambios,
+    ...changes,
   }
 }
 
-export function celda(weekday: number, hour: number, paid_orders: number): HourlyCell {
-  const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-  return { weekday, weekday_label: dias[weekday] ?? '', hour, paid_orders, sales: String(paid_orders * 30), average_sales: '30.00' }
+export function cell(weekday: number, hour: number, paidOrders: number): HourlyCell {
+  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+  return { weekday, weekday_label: days[weekday] ?? '', hour, paid_orders: paidOrders, sales: String(paidOrders * 30), average_sales: '30.00' }
 }
 
-export function merma(cambios: Partial<WasteReport> = {}): WasteReport {
+export function waste(changes: Partial<WasteReport> = {}): WasteReport {
   return {
-    period: PERIODO,
+    period: PERIOD,
     events: 5,
     total_cost: '82.40',
     pending_classification: 2,
@@ -150,47 +150,47 @@ export function merma(cambios: Partial<WasteReport> = {}): WasteReport {
       { cause: null, label: 'Sin clasificar', events: 2, cost: '22.40', share_percent: '27.2' },
     ],
     by_ingredient: [{ ingredient_id: 4, name: 'Pescado', events: 3, quantity: '1.5', unit: 'kg', cost: '60.00' }],
-    ...cambios,
+    ...changes,
   }
 }
 
 /** Todas las respuestas del panel de indicadores, con datos en cada sección. */
-export function reportesDelPanel(): Record<string, unknown> {
-  const pico = celda(4, 20, 9)
+export function panelReports(): Record<string, unknown> {
+  const peak = cell(4, 20, 9)
   return {
-    '/insights/summary': resumenDeVentas(),
+    '/insights/summary': salesSummary(),
     '/insights/sales/daily': {
-      period: PERIODO,
+      period: PERIOD,
       days: [
         { date: '2026-09-25', sales: '400.00', paid_orders: 12, average_ticket: '33.33' },
         { date: '2026-09-26', sales: '834.50', paid_orders: 28, average_ticket: '29.80' },
       ],
     },
-    '/insights/sales/hourly': { period: PERIODO, cells: [celda(4, 19, 3), pico, celda(5, 13, 0)], peak: pico },
-    '/insights/dishes/top': { period: PERIODO, dishes: [{ menu_item_id: 1, name: 'Ceviche', quantity: 18, revenue: '540.00' }] },
+    '/insights/sales/hourly': { period: PERIOD, cells: [cell(4, 19, 3), peak, cell(5, 13, 0)], peak },
+    '/insights/dishes/top': { period: PERIOD, dishes: [{ menu_item_id: 1, name: 'Ceviche', quantity: 18, revenue: '540.00' }] },
     '/insights/payments': {
-      period: PERIODO,
+      period: PERIOD,
       total: '1234.50',
       methods: [{ method: 'yape', label: 'Yape', paid_orders: 25, amount: '800.00', share_percent: '64.8' }],
     },
     '/insights/dishes/margins': {
-      period: PERIODO,
+      period: PERIOD,
       dishes: [
-        margen({ menu_item_id: 1, name: 'Ceviche', recipe_cost: '12.00', margin_percent: '60', gross_margin: '324.00' }),
-        margen({ menu_item_id: 2, name: 'Chicha', recipe_cost: null, margin_percent: null, gross_margin: null }),
-        margen({ menu_item_id: 3, name: 'Promo', recipe_cost: '35.00', margin_percent: '-16.7', gross_margin: '-5.00' }),
+        margin({ menu_item_id: 1, name: 'Ceviche', recipe_cost: '12.00', margin_percent: '60', gross_margin: '324.00' }),
+        margin({ menu_item_id: 2, name: 'Chicha', recipe_cost: null, margin_percent: null, gross_margin: null }),
+        margin({ menu_item_id: 3, name: 'Promo', recipe_cost: '35.00', margin_percent: '-16.7', gross_margin: '-5.00' }),
       ],
     },
     '/insights/waiters': {
-      period: PERIODO,
+      period: PERIOD,
       waiters: [{ waiter_id: 8, name: 'Luis Rojas', paid_orders: 22, sales: '700.00', average_ticket: '31.82', cancelled_orders: 1, tips: '20.00' }],
     },
     '/insights/low-stock': [{ ingredient_id: 4, name: 'Limón', stock: '0.5', min_stock: '2', missing: '1.5', unit: 'kg' }],
-    '/insights/waste': merma(),
+    '/insights/waste': waste(),
   }
 }
 
-export function margen(cambios: Partial<DishMargin>): DishMargin {
+export function margin(changes: Partial<DishMargin>): DishMargin {
   return {
     menu_item_id: 1,
     name: 'Plato',
@@ -203,6 +203,6 @@ export function margen(cambios: Partial<DishMargin>): DishMargin {
     unit_margin: null,
     margin_percent: null,
     gross_margin: null,
-    ...cambios,
+    ...changes,
   }
 }

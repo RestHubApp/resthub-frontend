@@ -7,7 +7,7 @@ interface InvoiceSheetProps {
   readonly timeZone: string
 }
 
-const FILA = 'flex justify-between gap-2'
+const ROW = 'flex justify-between gap-2'
 
 /**
  * La representación impresa del comprobante electrónico, en 80 mm.
@@ -36,7 +36,7 @@ export function InvoiceSheet({ invoice, settings, timeZone }: InvoiceSheetProps)
       <hr className="my-1 border-dashed border-black" />
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {invoice.lines.map((line) => (
-          <li key={`${line.description}-${line.unit_price}`} className={FILA}>
+          <li key={`${line.description}-${line.unit_price}`} className={ROW}>
             <span>{line.quantity} × {line.description}</span>
             <span className="tabular-nums">{formatMoney(line.total)}</span>
           </li>
@@ -44,11 +44,11 @@ export function InvoiceSheet({ invoice, settings, timeZone }: InvoiceSheetProps)
       </ul>
       <hr className="my-1 border-dashed border-black" />
       {toCents(invoice.discount) > 0 ? (
-        <p className={`m-0 ${FILA}`}><span>Descuento</span><span>− {formatMoney(invoice.discount)}</span></p>
+        <p className={`m-0 ${ROW}`}><span>Descuento</span><span>− {formatMoney(invoice.discount)}</span></p>
       ) : null}
-      <p className={`m-0 ${FILA}`}><span>Op. gravada</span><span>{formatMoney(invoice.taxable)}</span></p>
-      <p className={`m-0 ${FILA}`}><span>IGV {formatPercent(invoice.igv_rate)}</span><span>{formatMoney(invoice.igv)}</span></p>
-      <p className={`m-0 ${FILA} text-base font-bold`}><span>Total</span><span>{formatMoney(invoice.total)}</span></p>
+      <p className={`m-0 ${ROW}`}><span>Op. gravada</span><span>{formatMoney(invoice.taxable)}</span></p>
+      <p className={`m-0 ${ROW}`}><span>IGV {formatPercent(invoice.igv_rate)}</span><span>{formatMoney(invoice.igv)}</span></p>
+      <p className={`m-0 ${ROW} text-base font-bold`}><span>Total</span><span>{formatMoney(invoice.total)}</span></p>
       <p className="m-0 mt-2 text-center text-xs">
         {invoice.status === 'accepted'
           ? 'Representación impresa del comprobante electrónico aceptado por SUNAT.'

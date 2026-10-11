@@ -9,10 +9,10 @@ interface ActionBadgeProps {
 
 /** La acción sugerida, con ícono y texto: el color nunca va solo. */
 export function ActionBadge({ action, label }: ActionBadgeProps) {
-  const estilo = ACTION_STYLES[action]
+  const style = ACTION_STYLES[action]
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${TONE_BADGE[estilo.tone]}`}>
-      <Icon name={estilo.icon} size={14} />
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${TONE_BADGE[style.tone]}`}>
+      <Icon name={style.icon} size={14} />
       {label}
     </span>
   )

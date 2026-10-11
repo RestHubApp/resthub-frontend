@@ -32,17 +32,17 @@ interface RecipeEditorProps {
  * Sin ningún insumo, guardar borra la receta.
  */
 export function RecipeEditor({ recipe, ingredients, canManage }: RecipeEditorProps) {
-  const catalogo = recipeCatalog(ingredients, recipe)
+  const catalog = recipeCatalog(ingredients, recipe)
   const { register, handleSubmit, formState, control, reset } = useForm<RecipeValues>({
     resolver: zodResolver(recipeSchema),
     defaultValues: recipeValuesOf(recipe),
   })
   const { fields, append, remove } = useFieldArray({ control, name: 'lines' })
-  const lineas = useWatch({ control, name: 'lines' })
-  const disponibles = availableIngredients(ingredients, lineas, catalogo)
+  const lines = useWatch({ control, name: 'lines' })
+  const available = availableIngredients(ingredients, lines, catalog)
 
-  const guardar = useSaveRecipe(recipe.menu_item_id, (nueva) => {
-    reset(recipeValuesOf(nueva))
+  const save = useSaveRecipe(recipe.menu_item_id, (fresh) => {
+    reset(recipeValuesOf(fresh))
   })
 
   return (
@@ -50,12 +50,12 @@ export function RecipeEditor({ recipe, ingredients, canManage }: RecipeEditorPro
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          guardar.mutate(valores)
+        handleSubmit((values) => {
+          save.mutate(values)
         }),
       )}
     >
-      <RecipeTotals price={Number(recipe.price)} cost={recipeCost(lineas, catalogo)} hasLines={lineas.length > 0} />
+      <RecipeTotals price={Number(recipe.price)} cost={recipeCost(lines, catalog)} hasLines={lines.length > 0} />
 
       <section aria-labelledby="receta-insumos" className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 ring-foreground/10 sm:p-5">
         <h2 id="receta-insumos" className="m-0 font-heading text-lg font-semibold">
@@ -67,19 +67,19 @@ export function RecipeEditor({ recipe, ingredients, canManage }: RecipeEditorPro
           </p>
         ) : (
           <ul className="m-0 list-none divide-y p-0">
-            {fields.map((campo, indice) => {
-              const insumo = catalogo.get(campo.ingredient_id)
-              return insumo === undefined ? null : (
+            {fields.map((field, index) => {
+              const ingredient = catalog.get(field.ingredient_id)
+              return ingredient === undefined ? null : (
                 <RecipeLineRow
-                  key={campo.id}
-                  index={indice}
-                  ingredient={insumo}
-                  field={register(`lines.${String(indice)}.quantity` as `lines.${number}.quantity`)}
-                  cost={lineCost(lineas[indice]?.quantity ?? '', insumo)}
-                  error={formState.errors.lines?.[indice]?.quantity?.message}
+                  key={field.id}
+                  index={index}
+                  ingredient={ingredient}
+                  field={register(`lines.${String(index)}.quantity` as `lines.${number}.quantity`)}
+                  cost={lineCost(lines[index]?.quantity ?? '', ingredient)}
+                  error={formState.errors.lines?.[index]?.quantity?.message}
                   readOnly={!canManage}
                   onRemove={() => {
-                    remove(indice)
+                    remove(index)
                   }}
                 />
               )
@@ -88,7 +88,7 @@ export function RecipeEditor({ recipe, ingredients, canManage }: RecipeEditorPro
         )}
         {canManage ? (
           <AddRecipeLine
-            options={disponibles}
+            options={available}
             onAdd={(ingredientId) => {
               append({ ingredient_id: ingredientId, quantity: '' }, { focusName: `lines.${String(fields.length)}.quantity` })
             }}
@@ -96,15 +96,15 @@ export function RecipeEditor({ recipe, ingredients, canManage }: RecipeEditorPro
         ) : null}
       </section>
 
-      {guardar.isError ? (
-        <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudo guardar la receta.')}</FormMessage>
+      {save.isError ? (
+        <FormMessage tone="error">{errorMessage(save.error, 'No se pudo guardar la receta.')}</FormMessage>
       ) : null}
       {canManage ? (
         <RecipeFooter
-          empty={lineas.length === 0}
+          empty={lines.length === 0}
           hadRecipe={recipe.has_recipe}
           dirty={formState.isDirty}
-          pending={guardar.isPending}
+          pending={save.isPending}
         />
       ) : null}
     </form>

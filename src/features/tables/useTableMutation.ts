@@ -34,9 +34,9 @@ export function useTableMutation<TVariables, TResult>({
 
   return useMutation({
     mutationFn,
-    onSuccess: (resultado) => {
+    onSuccess: (result) => {
       if (updateCache !== undefined) {
-        queryClient.setQueryData(tablesQuery(true).queryKey, (mesas) => mesas && updateCache(mesas, resultado))
+        queryClient.setQueryData(tablesQuery(true).queryKey, (tables) => tables && updateCache(tables, result))
       }
       void queryClient.invalidateQueries({ queryKey: tablesQueryKey })
       if (success !== undefined) {

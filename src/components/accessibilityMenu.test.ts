@@ -3,12 +3,12 @@ import { waitFor } from '@testing-library/react'
 
 import { openAccessibilityMenu } from './accessibilityMenu'
 
-function botonDelWidget(): { boton: HTMLAnchorElement; clic: jest.Mock } {
-  const boton = document.createElement('a')
-  boton.className = 'asw-menu-btn'
-  const clic = jest.fn()
-  boton.addEventListener('click', clic)
-  return { boton, clic }
+function widgetButton(): { button: HTMLAnchorElement; click: jest.Mock } {
+  const button = document.createElement('a')
+  button.className = 'asw-menu-btn'
+  const click = jest.fn()
+  button.addEventListener('click', click)
+  return { button, click }
 }
 
 describe('openAccessibilityMenu', () => {
@@ -17,26 +17,26 @@ describe('openAccessibilityMenu', () => {
   })
 
   it('con el widget ya cargado, toca su botón', () => {
-    const { boton, clic } = botonDelWidget()
-    document.body.append(boton)
+    const { button, click } = widgetButton()
+    document.body.append(button)
 
     openAccessibilityMenu()
 
-    expect(clic).toHaveBeenCalledTimes(1)
+    expect(click).toHaveBeenCalledTimes(1)
   })
 
   it('si el widget todavía no cargó, lo carga y abre el menú cuando aparece su botón', async () => {
-    const { boton, clic } = botonDelWidget()
+    const { button, click } = widgetButton()
 
     openAccessibilityMenu()
-    expect(clic).not.toHaveBeenCalled()
+    expect(click).not.toHaveBeenCalled()
     // El widget dibuja su botón un momento después de importarse.
     window.setTimeout(() => {
-      document.body.append(boton)
+      document.body.append(button)
     }, 120)
 
     await waitFor(() => {
-      expect(clic).toHaveBeenCalledTimes(1)
+      expect(click).toHaveBeenCalledTimes(1)
     })
   })
 })

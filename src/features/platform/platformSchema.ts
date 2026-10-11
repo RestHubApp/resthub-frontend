@@ -7,10 +7,10 @@ import type {
 } from '@/api/types'
 import { DEFAULT_TIME_ZONE } from '@/services/format'
 import {
-  correoRule,
-  MAX_NOMBRE_COMPLETO,
+  emailRule,
+  MAX_COMPLETE_NAME,
   MAX_PASSWORD,
-  nombreRule,
+  nameRule,
   passwordRule,
 } from '@/services/fieldRules'
 import { MAX_SLUG, SLUG_PATTERN } from './slug'
@@ -21,7 +21,7 @@ import { isValidTimeZone } from './timeZones'
 const MAX_RESTAURANT_NAME = 120
 
 export const platformLoginSchema = z.object({
-  email: correoRule,
+  email: emailRule,
   // Al entrar no se exige el mínimo: el servidor ya dice si no coincide. El
   // máximo sí, porque el servidor rechaza una más larga antes de mirarla.
   password: z
@@ -50,17 +50,17 @@ const slugRule = z
  * no se vuelve a validar, así una zona guardada que este navegador no conoce
  * no impide cambiarle el nombre.
  */
-function timeZoneRule(sinCambio?: string) {
+function timeZoneRule(withoutChange?: string) {
   return z
     .string()
     .min(1, 'Elige la zona horaria')
-    .refine((zona) => zona === sinCambio || isValidTimeZone(zona), 'Elige una zona horaria de la lista')
+    .refine((zone) => zone === withoutChange || isValidTimeZone(zone), 'Elige una zona horaria de la lista')
 }
 
 /** Un encargado: la primera cuenta del restaurante o una más. */
 export const ownerSchema = z.object({
-  full_name: nombreRule('nombre completo', MAX_NOMBRE_COMPLETO, 'el'),
-  email: correoRule,
+  full_name: nameRule('nombre completo', MAX_COMPLETE_NAME, 'el'),
+  email: emailRule,
   password: passwordRule,
 })
 
@@ -120,12 +120,12 @@ export function settingsPayload(
   edited: EditedSettings,
   current: PlatformRestaurantDetail,
 ): UpdatePlatformRestaurantRequest {
-  const cambios: UpdatePlatformRestaurantRequest = {}
+  const changes: UpdatePlatformRestaurantRequest = {}
   if (edited.name === true && values.name !== current.name) {
-    cambios.name = values.name
+    changes.name = values.name
   }
   if (edited.timezone === true && values.timezone !== current.timezone) {
-    cambios.timezone = values.timezone
+    changes.timezone = values.timezone
   }
-  return cambios
+  return changes
 }

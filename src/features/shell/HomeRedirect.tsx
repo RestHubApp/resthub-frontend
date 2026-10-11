@@ -18,6 +18,6 @@ export function HomeRedirect() {
   if (account === null) {
     return <Navigate to={paths.login} replace />
   }
-  const primera = entriesFor(screens, account.permissions).at(0)
-  return <Navigate to={primera?.to ?? paths.profile} replace />
+  const first = entriesFor(screens, account.permissions).at(0)
+  return <Navigate to={first?.to ?? paths.profile} replace />
 }

@@ -34,7 +34,7 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
     const controller = new AbortController()
     let timer: number | undefined
 
-    const reintentar = (error?: unknown) => {
+    const retry = (error?: unknown) => {
       if (controller.signal.aborted) {
         return
       }
@@ -42,10 +42,10 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
         return
       }
       eventLogger.warn({ err: error, topic }, 'realtime.disconnected')
-      timer = window.setTimeout(conectar, RETRY_MS)
+      timer = window.setTimeout(connect, RETRY_MS)
     }
 
-    function conectar(): void {
+    function connect(): void {
       readEventStream({
         url: `${api.defaults.baseURL ?? ''}/events`,
         token: token ?? '',
@@ -56,11 +56,11 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
           }
         },
       }).then(() => {
-        reintentar()
-      }, reintentar)
+        retry()
+      }, retry)
     }
 
-    conectar()
+    connect()
     return () => {
       controller.abort()
       window.clearTimeout(timer)

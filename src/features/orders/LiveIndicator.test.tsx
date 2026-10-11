@@ -11,10 +11,10 @@ describe('LiveIndicator', () => {
     ['connecting', 'Conectando…'],
     ['live', 'En vivo'],
     ['offline', 'Sin conexión · reintentando'],
-  ] as const)('con el canal %s anuncia «%s»', (estado, texto) => {
-    render(<LiveIndicator status={estado} />)
+  ] as const)('con el canal %s anuncia «%s»', (status, text) => {
+    render(<LiveIndicator status={status} />)
 
-    expect(screen.getByRole('status')).toHaveTextContent(texto)
+    expect(screen.getByRole('status')).toHaveTextContent(text)
   })
 })
 
@@ -28,12 +28,12 @@ describe('OrderStatusBadge', () => {
 
 describe('QueryError', () => {
   it('muestra el texto de respaldo si el error no trae detalle y reintenta al tocar', async () => {
-    const reintentar = jest.fn()
-    render(<QueryError error={new Error('red')} fallback="No se pudo cargar el pedido." onRetry={reintentar} />)
+    const retry = jest.fn()
+    render(<QueryError error={new Error('red')} fallback="No se pudo cargar el pedido." onRetry={retry} />)
 
     expect(screen.getByText('No se pudo cargar el pedido.')).toBeInTheDocument()
     await userEvent.setup().click(screen.getByRole('button', { name: 'Reintentar' }))
 
-    expect(reintentar).toHaveBeenCalledTimes(1)
+    expect(retry).toHaveBeenCalledTimes(1)
   })
 })

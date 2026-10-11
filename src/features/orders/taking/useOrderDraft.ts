@@ -36,11 +36,11 @@ const EMPTY: readonly DraftLine[] = []
 
 /** La clave de una línea: el plato y sus opciones, en un orden fijo. */
 export function lineKeyFor(menuItemId: number, modifiers: readonly DraftModifier[] = []): string {
-  const firma = modifiers
+  const signature = modifiers
     .map((modifier) => `${modifier.group}:${modifier.option}`)
     .sort((a, b) => a.localeCompare(b))
     .join('|')
-  return firma === '' ? String(menuItemId) : `${String(menuItemId)}|${firma}`
+  return signature === '' ? String(menuItemId) : `${String(menuItemId)}|${signature}`
 }
 
 function update(
@@ -58,7 +58,7 @@ function update(
 }
 
 function newLine(item: OrderMenuItem, modifiers: readonly DraftModifier[]): DraftLine {
-  const extra = modifiers.reduce((suma, modifier) => suma + toCents(modifier.price), 0)
+  const extra = modifiers.reduce((sum, modifier) => sum + toCents(modifier.price), 0)
   return {
     lineKey: lineKeyFor(item.id, modifiers),
     menuItemId: item.id,
@@ -84,8 +84,8 @@ const useDraftStore = create<DraftState>((set) => ({
     set((state) => {
       const lines = state.drafts[key] ?? EMPTY
       const lineKey = lineKeyFor(item.id, modifiers)
-      const exists = lines.some((line) => line.lineKey === lineKey)
-      const next = exists
+      const isExisting = lines.some((line) => line.lineKey === lineKey)
+      const next = isExisting
         ? update(lines, lineKey, (line) => ({
             ...line,
             quantity: Math.min(line.quantity + 1, MAX_QUANTITY),

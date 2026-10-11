@@ -12,12 +12,12 @@ interface TodaySummaryProps {
  * usa lector de pantalla oye el efecto del interruptor.
  */
 export function TodaySummary({ categories }: TodaySummaryProps) {
-  const enCarta = categories
-    .filter((categoria) => categoria.is_active)
-    .flatMap((categoria) => categoria.items)
-    .filter((plato) => plato.is_active)
-  const agotados = enCarta.filter((plato) => !plato.is_available)
-  const disponibles = enCarta.length - agotados.length
+  const inMenu = categories
+    .filter((category) => category.is_active)
+    .flatMap((category) => category.items)
+    .filter((dish) => dish.is_active)
+  const outOfStock = inMenu.filter((dish) => !dish.is_available)
+  const available = inMenu.length - outOfStock.length
 
   return (
     <div
@@ -25,12 +25,12 @@ export function TodaySummary({ categories }: TodaySummaryProps) {
       className="flex flex-col gap-1 rounded-xl bg-card px-5 py-4 shadow-sm ring-1 ring-foreground/10 sm:flex-row sm:items-baseline sm:gap-4"
     >
       <p className="m-0 text-base font-semibold">
-        Hoy: {disponibles} de {enCarta.length} platos disponibles
+        Hoy: {available} de {inMenu.length} platos disponibles
       </p>
       <p className="m-0 text-sm text-muted-foreground">
-        {agotados.length === 0
+        {outOfStock.length === 0
           ? 'No hay nada agotado.'
-          : `Agotado hoy: ${agotados.map((plato) => plato.name).join(', ')}.`}
+          : `Agotado hoy: ${outOfStock.map((dish) => dish.name).join(', ')}.`}
       </p>
     </div>
   )

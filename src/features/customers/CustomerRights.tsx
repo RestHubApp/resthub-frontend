@@ -9,13 +9,13 @@ import { errorMessage } from '@/services/api'
 import { useNotifications } from '@/store/notifications'
 
 /** Entrega el archivo al navegador, como cualquier descarga. */
-function descargar(datos: CustomerExport, customerId: number): void {
-  const archivo = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' })
-  const enlace = document.createElement('a')
-  enlace.href = URL.createObjectURL(archivo)
-  enlace.download = `cliente-${String(customerId)}-datos.json`
-  enlace.click()
-  URL.revokeObjectURL(enlace.href)
+function download(data: CustomerExport, customerId: number): void {
+  const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(file)
+  link.download = `cliente-${String(customerId)}-datos.json`
+  link.click()
+  URL.revokeObjectURL(link.href)
 }
 
 interface CustomerRightsProps {
@@ -34,13 +34,13 @@ interface CustomerRightsProps {
 export function CustomerRights({ customer, onErased }: CustomerRightsProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const exportar = useMutation({
+  const exportAction = useMutation({
     mutationFn: () => exportCustomer(customer.id),
-    onSuccess: (datos) => {
-      descargar(datos, customer.id)
+    onSuccess: (data) => {
+      download(data, customer.id)
     },
   })
-  const borrar = useMutation({
+  const remove = useMutation({
     mutationFn: () => anonymizeCustomer(customer.id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: customersQueryKey })
@@ -48,7 +48,7 @@ export function CustomerRights({ customer, onErased }: CustomerRightsProps) {
       onErased()
     },
   })
-  const fallo = exportar.error ?? borrar.error
+  const failure = exportAction.error ?? remove.error
 
   return (
     <section aria-labelledby="derechos-titulo" className="flex flex-col gap-2 border-t pt-4">
@@ -56,23 +56,23 @@ export function CustomerRights({ customer, onErased }: CustomerRightsProps) {
       <p className="m-0 text-sm text-muted-foreground">
         Si el cliente lo pide, descarga lo que se guarda de él o bórralo (Ley N.º 29733).
       </p>
-      {fallo === null ? null : <FormMessage tone="error">{errorMessage(fallo, 'No se pudo completar.')}</FormMessage>}
+      {failure === null ? null : <FormMessage tone="error">{errorMessage(failure, 'No se pudo completar.')}</FormMessage>}
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
           variant="outline"
           size="lg"
           className="h-11"
-          disabled={exportar.isPending}
+          disabled={exportAction.isPending}
           onClick={() => {
-            exportar.mutate()
+            exportAction.mutate()
           }}
         >
-          {exportar.isPending ? 'Preparando…' : 'Descargar sus datos'}
+          {exportAction.isPending ? 'Preparando…' : 'Descargar sus datos'}
         </Button>
         <ConfirmDialog
           trigger={
-            <Button type="button" variant="destructive" size="lg" className="h-11" disabled={borrar.isPending}>
+            <Button type="button" variant="destructive" size="lg" className="h-11" disabled={remove.isPending}>
               Borrar sus datos
             </Button>
           }
@@ -80,7 +80,7 @@ export function CustomerRights({ customer, onErased }: CustomerRightsProps) {
           description="Se borran su nombre, teléfono, correo, dirección y notas de la libreta, de sus pedidos y de sus reservas. Sus ventas siguen contando y los comprobantes se conservan, como pide la ley tributaria. No se puede deshacer."
           confirmLabel="Borrar sus datos"
           onConfirm={() => {
-            borrar.mutate()
+            remove.mutate()
           }}
         />
       </div>

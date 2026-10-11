@@ -2,29 +2,29 @@ import { z } from 'zod'
 
 import type { Reservation, ReservationRequest, ReservationStatus } from '@/api/types'
 import type { StatusTone } from '@/components/StatusBadge'
-import { textoOpcional } from '@/components/formRules'
+import { textOptional } from '@/components/formRules'
 import { wallClockIn, zonedInstant } from '@/services/format'
 
 // Los topes repiten los del backend (`reservations/domain/reservations.py`).
-export const LIMITES = { name: 80, phone: 20, notes: 300, party: 50, minDuration: 30, maxDuration: 360 } as const
-const DURACION_POR_DEFECTO = 120
+export const LIMITS = { name: 80, phone: 20, notes: 300, party: 50, minDuration: 30, maxDuration: 360 } as const
+const DEFAULT_DURATION = 120
 
-const entero = (min: number, max: number, que: string) =>
+const integer = (min: number, max: number, that: string) =>
   z
     .string()
     .trim()
-    .regex(/^\d+$/u, `Escribe ${que} en números`)
-    .refine((valor) => Number(valor) >= min && Number(valor) <= max, `Entre ${String(min)} y ${String(max)}`)
+    .regex(/^\d+$/u, `Escribe ${that} en números`)
+    .refine((value) => Number(value) >= min && Number(value) <= max, `Entre ${String(min)} y ${String(max)}`)
 
 export const reservationSchema = z.object({
-  customer_name: z.string().trim().min(1, 'Escribe a nombre de quién').max(LIMITES.name, `Usa como máximo ${String(LIMITES.name)} caracteres`),
-  phone: textoOpcional(LIMITES.phone),
-  party_size: entero(1, LIMITES.party, 'cuántos vienen'),
+  customer_name: z.string().trim().min(1, 'Escribe a nombre de quién').max(LIMITS.name, `Usa como máximo ${String(LIMITS.name)} caracteres`),
+  phone: textOptional(LIMITS.phone),
+  party_size: integer(1, LIMITS.party, 'cuántos vienen'),
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, 'Elige el día'),
   time: z.string().regex(/^\d{2}:\d{2}$/u, 'Elige la hora'),
-  duration_minutes: entero(LIMITES.minDuration, LIMITES.maxDuration, 'los minutos'),
+  duration_minutes: integer(LIMITS.minDuration, LIMITS.maxDuration, 'los minutos'),
   table_id: z.string(),
-  notes: textoOpcional(LIMITES.notes),
+  notes: textOptional(LIMITS.notes),
 })
 
 export type ReservationValues = z.infer<typeof reservationSchema>
@@ -37,18 +37,18 @@ export function reservationDefaults(reservation: Reservation | null, day: string
       party_size: '2',
       day,
       time: '20:00',
-      duration_minutes: String(DURACION_POR_DEFECTO),
+      duration_minutes: String(DEFAULT_DURATION),
       table_id: '',
       notes: '',
     }
   }
-  const reloj = wallClockIn(reservation.reserved_for, timeZone)
+  const clock = wallClockIn(reservation.reserved_for, timeZone)
   return {
     customer_name: reservation.customer_name,
     phone: reservation.phone,
     party_size: String(reservation.party_size),
-    day: reloj.day,
-    time: reloj.time,
+    day: clock.day,
+    time: clock.time,
     duration_minutes: String(reservation.duration_minutes),
     table_id: reservation.table_id === null ? '' : String(reservation.table_id),
     notes: reservation.notes,

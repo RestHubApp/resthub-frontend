@@ -29,7 +29,7 @@ export function CategorySection({
   onAddItem,
 }: CategorySectionProps) {
   const headingId = useId()
-  const ultimo = category.items.length - 1
+  const last = category.items.length - 1
 
   return (
     <section aria-labelledby={headingId}>
@@ -48,16 +48,16 @@ export function CategorySection({
           </p>
         ) : (
           <ul className="m-0 list-none divide-y p-0">
-            {category.items.map((plato, indice) => (
+            {category.items.map((dish, index) => (
               <MenuItemRow
-                key={plato.id}
-                item={plato}
-                cost={costs.get(plato.id)}
+                key={dish.id}
+                item={dish}
+                cost={costs.get(dish.id)}
                 categories={categories}
-                isFirst={indice === 0}
-                isLast={indice === ultimo}
+                isFirst={index === 0}
+                isLast={index === last}
                 onMove={(direction) => {
-                  onMoveItem(plato.id, direction)
+                  onMoveItem(dish.id, direction)
                 }}
               />
             ))}

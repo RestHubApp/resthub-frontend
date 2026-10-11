@@ -22,8 +22,8 @@ export function FilterSelect<T extends string>({ label, value, options, allLabel
         id={id}
         value={value}
         onChange={(event) => {
-          const elegido = options.find((option) => option.value === event.target.value)
-          onChange(elegido?.value ?? '')
+          const selected = options.find((option) => option.value === event.target.value)
+          onChange(selected?.value ?? '')
         }}
         className="min-w-44"
       >

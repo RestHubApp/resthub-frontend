@@ -18,13 +18,13 @@ interface RoleFormDialogProps {
   readonly onOpenChange: (open: boolean) => void
 }
 
-const DESCRIPCIONES: Record<RoleAccess, string> = {
+const DESCRIPTIONS: Record<RoleAccess, string> = {
   edit: 'Lo que cambies vale para todas las personas que tienen este rol.',
   fixed: 'El encargado siempre tiene todos los permisos y su rol no se cambia.',
   beyond: 'Tiene permisos que tu cuenta no tiene, así que solo puedes mirarlo.',
 }
 
-function titulo(role: Role | null, access: RoleAccess): string {
+function title(role: Role | null, access: RoleAccess): string {
   if (role === null) {
     return 'Nuevo rol'
   }
@@ -34,9 +34,9 @@ function titulo(role: Role | null, access: RoleAccess): string {
 /** Crear un rol, cambiar sus permisos o, si no se puede cambiar, verlos. */
 export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps) {
   const granted = usePermissions()
-  const catalogo = useQuery({ ...permissionsQuery(), select: groupPermissions, enabled: open })
+  const catalog = useQuery({ ...permissionsQuery(), select: groupPermissions, enabled: open })
   const access = role === null ? 'edit' : roleAccess(role, granted)
-  const cerrar = () => {
+  const close = () => {
     onOpenChange(false)
   }
 
@@ -44,16 +44,16 @@ export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={titulo(role, access)}
-      description={role === null ? 'Ponle un nombre y elige qué puede hacer quien lo tenga.' : DESCRIPCIONES[access]}
+      title={title(role, access)}
+      description={role === null ? 'Ponle un nombre y elige qué puede hacer quien lo tenga.' : DESCRIPTIONS[access]}
       size="lg"
     >
-      {catalogo.isPending ? <ListSkeleton label="Cargando permisos…" count={6} itemClassName="h-11 rounded-lg" /> : null}
-      {catalogo.isError ? (
-        <FormMessage tone="error">{errorMessage(catalogo.error, 'No se pudieron cargar los permisos.')}</FormMessage>
+      {catalog.isPending ? <ListSkeleton label="Cargando permisos…" count={6} itemClassName="h-11 rounded-lg" /> : null}
+      {catalog.isError ? (
+        <FormMessage tone="error">{errorMessage(catalog.error, 'No se pudieron cargar los permisos.')}</FormMessage>
       ) : null}
-      {catalogo.isSuccess ? (
-        <RoleForm role={role} groups={catalogo.data} readOnly={access !== 'edit'} onDone={cerrar} />
+      {catalog.isSuccess ? (
+        <RoleForm role={role} groups={catalog.data} readOnly={access !== 'edit'} onDone={close} />
       ) : null}
     </FormDialog>
   )

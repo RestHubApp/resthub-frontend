@@ -17,8 +17,8 @@ import { KIND_TONES } from './movementKinds'
 import { formatUnitCost } from './units'
 import { useIngredients } from './useIngredients'
 
-const POR_PAGINA = 20
-function columnas(timeZone: string): DataColumn<Movement>[] {
+const BY_PAGE = 20
+function buildColumns(timeZone: string): DataColumn<Movement>[] {
   return [
   { id: 'fecha', header: 'Fecha', className: 'tabular-nums', cell: (mov) => formatDateTime(mov.created_at, timeZone) },
   { id: 'insumo', header: 'Insumo', cell: (mov) => mov.ingredient_name },
@@ -58,51 +58,51 @@ function columnas(timeZone: string): DataColumn<Movement>[] {
 
 /** El libro de movimientos: cada entrada y salida de stock, la más reciente primero. */
 export function MovementsPanel() {
-  const insumos = useIngredients()
+  const ingredients = useIngredients()
   const timeZone = useTimeZone()
-  const columns = useMemo(() => columnas(timeZone), [timeZone])
-  const [insumo, setInsumo] = useState('')
-  const [tipo, setTipo] = useState('')
-  const [pagina, setPagina] = useState(0)
+  const columns = useMemo(() => buildColumns(timeZone), [timeZone])
+  const [ingredient, setIngredient] = useState('')
+  const [type, setType] = useState('')
+  const [page, setPage] = useState(0)
 
   const params: MovementListParams = {
-    limit: POR_PAGINA,
-    offset: pagina * POR_PAGINA,
-    ...(insumo === '' ? {} : { ingredient_id: Number(insumo) }),
-    ...(tipo === '' ? {} : { kind: [tipo as MovementKind] }),
+    limit: BY_PAGE,
+    offset: page * BY_PAGE,
+    ...(ingredient === '' ? {} : { ingredient_id: Number(ingredient) }),
+    ...(type === '' ? {} : { kind: [type as MovementKind] }),
   }
-  const libro = useQuery({ ...movementsQuery(params), placeholderData: keepPreviousData })
-  const paginas = Math.max(1, Math.ceil((libro.data?.total ?? 0) / POR_PAGINA))
+  const book = useQuery({ ...movementsQuery(params), placeholderData: keepPreviousData })
+  const pages = Math.max(1, Math.ceil((book.data?.total ?? 0) / BY_PAGE))
 
   return (
     <div className="flex flex-col gap-4">
       <MovementFilters
-        ingredients={insumos.data ?? []}
-        ingredientId={insumo}
-        onIngredient={(valor) => {
-          setInsumo(valor)
-          setPagina(0)
+        ingredients={ingredients.data ?? []}
+        ingredientId={ingredient}
+        onIngredient={(value) => {
+          setIngredient(value)
+          setPage(0)
         }}
-        kind={tipo}
-        onKind={(valor) => {
-          setTipo(valor)
-          setPagina(0)
+        kind={type}
+        onKind={(value) => {
+          setType(value)
+          setPage(0)
         }}
       />
-      {libro.isError ? (
+      {book.isError ? (
         <FormMessage tone="error">
-          {errorMessage(libro.error, 'No se pudo cargar el libro de movimientos.')}
+          {errorMessage(book.error, 'No se pudo cargar el libro de movimientos.')}
         </FormMessage>
       ) : (
         <DataTable
           columns={columns}
-          data={libro.data?.items ?? []}
-          isLoading={libro.isPending}
+          data={book.data?.items ?? []}
+          isLoading={book.isPending}
           emptyMessage="No hay movimientos con estos filtros."
           getRowId={(mov) => String(mov.id)}
         />
       )}
-      {paginas > 1 ? <TablePagination actual={pagina} total={paginas} onChange={setPagina} /> : null}
+      {pages > 1 ? <TablePagination actual={page} total={pages} onChange={setPage} /> : null}
     </div>
   )
 }

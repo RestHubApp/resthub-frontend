@@ -29,12 +29,12 @@ export function TakeOrder({ target, title, description, notice }: TakeOrderProps
   const key = draftKey(target)
   const lines = useDraftLines(key)
   const { add, setQuantity, setNotes } = useDraftActions()
-  const enviar = useSubmitDraft(target, title)
-  const [resumen, setResumen] = useState(false)
+  const send = useSubmitDraft(target, title)
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false)
   const submitLabel = target.kind === 'add' ? 'Agregar al pedido' : 'Enviar a cocina'
   const submit = () => {
-    setResumen(false)
-    enviar.mutate(lines)
+    setIsSummaryOpen(false)
+    send.mutate(lines)
   }
 
   return (
@@ -59,15 +59,15 @@ export function TakeOrder({ target, title, description, notice }: TakeOrderProps
       <CartBar
         lines={lines}
         submitLabel={submitLabel}
-        pending={enviar.isPending}
+        pending={send.isPending}
         onOpen={() => {
-          setResumen(true)
+          setIsSummaryOpen(true)
         }}
         onSubmit={submit}
       />
       <CartSheet
-        open={resumen}
-        onOpenChange={setResumen}
+        open={isSummaryOpen}
+        onOpenChange={setIsSummaryOpen}
         title={`Resumen · ${title}`}
         lines={lines}
         onQuantity={(lineKey, quantity) => {
@@ -77,7 +77,7 @@ export function TakeOrder({ target, title, description, notice }: TakeOrderProps
           setNotes(key, lineKey, notes)
         }}
         submitLabel={submitLabel}
-        pending={enviar.isPending}
+        pending={send.isPending}
         onSubmit={submit}
       />
     </div>

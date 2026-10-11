@@ -34,15 +34,15 @@ function adjustmentRows(order: OrderResponse): Row[] {
  * Lo que falta va grande: es lo que quien cobra le dice al cliente.
  */
 export function BillSummary({ order }: BillSummaryProps) {
-  const ajustes = adjustmentRows(order)
+  const settings = adjustmentRows(order)
 
   return (
     <div className="flex flex-col gap-2 rounded-lg bg-secondary px-4 py-3 text-secondary-foreground">
-      {ajustes.length === 0 ? null : (
+      {settings.length === 0 ? null : (
         <dl className="m-0 grid grid-cols-2 gap-y-1 text-sm">
           <dt>Platos</dt>
           <dd className="m-0 text-right tabular-nums">{formatMoney(order.subtotal)}</dd>
-          {ajustes.map((row) => (
+          {settings.map((row) => (
             <div key={row.label} className="contents">
               <dt>{row.label}</dt>
               <dd className="m-0 text-right tabular-nums">{row.value}</dd>

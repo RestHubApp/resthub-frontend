@@ -58,7 +58,7 @@ jobs:
   # Análisis estático con Semgrep y búsqueda de secretos en el historial con
   # gitleaks. ESLint security corre en el job de arriba. El detalle y los falsos
   # positivos revisados están en RestHub_Pruebas/07-seguridad/sast.md.
-  seguridad:
+  security:
     name: Seguridad (Semgrep, gitleaks)
     runs-on: ubuntu-latest
     steps:
@@ -221,14 +221,14 @@ jobs:
           uv sync --frozen --directory resthub-backend
 
       - name: Migrar y sembrar la base de pruebas
-        run: bash e2e/servidor/backend.sh --preparar
+        run: bash e2e/server/backend.sh --prepare
 
       - name: Instalar Chromium de Playwright
         run: npx playwright install --with-deps chromium
 
       - name: Pruebas E2E (escritorio y celular a 390 px)
         env:
-          E2E_DB_PREPARADA: '1'
+          E2E_DB_PREPARED: '1'
         run: pnpm test:e2e
 
       - name: Subir el reporte de Playwright
@@ -236,11 +236,11 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reporte-playwright
-          # Las carpetas del reporte empiezan con punto (e2e/.reporte): sin
+          # Las carpetas del reporte empiezan con punto (e2e/.report): sin
           # esto, upload-artifact v4 las descarta como ocultas.
           include-hidden-files: true
           path: |
-            e2e/.reporte
-            e2e/.reporte-cobertura-ui.json
-            e2e/.resultados
+            e2e/.report
+            e2e/.report-coverage-ui.json
+            e2e/.results
           retention-days: 14

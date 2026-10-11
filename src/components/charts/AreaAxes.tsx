@@ -1,5 +1,5 @@
 import { type AreaGeometry, type SeriesPoint } from './areaGeometry'
-import { spreadIndices } from './scale'
+import { spreadIndexes } from './scale'
 
 interface AreaAxesProps {
   readonly geometry: AreaGeometry
@@ -41,7 +41,7 @@ export function AreaAxes({ geometry, points, formatTick, maxXLabels }: AreaAxesP
           </text>
         </g>
       ))}
-      {spreadIndices(points.length, maxXLabels).map((index) => (
+      {spreadIndexes(points.length, maxXLabels).map((index) => (
         <text
           key={points[index]?.key}
           x={x(index)}

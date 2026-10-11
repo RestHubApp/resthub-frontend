@@ -13,7 +13,7 @@ interface CashAmountFieldProps {
   readonly onQuick: (amount: string) => void
 }
 
-const BILLETES = [50, 100, 200] as const
+const BILLS = [50, 100, 200] as const
 const CENTS = 100
 
 /**
@@ -34,7 +34,7 @@ export function CashAmountField({
       <TextField
         id="monto-recibido"
         label="Monto recibido"
-        icon="pago"
+        icon="payment"
         inputMode="decimal"
         autoComplete="off"
         placeholder={centsToApi(totalCents)}
@@ -48,18 +48,18 @@ export function CashAmountField({
         }}>
           Monto exacto
         </Button>
-        {BILLETES.map((billete) => (
+        {BILLS.map((bill) => (
           <Button
-            key={billete}
+            key={bill}
             type="button"
             variant="outline"
             className="h-11"
-            disabled={billete * CENTS < totalCents}
+            disabled={bill * CENTS < totalCents}
             onClick={() => {
-              onQuick(String(billete))
+              onQuick(String(bill))
             }}
           >
-            {formatCents(billete * CENTS)}
+            {formatCents(bill * CENTS)}
           </Button>
         ))}
       </div>

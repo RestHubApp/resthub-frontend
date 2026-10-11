@@ -14,8 +14,8 @@ export function HeatmapLegend({ max, unit }: HeatmapLegendProps) {
       <span className="flex items-center gap-1.5">
         <span>Menos</span>
         <span className="flex gap-0.5" aria-hidden>
-          {Array.from({ length: HEAT_STEPS }, (_, indice) => (
-            <span key={indice} className={SWATCH} style={{ background: heatColor(indice + 1) }} />
+          {Array.from({ length: HEAT_STEPS }, (_, index) => (
+            <span key={index} className={SWATCH} style={{ background: heatColor(index + 1) }} />
           ))}
         </span>
         <span>Más (hasta {max} {unit})</span>

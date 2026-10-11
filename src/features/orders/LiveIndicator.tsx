@@ -32,7 +32,7 @@ export function LiveIndicator({ status }: LiveIndicatorProps) {
           <span className="relative inline-flex size-2.5 rounded-full bg-success" />
         </span>
       ) : (
-        <Icon name={status === 'offline' ? 'sinConexion' : 'enVivo'} size={16} />
+        <Icon name={status === 'offline' ? 'offline' : 'live'} size={16} />
       )}
       <span>{label}</span>
     </p>

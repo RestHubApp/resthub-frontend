@@ -38,7 +38,7 @@ export interface DataColumn<TData extends RowData> {
 }
 
 // Filas de la silueta: las que caben a la vista, no una página entera.
-const FILAS_CARGANDO = 6
+const ROWS_LOADING = 6
 
 const features = tableFeatures({
   rowExpandingFeature,
@@ -94,8 +94,8 @@ export function DataTable<TData extends RowData>({
   renderExpanded,
   pageSize,
 }: DataTableProps<TData>) {
-  const pagina = usePagination(data, pageSize)
-  const rows = useMemo(() => [...pagina.visibles], [pagina.visibles])
+  const page = usePagination(data, pageSize)
+  const rows = useMemo(() => [...page.visible], [page.visible])
   const columnDefs = useMemo(() => columns.map(toColumnDef), [columns])
   const cellClasses = useMemo(
     () => new Map(columns.map((column) => [column.id, column.className ?? ''])),
@@ -111,7 +111,7 @@ export function DataTable<TData extends RowData>({
   })
 
   if (isLoading) {
-    return <DataTableSkeleton headers={columns.map((column) => column.header)} rows={Math.min(pageSize ?? FILAS_CARGANDO, FILAS_CARGANDO)} />
+    return <DataTableSkeleton headers={columns.map((column) => column.header)} rows={Math.min(pageSize ?? ROWS_LOADING, ROWS_LOADING)} />
   }
   if (data.length === 0) {
     return <EmptyState title={emptyMessage} />
@@ -160,8 +160,8 @@ export function DataTable<TData extends RowData>({
         </TableBody>
       </Table>
     </div>
-    {pagina.total > 1 ? (
-      <TablePagination actual={pagina.actual} total={pagina.total} onChange={pagina.irA} />
+    {page.total > 1 ? (
+      <TablePagination actual={page.actual} total={page.total} onChange={page.irA} />
     ) : null}
     </div>
   )

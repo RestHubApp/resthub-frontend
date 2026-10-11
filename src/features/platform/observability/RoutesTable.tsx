@@ -14,8 +14,8 @@ interface RoutesTableProps {
   readonly filters: ObsFilters
 }
 
-const NUMERO = 'px-3 py-2 text-right tabular-nums'
-const ENLACE =
+const NUMBER = 'px-3 py-2 text-right tabular-nums'
+const LINK =
   'rounded font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
 
 function p95(route: ObsRouteStats): string {
@@ -27,7 +27,7 @@ function p95(route: ObsRouteStats): string {
  * sus errores y sus tiempos. Cada una enlaza a sus peticiones.
  */
 export function RoutesTable({ routes, sort, onSort, filters }: RoutesTableProps) {
-  const [peticiones, p95Col, errores] = ROUTE_SORTS
+  const [requests, p95Col, errors] = ROUTE_SORTS
   return (
     <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
       <Table>
@@ -35,8 +35,8 @@ export function RoutesTable({ routes, sort, onSort, filters }: RoutesTableProps)
         <TableHeader>
           <TableRow>
             <TableHead className="px-3">Ruta</TableHead>
-            <SortHeader column={peticiones.value} label={peticiones.label} sort={sort} onSort={onSort} />
-            <SortHeader column={errores.value} label={errores.label} sort={sort} onSort={onSort} />
+            <SortHeader column={requests.value} label={requests.label} sort={sort} onSort={onSort} />
+            <SortHeader column={errors.value} label={errors.label} sort={sort} onSort={onSort} />
             <TableHead className="px-3 text-right">p50</TableHead>
             <SortHeader column={p95Col.value} label={p95Col.label} sort={sort} onSort={onSort} />
             <TableHead className="px-3 text-right">Base (media)</TableHead>
@@ -48,20 +48,20 @@ export function RoutesTable({ routes, sort, onSort, filters }: RoutesTableProps)
               <TableCell className="px-3 py-2 whitespace-normal">
                 <Link
                   to={{ search: requestsOfRoute(filters, route.route).toString(), hash: 'peticiones' }}
-                  className={ENLACE}
+                  className={LINK}
                   aria-label={`Ver peticiones de ${route.method} ${route.route}`}
                 >
                   <span className="mr-2 font-mono text-xs text-muted-foreground">{route.method}</span>
                   <code className="text-sm break-all">{route.route}</code>
                 </Link>
               </TableCell>
-              <TableCell className={NUMERO}>{formatInteger(route.requests)}</TableCell>
-              <TableCell className={`${NUMERO} ${route.errors_5xx > 0 ? 'font-semibold text-destructive' : ''}`}>
+              <TableCell className={NUMBER}>{formatInteger(route.requests)}</TableCell>
+              <TableCell className={`${NUMBER} ${route.errors_5xx > 0 ? 'font-semibold text-destructive' : ''}`}>
                 {formatInteger(route.errors_5xx)}
               </TableCell>
-              <TableCell className={NUMERO}>{formatMilliseconds(route.p50_ms)}</TableCell>
-              <TableCell className={NUMERO}>{p95(route)}</TableCell>
-              <TableCell className={NUMERO}>{formatMilliseconds(route.avg_db_ms)}</TableCell>
+              <TableCell className={NUMBER}>{formatMilliseconds(route.p50_ms)}</TableCell>
+              <TableCell className={NUMBER}>{p95(route)}</TableCell>
+              <TableCell className={NUMBER}>{formatMilliseconds(route.avg_db_ms)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

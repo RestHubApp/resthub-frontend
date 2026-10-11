@@ -44,14 +44,14 @@ function keyOf(orderId: number, orderItemId: number | null): string {
  * distintivo de alergia.
  */
 export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNoteFlagsOptions = {}): OrderNoteFlags {
-  const { enabled = true, live = true, classifyPending = true } = options
+  const { enabled: isEnabled = true, live: isLive = true, classifyPending: isClassifyPending = true } = options
   const queryClient = useQueryClient()
   const ids = useMemo(() => [...new Set(orderIds)].sort((a, b) => a - b).slice(0, MAX_ORDER_NOTES_ORDERS), [orderIds])
-  const activo = enabled && ids.length > 0
+  const isActive = isEnabled && ids.length > 0
 
-  const notas = useQuery({
+  const notes = useQuery({
     ...orderNotesQuery(ids),
-    enabled: activo,
+    enabled: isActive,
     // Al llegar un pedido nuevo cambia la lista de ids: los distintivos de los
     // que ya estaban siguen a la vista mientras se pregunta por la lista nueva.
     placeholderData: keepPreviousData,
@@ -59,47 +59,47 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
 
   useServerEvent('insights', () => {
     void queryClient.invalidateQueries({ queryKey: orderNotesQueryKey })
-  }, activo && live)
+  }, isActive && isLive)
 
-  const { mutate: clasificar, isPending: clasificando } = useMutation({
+  const { mutate: classify, isPending: isClassifying } = useMutation({
     mutationFn: classifyOrderNotes,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: orderNotesQueryKey }),
   })
-  const pedidas = useRef(new Set<string>())
-  const datos = notas.data
+  const ordered = useRef(new Set<string>())
+  const data = notes.data
   // Lo que se conserva de la consulta anterior puede traer pedidos que ya no están.
   const items = useMemo(() => {
-    const vigentes = new Set(ids)
-    return datos?.items.filter((item) => vigentes.has(item.order_id))
-  }, [datos, ids])
+    const current = new Set(ids)
+    return data?.items.filter((item) => current.has(item.order_id))
+  }, [data, ids])
   // Lo pendiente de clasificar; vacio si la pantalla no lo pidio.
-  const pendientes = useMemo(
+  const pending = useMemo(
     () =>
-      classifyPending
+      isClassifyPending
         ? (items ?? []).filter((item) => item.status === 'pending').map((item) => keyOf(item.order_id, item.order_item_id))
         : [],
-    [items, classifyPending],
+    [items, isClassifyPending],
   )
   useEffect(() => {
-    const nuevas = pendientes.filter((clave) => !pedidas.current.has(clave))
-    if (nuevas.length === 0 || clasificando) {
+    const fresh = pending.filter((key) => !ordered.current.has(key))
+    if (fresh.length === 0 || isClassifying) {
       return
     }
-    for (const clave of nuevas) {
-      pedidas.current.add(clave)
+    for (const key of fresh) {
+      ordered.current.add(key)
     }
-    clasificar()
-  }, [pendientes, clasificar, clasificando])
+    classify()
+  }, [pending, classify, isClassifying])
 
   return useMemo(() => {
-    const lista = items ?? []
-    const porClave = new Map(lista.map((item) => [keyOf(item.order_id, item.order_item_id), item]))
+    const list = items ?? []
+    const byKey = new Map(list.map((item) => [keyOf(item.order_id, item.order_item_id), item]))
     return {
-      flags: lista,
-      flagFor: (orderId, orderItemId) => porClave.get(keyOf(orderId, orderItemId)),
-      allergyCount: lista.filter((item) => item.mentions_allergy === true).length,
-      isLoading: notas.isPending && activo,
-      error: notas.error,
+      flags: list,
+      flagFor: (orderId, orderItemId) => byKey.get(keyOf(orderId, orderItemId)),
+      allergyCount: list.filter((item) => item.mentions_allergy === true).length,
+      isLoading: notes.isPending && isActive,
+      error: notes.error,
     }
-  }, [items, notas.isPending, notas.error, activo])
+  }, [items, notes.isPending, notes.error, isActive])
 }

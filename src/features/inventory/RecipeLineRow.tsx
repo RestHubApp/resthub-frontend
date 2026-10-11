@@ -68,7 +68,7 @@ export function RecipeLineRow({
           aria-label={`Quitar ${ingredient.name}`}
           onClick={onRemove}
         >
-          <Icon name="eliminar" size={18} />
+          <Icon name="delete" size={18} />
         </Button>
       )}
     </li>

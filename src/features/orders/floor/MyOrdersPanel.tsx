@@ -13,23 +13,23 @@ import { todayIn } from '@/services/format'
 export function MyOrdersPanel() {
   const userId = useSession((state) => state.account?.user.id)
   const timeZone = useTimeZone()
-  const hoy = todayIn(timeZone)
-  const params = { waiter_id: userId, date_from: hoy, date_to: hoy, limit: MAX_ORDERS_PAGE }
-  const pedidos = useQuery({ ...ordersQuery(params), enabled: userId !== undefined })
+  const today = todayIn(timeZone)
+  const params = { waiter_id: userId, date_from: today, date_to: today, limit: MAX_ORDERS_PAGE }
+  const orders = useQuery({ ...ordersQuery(params), enabled: userId !== undefined })
 
-  if (pedidos.isPending) {
+  if (orders.isPending) {
     return <ListSkeleton label="Cargando tus pedidos…" count={3} itemClassName="h-20 rounded-xl" />
   }
-  if (pedidos.isError) {
+  if (orders.isError) {
     return (
       <QueryError
-        error={pedidos.error}
+        error={orders.error}
         fallback="No se pudieron cargar tus pedidos."
-        onRetry={() => void pedidos.refetch()}
+        onRetry={() => void orders.refetch()}
       />
     )
   }
-  if (pedidos.data.items.length === 0) {
+  if (orders.data.items.length === 0) {
     return (
       <EmptyState
         title="Todavía no tomaste pedidos hoy"
@@ -37,13 +37,13 @@ export function MyOrdersPanel() {
       />
     )
   }
-  const enCurso = pedidos.data.items.filter((order) => isActive(order.status))
-  const cerrados = pedidos.data.items.filter((order) => !isActive(order.status))
+  const inProgress = orders.data.items.filter((order) => isActive(order.status))
+  const closed = orders.data.items.filter((order) => !isActive(order.status))
 
   return (
     <div className="flex flex-col gap-5">
-      <OrderList title="En curso" orders={enCurso} />
-      <OrderList title="Cerrados hoy" orders={cerrados} />
+      <OrderList title="En curso" orders={inProgress} />
+      <OrderList title="Cerrados hoy" orders={closed} />
     </div>
   )
 }

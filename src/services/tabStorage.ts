@@ -51,30 +51,30 @@ interface TabEnvironment {
 // base sin distinguir mayúsculas y decodifica cada tramo. Si esta pestaña y el
 // router no coincidieran, `/Vista-Previa` o `/vista%2Dprevia` llegarían a la
 // ruta de canje en una pestaña que no se eligió como de vista previa.
-function quitarBase(pathname: string, base: string): string | null {
+function removeBase(pathname: string, base: string): string | null {
   if (base === '' || base === '/') {
     return pathname
   }
   if (!pathname.toLowerCase().startsWith(base.toLowerCase())) {
     return null
   }
-  const inicio = base.endsWith('/') ? base.length - 1 : base.length
-  const siguiente = pathname.charAt(inicio)
-  if (siguiente !== '' && siguiente !== '/') {
+  const start = base.endsWith('/') ? base.length - 1 : base.length
+  const next = pathname.charAt(start)
+  if (next !== '' && next !== '/') {
     return null
   }
-  return pathname.slice(inicio) || '/'
+  return pathname.slice(start) || '/'
 }
 
-function decodificar(ruta: string): string {
+function decode(route: string): string {
   try {
-    return ruta
+    return route
       .split('/')
-      .map((tramo) => decodeURIComponent(tramo).replace(/\//gu, '%2F'))
+      .map((stretch) => decodeURIComponent(stretch).replace(/\//gu, '%2F'))
       .join('/')
   } catch {
     // Un `%` mal escrito: el router tampoco la decodifica.
-    return ruta
+    return route
   }
 }
 
@@ -84,11 +84,11 @@ function decodificar(ruta: string): string {
  * barra final. `null` si la dirección no está bajo la base.
  */
 export function appPath(pathname: string, base: string): string | null {
-  const ruta = quitarBase(pathname, base)
-  if (ruta === null) {
+  const route = removeBase(pathname, base)
+  if (route === null) {
     return null
   }
-  let normal = decodificar(ruta).toLowerCase()
+  let normal = decode(route).toLowerCase()
   while (normal.endsWith('/')) {
     normal = normal.slice(0, -1)
   }
@@ -105,7 +105,7 @@ export function previewEntryUrl(base: string = import.meta.env.BASE_URL): string
   return `${base.replace(/\/$/u, '')}${PREVIEW_ENTRY_PATH}`
 }
 
-function marcada(tab: KeyValueStorage | null): boolean {
+function marked(tab: KeyValueStorage | null): boolean {
   if (tab === null) {
     return false
   }
@@ -125,7 +125,7 @@ function marcada(tab: KeyValueStorage | null): boolean {
  * pero mejor que pisar la sesión real del navegador.
  */
 export function chooseTabStorage(env: TabEnvironment): TabStorage {
-  if (isPreviewEntry(env.pathname, env.base) || marcada(env.tab)) {
+  if (isPreviewEntry(env.pathname, env.base) || marked(env.tab)) {
     return { kind: 'preview', storage: env.tab, sessionKey: PREVIEW_SESSION_KEY }
   }
   return { kind: 'restaurant', storage: env.local, sessionKey: RESTAURANT_SESSION_KEY }
@@ -133,15 +133,15 @@ export function chooseTabStorage(env: TabEnvironment): TabStorage {
 
 // Leer `localStorage` o `sessionStorage` puede lanzar con el almacenamiento
 // bloqueado; en las pruebas, sin navegador, no existen.
-function almacen(obtener: () => KeyValueStorage | undefined): KeyValueStorage | null {
+function storage(get: () => KeyValueStorage | undefined): KeyValueStorage | null {
   try {
-    return obtener() ?? null
+    return get() ?? null
   } catch {
     return null
   }
 }
 
-function entornoActual(): TabEnvironment {
+function currentEnvironment(): TabEnvironment {
   const global = globalThis as {
     location?: { pathname: string }
     localStorage?: KeyValueStorage
@@ -150,8 +150,8 @@ function entornoActual(): TabEnvironment {
   return {
     pathname: global.location?.pathname ?? '/',
     base: import.meta.env.BASE_URL,
-    local: almacen(() => global.localStorage),
-    tab: almacen(() => global.sessionStorage),
+    local: storage(() => global.localStorage),
+    tab: storage(() => global.sessionStorage),
   }
 }
 
@@ -174,19 +174,19 @@ export function captureEntryFragment(page: EntryPage, base: string): string | nu
   if (!isPreviewEntry(page.location.pathname, base)) {
     return null
   }
-  const fragmento = page.location.hash
+  const fragment = page.location.hash
   try {
     page.history.replaceState(page.history.state, '', `${previewEntryUrl(base)}${page.location.search}`)
   } catch {
     // Sin historial que reescribir, el canje igual toma el código de acá.
   }
-  return fragmento
+  return fragment
 }
 
 /** El almacenamiento de esta pestaña, elegido al cargar la página. */
-export const tabStorage: TabStorage = chooseTabStorage(entornoActual())
+export const tabStorage: TabStorage = chooseTabStorage(currentEnvironment())
 
-function paginaActual(): EntryPage | null {
+function currentPage(): EntryPage | null {
   const global = globalThis as { location?: EntryPage['location']; history?: EntryPage['history'] }
   return global.location === undefined || global.history === undefined
     ? null
@@ -194,9 +194,9 @@ function paginaActual(): EntryPage | null {
 }
 
 // El fragmento que traía la dirección al cargar, hasta que el canje lo toma.
-const pagina = paginaActual()
-const fragmentoDeEntrada: { value: string | null } = {
-  value: pagina === null ? null : captureEntryFragment(pagina, import.meta.env.BASE_URL),
+const page = currentPage()
+const entryFragment: { value: string | null } = {
+  value: page === null ? null : captureEntryFragment(page, import.meta.env.BASE_URL),
 }
 
 /**
@@ -205,9 +205,9 @@ const fragmentoDeEntrada: { value: string | null } = {
  * página no se cargó en esa ruta.
  */
 export function takeEntryFragment(): string | null {
-  const fragmento = fragmentoDeEntrada.value
-  fragmentoDeEntrada.value = null
-  return fragmento
+  const fragment = entryFragment.value
+  entryFragment.value = null
+  return fragment
 }
 
 /** Si esta pestaña es de vista previa. */

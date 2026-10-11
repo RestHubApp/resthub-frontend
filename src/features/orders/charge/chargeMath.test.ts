@@ -39,37 +39,37 @@ describe('equalPartCents', () => {
 })
 
 describe('itemsCents', () => {
-  const platos = [item(1, '20.00'), item(2, '15.50'), item(3, '10.00', { is_courtesy: true })]
+  const dishes = [item(1, '20.00'), item(2, '15.50'), item(3, '10.00', { is_courtesy: true })]
 
   it('suma los platos elegidos sin las cortesías', () => {
-    const pedido = order(platos, '35.50')
-    expect(itemsCents(pedido, [2, 3])).toBe(1550)
+    const sampleOrder = order(dishes, '35.50')
+    expect(itemsCents(sampleOrder, [2, 3])).toBe(1550)
   })
 
   it('aplica el descuento del pedido con medio céntimo hacia arriba', () => {
-    const pedido = order(platos, '31.95', '10')
+    const sampleOrder = order(dishes, '31.95', '10')
     // 15.50 − 10 % = 13.95
-    expect(itemsCents(pedido, [2])).toBe(1395)
+    expect(itemsCents(sampleOrder, [2])).toBe(1395)
   })
 
   it('si son todos los que faltan, cobra el saldo exacto', () => {
-    const pedido = order(platos, '31.95', '10')
-    expect(itemsCents(pedido, [1, 2, 3])).toBe(3195)
+    const sampleOrder = order(dishes, '31.95', '10')
+    expect(itemsCents(sampleOrder, [1, 2, 3])).toBe(3195)
   })
 
   it('ignora los platos ya pagados', () => {
-    const pedido = order([item(1, '20.00', { is_paid: true }), item(2, '15.50')], '15.50')
-    expect(unpaidItems(pedido).map((plato) => plato.id)).toEqual([2])
-    expect(itemsCents(pedido, [1])).toBe(0)
+    const sampleOrder = order([item(1, '20.00', { is_paid: true }), item(2, '15.50')], '15.50')
+    expect(unpaidItems(sampleOrder).map((dish) => dish.id)).toEqual([2])
+    expect(itemsCents(sampleOrder, [1])).toBe(0)
   })
 })
 
 describe('chargeCents', () => {
-  const pedido = order([item(1, '30.00'), item(2, '12.00')], '42.00')
+  const sampleOrder = order([item(1, '30.00'), item(2, '12.00')], '42.00')
 
   it('según el modo: todo, partes iguales o por platos', () => {
-    expect(chargeCents(pedido, 'all', 1, [])).toBe(4200)
-    expect(chargeCents(pedido, 'equal', 2, [])).toBe(2100)
-    expect(chargeCents(pedido, 'items', 1, [2])).toBe(1200)
+    expect(chargeCents(sampleOrder, 'all', 1, [])).toBe(4200)
+    expect(chargeCents(sampleOrder, 'equal', 2, [])).toBe(2100)
+    expect(chargeCents(sampleOrder, 'items', 1, [2])).toBe(1200)
   })
 })

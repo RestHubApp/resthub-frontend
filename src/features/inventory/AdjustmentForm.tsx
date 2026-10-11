@@ -24,7 +24,7 @@ interface AdjustmentFormProps {
   readonly onDone: () => void
 }
 
-const MODOS = [
+const MODES = [
   { value: 'count', label: 'Conté lo que hay' },
   { value: 'difference', label: 'Sé cuánto sobra o falta' },
 ] as const
@@ -36,13 +36,13 @@ const MODOS = [
  * calcula la diferencia. Si ya se sabe la diferencia, se escribe directo.
  */
 export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
-  const unidades = inputUnits(ingredient.unit)
+  const units = inputUnits(ingredient.unit)
   const { register, handleSubmit, formState, control } = useForm<AdjustmentValues>({
     resolver: zodResolver(adjustmentSchema),
     defaultValues: {
       mode: 'count',
       quantity: '',
-      quantity_unit: unidades[0]?.value ?? ingredient.unit,
+      quantity_unit: units[0]?.value ?? ingredient.unit,
       sign: 'subtract',
       reason: 'Conteo físico',
     },
@@ -53,25 +53,25 @@ export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
   })
   const delta = adjustmentDelta({ mode, quantity, quantity_unit: quantityUnit, sign }, ingredient)
 
-  const ajuste = useInventoryChange({
-    send: (datos: AdjustmentValues) => registerAdjustment(adjustmentPayload(datos, ingredient)),
-    success: (resultado) =>
-      `Ajuste de ${formatSignedQuantity(resultado.movement.quantity, ingredient.unit)}: ${ingredient.name} queda en ${formatQuantity(resultado.ingredient.stock, ingredient.unit)}`,
+  const adjustment = useInventoryChange({
+    send: (data: AdjustmentValues) => registerAdjustment(adjustmentPayload(data, ingredient)),
+    success: (result) =>
+      `Ajuste de ${formatSignedQuantity(result.movement.quantity, ingredient.unit)}: ${ingredient.name} queda en ${formatQuantity(result.ingredient.stock, ingredient.unit)}`,
     onDone,
   })
-  const errores = formState.errors
+  const errors = formState.errors
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((datos) => {
-          ajuste.mutate(datos)
+        handleSubmit((data) => {
+          adjustment.mutate(data)
         }),
       )}
     >
-      <ChoiceField legend="¿Qué sabes?" field={register('mode')} options={MODOS} />
+      <ChoiceField legend="¿Qué sabes?" field={register('mode')} options={MODES} />
       {mode === 'difference' ? (
         <SelectField id="adjustment-sign" label="La diferencia" field={register('sign')}>
           <NativeSelectOption value="subtract">Falta: restar del stock</NativeSelectOption>
@@ -83,24 +83,24 @@ export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
         label={mode === 'count' ? 'Stock contado' : 'Cantidad de la diferencia'}
         amount={register('quantity')}
         unit={register('quantity_unit')}
-        units={unidades}
-        error={errores.quantity?.message}
+        units={units}
+        error={errors.quantity?.message}
       />
       <TextField
         id="adjustment-reason"
         label="Motivo"
         autoComplete="off"
         field={register('reason')}
-        error={errores.reason?.message}
+        error={errors.reason?.message}
       />
       <StockPreview ingredient={ingredient} delta={delta} />
 
-      {ajuste.isError ? (
+      {adjustment.isError ? (
         <FormMessage tone="error">
-          {errorMessage(ajuste.error, 'No se pudo registrar el ajuste.')}
+          {errorMessage(adjustment.error, 'No se pudo registrar el ajuste.')}
         </FormMessage>
       ) : null}
-      <FormButtons label="Guardar ajuste" icon="conteo" pending={ajuste.isPending} onCancel={onDone} />
+      <FormButtons label="Guardar ajuste" icon="count" pending={adjustment.isPending} onCancel={onDone} />
     </form>
   )
 }
