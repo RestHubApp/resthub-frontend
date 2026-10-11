@@ -29,7 +29,7 @@ export const ROUTES = [
   // Sin sesión.
   { id: 'acceso', name: 'Acceso', route: '/acceso', pattern: '/acceso', account: null },
   { id: 'raiz', name: 'Raíz (redirige al acceso sin sesión)', route: '/', pattern: '/', account: null, redirect: true },
-  { id: 'plataforma-acceso', name: 'Plataforma: acceso', route: '/plataforma/acceso', pattern: '/plataforma/acceso', account: null },
+  { id: 'plataforma-acceso', name: 'Plataforma: acceso de antes (redirige al acceso)', route: '/plataforma/acceso', pattern: '/plataforma/acceso', account: null, redirect: true },
   { id: 'vista-previa-sin-codigo', name: 'Vista previa sin código válido', route: '/vista-previa', pattern: '/vista-previa', account: null },
   { id: 'privacidad', name: 'Política de privacidad (pública)', route: '/privacidad', pattern: '/privacidad', account: null },
   { id: 'terminos', name: 'Aceptar los términos antes de empezar', route: '/', pattern: '/', account: 'sin-terminos' },
@@ -76,7 +76,6 @@ export const ROUTES = [
   { id: 'plataforma-bitacora', name: 'Plataforma: bitácora', route: '/plataforma/bitacora', pattern: '/plataforma/bitacora', account: 'platform' },
   { id: 'plataforma-vista-previa', name: 'Plataforma: vista previa', route: '/plataforma/vista-previa', pattern: '/plataforma/vista-previa', account: 'platform' },
   { id: 'plataforma-observabilidad', name: 'Plataforma: observabilidad', route: '/plataforma/observabilidad', pattern: '/plataforma/observabilidad', account: 'platform' },
-  { id: 'plataforma-comodin', name: 'Plataforma: ruta inexistente (redirige)', route: '/plataforma/no-existe', pattern: '/plataforma/*', account: 'platform', redirect: true },
 
   // Vista previa: la pestaña que abre «Ver como…», con su franja.
   { id: 'vp-encargado', name: 'Vista previa como encargado', route: '/tablero', pattern: '/vista-previa', account: 'vp-encargado' },
@@ -194,5 +193,5 @@ export const ROUTER_ROUTES = [
   '/comprobantes/:invoiceId/imprimir', '/reservas', '/clientes', '/caja', '/menu', '/mesas', '/inventario',
   '/inventario/recetas/:menuItemId', '/personal', '/roles', '/panel', '/panel/reposicion', '/panel/ia', '*',
   '/plataforma/acceso', '/plataforma', '/plataforma/restaurantes/nuevo', '/plataforma/restaurantes/:restaurantId',
-  '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/plataforma/*', '/vista-previa', '/privacidad',
+  '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/vista-previa', '/privacidad',
 ]

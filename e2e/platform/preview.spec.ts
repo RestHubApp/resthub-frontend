@@ -100,12 +100,13 @@ test('PLA-12 la vista previa como encargado abre otra pestaña con su franja y t
     await preview.goto('/perfil')
     await expect(preview.getByRole('heading', { name: 'Mi perfil', level: 1 })).toBeVisible()
     await expect(preview.getByRole('heading', { name: 'Cambiar contraseña' })).toHaveCount(0)
-    // La pestaña de vista previa no abre la administración del sistema.
+    // La pestaña de vista previa tiene la sesión del local de muestra: no tiene los
+    // permisos de la administración del sistema y su guarda la lleva al inicio.
     await preview.goto('/plataforma')
-    await expect(preview.getByText('Estás en una vista previa')).toBeVisible()
+    await expect(preview).toHaveURL(/\/pedidos$/u)
     await evidence(preview, 'pla-12-plataforma-bloqueada')
     await touchAndWaitClosing(preview, preview.getByRole('button', { name: SIGN_OUT }))
-    // La sesión de plataforma de esta pestaña sigue intacta.
+    // La sesión de plataforma de la pestaña de origen sigue intacta.
     await page.reload()
     await expect(page.getByRole('heading', { name: 'Vista previa', level: 1 })).toBeVisible()
   })
@@ -227,6 +228,7 @@ test('PLA-15 el canje avisa si falta el código, si no vale o si no hay conexió
   await expect(page.getByRole('button', { name: 'Entrar' })).toHaveCount(0)
   await evidence(page, 'pla-15-terminada')
   await page.getByRole('button', { name: 'Cerrar la vista previa' }).click()
-  // Una pestaña que no abrió un script no se deja cerrar: vuelve a la administración.
-  await expect(page).toHaveURL(/\/plataforma\/(acceso|vista-previa)$/u)
+  // Una pestaña que no abrió un script no se deja cerrar: vuelve a la administración,
+  // que sin sesión pide el acceso de todos.
+  await expect(page).toHaveURL(/\/acceso$/u)
 })

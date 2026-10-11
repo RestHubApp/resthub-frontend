@@ -5,7 +5,7 @@ import type { Page } from '@playwright/test'
 import { SECRET, Customer, SEED, unique } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, openAsPlatform, evidence, expect, test } from '../support/fixtures'
-import { logWithPages, signInByForm } from '../support/platform'
+import { logWithPages, navigation, signInByForm } from '../support/platform'
 
 const FAILURE = { status: 500, contentType: 'application/json', body: '{}' }
 
@@ -24,7 +24,7 @@ test('PLA-07 la bitácora registra lo que hace el administrador y se pagina', as
   await api.patch(`/platform/restaurants/${String(local.id)}`, { name })
   await logWithPages(local.http, api)
   await openAsPlatform(page, platform, '/plataforma')
-  await page.getByRole('navigation', { name: 'Administración del sistema' }).getByRole('link', { name: 'Bitácora' }).click()
+  await navigation(page).getByRole('link', { name: 'Bitácora' }).click()
   await expect(page).toHaveURL(/\/plataforma\/bitacora$/u)
   await expect(page.getByRole('heading', { name: 'Bitácora', level: 1 })).toBeVisible()
   const edit = page.getByRole('row').filter({ hasText: `nombre «${name}»` })
@@ -38,18 +38,23 @@ test('PLA-07 la bitácora registra lo que hace el administrador y se pagina', as
   await expect(page.getByRole('row').filter({ hasText: 'Inició sesión' }).first()).toBeVisible()
 })
 
-test('PLA-08 el acceso de plataforma rechaza credenciales equivocadas y su guarda vuelve a la pantalla pedida', async ({ page, local }) => {
+test('PLA-08 el acceso único rechaza credenciales equivocadas y su guarda vuelve a la pantalla pedida', async ({ page, local }) => {
   covers(
     'estado:plataforma.acceso-error',
     'funcion:plataforma.sin-sesion',
     'funcion:plataforma.sesion-separada',
     'funcion:plataforma.entrar',
-    'ruta:/plataforma/*',
     'ruta:/plataforma/bitacora',
   )
-  // Una sesión de restaurante abierta no entra al área de plataforma.
+  // Una cuenta del personal no entra a las pantallas de plataforma: la guarda
+  // por permiso la lleva al inicio de su cuenta.
   await openAs(page, local.owner, '/plataforma/bitacora')
-  await expect(page).toHaveURL(/\/plataforma\/acceso$/u)
+  await expect(page).toHaveURL(/\/pedidos$/u)
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await expect(page).toHaveURL(/\/acceso$/u)
+  // Sin sesión, una pantalla de plataforma lleva al acceso y vuelve después de entrar.
+  await page.goto('/plataforma/bitacora')
+  await expect(page).toHaveURL(/\/acceso$/u)
   await signInByForm(page, `nadie-${unique()}@resthub.pe`, 'no-es-la-clave-1')
   await expect(page.getByText('El correo o la contraseña no son correctos.')).toBeVisible()
   await evidence(page, 'pla-08-error')
@@ -61,9 +66,9 @@ test('PLA-08 el acceso de plataforma rechaza credenciales equivocadas y su guard
   await expect(page.getByRole('heading', { name: 'Bitácora', level: 1 })).toBeVisible()
   await page.goto('/plataforma/esto-no-existe')
   await expect(page).toHaveURL(/\/plataforma$/u)
-  // La sesión del restaurante sigue ahí, aparte.
+  // La cuenta de plataforma tampoco abre las pantallas del restaurante.
   await page.goto('/tablero')
-  await expect(page.getByRole('heading', { name: 'Tablero', level: 1 })).toBeVisible()
+  await expect(page).toHaveURL(/\/plataforma$/u)
 })
 
 test('PLA-09 la lista, la ficha y la bitácora avisan cuando no cargan y se reintentan', async ({ page, platform, local }) => {

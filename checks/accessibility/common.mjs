@@ -23,7 +23,7 @@ export const ACCOUNTS = {
   owner: { email: 'admin@resthub.dev', access: '/acceso' },
   waiter: { email: 'mesero@resthub.dev', access: '/acceso' },
   kitchen: { email: 'cocina@resthub.dev', access: '/acceso' },
-  platform: { email: 'plataforma@resthub.dev', access: '/plataforma/acceso' },
+  platform: { email: 'plataforma@resthub.dev', access: '/acceso' },
   // Un mesero que todavía no aceptó los términos: ve la puerta «Antes de empezar».
   'sin-terminos': { email: 'nuevo-a11y@resthub.dev', access: '/acceso' },
   // La pestaña que abre «Ver como…» desde el área de plataforma.
@@ -113,7 +113,7 @@ async function readStorage(page) {
  * Inicia sesión como lo haría una persona y guarda lo que la aplicación dejó
  * en el almacenamiento del navegador, para reutilizarlo en cada medición.
  *
- * - Cuentas normales: el formulario de acceso (o el de plataforma).
+ * - Cuentas normales (y la de plataforma): el formulario de acceso, que es uno solo.
  * - Vista previa: el administrador del sistema pide el código de un solo uso
  *   (`POST /platform/preview`, lo mismo que hace «Ver como…») y la pestaña lo
  *   canjea en `/vista-previa#codigo=…`; su sesión queda en el sessionStorage.
@@ -123,7 +123,7 @@ export async function signIn(browser, account) {
   const context = await browser.newContext(contextOf('desktop'))
   const page = await context.newPage()
   if (dataAccount.preview) {
-    const { access_token: token } = await callApi('POST', '/platform/auth/login', { email: ACCOUNTS.platform.email, password: PASSWORD })
+    const { access_token: token } = await callApi('POST', '/auth/login', { email: ACCOUNTS.platform.email, password: PASSWORD })
     const { code } = await callApi('POST', '/platform/preview', { as: dataAccount.preview }, token)
     await page.goto(`${BASE_URL}/vista-previa#codigo=${encodeURIComponent(code)}`)
     await page.waitForURL((url) => !url.pathname.startsWith('/vista-previa'), { timeout: 20_000 })

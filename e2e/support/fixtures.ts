@@ -5,7 +5,6 @@ import { test as base, expect as expectBase, type Page } from '@playwright/test'
 import { createRestaurant, signInPlatformByApi, newHttp, type Local, type Session, type SessionPlatform } from './api'
 
 const SESSION = 'resthub.session.v2'
-const SESSION_PLATFORM = 'resthub.platform-session.v1'
 
 interface Accessories {
   /** Un restaurante recién dado de alta, solo para esta prueba. */
@@ -41,7 +40,7 @@ export const expect = expectBase
  * entrado antes en ese navegador. El acceso por el formulario tiene sus
  * propias pruebas; las demás no necesitan repetirlo.
  */
-export async function openAs(page: Page, session: Session, destination = '/'): Promise<void> {
+export async function openAs(page: Page, session: Session | SessionPlatform, destination = '/'): Promise<void> {
   await page.goto('/acceso')
   await page.evaluate(
     ([key, value]) => {
@@ -52,15 +51,9 @@ export async function openAs(page: Page, session: Session, destination = '/'): P
   await page.goto(destination)
 }
 
+/** Lo mismo con la cuenta de la administración del sistema: es la misma sesión del navegador, con otra cuenta. */
 export async function openAsPlatform(page: Page, session: SessionPlatform, destination = '/plataforma'): Promise<void> {
-  await page.goto('/plataforma/acceso')
-  await page.evaluate(
-    ([key, value]) => {
-      localStorage.setItem(key, value)
-    },
-    [SESSION_PLATFORM, JSON.stringify({ token: session.token, admin: session.admin })] as const,
-  )
-  await page.goto(destination)
+  await openAs(page, session, destination)
 }
 
 /** El aviso emergente (toast) con ese texto. */

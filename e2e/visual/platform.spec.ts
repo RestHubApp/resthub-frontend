@@ -22,7 +22,6 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
   deadline(150_000)
   covers(
     'ruta:/plataforma',
-    'ruta:/plataforma/*',
     'ruta:/plataforma/restaurantes/nuevo',
     'ruta:/plataforma/restaurantes/:restaurantId',
     'dialogo:platform/OwnersSection',
@@ -141,8 +140,8 @@ test('VIS-14 la franja de la vista previa como mesero, su salida con pedidos sin
     await signOut.getByRole('button', { name: 'Cancelar' }).click()
     await expect(signOut).toBeHidden()
 
+    // La sesión de la vista previa no tiene permisos de plataforma: la guarda la lleva al inicio.
     await page.goto('/plataforma')
-    await expect(page.getByText('Estás en una vista previa')).toBeVisible()
-    await capture(page, 'vista-previa-plataforma-bloqueada', { mask: [page.getByRole('region', { name: 'Vista previa' })] })
+    await expect(page).toHaveURL(/\/pedidos$/u)
   })
 })
