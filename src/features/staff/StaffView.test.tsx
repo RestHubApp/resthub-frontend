@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { EQUIPO, miembro, rol, ROL_ENCARGADO, ROL_MESERO } from '#jest/fixtures/plataforma'
-import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor, type Peticion } from '#jest/harness'
+import { entrarComo, montar, PERMISOS_ENCARGADO, primero, RespuestaDeError, servidor, type Peticion } from '#jest/harness'
 import type { PermissionCode } from '../../api/types'
 import StaffView from './StaffView'
 
@@ -89,7 +89,7 @@ describe('StaffView', () => {
 
   it('la cuenta propia cambia el nombre pero no el rol, ni se desactiva', async () => {
     const { api, guardar, user } = abrirPersonal()
-    api.on('patch', '/staff/7', (peticion: Peticion) => guardar({ ...(EQUIPO[0]), ...(peticion.body as object) }))
+    api.on('patch', '/staff/7', (peticion: Peticion) => guardar({ ...primero(EQUIPO), ...(peticion.body as object) }))
     const propia = await filaDe(/Ana Torres/u)
 
     expect(within(propia).queryByRole('button', { name: 'Contraseña' })).not.toBeInTheDocument()
@@ -135,7 +135,7 @@ describe('StaffView: cambios sobre otras cuentas', () => {
   it('desactivar se confirma; activar va directo', async () => {
     const { api, guardar, user } = abrirPersonal()
     api.on('patch', '/staff/8/status', () => guardar(miembro({ is_active: false })))
-    api.on('patch', '/staff/9/status', () => guardar({ ...(EQUIPO[2]), is_active: true }))
+    api.on('patch', '/staff/9/status', () => guardar({ ...(EQUIPO.at(2) ?? primero(EQUIPO)), is_active: true }))
 
     await user.click(within(await filaDe(/Luis Quispe/u)).getByRole('button', { name: 'Desactivar' }))
     const aviso = await screen.findByRole('alertdialog', { name: '¿Desactivar a Luis Quispe?' })

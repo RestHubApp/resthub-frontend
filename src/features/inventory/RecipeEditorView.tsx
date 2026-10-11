@@ -22,7 +22,7 @@ function regreso(estado: unknown): { readonly to: string; readonly label: string
 
 /** La receta de un plato, en su propia dirección para poder enlazarla desde el menú. */
 export default function RecipeEditorView() {
-  const menuItemId = Number(useParams().menuItemId)
+  const menuItemId = Number(useParams()['menuItemId'])
   const volver = regreso(useLocation().state)
   const canManage = useCan('inventory.manage')
   const receta = useQuery({

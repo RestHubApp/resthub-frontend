@@ -26,6 +26,9 @@ export default function TrafficChart({ series }: { readonly series: ObsTimeserie
         formatTick={formatInteger}
         describe={(index) => {
           const punto = points[index]
+          if (punto === undefined) {
+            return { title: '', rows: [] }
+          }
           return {
             title: bucketTitle(punto.t, bucket, PLATFORM_TIME_ZONE),
             rows: [

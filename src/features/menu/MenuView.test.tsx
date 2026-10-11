@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
 import { carta, costoDePlato, plato } from '#jest/fixtures/inventario'
-import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
+import { entrarComo, montar, PERMISOS_ENCARGADO, primero, RespuestaDeError, servidor } from '#jest/harness'
 import type { MenuResponse } from '../../api/types'
 import MenuView from './MenuView'
 
@@ -79,7 +79,8 @@ describe('MenuView: disponible hoy', () => {
     api.on('patch', DISPONIBILIDAD, () => {
       const nueva = carta()
       const ceviche = { ...plato(), is_available: false }
-      nueva.categories[0] = { ...nueva.categories[0], items: [ceviche, ...nueva.categories[0].items.slice(1)] }
+      const primera = primero(nueva.categories)
+      nueva.categories[0] = { ...primera, items: [ceviche, ...primera.items.slice(1)] }
       api.on('get', MENU, nueva)
       return ceviche
     })

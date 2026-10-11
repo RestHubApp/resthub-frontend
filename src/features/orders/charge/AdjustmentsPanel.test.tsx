@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
 import { pago, pedido, plato } from '#jest/fixtures/cobro'
-import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, primero, RespuestaDeError, servidor } from '#jest/harness'
 import type { OrderResponse } from '../../../api/types'
 import AdjustmentsPanel from './AdjustmentsPanel'
 
@@ -102,7 +102,7 @@ describe('cortesías', () => {
     api.on('put', CORTESIA, pedido())
 
     await user.click(screen.getByText(INVITAR_PLATO))
-    await user.click(screen.getAllByRole('button', { name: 'Invitar' })[0])
+    await user.click(primero(screen.getAllByRole('button', { name: 'Invitar' })))
     const motivo = screen.getByLabelText('Motivo de la cortesía de Lomo saltado')
     await user.type(motivo, 'Cump')
     expect(screen.getByRole('button', { name: 'Confirmar' })).toBeDisabled()

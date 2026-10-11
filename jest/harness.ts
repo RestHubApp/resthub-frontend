@@ -278,3 +278,21 @@ afterEach(() => {
   }
   useNotifications.setState({ toasts: [] })
 })
+
+/** El primer elemento de una lista que la prueba da por no vacia; falla con un mensaje claro si no. */
+export function primero<T>(lista: readonly T[]): T {
+  const elemento = lista[0]
+  if (elemento === undefined) {
+    throw new Error('Se esperaba al menos un elemento.')
+  }
+  return elemento
+}
+
+/** El segundo elemento de una lista que la prueba da por tener al menos dos. */
+export function segundo<T>(lista: readonly T[]): T {
+  const elemento = lista[1]
+  if (elemento === undefined) {
+    throw new Error('Se esperaban al menos dos elementos.')
+  }
+  return elemento
+}

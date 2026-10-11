@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { carta, categoria, plato } from '#jest/fixtures/inventario'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { entrarComo, montar, primero, RespuestaDeError, servidor } from '#jest/harness'
 import type { MenuResponse } from '../../api/types'
 import MenuView from './MenuView'
 
@@ -129,7 +129,7 @@ describe('editar la carta', () => {
   it('sacar un plato de la carta se confirma antes de enviarse', async () => {
     const { api, user } = abrirMenu()
     const fuera = carta()
-    fuera.categories[0] = { ...carta().categories[0], items: [plato({ is_active: false }), plato({ id: 11, name: 'Causa' })] }
+    fuera.categories[0] = { ...primero(carta().categories), items: [plato({ is_active: false }), plato({ id: 11, name: 'Causa' })] }
     api.on('patch', PLATO_10, yLuego(api, plato({ is_active: false }), fuera))
 
     const fila = (await screen.findByRole('heading', { name: 'Ceviche' })).closest('li') as HTMLElement

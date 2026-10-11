@@ -31,7 +31,7 @@ const ChargeDialog = lazy(() => import('./charge/ChargeDialog'))
  * aparece sin recargar.
  */
 export default function OrderDetailView() {
-  const orderId = Number(useParams().orderId)
+  const orderId = Number(useParams()['orderId'])
   const live = useLiveUpdates()
   const pedido = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
   // Las alergias las ve el encargado; useLiveUpdates ya refresca las notas.

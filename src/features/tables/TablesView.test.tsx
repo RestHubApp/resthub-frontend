@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { mesa, pedidoEnMesa } from '#jest/fixtures/inventario'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { entrarComo, montar, primero, RespuestaDeError, servidor } from '#jest/harness'
 import TablesView from './TablesView'
 
 const MESAS = '/tables'
@@ -70,7 +70,7 @@ describe('TablesView: lista y nombre', () => {
     const { api, user } = abrirMesas()
     api.on('patch', '/tables/1', new RespuestaDeError(409, 'Ya hay una mesa con ese nombre.'))
 
-    await user.click((await screen.findAllByRole('button', { name: 'Renombrar' }))[0])
+    await user.click(primero(await screen.findAllByRole('button', { name: 'Renombrar' })))
     const ventana = await screen.findByRole('dialog', { name: 'Renombrar Mesa 1' })
     const campo = within(ventana).getByLabelText(NOMBRE)
     expect(campo).toHaveValue('1')

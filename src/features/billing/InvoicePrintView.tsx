@@ -14,7 +14,7 @@ import InvoiceSheet from './InvoiceSheet'
 
 /** La hoja del comprobante para la impresora térmica; se imprime sola al abrirla. */
 export default function InvoicePrintView() {
-  const invoiceId = Number(useParams().invoiceId)
+  const invoiceId = Number(useParams()["invoiceId"])
   const timeZone = useTimeZone()
   const veAjustes = useCan('billing.manage')
   const comprobante = useQuery({ ...invoiceQuery(invoiceId), enabled: Number.isInteger(invoiceId) })

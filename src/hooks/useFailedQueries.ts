@@ -21,7 +21,7 @@ export function useFailedQueries(scope: 'platform' | 'restaurant') {
   // Una lectura de fondo (`meta.background`) que falla no avisa: no hay nada
   // en pantalla que dependa de ella. El reintento sí la vuelve a pedir.
   const visible = useCallback((query: Query) =>
-    belongs(query.queryKey) && query.isActive() && query.state.status === 'error' && query.meta?.background !== true, [belongs])
+    belongs(query.queryKey) && query.isActive() && query.state.status === 'error' && query.meta?.['background'] !== true, [belongs])
   const snapshot = useCallback(() => {
     const activas = cache.getAll()
       .filter(visible)

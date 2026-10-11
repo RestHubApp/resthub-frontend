@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { entrarComo, montarRutas, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { entrarComo, montarRutas, PERMISOS_ENCARGADO, PERMISOS_MESERO, primero, RespuestaDeError, segundo, servidor } from '#jest/harness'
 import { currentUserQueryKey } from '../../api/auth'
 import { queryClient } from '../../services/queryClient'
 import type { OpenOrderRequest } from '../../api/types'
@@ -34,7 +34,7 @@ function abrirArmazon(screens: readonly ScreenPreload[] = [], en = '/') {
 }
 
 function barraLateral() {
-  return screen.getAllByRole('navigation', MENU)[0]
+  return primero(screen.getAllByRole('navigation', MENU))
 }
 
 function contenedorDeLaBarra(): HTMLElement {
@@ -46,7 +46,7 @@ function contenedorDeLaBarra(): HTMLElement {
 }
 
 function barraInferior() {
-  return screen.getAllByRole('navigation', MENU)[1]
+  return segundo(screen.getAllByRole('navigation', MENU))
 }
 
 function enlaces(zona: HTMLElement): string[] {

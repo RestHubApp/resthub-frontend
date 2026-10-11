@@ -8,7 +8,7 @@ import TakeOrder from './taking/TakeOrder'
 
 /** Agregar platos a un pedido que ya existe. */
 export default function AddItemsView() {
-  const orderId = Number(useParams().orderId)
+  const orderId = Number(useParams()['orderId'])
   const pedido = useQuery(orderQuery(orderId))
   const order = pedido.data
   const cerrado = order !== undefined && !isActive(order.status)

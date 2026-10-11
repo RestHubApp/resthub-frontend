@@ -16,7 +16,7 @@ import { type DraftLine, toNewItems, useDraftActions } from './useOrderDraft'
 /** El pedido se creo pero la cocina no lo recibio: queda abierto para reintentar. */
 class NotSentError extends Error {
   readonly order: OrderResponse
-  readonly cause: unknown
+  override readonly cause: unknown
 
   constructor(order: OrderResponse, cause: unknown) {
     super('El pedido quedó abierto.')

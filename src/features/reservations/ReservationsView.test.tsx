@@ -14,7 +14,7 @@ const FAMILIA = 'Familia Huamán'
 
 function abrir(reservas: Reservation[] = [reserva()], permisos?: Parameters<typeof entrarComo>[0]) {
   const api = servidor()
-    .on('get', LISTA, (peticion: { params: Record<string, unknown> }) => (peticion.params.day === DIA ? reservas : []))
+    .on('get', LISTA, (peticion: { params: Record<string, unknown> }) => (peticion.params['day'] === DIA ? reservas : []))
     .on('get', '/tables', [mesa(1, '1'), mesa(2, '2'), mesa(3, 'Terraza')])
   entrarComo(permisos)
   const montaje = montar(<ReservationsView />)

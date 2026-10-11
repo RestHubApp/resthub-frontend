@@ -42,13 +42,19 @@ export default function LatencySection({ params, live }: LatencySectionProps) {
               label={`Latencia p95 por cubo de ${formatBucket(bucket)}, horas de Lima`}
               formatValue={formatMilliseconds}
               formatTick={formatMilliseconds}
-              describe={(index) => ({
-                title: bucketTitle(points[index].t, bucket, PLATFORM_TIME_ZONE),
-                rows: [
-                  { label: 'p95', value: formatMilliseconds(points[index].p95_ms), swatch: 'var(--chart-1)' },
-                  { label: 'peticiones', value: formatInteger(points[index].requests) },
-                ],
-              })}
+              describe={(index) => {
+                const punto = points[index]
+                if (punto === undefined) {
+                  return { title: '', rows: [] }
+                }
+                return {
+                  title: bucketTitle(punto.t, bucket, PLATFORM_TIME_ZONE),
+                  rows: [
+                    { label: 'p95', value: formatMilliseconds(punto.p95_ms), swatch: 'var(--chart-1)' },
+                    { label: 'peticiones', value: formatInteger(punto.requests) },
+                  ],
+                }
+              }}
             />
           }
           table={<DataGrid caption="Latencia p95 por cubo" columns={columns(bucket)} rows={points} rowKey={(p) => p.t} />}

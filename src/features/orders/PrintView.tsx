@@ -22,8 +22,8 @@ import QueryError from './QueryError'
  */
 export default function PrintView() {
   const params = useParams()
-  const orderId = Number(params.orderId)
-  const comanda = params.kind === 'comanda'
+  const orderId = Number(params['orderId'])
+  const comanda = params['kind'] === 'comanda'
   const timeZone = useTimeZone()
   const restaurante = useSession((state) => state.account?.restaurant.name ?? '')
   const pedido = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })

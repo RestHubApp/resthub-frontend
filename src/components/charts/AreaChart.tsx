@@ -76,7 +76,7 @@ export default function AreaChart({ points, label, formatValue, formatTick, desc
           <path d={geometry.areaPath} fill="var(--chart-area)" />
           <path d={geometry.linePath} fill="none" stroke={SERIES} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
           <path d={geometry.overlayPath} fill="none" stroke={overlay.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-          {points.length === 0 || maximo.value <= 0 ? null : (
+          {maximo === undefined || maximo.value <= 0 ? null : (
             <g aria-hidden>
               <circle cx={x(maxIndex)} cy={y(maximo.value)} r={4} fill={SERIES} stroke="var(--card)" strokeWidth={2} />
               <text

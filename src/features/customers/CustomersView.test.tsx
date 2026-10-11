@@ -16,7 +16,7 @@ const EDITADA = 'Rosa Q. Mamani'
 
 function abrir(clientes: Customer[] = [cliente()], permisos?: Parameters<typeof entrarComo>[0]) {
   const api = servidor().on('get', LISTA, (peticion: { params: Record<string, unknown> }) => {
-    const q = String(peticion.params.q).toLowerCase()
+    const q = String(peticion.params['q']).toLowerCase()
     const items = clientes.filter((c) => c.name.toLowerCase().includes(q) || c.phone.includes(q))
     return { items, total: items.length }
   })
