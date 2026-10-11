@@ -1,14 +1,17 @@
 // Arnés de las pruebas de componentes: monta una pantalla como la ve el
 // usuario (router, caché de consultas y sesión) y responde el API con un
-// servidor falso a nivel de `fetch`. Así se ejercitan también las funciones de
-// `src/api/`, el cliente tipado y el transporte de `src/services/api.ts`.
+// servidor falso montado sobre MSW (`jest/mswServer.ts`). Así se ejercitan también
+// las funciones de `src/api/`, el cliente tipado y el transporte de
+// `src/services/api.ts`.
 import { afterEach, beforeEach } from '@jest/globals'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, type RenderResult } from '@testing-library/react'
 import { userEvent, type UserEvent } from '@testing-library/user-event'
+import { HttpResponse, http } from 'msw'
 import { createElement, type ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider, useLocation, type RouteObject } from 'react-router'
 
+import { mswServer } from './mswServer'
 import type { CurrentUserResponse, PermissionCode } from '../src/api/types'
 import { RouteError } from '../src/router/RouteError'
 import { SCREENS } from '../src/router/screens'
@@ -99,6 +102,9 @@ async function requestOf(request: HttpRequest): Promise<Request> {
   }
 }
 
+// Lo que lanza `withoutNetwork` para que el manejador responda con un corte de red.
+class NetworkCut extends TypeError {}
+
 /** El servidor falso: las rutas se declaran con `on` y las peticiones quedan en `peticiones`. */
 export class FakeServer {
   readonly requests: Request[] = []
@@ -136,14 +142,19 @@ export class FakeServer {
     return route
   }
 
-  /** El `fetch` de la aplicación mientras dura la prueba. */
-  readonly fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    const request = await requestOf(new globalThis.Request(input, init))
-    this.requests.push(request)
-    const route = this.takeRoute(request)
-    const value = route ? await route.respond(request) : new ErrorResponse(404, 'No existe (prueba)')
-    return responseOf(value, route?.status ?? 404)
-  }
+  /** El manejador de MSW que atiende cualquier ruta de `/api/v1` con las rutas declaradas. */
+  readonly handler = http.all('*/api/v1/*', async ({ request }) => {
+    const entry = await requestOf(request)
+    this.requests.push(entry)
+    const route = this.takeRoute(entry)
+    try {
+      const value = route ? await route.respond(entry) : new ErrorResponse(404, 'No existe (prueba)')
+      return responseOf(value, route?.status ?? 404)
+    } catch (error) {
+      if (error instanceof NetworkCut) return HttpResponse.error()
+      throw error
+    }
+  })
 }
 
 /** La respuesta HTTP de lo que declaró la prueba: un error del API, un valor JSON o nada. */
@@ -163,17 +174,14 @@ export function withoutResponse(): Promise<never> {
 
 /** Un corte de red: `fetch` falla sin respuesta. */
 export function withoutNetwork(): never {
-  throw new TypeError('Failed to fetch')
+  throw new NetworkCut('Failed to fetch')
 }
-
-const fetchOriginal = globalThis.fetch
-let currentServer: FakeServer | null = null
 
 /** Instala un servidor falso nuevo para la prueba en curso. */
 export function server(): FakeServer {
-  currentServer = new FakeServer()
-  globalThis.fetch = currentServer.fetch
-  return currentServer
+  const fake = new FakeServer()
+  mswServer.use(fake.handler)
+  return fake
 }
 
 /** Todos los permisos: la cuenta del encargado. */
@@ -284,8 +292,6 @@ beforeEach(() => {
 
 afterEach(() => {
   queryClient.clear()
-  globalThis.fetch = fetchOriginal
-  currentServer = null
   setAuthToken(null)
   useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })
   if (usePlatformSession.getState().token !== null) {

@@ -1,4 +1,6 @@
-import { afterEach, describe, expect, it, jest } from '@jest/globals'
+import { afterEach, describe, expect, it } from '@jest/globals'
+
+import { answerAll, type Sent } from '#jest/answerAll'
 
 import { QueryClient } from '@tanstack/react-query'
 
@@ -7,33 +9,14 @@ import { setAuthToken } from '@/services/apiCredentials'
 import { exchangePreviewCode, sessionOf } from './auth'
 import { platformMutationKeys, platformSandboxQuery, resetPlatformSandbox, startPlatformPreview } from './platform'
 
-const originalFetch = globalThis.fetch
-
-interface Sent {
-  readonly method: string
-  readonly path: string
-  readonly body: string
-  readonly authorization: string | null
-}
-
 const sent: Sent[] = []
 
 // Responde sin red con ese cuerpo y anota lo que salió.
 function respondWith(body: unknown): void {
-  globalThis.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-    const request = new Request(input, init)
-    sent.push({
-      method: request.method,
-      path: new URL(request.url).pathname,
-      body: await request.text(),
-      authorization: request.headers.get('Authorization'),
-    })
-    return new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } })
-  })
+  answerAll(200, body, sent)
 }
 
 afterEach(() => {
-  globalThis.fetch = originalFetch
   sent.length = 0
   setAuthToken(null)
 })
@@ -51,7 +34,7 @@ describe('API de la vista previa', () => {
   it('reinicia el local de muestra con POST sin cuerpo', async () => {
     respondWith({ restaurant: null, accounts: [] })
     await resetPlatformSandbox()
-    expect(sent).toEqual([{ method: 'POST', path: '/api/v1/platform/sandbox/reset', body: '', authorization: null }])
+    expect(sent).toMatchObject([{ method: 'POST', path: '/api/v1/platform/sandbox/reset', body: '', authorization: null }])
   })
 
   it('pide el código diciendo como quién se entra', async () => {
@@ -69,7 +52,7 @@ describe('API de la vista previa', () => {
     setAuthToken('sesion-abierta')
     respondWith({})
     await exchangePreviewCode({ code: 'abc' })
-    expect(sent).toEqual([{ method: 'POST', path: '/api/v1/auth/preview', body: '{"code":"abc"}', authorization: null }])
+    expect(sent).toMatchObject([{ method: 'POST', path: '/api/v1/auth/preview', body: '{"code":"abc"}', authorization: null }])
   })
 
   it('la sesión conserva la marca de vista previa', () => {

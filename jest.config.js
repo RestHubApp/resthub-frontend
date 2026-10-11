@@ -11,14 +11,19 @@ const importMetaEnv = fileURLToPath(new URL('./jest/importMetaEnv.cjs', import.m
 // El entorno va con la ruta completa: Stryker lo carga sin expandir <rootDir>.
 const environmentJsdom = fileURLToPath(new URL('./jest/jsdomEnvironment.cjs', import.meta.url))
 
-// Dependencias que solo traen ESM: React Router 8 (y la que usa para cookies) y TanStack Table 9.
-const onlyEsm = ['react-router', 'cookie-es', '@tanstack/react-table', '@tanstack/table-core']
+// Dependencias que solo traen ESM: React Router 8 (y la que usa para cookies), TanStack Table 9 y las de MSW.
+const onlyEsm = ['react-router', 'cookie-es', '@tanstack/react-table', '@tanstack/table-core', 'rettime', 'until-async', '@open-draft/deferred-promise', 'openapi-msw']
 
 /** @type {import('jest').Config} */
 export default {
   // El DOM de jsdom (con la API fetch de Node) para las pruebas de componentes. Las de lógica que simulan
   // una pestaña sin DOM (sin `window`) declaran `@jest-environment node`.
   testEnvironment: environmentJsdom,
+  // jsdom resuelve los paquetes con la condición de exportación «browser». MSW
+  // (`msw/node`) la usaría para cargar su versión de navegador, que no sirve en
+  // Jest; con una condición vacía se resuelve la de Node (receta de la
+  // documentación de MSW para Jest).
+  testEnvironmentOptions: { customExportConditions: [''] },
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.{ts,tsx}'],
   setupFiles: ['<rootDir>/jest/setup.ts'],

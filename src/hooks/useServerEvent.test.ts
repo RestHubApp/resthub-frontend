@@ -28,7 +28,7 @@ describe('useServerEvent', () => {
     await waitFor(() => {
       expect(channel.connections).toHaveLength(1)
     })
-    expect(channel.connections[0]).toEqual({ url: '/api/v1/events', authorization: 'Bearer token-secreto' })
+    expect(channel.connections[0]).toEqual({ url: 'http://localhost/api/v1/events', authorization: 'Bearer token-secreto' })
   })
 
   it('entrega solo los avisos de su tema', async () => {

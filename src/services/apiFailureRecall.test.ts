@@ -1,20 +1,16 @@
-import { afterEach, describe, expect, it, jest } from '@jest/globals'
+import { afterEach, describe, expect, it } from '@jest/globals'
 
+import { answerAll } from '#jest/answerAll'
 import { readPlatform, readRestaurant, writeRestaurant } from '#jest/apiCalls'
 import { apiFailureMessage, clearApiFailure } from './apiFailure'
 
 const CUTOFF = 'Servicio no disponible.'
 
-const originalFetch = globalThis.fetch
-
 function respondWith(status: number, body: unknown): void {
-  globalThis.fetch = jest.fn(() =>
-    Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })),
-  )
+  answerAll(status, body)
 }
 
 afterEach(() => {
-  globalThis.fetch = originalFetch
   clearApiFailure()
 })
 

@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { HttpResponse, http } from 'msw'
 import { createElement, type ReactNode } from 'react'
 
 import { signInAs } from '#jest/harness'
+import { mswServer } from '#jest/mswServer'
 import { queryClient } from '@/services/queryClient'
 import { useLiveUpdates } from './useLiveUpdates'
 
@@ -18,9 +20,8 @@ interface Connection {
 
 const connections: Connection[] = []
 let responseStatus = 200
-const fetchOriginal = window.fetch.bind(window)
 
-function fakeChannel(entry: RequestInfo | URL, options?: RequestInit): Promise<Response> {
+function fakeChannel({ request }: { readonly request: Request }): Response {
   let handler: ReadableStreamDefaultController<Uint8Array> | null = null
   const flow = new ReadableStream<Uint8Array>({
     start(c) {
@@ -29,13 +30,13 @@ function fakeChannel(entry: RequestInfo | URL, options?: RequestInit): Promise<R
   })
   const encoder = new TextEncoder()
   connections.push({
-    url: entry instanceof Request ? entry.url : entry.toString(),
-    headers: new Headers(options?.headers),
+    url: request.url,
+    headers: request.headers,
     write: (text) => handler?.enqueue(encoder.encode(text)),
     close: () => handler?.close(),
   })
   const body = responseStatus === 200 ? flow : null
-  return Promise.resolve(new Response(body, { status: responseStatus }))
+  return new HttpResponse(body, { status: responseStatus })
 }
 
 function wrapper({ children }: { readonly children: ReactNode }) {
@@ -60,14 +61,13 @@ function invalidated(key: readonly unknown[]): boolean | undefined {
 beforeEach(() => {
   connections.length = 0
   responseStatus = 200
-  window.fetch = fakeChannel
+  mswServer.use(http.get('*/api/v1/events', fakeChannel))
   queryClient.setQueryData(['orders', 'active'], [])
   queryClient.setQueryData(['tables', { includeInactive: false }], [])
   queryClient.setQueryData(['menu', 'pedidos'], { categories: [] })
 })
 
 afterEach(() => {
-  window.fetch = fetchOriginal
   jest.useRealTimers()
 })
 
@@ -78,7 +78,7 @@ describe('useLiveUpdates', () => {
     await waitFor(() => {
       expect(connections).toHaveLength(1)
     })
-    expect(connections[0]?.url).toBe('/api/v1/events')
+    expect(connections[0]?.url).toBe('http://localhost/api/v1/events')
     expect(connections[0]?.headers.get('Authorization')).toBe('Bearer token-de-prueba')
 
     notice('ready')

@@ -16,6 +16,9 @@ allowBuilds:
   # @scarf/scarf solo envía estadísticas de instalación.
   '@pact-foundation/pact-core': false
   '@scarf/scarf': false
+  # msw: su postinstall solo copia el worker del navegador (mockServiceWorker.js);
+  # las pruebas usan msw/node y no lo necesitan.
+  msw: false
 
 minimumReleaseAgeExclude:
   - '@types/node@22.20.2 || 24.13.4'

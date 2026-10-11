@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
+import { answerAll, answerNever, answerWithNetworkError, type Sent } from '#jest/answerAll'
 import { readRestaurant, writePlatform, writeWithoutCredential } from '#jest/apiCalls'
 import { SLOW_TIMEOUT_MS } from './api'
 import { setAuthToken, setPlatformAuthToken, setPlatformUnauthorizedHandler, setUnauthorizedHandler } from './apiCredentials'
@@ -15,35 +16,15 @@ const WITHOUT_BAR = 'platform/restaurants'
 const LEAVES_PLATFORM = '/platform/../orders'
 const OTHER_ORIGIN = '//evil.com/platform'
 
-const originalFetch = globalThis.fetch
-
 /** Lo que llegó al servidor falso: la ruta y la cabecera `Authorization` de cada petición. */
-const received: { path: string; authorization: string | null; requestId: string | null }[] = []
+const received: Sent[] = []
 
 // Sin red: responde con ese código y anota con qué cabeceras salió la petición.
 function respondWith(status: number, body: unknown = []): void {
-  globalThis.fetch = jest.fn((input: RequestInfo | URL, init?: RequestInit) => {
-    const request = new Request(input, init)
-    received.push({
-      path: new URL(request.url).pathname,
-      authorization: request.headers.get('Authorization'),
-      requestId: request.headers.get('X-Request-ID'),
-    })
-    return Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }))
-  })
-}
-
-// Una conexión que no responde: solo termina cuando se aborta su señal.
-function hangingFetch(_input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  return new Promise<Response>((_resolve, reject) => {
-    init?.signal?.addEventListener('abort', () => {
-      reject(new DOMException('Abortado', 'AbortError'))
-    })
-  })
+  answerAll(status, body, received)
 }
 
 afterEach(() => {
-  globalThis.fetch = originalFetch
   received.length = 0
   setAuthToken(null)
   setPlatformAuthToken(null)
@@ -186,14 +167,15 @@ describe('errores de la petición', () => {
   })
 
   it('un corte de red rechaza sin código HTTP', async () => {
-    globalThis.fetch = jest.fn(() => Promise.reject(new TypeError('Failed to fetch')))
+    answerWithNetworkError()
     const error: unknown = await readRestaurant().catch((cause: unknown) => cause)
     expect(error).toMatchObject({ status: undefined, code: 'network' })
   })
 
   it('una petición que no responde a tiempo rechaza con `timeout`', async () => {
-    jest.useFakeTimers()
-    globalThis.fetch = hangingFetch
+    // MSW espera con setImmediate y microtareas: si se falsean, responde 500 en vez de quedarse colgado.
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
+    answerNever()
     const pending = readRestaurant().catch((cause: unknown) => cause)
     await jest.advanceTimersByTimeAsync(15_001)
     expect(await pending).toMatchObject({ code: 'timeout' })
