@@ -1,6 +1,8 @@
 import comments from '@eslint-community/eslint-plugin-eslint-comments/configs'
 import js from '@eslint/js'
 import boundaries from 'eslint-plugin-boundaries'
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
+import importX from 'eslint-plugin-import-x'
 import noBarrelFiles from 'eslint-plugin-no-barrel-files'
 import checkFile from 'eslint-plugin-check-file'
 import react from 'eslint-plugin-react'
@@ -344,6 +346,44 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Importaciones: ciclos, duplicados y dependencias.
+  //
+  // Sin `import-x/extensions` y `resolver-next`, no-cycle no resuelve las
+  // rutas de un proyecto TS y reporta 0 siempre (falso verde).
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { 'import-x': importX },
+    settings: {
+      'import-x/extensions': ['.ts', '.tsx', '.js'],
+      'import-x/resolver-next': [createTypeScriptImportResolver({ project: './tsconfig.json' })],
+    },
+    rules: {
+      'import-x/no-cycle': ['error', { maxDepth: Infinity }],
+      'import-x/no-duplicates': 'error',
+      'import-x/no-self-import': 'error',
+      'import-x/no-useless-path-segments': 'error',
+      'import-x/no-extraneous-dependencies': [
+        'error',
+        {
+          devDependencies: [
+            '**/*.test.{ts,tsx}',
+            'jest/**',
+            'e2e/**',
+            'pruebas/**',
+            '*.config.{js,ts,mjs}',
+            'src/api/contract/**',
+            'vite.*.ts',
+          ],
+        },
+      ],
+      'import-x/no-mutable-exports': 'error',
+      'import-x/first': 'error',
+      'import-x/newline-after-import': 'error',
     },
   },
 
