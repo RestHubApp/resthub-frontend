@@ -1,20 +1,20 @@
 // Administración del sistema: alta, edición, activación y encargados de los
 // restaurantes (HU40), y la lista con su búsqueda y su paginación.
-import { CLAVE_NUEVA, Cliente, entrarPorApi, unico } from '../soporte/api'
-import { cubre } from '../soporte/cobertura'
-import { abrirComo, abrirComoPlataforma, evidencia, expect, test } from '../soporte/fixtures'
+import { NEW_SECRET, Customer, signInByApi, unique } from '../soporte/api'
+import { covers } from '../soporte/cobertura'
+import { openAs, openAsPlatform, evidence, expect, test } from '../soporte/fixtures'
 import {
-  entrarPorFormulario,
-  navegacion,
-  PAGINA_PLATAFORMA,
-  restaurantesConPaginas,
-  restaurantesConPrefijo,
+  signInByForm,
+  navigation,
+  PAGE_PLATFORM,
+  restaurantsWithPages,
+  restaurantsWithPrefix,
 } from '../soporte/plataforma'
 
-const FICHA = /\/plataforma\/restaurantes\/\d+$/u
+const CARD = /\/plataforma\/restaurantes\/\d+$/u
 
-test('PLA-01 el administrador da de alta un restaurante con su encargado y ese encargado entra', async ({ page, plataforma }) => {
-  cubre(
+test('PLA-01 el administrador da de alta un restaurante con su encargado y ese encargado entra', async ({ page, plataforma: platform }) => {
+  covers(
     'ruta:/plataforma',
     'ruta:/plataforma/restaurantes/nuevo',
     'ruta:/plataforma/restaurantes/:restaurantId',
@@ -23,10 +23,10 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
     'funcion:plataforma.restaurantes.validar-alta',
     'funcion:acceso.entrar',
   )
-  const sufijo = unico()
-  const nombre = `Cevichería Ñandú ${sufijo}`
-  const correo = `rosa-${sufijo}@e2e.resthub.dev`
-  await abrirComoPlataforma(page, plataforma, '/plataforma')
+  const suffix = unique()
+  const name = `Cevichería Ñandú ${suffix}`
+  const email = `rosa-${suffix}@e2e.resthub.dev`
+  await openAsPlatform(page, platform, '/plataforma')
   await page.getByRole('link', { name: 'Nuevo restaurante' }).click()
   await expect(page).toHaveURL(/\/plataforma\/restaurantes\/nuevo$/u)
   await expect(page.getByRole('heading', { name: 'Nuevo restaurante', level: 1 })).toBeVisible()
@@ -36,192 +36,192 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
   await expect(page.getByText('Escribe el identificador')).toBeVisible()
   await expect(page.getByText('Escribe el nombre completo')).toBeVisible()
   await expect(page.getByText('Usa al menos 10 caracteres')).toBeVisible()
-  await evidencia(page, 'pla-01-validacion')
+  await evidence(page, 'pla-01-validacion')
 
-  await page.getByLabel('Nombre', { exact: true }).fill(nombre)
-  await expect(page.getByLabel('Identificador')).toHaveValue(`cevicheria-nandu-${sufijo.toLowerCase()}`)
+  await page.getByLabel('Nombre', { exact: true }).fill(name)
+  await expect(page.getByLabel('Identificador')).toHaveValue(`cevicheria-nandu-${suffix.toLowerCase()}`)
   await expect(page.getByLabel('Zona horaria')).toHaveValue('America/Lima')
   await page.getByLabel('Nombre completo').fill('Rosa Quispe Rojas')
-  await page.getByLabel('Correo').fill(correo)
-  await page.getByLabel('Contraseña inicial', { exact: true }).fill(CLAVE_NUEVA)
-  await evidencia(page, 'pla-01-formulario')
+  await page.getByLabel('Correo').fill(email)
+  await page.getByLabel('Contraseña inicial', { exact: true }).fill(NEW_SECRET)
+  await evidence(page, 'pla-01-formulario')
   await page.getByRole('button', { name: 'Crear restaurante' }).click()
 
-  await expect(page).toHaveURL(FICHA)
-  await expect(page.getByRole('heading', { name: nombre, level: 1 })).toBeVisible()
+  await expect(page).toHaveURL(CARD)
+  await expect(page.getByRole('heading', { name: name, level: 1 })).toBeVisible()
   await expect(page.getByText('Restaurante creado. Su encargado ya puede entrar con su correo.')).toBeVisible()
   await expect(page.getByText('Activo', { exact: true })).toBeVisible()
-  await expect(page.getByText(correo)).toBeVisible()
-  await evidencia(page, 'pla-01-ficha')
+  await expect(page.getByText(email)).toBeVisible()
+  await evidence(page, 'pla-01-ficha')
 
   // El encargado nuevo entra por el acceso de siempre y ve su local.
   await page.goto('/acceso')
-  await entrarPorFormulario(page, correo, CLAVE_NUEVA)
+  await signInByForm(page, email, NEW_SECRET)
   // Su primer acceso: acepta los términos y la política de privacidad (Ley N.º 29733).
   await expect(page.getByRole('heading', { name: 'Antes de empezar' })).toBeVisible()
   await expect(page.getByRole('link', { name: /términos de uso y la política de privacidad/u })).toHaveAttribute('href', '/privacidad')
-  await evidencia(page, 'pla-01-terminos')
+  await evidence(page, 'pla-01-terminos')
   await page.getByRole('button', { name: 'Acepto los términos' }).click()
   await expect(page).toHaveURL(/\/pedidos$/u)
-  await expect(page.getByText(nombre).first()).toBeVisible()
-  await expect(navegacion(page).getByRole('link', { name: 'Personal' })).toBeVisible()
-  await evidencia(page, 'pla-01-encargado-entra')
+  await expect(page.getByText(name).first()).toBeVisible()
+  await expect(navigation(page).getByRole('link', { name: 'Personal' })).toBeVisible()
+  await evidence(page, 'pla-01-encargado-entra')
 })
 
-test('PLA-02 el alta rechaza un identificador ya usado y «Cancelar» vuelve a la lista', async ({ page, plataforma, local }) => {
-  cubre('estado:plataforma.restaurantes.alta-error', 'funcion:plataforma.restaurantes.cancelar-alta', 'ruta:/plataforma/restaurantes/nuevo')
-  const sufijo = unico()
-  await abrirComoPlataforma(page, plataforma, '/plataforma/restaurantes/nuevo')
+test('PLA-02 el alta rechaza un identificador ya usado y «Cancelar» vuelve a la lista', async ({ page, plataforma: platform, local }) => {
+  covers('estado:plataforma.restaurantes.alta-error', 'funcion:plataforma.restaurantes.cancelar-alta', 'ruta:/plataforma/restaurantes/nuevo')
+  const suffix = unique()
+  await openAsPlatform(page, platform, '/plataforma/restaurantes/nuevo')
   await page.getByLabel('Nombre', { exact: true }).fill('Otro Restaurante')
   await page.getByLabel('Identificador').fill(local.slug)
   await page.getByLabel('Nombre completo').fill('Luis Torres')
-  await page.getByLabel('Correo').fill(`luis-${sufijo}@e2e.resthub.dev`)
-  await page.getByLabel('Contraseña inicial', { exact: true }).fill(CLAVE_NUEVA)
+  await page.getByLabel('Correo').fill(`luis-${suffix}@e2e.resthub.dev`)
+  await page.getByLabel('Contraseña inicial', { exact: true }).fill(NEW_SECRET)
   await page.getByRole('button', { name: 'Crear restaurante' }).click()
   // El formulario lo dice en su mensaje y el aviso general de la ventana lo repite.
   await expect(page.getByText(`Ya existe un restaurante con el identificador '${local.slug}'.`).first()).toBeVisible()
   await expect(page).toHaveURL(/\/plataforma\/restaurantes\/nuevo$/u)
-  await evidencia(page, 'pla-02-identificador-repetido')
+  await evidence(page, 'pla-02-identificador-repetido')
   await page.getByRole('button', { name: 'Cancelar' }).click()
   await expect(page).toHaveURL(/\/plataforma$/u)
   await expect(page.getByRole('heading', { name: 'Restaurantes', level: 1 })).toBeVisible()
 })
 
-test('PLA-03 el administrador cambia el nombre y la zona horaria de un restaurante', async ({ page, plataforma, local }) => {
-  cubre('funcion:plataforma.restaurante.editar', 'ruta:/plataforma/restaurantes/:restaurantId')
-  const nuevo = `Restaurante Editado ${unico()}`
-  await abrirComoPlataforma(page, plataforma, `/plataforma/restaurantes/${String(local.id)}`)
+test('PLA-03 el administrador cambia el nombre y la zona horaria de un restaurante', async ({ page, plataforma: platform, local }) => {
+  covers('funcion:plataforma.restaurante.editar', 'ruta:/plataforma/restaurantes/:restaurantId')
+  const fresh = `Restaurante Editado ${unique()}`
+  await openAsPlatform(page, platform, `/plataforma/restaurantes/${String(local.id)}`)
   await expect(page.getByRole('heading', { name: local.nombre, level: 1 })).toBeVisible()
-  const guardar = page.getByRole('button', { name: 'Guardar cambios' })
-  await expect(guardar).toBeDisabled()
-  await page.getByLabel('Nombre', { exact: true }).fill(nuevo)
+  const save = page.getByRole('button', { name: 'Guardar cambios' })
+  await expect(save).toBeDisabled()
+  await page.getByLabel('Nombre', { exact: true }).fill(fresh)
   await page.getByLabel('Zona horaria').selectOption('America/Bogota')
-  await guardar.click()
+  await save.click()
   await expect(page.getByText('Cambios guardados.')).toBeVisible()
-  await expect(page.getByRole('heading', { name: nuevo, level: 1 })).toBeVisible()
-  await expect(guardar).toBeDisabled()
-  await evidencia(page, 'pla-03-guardado')
-  const ficha = await new Cliente(local.http, plataforma.token).get(`/platform/restaurants/${String(local.id)}`)
-  expect(ficha).toMatchObject({ name: nuevo, timezone: 'America/Bogota' })
+  await expect(page.getByRole('heading', { name: fresh, level: 1 })).toBeVisible()
+  await expect(save).toBeDisabled()
+  await evidence(page, 'pla-03-guardado')
+  const card = await new Customer(local.http, platform.token).get(`/platform/restaurants/${String(local.id)}`)
+  expect(card).toMatchObject({ name: fresh, timezone: 'America/Bogota' })
 })
 
-test('PLA-04 desactivar un restaurante corta el acceso de su personal y activarlo lo devuelve', async ({ page, plataforma, local, browser }) => {
-  cubre(
+test('PLA-04 desactivar un restaurante corta el acceso de su personal y activarlo lo devuelve', async ({ page, plataforma: platform, local, browser }) => {
+  covers(
     'confirmacion:platform/RestaurantStatusButton',
     'funcion:plataforma.restaurante.desactivar',
     'funcion:plataforma.restaurante.activar',
     'estado:acceso.restaurante-desactivado',
   )
-  const celular = await browser.newContext()
-  const mesero = await celular.newPage()
-  await abrirComo(mesero, local.mesero, '/pedidos')
-  await expect(navegacion(mesero).getByRole('link', { name: 'Clientes' })).toBeVisible()
+  const mobile = await browser.newContext()
+  const waiter = await mobile.newPage()
+  await openAs(waiter, local.mesero, '/pedidos')
+  await expect(navigation(waiter).getByRole('link', { name: 'Clientes' })).toBeVisible()
 
-  await abrirComoPlataforma(page, plataforma, `/plataforma/restaurantes/${String(local.id)}`)
-  const desactivar = page.getByRole('button', { name: 'Desactivar restaurante' })
-  const confirmacion = page.getByRole('alertdialog', { name: `¿Desactivar ${local.nombre}?` })
-  await desactivar.click()
-  await expect(confirmacion).toContainText('las 3 cuentas de su personal')
-  await confirmacion.getByRole('button', { name: 'Cancelar' }).click()
-  await expect(confirmacion).toBeHidden()
+  await openAsPlatform(page, platform, `/plataforma/restaurantes/${String(local.id)}`)
+  const deactivate = page.getByRole('button', { name: 'Desactivar restaurante' })
+  const confirmation = page.getByRole('alertdialog', { name: `¿Desactivar ${local.nombre}?` })
+  await deactivate.click()
+  await expect(confirmation).toContainText('las 3 cuentas de su personal')
+  await confirmation.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(confirmation).toBeHidden()
   await expect(page.getByRole('heading', { name: 'Restaurante activo' })).toBeVisible()
 
-  await desactivar.click()
-  await evidencia(page, 'pla-04-confirmar')
-  await confirmacion.getByRole('button', { name: 'Desactivar' }).click()
+  await deactivate.click()
+  await evidence(page, 'pla-04-confirmar')
+  await confirmation.getByRole('button', { name: 'Desactivar' }).click()
   await expect(page.getByRole('heading', { name: 'Restaurante desactivado' })).toBeVisible()
   await expect(page.getByText('Inactivo', { exact: true })).toBeVisible()
-  await evidencia(page, 'pla-04-desactivado')
+  await evidence(page, 'pla-04-desactivado')
 
   // El mesero que tenía la aplicación abierta sale en su siguiente petición.
-  await navegacion(mesero).getByRole('link', { name: 'Clientes' }).click()
-  await expect(mesero).toHaveURL(/\/acceso$/u)
-  await entrarPorFormulario(mesero, local.mesero.email, local.mesero.password)
-  await expect(mesero.getByText('El restaurante de esta cuenta está desactivado.')).toBeVisible()
-  await evidencia(mesero, 'pla-04-acceso-cortado')
+  await navigation(waiter).getByRole('link', { name: 'Clientes' }).click()
+  await expect(waiter).toHaveURL(/\/acceso$/u)
+  await signInByForm(waiter, local.mesero.email, local.mesero.password)
+  await expect(waiter.getByText('El restaurante de esta cuenta está desactivado.')).toBeVisible()
+  await evidence(waiter, 'pla-04-acceso-cortado')
 
   await page.getByRole('button', { name: 'Activar restaurante' }).click()
   await expect(page.getByRole('heading', { name: 'Restaurante activo' })).toBeVisible()
-  await mesero.getByRole('button', { name: 'Entrar' }).click()
+  await waiter.getByRole('button', { name: 'Entrar' }).click()
   // Vuelve a la pantalla que estaba abriendo cuando se cortó el acceso.
-  await expect(mesero).toHaveURL(/\/clientes$/u)
-  await celular.close()
+  await expect(waiter).toHaveURL(/\/clientes$/u)
+  await mobile.close()
 })
 
-test('PLA-05 el administrador agrega otro encargado y rechaza un correo ya usado', async ({ page, plataforma, local }) => {
-  cubre('dialogo:platform/OwnersSection', 'funcion:plataforma.restaurante.agregar-encargado', 'estado:plataforma.restaurante.encargado-error')
-  const correo = `segundo-${unico()}@e2e.resthub.dev`
-  await abrirComoPlataforma(page, plataforma, `/plataforma/restaurantes/${String(local.id)}`)
-  const agregar = page.getByRole('button', { name: 'Agregar encargado' })
-  const ventana = page.getByRole('dialog', { name: 'Agregar encargado' })
-  await agregar.click()
-  await expect(ventana).toBeVisible()
-  await ventana.getByRole('button', { name: 'Cancelar' }).click()
-  await expect(ventana).toBeHidden()
+test('PLA-05 el administrador agrega otro encargado y rechaza un correo ya usado', async ({ page, plataforma: platform, local }) => {
+  covers('dialogo:platform/OwnersSection', 'funcion:plataforma.restaurante.agregar-encargado', 'estado:plataforma.restaurante.encargado-error')
+  const email = `segundo-${unique()}@e2e.resthub.dev`
+  await openAsPlatform(page, platform, `/plataforma/restaurantes/${String(local.id)}`)
+  const add = page.getByRole('button', { name: 'Agregar encargado' })
+  const windowValue = page.getByRole('dialog', { name: 'Agregar encargado' })
+  await add.click()
+  await expect(windowValue).toBeVisible()
+  await windowValue.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(windowValue).toBeHidden()
 
-  await agregar.click()
-  await ventana.getByRole('button', { name: 'Agregar encargado' }).click()
-  await expect(ventana.getByText('Escribe el nombre completo')).toBeVisible()
-  await ventana.getByLabel('Nombre completo').fill('Carmen Salas')
-  await ventana.getByLabel('Correo').fill(local.mesero.email)
-  await ventana.getByLabel('Contraseña inicial', { exact: true }).fill(CLAVE_NUEVA)
-  await ventana.getByRole('button', { name: 'Agregar encargado' }).click()
-  await expect(ventana.getByText(`Ya existe una cuenta con el correo '${local.mesero.email}'.`)).toBeVisible()
-  await evidencia(page, 'pla-05-correo-repetido')
+  await add.click()
+  await windowValue.getByRole('button', { name: 'Agregar encargado' }).click()
+  await expect(windowValue.getByText('Escribe el nombre completo')).toBeVisible()
+  await windowValue.getByLabel('Nombre completo').fill('Carmen Salas')
+  await windowValue.getByLabel('Correo').fill(local.mesero.email)
+  await windowValue.getByLabel('Contraseña inicial', { exact: true }).fill(NEW_SECRET)
+  await windowValue.getByRole('button', { name: 'Agregar encargado' }).click()
+  await expect(windowValue.getByText(`Ya existe una cuenta con el correo '${local.mesero.email}'.`)).toBeVisible()
+  await evidence(page, 'pla-05-correo-repetido')
 
-  await ventana.getByLabel('Correo').fill(correo)
-  await ventana.getByRole('button', { name: 'Agregar encargado' }).click()
-  await expect(ventana).toBeHidden()
-  const encargados = page.getByRole('listitem').filter({ hasText: correo })
-  await expect(encargados).toContainText('Carmen Salas')
-  await expect(encargados).toContainText('Activa')
-  await evidencia(page, 'pla-05-encargado-agregado')
-  const sesion = await entrarPorApi(local.http, correo, CLAVE_NUEVA)
-  expect(sesion.cuenta).toMatchObject({ user: { role_label: 'Encargado' }, restaurant: { id: local.id } })
+  await windowValue.getByLabel('Correo').fill(email)
+  await windowValue.getByRole('button', { name: 'Agregar encargado' }).click()
+  await expect(windowValue).toBeHidden()
+  const owners = page.getByRole('listitem').filter({ hasText: email })
+  await expect(owners).toContainText('Carmen Salas')
+  await expect(owners).toContainText('Activa')
+  await evidence(page, 'pla-05-encargado-agregado')
+  const session = await signInByApi(local.http, email, NEW_SECRET)
+  expect(session.cuenta).toMatchObject({ user: { role_label: 'Encargado' }, restaurant: { id: local.id } })
 })
 
-test('PLA-06 la lista de restaurantes se busca por nombre o identificador y se pagina', async ({ page, plataforma, local }) => {
-  cubre('funcion:plataforma.restaurantes.buscar', 'funcion:plataforma.restaurantes.paginar', 'estado:plataforma.restaurantes.vacio', 'ruta:/plataforma')
+test('PLA-06 la lista de restaurantes se busca por nombre o identificador y se pagina', async ({ page, plataforma: platform, local }) => {
+  covers('funcion:plataforma.restaurantes.buscar', 'funcion:plataforma.restaurantes.paginar', 'estado:plataforma.restaurantes.vacio', 'ruta:/plataforma')
   // En una base recién sembrada faltan restaurantes para una segunda página:
   // se dan de alta de a uno, y eso pasa una sola vez por base.
   test.setTimeout(120_000)
-  const api = new Cliente(local.http, plataforma.token)
-  const prefijo = `Paginado ${unico()}`
-  await restaurantesConPaginas(api)
-  await restaurantesConPrefijo(api, prefijo, 2)
-  await abrirComoPlataforma(page, plataforma, '/plataforma')
-  const buscar = page.getByRole('searchbox', { name: 'Buscar por nombre o identificador' })
-  const filas = page.getByRole('row').filter({ has: page.getByRole('link') })
+  const api = new Customer(local.http, platform.token)
+  const prefix = `Paginado ${unique()}`
+  await restaurantsWithPages(api)
+  await restaurantsWithPrefix(api, prefix, 2)
+  await openAsPlatform(page, platform, '/plataforma')
+  const search = page.getByRole('searchbox', { name: 'Buscar por nombre o identificador' })
+  const rows = page.getByRole('row').filter({ has: page.getByRole('link') })
 
   // Sin búsqueda: 25 por página, los más nuevos primero.
-  await expect(filas).toHaveCount(PAGINA_PLATAFORMA)
+  await expect(rows).toHaveCount(PAGE_PLATFORM)
   await expect(page.getByText(/^Página 1 de \d+$/u)).toBeVisible()
   // Cada fila lleva su identificador, que no se repite.
-  const primera = await filas.first().innerText()
-  await evidencia(page, 'pla-06-pagina-1')
+  const first = await rows.first().innerText()
+  await evidence(page, 'pla-06-pagina-1')
   await page.getByRole('button', { name: 'Siguiente' }).click()
   await expect(page.getByText(/^Página 2 de \d+$/u)).toBeVisible()
-  await expect(filas.first()).not.toHaveText(primera)
+  await expect(rows.first()).not.toHaveText(first)
   await page.getByRole('button', { name: 'Anterior' }).click()
   await expect(page.getByText(/^Página 1 de \d+$/u)).toBeVisible()
 
-  await buscar.fill(prefijo)
+  await search.fill(prefix)
   await expect(page.getByRole('heading', { name: '2 restaurantes' })).toBeVisible()
   // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
-  await expect(filas).toHaveText([new RegExp(`${prefijo} 02`, 'u'), new RegExp(`${prefijo} 01`, 'u')])
+  await expect(rows).toHaveText([new RegExp(`${prefix} 02`, 'u'), new RegExp(`${prefix} 01`, 'u')])
   await expect(page.getByText(/^Página \d+ de/u)).toBeHidden()
-  await evidencia(page, 'pla-06-busqueda')
+  await evidence(page, 'pla-06-busqueda')
 
-  await buscar.fill(local.slug)
+  await search.fill(local.slug)
   await expect(page.getByRole('heading', { name: '1 restaurante', exact: true })).toBeVisible()
-  await expect(filas).toContainText(local.slug)
-  await filas.getByRole('link', { name: local.nombre }).click()
+  await expect(rows).toContainText(local.slug)
+  await rows.getByRole('link', { name: local.nombre }).click()
   // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
   await expect(page).toHaveURL(new RegExp(`/plataforma/restaurantes/${String(local.id)}$`, 'u'))
   await page.getByRole('link', { name: 'Restaurantes' }).first().click()
 
-  await buscar.fill(`no-existe-${unico()}`)
+  await search.fill(`no-existe-${unique()}`)
   await expect(page.getByText('Ningún restaurante coincide con la búsqueda.')).toBeVisible()
   await expect(page.getByRole('heading', { name: '0 restaurantes' })).toBeVisible()
-  await evidencia(page, 'pla-06-sin-resultados')
+  await evidence(page, 'pla-06-sin-resultados')
 })

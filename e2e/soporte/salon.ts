@@ -2,18 +2,18 @@
 // opciones y la impresión del navegador reemplazada por un contador.
 import type { APIResponse, Page } from '@playwright/test'
 
-import { API_ORIGIN, unico, type Local, type Mesa, type Plato, type Sesion } from './api'
+import { API_ORIGIN, unique, type Local, type Table, type Dish, type Session } from './api'
 
 type Json = Record<string, unknown>
 
 const API = `${API_ORIGIN}/api/v1`
 
-async function cuerpo(respuesta: APIResponse, que: string): Promise<Json> {
-  if (!respuesta.ok()) {
-    throw new Error(`${que}: ${String(respuesta.status())} ${await respuesta.text()}`)
+async function body(response: APIResponse, that: string): Promise<Json> {
+  if (!response.ok()) {
+    throw new Error(`${that}: ${String(response.status())} ${await response.text()}`)
   }
-  const texto = await respuesta.text()
-  return texto === '' ? {} : (JSON.parse(texto) as Json)
+  const text = await response.text()
+  return text === '' ? {} : (JSON.parse(text) as Json)
 }
 
 /**
@@ -27,154 +27,154 @@ export class ApiSalon {
   private readonly local: Local
   private readonly token: string
 
-  constructor(local: Local, quien: Sesion) {
+  constructor(local: Local, who: Session) {
     this.local = local
-    this.token = quien.token
+    this.token = who.token
   }
 
   private opciones(data?: unknown) {
     return { headers: { Authorization: `Bearer ${this.token}`, Connection: 'close' }, data }
   }
 
-  async get(ruta: string): Promise<Json> {
-    return cuerpo(await this.local.http.get(`${API}${ruta}`, this.opciones()), `GET ${ruta}`)
+  async get(route: string): Promise<Json> {
+    return body(await this.local.http.get(`${API}${route}`, this.opciones()), `GET ${route}`)
   }
 
   /** Solo el código de estado, para comprobar un 404 o un rechazo. */
-  async estado(ruta: string): Promise<number> {
-    return (await this.local.http.get(`${API}${ruta}`, this.opciones())).status()
+  async estado(route: string): Promise<number> {
+    return (await this.local.http.get(`${API}${route}`, this.opciones())).status()
   }
 
-  async lista(ruta: string): Promise<Json[]> {
-    const datos = (await this.get(ruta)) as unknown
-    return Array.isArray(datos) ? (datos as Json[]) : (((datos as Json).items ?? []) as Json[])
+  async lista(route: string): Promise<Json[]> {
+    const data = (await this.get(route)) as unknown
+    return Array.isArray(data) ? (data as Json[]) : (((data as Json).items ?? []) as Json[])
   }
 
-  async post(ruta: string, data: unknown = {}): Promise<Json> {
-    return cuerpo(await this.local.http.post(`${API}${ruta}`, this.opciones(data)), `POST ${ruta}`)
+  async post(route: string, data: unknown = {}): Promise<Json> {
+    return body(await this.local.http.post(`${API}${route}`, this.opciones(data)), `POST ${route}`)
   }
 
-  async patch(ruta: string, data: unknown): Promise<Json> {
-    return cuerpo(await this.local.http.patch(`${API}${ruta}`, this.opciones(data)), `PATCH ${ruta}`)
+  async patch(route: string, data: unknown): Promise<Json> {
+    return body(await this.local.http.patch(`${API}${route}`, this.opciones(data)), `PATCH ${route}`)
   }
 }
 
 /** El API como esa cuenta; sin cuenta, como el encargado. */
-export function api(local: Local, quien: Sesion = local.encargado): ApiSalon {
-  return new ApiSalon(local, quien)
+export function api(local: Local, who: Session = local.encargado): ApiSalon {
+  return new ApiSalon(local, who)
 }
 
-export interface Linea {
-  readonly plato: Plato
+export interface Line {
+  readonly plato: Dish
   readonly cantidad?: number
   readonly notas?: string
   /** Las opciones elegidas de un plato con `modifier_groups`. */
   readonly opciones?: readonly { readonly grupo: string; readonly opcion: string }[]
 }
 
-function items(lineas: readonly Linea[]) {
-  return lineas.map(({ plato, cantidad = 1, notas = '', opciones = [] }) => ({
-    menu_item_id: plato.id,
-    quantity: cantidad,
-    notes: notas,
-    modifiers: opciones.map(({ grupo, opcion }) => ({ group: grupo, option: opcion })),
+function items(lines: readonly Line[]) {
+  return lines.map(({ plato: dish, cantidad: quantity = 1, notas: notes = '', opciones: options = [] }) => ({
+    menu_item_id: dish.id,
+    quantity: quantity,
+    notes: notes,
+    modifiers: options.map(({ grupo: group, opcion: option }) => ({ group: group, option: option })),
   }))
 }
 
 /** El número y el id de un pedido que devolvió el API. */
-export function numero(pedido: Json): string {
-  return String(pedido.number)
+export function number(order: Json): string {
+  return String(order.number)
 }
 
-export function id(pedido: Json): number {
-  return Number(pedido.id)
+export function id(order: Json): number {
+  return Number(order.id)
 }
 
 /** Un pedido en mesa abierto que todavía no se envió a cocina. */
-export async function pedidoAbierto(local: Local, mesa: Mesa, lineas: readonly Linea[]): Promise<Json> {
+export async function openOrder(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
   return api(local, local.mesero).post('/orders', {
     type: 'dine_in',
-    table_id: mesa.id,
-    client_request_id: `e2e-${unico()}`,
-    items: items(lineas),
+    table_id: table.id,
+    client_request_id: `e2e-${unique()}`,
+    items: items(lines),
   })
 }
 
 /** Un pedido para llevar enviado a cocina. */
-export async function pedidoParaLlevar(
+export async function orderTakeaway(
   local: Local,
-  nombre: string,
-  lineas: readonly Linea[],
-  quien: Sesion = local.mesero,
+  name: string,
+  lines: readonly Line[],
+  who: Session = local.mesero,
 ): Promise<Json> {
-  const llevar = api(local, quien)
-  const pedido = await llevar.post('/orders', {
+  const takeaway = api(local, who)
+  const order = await takeaway.post('/orders', {
     type: 'takeaway',
-    customer_name: nombre,
-    client_request_id: `e2e-${unico()}`,
-    items: items(lineas),
+    customer_name: name,
+    client_request_id: `e2e-${unique()}`,
+    items: items(lines),
   })
-  return llevar.post(`/orders/${String(pedido.id)}/send`)
+  return takeaway.post(`/orders/${String(order.id)}/send`)
 }
 
 /** Un delivery enviado a cocina. */
-export async function pedidoDelivery(local: Local, cliente: string, lineas: readonly Linea[]): Promise<Json> {
-  const mesero = api(local, local.mesero)
-  const pedido = await mesero.post('/orders', {
+export async function orderDelivery(local: Local, customer: string, lines: readonly Line[]): Promise<Json> {
+  const waiter = api(local, local.mesero)
+  const order = await waiter.post('/orders', {
     type: 'delivery',
-    customer_name: cliente,
+    customer_name: customer,
     customer_phone: '987654321',
     delivery_address: 'Av. Arequipa 123, Lince',
     delivery_reference: 'Frente al parque',
-    client_request_id: `e2e-${unico()}`,
-    items: items(lineas),
+    client_request_id: `e2e-${unique()}`,
+    items: items(lines),
   })
-  return mesero.post(`/orders/${String(pedido.id)}/send`)
+  return waiter.post(`/orders/${String(order.id)}/send`)
 }
 
 /** Un pedido en mesa abierto y enviado a cocina, como el celular del mesero. */
-export async function pedidoEnMesa(
+export async function orderInTable(
   local: Local,
-  mesa: Mesa,
-  lineas: readonly Linea[],
-  quien: Sesion = local.mesero,
+  table: Table,
+  lines: readonly Line[],
+  who: Session = local.mesero,
 ): Promise<Json> {
-  const cliente = api(local, quien)
-  const pedido = await cliente.post('/orders', {
+  const customer = api(local, who)
+  const order = await customer.post('/orders', {
     type: 'dine_in',
-    table_id: mesa.id,
-    client_request_id: `e2e-${unico()}`,
-    items: items(lineas),
+    table_id: table.id,
+    client_request_id: `e2e-${unique()}`,
+    items: items(lines),
   })
-  return cliente.post(`/orders/${String(pedido.id)}/send`)
+  return customer.post(`/orders/${String(order.id)}/send`)
 }
 
 /** La cocina lo marca listo y el mesero lo sirve. */
-export async function servir(local: Local, pedidoId: number): Promise<Json> {
-  await api(local, local.cocina).post(`/orders/${String(pedidoId)}/ready`)
-  return api(local, local.mesero).post(`/orders/${String(pedidoId)}/served`)
+export async function serve(local: Local, orderId: number): Promise<Json> {
+  await api(local, local.cocina).post(`/orders/${String(orderId)}/ready`)
+  return api(local, local.mesero).post(`/orders/${String(orderId)}/served`)
 }
 
 /** Un pedido en mesa servido, listo para cobrar. */
-export async function pedidoServido(local: Local, mesa: Mesa, lineas: readonly Linea[]): Promise<Json> {
-  const pedido = await pedidoEnMesa(local, mesa, lineas)
-  return servir(local, id(pedido))
+export async function orderServed(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
+  const order = await orderInTable(local, table, lines)
+  return serve(local, id(order))
 }
 
 /** Un pedido servido y pagado en un solo pago con tarjeta (la caja tiene que estar abierta). */
-export async function pedidoPagado(local: Local, mesa: Mesa, lineas: readonly Linea[]): Promise<Json> {
-  const pedido = await pedidoServido(local, mesa, lineas)
-  return api(local, local.mesero).post(`/orders/${String(pedido.id)}/payments`, {
+export async function orderPaid(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
+  const order = await orderServed(local, table, lines)
+  return api(local, local.mesero).post(`/orders/${String(order.id)}/payments`, {
     payment_method: 'card',
     tip: '0',
   })
 }
 
 /** Un plato con un grupo obligatorio (término) y extras opcionales con precio. */
-export async function platoConOpciones(local: Local): Promise<Plato> {
-  const fondos = local.plato('Lomo saltado').categoriaId
-  const creado = await api(local).post('/menu/items', {
-    category_id: fondos,
+export async function dishWithOptions(local: Local): Promise<Dish> {
+  const funds = local.plato('Lomo saltado').categoriaId
+  const created = await api(local).post('/menu/items', {
+    category_id: funds,
     name: 'Bistec a lo pobre',
     price: '30.00',
     modifier_groups: [
@@ -200,28 +200,28 @@ export async function platoConOpciones(local: Local): Promise<Plato> {
       },
     ],
   })
-  return { id: Number(creado.id), nombre: 'Bistec a lo pobre', precio: '30.00', categoriaId: fondos }
+  return { id: Number(created.id), nombre: 'Bistec a lo pobre', precio: '30.00', categoriaId: funds }
 }
 
 /**
  * `window.print()` abre el diálogo del sistema: en la prueba solo cuenta las
  * veces que se pidió, para comprobar que la hoja lanzó la impresión.
  */
-export async function contarImpresiones(page: Page): Promise<void> {
+export async function countPrints(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const ventana = window as unknown as { impresiones: number }
-    ventana.impresiones = 0
+    const windowValue = window as unknown as { impresiones: number }
+    windowValue.impresiones = 0
     window.print = () => {
-      ventana.impresiones += 1
+      windowValue.impresiones += 1
     }
   })
 }
 
-export async function impresiones(page: Page): Promise<number> {
+export async function prints(page: Page): Promise<number> {
   return page.evaluate(() => (window as unknown as { impresiones: number }).impresiones)
 }
 
 /** Un pedido por su id, leído del API como encargado. */
-export async function leerPedido(local: Local, pedidoId: number): Promise<Json> {
-  return api(local).get(`/orders/${String(pedidoId)}`)
+export async function readOrder(local: Local, orderId: number): Promise<Json> {
+  return api(local).get(`/orders/${String(orderId)}`)
 }

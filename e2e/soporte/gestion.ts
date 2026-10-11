@@ -6,15 +6,15 @@ import type { APIResponse, Page } from '@playwright/test'
 
 import {
   API_ORIGIN,
-  CLAVE_NUEVA,
-  entrarPlataformaPorApi,
-  entrarPorApi,
-  nuevoHttp,
-  unico,
+  NEW_SECRET,
+  signInPlatformByApi,
+  signInByApi,
+  newHttp,
+  unique,
   type Local,
-  type Mesa,
-  type Plato,
-  type Sesion,
+  type Table,
+  type Dish,
+  type Session,
 } from './api'
 import { test as base } from './fixtures'
 
@@ -22,12 +22,12 @@ type Json = Record<string, unknown>
 
 const API = `${API_ORIGIN}/api/v1`
 
-async function cuerpo(respuesta: APIResponse, que: string): Promise<Json> {
-  if (!respuesta.ok()) {
-    throw new Error(`${que}: ${String(respuesta.status())} ${await respuesta.text()}`)
+async function body(response: APIResponse, that: string): Promise<Json> {
+  if (!response.ok()) {
+    throw new Error(`${that}: ${String(response.status())} ${await response.text()}`)
   }
-  const texto = await respuesta.text()
-  return texto === '' ? {} : (JSON.parse(texto) as Json)
+  const text = await response.text()
+  return text === '' ? {} : (JSON.parse(text) as Json)
 }
 
 type Http = Local['http']
@@ -37,7 +37,7 @@ type Http = Local['http']
  * llamadas la prueba pasa segundos en la pantalla y uvicorn cierra la que
  * quedó abierta, lo que daría «socket hang up» al reusarla.
  */
-export class ApiGestion {
+export class ApiManagement {
   private readonly http: Http
   private readonly token: string
 
@@ -50,52 +50,52 @@ export class ApiGestion {
     return { headers: { Authorization: `Bearer ${this.token}`, Connection: 'close' }, data }
   }
 
-  async get(ruta: string): Promise<Json> {
-    return cuerpo(await this.http.get(`${API}${ruta}`, this.opciones()), `GET ${ruta}`)
+  async get(route: string): Promise<Json> {
+    return body(await this.http.get(`${API}${route}`, this.opciones()), `GET ${route}`)
   }
 
-  async lista(ruta: string): Promise<Json[]> {
-    const datos = (await this.get(ruta)) as unknown
-    return Array.isArray(datos) ? (datos as Json[]) : (((datos as Json).items ?? []) as Json[])
+  async lista(route: string): Promise<Json[]> {
+    const data = (await this.get(route)) as unknown
+    return Array.isArray(data) ? (data as Json[]) : (((data as Json).items ?? []) as Json[])
   }
 
-  async post(ruta: string, data: unknown = {}): Promise<Json> {
-    return cuerpo(await this.http.post(`${API}${ruta}`, this.opciones(data)), `POST ${ruta}`)
+  async post(route: string, data: unknown = {}): Promise<Json> {
+    return body(await this.http.post(`${API}${route}`, this.opciones(data)), `POST ${route}`)
   }
 
-  async put(ruta: string, data: unknown): Promise<Json> {
-    return cuerpo(await this.http.put(`${API}${ruta}`, this.opciones(data)), `PUT ${ruta}`)
+  async put(route: string, data: unknown): Promise<Json> {
+    return body(await this.http.put(`${API}${route}`, this.opciones(data)), `PUT ${route}`)
   }
 
-  async patch(ruta: string, data: unknown): Promise<Json> {
-    return cuerpo(await this.http.patch(`${API}${ruta}`, this.opciones(data)), `PATCH ${ruta}`)
+  async patch(route: string, data: unknown): Promise<Json> {
+    return body(await this.http.patch(`${API}${route}`, this.opciones(data)), `PATCH ${route}`)
   }
 }
 
 /** El API como esa cuenta; sin cuenta, como el encargado. */
-export function api(local: Pick<Local, 'http' | 'encargado'>, quien: Sesion = local.encargado): ApiGestion {
-  return new ApiGestion(local.http, quien.token)
+export function api(local: Pick<Local, 'http' | 'encargado'>, who: Session = local.encargado): ApiManagement {
+  return new ApiManagement(local.http, who.token)
 }
 
 /** Un monto como lo escribe la aplicación («S/ 164.00»), con cualquier espacio. */
-export function soles(monto: string): RegExp {
+export function soles(amount: string): RegExp {
   // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
-  return new RegExp(`S/\\s*${monto.replaceAll('.', '\\.')}`, 'u')
+  return new RegExp(`S/\\s*${amount.replaceAll('.', '\\.')}`, 'u')
 }
 
 /** El día de hoy en Lima, la zona de los restaurantes de prueba (`2026-09-26`). */
-export function hoy(): string {
+export function today(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' }).format(new Date())
 }
 
 /** El id numérico de una respuesta del API. */
-export function id(dato: Json): number {
-  return Number(dato.id)
+export function id(data: Json): number {
+  return Number(data.id)
 }
 
-export interface Venta {
-  readonly items: readonly { readonly plato: Plato; readonly cantidad?: number }[]
-  readonly mesa: Mesa
+export interface Sale {
+  readonly items: readonly { readonly plato: Dish; readonly cantidad?: number }[]
+  readonly mesa: Table
   readonly metodo?: 'cash' | 'yape' | 'plin' | 'card' | 'transfer'
   readonly propina?: string
 }
@@ -105,25 +105,25 @@ export interface Venta {
  * la cocina lo marca listo, el mesero lo sirve y lo cobra. Hace falta la caja
  * abierta. Devuelve el pedido pagado.
  */
-export async function vender(local: Local, venta: Venta): Promise<Json> {
-  const mesero = api(local, local.mesero)
-  const pedido = await mesero.post('/orders', {
+export async function sell(local: Local, sale: Sale): Promise<Json> {
+  const waiter = api(local, local.mesero)
+  const order = await waiter.post('/orders', {
     type: 'dine_in',
-    table_id: venta.mesa.id,
-    client_request_id: `e2e-${unico()}`,
-    items: venta.items.map(({ plato, cantidad = 1 }) => ({ menu_item_id: plato.id, quantity: cantidad, notes: '' })),
+    table_id: sale.mesa.id,
+    client_request_id: `e2e-${unique()}`,
+    items: sale.items.map(({ plato: dish, cantidad: quantity = 1 }) => ({ menu_item_id: dish.id, quantity: quantity, notes: '' })),
   })
-  const ruta = `/orders/${String(id(pedido))}`
-  await mesero.post(`${ruta}/send`)
-  await api(local, local.cocina).post(`${ruta}/ready`)
-  await mesero.post(`${ruta}/served`)
-  return mesero.post(`${ruta}/charge`, { payment_method: venta.metodo ?? 'cash', tip: venta.propina ?? '0' })
+  const route = `/orders/${String(id(order))}`
+  await waiter.post(`${route}/send`)
+  await api(local, local.cocina).post(`${route}/ready`)
+  await waiter.post(`${route}/served`)
+  return waiter.post(`${route}/charge`, { payment_method: sale.metodo ?? 'cash', tip: sale.propina ?? '0' })
 }
 
 /** La boleta simple de un pedido pagado, sin datos del cliente. */
-export async function emitirBoleta(local: Local, pedidoId: number): Promise<Json> {
+export async function issueSalesReceipt(local: Local, orderId: number): Promise<Json> {
   return api(local).post('/billing/invoices', {
-    order_id: pedidoId,
+    order_id: orderId,
     kind: 'boleta',
     customer_name: '',
     customer_document_type: 'none',
@@ -133,70 +133,70 @@ export async function emitirBoleta(local: Local, pedidoId: number): Promise<Json
 }
 
 /** Una cuenta más del personal con ese rol. Devuelve la sesión ya iniciada. */
-export async function nuevaCuenta(local: Local, nombre: string, rolId: number): Promise<Sesion> {
-  const correo = `cuenta-${unico()}@e2e.resthub.dev`
-  await api(local).post('/staff', { email: correo, full_name: nombre, role_id: rolId, password: CLAVE_NUEVA })
-  return entrarPorApi(local.http, correo, CLAVE_NUEVA)
+export async function newAccount(local: Local, name: string, roleId: number): Promise<Session> {
+  const email = `cuenta-${unique()}@e2e.resthub.dev`
+  await api(local).post('/staff', { email: email, full_name: name, role_id: roleId, password: NEW_SECRET })
+  return signInByApi(local.http, email, NEW_SECRET)
 }
 
 /** Si una cuenta puede entrar con esa contraseña (el código del acceso). */
-export async function intentarAcceso(http: Http, email: string, password: string): Promise<number> {
-  const respuesta = await http.post(`${API}/auth/login`, { data: { email, password }, headers: { Connection: 'close' } })
-  return respuesta.status()
+export async function tryAccess(http: Http, email: string, password: string): Promise<number> {
+  const response = await http.post(`${API}/auth/login`, { data: { email, password }, headers: { Connection: 'close' } })
+  return response.status()
 }
 
 /** El servidor responde 500 a cada petición que empiece con esa ruta del API (`/cash/current`). */
-export async function fallaServidor(page: Page, ruta: string): Promise<void> {
-  await page.route(`**/api/v1${ruta}**`, (peticion) => peticion.fulfill({ status: 500, contentType: 'application/json', body: '{}' }))
+export async function failureServer(page: Page, route: string): Promise<void> {
+  await page.route(`**/api/v1${route}**`, (request) => request.fulfill({ status: 500, contentType: 'application/json', body: '{}' }))
 }
 
 /** Un restaurante recién dado de alta: solo su encargado, sin carta, mesas ni inventario. */
-export interface LocalVacio {
-  readonly encargado: Sesion
+export interface RestaurantEmpty {
+  readonly encargado: Session
   readonly http: Http
 }
 
-async function crearLocalVacio(): Promise<LocalVacio> {
-  const http = await nuevoHttp()
-  const plataforma = await entrarPlataformaPorApi(http)
-  const sufijo = unico()
-  const correo = `vacio-${sufijo}@e2e.resthub.dev`
-  await new ApiGestion(http, plataforma.token).post('/platform/restaurants', {
+async function createRestaurantEmpty(): Promise<RestaurantEmpty> {
+  const http = await newHttp()
+  const platform = await signInPlatformByApi(http)
+  const suffix = unique()
+  const email = `vacio-${suffix}@e2e.resthub.dev`
+  await new ApiManagement(http, platform.token).post('/platform/restaurants', {
     name: 'Restaurante Vacío E2E',
-    slug: `e2e-vacio-${sufijo}`,
+    slug: `e2e-vacio-${suffix}`,
     timezone: 'America/Lima',
-    owner: { full_name: 'Encargado Nuevo', email: correo, password: CLAVE_NUEVA },
+    owner: { full_name: 'Encargado Nuevo', email: email, password: NEW_SECRET },
   })
-  return { encargado: await entrarPorApi(http, correo, CLAVE_NUEVA), http }
+  return { encargado: await signInByApi(http, email, NEW_SECRET), http }
 }
 
 /** Los accesorios comunes más el restaurante vacío, para los estados vacíos. */
-export const test = base.extend<{ vacio: LocalVacio }>({
-  vacio: async ({}, usar) => {
-    const vacio = await crearLocalVacio()
-    await usar(vacio)
-    await vacio.http.dispose()
+export const test = base.extend<{ vacio: RestaurantEmpty }>({
+  vacio: async ({}, use) => {
+    const empty = await createRestaurantEmpty()
+    await use(empty)
+    await empty.http.dispose()
   },
 })
 
 /** Cuenta las veces que la página pide imprimir, sin abrir el diálogo del sistema. */
-export async function contarImpresiones(page: Page): Promise<void> {
+export async function countPrints(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const ventana = window as unknown as { impresiones: number }
-    ventana.impresiones = 0
+    const windowValue = window as unknown as { impresiones: number }
+    windowValue.impresiones = 0
     window.print = () => {
-      ventana.impresiones += 1
+      windowValue.impresiones += 1
     }
   })
 }
 
-export async function impresiones(page: Page): Promise<number> {
+export async function prints(page: Page): Promise<number> {
   return page.evaluate(() => (window as unknown as { impresiones: number }).impresiones)
 }
 
 /** El día que cae `dias` después de hoy en Lima (`2026-09-28`). */
-export function diaDesdeHoy(dias: number): string {
-  const fecha = new Date(`${hoy()}T12:00:00Z`)
-  fecha.setUTCDate(fecha.getUTCDate() + dias)
-  return fecha.toISOString().slice(0, 10)
+export function dayFromToday(days: number): string {
+  const date = new Date(`${today()}T12:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + days)
+  return date.toISOString().slice(0, 10)
 }

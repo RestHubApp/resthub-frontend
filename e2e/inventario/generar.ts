@@ -2,13 +2,13 @@
 // Uso: pnpm e2e:inventario
 import { writeFileSync } from 'node:fs'
 
-import { ARCHIVO_INVENTARIO, inventario } from './inventario.ts'
+import { FILE_INVENTORY, inventory } from './inventario.ts'
 
-const elementos = inventario()
-const porTipo: Record<string, number> = {}
-for (const elemento of elementos) {
-  porTipo[elemento.tipo] = (porTipo[elemento.tipo] ?? 0) + 1
+const items = inventory()
+const byType: Record<string, number> = {}
+for (const element of items) {
+  byType[element.tipo] = (byType[element.tipo] ?? 0) + 1
 }
 // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
-writeFileSync(ARCHIVO_INVENTARIO, `${JSON.stringify({ total: elementos.length, porTipo, elementos }, null, 2)}\n`)
-console.warn(`Inventario: ${String(elementos.length)} elementos`, porTipo)
+writeFileSync(FILE_INVENTORY, `${JSON.stringify({ total: items.length, porTipo: byType, elementos: items }, null, 2)}\n`)
+console.warn(`Inventario: ${String(items.length)} elementos`, byType)

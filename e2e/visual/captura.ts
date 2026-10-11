@@ -23,15 +23,15 @@ import { join } from 'node:path'
 import type { Locator, Page, Request, Route } from '@playwright/test'
 
 import { expect as expectBase, test as base } from '../soporte/fixtures'
-import { BITACORA, LOCAL_DE_MUESTRA, OBSERVABILIDAD, RESTAURANTES } from './datos'
+import { LOG, SAMPLE_RESTAURANT, OBSERVABILITY, RESTAURANTS } from './datos'
 
 
-const ESTILO = join(import.meta.dirname, 'captura.css')
+const STYLE = join(import.meta.dirname, 'captura.css')
 // Tomar una captura en WebKit bajo WSL (sin GPU, con el envoltorio de
 // librerías) tarda varios segundos, más con otras pruebas corriendo: con los
 // 8 s de `expect` la primera ni siquiera termina. Es el tiempo de sacar la
 // foto, no una espera a que algo se estabilice.
-const TIEMPO_CAPTURA = 30_000
+const TIME_CAPTURE = 30_000
 
 /**
  * El `expect` de las capturas, con 15 s para que aparezca cada cosa en vez
@@ -41,17 +41,17 @@ const TIEMPO_CAPTURA = 30_000
  */
 export const expect = expectBase.configure({ timeout: 15_000 })
 const API = '/api/v1'
-const EVENTOS = `${API}/events`
+const EVENTS = `${API}/events`
 const OBS = `${API}/platform/observability/`
 
-const FIJOS: Readonly<Record<string, unknown>> = {
-  [`${API}/platform/restaurants`]: RESTAURANTES,
-  [`${API}/platform/activity`]: BITACORA,
-  [`${API}/platform/sandbox`]: LOCAL_DE_MUESTRA,
+const FIXED: Readonly<Record<string, unknown>> = {
+  [`${API}/platform/restaurants`]: RESTAURANTS,
+  [`${API}/platform/activity`]: LOG,
+  [`${API}/platform/sandbox`]: SAMPLE_RESTAURANT,
 }
 
 /** Los sufijos aleatorios de las cuentas y los locales de prueba, con su reemplazo fijo. */
-const SUFIJOS: readonly (readonly [RegExp, string])[] = [
+const SUFFIXES: readonly (readonly [RegExp, string])[] = [
   [/\b(encargado|mesero|cocina|vacio|cuenta)-[a-z0-9]+@e2e\.resthub\.dev/gu, '$1@e2e.resthub.dev'],
   [/\be2e-(?:vacio-)?[a-z0-9]{10,}\b/gu, 'e2e-local'],
   [/\bmuestra-[0-9a-f]{6,}\b/gu, 'muestra-local'],
@@ -63,7 +63,7 @@ const SUFIJOS: readonly (readonly [RegExp, string])[] = [
  * estas respuestas la hora del día se fija a las 12:00 de Lima. Ninguna de
  * ellas calcula tiempos transcurridos (eso sale de `/orders/active`).
  */
-const LISTAS_CON_HORA: readonly RegExp[] = [
+const LISTS_WITH_HOUR: readonly RegExp[] = [
   /^\/api\/v1\/orders$/u,
   /^\/api\/v1\/inventory\/movements$/u,
   // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
@@ -75,53 +75,53 @@ const LISTAS_CON_HORA: readonly RegExp[] = [
   /^\/api\/v1\/customers(?:\/\d+)?$/u,
 ]
 // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
-const INSTANTE = /"(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})"/gu
+const INSTANT = /"(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})"/gu
 
 // La ficha de un restaurante de plataforma muestra «Alta: <fecha y hora>»: el
 // largo de ese texto (enmascarado) cambia con la hora y hacía saltar de línea
 // lo que sigue. Se fija el instante entero (la ficha no calcula tiempos).
-const FICHA_CON_ALTA = /^\/api\/v1\/platform\/restaurants\/\d+$/u
+const CARD_WITH_REGISTRATION = /^\/api\/v1\/platform\/restaurants\/\d+$/u
 
-function normalizar(ruta: string, texto: string): string {
-  const sinSufijos = SUFIJOS.reduce((actual, [patron, reemplazo]) => actual.replace(patron, reemplazo), texto)
-  if (FICHA_CON_ALTA.test(ruta)) {
-    return sinSufijos.replace(INSTANTE, '"2026-09-27T17:00:00Z"')
+function normalize(route: string, text: string): string {
+  const withoutSuffixes = SUFFIXES.reduce((actual, [patron, replacement]) => actual.replace(patron, replacement), text)
+  if (CARD_WITH_REGISTRATION.test(route)) {
+    return withoutSuffixes.replace(INSTANT, '"2026-09-27T17:00:00Z"')
   }
-  return LISTAS_CON_HORA.some((lista) => lista.test(ruta)) ? sinSufijos.replace(INSTANTE, '"$1T17:00:00Z"') : sinSufijos
+  return LISTS_WITH_HOUR.some((list) => list.test(route)) ? withoutSuffixes.replace(INSTANT, '"$1T17:00:00Z"') : withoutSuffixes
 }
 
-function datoFijo(ruta: string): unknown {
-  if (ruta.startsWith(OBS)) {
-    const clave = ruta.slice(OBS.length) as keyof typeof OBSERVABILIDAD
-    return OBSERVABILIDAD[clave]
+function fixedData(route: string): unknown {
+  if (route.startsWith(OBS)) {
+    const password = route.slice(OBS.length) as keyof typeof OBSERVABILITY
+    return OBSERVABILITY[password]
   }
-  return FIJOS[ruta]
+  return FIXED[route]
 }
 
-async function responder(route: Route, peticion: Request): Promise<void> {
-  if (peticion.method() !== 'GET') {
+async function respond(route: Route, request: Request): Promise<void> {
+  if (request.method() !== 'GET') {
     await route.fallback()
     return
   }
-  const ruta = new URL(peticion.url()).pathname
-  const fijo = datoFijo(ruta)
-  if (fijo !== undefined) {
-    await route.fulfill({ json: fijo })
+  const routeValue = new URL(request.url()).pathname
+  const fixed = fixedData(routeValue)
+  if (fixed !== undefined) {
+    await route.fulfill({ json: fixed })
     return
   }
   // Sin reusar la conexión: uvicorn cierra las que quedan abiertas a los 5 s
   // y reusarla da «socket hang up» (igual que en `e2e/soporte/api.ts`). Si
   // aun así se corta, se intenta una vez más.
-  const opciones = { headers: { ...peticion.headers(), connection: 'close' } }
-  const respuesta = await route.fetch(opciones).catch(async () => route.fetch(opciones))
-  await route.fulfill({ response: respuesta, body: normalizar(ruta, await respuesta.text()) })
+  const options = { headers: { ...request.headers(), connection: 'close' } }
+  const response = await route.fetch(options).catch(async () => route.fetch(options))
+  await route.fulfill({ response: response, body: normalize(routeValue, await response.text()) })
 }
 
 function esApi(url: URL): boolean {
-  return url.pathname.startsWith(`${API}/`) && url.pathname !== EVENTOS
+  return url.pathname.startsWith(`${API}/`) && url.pathname !== EVENTS
 }
 
-async function preparar(page: Page): Promise<void> {
+async function prepare(page: Page): Promise<void> {
   await page.route('https://cdn.jsdelivr.net/**', (route) => route.abort())
   // El widget de accesibilidad, al iniciarse, fija en línea el tamaño de letra
   // de cada texto ya dibujado con `parseInt` (12,8 px pasa a 12 px) y no toca
@@ -129,43 +129,43 @@ async function preparar(page: Page): Promise<void> {
   // salía de 12 o de 12,8 px. Las capturas se toman sin el widget; su menú lo
   // recorren las E2E (ACC-13 y ACC-14).
   await page.route(/\/assets\/sienna-accessibility[^/]*\.js$/u, (route) => route.abort())
-  await page.route(esApi, async (route, peticion) => {
+  await page.route(esApi, async (route, request) => {
     // Si `route.fetch` falla (el servidor cortó la conexión) la petición no
     // puede quedar sin respuesta: la página seguiría en «Cargando…». Sigue
     // sin normalizar hacia el servidor. Si la página ya se cerró, no hay a
     // quién responder.
-    await responder(route, peticion).catch(async () => route.continue().catch(() => undefined))
+    await respond(route, request).catch(async () => route.continue().catch(() => undefined))
   })
 }
 
 /** Los accesorios de siempre, con la página ya preparada para capturar. */
 export const test = base.extend<{ capturable: undefined }>({
   capturable: [
-    async ({ page }, usar) => {
-      await preparar(page)
-      await usar(undefined)
+    async ({ page }, use) => {
+      await prepare(page)
+      await use(undefined)
       await page.unrouteAll({ behavior: 'ignoreErrors' })
     },
     { auto: true },
   ],
 })
 
-const MESES = 'ene|feb|mar|abr|may|jun|jul|ago|set|oct|nov|dic'
-const MESES_LARGOS = 'enero|febrero|marzo|abril|mayo|junio|julio|agosto|setiembre|octubre|noviembre|diciembre'
+const MONTHS = 'ene|feb|mar|abr|may|jun|jul|ago|set|oct|nov|dic'
+const MONTHS_LONGS = 'enero|febrero|marzo|abril|mayo|junio|julio|agosto|setiembre|octubre|noviembre|diciembre'
 
 /** Lo que cambia con la hora real: fechas, horas, minutos transcurridos y cuentas regresivas. */
 export function volatiles(page: Page | Locator): Locator[] {
   return [
     page.getByText(/\d{1,2}:\d{2}\s?[ap]\.\s?m\./u),
-    page.getByText(new RegExp(`\\b\\d{1,2} (?:${MESES})\\.?(?: \\d{4})?\\b`, 'u')),
-    page.getByText(new RegExp(`\\d{1,2} de (?:${MESES_LARGOS})`, 'u')),
+    page.getByText(new RegExp(`\\b\\d{1,2} (?:${MONTHS})\\.?(?: \\d{4})?\\b`, 'u')),
+    page.getByText(new RegExp(`\\d{1,2} de (?:${MONTHS_LONGS})`, 'u')),
     page.getByText(/^\d+ min$/u),
     page.getByText(/^hace /u),
     page.getByRole('timer'),
   ]
 }
 
-export interface Opciones {
+export interface Options {
   /** Lo que se enmascara además de `volatiles`. */
   readonly mask?: readonly Locator[]
   /**
@@ -184,32 +184,32 @@ export interface Opciones {
  * variable todavía no había llegado para ese peso) y la línea base cambiaba
  * de una corrida a otra en los enlaces y las insignias.
  */
-async function fuentesListas(page: Page): Promise<void> {
+async function sourcesLists(page: Page): Promise<void> {
   await page.evaluate(async () => {
-    await Promise.all(['400', '500', '600', '700'].map((peso) => document.fonts.load(`${peso} 16px "Geist Variable"`)))
+    await Promise.all(['400', '500', '600', '700'].map((weight) => document.fonts.load(`${weight} 16px "Geist Variable"`)))
     await document.fonts.ready
     // Dos cuadros: el navegador vuelve a medir el texto que dibujó con la fuente de reemplazo.
-    await new Promise((listo) => {
+    await new Promise((ready) => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(listo)
+        requestAnimationFrame(ready)
       })
     })
   })
 }
 
-export async function capturar(page: Page, nombre: string, opciones: Opciones = {}): Promise<void> {
+export async function capture(page: Page, name: string, options: Options = {}): Promise<void> {
   await expect(page.getByText(/^Cargando/u)).toHaveCount(0)
-  await fuentesListas(page)
+  await sourcesLists(page)
   if (esMovil()) {
     // En el celular la página no se desplaza de costado (AGENTS.md, «Uso en el celular»).
-    const ancho = await page.evaluate(() => document.documentElement.scrollWidth)
-    expect.soft(ancho, `${nombre}: la página se desplaza de costado a 390 px`).toBeLessThanOrEqual(390)
+    const width = await page.evaluate(() => document.documentElement.scrollWidth)
+    expect.soft(width, `${name}: la página se desplaza de costado a 390 px`).toBeLessThanOrEqual(390)
   }
-  await expect(page).toHaveScreenshot(`${nombre}.png`, {
-    fullPage: opciones.fullPage ?? !esMovil(),
-    mask: [...volatiles(page), ...(opciones.mask ?? [])],
-    stylePath: ESTILO,
-    timeout: TIEMPO_CAPTURA,
+  await expect(page).toHaveScreenshot(`${name}.png`, {
+    fullPage: options.fullPage ?? !esMovil(),
+    mask: [...volatiles(page), ...(options.mask ?? [])],
+    stylePath: STYLE,
+    timeout: TIME_CAPTURE,
   })
 }
 
@@ -218,26 +218,26 @@ export async function capturar(page: Page, nombre: string, opciones: Opciones = 
  * máscara sobre el fondo (la hora de un pedido detrás) se pintaría encima
  * del diálogo, porque las máscaras se pintan por encima de cualquier capa.
  */
-export async function capturarVentana(ventana: Locator, nombre: string, mask: readonly Locator[] = []): Promise<void> {
-  await expect(ventana).toBeVisible()
-  await expect(ventana.getByText(/^Cargando/u)).toHaveCount(0)
-  await fuentesListas(ventana.page())
-  await expect(ventana).toHaveScreenshot(`${nombre}.png`, {
-    mask: [...volatiles(ventana), ...mask],
-    stylePath: ESTILO,
-    timeout: TIEMPO_CAPTURA,
+export async function captureWindow(windowValue: Locator, name: string, mask: readonly Locator[] = []): Promise<void> {
+  await expect(windowValue).toBeVisible()
+  await expect(windowValue.getByText(/^Cargando/u)).toHaveCount(0)
+  await sourcesLists(windowValue.page())
+  await expect(windowValue).toHaveScreenshot(`${name}.png`, {
+    mask: [...volatiles(windowValue), ...mask],
+    stylePath: STYLE,
+    timeout: TIME_CAPTURE,
   })
 }
 
 /** El tiempo máximo de una captura (ver `TIEMPO_CAPTURA`). */
-export const tiempoDeCaptura = TIEMPO_CAPTURA
+export const captureTime = TIME_CAPTURE
 
 /**
  * El tiempo de una prueba que junta varias capturas. En WebKit cada captura
  * tarda varias veces lo que en Chromium o Firefox (ver `TIEMPO_CAPTURA`), así
  * que ahí el plazo es mayor.
  */
-export function plazo(ms: number): void {
+export function deadline(ms: number): void {
   test.setTimeout(test.info().project.name.includes('webkit') ? ms * 2.5 : ms)
 }
 

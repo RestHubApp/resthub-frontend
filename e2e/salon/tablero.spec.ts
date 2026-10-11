@@ -3,101 +3,101 @@
 // filtros de fecha, estado, tipo y mesero, el detalle de cada fila y páginas.
 import type { Page } from '@playwright/test'
 
-import { cubre } from '../soporte/cobertura'
-import { abrirComo, aviso, evidencia, expect, test } from '../soporte/fixtures'
+import { covers } from '../soporte/cobertura'
+import { openAs, notice, evidence, expect, test } from '../soporte/fixtures'
 import {
   api,
   id,
-  leerPedido,
-  pedidoAbierto,
-  pedidoDelivery,
-  pedidoParaLlevar,
-  pedidoPagado,
-  pedidoServido,
+  readOrder,
+  openOrder,
+  orderDelivery,
+  orderTakeaway,
+  orderPaid,
+  orderServed,
 } from '../soporte/salon'
 
 // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
-const columna = (page: Page, estado: string) => page.getByRole('region', { name: new RegExp(`^${estado}: \\d+$`, 'u') })
-const tarjeta = (page: Page, numero: unknown) => page.getByRole('article', { name: `Pedido #${String(numero)}` })
+const column = (page: Page, status: string) => page.getByRole('region', { name: new RegExp(`^${status}: \\d+$`, 'u') })
+const card = (page: Page, number: unknown) => page.getByRole('article', { name: `Pedido #${String(number)}` })
 
 /** Hoy y mañana en Lima, como `AAAA-MM-DD`. */
-function diaEnLima(desplazamiento = 0): string {
-  const dia = new Date(Date.now() + desplazamiento * 24 * 60 * 60 * 1000)
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' }).format(dia)
+function dayInLima(scroll = 0): string {
+  const day = new Date(Date.now() + scroll * 24 * 60 * 60 * 1000)
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' }).format(day)
 }
 
 test('SAL-28 el encargado filtra el tablero por tipo y envía, cobra y cancela desde las tarjetas', async ({
   page,
   localConCaja: local,
 }) => {
-  cubre(
+  covers(
     'funcion:tablero.filtrar-tipo',
     'funcion:tablero.enviar-a-cocina',
     'funcion:tablero.cobrar',
     'funcion:tablero.cancelar',
     'funcion:tablero.ir-al-pedido',
   )
-  const abierto = await pedidoAbierto(local, local.mesa('1'), [{ plato: local.plato('Chicha morada') }])
-  const llevar = await pedidoParaLlevar(local, 'Ana', [{ plato: local.plato('Ají de gallina') }])
-  const delivery = await pedidoDelivery(local, 'Luis', [{ plato: local.plato('Lomo saltado') }])
-  const servido = await pedidoServido(local, local.mesa('2'), [{ plato: local.plato('Ceviche clásico') }])
-  await abrirComo(page, local.encargado, '/tablero')
+  const open = await openOrder(local, local.mesa('1'), [{ plato: local.plato('Chicha morada') }])
+  const takeaway = await orderTakeaway(local, 'Ana', [{ plato: local.plato('Ají de gallina') }])
+  const delivery = await orderDelivery(local, 'Luis', [{ plato: local.plato('Lomo saltado') }])
+  const served = await orderServed(local, local.mesa('2'), [{ plato: local.plato('Ceviche clásico') }])
+  await openAs(page, local.encargado, '/tablero')
 
-  const filtro = page.getByRole('group', { name: 'Filtrar por tipo' })
-  await expect(filtro.getByRole('button')).toHaveText(['Todos (4)', 'En mesa (2)', 'Para llevar (1)', 'Delivery (1)'])
-  await filtro.getByRole('button', { name: 'Para llevar (1)' }).click()
-  await expect(filtro.getByRole('button', { name: 'Para llevar (1)' })).toHaveAttribute('aria-pressed', 'true')
+  const filter = page.getByRole('group', { name: 'Filtrar por tipo' })
+  await expect(filter.getByRole('button')).toHaveText(['Todos (4)', 'En mesa (2)', 'Para llevar (1)', 'Delivery (1)'])
+  await filter.getByRole('button', { name: 'Para llevar (1)' }).click()
+  await expect(filter.getByRole('button', { name: 'Para llevar (1)' })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('article')).toHaveCount(1)
-  await expect(tarjeta(page, llevar.number)).toContainText('Para llevar · Ana')
-  await filtro.getByRole('button', { name: 'Delivery (1)' }).click()
+  await expect(card(page, takeaway.number)).toContainText('Para llevar · Ana')
+  await filter.getByRole('button', { name: 'Delivery (1)' }).click()
   await expect(page.getByRole('article')).toHaveCount(1)
-  await expect(tarjeta(page, delivery.number)).toContainText('Delivery · Luis')
-  await filtro.getByRole('button', { name: 'En mesa (2)' }).click()
+  await expect(card(page, delivery.number)).toContainText('Delivery · Luis')
+  await filter.getByRole('button', { name: 'En mesa (2)' }).click()
   await expect(page.getByRole('article')).toHaveCount(2)
-  await evidencia(page, 'sal-28-1-filtro')
-  await filtro.getByRole('button', { name: 'Todos (4)' }).click()
+  await evidence(page, 'sal-28-1-filtro')
+  await filter.getByRole('button', { name: 'Todos (4)' }).click()
   await expect(page.getByRole('article')).toHaveCount(4)
 
   // El pedido abierto se manda a cocina desde su tarjeta.
-  await expect(columna(page, 'Abierto')).toContainText('Mesa 1')
-  await tarjeta(page, abierto.number).getByRole('button', { name: 'Enviar a cocina' }).click()
-  await expect(columna(page, 'En cocina').getByRole('article')).toHaveCount(3)
-  await expect(columna(page, 'Abierto')).toContainText('Sin pedidos')
+  await expect(column(page, 'Abierto')).toContainText('Mesa 1')
+  await card(page, open.number).getByRole('button', { name: 'Enviar a cocina' }).click()
+  await expect(column(page, 'En cocina').getByRole('article')).toHaveCount(3)
+  await expect(column(page, 'Abierto')).toContainText('Sin pedidos')
 
   // Cancelar el delivery desde la tarjeta.
   await page.getByRole('button', { name: `Cancelar pedido #${String(delivery.number)}` }).click()
-  const cancelar = page.getByRole('dialog', { name: `¿Cancelar el pedido #${String(delivery.number)}?` })
-  await expect(cancelar).toContainText('Delivery · Luis. El pedido pasa al historial como cancelado.')
-  await cancelar.getByRole('textbox', { name: 'Motivo' }).fill('No contestó el teléfono')
-  await cancelar.getByRole('button', { name: 'Cancelar pedido' }).click()
-  await expect(aviso(page, `Pedido #${String(delivery.number)} cancelado.`)).toBeVisible()
-  await expect(tarjeta(page, delivery.number)).toHaveCount(0)
+  const cancel = page.getByRole('dialog', { name: `¿Cancelar el pedido #${String(delivery.number)}?` })
+  await expect(cancel).toContainText('Delivery · Luis. El pedido pasa al historial como cancelado.')
+  await cancel.getByRole('textbox', { name: 'Motivo' }).fill('No contestó el teléfono')
+  await cancel.getByRole('button', { name: 'Cancelar pedido' }).click()
+  await expect(notice(page, `Pedido #${String(delivery.number)} cancelado.`)).toBeVisible()
+  await expect(card(page, delivery.number)).toHaveCount(0)
 
   // Cobrar el servido desde la tarjeta: la tarjeta sale y el recibo sigue a la vista.
-  await tarjeta(page, servido.number).getByRole('button', { name: 'Cobrar' }).click()
-  const cobro = page.getByRole('dialog', { name: `Cobrar pedido #${String(servido.number)}` })
-  await cobro.getByText('Plin', { exact: true }).click()
-  await cobro.getByRole('button', { name: 'Confirmar pago' }).click()
-  const recibo = page.getByRole('dialog', { name: 'Cobro registrado' })
-  await expect(recibo).toContainText(`Pedido #${String(servido.number)} pagado · Plin`)
-  await expect(tarjeta(page, servido.number)).toHaveCount(0)
-  await evidencia(page, 'sal-28-2-cobrado-desde-tablero')
-  await recibo.getByRole('button', { name: 'Terminar' }).click()
-  await expect(filtro.getByRole('button', { name: 'Todos (2)' })).toBeVisible()
+  await card(page, served.number).getByRole('button', { name: 'Cobrar' }).click()
+  const charge = page.getByRole('dialog', { name: `Cobrar pedido #${String(served.number)}` })
+  await charge.getByText('Plin', { exact: true }).click()
+  await charge.getByRole('button', { name: 'Confirmar pago' }).click()
+  const receipt = page.getByRole('dialog', { name: 'Cobro registrado' })
+  await expect(receipt).toContainText(`Pedido #${String(served.number)} pagado · Plin`)
+  await expect(card(page, served.number)).toHaveCount(0)
+  await evidence(page, 'sal-28-2-cobrado-desde-tablero')
+  await receipt.getByRole('button', { name: 'Terminar' }).click()
+  await expect(filter.getByRole('button', { name: 'Todos (2)' })).toBeVisible()
 
-  expect((await leerPedido(local, id(delivery))).status).toBe('cancelled')
-  expect(await leerPedido(local, id(servido))).toMatchObject({ status: 'paid', payment_method: 'plin' })
+  expect((await readOrder(local, id(delivery))).status).toBe('cancelled')
+  expect(await readOrder(local, id(served))).toMatchObject({ status: 'paid', payment_method: 'plin' })
 
-  await tarjeta(page, llevar.number).getByRole('link', { name: `Pedido #${String(llevar.number)}` }).click()
+  await card(page, takeaway.number).getByRole('link', { name: `Pedido #${String(takeaway.number)}` }).click()
   // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
-  await expect(page).toHaveURL(new RegExp(`/pedidos/${String(llevar.id)}$`, 'u'))
+  await expect(page).toHaveURL(new RegExp(`/pedidos/${String(takeaway.id)}$`, 'u'))
 })
 
 test('SAL-29 el historial filtra por fecha, estado, tipo y mesero, y despliega el detalle de cada pedido', async ({
   page,
   localConCaja: local,
 }) => {
-  cubre(
+  covers(
     'ruta:/tablero/historial',
     'desplegable:orders/HistoryView',
     'funcion:historial.filtrar-fecha',
@@ -107,39 +107,39 @@ test('SAL-29 el historial filtra por fecha, estado, tipo y mesero, y despliega e
     'funcion:historial.ver-detalle',
     'estado:historial.vacio',
   )
-  const pagado = await pedidoPagado(local, local.mesa('1'), [{ plato: local.plato('Lomo saltado') }])
-  const cancelado = await pedidoParaLlevar(local, 'Rosa', [{ plato: local.plato('Chicha morada') }])
-  await api(local).post(`/orders/${String(cancelado.id)}/cancel`, { reason: 'Pedido duplicado' })
-  await pedidoParaLlevar(local, 'Pedro', [{ plato: local.plato('Inca Kola 500 ml') }], local.encargado)
+  const paid = await orderPaid(local, local.mesa('1'), [{ plato: local.plato('Lomo saltado') }])
+  const cancelled = await orderTakeaway(local, 'Rosa', [{ plato: local.plato('Chicha morada') }])
+  await api(local).post(`/orders/${String(cancelled.id)}/cancel`, { reason: 'Pedido duplicado' })
+  await orderTakeaway(local, 'Pedro', [{ plato: local.plato('Inca Kola 500 ml') }], local.encargado)
 
-  await abrirComo(page, local.encargado, '/tablero')
+  await openAs(page, local.encargado, '/tablero')
   await page.getByRole('link', { name: 'Historial' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Historial de pedidos' })).toBeVisible()
   await expect(page.getByText('3 en total')).toBeVisible()
-  const filas = page.getByRole('row').filter({ has: page.getByRole('cell') })
-  await expect(filas).toHaveCount(3)
-  await evidencia(page, 'sal-29-1-historial')
+  const rows = page.getByRole('row').filter({ has: page.getByRole('cell') })
+  await expect(rows).toHaveCount(3)
+  await evidence(page, 'sal-29-1-historial')
 
   await page.getByRole('combobox', { name: 'Estado' }).selectOption({ label: 'Pagado' })
   await expect(page.getByText('1 en total')).toBeVisible()
-  await expect(filas).toHaveCount(1)
-  await expect(filas.first()).toContainText('Mesa 1')
-  await expect(filas.first()).toContainText('Tarjeta')
+  await expect(rows).toHaveCount(1)
+  await expect(rows.first()).toContainText('Mesa 1')
+  await expect(rows.first()).toContainText('Tarjeta')
 
   // El desplegable de la fila muestra los platos y cómo se pagó.
-  const ver = page.getByRole('button', { name: `Ver el detalle del pedido #${String(pagado.number)}` })
+  const ver = page.getByRole('button', { name: `Ver el detalle del pedido #${String(paid.number)}` })
   await ver.click()
-  const ocultar = page.getByRole('button', { name: `Ocultar el detalle del pedido #${String(pagado.number)}` })
-  await expect(ocultar).toHaveAttribute('aria-expanded', 'true')
+  const hide = page.getByRole('button', { name: `Ocultar el detalle del pedido #${String(paid.number)}` })
+  await expect(hide).toHaveAttribute('aria-expanded', 'true')
   await expect(page.getByText('Pagado con')).toBeVisible()
   await expect(page.getByText('1×Lomo saltado')).toBeVisible()
-  await evidencia(page, 'sal-29-2-detalle')
-  await ocultar.click()
+  await evidence(page, 'sal-29-2-detalle')
+  await hide.click()
   await expect(page.getByText('Pagado con')).toBeHidden()
 
   await page.getByRole('combobox', { name: 'Estado' }).selectOption({ label: 'Cancelado' })
-  await expect(filas).toHaveCount(1)
-  await page.getByRole('button', { name: `Ver el detalle del pedido #${String(cancelado.number)}` }).click()
+  await expect(rows).toHaveCount(1)
+  await page.getByRole('button', { name: `Ver el detalle del pedido #${String(cancelled.number)}` }).click()
   await expect(page.getByText(/Motivo: Pedido duplicado/u)).toBeVisible()
   await page.getByRole('combobox', { name: 'Estado' }).selectOption({ label: 'Cualquiera' })
 
@@ -147,40 +147,40 @@ test('SAL-29 el historial filtra por fecha, estado, tipo y mesero, y despliega e
   await expect(page.getByText('2 en total')).toBeVisible()
   await page.getByRole('combobox', { name: 'Mesero' }).selectOption({ label: 'Encargada Prueba' })
   await expect(page.getByText('1 en total')).toBeVisible()
-  await expect(filas.first()).toContainText('Para llevar · Pedro')
+  await expect(rows.first()).toContainText('Para llevar · Pedro')
   await page.getByRole('combobox', { name: 'Mesero' }).selectOption({ label: 'Mesero Prueba' })
-  await expect(filas.first()).toContainText('Para llevar · Rosa')
+  await expect(rows.first()).toContainText('Para llevar · Rosa')
   await page.getByRole('combobox', { name: 'Tipo' }).selectOption({ label: 'En mesa y para llevar' })
   await page.getByRole('combobox', { name: 'Mesero' }).selectOption({ label: 'Cualquiera' })
   await expect(page.getByText('3 en total')).toBeVisible()
 
-  await page.getByLabel('Desde').fill(diaEnLima(1))
-  await page.getByLabel('Hasta').fill(diaEnLima(1))
+  await page.getByLabel('Desde').fill(dayInLima(1))
+  await page.getByLabel('Hasta').fill(dayInLima(1))
   await expect(page.getByText('Ningún pedido coincide con los filtros.')).toBeVisible()
-  await evidencia(page, 'sal-29-3-sin-resultados')
-  await page.getByLabel('Desde').fill(diaEnLima(-1))
-  await page.getByLabel('Hasta').fill(diaEnLima())
+  await evidence(page, 'sal-29-3-sin-resultados')
+  await page.getByLabel('Desde').fill(dayInLima(-1))
+  await page.getByLabel('Hasta').fill(dayInLima())
   await expect(page.getByText('3 en total')).toBeVisible()
 })
 
 test('SAL-30 el historial pagina de 25 en 25', async ({ page, local }) => {
-  cubre('funcion:historial.paginar')
-  const cliente = api(local, local.mesero)
+  covers('funcion:historial.paginar')
+  const customer = api(local, local.mesero)
   for (let i = 1; i <= 26; i += 1) {
-    await cliente.post('/orders', { type: 'takeaway', customer_name: `Cliente ${String(i)}`, items: [] })
+    await customer.post('/orders', { type: 'takeaway', customer_name: `Cliente ${String(i)}`, items: [] })
   }
-  await abrirComo(page, local.encargado, '/tablero/historial')
+  await openAs(page, local.encargado, '/tablero/historial')
   await expect(page.getByText('26 en total')).toBeVisible()
-  const paginas = page.getByRole('navigation', { name: 'Paginación' })
-  await expect(paginas).toContainText('Página 1 de 2')
-  const filas = page.getByRole('row').filter({ has: page.getByRole('cell') })
-  await expect(filas).toHaveCount(25)
-  await expect(paginas.getByRole('button', { name: 'Anterior' })).toBeDisabled()
-  await paginas.getByRole('button', { name: 'Siguiente' }).click()
-  await expect(paginas).toContainText('Página 2 de 2')
-  await expect(filas).toHaveCount(1)
-  await expect(paginas.getByRole('button', { name: 'Siguiente' })).toBeDisabled()
-  await evidencia(page, 'sal-30-1-pagina-2')
-  await paginas.getByRole('button', { name: 'Anterior' }).click()
-  await expect(filas).toHaveCount(25)
+  const pages = page.getByRole('navigation', { name: 'Paginación' })
+  await expect(pages).toContainText('Página 1 de 2')
+  const rows = page.getByRole('row').filter({ has: page.getByRole('cell') })
+  await expect(rows).toHaveCount(25)
+  await expect(pages.getByRole('button', { name: 'Anterior' })).toBeDisabled()
+  await pages.getByRole('button', { name: 'Siguiente' }).click()
+  await expect(pages).toContainText('Página 2 de 2')
+  await expect(rows).toHaveCount(1)
+  await expect(pages.getByRole('button', { name: 'Siguiente' })).toBeDisabled()
+  await evidence(page, 'sal-30-1-pagina-2')
+  await pages.getByRole('button', { name: 'Anterior' }).click()
+  await expect(rows).toHaveCount(25)
 })

@@ -5,60 +5,60 @@ import { dirname, join } from 'node:path'
 
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter'
 
-interface Elemento {
+interface Element {
   readonly id: string
   readonly tipo: string
 }
 
-const RAIZ = join(import.meta.dirname, '..')
-const SALIDA = `${process.env.E2E_REPORTE ?? join(RAIZ, '.reporte')}-cobertura-ui.json`
+const ROOT = join(import.meta.dirname, '..')
+const OUTPUT = `${process.env.E2E_REPORTE ?? join(ROOT, '.reporte')}-cobertura-ui.json`
 
-export default class ReporteCobertura implements Reporter {
+export default class ReportCoverage implements Reporter {
   private readonly vistos = new Map<string, Set<string>>()
 
-  onTestEnd(prueba: TestCase, resultado: TestResult): void {
-    if (resultado.status !== 'passed') {
+  onTestEnd(test: TestCase, result: TestResult): void {
+    if (result.status !== 'passed') {
       return
     }
-    const proyecto = prueba.parent.project()?.name ?? ''
-    const ids = [...prueba.annotations, ...resultado.annotations]
-      .filter((nota) => nota.type === 'cubre' && nota.description !== undefined)
-      .map((nota) => String(nota.description))
-    const conjunto = this.vistos.get(proyecto) ?? new Set<string>()
+    const project = test.parent.project()?.name ?? ''
+    const ids = [...test.annotations, ...result.annotations]
+      .filter((note) => note.type === 'cubre' && note.description !== undefined)
+      .map((note) => String(note.description))
+    const set = this.vistos.get(project) ?? new Set<string>()
     for (const id of ids) {
-      conjunto.add(id)
+      set.add(id)
     }
-    this.vistos.set(proyecto, conjunto)
+    this.vistos.set(project, set)
   }
 
   onEnd(): void {
-    const inventario = JSON.parse(readFileSync(join(RAIZ, 'cobertura-ui.json'), 'utf8')) as {
-      elementos: Elemento[]
+    const inventory = JSON.parse(readFileSync(join(ROOT, 'cobertura-ui.json'), 'utf8')) as {
+      elementos: Element[]
     }
-    const todos = new Set<string>()
+    const all = new Set<string>()
     for (const ids of this.vistos.values()) {
       for (const id of ids) {
-        todos.add(id)
+        all.add(id)
       }
     }
-    if (todos.size === 0) {
+    if (all.size === 0) {
       return
     }
-    const porTipo: Record<string, { total: number; recorridos: number; faltan: string[] }> = {}
-    for (const elemento of inventario.elementos) {
-      const fila = porTipo[elemento.tipo] ?? { total: 0, recorridos: 0, faltan: [] }
-      fila.total += 1
-      if (todos.has(elemento.id)) {
-        fila.recorridos += 1
+    const byType: Record<string, { total: number; recorridos: number; faltan: string[] }> = {}
+    for (const element of inventory.elementos) {
+      const row = byType[element.tipo] ?? { total: 0, recorridos: 0, faltan: [] }
+      row.total += 1
+      if (all.has(element.id)) {
+        row.recorridos += 1
       } else {
-        fila.faltan.push(elemento.id)
+        row.faltan.push(element.id)
       }
-      porTipo[elemento.tipo] = fila
+      byType[element.tipo] = row
     }
-    const proyectos = Object.fromEntries([...this.vistos].map(([nombre, ids]) => [nombre, ids.size]))
+    const projects = Object.fromEntries([...this.vistos].map(([name, ids]) => [name, ids.size]))
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
-    mkdirSync(dirname(SALIDA), { recursive: true })
+    mkdirSync(dirname(OUTPUT), { recursive: true })
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
-    writeFileSync(SALIDA, `${JSON.stringify({ fecha: new Date().toISOString(), proyectos, porTipo }, null, 2)}\n`)
+    writeFileSync(OUTPUT, `${JSON.stringify({ fecha: new Date().toISOString(), proyectos: projects, porTipo: byType }, null, 2)}\n`)
   }
 }

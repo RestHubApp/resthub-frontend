@@ -3,73 +3,73 @@
 // la cola sin señal del celular.
 import type { Page } from '@playwright/test'
 
-import { unico, type Local, type Mesa, type Plato, type Sesion } from '../soporte/api'
+import { unique, type Local, type Table, type Dish, type Session } from '../soporte/api'
 import { api, id } from '../soporte/gestion'
 
 type Json = Record<string, unknown>
 
-export interface Linea {
-  readonly plato: Plato
+export interface Line {
+  readonly plato: Dish
   readonly cantidad?: number
   readonly notas?: string
 }
 
-function items(lineas: readonly Linea[]) {
-  return lineas.map(({ plato, cantidad = 1, notas = '' }) => ({ menu_item_id: plato.id, quantity: cantidad, notes: notas }))
+function items(lines: readonly Line[]) {
+  return lines.map(({ plato: dish, cantidad: quantity = 1, notas: notes = '' }) => ({ menu_item_id: dish.id, quantity: quantity, notes: notes }))
 }
 
 /** Un pedido en mesa abierto, todavía sin enviar a cocina. */
-export async function abierto(local: Local, mesa: Mesa, lineas: readonly Linea[]): Promise<Json> {
+export async function open(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
   return api(local, local.mesero).post('/orders', {
     type: 'dine_in',
-    table_id: mesa.id,
-    client_request_id: `e2e-${unico()}`,
-    items: items(lineas),
+    table_id: table.id,
+    client_request_id: `e2e-${unique()}`,
+    items: items(lines),
   })
 }
 
 /** Un pedido en mesa enviado a cocina. */
-export async function enCocina(local: Local, mesa: Mesa, lineas: readonly Linea[]): Promise<Json> {
-  const pedido = await abierto(local, mesa, lineas)
-  return api(local, local.mesero).post(`/orders/${String(id(pedido))}/send`)
+export async function inKitchen(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
+  const order = await open(local, table, lines)
+  return api(local, local.mesero).post(`/orders/${String(id(order))}/send`)
 }
 
 /** Un pedido en mesa servido, por cobrar. */
-export async function servido(local: Local, mesa: Mesa, lineas: readonly Linea[]): Promise<Json> {
-  const pedido = await enCocina(local, mesa, lineas)
-  await api(local, local.cocina).post(`/orders/${String(id(pedido))}/ready`)
-  return api(local, local.mesero).post(`/orders/${String(id(pedido))}/served`)
+export async function served(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
+  const order = await inKitchen(local, table, lines)
+  await api(local, local.cocina).post(`/orders/${String(id(order))}/ready`)
+  return api(local, local.mesero).post(`/orders/${String(id(order))}/served`)
 }
 
 /** Un pedido para llevar enviado a cocina. */
-export async function paraLlevar(local: Local, cliente: string, lineas: readonly Linea[]): Promise<Json> {
-  const mesero = api(local, local.mesero)
-  const pedido = await mesero.post('/orders', {
+export async function takeaway(local: Local, customer: string, lines: readonly Line[]): Promise<Json> {
+  const waiter = api(local, local.mesero)
+  const order = await waiter.post('/orders', {
     type: 'takeaway',
-    customer_name: cliente,
-    client_request_id: `e2e-${unico()}`,
-    items: items(lineas),
+    customer_name: customer,
+    client_request_id: `e2e-${unique()}`,
+    items: items(lines),
   })
-  return mesero.post(`/orders/${String(id(pedido))}/send`)
+  return waiter.post(`/orders/${String(id(order))}/send`)
 }
 
 /** Un delivery enviado a cocina. */
-export async function delivery(local: Local, cliente: string, lineas: readonly Linea[]): Promise<Json> {
-  const mesero = api(local, local.mesero)
-  const pedido = await mesero.post('/orders', {
+export async function delivery(local: Local, customer: string, lines: readonly Line[]): Promise<Json> {
+  const waiter = api(local, local.mesero)
+  const order = await waiter.post('/orders', {
     type: 'delivery',
-    customer_name: cliente,
+    customer_name: customer,
     customer_phone: '987654321',
     delivery_address: 'Av. Arequipa 123, Lince',
     delivery_reference: 'Frente al parque',
-    client_request_id: `e2e-${unico()}`,
-    items: items(lineas),
+    client_request_id: `e2e-${unique()}`,
+    items: items(lines),
   })
-  return mesero.post(`/orders/${String(id(pedido))}/send`)
+  return waiter.post(`/orders/${String(id(order))}/send`)
 }
 
 /** Un plato con un grupo obligatorio (término) y extras opcionales con precio. */
-export async function platoConOpciones(local: Local): Promise<void> {
+export async function dishWithOptions(local: Local): Promise<void> {
   await api(local).post('/menu/items', {
     category_id: local.plato('Lomo saltado').categoriaId,
     name: 'Bistec a lo pobre',
@@ -94,7 +94,7 @@ export async function platoConOpciones(local: Local): Promise<void> {
   })
 }
 
-const COLA = 'resthub.pedidos-sin-enviar.v2'
+const QUEUE = 'resthub.pedidos-sin-enviar.v2'
 
 /**
  * Deja un pedido tomado sin señal en la cola del celular y recarga la página.
@@ -104,39 +104,39 @@ const COLA = 'resthub.pedidos-sin-enviar.v2'
  * `almacen` es `localStorage` en una pestaña normal y `sessionStorage` en una
  * de vista previa, igual que la cola de la aplicación.
  */
-export interface EnCola {
+export interface InQueue {
   readonly dueno: { readonly userId: number; readonly restaurantId: number }
-  readonly mesa: Pick<Mesa, 'id' | 'etiqueta'>
-  readonly plato: Pick<Plato, 'id'>
+  readonly mesa: Pick<Table, 'id' | 'etiqueta'>
+  readonly plato: Pick<Dish, 'id'>
   readonly almacen?: 'localStorage' | 'sessionStorage'
 }
 
-export async function pedidoEnCola(page: Page, { dueno, mesa, plato, almacen = 'localStorage' }: EnCola): Promise<void> {
-  await page.route('**/api/v1/orders', (route, peticion) =>
-    peticion.method() === 'POST' ? route.abort('internetdisconnected') : route.fallback(),
+export async function orderInQueue(page: Page, { dueno: owner, mesa: table, plato: dish, almacen: storage = 'localStorage' }: InQueue): Promise<void> {
+  await page.route('**/api/v1/orders', (route, request) =>
+    request.method() === 'POST' ? route.abort('internetdisconnected') : route.fallback(),
   )
-  const pedido = {
-    ...dueno,
+  const order = {
+    ...owner,
     request: {
       type: 'dine_in',
-      table_id: mesa.id,
-      client_request_id: `e2e-${unico()}`,
-      items: [{ menu_item_id: plato.id, quantity: 1, notes: '' }],
+      table_id: table.id,
+      client_request_id: `e2e-${unique()}`,
+      items: [{ menu_item_id: dish.id, quantity: 1, notes: '' }],
     },
     queuedAt: '2026-09-26T15:00:00.000Z',
-    label: `Mesa ${mesa.etiqueta}`,
+    label: `Mesa ${table.etiqueta}`,
   }
   await page.evaluate(
-    ([clave, valor, donde]) => {
-      window[donde].setItem(clave, valor)
+    ([password, value, where]) => {
+      window[where].setItem(password, value)
     },
-    [COLA, JSON.stringify([pedido]), almacen] as const,
+    [QUEUE, JSON.stringify([order]), storage] as const,
   )
   await page.reload()
 }
 
 /** La persona y el local de una sesión, como los guarda la cola. */
-export function duenoDe(sesion: Sesion): { userId: number; restaurantId: number } {
-  const cuenta = sesion.cuenta as { user: { id: number }; restaurant: { id: number } }
-  return { userId: cuenta.user.id, restaurantId: cuenta.restaurant.id }
+export function ownerOf(session: Session): { userId: number; restaurantId: number } {
+  const account = session.cuenta as { user: { id: number }; restaurant: { id: number } }
+  return { userId: account.user.id, restaurantId: account.restaurant.id }
 }

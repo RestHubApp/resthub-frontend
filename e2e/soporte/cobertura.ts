@@ -4,7 +4,7 @@
 // los que marcaron las pruebas que pasaron.
 import { test } from '@playwright/test'
 
-export function cubre(...ids: string[]): void {
+export function covers(...ids: string[]): void {
   for (const id of ids) {
     test.info().annotations.push({ type: 'cubre', description: id })
   }

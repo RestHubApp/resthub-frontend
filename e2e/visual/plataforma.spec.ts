@@ -6,20 +6,20 @@
 // el de esta prueba.
 import type { APIRequestContext, Page } from '@playwright/test'
 
-import { Cliente } from '../soporte/api'
-import { conLocalDeMuestra } from '../soporte/plataforma'
-import { cubre } from '../soporte/cobertura'
-import { abrirComoPlataforma } from '../soporte/fixtures'
-import { capturar, capturarVentana, expect, plazo, test, tiempoDeCaptura } from './captura'
-import { pedidoEnCola } from './preparar'
+import { Customer } from '../soporte/api'
+import { withSampleRestaurant } from '../soporte/plataforma'
+import { covers } from '../soporte/cobertura'
+import { openAsPlatform } from '../soporte/fixtures'
+import { capture, captureWindow, expect, deadline, test, captureTime } from './captura'
+import { orderInQueue } from './preparar'
 
 test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista previa de plataforma', async ({
   page,
-  plataforma,
+  plataforma: platform,
   local,
 }) => {
-  plazo(150_000)
-  cubre(
+  deadline(150_000)
+  covers(
     'ruta:/plataforma',
     'ruta:/plataforma/*',
     'ruta:/plataforma/restaurantes/nuevo',
@@ -31,35 +31,35 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
     'ruta:/plataforma/vista-previa',
     'confirmacion:platform/SandboxResetButton',
   )
-  await abrirComoPlataforma(page, plataforma, '/plataforma/no-existe')
+  await openAsPlatform(page, platform, '/plataforma/no-existe')
   await expect(page).toHaveURL(/\/plataforma$/u)
   await expect(page.getByRole('heading', { name: '3 restaurantes' })).toBeVisible()
-  await capturar(page, 'plataforma-restaurantes')
+  await capture(page, 'plataforma-restaurantes')
 
   await page.getByRole('link', { name: 'Nuevo restaurante' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Nuevo restaurante' })).toBeVisible()
-  await capturar(page, 'plataforma-nuevo-restaurante')
+  await capture(page, 'plataforma-nuevo-restaurante')
 
   await page.goto(`/plataforma/restaurantes/${String(local.id)}`)
   await expect(page.getByRole('heading', { level: 1, name: 'Restaurante E2E' })).toBeVisible()
   await expect(page.getByText('encargado@e2e.resthub.dev')).toBeVisible()
-  await capturar(page, 'plataforma-restaurante')
+  await capture(page, 'plataforma-restaurante')
 
   await page.getByRole('button', { name: 'Agregar encargado' }).click()
-  const encargado = page.getByRole('dialog', { name: 'Agregar encargado' })
-  await capturarVentana(encargado, 'dialogo-agregar-encargado')
+  const owner = page.getByRole('dialog', { name: 'Agregar encargado' })
+  await captureWindow(owner, 'dialogo-agregar-encargado')
   await page.keyboard.press('Escape')
-  await expect(encargado).toBeHidden()
+  await expect(owner).toBeHidden()
 
   await page.getByRole('button', { name: 'Desactivar restaurante' }).click()
-  const desactivar = page.getByRole('alertdialog', { name: '¿Desactivar Restaurante E2E?' })
-  await capturarVentana(desactivar, 'confirmar-desactivar-restaurante')
-  await desactivar.getByRole('button', { name: 'Cancelar' }).click()
-  await expect(desactivar).toBeHidden()
+  const deactivate = page.getByRole('alertdialog', { name: '¿Desactivar Restaurante E2E?' })
+  await captureWindow(deactivate, 'confirmar-desactivar-restaurante')
+  await deactivate.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(deactivate).toBeHidden()
 
   await page.getByRole('link', { name: 'Bitácora' }).click()
   await expect(page.getByText('4 en total')).toBeVisible()
-  await capturar(page, 'plataforma-bitacora')
+  await capture(page, 'plataforma-bitacora')
 
   await page.getByRole('link', { name: 'Observabilidad' }).click()
   // La sección de rutas no pide datos hasta entrar en pantalla (el observador
@@ -73,75 +73,75 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
     .catch(() => undefined)
   await expect(page.getByRole('heading', { name: 'Rutas' })).toBeVisible()
   await expect(page.getByText('orders.open_failed')).toBeVisible()
-  await capturar(page, 'plataforma-observabilidad')
+  await capture(page, 'plataforma-observabilidad')
 
   await page.getByRole('link', { name: 'Vista previa' }).click()
   await expect(page.getByText('muestra-local')).toBeVisible()
-  await capturar(page, 'plataforma-vista-previa')
+  await capture(page, 'plataforma-vista-previa')
   await page.getByRole('button', { name: 'Reiniciar local de muestra' }).click()
-  const reiniciar = page.getByRole('alertdialog', { name: '¿Reiniciar el local de muestra?' })
-  await capturarVentana(reiniciar, 'confirmar-reiniciar-local-de-muestra')
-  await reiniciar.getByRole('button', { name: 'Cancelar' }).click()
-  await expect(reiniciar).toBeHidden()
+  const reset = page.getByRole('alertdialog', { name: '¿Reiniciar el local de muestra?' })
+  await captureWindow(reset, 'confirmar-reiniciar-local-de-muestra')
+  await reset.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(reset).toBeHidden()
 })
 
 /** Un código de vista previa recién pedido, con el local de muestra creado si no existía. */
-async function codigoDeVistaPrevia(http: APIRequestContext, token: string): Promise<string> {
-  const admin = new Cliente(http, token)
-  const muestra = await admin.get('/platform/sandbox').catch(() => null)
-  if (muestra?.restaurant === null || muestra?.restaurant === undefined) {
+async function previewCode(http: APIRequestContext, token: string): Promise<string> {
+  const admin = new Customer(http, token)
+  const sample = await admin.get('/platform/sandbox').catch(() => null)
+  if (sample?.restaurant === null || sample?.restaurant === undefined) {
     await admin.post('/platform/sandbox/reset')
   }
   return String((await admin.post('/platform/preview', { as: 'waiter' })).code)
 }
 
-async function sesionDeVistaPrevia(page: Page): Promise<{ userId: number; restaurantId: number }> {
+async function previewSession(page: Page): Promise<{ userId: number; restaurantId: number }> {
   return page.evaluate(() => {
-    const crudo = sessionStorage.getItem('resthub.vista-previa.sesion.v1') ?? '{}'
-    const { account } = JSON.parse(crudo) as { account: { user: { id: number }; restaurant: { id: number } } }
+    const raw = sessionStorage.getItem('resthub.vista-previa.sesion.v1') ?? '{}'
+    const { account } = JSON.parse(raw) as { account: { user: { id: number }; restaurant: { id: number } } }
     return { userId: account.user.id, restaurantId: account.restaurant.id }
   })
 }
 
 test('VIS-14 la franja de la vista previa como mesero, su salida con pedidos sin enviar y el código vencido', async ({
   page,
-  plataforma,
+  plataforma: platform,
   request,
 }) => {
-  plazo(240_000)
-  cubre('ruta:/vista-previa', 'confirmacion:shell/PreviewExitButton')
+  deadline(240_000)
+  covers('ruta:/vista-previa', 'confirmacion:shell/PreviewExitButton')
 
   await page.goto('/vista-previa#codigo=codigo-que-no-existe')
   await expect(page.getByRole('heading', { name: 'No se pudo abrir la vista previa' })).toBeVisible()
-  await capturar(page, 'vista-previa-codigo-invalido')
+  await capture(page, 'vista-previa-codigo-invalido')
 
-  await conLocalDeMuestra(async () => {
-    const codigo = await codigoDeVistaPrevia(request, plataforma.token)
+  await withSampleRestaurant(async () => {
+    const code = await previewCode(request, platform.token)
     // Solo cambia el fragmento: sin salir antes de la página, el código no se vuelve a canjear.
     await page.goto('about:blank')
-    await page.goto(`/vista-previa#codigo=${encodeURIComponent(codigo)}`)
-    const franja = page.getByRole('region', { name: 'Vista previa' })
-    await expect(franja).toContainText('Vista previa · Restaurante de muestra · como Mesero')
+    await page.goto(`/vista-previa#codigo=${encodeURIComponent(code)}`)
+    const slot = page.getByRole('region', { name: 'Vista previa' })
+    await expect(slot).toContainText('Vista previa · Restaurante de muestra · como Mesero')
     await expect(page).toHaveURL(/\/pedidos$/u)
     // Los datos del local de muestra los cambian otras pruebas: se captura la franja y el armazón.
-    await expect(franja).toHaveScreenshot('vista-previa-franja.png', { mask: [franja.getByRole('timer')], timeout: tiempoDeCaptura })
-    await capturar(page, 'vista-previa-mesero', { mask: [page.getByRole('main')] })
+    await expect(slot).toHaveScreenshot('vista-previa-franja.png', { mask: [slot.getByRole('timer')], timeout: captureTime })
+    await capture(page, 'vista-previa-mesero', { mask: [page.getByRole('main')] })
 
-    await pedidoEnCola(page, {
-      dueno: await sesionDeVistaPrevia(page),
+    await orderInQueue(page, {
+      dueno: await previewSession(page),
       mesa: { id: 0, etiqueta: '3' },
       plato: { id: 0 },
       almacen: 'sessionStorage',
     })
-    await franja.getByRole('button', { name: 'Salir de la vista previa' }).click()
-    const salir = page.getByRole('alertdialog', { name: '¿Salir con pedidos sin enviar?' })
-    await expect(salir).toContainText('Mesa 3')
-    await capturarVentana(salir, 'confirmar-salir-de-la-vista-previa')
-    await salir.getByRole('button', { name: 'Cancelar' }).click()
-    await expect(salir).toBeHidden()
+    await slot.getByRole('button', { name: 'Salir de la vista previa' }).click()
+    const signOut = page.getByRole('alertdialog', { name: '¿Salir con pedidos sin enviar?' })
+    await expect(signOut).toContainText('Mesa 3')
+    await captureWindow(signOut, 'confirmar-salir-de-la-vista-previa')
+    await signOut.getByRole('button', { name: 'Cancelar' }).click()
+    await expect(signOut).toBeHidden()
 
     await page.goto('/plataforma')
     await expect(page.getByText('Estás en una vista previa')).toBeVisible()
-    await capturar(page, 'vista-previa-plataforma-bloqueada', { mask: [page.getByRole('region', { name: 'Vista previa' })] })
+    await capture(page, 'vista-previa-plataforma-bloqueada', { mask: [page.getByRole('region', { name: 'Vista previa' })] })
   })
 })

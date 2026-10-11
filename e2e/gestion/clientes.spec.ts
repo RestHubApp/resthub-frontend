@@ -4,23 +4,23 @@
 import { readFile } from 'node:fs/promises'
 
 import type { Local } from '../soporte/api'
-import { cubre } from '../soporte/cobertura'
-import { abrirComo, aviso, evidencia, expect, test } from '../soporte/fixtures'
-import { api, fallaServidor, id, soles } from '../soporte/gestion'
+import { covers } from '../soporte/cobertura'
+import { openAs, notice, evidence, expect, test } from '../soporte/fixtures'
+import { api, failureServer, id, soles } from '../soporte/gestion'
 
 /** Un pedido del cliente de principio a fin, cobrado con Yape. */
-async function pedidoDe(local: Local, clienteId: number, tipo: 'delivery' | 'dine_in'): Promise<number> {
-  const mesero = api(local, local.mesero)
-  const datos = tipo === 'delivery'
-    ? { type: 'delivery', customer_id: clienteId, customer_name: 'Rosa Díaz', customer_phone: '987654321', delivery_address: 'Av. Sol 123' }
-    : { type: 'dine_in', table_id: local.mesa('1').id, customer_id: clienteId }
-  const pedido = await mesero.post('/orders', { ...datos, items: [{ menu_item_id: local.plato('Chicha morada').id, quantity: 1, notes: '' }] })
-  const ruta = `/orders/${String(id(pedido))}`
-  await mesero.post(`${ruta}/send`)
-  await api(local, local.cocina).post(`${ruta}/ready`)
-  await mesero.post(`${ruta}/served`)
-  await mesero.post(`${ruta}/charge`, { payment_method: 'yape', tip: '0' })
-  return id(pedido)
+async function orderOf(local: Local, customerId: number, type: 'delivery' | 'dine_in'): Promise<number> {
+  const waiter = api(local, local.mesero)
+  const data = type === 'delivery'
+    ? { type: 'delivery', customer_id: customerId, customer_name: 'Rosa Díaz', customer_phone: '987654321', delivery_address: 'Av. Sol 123' }
+    : { type: 'dine_in', table_id: local.mesa('1').id, customer_id: customerId }
+  const order = await waiter.post('/orders', { ...data, items: [{ menu_item_id: local.plato('Chicha morada').id, quantity: 1, notes: '' }] })
+  const route = `/orders/${String(id(order))}`
+  await waiter.post(`${route}/send`)
+  await api(local, local.cocina).post(`${route}/ready`)
+  await waiter.post(`${route}/served`)
+  await waiter.post(`${route}/charge`, { payment_method: 'yape', tip: '0' })
+  return id(order)
 }
 
 // Cada prueba es un recorrido largo de la pantalla con datos preparados por el
@@ -30,7 +30,7 @@ test.beforeEach(() => {
 })
 
 test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es frecuente y edita sus datos', async ({ page, localConCaja: local }) => {
-  cubre(
+  covers(
     'ruta:/clientes',
     'dialogo:customers/CustomerDialog',
     'hoja:customers/CustomerSheet',
@@ -45,145 +45,145 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
     'estado:clientes.sin-resultados',
     'estado:clientes.error',
   )
-  await abrirComo(page, local.encargado, '/clientes')
+  await openAs(page, local.encargado, '/clientes')
   await expect(page.getByRole('heading', { level: 1, name: 'Clientes' })).toBeVisible()
   await expect(page.getByText('Todavía no hay clientes')).toBeVisible()
 
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  const alta = page.getByRole('dialog', { name: 'Nuevo cliente' })
-  await alta.getByLabel('Correo (opcional)').fill('rosa@')
-  await alta.getByRole('button', { name: 'Guardar' }).click()
-  await expect(alta.getByText('Escribe el nombre')).toBeVisible()
-  await expect(alta.getByText('Escribe un correo válido')).toBeVisible()
+  const registration = page.getByRole('dialog', { name: 'Nuevo cliente' })
+  await registration.getByLabel('Correo (opcional)').fill('rosa@')
+  await registration.getByRole('button', { name: 'Guardar' }).click()
+  await expect(registration.getByText('Escribe el nombre')).toBeVisible()
+  await expect(registration.getByText('Escribe un correo válido')).toBeVisible()
   // Ley N.º 29733: sin el consentimiento del cliente no se guarda.
-  await expect(alta.getByText('Sin su consentimiento no se puede guardar al cliente en la libreta.')).toBeVisible()
-  await alta.getByLabel('Nombre', { exact: true }).fill('Rosa Díaz')
-  await alta.getByLabel('Teléfono (opcional)').fill('987654321')
-  await alta.getByLabel('Correo (opcional)').fill('rosa@correo.pe')
-  await alta.getByLabel('Dirección (opcional)').fill('Av. Sol 123')
-  await alta.getByLabel('Referencia (opcional)').fill('Frente al parque')
-  await alta.getByLabel('Notas (opcional)').fill('Sin cebolla')
-  await alta.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
-  await evidencia(page, 'ges-21-1-nuevo-cliente')
-  await alta.getByRole('button', { name: 'Guardar' }).click()
-  await expect(aviso(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
-  const fila = page.getByRole('button', { name: /Rosa Díaz/u })
-  await expect(fila).toContainText('0 visitas')
+  await expect(registration.getByText('Sin su consentimiento no se puede guardar al cliente en la libreta.')).toBeVisible()
+  await registration.getByLabel('Nombre', { exact: true }).fill('Rosa Díaz')
+  await registration.getByLabel('Teléfono (opcional)').fill('987654321')
+  await registration.getByLabel('Correo (opcional)').fill('rosa@correo.pe')
+  await registration.getByLabel('Dirección (opcional)').fill('Av. Sol 123')
+  await registration.getByLabel('Referencia (opcional)').fill('Frente al parque')
+  await registration.getByLabel('Notas (opcional)').fill('Sin cebolla')
+  await registration.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
+  await evidence(page, 'ges-21-1-nuevo-cliente')
+  await registration.getByRole('button', { name: 'Guardar' }).click()
+  await expect(notice(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
+  const row = page.getByRole('button', { name: /Rosa Díaz/u })
+  await expect(row).toContainText('0 visitas')
   await expect(page.getByRole('heading', { name: '1 cliente' })).toBeVisible()
 
   // El teléfono identifica al cliente: no se repite.
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  await alta.getByLabel('Nombre', { exact: true }).fill('Otra Rosa')
-  await alta.getByLabel('Teléfono (opcional)').fill('987654321')
-  await alta.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
-  await alta.getByRole('button', { name: 'Guardar' }).click()
-  await expect(alta.getByRole('alert')).toContainText('El teléfono 987654321 ya es de Rosa Díaz.')
-  await alta.getByRole('button', { name: 'Cancelar' }).click()
-  await expect(alta).toBeHidden()
+  await registration.getByLabel('Nombre', { exact: true }).fill('Otra Rosa')
+  await registration.getByLabel('Teléfono (opcional)').fill('987654321')
+  await registration.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
+  await registration.getByRole('button', { name: 'Guardar' }).click()
+  await expect(registration.getByRole('alert')).toContainText('El teléfono 987654321 ya es de Rosa Díaz.')
+  await registration.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(registration).toBeHidden()
 
   // Tres pedidos de delivery lo vuelven frecuente.
-  const clienteId = id((await api(local).lista('/customers'))[0])
+  const customerId = id((await api(local).lista('/customers'))[0])
   for (let n = 0; n < 3; n += 1) {
-    await pedidoDe(local, clienteId, 'delivery')
+    await orderOf(local, customerId, 'delivery')
   }
   await page.reload()
-  await expect(fila).toContainText('Frecuente')
-  await expect(fila).toContainText(/3 visitas · S\/\s*24\.00/u)
+  await expect(row).toContainText('Frecuente')
+  await expect(row).toContainText(/3 visitas · S\/\s*24\.00/u)
 
-  const buscar = page.getByRole('searchbox', { name: 'Buscar por nombre o teléfono' })
-  await buscar.fill('999')
+  const search = page.getByRole('searchbox', { name: 'Buscar por nombre o teléfono' })
+  await search.fill('999')
   await expect(page.getByText('Nadie coincide con la búsqueda')).toBeVisible()
-  await buscar.fill('9876')
-  await expect(fila).toBeVisible()
-  await buscar.fill('rosa')
-  await expect(fila).toBeVisible()
+  await search.fill('9876')
+  await expect(row).toBeVisible()
+  await search.fill('rosa')
+  await expect(row).toBeVisible()
 
-  await fila.click()
-  const ficha = page.getByRole('dialog', { name: 'Rosa Díaz' })
-  await expect(ficha).toContainText('987654321 · rosa@correo.pe')
-  const cifra = (nombre: string) => ficha.getByRole('term').filter({ hasText: nombre }).locator('xpath=..')
-  await expect(cifra('Visitas')).toContainText('3')
-  await expect(cifra('Gastado')).toContainText(soles('24.00'))
-  await expect(cifra('Ticket prom.')).toContainText(soles('8.00'))
-  await expect(ficha).toContainText('Cliente frecuente')
-  await expect(ficha).toContainText('Av. Sol 123 · Ref.: Frente al parque')
-  await expect(ficha).toContainText('Sin cebolla')
-  await expect(ficha.getByRole('link', { name: /#\d/u })).toHaveCount(3)
-  await evidencia(page, 'ges-21-2-ficha')
+  await row.click()
+  const card = page.getByRole('dialog', { name: 'Rosa Díaz' })
+  await expect(card).toContainText('987654321 · rosa@correo.pe')
+  const figure = (name: string) => card.getByRole('term').filter({ hasText: name }).locator('xpath=..')
+  await expect(figure('Visitas')).toContainText('3')
+  await expect(figure('Gastado')).toContainText(soles('24.00'))
+  await expect(figure('Ticket prom.')).toContainText(soles('8.00'))
+  await expect(card).toContainText('Cliente frecuente')
+  await expect(card).toContainText('Av. Sol 123 · Ref.: Frente al parque')
+  await expect(card).toContainText('Sin cebolla')
+  await expect(card.getByRole('link', { name: /#\d/u })).toHaveCount(3)
+  await evidence(page, 'ges-21-2-ficha')
 
-  await ficha.getByRole('button', { name: 'Editar datos' }).click()
-  const edicion = page.getByRole('dialog', { name: 'Editar a Rosa Díaz' })
-  await expect(edicion.getByLabel('Dirección (opcional)')).toHaveValue('Av. Sol 123')
-  await edicion.getByLabel('Notas (opcional)').fill('Alérgica al maní')
-  await edicion.getByRole('button', { name: 'Guardar' }).click()
-  await expect(aviso(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
-  expect((await api(local).get(`/customers/${String(clienteId)}`)).notes).toBe('Alérgica al maní')
+  await card.getByRole('button', { name: 'Editar datos' }).click()
+  const edit = page.getByRole('dialog', { name: 'Editar a Rosa Díaz' })
+  await expect(edit.getByLabel('Dirección (opcional)')).toHaveValue('Av. Sol 123')
+  await edit.getByLabel('Notas (opcional)').fill('Alérgica al maní')
+  await edit.getByRole('button', { name: 'Guardar' }).click()
+  await expect(notice(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
+  expect((await api(local).get(`/customers/${String(customerId)}`)).notes).toBe('Alérgica al maní')
 
-  await fallaServidor(page, '/customers')
+  await failureServer(page, '/customers')
   await page.reload()
   await expect(page.getByRole('button', { name: 'Reintentar' })).toBeVisible()
 })
 
 test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', async ({ page, localConCaja: local }) => {
-  const cliente = await api(local).post('/customers', { name: 'Julio Paz', phone: '912345678', email: '', address: '', reference: '', notes: '', consent: true })
-  await pedidoDe(local, id(cliente), 'dine_in')
-  await abrirComo(page, local.encargado, '/clientes')
+  const customer = await api(local).post('/customers', { name: 'Julio Paz', phone: '912345678', email: '', address: '', reference: '', notes: '', consent: true })
+  await orderOf(local, id(customer), 'dine_in')
+  await openAs(page, local.encargado, '/clientes')
   await page.getByRole('button', { name: /Julio Paz/u }).click()
-  const pedido = page.getByRole('dialog', { name: 'Julio Paz' }).getByRole('link', { name: /#1/u })
-  await expect(pedido).toBeVisible()
-  await evidencia(page, 'ges-22-1-tipo-de-pedido')
-  await expect(pedido).toContainText('En mesa')
+  const order = page.getByRole('dialog', { name: 'Julio Paz' }).getByRole('link', { name: /#1/u })
+  await expect(order).toBeVisible()
+  await evidence(page, 'ges-22-1-tipo-de-pedido')
+  await expect(order).toContainText('En mesa')
 })
 
 test('GES-25 la ventana de un cliente nuevo abre vacía después de guardar otro', async ({ page, local }) => {
-  await abrirComo(page, local.encargado, '/clientes')
+  await openAs(page, local.encargado, '/clientes')
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  const alta = page.getByRole('dialog', { name: 'Nuevo cliente' })
-  await alta.getByLabel('Nombre', { exact: true }).fill('Rosa Díaz')
-  await alta.getByLabel('Teléfono (opcional)').fill('987654321')
-  await alta.getByLabel('Notas (opcional)').fill('Sin cebolla')
-  await alta.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
-  await alta.getByRole('button', { name: 'Guardar' }).click()
-  await expect(aviso(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
+  const registration = page.getByRole('dialog', { name: 'Nuevo cliente' })
+  await registration.getByLabel('Nombre', { exact: true }).fill('Rosa Díaz')
+  await registration.getByLabel('Teléfono (opcional)').fill('987654321')
+  await registration.getByLabel('Notas (opcional)').fill('Sin cebolla')
+  await registration.getByRole('checkbox', { name: /Ley N\.º 29733/u }).click()
+  await registration.getByRole('button', { name: 'Guardar' }).click()
+  await expect(notice(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  await evidencia(page, 'ges-25-1-cliente-nuevo-vacio')
-  await expect(alta.getByRole('checkbox', { name: /Ley N\.º 29733/u })).not.toBeChecked()
-  await expect(alta.getByLabel('Nombre', { exact: true })).toHaveValue('')
-  await expect(alta.getByLabel('Teléfono (opcional)')).toHaveValue('')
-  await expect(alta.getByLabel('Notas (opcional)')).toHaveValue('')
+  await evidence(page, 'ges-25-1-cliente-nuevo-vacio')
+  await expect(registration.getByRole('checkbox', { name: /Ley N\.º 29733/u })).not.toBeChecked()
+  await expect(registration.getByLabel('Nombre', { exact: true })).toHaveValue('')
+  await expect(registration.getByLabel('Teléfono (opcional)')).toHaveValue('')
+  await expect(registration.getByLabel('Notas (opcional)')).toHaveValue('')
 })
 
 test('GES-34 el encargado descarga los datos de un cliente y, a su pedido, los borra', async ({ page, localConCaja: local }) => {
-  cubre('confirmacion:customers/CustomerRights', 'funcion:clientes.exportar-datos', 'funcion:clientes.borrar-datos')
-  const cliente = await api(local).post('/customers', {
+  covers('confirmacion:customers/CustomerRights', 'funcion:clientes.exportar-datos', 'funcion:clientes.borrar-datos')
+  const customer = await api(local).post('/customers', {
     name: 'Rosa Díaz', phone: '987654321', email: '', address: 'Av. Sol 123', reference: '', notes: 'Alérgica al maní', consent: true,
   })
-  const pedidoId = await pedidoDe(local, id(cliente), 'delivery')
-  await abrirComo(page, local.encargado, '/clientes')
+  const orderId = await orderOf(local, id(customer), 'delivery')
+  await openAs(page, local.encargado, '/clientes')
   await page.getByRole('button', { name: /Rosa Díaz/u }).click()
-  const ficha = page.getByRole('dialog', { name: 'Rosa Díaz' })
+  const card = page.getByRole('dialog', { name: 'Rosa Díaz' })
 
   // Derecho de acceso: un archivo con lo que se guarda de ella.
-  const [descarga] = await Promise.all([
+  const [download] = await Promise.all([
     page.waitForEvent('download'),
-    ficha.getByRole('button', { name: 'Descargar sus datos' }).click(),
+    card.getByRole('button', { name: 'Descargar sus datos' }).click(),
   ])
-  expect(descarga.suggestedFilename()).toBe(`cliente-${String(id(cliente))}-datos.json`)
-  const ruta = await descarga.path()
+  expect(download.suggestedFilename()).toBe(`cliente-${String(id(customer))}-datos.json`)
+  const route = await download.path()
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- la ruta la entrega Playwright para su propia descarga
-  const datos = JSON.parse(await readFile(ruta, 'utf8')) as { notes: string; orders: { delivery_address: string }[] }
-  expect(datos.notes).toBe('Alérgica al maní')
-  expect(datos.orders.map((pedido) => pedido.delivery_address)).toEqual(['Av. Sol 123'])
+  const data = JSON.parse(await readFile(route, 'utf8')) as { notes: string; orders: { delivery_address: string }[] }
+  expect(data.notes).toBe('Alérgica al maní')
+  expect(data.orders.map((order) => order.delivery_address)).toEqual(['Av. Sol 123'])
 
   // Derecho de cancelación: se confirma porque no se deshace.
-  await ficha.getByRole('button', { name: 'Borrar sus datos' }).click()
-  const confirmar = page.getByRole('alertdialog', { name: '¿Borrar los datos de Rosa Díaz?' })
-  await expect(confirmar).toContainText('No se puede deshacer.')
-  await evidencia(page, 'ges-34-1-confirmar-borrado')
-  await confirmar.getByRole('button', { name: 'Borrar sus datos' }).click()
-  await expect(aviso(page, 'Los datos del cliente se borraron.')).toBeVisible()
-  await expect(ficha).toBeHidden()
+  await card.getByRole('button', { name: 'Borrar sus datos' }).click()
+  const confirm = page.getByRole('alertdialog', { name: '¿Borrar los datos de Rosa Díaz?' })
+  await expect(confirm).toContainText('No se puede deshacer.')
+  await evidence(page, 'ges-34-1-confirmar-borrado')
+  await confirm.getByRole('button', { name: 'Borrar sus datos' }).click()
+  await expect(notice(page, 'Los datos del cliente se borraron.')).toBeVisible()
+  await expect(card).toBeHidden()
   await expect(page.getByText('Todavía no hay clientes')).toBeVisible()
-  const pedido = await api(local).get(`/orders/${String(pedidoId)}`)
-  expect(pedido).toMatchObject({ customer_name: 'Cliente eliminado', customer_phone: '', delivery_address: '' })
+  const orderValue = await api(local).get(`/orders/${String(orderId)}`)
+  expect(orderValue).toMatchObject({ customer_name: 'Cliente eliminado', customer_phone: '', delivery_address: '' })
 })

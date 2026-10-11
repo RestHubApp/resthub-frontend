@@ -3,12 +3,12 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { api } from '../soporte/gestion'
-import { cubre } from '../soporte/cobertura'
-import { abrirComo } from '../soporte/fixtures'
-import { capturar, capturarVentana, expect, plazo, test } from './captura'
-import { enCocina } from './preparar'
+import { covers } from '../soporte/cobertura'
+import { openAs } from '../soporte/fixtures'
+import { capture, captureWindow, expect, deadline, test } from './captura'
+import { inKitchen } from './preparar'
 
-interface Ventana {
+interface WindowValue {
   readonly boton: Locator
   readonly rol: 'dialog' | 'alertdialog'
   readonly titulo: string
@@ -16,26 +16,26 @@ interface Ventana {
 }
 
 /** Abre un formulario en ventana, lo captura y lo cierra con Escape. */
-async function formulario(page: Page, boton: Locator, titulo: string, nombre: string): Promise<void> {
-  await boton.click()
-  const abierta = page.getByRole('dialog', { name: titulo, exact: true })
-  await capturarVentana(abierta, nombre)
+async function form(page: Page, button: Locator, title: string, name: string): Promise<void> {
+  await button.click()
+  const open = page.getByRole('dialog', { name: title, exact: true })
+  await captureWindow(open, name)
   await page.keyboard.press('Escape')
-  await expect(abierta).toBeHidden()
+  await expect(open).toBeHidden()
 }
 
 /** Abre una ventana, la captura y la cancela. */
-async function ventana(page: Page, { boton, rol, titulo, nombre }: Ventana): Promise<void> {
-  await boton.click()
-  const abierta = page.getByRole(rol, { name: titulo })
-  await capturarVentana(abierta, nombre)
-  await abierta.getByRole('button', { name: 'Cancelar' }).click()
-  await expect(abierta).toBeHidden()
+async function handleWindow(page: Page, { boton: button, rol: role, titulo: title, nombre: name }: WindowValue): Promise<void> {
+  await button.click()
+  const open = page.getByRole(role, { name: title })
+  await captureWindow(open, name)
+  await open.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(open).toBeHidden()
 }
 
 test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page, local }) => {
-  plazo(120_000)
-  cubre(
+  deadline(120_000)
+  covers(
     'ruta:/mesas',
     'dialogo:tables/TableFormDialog',
     'ruta:/personal',
@@ -47,35 +47,35 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
     'confirmacion:roles/DeleteRoleButton',
     'dialogo:roles/RoleFormDialog',
   )
-  await enCocina(local, local.mesa('2'), [{ plato: local.plato('Lomo saltado') }])
+  await inKitchen(local, local.mesa('2'), [{ plato: local.plato('Lomo saltado') }])
   // Un rol sin cuentas: el que tiene cuentas no se puede eliminar.
   await api(local).post('/roles', { name: 'Cajero', permissions: ['orders.read_all', 'cash.manage'] })
 
-  await abrirComo(page, local.encargado, '/mesas')
+  await openAs(page, local.encargado, '/mesas')
   await expect(page.getByText('4 activas de 4')).toBeVisible()
   await expect(page.getByText(/Ocupada · pedido #1/u)).toBeVisible()
-  await capturar(page, 'mesas')
-  await formulario(page, page.getByRole('button', { name: 'Nueva mesa' }), 'Nueva mesa', 'dialogo-nueva-mesa')
-  const mesa1 = page.getByRole('listitem').filter({ hasText: 'Mesa 1' })
-  await formulario(page, mesa1.getByRole('button', { name: 'Renombrar' }), 'Renombrar Mesa 1', 'dialogo-renombrar-mesa')
+  await capture(page, 'mesas')
+  await form(page, page.getByRole('button', { name: 'Nueva mesa' }), 'Nueva mesa', 'dialogo-nueva-mesa')
+  const table1 = page.getByRole('listitem').filter({ hasText: 'Mesa 1' })
+  await form(page, table1.getByRole('button', { name: 'Renombrar' }), 'Renombrar Mesa 1', 'dialogo-renombrar-mesa')
 
   await page.goto('/personal')
-  const mesero = page.getByRole('row', { name: /Mesero Prueba/u })
-  await expect(mesero).toContainText('mesero@e2e.resthub.dev')
-  await capturar(page, 'personal')
-  await ventana(page, { boton: page.getByRole('button', { name: 'Nueva cuenta' }), rol: 'dialog', titulo: 'Nueva cuenta', nombre: 'dialogo-nueva-cuenta' })
-  await ventana(page, { boton: mesero.getByRole('button', { name: 'Editar' }), rol: 'dialog', titulo: 'Editar a Mesero Prueba', nombre: 'dialogo-editar-cuenta' })
-  await ventana(page, { boton: mesero.getByRole('button', { name: 'Contraseña' }), rol: 'dialog', titulo: 'Restablecer la contraseña de Mesero Prueba', nombre: 'dialogo-restablecer-contrasena' })
-  await ventana(page, { boton: mesero.getByRole('button', { name: 'Desactivar' }), rol: 'alertdialog', titulo: '¿Desactivar a Mesero Prueba?', nombre: 'confirmar-desactivar-cuenta' })
+  const waiter = page.getByRole('row', { name: /Mesero Prueba/u })
+  await expect(waiter).toContainText('mesero@e2e.resthub.dev')
+  await capture(page, 'personal')
+  await handleWindow(page, { boton: page.getByRole('button', { name: 'Nueva cuenta' }), rol: 'dialog', titulo: 'Nueva cuenta', nombre: 'dialogo-nueva-cuenta' })
+  await handleWindow(page, { boton: waiter.getByRole('button', { name: 'Editar' }), rol: 'dialog', titulo: 'Editar a Mesero Prueba', nombre: 'dialogo-editar-cuenta' })
+  await handleWindow(page, { boton: waiter.getByRole('button', { name: 'Contraseña' }), rol: 'dialog', titulo: 'Restablecer la contraseña de Mesero Prueba', nombre: 'dialogo-restablecer-contrasena' })
+  await handleWindow(page, { boton: waiter.getByRole('button', { name: 'Desactivar' }), rol: 'alertdialog', titulo: '¿Desactivar a Mesero Prueba?', nombre: 'confirmar-desactivar-cuenta' })
 
   await page.goto('/roles')
   await expect(page.getByRole('heading', { level: 1, name: 'Roles' })).toBeVisible()
   await expect(page.getByText('Cajero').first()).toBeVisible()
-  await capturar(page, 'roles')
-  await formulario(page, page.getByRole('button', { name: 'Nuevo rol' }), 'Nuevo rol', 'dialogo-nuevo-rol')
-  const encargado = page.getByRole('listitem').filter({ hasText: /^Encargado/u })
-  await formulario(page, encargado.getByRole('button', { name: 'Ver permisos' }), 'Encargado', 'dialogo-ver-permisos-rol')
-  const cajero = page.getByRole('listitem').filter({ hasText: /^Cajero/u })
-  await formulario(page, cajero.getByRole('button', { name: 'Editar' }), 'Editar Cajero', 'dialogo-editar-rol')
-  await ventana(page, { boton: page.getByRole('button', { name: 'Eliminar el rol Cajero' }), rol: 'alertdialog', titulo: '¿Eliminar el rol Cajero?', nombre: 'confirmar-eliminar-rol' })
+  await capture(page, 'roles')
+  await form(page, page.getByRole('button', { name: 'Nuevo rol' }), 'Nuevo rol', 'dialogo-nuevo-rol')
+  const owner = page.getByRole('listitem').filter({ hasText: /^Encargado/u })
+  await form(page, owner.getByRole('button', { name: 'Ver permisos' }), 'Encargado', 'dialogo-ver-permisos-rol')
+  const cashier = page.getByRole('listitem').filter({ hasText: /^Cajero/u })
+  await form(page, cashier.getByRole('button', { name: 'Editar' }), 'Editar Cajero', 'dialogo-editar-rol')
+  await handleWindow(page, { boton: page.getByRole('button', { name: 'Eliminar el rol Cajero' }), rol: 'alertdialog', titulo: '¿Eliminar el rol Cajero?', nombre: 'confirmar-eliminar-rol' })
 })
