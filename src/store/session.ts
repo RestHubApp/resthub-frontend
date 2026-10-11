@@ -14,7 +14,7 @@ import type { CurrentUserResponse, PermissionCode } from '@/api/types'
 // previa, cada una con su clave. La version va en la clave: si cambia la forma
 // de lo guardado, una sesion vieja se descarta en vez de leerse como si tuviera
 // la forma nueva.
-const ALMACEN = tabStorage.storage
+const STORAGE = tabStorage.storage
 const STORAGE_KEY = tabStorage.sessionKey
 // Las versiones anteriores ya no se leen; tampoco se dejan con un token adentro.
 const OLD_STORAGE_KEYS = ['resthub.session.v1'] as const
@@ -64,18 +64,18 @@ interface SessionState {
   exitPreview: () => void
 }
 
-type Lectura = { readonly ok: true; readonly session: StoredSession | null } | { readonly ok: false }
+type Read = { readonly ok: true; readonly session: StoredSession | null } | { readonly ok: false }
 
 // Lee la sesion guardada del navegador (el token se guarda para que recargar
 // la pagina no eche al usuario). Distingue «no hay sesión guardada» de «no se
 // pudo leer»: sin almacenamiento no se sabe qué hizo otra pestaña, y eso no
 // alcanza para cerrar la sesión de esta.
-function leerGuardada(): Lectura {
-  if (ALMACEN === null) {
+function readSaved(): Read {
+  if (STORAGE === null) {
     return { ok: false }
   }
   try {
-    const raw = ALMACEN.getItem(STORAGE_KEY)
+    const raw = STORAGE.getItem(STORAGE_KEY)
     return { ok: true, session: raw === null ? null : (JSON.parse(raw) as StoredSession) }
   } catch {
     return { ok: false }
@@ -89,7 +89,7 @@ function forgetOldSessions(): void {
   }
   try {
     for (const key of OLD_STORAGE_KEYS) {
-      ALMACEN?.removeItem(key)
+      STORAGE?.removeItem(key)
     }
   } catch {
     // Sin almacenamiento tampoco hay nada viejo que borrar.
@@ -100,17 +100,17 @@ function forgetOldSessions(): void {
 // logro. Solo se compara lo guardado con lo que la pestana escribio: si nunca
 // llego a guardarse (almacenamiento bloqueado o lleno), no hay nada que otra
 // pestana haya podido cambiar.
-const persistencia: { token: string | null } = { token: null }
+const persistence: { token: string | null } = { token: null }
 
 function writeStoredSession(session: StoredSession | null): void {
-  persistencia.token = null
+  persistence.token = null
   try {
     if (session === null) {
-      ALMACEN?.removeItem(STORAGE_KEY)
+      STORAGE?.removeItem(STORAGE_KEY)
       return
     }
-    ALMACEN?.setItem(STORAGE_KEY, JSON.stringify(session))
-    persistencia.token = ALMACEN === null ? null : session.token
+    STORAGE?.setItem(STORAGE_KEY, JSON.stringify(session))
+    persistence.token = STORAGE === null ? null : session.token
   } catch {
     // Sin almacenamiento la sesion dura lo que dure la pestana. Es una
     // degradacion aceptable; perder el acceso por no poder escribir no lo es.
@@ -123,25 +123,25 @@ function writeStoredSession(session: StoredSession | null): void {
  * escribir encima; lo guardado manda. Una vista previa vive en su propia
  * pestana y ninguna otra la toca.
  */
-function otraPestanaLaCambio(token: string): boolean {
+function otherTabChange(token: string): boolean {
   // Compara tokens para saber cuál sesión escribió esta pestaña, no para verificar un secreto.
-  const escritaPorEsta = persistencia.token === token
-  if (isPreviewTab() || !escritaPorEsta) {
+  const writtenByThis = persistence.token === token
+  if (isPreviewTab() || !writtenByThis) {
     return false
   }
-  const lectura = leerGuardada()
-  return lectura.ok && lectura.session?.token !== token
+  const read = readSaved()
+  return read.ok && read.session?.token !== token
 }
 
 // Cierra la sesion en el momento en que vence su token.
-const programarVencimiento = expiryTimer(() => {
+const scheduleExpiry = expiryTimer(() => {
   useSession.getState().expire()
 })
 
-function limpiarSesion(): void {
+function cleanSession(): void {
   setAuthToken(null)
   writeStoredSession(null)
-  programarVencimiento(null)
+  scheduleExpiry(null)
   // Nada de la cuenta anterior queda en el cache para la siguiente. Lo del
   // administrador del sistema es de otra sesion y se queda.
   clearQueriesExcept(PLATFORM_QUERY_ROOT)
@@ -154,26 +154,26 @@ function limpiarSesion(): void {
  * Cierra la sesion solo en esta pestana, sin tocar lo guardado: lo guardado ya
  * es de otra pestana (que la cerro o abrio otra cuenta) y borrarlo la echaria.
  */
-function soltarSesion(): void {
+function dropSession(): void {
   setAuthToken(null)
-  persistencia.token = null
-  programarVencimiento(null)
+  persistence.token = null
+  scheduleExpiry(null)
   clearQueriesExcept(PLATFORM_QUERY_ROOT)
 }
 
 /** Si lo guardado se puede seguir usando: vigente y, en una vista previa, marcado como tal. */
-function vigente(session: StoredSession | null): session is StoredSession {
+function current(session: StoredSession | null): session is StoredSession {
   return session !== null && !isTokenExpired(session.token) && (!isPreviewTab() || session.account.preview)
 }
 
 forgetOldSessions()
-const lecturaInicial = leerGuardada()
-const guardada = lecturaInicial.ok ? lecturaInicial.session : null
-const restored = vigente(guardada) ? guardada : null
-if (guardada !== null && restored === null) {
+const initialRead = readSaved()
+const saved = initialRead.ok ? initialRead.session : null
+const restored = current(saved) ? saved : null
+if (saved !== null && restored === null) {
   writeStoredSession(null)
 }
-persistencia.token = restored?.token ?? null
+persistence.token = restored?.token ?? null
 // Una vista previa que se recarga ya vencida tampoco guarda su cola.
 if (restored === null) {
   discardPreviewQueue()
@@ -183,14 +183,14 @@ setAuthToken(restored?.token ?? null)
 export const useSession = create<SessionState>((set, get) => ({
   token: restored?.token ?? null,
   account: restored?.account ?? null,
-  expired: guardada !== null && restored === null,
+  expired: saved !== null && restored === null,
   passwordChanged: false,
 
   signIn: (token, account) => {
     setAuthToken(token)
     writeStoredSession({ token, account })
     set({ token, account, expired: false, passwordChanged: false })
-    programarVencimiento(token)
+    scheduleExpiry(token)
     logger.info(
       { userId: account.user.id, roleId: account.user.role_id, restaurantId: account.restaurant.id },
       'auth.signed_in',
@@ -203,7 +203,7 @@ export const useSession = create<SessionState>((set, get) => ({
     if (token === null) {
       return
     }
-    if (otraPestanaLaCambio(token)) {
+    if (otherTabChange(token)) {
       syncWithStoredSession()
       return
     }
@@ -218,19 +218,19 @@ export const useSession = create<SessionState>((set, get) => ({
     // Otra pestana cerro la sesion o entro otra cuenta mientras esta renovaba:
     // escribir el token renovado resucitaria la sesion cerrada o pisaria la
     // de la otra cuenta. Esta pestana se pone al dia con lo guardado.
-    if (otraPestanaLaCambio(origin)) {
+    if (otherTabChange(origin)) {
       syncWithStoredSession()
       return
     }
     setAuthToken(token)
     writeStoredSession({ token, account })
     set({ token, account })
-    programarVencimiento(token)
+    scheduleExpiry(token)
     logger.info('auth.renewed')
   },
 
   signOut: () => {
-    limpiarSesion()
+    cleanSession()
     set({ token: null, account: null, expired: false, passwordChanged: false })
     logger.info('auth.signed_out')
   },
@@ -244,7 +244,7 @@ export const useSession = create<SessionState>((set, get) => ({
     if (get().token === null) {
       return
     }
-    limpiarSesion()
+    cleanSession()
     set({ token: null, account: null, expired: true, passwordChanged: false })
     logger.warn('auth.session_expired')
   },
@@ -264,14 +264,14 @@ export const useSession = create<SessionState>((set, get) => ({
     if (!isPreviewTab()) {
       return
     }
-    limpiarSesion()
+    cleanSession()
     setPreviewTabMark(false)
     set({ token: null, account: null, expired: false, passwordChanged: false })
     logger.info('auth.preview_exited')
   },
 }))
 
-programarVencimiento(restored?.token ?? null)
+scheduleExpiry(restored?.token ?? null)
 setUnauthorizedHandler(() => {
   useSession.getState().expire()
 })
@@ -293,27 +293,27 @@ function syncWithStoredSession(): void {
   if (isPreviewTab()) {
     return
   }
-  const lectura = leerGuardada()
-  if (!lectura.ok) {
+  const read = readSaved()
+  if (!read.ok) {
     return
   }
-  const actual = lectura.session
-  const estado = useSession.getState()
-  if (actual !== null && actual.token === estado.token) {
+  const actual = read.session
+  const status = useSession.getState()
+  if (actual !== null && actual.token === status.token) {
     return
   }
-  if (vigente(actual) && (estado.account === null || (actual.account.user.id === estado.account.user.id && actual.account.restaurant.id === estado.account.restaurant.id))) {
+  if (current(actual) && (status.account === null || (actual.account.user.id === status.account.user.id && actual.account.restaurant.id === status.account.restaurant.id))) {
     setAuthToken(actual.token)
-    persistencia.token = actual.token
-    programarVencimiento(actual.token)
+    persistence.token = actual.token
+    scheduleExpiry(actual.token)
     useSession.setState({ token: actual.token, account: actual.account, expired: false, passwordChanged: false })
     logger.info('auth.synced_from_other_tab')
     return
   }
-  if (estado.token === null) {
+  if (status.token === null) {
     return
   }
-  soltarSesion()
+  dropSession()
   useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })
   logger.info('auth.signed_out_in_other_tab')
 }
@@ -323,7 +323,7 @@ function syncWithStoredSession(): void {
 // se vacio el almacenamiento entero.
 if (typeof window !== 'undefined' && !isPreviewTab()) {
   window.addEventListener('storage', (event: StorageEvent) => {
-    if (event.storageArea !== null && event.storageArea !== ALMACEN) {
+    if (event.storageArea !== null && event.storageArea !== STORAGE) {
       return
     }
     if (event.key === STORAGE_KEY || event.key === null) {
@@ -356,7 +356,7 @@ export function useCan(permission: PermissionCode): boolean {
   return useSession((state) => hasPermission(state.account, permission))
 }
 
-const SIN_PERMISOS: readonly PermissionCode[] = []
+const WITHOUT_PERMISSIONS: readonly PermissionCode[] = []
 
 /**
  * Todos los permisos de la cuenta.
@@ -364,7 +364,7 @@ const SIN_PERMISOS: readonly PermissionCode[] = []
  * Para comparar con los de un rol: nadie da un permiso que no tiene.
  */
 export function usePermissions(): readonly PermissionCode[] {
-  return useSession((state) => state.account?.permissions ?? SIN_PERMISOS)
+  return useSession((state) => state.account?.permissions ?? WITHOUT_PERMISSIONS)
 }
 
 /**

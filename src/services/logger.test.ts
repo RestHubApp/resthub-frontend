@@ -6,11 +6,11 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
-type Entorno = Record<string, unknown>
+type Environment = Record<string, unknown>
 
-async function loggerCon(entorno: Entorno) {
-  const anterior = (globalThis as { __VITE_ENV__?: Entorno }).__VITE_ENV__
-  stubGlobal('__VITE_ENV__', { ...anterior, ...entorno })
+async function loggerWith(environment: Environment) {
+  const previous = (globalThis as { __VITE_ENV__?: Environment }).__VITE_ENV__
+  stubGlobal('__VITE_ENV__', { ...previous, ...environment })
   jest.resetModules()
   return import('./logger')
 }
@@ -19,7 +19,7 @@ afterEach(() => {
   unstubAllGlobals()
 })
 
-function espiarConsola() {
+function spyConsole() {
   return {
     error: jest.spyOn(console, 'error').mockImplementation(() => undefined),
     warn: jest.spyOn(console, 'warn').mockImplementation(() => undefined),
@@ -30,57 +30,57 @@ function espiarConsola() {
 
 describe('nivel de los logs', () => {
   it('con nivel error descarta avisos, información y depuración', async () => {
-    const { logger } = await loggerCon({ VITE_LOG_LEVEL: 'error' })
-    const consola = espiarConsola()
+    const { logger } = await loggerWith({ VITE_LOG_LEVEL: 'error' })
+    const console = spyConsole()
 
     logger.error('visible')
     logger.warn('oculto')
     logger.info('oculto')
     logger.debug('oculto')
 
-    expect(consola.error).toHaveBeenCalledTimes(1)
-    expect(consola.warn).not.toHaveBeenCalled()
-    expect(consola.info).not.toHaveBeenCalled()
-    expect(consola.debug).not.toHaveBeenCalled()
+    expect(console.error).toHaveBeenCalledTimes(1)
+    expect(console.warn).not.toHaveBeenCalled()
+    expect(console.info).not.toHaveBeenCalled()
+    expect(console.debug).not.toHaveBeenCalled()
   })
 
   it('sin nivel válido, en desarrollo se ve desde debug y se oculta trace', async () => {
-    const { logger } = await loggerCon({ VITE_LOG_LEVEL: 'ruidoso', DEV: true })
-    const consola = espiarConsola()
+    const { logger } = await loggerWith({ VITE_LOG_LEVEL: 'ruidoso', DEV: true })
+    const console = spyConsole()
 
     logger.debug('visible')
     logger.trace('oculto')
 
-    expect(consola.debug).toHaveBeenCalledTimes(1)
-    expect(consola.debug).not.toHaveBeenCalledWith(expect.objectContaining({ msg: 'oculto' }))
+    expect(console.debug).toHaveBeenCalledTimes(1)
+    expect(console.debug).not.toHaveBeenCalledWith(expect.objectContaining({ msg: 'oculto' }))
   })
 
   it('en producción descarta información y depuración, y deja avisos y errores', async () => {
-    const { logger } = await loggerCon({ VITE_LOG_LEVEL: undefined, DEV: false })
-    const consola = espiarConsola()
+    const { logger } = await loggerWith({ VITE_LOG_LEVEL: undefined, DEV: false })
+    const console = spyConsole()
 
     logger.debug('oculto')
     logger.info('oculto')
     logger.warn('aviso')
     logger.error('fallo')
 
-    expect(consola.debug).not.toHaveBeenCalled()
-    expect(consola.info).not.toHaveBeenCalled()
-    expect(consola.warn).toHaveBeenCalledTimes(1)
-    expect(consola.error).toHaveBeenCalledTimes(1)
+    expect(console.debug).not.toHaveBeenCalled()
+    expect(console.info).not.toHaveBeenCalled()
+    expect(console.warn).toHaveBeenCalledTimes(1)
+    expect(console.error).toHaveBeenCalledTimes(1)
   })
 })
 
 describe('errores que nadie capturó', () => {
   it('quedan en el log con su origen', async () => {
-    const { logger, logUncaughtErrors } = await loggerCon({ VITE_LOG_LEVEL: 'error' })
-    const manejadores = new Map<string, (evento: unknown) => void>()
-    stubGlobal('window', { addEventListener: (tipo: string, fn: (evento: unknown) => void) => manejadores.set(tipo, fn) })
+    const { logger, logUncaughtErrors } = await loggerWith({ VITE_LOG_LEVEL: 'error' })
+    const handlers = new Map<string, (event: unknown) => void>()
+    stubGlobal('window', { addEventListener: (type: string, fn: (event: unknown) => void) => handlers.set(type, fn) })
     const error = jest.spyOn(logger, 'error').mockImplementation(() => undefined)
 
     logUncaughtErrors()
-    manejadores.get('error')?.({ error: new Error('boom'), filename: 'app.js', lineno: 12 })
-    manejadores.get('unhandledrejection')?.({ reason: 'sin catch' })
+    handlers.get('error')?.({ error: new Error('boom'), filename: 'app.js', lineno: 12 })
+    handlers.get('unhandledrejection')?.({ reason: 'sin catch' })
 
     expect(error).toHaveBeenCalledWith(expect.objectContaining({ source: 'app.js', line: 12 }), 'app.uncaught_error')
     expect(error).toHaveBeenCalledWith({ err: 'sin catch' }, 'app.unhandled_rejection')

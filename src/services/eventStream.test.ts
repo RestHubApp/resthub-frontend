@@ -3,7 +3,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 
-import { cualquieraDe, readEventStream } from './eventStream'
+import { anyOf, readEventStream } from './eventStream'
 
 const originalFetch = globalThis.fetch
 
@@ -60,16 +60,16 @@ describe('cualquieraDe sin AbortSignal.any (Safari antes de 17.4)', () => {
   it('se aborta con la primera de las dos y conserva su motivo', () => {
     const a = new AbortController()
     const b = new AbortController()
-    const combinada = cualquieraDe(a.signal, b.signal)
-    expect(combinada.aborted).toBe(false)
+    const combined = anyOf(a.signal, b.signal)
+    expect(combined.aborted).toBe(false)
     b.abort('inactivo')
-    expect(combinada.aborted).toBe(true)
-    expect(combinada.reason).toBe('inactivo')
+    expect(combined.aborted).toBe(true)
+    expect(combined.reason).toBe('inactivo')
   })
 
   it('nace abortada si una ya lo estaba', () => {
     const a = new AbortController()
     a.abort('cerrado')
-    expect(cualquieraDe(a.signal, new AbortController().signal).reason).toBe('cerrado')
+    expect(anyOf(a.signal, new AbortController().signal).reason).toBe('cerrado')
   })
 })

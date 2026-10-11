@@ -37,21 +37,21 @@ export function toNumber(value: string | number | null | undefined): number {
   if (value === null || value === undefined) {
     return 0
   }
-  const numero = typeof value === 'number' ? value : Number.parseFloat(value)
-  return Number.isFinite(numero) ? numero : 0
+  const number = typeof value === 'number' ? value : Number.parseFloat(value)
+  return Number.isFinite(number) ? number : 0
 }
 
 function finite(value: string | number): number | null {
-  const numero = typeof value === 'number' ? value : Number(value)
-  return Number.isFinite(numero) ? numero : null
+  const number = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(number) ? number : null
 }
 
 // ---------------------------------------------------------------- Dinero
 
 /** `S/ 1,234.50`. Un valor que no es número se muestra como un guion. */
 export function formatMoney(value: string | number): string {
-  const numero = finite(value)
-  return numero === null ? NO_VALUE : SOLES.format(numero)
+  const number = finite(value)
+  return number === null ? NO_VALUE : SOLES.format(number)
 }
 
 /** Para los ejes de un gráfico: `S/ 850` o `S/ 2.5 K`. */
@@ -80,15 +80,15 @@ export function formatInteger(value: string | number): string {
 
 /** `65.6 %`. El API ya manda el porcentaje multiplicado por cien. */
 export function formatPercent(value: string | number): string {
-  const numero = finite(value)
-  return numero === null ? NO_VALUE : `${ONE_DECIMAL.format(numero)} %`
+  const number = finite(value)
+  return number === null ? NO_VALUE : `${ONE_DECIMAL.format(number)} %`
 }
 
 /** `+2.5 %` o `−0.9 %`, con el signo siempre escrito. */
 export function formatChange(value: string | number): string {
-  const numero = toNumber(value)
-  const signos: Record<number, string> = { 1: '+', [-1]: '−' }
-  return `${signos[Math.sign(numero)] ?? ''}${ONE_DECIMAL.format(Math.abs(numero))} %`
+  const number = toNumber(value)
+  const signs: Record<number, string> = { 1: '+', [-1]: '−' }
+  return `${signs[Math.sign(number)] ?? ''}${ONE_DECIMAL.format(Math.abs(number))} %`
 }
 
 /** Una confianza de 0 a 1 como porcentaje entero: `87 %`. */
@@ -98,8 +98,8 @@ export function formatConfidence(value: number | null): string {
 
 /** `0.7 días`, `1 día`. */
 export function formatDays(value: string | number): string {
-  const numero = toNumber(value)
-  return `${TWO_DECIMALS.format(numero)} ${numero === 1 ? 'día' : 'días'}`
+  const number = toNumber(value)
+  return `${TWO_DECIMALS.format(number)} ${number === 1 ? 'día' : 'días'}`
 }
 
 /**
@@ -128,22 +128,22 @@ const LARGE_LABELS: Readonly<Partial<Record<string, string>>> = { g: 'kg', ml: '
  * desde mil gramos o mililitros pasa a kg o L. `5600 g` → `5.6 kg`, `5 unit` → `5 unid.`.
  */
 export function formatQuantity(value: string | number, unit: string): string {
-  const numero = finite(value)
-  if (numero === null) {
+  const number = finite(value)
+  if (number === null) {
     return NO_VALUE
   }
-  const grande = LARGE_LABELS[unit]
-  if (grande !== undefined && Math.abs(numero) >= THOUSAND) {
-    return `${THREE_DECIMALS.format(numero / THOUSAND)} ${grande}`
+  const large = LARGE_LABELS[unit]
+  if (large !== undefined && Math.abs(number) >= THOUSAND) {
+    return `${THREE_DECIMALS.format(number / THOUSAND)} ${large}`
   }
-  return `${TWO_DECIMALS.format(numero)} ${BASE_LABELS[unit] ?? unit}`
+  return `${TWO_DECIMALS.format(number)} ${BASE_LABELS[unit] ?? unit}`
 }
 
 /** Con signo siempre visible, para el libro de movimientos: `+5 kg`, `−150 g`. */
 export function formatSignedQuantity(value: string | number, unit: string): string {
-  const numero = toNumber(value)
-  const texto = formatQuantity(Math.abs(numero), unit)
-  return numero < 0 ? `−${texto}` : `+${texto}`
+  const number = toNumber(value)
+  const text = formatQuantity(Math.abs(number), unit)
+  return number < 0 ? `−${text}` : `+${text}`
 }
 
 // ---------------------------------------------------------------- Fechas y horas
@@ -217,14 +217,14 @@ const SECONDS_PER_MINUTE = 60
  * Se redondea hacia arriba: mientras quede algo, no se lee `0:00`.
  */
 export function formatCountdown(ms: number): string {
-  const segundos = Math.max(0, Math.ceil(ms / THOUSAND))
-  const minutos = Math.floor(segundos / SECONDS_PER_MINUTE)
-  const ss = String(segundos % SECONDS_PER_MINUTE).padStart(2, '0')
-  if (minutos < MINUTES_PER_HOUR) {
-    return `${String(minutos)}:${ss}`
+  const seconds = Math.max(0, Math.ceil(ms / THOUSAND))
+  const minutes = Math.floor(seconds / SECONDS_PER_MINUTE)
+  const ss = String(seconds % SECONDS_PER_MINUTE).padStart(2, '0')
+  if (minutes < MINUTES_PER_HOUR) {
+    return `${String(minutes)}:${ss}`
   }
-  const mm = String(minutos % MINUTES_PER_HOUR).padStart(2, '0')
-  return `${String(Math.floor(minutos / MINUTES_PER_HOUR))}:${mm}:${ss}`
+  const mm = String(minutes % MINUTES_PER_HOUR).padStart(2, '0')
+  return `${String(Math.floor(minutes / MINUTES_PER_HOUR))}:${mm}:${ss}`
 }
 
 // Las horas que se escriben (una reserva a las 20:00) son del reloj del local,
@@ -232,10 +232,10 @@ export function formatCountdown(ms: number): string {
 
 /** Día y hora del reloj del local para un instante: `{ day: '2026-09-25', time: '20:00' }`. */
 export function wallClockIn(isoDateTime: string, timeZone: string): { day: string; time: string } {
-  const instante = new Date(isoDateTime)
-  const day = new Intl.DateTimeFormat('en-CA', { timeZone }).format(instante)
+  const instant = new Date(isoDateTime)
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone }).format(instant)
   const time = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(
-    instante,
+    instant,
   )
   return { day, time }
 }
@@ -253,17 +253,17 @@ export function formatShortDateTime(isoDateTime: string, timeZone: string): stri
 
 /** Con segundos, para ordenar lo que pasó en el mismo minuto: `25 set., 14:05:09`. */
 export function formatTimestamp(isoDateTime: string, timeZone: string): string {
-  const instante = new Date(isoDateTime)
-  const day = new Intl.DateTimeFormat('en-CA', { timeZone }).format(instante)
-  const time = new Intl.DateTimeFormat('en-GB', { timeZone, timeStyle: 'medium', hourCycle: 'h23' }).format(instante)
+  const instant = new Date(isoDateTime)
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone }).format(instant)
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone, timeStyle: 'medium', hourCycle: 'h23' }).format(instant)
   return `${formatShortDate(day)}, ${time}`
 }
 
 /** El instante (ISO, en UTC) de un día y hora del reloj del local. */
 export function zonedInstant(day: string, time: string, timeZone: string): string {
-  const supuesto = new Date(`${day}T${time}:00Z`).getTime()
+  const assumed = new Date(`${day}T${time}:00Z`).getTime()
   // Cuánto se corre el reloj del local respecto de UTC en ese momento.
-  const reloj = wallClockIn(new Date(supuesto).toISOString(), timeZone)
-  const desfase = new Date(`${reloj.day}T${reloj.time}:00Z`).getTime() - supuesto
-  return new Date(supuesto - desfase).toISOString()
+  const clock = wallClockIn(new Date(assumed).toISOString(), timeZone)
+  const offset = new Date(`${clock.day}T${clock.time}:00Z`).getTime() - assumed
+  return new Date(assumed - offset).toISOString()
 }

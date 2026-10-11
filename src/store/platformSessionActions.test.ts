@@ -5,9 +5,9 @@ import { PLATFORM_STORAGE_KEY, usePlatformSession } from './platformSession'
 
 const ADMIN = { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' }
 
-function guardada(): unknown {
-  const texto = localStorage.getItem(PLATFORM_STORAGE_KEY)
-  return texto === null ? null : (JSON.parse(texto) as unknown)
+function saved(): unknown {
+  const text = localStorage.getItem(PLATFORM_STORAGE_KEY)
+  return text === null ? null : (JSON.parse(text) as unknown)
 }
 
 afterEach(() => {
@@ -22,7 +22,7 @@ describe('sesión del administrador del sistema', () => {
     usePlatformSession.getState().signIn('p-1', ADMIN)
     usePlatformSession.getState().refresh({ ...ADMIN, full_name: 'Soporte' })
     expect(usePlatformSession.getState().admin?.full_name).toBe('Soporte')
-    expect(guardada()).toEqual({ token: 'p-1', admin: { ...ADMIN, full_name: 'Soporte' } })
+    expect(saved()).toEqual({ token: 'p-1', admin: { ...ADMIN, full_name: 'Soporte' } })
   })
 
   it('renovar cambia el token solo si la sesión sigue siendo la que pidió la renovación', () => {
@@ -42,6 +42,6 @@ describe('sesión del administrador del sistema', () => {
     usePlatformSession.getState().signIn('p-1', ADMIN)
     usePlatformSession.getState().expire()
     expect(usePlatformSession.getState()).toMatchObject({ token: null, admin: null, expired: true })
-    expect(guardada()).toBeNull()
+    expect(saved()).toBeNull()
   })
 })

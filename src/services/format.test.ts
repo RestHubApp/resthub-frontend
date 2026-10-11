@@ -18,8 +18,8 @@ describe('zonedInstant', () => {
   })
 
   it('ida y vuelta con el reloj del local', () => {
-    const instante = zonedInstant('2026-03-08', '13:30', 'America/New_York')
-    expect(wallClockIn(instante, 'America/New_York')).toEqual({ day: '2026-03-08', time: '13:30' })
+    const instant = zonedInstant('2026-03-08', '13:30', 'America/New_York')
+    expect(wallClockIn(instant, 'America/New_York')).toEqual({ day: '2026-03-08', time: '13:30' })
   })
 })
 

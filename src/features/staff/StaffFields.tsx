@@ -5,7 +5,7 @@ import { ReadOnlyField } from '@/components/ReadOnlyField'
 import { SelectField } from '@/components/SelectField'
 import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
-import { soloLetras } from '@/services/fieldRules'
+import { onlyLetters } from '@/services/fieldRules'
 
 interface StaffFieldsProps {
   /** Lo que devuelve `register(...)` para cada campo. */
@@ -55,7 +55,7 @@ export function StaffFields({
           placeholder="María Quispe Rojas"
           icon="perfil"
           autoComplete="off"
-          sanitize={soloLetras}
+          sanitize={onlyLetters}
           field={fields.full_name}
           error={errors.full_name}
         />

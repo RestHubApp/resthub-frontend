@@ -7,7 +7,7 @@ import { enqueueOrder, queuedOrders, removeQueued, subscribeQueue, useQueuedOrde
 const ANA = cuenta(PERMISOS_MESERO)
 const LUIS = cuenta(PERMISOS_MESERO, { user: { ...ANA.user, id: 8, full_name: 'Luis' } })
 
-function pedido(id: string, userId = ANA.user.id): QueuedOrder {
+function order(id: string, userId = ANA.user.id): QueuedOrder {
   return {
     userId,
     restaurantId: ANA.restaurant.id,
@@ -18,11 +18,11 @@ function pedido(id: string, userId = ANA.user.id): QueuedOrder {
 }
 
 afterEach(() => {
-  for (const orden of queuedOrders({ userId: ANA.user.id, restaurantId: 1 })) {
-    removeQueued(orden.request.client_request_id ?? '')
+  for (const orderValue of queuedOrders({ userId: ANA.user.id, restaurantId: 1 })) {
+    removeQueued(orderValue.request.client_request_id ?? '')
   }
-  for (const orden of queuedOrders({ userId: LUIS.user.id, restaurantId: 1 })) {
-    removeQueued(orden.request.client_request_id ?? '')
+  for (const orderValue of queuedOrders({ userId: LUIS.user.id, restaurantId: 1 })) {
+    removeQueued(orderValue.request.client_request_id ?? '')
   }
 })
 
@@ -32,7 +32,7 @@ describe('useQueuedOrders', () => {
     expect(result.current).toEqual([])
 
     act(() => {
-      enqueueOrder(pedido('a'))
+      enqueueOrder(order('a'))
     })
     expect(result.current.map((o) => o.request.client_request_id)).toEqual(['a'])
 
@@ -44,7 +44,7 @@ describe('useQueuedOrders', () => {
 
   it('no mezcla la cola de otra cuenta en el mismo celular, y sin sesión no hay cola', () => {
     act(() => {
-      enqueueOrder(pedido('de-luis', LUIS.user.id))
+      enqueueOrder(order('de-luis', LUIS.user.id))
     })
     expect(renderHook(() => useQueuedOrders(ANA)).result.current).toEqual([])
     expect(renderHook(() => useQueuedOrders(LUIS)).result.current).toHaveLength(1)
@@ -52,13 +52,13 @@ describe('useQueuedOrders', () => {
   })
 
   it('quien deja de escuchar ya no recibe avisos', () => {
-    let avisos = 0
-    const dejar = subscribeQueue(() => {
-      avisos += 1
+    let notices = 0
+    const leave = subscribeQueue(() => {
+      notices += 1
     })
-    enqueueOrder(pedido('b'))
-    dejar()
-    enqueueOrder(pedido('c'))
-    expect(avisos).toBe(1)
+    enqueueOrder(order('b'))
+    leave()
+    enqueueOrder(order('c'))
+    expect(notices).toBe(1)
   })
 })

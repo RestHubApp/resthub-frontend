@@ -20,7 +20,7 @@ import { tabStorage } from '@/services/tabStorage'
 //
 // La versión va en la clave: la v1 no decía de quién era cada pedido y no se lee.
 const STORAGE_KEY = 'resthub.pedidos-sin-enviar.v2'
-const ALMACEN = tabStorage.storage
+const STORAGE = tabStorage.storage
 
 /** La cuenta dueña de un pedido en cola: la persona y el local donde lo tomó. */
 export interface QueueOwner {
@@ -61,7 +61,7 @@ function read(): readonly QueuedOrder[] {
     return cache.value
   }
   try {
-    const raw = ALMACEN?.getItem(STORAGE_KEY) ?? null
+    const raw = STORAGE?.getItem(STORAGE_KEY) ?? null
     const parsed: unknown = raw === null ? null : JSON.parse(raw)
     cache.value = Array.isArray(parsed) ? (parsed as QueuedOrder[]) : EMPTY
   } catch {
@@ -88,9 +88,9 @@ function write(queue: readonly QueuedOrder[]): void {
   cache.value = queue
   try {
     if (queue.length === 0) {
-      ALMACEN?.removeItem(STORAGE_KEY)
+      STORAGE?.removeItem(STORAGE_KEY)
     } else {
-      ALMACEN?.setItem(STORAGE_KEY, JSON.stringify(queue))
+      STORAGE?.setItem(STORAGE_KEY, JSON.stringify(queue))
     }
   } catch {
     // Sin almacenamiento la cola dura lo que la pestaña: es lo mejor posible.
@@ -103,7 +103,7 @@ function write(queue: readonly QueuedOrder[]): void {
 // cola real, vista desde una vista previa) no es de esta cola.
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event: StorageEvent) => {
-    if (event.storageArea !== null && event.storageArea !== ALMACEN) {
+    if (event.storageArea !== null && event.storageArea !== STORAGE) {
       return
     }
     if (event.key === STORAGE_KEY || event.key === null) {
@@ -119,10 +119,10 @@ export function queuedOrders(owner: QueueOwner | null): readonly QueuedOrder[] {
     return EMPTY
   }
   const base = read()
-  const clave = `${String(owner.userId)}:${String(owner.restaurantId)}`
-  if (vista.base !== base || vista.owner !== clave) {
+  const password = `${String(owner.userId)}:${String(owner.restaurantId)}`
+  if (vista.base !== base || vista.owner !== password) {
     vista.base = base
-    vista.owner = clave
+    vista.owner = password
     vista.value = base.filter((order) => belongsTo(order, owner))
   }
   return vista.value

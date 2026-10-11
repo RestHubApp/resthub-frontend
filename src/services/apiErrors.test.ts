@@ -1,9 +1,9 @@
 import { describe, expect, it } from '@jest/globals'
 import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios'
 
-import { debeReintentar, errorMessage, errorStatus } from './api'
+import { shouldRetry, errorMessage, errorStatus } from './api'
 
-const FALLA = 'No se pudo guardar.'
+const FAILURE = 'No se pudo guardar.'
 
 function errorDelApi(status: number, data: unknown): AxiosError {
   const config = { headers: new AxiosHeaders() }
@@ -13,18 +13,18 @@ function errorDelApi(status: number, data: unknown): AxiosError {
 
 describe('mensajes de error del API', () => {
   it('muestra el `detail` que manda el proyecto', () => {
-    expect(errorMessage(errorDelApi(409, { detail: 'El pedido cambió' }), FALLA)).toBe('El pedido cambió')
+    expect(errorMessage(errorDelApi(409, { detail: 'El pedido cambió' }), FAILURE)).toBe('El pedido cambió')
   })
 
   it('de un error de validación de Pydantic toma el primer problema', () => {
     const error = errorDelApi(422, { detail: [{ msg: 'El RUC tiene 11 dígitos' }, { msg: 'otro' }] })
-    expect(errorMessage(error, FALLA)).toBe('El RUC tiene 11 dígitos')
+    expect(errorMessage(error, FAILURE)).toBe('El RUC tiene 11 dígitos')
   })
 
   it('sin detalle, o si no es un error de Axios, usa el mensaje de la pantalla', () => {
-    expect(errorMessage(errorDelApi(500, {}), FALLA)).toBe(FALLA)
-    expect(errorMessage(errorDelApi(422, { detail: [] }), FALLA)).toBe(FALLA)
-    expect(errorMessage(new Error('x'), FALLA)).toBe(FALLA)
+    expect(errorMessage(errorDelApi(500, {}), FAILURE)).toBe(FAILURE)
+    expect(errorMessage(errorDelApi(422, { detail: [] }), FAILURE)).toBe(FAILURE)
+    expect(errorMessage(new Error('x'), FAILURE)).toBe(FAILURE)
   })
 
   it('errorStatus da el código, o nada si ni siquiera respondió', () => {
@@ -36,13 +36,13 @@ describe('mensajes de error del API', () => {
 
 describe('debeReintentar', () => {
   it('un 4xx no se repite: no cambia por insistir', () => {
-    expect(debeReintentar(0, errorDelApi(401, {}))).toBe(false)
-    expect(debeReintentar(0, errorDelApi(422, {}))).toBe(false)
+    expect(shouldRetry(0, errorDelApi(401, {}))).toBe(false)
+    expect(shouldRetry(0, errorDelApi(422, {}))).toBe(false)
   })
 
   it('un corte de red o un 5xx se repite una sola vez', () => {
-    expect(debeReintentar(0, errorDelApi(503, {}))).toBe(true)
-    expect(debeReintentar(1, errorDelApi(503, {}))).toBe(false)
-    expect(debeReintentar(0, new AxiosError('Network Error', AxiosError.ERR_NETWORK))).toBe(true)
+    expect(shouldRetry(0, errorDelApi(503, {}))).toBe(true)
+    expect(shouldRetry(1, errorDelApi(503, {}))).toBe(false)
+    expect(shouldRetry(0, new AxiosError('Network Error', AxiosError.ERR_NETWORK))).toBe(true)
   })
 })

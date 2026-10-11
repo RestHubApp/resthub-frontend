@@ -2,7 +2,7 @@ import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import { PasswordField } from '@/components/PasswordField'
 import { TextField } from '@/components/TextField'
-import { MIN_PASSWORD, soloLetras } from '@/services/fieldRules'
+import { MIN_PASSWORD, onlyLetters } from '@/services/fieldRules'
 
 interface OwnerFieldsProps {
   /** Distingue los `id` cuando hay más de un formulario en la pantalla. */
@@ -34,7 +34,7 @@ export function OwnerFields({ idPrefix, fields, errors }: OwnerFieldsProps) {
           placeholder="María Quispe Rojas"
           icon="perfil"
           autoComplete="off"
-          sanitize={soloLetras}
+          sanitize={onlyLetters}
           field={fields.full_name}
           error={errors.full_name}
         />

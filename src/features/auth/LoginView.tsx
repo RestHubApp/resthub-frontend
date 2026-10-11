@@ -12,7 +12,7 @@ import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import { correoRule, MAX_PASSWORD } from '@/services/fieldRules'
+import { emailRule, MAX_PASSWORD } from '@/services/fieldRules'
 import { paths } from '@/services/paths'
 import { isPreviewTab } from '@/services/tabStorage'
 import { useSession } from '@/store/session'
@@ -21,7 +21,7 @@ import { AuthCard } from './AuthCard'
 import { SessionExpiredNotice } from './SessionExpiredNotice'
 
 const schema = z.object({
-  email: correoRule,
+  email: emailRule,
   // Al entrar no se exige el minimo: la respuesta del servidor ya dice si
   // la contrasena no coincide, y repetir aca la regla no agrega nada. El
   // maximo si, porque el servidor rechaza una mas larga antes de mirarla.

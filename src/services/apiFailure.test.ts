@@ -14,14 +14,14 @@ describe('apiFailure', () => {
   })
 
   it('avisa a quien escucha y se olvida al reintentar', () => {
-    let avisos = 0
-    const dejar = subscribeApiFailure(() => {
-      avisos += 1
+    let notices = 0
+    const leave = subscribeApiFailure(() => {
+      notices += 1
     })
     noteApiFailure('platform', 'Servicio no disponible.')
     clearApiFailure()
-    expect(avisos).toBe(2)
+    expect(notices).toBe(2)
     expect(apiFailureMessage('platform')).toBeNull()
-    dejar()
+    leave()
   })
 })

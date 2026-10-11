@@ -1,10 +1,10 @@
 // Lo que el navegador espera antes de dar por hecho que no dejó cerrar la pestaña.
-const ESPERA_AL_CERRAR_MS = 200
+const WAIT_ON_CLOSE_MS = 200
 
 /** Una ruta de la aplicación con su base (`import.meta.env.BASE_URL`), para salir de React Router. */
 export function appUrl(path: string, base: string = import.meta.env.BASE_URL): string {
-  const ruta = path.startsWith('/') ? path : '/' + path
-  return base.replace(/\/$/u, '') + ruta
+  const route = path.startsWith('/') ? path : '/' + path
+  return base.replace(/\/$/u, '') + route
 }
 
 /**
@@ -19,5 +19,5 @@ export function closeTabOrGo(path: string): void {
   window.close()
   window.setTimeout(() => {
     window.location.replace(appUrl(path))
-  }, ESPERA_AL_CERRAR_MS)
+  }, WAIT_ON_CLOSE_MS)
 }

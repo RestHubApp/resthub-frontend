@@ -6,22 +6,22 @@ interface ApiFailure {
 }
 
 let actual: ApiFailure | null = null
-const oyentes = new Set<() => void>()
+const listeners = new Set<() => void>()
 
-function avisar(): void {
-  for (const oyente of oyentes) oyente()
+function notify(): void {
+  for (const listener of listeners) listener()
 }
 
 /** Recuerda el último corte del API para las pantallas que no repiten la consulta. */
 export function noteApiFailure(scope: ApiFailureScope, message: string): void {
   actual = { scope, message }
-  avisar()
+  notify()
 }
 
 export function clearApiFailure(): void {
   if (actual === null) return
   actual = null
-  avisar()
+  notify()
 }
 
 /** Una lectura de ese ámbito respondió: el corte que se recordaba ya pasó. */
@@ -29,10 +29,10 @@ export function clearApiFailureOf(scope: ApiFailureScope): void {
   if (actual?.scope === scope) clearApiFailure()
 }
 
-export function subscribeApiFailure(oyente: () => void): () => void {
-  oyentes.add(oyente)
+export function subscribeApiFailure(listener: () => void): () => void {
+  listeners.add(listener)
   return () => {
-    oyentes.delete(oyente)
+    listeners.delete(listener)
   }
 }
 
