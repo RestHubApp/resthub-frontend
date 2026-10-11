@@ -16,7 +16,7 @@ interface FilterSelectProps {
 }
 
 /** Una lista de un filtro, con su etiqueta visible. */
-export default function FilterSelect({ id, label, value, onChange, anyLabel, children, className = '' }: FilterSelectProps) {
+export function FilterSelect({ id, label, value, onChange, anyLabel, children, className = '' }: FilterSelectProps) {
   return (
     <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
       <Label htmlFor={id}>{label}</Label>

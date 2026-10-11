@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import Icon from './Icon'
+import { Icon } from './Icon'
 
 type Nivel = 'h2' | 'h3' | 'h4'
 
@@ -27,7 +27,7 @@ interface CollapsibleHeadingProps {
  * sigue encontrando la sección al recorrer los títulos, y además anuncia si
  * está abierta. La flecha gira, pero sin animación si la persona la desactivó.
  */
-export default function CollapsibleHeading({
+export function CollapsibleHeading({
   title,
   as,
   description,

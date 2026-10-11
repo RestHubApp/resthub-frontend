@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { useOfflineOrders } from './useOfflineOrders'
 
@@ -8,7 +8,7 @@ import { useOfflineOrders } from './useOfflineOrders'
  * Montarlo es lo que dispara el envío automático al volver la conexión: va en
  * las pantallas donde el mesero pasa el turno.
  */
-export default function OfflineOrdersBanner() {
+export function OfflineOrdersBanner() {
   const { pendientes, enviar } = useOfflineOrders()
   if (pendientes.length === 0) {
     return null

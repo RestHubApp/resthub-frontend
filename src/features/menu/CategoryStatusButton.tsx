@@ -1,7 +1,7 @@
 import { updateCategory } from '@/api/menu'
 import type { MenuSection } from '@/api/types'
-import ConfirmDialog from '@/components/ConfirmDialog'
-import Icon from '@/components/Icon'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { withCategory } from './menuCache'
 import { useMenuAction } from './useMenuAction'
@@ -11,7 +11,7 @@ interface CategoryStatusButtonProps {
 }
 
 /** Oculta una categoría entera de la carta del mesero, o la devuelve. */
-export default function CategoryStatusButton({ category }: CategoryStatusButtonProps) {
+export function CategoryStatusButton({ category }: CategoryStatusButtonProps) {
   const estado = useMenuAction({
     send: () => updateCategory(category.id, { is_active: !category.is_active }),
     updateCache: withCategory,

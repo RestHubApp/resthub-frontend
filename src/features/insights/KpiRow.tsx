@@ -1,5 +1,5 @@
 import type { SalesSummary } from '@/api/types'
-import KpiTile from './KpiTile'
+import { KpiTile } from './KpiTile'
 import { formatInteger, formatMoney, formatShortDate, toNumber } from '@/services/format'
 
 interface KpiRowProps {
@@ -18,7 +18,7 @@ function cancelledChange(summary: SalesSummary): string | null {
 }
 
 /** Ventas, pedidos pagados, ticket promedio y cancelados del período, contra el anterior. */
-export default function KpiRow({ summary }: KpiRowProps) {
+export function KpiRow({ summary }: KpiRowProps) {
   const { previous } = summary
   const comparado = `${formatShortDate(previous.date_from)} – ${formatShortDate(previous.date_to)}`
 

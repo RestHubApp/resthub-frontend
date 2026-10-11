@@ -1,15 +1,15 @@
 import { useState } from 'react'
 
 import type { MenuSection } from '@/api/types'
-import FormDialog from '@/components/FormDialog'
-import Icon from '@/components/Icon'
-import StatusBadge from '@/components/StatusBadge'
+import { FormDialog } from '@/components/FormDialog'
+import { Icon } from '@/components/Icon'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
-import CategoryForm from './CategoryForm'
-import CategoryStatusButton from './CategoryStatusButton'
-import DeleteCategoryButton from './DeleteCategoryButton'
+import { CategoryForm } from './CategoryForm'
+import { CategoryStatusButton } from './CategoryStatusButton'
+import { DeleteCategoryButton } from './DeleteCategoryButton'
 import type { Direction } from './menuOrder'
-import MoveButtons from './MoveButtons'
+import { MoveButtons } from './MoveButtons'
 
 interface CategoryHeaderProps {
   readonly category: MenuSection
@@ -35,7 +35,7 @@ function resumen(category: MenuSection): string {
 }
 
 /** El título de una categoría, su resumen y lo que se hace con ella. */
-export default function CategoryHeader({
+export function CategoryHeader({
   category,
   headingId,
   isFirst,

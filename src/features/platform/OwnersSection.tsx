@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
 import type { PlatformRestaurantDetail } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import FormDialog from '@/components/FormDialog'
-import Icon from '@/components/Icon'
-import SectionCard from '@/components/SectionCard'
-import StatusBadge from '@/components/StatusBadge'
+import { EmptyState } from '@/components/EmptyState'
+import { FormDialog } from '@/components/FormDialog'
+import { Icon } from '@/components/Icon'
+import { SectionCard } from '@/components/SectionCard'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
-import AddOwnerForm from './AddOwnerForm'
+import { AddOwnerForm } from './AddOwnerForm'
 
 interface OwnersSectionProps {
   readonly restaurant: PlatformRestaurantDetail
@@ -19,7 +19,7 @@ interface OwnersSectionProps {
  * Desde acá solo se agregan: el resto del personal, y editar o desactivar a
  * un encargado, lo hace el propio local desde «Personal».
  */
-export default function OwnersSection({ restaurant }: OwnersSectionProps) {
+export function OwnersSection({ restaurant }: OwnersSectionProps) {
   const [agregando, setAgregando] = useState(false)
 
   return (

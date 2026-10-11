@@ -1,4 +1,4 @@
-import LoadingRegion from './LoadingRegion'
+import { LoadingRegion } from './LoadingRegion'
 import { Skeleton } from './ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 
@@ -9,7 +9,7 @@ interface DataTableSkeletonProps {
 }
 
 /** La tabla con sus cabeceras y filas vacías mientras llegan los datos. */
-export default function DataTableSkeleton({ headers, rows }: DataTableSkeletonProps) {
+export function DataTableSkeleton({ headers, rows }: DataTableSkeletonProps) {
   return (
     <LoadingRegion label="Cargando…" className="rounded-xl bg-card ring-1 ring-foreground/10">
       <Table>

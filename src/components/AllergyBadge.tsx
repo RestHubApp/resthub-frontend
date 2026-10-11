@@ -1,5 +1,5 @@
 import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
-import Icon from './Icon'
+import { Icon } from './Icon'
 
 interface AllergyBadgeProps {
   /** Lo que devuelve `flagFor(pedido, ítem)` de `useOrderNoteFlags`. */
@@ -28,7 +28,7 @@ function tooltip(flag: OrderNoteFlag): string {
  * o restricción; si la nota sigue pendiente o es una preferencia, no dibuja
  * nada. Lleva ícono y la palabra "Alergia": el rojo nunca va solo.
  */
-export default function AllergyBadge({ flag, className, withNote = true }: AllergyBadgeProps) {
+export function AllergyBadge({ flag, className, withNote = true }: AllergyBadgeProps) {
   if (flag?.mentions_allergy !== true) {
     return null
   }

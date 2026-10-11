@@ -1,5 +1,5 @@
 import type { Customer } from '@/api/types'
-import StatusBadge from '@/components/StatusBadge'
+import { StatusBadge } from '@/components/StatusBadge'
 import { formatMoney } from '@/services/format'
 
 interface CustomerRowProps {
@@ -12,7 +12,7 @@ function visitas(count: number): string {
 }
 
 /** Un cliente en la lista: nombre, contacto, visitas y gasto. */
-export default function CustomerRow({ customer, onOpen }: CustomerRowProps) {
+export function CustomerRow({ customer, onOpen }: CustomerRowProps) {
   return (
     <li>
       <button

@@ -1,8 +1,9 @@
 import { Link } from 'react-router'
 
 import type { DishCost } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { formatMoney, formatPercent } from '@/services/format'
+import { paths } from '@/services/paths'
 
 interface DishMarginProps {
   readonly itemId: number
@@ -12,7 +13,7 @@ interface DishMarginProps {
 }
 
 // El editor de recetas vuelve a donde se lo abrió.
-const DESDE_MENU = { from: '/menu' } as const
+const DESDE_MENU = { from: paths.menu } as const
 
 const ENLACE =
   'inline-flex min-h-11 items-center gap-1.5 rounded-md px-1 font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
@@ -22,11 +23,11 @@ const ENLACE =
  *
  * Un margen negativo se marca: el plato se vende por debajo de lo que cuesta.
  */
-export default function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
+export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
   if (cost === undefined) {
     return null
   }
-  const destino = `/inventario/recetas/${String(itemId)}`
+  const destino = paths.inventory.recipe(itemId)
 
   if (!cost.has_recipe || cost.margin === null || cost.cost === null) {
     return (

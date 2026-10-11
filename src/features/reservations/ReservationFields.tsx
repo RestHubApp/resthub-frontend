@@ -2,9 +2,9 @@ import type { UseFormReturn } from 'react-hook-form'
 
 import { tableName } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import SelectField from '@/components/SelectField'
-import TextareaField from '@/components/TextareaField'
-import TextField from '@/components/TextField'
+import { SelectField } from '@/components/SelectField'
+import { TextareaField } from '@/components/TextareaField'
+import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { LIMITES, type ReservationValues } from './reservationSchema'
 
@@ -14,7 +14,7 @@ interface ReservationFieldsProps {
 }
 
 /** Los datos de una reserva: quién, cuándo, cuántos, en qué mesa. */
-export default function ReservationFields({ form, tables }: ReservationFieldsProps) {
+export function ReservationFields({ form, tables }: ReservationFieldsProps) {
   const { register, formState } = form
   const errors = formState.errors
 

@@ -1,8 +1,9 @@
 import { Link } from 'react-router'
 
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 
 interface PrintLinksProps {
   readonly order: OrderResponse
@@ -14,15 +15,14 @@ interface PrintLinksProps {
  * La comanda tiene sentido desde que el pedido va a cocina; la cuenta, en
  * cualquier momento (antes de pagar es la precuenta, después el ticket).
  */
-export default function PrintLinks({ order }: PrintLinksProps) {
-  const base = `/imprimir/${String(order.id)}`
+export function PrintLinks({ order }: PrintLinksProps) {
   const enCocina = order.status !== 'open' && order.status !== 'cancelled'
 
   return (
     <div className="flex flex-wrap gap-2">
       {enCocina ? (
         <Button asChild variant="ghost" size="sm">
-          <Link to={`${base}/comanda`}>
+          <Link to={paths.orders.print(order.id, 'comanda')}>
             <Icon name="imprimir" size={16} />
             <span>Imprimir comanda</span>
           </Link>
@@ -30,7 +30,7 @@ export default function PrintLinks({ order }: PrintLinksProps) {
       ) : null}
       {order.status === 'cancelled' ? null : (
         <Button asChild variant="ghost" size="sm">
-          <Link to={`${base}/cuenta`}>
+          <Link to={paths.orders.print(order.id, 'cuenta')}>
             <Icon name="imprimir" size={16} />
             <span>{order.status === 'paid' ? 'Imprimir ticket' : 'Imprimir precuenta'}</span>
           </Link>

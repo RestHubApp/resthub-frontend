@@ -1,10 +1,10 @@
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import ListSkeleton from '@/components/ListSkeleton'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { ListSkeleton } from '@/components/ListSkeleton'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
-import IngredientStatus from './IngredientStatus'
+import { IngredientStatus } from './IngredientStatus'
 import type { StockAction } from './StockActionDialog'
 import { useLowStock } from './useLowStock'
 import { formatQuantity } from '@/services/format'
@@ -15,7 +15,7 @@ interface AlertsPanelProps {
 }
 
 /** Los insumos por reponer, con lo que falta para llegar al mínimo y la compra a un toque. */
-export default function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
+export function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
   const alertas = useLowStock()
 
   if (alertas.isError) {

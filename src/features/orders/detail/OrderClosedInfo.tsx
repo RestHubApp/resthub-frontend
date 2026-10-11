@@ -1,8 +1,8 @@
 import type { OrderResponse } from '@/api/types'
 import { formatDateTime, formatMoney, formatPercent, toCents } from '@/services/format'
 import { useTimeZone } from '@/store/session'
-import PaymentsDone from '@/features/orders/charge/PaymentsDone'
-import InvoicePanel from '@/features/orders/invoice/InvoicePanel'
+import { PaymentsDone } from '@/features/orders/charge/PaymentsDone'
+import { InvoicePanel } from '@/features/orders/invoice/InvoicePanel'
 
 interface OrderClosedInfoProps {
   readonly order: OrderResponse
@@ -39,7 +39,7 @@ function paidRows(order: OrderResponse, timeZone: string): Row[] {
 }
 
 /** Cómo terminó un pedido: cobrado con qué y cuánto, o cancelado y por qué. */
-export default function OrderClosedInfo({ order }: OrderClosedInfoProps) {
+export function OrderClosedInfo({ order }: OrderClosedInfoProps) {
   const timeZone = useTimeZone()
   if (order.status === 'cancelled') {
     return (

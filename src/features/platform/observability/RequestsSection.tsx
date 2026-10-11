@@ -1,12 +1,12 @@
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { obsRequestsQuery } from '@/api/observability'
-import SectionCard from '@/components/SectionCard'
-import PlatformQueryError from '@/features/platform/PlatformQueryError'
-import LoadMoreButton from './LoadMoreButton'
+import { SectionCard } from '@/components/SectionCard'
+import { PlatformQueryError } from '@/features/platform/PlatformQueryError'
+import { LoadMoreButton } from './LoadMoreButton'
 import { type ObsFilters, requestsParams } from './obsFilters'
-import RequestFilters from './RequestFilters'
-import RequestTable from './RequestTable'
+import { RequestFilters } from './RequestFilters'
+import { RequestTable } from './RequestTable'
 import type { LiveOptions } from './useObsRefresh'
 
 interface RequestsSectionProps {
@@ -16,7 +16,7 @@ interface RequestsSectionProps {
 }
 
 /** Las peticiones una por una, para ir de un error a su petición y de ahí a sus logs. */
-export default function RequestsSection({ filters, onChange, live }: RequestsSectionProps) {
+export function RequestsSection({ filters, onChange, live }: RequestsSectionProps) {
   const peticiones = useInfiniteQuery({ ...obsRequestsQuery(requestsParams(filters)), ...live, placeholderData: keepPreviousData })
   const filas = peticiones.data?.pages.flatMap((page) => page.items) ?? []
 

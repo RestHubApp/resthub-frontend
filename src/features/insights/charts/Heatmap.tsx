@@ -1,7 +1,7 @@
 import type { HourlyCell } from '@/api/types'
-import ChartTooltip, { type TooltipRow } from '@/components/charts/ChartTooltip'
+import { ChartTooltip, type TooltipRow } from '@/components/charts/ChartTooltip'
 import { heatColor, heatmapModel, heatStep } from './heatmapModel'
-import HeatmapLegend from './HeatmapLegend'
+import { HeatmapLegend } from './HeatmapLegend'
 import { useChartCursor } from '@/components/charts/useChartCursor'
 import { useElementWidth } from '@/components/charts/useElementWidth'
 
@@ -37,7 +37,7 @@ function ringFor(cell: HourlyCell, peak: HourlyCell | null, active: HourlyCell |
  * es más. El cero va en gris para no confundirse con "poco". El pico lleva un
  * anillo, además del color, y su lectura escrita arriba.
  */
-export default function Heatmap({ cells, peak, label, describe }: HeatmapProps) {
+export function Heatmap({ cells, peak, label, describe }: HeatmapProps) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const model = heatmapModel(cells)
   const columnas = model.hours.length

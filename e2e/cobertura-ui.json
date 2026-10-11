@@ -16,217 +16,217 @@
       "id": "ruta:/",
       "tipo": "ruta",
       "descripcion": "Pantalla /",
-      "origen": "src/router/index.tsx (index: HomeRedirect)"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/*",
       "tipo": "ruta",
       "descripcion": "Una ruta que no existe redirige al inicio",
-      "origen": "src/router/index.tsx"
+      "origen": "src/router/routes.tsx"
     },
     {
       "id": "ruta:/acceso",
       "tipo": "ruta",
       "descripcion": "Pantalla /acceso",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/caja",
       "tipo": "ruta",
       "descripcion": "Pantalla /caja",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/clientes",
       "tipo": "ruta",
       "descripcion": "Pantalla /clientes",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/cocina",
       "tipo": "ruta",
       "descripcion": "Pantalla /cocina",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/comprobantes",
       "tipo": "ruta",
       "descripcion": "Pantalla /comprobantes",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/comprobantes/:invoiceId/imprimir",
       "tipo": "ruta",
       "descripcion": "Pantalla /comprobantes/:invoiceId/imprimir",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/imprimir/:orderId/:kind",
       "tipo": "ruta",
       "descripcion": "Pantalla /imprimir/:orderId/:kind",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/inventario",
       "tipo": "ruta",
       "descripcion": "Pantalla /inventario",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/inventario/recetas/:menuItemId",
       "tipo": "ruta",
       "descripcion": "Pantalla /inventario/recetas/:menuItemId",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/menu",
       "tipo": "ruta",
       "descripcion": "Pantalla /menu",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/mesas",
       "tipo": "ruta",
       "descripcion": "Pantalla /mesas",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/panel",
       "tipo": "ruta",
       "descripcion": "Pantalla /panel",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/panel/ia",
       "tipo": "ruta",
       "descripcion": "Pantalla /panel/ia",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/panel/reposicion",
       "tipo": "ruta",
       "descripcion": "Pantalla /panel/reposicion",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/pedidos",
       "tipo": "ruta",
       "descripcion": "Pantalla /pedidos",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/pedidos/:orderId",
       "tipo": "ruta",
       "descripcion": "Pantalla /pedidos/:orderId",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/pedidos/:orderId/agregar",
       "tipo": "ruta",
       "descripcion": "Pantalla /pedidos/:orderId/agregar",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/pedidos/nuevo",
       "tipo": "ruta",
       "descripcion": "Pantalla /pedidos/nuevo",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/perfil",
       "tipo": "ruta",
       "descripcion": "Pantalla /perfil",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/personal",
       "tipo": "ruta",
       "descripcion": "Pantalla /personal",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/plataforma",
       "tipo": "ruta",
       "descripcion": "Pantalla /plataforma",
-      "origen": "src/router/index.tsx (index: RestaurantsView)"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/plataforma/*",
       "tipo": "ruta",
       "descripcion": "Una ruta que no existe redirige al inicio",
-      "origen": "src/router/index.tsx"
+      "origen": "src/router/routes.tsx"
     },
     {
       "id": "ruta:/plataforma/acceso",
       "tipo": "ruta",
       "descripcion": "Pantalla /plataforma/acceso",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/plataforma/bitacora",
       "tipo": "ruta",
       "descripcion": "Pantalla /plataforma/bitacora",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/plataforma/observabilidad",
       "tipo": "ruta",
       "descripcion": "Pantalla /plataforma/observabilidad",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/plataforma/restaurantes/:restaurantId",
       "tipo": "ruta",
       "descripcion": "Pantalla /plataforma/restaurantes/:restaurantId",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/plataforma/restaurantes/nuevo",
       "tipo": "ruta",
       "descripcion": "Pantalla /plataforma/restaurantes/nuevo",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/plataforma/vista-previa",
       "tipo": "ruta",
       "descripcion": "Pantalla /plataforma/vista-previa",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/privacidad",
       "tipo": "ruta",
       "descripcion": "Pantalla /privacidad",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/reservas",
       "tipo": "ruta",
       "descripcion": "Pantalla /reservas",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/roles",
       "tipo": "ruta",
       "descripcion": "Pantalla /roles",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/tablero",
       "tipo": "ruta",
       "descripcion": "Pantalla /tablero",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/tablero/historial",
       "tipo": "ruta",
       "descripcion": "Pantalla /tablero/historial",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "ruta:/vista-previa",
       "tipo": "ruta",
       "descripcion": "Pantalla /vista-previa",
-      "origen": "src/router/index.tsx"
+      "origen": "src/services/paths.ts"
     },
     {
       "id": "confirmacion:cash/CloseCashButton",

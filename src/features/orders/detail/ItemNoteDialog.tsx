@@ -2,10 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
 import { textoOpcional } from '@/components/formRules'
-import TextField from '@/components/TextField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 
@@ -24,7 +24,7 @@ interface ItemNoteDialogProps {
 }
 
 /** Cambiar la nota de un plato de un pedido que todavia no se envio. */
-export default function ItemNoteDialog({
+export function ItemNoteDialog({
   open,
   onOpenChange,
   dish,

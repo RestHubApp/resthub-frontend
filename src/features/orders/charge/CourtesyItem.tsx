@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { grantCourtesy, revokeCourtesy } from '@/api/orders'
 import type { OrderItemResponse, OrderResponse } from '@/api/types'
 import { MIN_TEXTO } from '@/components/formRules'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatMoney } from '@/services/format'
@@ -21,7 +21,7 @@ interface CourtesyItemProps {
  * El motivo se escribe ahí mismo: es una línea, y abrir otra ventana encima
  * del cobro perdería de vista la cuenta.
  */
-export default function CourtesyItem({ order, item }: CourtesyItemProps) {
+export function CourtesyItem({ order, item }: CourtesyItemProps) {
   const [motivo, setMotivo] = useState<string | null>(null)
   const cambiar = useOrderAction({
     mutationFn: (reason: string | null) =>

@@ -4,14 +4,15 @@ import { Link } from 'react-router'
 
 import { movementsQuery } from '@/api/inventory'
 import type { Movement, MovementKind, MovementListParams } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import FormMessage from '@/components/FormMessage'
-import StatusBadge from '@/components/StatusBadge'
-import TablePagination from '@/components/TablePagination'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { FormMessage } from '@/components/FormMessage'
+import { StatusBadge } from '@/components/StatusBadge'
+import { TablePagination } from '@/components/TablePagination'
 import { errorMessage } from '@/services/api'
 import { formatDateTime, formatSignedQuantity } from '@/services/format'
+import { paths } from '@/services/paths'
 import { useTimeZone } from '@/store/session'
-import MovementFilters from './MovementFilters'
+import { MovementFilters } from './MovementFilters'
 import { KIND_TONES } from './movementKinds'
 import { formatUnitCost } from './units'
 import { useIngredients } from './useIngredients'
@@ -47,7 +48,7 @@ function columnas(timeZone: string): DataColumn<Movement>[] {
         mov.reason || '—'
       ) : (
         // El enlace usa el id; el texto, el número del día que ve el personal.
-        <Link to={`/pedidos/${String(mov.order_id)}`} className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link to={paths.orders.detail(mov.order_id)} className="font-medium text-primary underline-offset-4 hover:underline">
           {mov.order_number === null ? 'Ver pedido' : `Pedido #${String(mov.order_number)}`}
         </Link>
       ),
@@ -56,7 +57,7 @@ function columnas(timeZone: string): DataColumn<Movement>[] {
 }
 
 /** El libro de movimientos: cada entrada y salida de stock, la más reciente primero. */
-export default function MovementsPanel() {
+export function MovementsPanel() {
   const insumos = useIngredients()
   const timeZone = useTimeZone()
   const columns = useMemo(() => columnas(timeZone), [timeZone])

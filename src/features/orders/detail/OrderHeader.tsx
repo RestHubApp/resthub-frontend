@@ -1,9 +1,9 @@
 import type { OrderResponse } from '@/api/types'
-import OrderStatusBadge from '@/features/orders/OrderStatusBadge'
+import { OrderStatusBadge } from '@/features/orders/OrderStatusBadge'
 import { formatMoney, formatTime } from '@/services/format'
 import { useTimeZone } from '@/store/session'
-import AllergyAlert from '@/features/orders/AllergyAlert'
-import ItemNote from '@/features/orders/ItemNote'
+import { AllergyAlert } from '@/features/orders/AllergyAlert'
+import { ItemNote } from '@/features/orders/ItemNote'
 import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
 import { dishCount, orderPlace } from '@/features/orders/orderLabels'
 
@@ -13,7 +13,7 @@ interface OrderHeaderProps {
 }
 
 /** Numero, lugar, estado, mesero y total: lo que se lee primero de un pedido. */
-export default function OrderHeader({ order, flagFor }: OrderHeaderProps) {
+export function OrderHeader({ order, flagFor }: OrderHeaderProps) {
   const timeZone = useTimeZone()
   return (
     <header className="flex flex-col gap-2">

@@ -18,7 +18,7 @@ const PORCENTAJE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
  * Es una regla del local, no de un turno: vale hasta que el encargado la
  * cambie. Por encima del tope, y las cortesías, solo el encargado.
  */
-export default function DiscountLimitForm() {
+export function DiscountLimitForm() {
   const restaurante = useQuery(restaurantQuery)
   const [valor, setValor] = useState<string | null>(null)
   const queryClient = useQueryClient()

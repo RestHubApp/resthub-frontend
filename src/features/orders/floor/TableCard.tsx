@@ -1,11 +1,12 @@
 import { Link } from 'react-router'
 
 import type { TableState } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { tableName } from '@/api/tables'
-import OrderStatusBadge from '@/features/orders/OrderStatusBadge'
+import { OrderStatusBadge } from '@/features/orders/OrderStatusBadge'
 import { formatMoney } from '@/services/format'
 import { dishCount } from '@/features/orders/orderLabels'
+import { paths } from '@/services/paths'
 
 interface TableCardProps {
   readonly table: TableState
@@ -21,14 +22,14 @@ const BASE =
  * el pedido listo se marca con un borde verde y lo dice: es la que el mesero
  * tiene que atender primero.
  */
-export default function TableCard({ table }: TableCardProps) {
+export function TableCard({ table }: TableCardProps) {
   const order = table.active_order
   const nombre = tableName(table.label)
 
   if (order === null) {
     return (
       <Link
-        to={`/pedidos/nuevo?mesa=${String(table.id)}`}
+        to={paths.orders.newForTable(table.id)}
         className={`${BASE} border border-dashed border-input bg-card hover:border-primary hover:bg-secondary/40`}
       >
         <span className="font-heading text-xl font-bold">{nombre}</span>
@@ -42,7 +43,7 @@ export default function TableCard({ table }: TableCardProps) {
 
   return (
     <Link
-      to={`/pedidos/${String(order.id)}`}
+      to={paths.orders.detail(order.id)}
       className={`${BASE} bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)] ${order.status === 'ready' ? 'ring-2 ring-success' : 'ring-1 ring-primary/25'}`}
     >
       <span className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">

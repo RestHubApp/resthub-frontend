@@ -1,9 +1,11 @@
 import { Link } from 'react-router'
 
 import { advanceOrder, type OrderStep } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
 import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
 import { isActive } from '@/features/orders/orderLabels'
@@ -24,10 +26,10 @@ const WIDE = 'h-12 w-full px-5 text-base sm:w-auto'
  * El paso depende del estado y del permiso: el mesero ve "Marcar servido"
  * cuando esta listo, el encargado ademas "Marcar listo" y "Cobrar".
  */
-export default function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
+export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
   const paso = nextStepFor(order.status)
   const puede = useCanTakeStep(order, paso)
-  const puedeCancelar = useCan('orders.manage')
+  const puedeCancelar = useCan(PERMISSION.ordersManage)
   const avanzar = useOrderAction({
     mutationFn: (step: OrderStep) => advanceOrder(order.id, step),
     success: stepDoneMessage,
@@ -62,7 +64,7 @@ export default function OrderActions({ order, onCharge, onCancel }: OrderActions
         <p className="m-0 rounded-lg bg-muted px-4 py-3 text-sm font-medium">{paso?.waiting}</p>
       )}
       <Button asChild variant="outline" size="lg" className={WIDE}>
-        <Link to={`/pedidos/${String(order.id)}/agregar`}>
+        <Link to={paths.orders.addItems(order.id)}>
           <Icon name="agregar" size={18} />
           <span>Agregar platos</span>
         </Link>

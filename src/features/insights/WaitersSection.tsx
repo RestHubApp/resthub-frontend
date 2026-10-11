@@ -1,8 +1,8 @@
 import { fetchWaiterPerformance, insightsReportQuery } from '@/api/insights'
 import type { InsightsRangeParams, WaiterPerformance } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import SectionCard from '@/components/SectionCard'
-import ReportState from './ReportState'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { SectionCard } from '@/components/SectionCard'
+import { ReportState } from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
 import { formatInteger, formatMoney } from '@/services/format'
 
@@ -21,7 +21,7 @@ const COLUMNS: DataColumn<WaiterPerformance>[] = [
 ]
 
 /** Cuánto vendió cada mesero en el período, de mayor a menor. */
-export default function WaitersSection({ range }: WaitersSectionProps) {
+export function WaitersSection({ range }: WaitersSectionProps) {
   const report = useInsightsReport(insightsReportQuery('waiters', range, fetchWaiterPerformance))
 
   return (

@@ -16,7 +16,7 @@ const OPCION =
  * anuncia la pregunta y la opción, y las flechas del teclado cambian de una a
  * otra. La etiqueta entera se puede tocar.
  */
-export default function ChoiceField({ legend, field, options }: ChoiceFieldProps) {
+export function ChoiceField({ legend, field, options }: ChoiceFieldProps) {
   return (
     <fieldset className="m-0 flex flex-col border-0 p-0">
       <legend className="mb-2 text-sm font-medium">{legend}</legend>

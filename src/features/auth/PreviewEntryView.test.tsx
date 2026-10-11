@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 
 import { montarRutas, servidor } from '#jest/harness'
 import type { PreviewEntryResult } from './previewEntry'
-import PreviewEntryView from './PreviewEntryView'
+import { PreviewEntryView } from './PreviewEntryView'
 
 function abrirConResultado(resultado: PreviewEntryResult) {
   servidor()

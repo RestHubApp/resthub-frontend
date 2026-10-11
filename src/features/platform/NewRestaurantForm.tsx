@@ -5,14 +5,14 @@ import { type FieldErrors, useForm } from 'react-hook-form'
 
 import { createPlatformRestaurant, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } from '@/api/platform'
 import type { PlatformRestaurantDetail } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import SectionCard from '@/components/SectionCard'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { SectionCard } from '@/components/SectionCard'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import OwnerFields from './OwnerFields'
+import { OwnerFields } from './OwnerFields'
 import {
   createRestaurantPayload,
   createRestaurantSchema,
@@ -21,7 +21,7 @@ import {
 } from './platformSchema'
 import { saveRestaurant } from './restaurantCache'
 import { followSlug, MAX_SLUG, sanitizeSlugInput } from './slug'
-import TimeZoneField from './TimeZoneField'
+import { TimeZoneField } from './TimeZoneField'
 
 function ownerErrors(errors: FieldErrors<CreateRestaurantValues>['owner']) {
   return {
@@ -43,7 +43,7 @@ interface NewRestaurantFormProps {
  * respeta. El servidor crea el local, sus roles base y la cuenta en una sola
  * operación: si el identificador o el correo ya existen, no queda nada a medias.
  */
-export default function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProps) {
+export function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProps) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState, getValues, setValue } = useForm<CreateRestaurantValues>({
     resolver: zodResolver(createRestaurantSchema),

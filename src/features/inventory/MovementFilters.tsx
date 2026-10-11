@@ -14,7 +14,7 @@ interface MovementFiltersProps {
 }
 
 /** Filtrar el libro por insumo y por tipo de movimiento. */
-export default function MovementFilters({
+export function MovementFilters({
   ingredients,
   ingredientId,
   onIngredient,

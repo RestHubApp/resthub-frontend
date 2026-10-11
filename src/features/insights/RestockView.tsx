@@ -1,16 +1,16 @@
 import { useState } from 'react'
 
 import type { RestockAction, RestockItem } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
-import PanelHeader from './PanelHeader'
-import ReportState from './ReportState'
-import RestockItemCard from './RestockItemCard'
-import RestockNotice from './RestockNotice'
-import RestockSummary from './RestockSummary'
+import { PanelHeader } from './PanelHeader'
+import { ReportState } from './ReportState'
+import { RestockItemCard } from './RestockItemCard'
+import { RestockNotice } from './RestockNotice'
+import { RestockSummary } from './RestockSummary'
 import { useRestock } from './useRestock'
 
 // Lo más urgente arriba; a igual urgencia, lo que se acaba antes.
@@ -27,7 +27,7 @@ function visible(item: RestockItem, filtro: RestockAction | null, verEspera: boo
 }
 
 /** Reposición inteligente: qué comprar y cuándo, según el consumo y las mermas. */
-export default function RestockView() {
+export function RestockView() {
   const { recomendacion, actualizar } = useRestock()
   const [filtro, setFiltro] = useState<RestockAction | null>(null)
   const [verEspera, setVerEspera] = useState(false)

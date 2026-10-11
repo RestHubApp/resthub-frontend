@@ -1,6 +1,6 @@
-import ShellIcon from './ShellIcon'
+import { ShellIcon } from './ShellIcon'
 import type { NavEntry } from './navigation'
-import PreloadLink from './PreloadLink'
+import { PreloadLink } from './PreloadLink'
 
 interface NavListProps {
   readonly entries: readonly NavEntry[]
@@ -24,7 +24,7 @@ function linkClass({ isActive }: { isActive: boolean }): string {
  * NavLink marca la pantalla actual con `aria-current`, asi que el lector de
  * pantalla la anuncia sin depender del color.
  */
-export default function NavList({ entries, onNavigate }: NavListProps) {
+export function NavList({ entries, onNavigate }: NavListProps) {
   return (
     <ul className="m-0 flex list-none flex-col gap-1 p-0">
       {entries.map((entry) => (

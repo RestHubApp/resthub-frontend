@@ -1,7 +1,7 @@
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 
 import { platformObservabilityQueryKey } from '@/api/observability'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { refreshStatus } from './autoRefresh'
 import type { ObsRefresh } from './useObsRefresh'
@@ -11,7 +11,7 @@ interface RefreshControlProps {
 }
 
 /** Pausar o reanudar la actualización automática, y releer ya. */
-export default function RefreshControl({ refresh }: RefreshControlProps) {
+export function RefreshControl({ refresh }: RefreshControlProps) {
   const queryClient = useQueryClient()
   const leyendo = useIsFetching({ queryKey: platformObservabilityQueryKey }) > 0
   const { paused, setPaused, visibility } = refresh

@@ -23,7 +23,7 @@ interface AvailabilityVars {
  * visible no cambia y forma parte del nombre accesible; el estado lo dicen el
  * interruptor y la etiqueta "Agotado hoy" del plato.
  */
-export default function AvailabilityToggle({ item }: AvailabilityToggleProps) {
+export function AvailabilityToggle({ item }: AvailabilityToggleProps) {
   const cambio = useMenuChange<AvailabilityVars>({
     send: ({ id, isAvailable }) => setAvailability(id, isAvailable),
     preview: (menu, { id, isAvailable }) => patchItem(menu, id, { is_available: isAvailable }),

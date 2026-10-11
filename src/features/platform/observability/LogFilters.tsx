@@ -1,7 +1,7 @@
 import type { ObsLogLevel } from '@/api/types'
-import FilterActions from './FilterActions'
-import FilterSelect from './FilterSelect'
-import FilterTextField from './FilterTextField'
+import { FilterActions } from './FilterActions'
+import { FilterSelect } from './FilterSelect'
+import { FilterTextField } from './FilterTextField'
 import { MAX_LOG_SEARCH, MAX_REQUEST_ID, type ObsFilters } from './obsFilters'
 import { useDraft } from './useDraft'
 
@@ -17,7 +17,7 @@ const NIVELES = [
 ]
 
 /** Nivel, búsqueda en el evento y sus campos, y `request_id`. */
-export default function LogFilters({ filters, onChange }: LogFiltersProps) {
+export function LogFilters({ filters, onChange }: LogFiltersProps) {
   const [busqueda, setBusqueda] = useDraft(filters.logSearch)
   const [peticion, setPeticion] = useDraft(filters.logRequestId)
   const activos = filters.logLevel !== null || filters.logSearch !== '' || filters.logRequestId !== ''

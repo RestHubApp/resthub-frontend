@@ -1,8 +1,9 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 
 import type { PermissionCode } from '@/api/types'
+import { paths } from '@/services/paths'
 import { hasPermission, useSession } from '@/store/session'
-import TermsGate from './TermsGate'
+import { TermsGate } from './TermsGate'
 
 interface RequireSessionProps {
   /** Permiso que exige la ruta. Sin el, basta con estar autenticado. */
@@ -17,12 +18,12 @@ interface RequireSessionProps {
  * autorizacion de verdad vive en el servidor. Sin el permiso, la guarda lleva
  * al inicio, que elige la primera pantalla que la cuenta si puede abrir.
  */
-export default function RequireSession({ permission }: RequireSessionProps) {
+export function RequireSession({ permission }: RequireSessionProps) {
   const account = useSession((state) => state.account)
   const location = useLocation()
 
   if (account === null) {
-    return <Navigate to="/acceso" replace state={{ from: location.pathname }} />
+    return <Navigate to={paths.login} replace state={{ from: location.pathname }} />
   }
   // Ley N.º 29733: sin aceptar los términos vigentes no se trabaja. Una vista
   // previa no los acepta: quien mira no es el dueño de la cuenta.
@@ -30,7 +31,7 @@ export default function RequireSession({ permission }: RequireSessionProps) {
     return <TermsGate account={account} />
   }
   if (permission !== undefined && !hasPermission(account, permission)) {
-    return <Navigate to="/" replace />
+    return <Navigate to={paths.home} replace />
   }
   return <Outlet />
 }

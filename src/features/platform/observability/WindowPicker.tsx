@@ -8,7 +8,7 @@ interface WindowPickerProps {
 }
 
 /** La ventana que mira el panel: la última hora, 6 h, 24 h o 7 días hasta ahora. */
-export default function WindowPicker({ value, onChange }: WindowPickerProps) {
+export function WindowPicker({ value, onChange }: WindowPickerProps) {
   return (
     <div role="group" aria-labelledby="obs-ventana" className="flex flex-col gap-2">
       <span id="obs-ventana" className="text-sm font-medium">

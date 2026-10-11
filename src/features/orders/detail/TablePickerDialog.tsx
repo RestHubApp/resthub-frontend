@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 
 import { tableName, tablesQuery } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import FormDialog from '@/components/FormDialog'
-import RetryQueryError from '@/components/RetryQueryError'
+import { EmptyState } from '@/components/EmptyState'
+import { FormDialog } from '@/components/FormDialog'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/services/format'
 import { errorMessage } from '@/services/api'
@@ -27,7 +27,7 @@ interface TablePickerDialogProps {
  * Sirve para mudar un pedido (mesas libres) y para unir otra mesa a esta
  * (mesas con pedido): lo que cambia es qué mesas se ofrecen.
  */
-export default function TablePickerDialog({
+export function TablePickerDialog({
   open,
   title,
   description,

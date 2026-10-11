@@ -3,20 +3,20 @@ import { useWatch } from 'react-hook-form'
 
 import { currentCashQuery } from '@/api/cash'
 import type { OrderResponse } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import Icon from '@/components/Icon'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import AdjustmentsPanel from './AdjustmentsPanel'
-import BillSummary from './BillSummary'
-import CashAmountField from './CashAmountField'
-import CashClosedNotice from './CashClosedNotice'
+import { AdjustmentsPanel } from './AdjustmentsPanel'
+import { BillSummary } from './BillSummary'
+import { CashAmountField } from './CashAmountField'
+import { CashClosedNotice } from './CashClosedNotice'
 import { amountCents, tipCents } from './chargeSchema'
-import PaymentMethodPicker from './PaymentMethodPicker'
-import PaymentsDone from './PaymentsDone'
-import SplitDetails from './SplitDetails'
-import SplitModePicker from './SplitModePicker'
-import TipField from './TipField'
+import { PaymentMethodPicker } from './PaymentMethodPicker'
+import { PaymentsDone } from './PaymentsDone'
+import { SplitDetails } from './SplitDetails'
+import { SplitModePicker } from './SplitModePicker'
+import { TipField } from './TipField'
 import { usePaymentForm } from './usePaymentForm'
 
 interface ChargeFormProps {
@@ -39,7 +39,7 @@ function changeFor(dueCents: number, amount: string): number | null {
  * Una cuenta dividida se cobra de a una persona: después de cada pago el
  * formulario queda listo para la siguiente, con el saldo actualizado.
  */
-export default function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
+export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
   const caja = useQuery(currentCashQuery)
   const pago = usePaymentForm(order, onPaid)
   const { register, formState, setValue, control } = pago.form

@@ -1,3 +1,4 @@
+import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
 import { useCan, useSession } from '@/store/session'
 import type { NextStep } from './nextStep'
@@ -10,8 +11,8 @@ import type { NextStep } from './nextStep'
  * lo exige igual; acá solo se evita mostrar un botón que va a responder 403.
  */
 export function useCanTakeStep(order: OrderResponse, paso: NextStep | undefined): boolean {
-  const conPermiso = useCan(paso?.permission ?? 'orders.take')
-  const veTodos = useCan('orders.read_all')
+  const conPermiso = useCan(paso?.permission ?? PERMISSION.ordersTake)
+  const veTodos = useCan(PERMISSION.ordersReadAll)
   const propio = useSession((state) => state.account?.user.id === order.waiter_id)
   if (paso === undefined || !conPermiso) {
     return false

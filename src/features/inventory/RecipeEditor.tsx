@@ -2,10 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 
 import type { Ingredient, Recipe } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
+import { FormMessage } from '@/components/FormMessage'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import AddRecipeLine from './AddRecipeLine'
+import { AddRecipeLine } from './AddRecipeLine'
 import { recipeSchema, type RecipeValues } from './inventorySchema'
 import {
   availableIngredients,
@@ -14,9 +14,9 @@ import {
   recipeCost,
   recipeValuesOf,
 } from './recipeMath'
-import RecipeFooter from './RecipeFooter'
-import RecipeLineRow from './RecipeLineRow'
-import RecipeTotals from './RecipeTotals'
+import { RecipeFooter } from './RecipeFooter'
+import { RecipeLineRow } from './RecipeLineRow'
+import { RecipeTotals } from './RecipeTotals'
 import { useSaveRecipe } from './useSaveRecipe'
 
 interface RecipeEditorProps {
@@ -31,7 +31,7 @@ interface RecipeEditorProps {
  * Se guarda la receta entera de una vez (PUT): lo que se ve es lo que queda.
  * Sin ningún insumo, guardar borra la receta.
  */
-export default function RecipeEditor({ recipe, ingredients, canManage }: RecipeEditorProps) {
+export function RecipeEditor({ recipe, ingredients, canManage }: RecipeEditorProps) {
   const catalogo = recipeCatalog(ingredients, recipe)
   const { register, handleSubmit, formState, control, reset } = useForm<RecipeValues>({
     resolver: zodResolver(recipeSchema),

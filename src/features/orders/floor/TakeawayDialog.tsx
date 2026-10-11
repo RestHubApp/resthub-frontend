@@ -1,16 +1,17 @@
-import { lazy, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
+import { lazyNamed } from '@/components/lazyNamed'
 
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 
 // El formulario trae react-hook-form y zod: se baja al tocar el botón.
-const TakeawayForm = lazy(() => import('./TakeawayForm'))
+const TakeawayForm = lazyNamed(() => import('./TakeawayForm'), 'TakeawayForm')
 
 /**
  * "Para llevar": el botón de la pantalla de pedidos. El formulario con los
  * datos del cliente es `TakeawayForm` y se carga al abrirlo.
  */
-export default function TakeawayDialog() {
+export function TakeawayDialog() {
   const [open, setOpen] = useState(false)
   return (
     <>

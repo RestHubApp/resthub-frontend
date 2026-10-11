@@ -4,13 +4,13 @@ import { useForm } from 'react-hook-form'
 
 import { updateStaff } from '@/api/staff'
 import type { Role, StaffResponse } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import StaffFields from './StaffFields'
+import { StaffFields } from './StaffFields'
 import { saveStaffMember } from './staffList'
 import {
   identityOf,
@@ -28,7 +28,7 @@ interface StaffEditFormProps {
   readonly onDone: () => void
 }
 
-export default function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormProps) {
+export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormProps) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState } = useForm<StaffIdentityValues>({
     resolver: zodResolver(staffIdentitySchema),

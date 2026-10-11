@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form'
 
 import { openCash } from '@/api/cash'
 import type { OpenCashRequest } from '@/api/types'
-import Icon from '@/components/Icon'
-import TextField from '@/components/TextField'
+import { Icon } from '@/components/Icon'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { formatMoney } from '@/services/format'
@@ -16,7 +16,7 @@ import { useCashMutation } from './useCashMutation'
  *
  * Sin caja abierta nadie puede cobrar, así que es lo primero del día.
  */
-export default function OpenCashForm() {
+export function OpenCashForm() {
   const { register, handleSubmit, formState } = useForm<OpenCashValues>({
     resolver: zodResolver(openCashSchema),
     defaultValues: { opening_amount: '', notes: '' },

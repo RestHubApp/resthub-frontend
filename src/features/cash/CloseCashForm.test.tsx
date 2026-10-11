@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { resumenDeCaja, turnoDeCaja } from '#jest/fixtures/cash'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
 import type { CashSession } from '@/api/types'
-import CloseCashForm from './CloseCashForm'
+import { CloseCashForm } from './CloseCashForm'
 
 const CONTADO = 'Efectivo contado'
 const CERRAR = { name: 'Cerrar caja' }

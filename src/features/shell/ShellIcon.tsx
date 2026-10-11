@@ -75,7 +75,7 @@ const DEFAULT_SIZE = 20
 const STROKE_WIDTH = 1.75
 
 /** La misma pinta que `Icon`, para el puñado de iconos que dibuja el armazón. */
-export default function ShellIcon({ name, size = DEFAULT_SIZE, label, className }: ShellIconProps) {
+export function ShellIcon({ name, size = DEFAULT_SIZE, label, className }: ShellIconProps) {
   const nombrado = label !== undefined && label !== ''
   const Glyph = SHELL_ICONS[name]
 

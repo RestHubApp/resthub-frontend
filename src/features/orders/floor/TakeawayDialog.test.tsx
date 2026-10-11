@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { cliente, ultimoCuerpo } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, servidor, sinRespuesta } from '#jest/harness'
-import TakeawayDialog from './TakeawayDialog'
+import { TakeawayDialog } from './TakeawayDialog'
 
 const DIRECCION = 'Dirección de entrega'
 const AREQUIPA = 'Av. Arequipa 500'

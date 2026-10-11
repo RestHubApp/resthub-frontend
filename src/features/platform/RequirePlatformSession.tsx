@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 
+import { paths } from '@/services/paths'
 import { usePlatformSession } from '@/store/platformSession'
 
 /**
@@ -9,12 +10,12 @@ import { usePlatformSession } from '@/store/platformSession'
  * entra acá. Es comodidad de la interfaz; el servidor rechaza con 401
  * cualquier token que no sea de plataforma.
  */
-export default function RequirePlatformSession() {
+export function RequirePlatformSession() {
   const admin = usePlatformSession((state) => state.admin)
   const location = useLocation()
 
   if (admin === null) {
-    return <Navigate to="/plataforma/acceso" replace state={{ from: location.pathname }} />
+    return <Navigate to={paths.platform.login} replace state={{ from: location.pathname }} />
   }
   return <Outlet />
 }

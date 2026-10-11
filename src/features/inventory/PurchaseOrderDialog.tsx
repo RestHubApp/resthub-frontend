@@ -4,14 +4,14 @@ import { useState } from 'react'
 import { ingredientsQuery } from '@/api/inventory'
 import { createPurchaseOrder, purchaseSuggestionsQuery, suppliersQuery } from '@/api/purchasing'
 import type { CreatePurchaseOrderRequest } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
-import Icon from '@/components/Icon'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { formatMoney } from '@/services/format'
-import PurchaseLinesList from './PurchaseLinesList'
+import { PurchaseLinesList } from './PurchaseLinesList'
 import { emptyLine, type LineDraft, linesForApi, linesFromSuggestions } from './purchaseLines'
 import { usePurchasingMutation } from './usePurchasingMutation'
 
@@ -26,7 +26,7 @@ interface PurchaseOrderDialogProps {
  * «Cargar sugerencias» trae lo que se está acabando con la cantidad que
  * alcanza para una semana; después se ajusta a mano lo que haga falta.
  */
-export default function PurchaseOrderDialog({ open, onClose }: PurchaseOrderDialogProps) {
+export function PurchaseOrderDialog({ open, onClose }: PurchaseOrderDialogProps) {
   const proveedores = useQuery({ ...suppliersQuery, enabled: open })
   const insumos = useQuery({ ...ingredientsQuery, enabled: open })
   const sugerencias = useQuery({ ...purchaseSuggestionsQuery, enabled: open })

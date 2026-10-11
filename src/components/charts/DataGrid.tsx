@@ -19,7 +19,7 @@ interface DataGridProps<T> {
 const NUMERIC = 'text-right tabular-nums'
 
 /** La vista de tabla de un gráfico: los mismos datos, sin depender del color. */
-export default function DataGrid<T>({ caption, columns, rows, rowKey }: DataGridProps<T>) {
+export function DataGrid<T>({ caption, columns, rows, rowKey }: DataGridProps<T>) {
   return (
     <div className="max-h-96 overflow-auto rounded-xl ring-1 ring-foreground/10">
       <Table>

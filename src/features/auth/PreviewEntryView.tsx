@@ -1,14 +1,15 @@
 import { useLoaderData } from 'react-router'
 
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { appUrl } from '@/services/leaveTab'
+import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
-import AuthCard from './AuthCard'
+import { AuthCard } from './AuthCard'
 import { FAILURE_MESSAGES } from './previewCode'
 import type { PreviewEntryResult } from './previewEntry'
-import PreviewEntryPending from './PreviewEntryPending'
+import { PreviewEntryPending } from './PreviewEntryPending'
 
 /**
  * Lo que queda en `/vista-previa` si el código no sirvió.
@@ -17,7 +18,7 @@ import PreviewEntryPending from './PreviewEntryPending'
  * El enlace de vuelta recarga la página: la pestaña deja de ser de vista
  * previa y vuelve a leer la sesión de plataforma del navegador.
  */
-export default function PreviewEntryView() {
+export function PreviewEntryView() {
   const resultado = useLoaderData<PreviewEntryResult>()
 
   if (resultado === 'reloading') {
@@ -39,7 +40,7 @@ export default function PreviewEntryView() {
           </Button>
           <Button asChild size="lg" className="h-11 w-full">
             <a
-              href={appUrl('/plataforma/vista-previa')}
+              href={appUrl(paths.platform.preview)}
               onClick={() => {
                 useSession.getState().exitPreview()
               }}

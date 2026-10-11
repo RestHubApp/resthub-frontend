@@ -2,19 +2,19 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { invoicesQuery } from '@/api/billing'
-import EmptyState from '@/components/EmptyState'
-import ListSkeleton from '@/components/ListSkeleton'
-import RetryQueryError from '@/components/RetryQueryError'
-import TablePagination from '@/components/TablePagination'
+import { EmptyState } from '@/components/EmptyState'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { RetryQueryError } from '@/components/RetryQueryError'
+import { TablePagination } from '@/components/TablePagination'
 import { errorMessage } from '@/services/api'
 import { useTimeZone } from '@/store/session'
-import InvoiceRow from './InvoiceRow'
+import { InvoiceRow } from './InvoiceRow'
 import { useResendInvoice } from './useResendInvoice'
 
 const PAGINA = 25
 
 /** Los comprobantes emitidos, del más reciente al más antiguo, de a 25. */
-export default function InvoiceList() {
+export function InvoiceList() {
   const timeZone = useTimeZone()
   const [pagina, setPagina] = useState(0)
   const emitidos = useQuery(invoicesQuery(pagina * PAGINA))

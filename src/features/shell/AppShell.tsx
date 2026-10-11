@@ -1,19 +1,20 @@
 import { Outlet } from 'react-router'
 
-import AccessibilityWidget from '@/components/AccessibilityWidget'
-import ApiFailureNotice from '@/components/ApiFailureNotice'
+import { AccessibilityWidget } from '@/components/AccessibilityWidget'
+import { ApiFailureNotice } from '@/components/ApiFailureNotice'
 import { useFailedQueries } from '@/hooks/useFailedQueries'
+import { paths } from '@/services/paths'
 import { isPreviewTab } from '@/services/tabStorage'
 import { usePreview, useSession } from '@/store/session'
-import BottomNav from './BottomNav'
-import Brand from './Brand'
+import { BottomNav } from './BottomNav'
+import { Brand } from './Brand'
 import { entriesFor } from './navigation'
-import PreviewBanner from './PreviewBanner'
-import PreviewEndedView from './PreviewEndedView'
-import RestaurantName from './RestaurantName'
-import { type ScreenPreload, ScreenPreloadContext } from './screenPreload'
-import SideNav from './SideNav'
-import ToastStack from './ToastStack'
+import { PreviewBanner } from './PreviewBanner'
+import { PreviewEndedView } from './PreviewEndedView'
+import { RestaurantName } from './RestaurantName'
+import { type ShellScreen, ShellScreensContext } from './shellScreens'
+import { SideNav } from './SideNav'
+import { ToastStack } from './ToastStack'
 import { useAccountRefresh } from './useAccountRefresh'
 import { useSessionRenewal } from './useSessionRenewal'
 
@@ -27,11 +28,11 @@ const SKIP_LINK = (
   </a>
 )
 
-const SIN_PANTALLAS: readonly ScreenPreload[] = []
+const SIN_PANTALLAS: readonly ShellScreen[] = []
 
 interface AppShellProps {
-  /** Las pantallas que se adelantan: sus archivos en ratos libres, sus datos al acercarse al enlace. */
-  readonly screens?: readonly ScreenPreload[]
+  /** Las pantallas del registro: de ellas salen el menú y lo que se adelanta al acercarse a un enlace. */
+  readonly screens?: readonly ShellScreen[]
 }
 
 /**
@@ -43,7 +44,7 @@ interface AppShellProps {
  * una barra inferior, y arriba queda el nombre del restaurante; el contenido
  * reserva abajo el alto de esa barra para que nada quede tapado.
  */
-export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
+export function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
   const account = useSession((state) => state.account)
   const preview = usePreview()
   const failed = useFailedQueries('restaurant')
@@ -60,7 +61,7 @@ export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
         {SKIP_LINK}
         <AccessibilityWidget />
         <header className="mx-auto flex w-full max-w-5xl px-4 pt-5 sm:px-6">
-          <Brand to="/acceso" />
+          <Brand to={paths.login} />
         </header>
         <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col px-4 py-6 outline-none sm:px-6">
           <Outlet />
@@ -69,10 +70,10 @@ export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
     )
   }
 
-  const entries = entriesFor(account.permissions)
+  const entries = entriesFor(screens, account.permissions)
 
   return (
-    <ScreenPreloadContext value={screens}>
+    <ShellScreensContext value={screens}>
       {preview ? <PreviewBanner account={account} /> : null}
       <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
         {SKIP_LINK}
@@ -82,7 +83,7 @@ export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
 
         <div className="flex min-h-dvh min-w-0 flex-col">
           <header className="sticky top-[var(--preview-banner-h,0px)] z-30 flex items-center gap-3 border-b bg-card px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 lg:hidden">
-            <Brand to="/" compact />
+            <Brand to={paths.home} compact />
             <RestaurantName name={account.restaurant.name} variant="header" />
           </header>
           <ApiFailureNotice message={failed.message} onRetry={failed.retry} />
@@ -97,6 +98,6 @@ export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
 
         <BottomNav entries={entries} account={account} />
       </div>
-    </ScreenPreloadContext>
+    </ShellScreensContext>
   )
 }

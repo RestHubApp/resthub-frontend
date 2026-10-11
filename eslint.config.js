@@ -17,6 +17,89 @@ import sonarjs from 'eslint-plugin-sonarjs'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
+// ---------------------------------------------------------------------
+// Fuentes unicas por sintaxis (no-restricted-syntax).
+//
+// ESLint admite una sola lista de `no-restricted-syntax` por archivo, asi que
+// cada fuente unica aporta su grupo de selectores y cada bloque de mas abajo
+// compone los grupos que le tocan: `restrictSyntax(...)` los pide todos y
+// `restrictSyntaxExcept('routes')` deja fuera el del modulo que es dueño de
+// esa fuente. En los selectores, `\x2F` es la barra: esquery no deja
+// escribirla dentro de una expresion regular.
+// ---------------------------------------------------------------------
+const SLASH_START = String.raw`/^\x2F/`
+
+// Un literal de ruta es un string (o la primera parte de una plantilla) que
+// empieza con barra, en un enlace, una navegacion o la definicion de una ruta.
+const routeValues = [`Literal[value=${SLASH_START}]`, `TemplateLiteral > TemplateElement:first-child[value.raw=${SLASH_START}]`]
+const routeContexts = [
+  'JSXAttribute[name.name=/^(to|href)$/] ',
+  'CallExpression[callee.name=/^(navigate|redirect|appUrl|closeTabOrGo)$/] ',
+  'Property[key.name=/^(to|from|path)$/] > ',
+]
+
+const SYNTAX_SOURCES = {
+  routes: {
+    message:
+      'Las rutas salen de src/services/paths.ts: usa paths.<pantalla> (por ejemplo paths.orders.detail(id)) y, si no existe, agregala alli.',
+    selectors: routeContexts.flatMap((context) => routeValues.map((value) => `${context}${value}`)),
+  },
+  permissions: {
+    message:
+      'Los permisos tienen nombre en src/api/permissions.ts: usa PERMISSION.<nombre> y, si no existe, agregalo alli.',
+    selectors: [
+      String.raw`CallExpression[callee.name=/^(useCan|can|hasPermission)$/] Literal[value=/^[a-z_]+\.[a-z_]+$/]`,
+      "Property[key.name='permission'] > Literal",
+      "JSXAttribute[name.name='permission'] Literal",
+    ],
+  },
+  queryKeys: {
+    message:
+      'Las claves de consulta se definen una vez en src/api con queryOptions; usa la consulta (xQuery()) o la clave exportada (xQueryKey).',
+    selectors: ["Property[key.name='queryKey'] > ArrayExpression"],
+  },
+  colors: {
+    message: 'Los colores son los tokens de index.css (clases de Tailwind); un hex o rgb() suelto se desfasa del tema.',
+    selectors: [
+      String.raw`Literal[value=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]`,
+      String.raw`Literal[value=/\b(rgba?|hsla?|oklch|oklab)\(/]`,
+      String.raw`TemplateElement[value.raw=/\b(rgba?|hsla?|oklch|oklab)\(/]`,
+    ],
+  },
+  roles: {
+    message:
+      'La interfaz pregunta por permisos (useCan), nunca por el rol: comparar su clase o su id solo se hace en features/roles y features/staff.',
+    selectors: [
+      String.raw`BinaryExpression[operator=/^[!=]==?$/] MemberExpression[property.name=/^(role_id|user_role_id|role_kind|role_name)$/]`,
+      String.raw`BinaryExpression[operator=/^[!=]==?$/] MemberExpression[property.name='kind'][object.name=/^[rR]ole$/]`,
+    ],
+  },
+  storage: {
+    message: 'El almacenamiento del navegador y la red pasan por src/services (tabStorage, api) y src/store, que ya limpian al cerrar sesion.',
+    selectors: [
+      String.raw`MemberExpression[object.name=/^(window|globalThis)$/][property.name=/^(localStorage|sessionStorage|fetch)$/]`,
+      String.raw`Identifier[name=/^(localStorage|sessionStorage)$/]:not(MemberExpression > Identifier.property, Property > Identifier.key)`,
+      "CallExpression[callee.name='fetch']",
+    ],
+  },
+  axios: {
+    message: 'Solo src/services/api.ts habla con Axios; las pantallas usan las funciones de src/api.',
+    selectors: ["ImportDeclaration[source.value='axios']"],
+  },
+  apiSchema: {
+    message: 'schema.d.ts es generado: solo src/api/types.ts lo importa y expone los tipos con nombre.',
+    selectors: [String.raw`ImportDeclaration[source.value=/(^|\x2F)schema$/]`],
+  },
+}
+
+/** La regla compuesta con todos los grupos menos los de los modulos que son dueños de esa fuente. */
+const restrictSyntaxExcept = (...owned) => [
+  'error',
+  ...Object.entries(SYNTAX_SOURCES)
+    .filter(([name]) => !owned.includes(name))
+    .flatMap(([, { selectors, message }]) => selectors.map((selector) => ({ selector, message }))),
+]
+
 export default tseslint.config(
   {
     ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados*/**', 'e2e/.reporte*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'pruebas/accesibilidad/.wave-ext/**', 'pruebas/accesibilidad/reportes/**'],
@@ -194,6 +277,56 @@ export default tseslint.config(
   },
 
   // ---------------------------------------------------------------------
+  // Fuentes unicas: rutas, permisos, claves de consulta, colores, roles,
+  // almacenamiento, Axios y el esquema generado.
+  //
+  // Cada dato vive en un solo modulo (ver SYNTAX_SOURCES arriba) y fuera de el
+  // un literal es una copia que se desfasa. Los bloques de mas abajo dejan
+  // fuera de cada grupo al modulo que es dueño de esa fuente. Las pruebas
+  // pueden escribir los literales: asi comprueban lo que ve el usuario.
+  // ---------------------------------------------------------------------
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept() },
+  },
+  {
+    files: ['src/api/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('queryKeys') },
+  },
+  {
+    files: ['src/api/permissions.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('queryKeys', 'permissions') },
+  },
+  {
+    files: ['src/api/types.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('queryKeys', 'apiSchema') },
+  },
+  {
+    files: ['src/services/**/*.{ts,tsx}', 'src/store/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage') },
+  },
+  {
+    files: ['src/services/paths.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage', 'routes') },
+  },
+  {
+    files: ['src/services/api.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage', 'axios') },
+  },
+  {
+    files: ['src/components/ui/**/*.{ts,tsx}', 'src/components/printSheet.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('colors') },
+  },
+  {
+    files: ['src/features/roles/**/*.{ts,tsx}', 'src/features/staff/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('roles') },
+  },
+
+  // ---------------------------------------------------------------------
   // Nombrado de carpetas y archivos.
   // ---------------------------------------------------------------------
   {
@@ -222,7 +355,7 @@ export default tseslint.config(
         },
         { ignoreMiddleExtensions: true },
       ],
-      'check-file/no-index': 'off',
+      'check-file/no-index': 'error',
     },
   },
 
@@ -296,10 +429,14 @@ export default tseslint.config(
               ],
             },
             {
+              // Ademas de las pantallas, el registro de pantallas lee las rutas
+              // (services) y los permisos con nombre (api).
               from: [{ element: { type: 'router' } }],
               allow: [
                 { to: { element: { type: 'features' } } },
                 { to: { element: { type: 'components' } } },
+                { to: { element: { type: 'services' } } },
+                { to: { element: { type: 'api' } } },
               ],
             },
             {
@@ -386,6 +523,9 @@ export default tseslint.config(
         },
       ],
       'import-x/no-mutable-exports': 'error',
+      // Un solo nombre por simbolo: renombrar y buscar usos es seguro. Los
+      // archivos que una herramienta carga por default estan mas abajo.
+      'import-x/no-default-export': 'error',
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',
     },
@@ -535,7 +675,15 @@ export default tseslint.config(
     extends: [tseslint.configs.disableTypeChecked],
     rules: {
       'check-file/filename-naming-convention': 'off',
+      // Vite, Jest, Playwright, Stryker y ESLint leen la configuracion del
+      // export default del archivo; no admiten un export con nombre.
+      'import-x/no-default-export': 'off',
     },
+  },
+  // Playwright carga el reporter como `export default class`.
+  {
+    files: ['e2e/soporte/reporteCobertura.ts'],
+    rules: { 'import-x/no-default-export': 'off' },
   },
   // ---------------------------------------------------------------------
   // Scripts de medición de accesibilidad (Node, fuera de la aplicación).

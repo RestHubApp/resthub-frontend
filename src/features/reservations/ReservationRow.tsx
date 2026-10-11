@@ -1,5 +1,5 @@
 import type { Reservation, ReservationStatus } from '@/api/types'
-import StatusBadge from '@/components/StatusBadge'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { formatTime } from '@/services/format'
 import { STATUS_TONE } from './reservationSchema'
@@ -21,7 +21,7 @@ const ACCIONES: readonly { status: ReservationStatus; label: string; variant: 'd
 ]
 
 /** Una reserva del día: hora, a nombre de quién, cuántos, mesa y qué hacer. */
-export default function ReservationRow({ reservation, tableLabel, timeZone, canManage, busy, onEdit, onStatus }: ReservationRowProps) {
+export function ReservationRow({ reservation, tableLabel, timeZone, canManage, busy, onEdit, onStatus }: ReservationRowProps) {
   const pendiente = reservation.status === 'booked'
   const detalle = [
     `${String(reservation.party_size)} personas`,

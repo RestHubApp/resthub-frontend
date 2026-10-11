@@ -6,7 +6,7 @@ import { entrarComo, montar, primero, RespuestaDeError, servidor, sinRed } from 
 import type { OpenOrderRequest } from '@/api/types'
 import { ownerOf, queuedOrders, removeQueued } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
-import NewOrderView from '@/features/orders/NewOrderView'
+import { NewOrderView } from '@/features/orders/NewOrderView'
 import { useDraftActions } from './useOrderDraft'
 
 const PEDIDOS = '/orders'

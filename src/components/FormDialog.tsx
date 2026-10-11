@@ -1,7 +1,7 @@
 import { useMutationState } from '@tanstack/react-query'
 import { type ReactNode, useRef, useState } from 'react'
 
-import FormMessage from './FormMessage'
+import { FormMessage } from './FormMessage'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
 
 interface FormDialogProps {
@@ -24,7 +24,7 @@ const ANCHOS = { md: 'sm:max-w-lg', lg: 'sm:max-w-2xl' } as const
  * encierra el foco adentro y cierra con Escape. Un formulario largo se
  * desplaza dentro de la ventana, también en el celular.
  */
-export default function FormDialog({
+export function FormDialog({
   open,
   onOpenChange,
   title,

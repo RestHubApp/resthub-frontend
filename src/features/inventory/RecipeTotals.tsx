@@ -14,7 +14,7 @@ interface RecipeTotalsProps {
  * El margen se recalcula con cada tecla; se anuncia con cortesía, sin
  * interrumpir a quien está escribiendo.
  */
-export default function RecipeTotals({ price, cost, hasLines }: RecipeTotalsProps) {
+export function RecipeTotals({ price, cost, hasLines }: RecipeTotalsProps) {
   const margen = price - cost
   const porcentaje = price > 0 ? (margen / price) * 100 : 0
   const perdida = margen < 0

@@ -4,10 +4,10 @@ import { z } from 'zod'
 
 import { cancelOrder } from '@/api/orders'
 import type { OrderResponse } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
 import { textoObligatorio } from '@/components/formRules'
-import TextareaField from '@/components/TextareaField'
+import { TextareaField } from '@/components/TextareaField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { orderPlace } from './orderLabels'
@@ -30,7 +30,7 @@ interface CancelOrderDialogProps {
  * El motivo es obligatorio: un pedido cancelado sin explicacion es plata que
  * no entro y nadie sabe por que. Queda en el historial.
  */
-export default function CancelOrderDialog({ order, onClose }: CancelOrderDialogProps) {
+export function CancelOrderDialog({ order, onClose }: CancelOrderDialogProps) {
   const { register, handleSubmit, formState, reset } = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { reason: '' },

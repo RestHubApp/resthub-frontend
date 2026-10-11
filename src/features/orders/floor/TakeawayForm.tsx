@@ -3,16 +3,16 @@ import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import CustomerLookup from './CustomerLookup'
-import TakeawayConsent from './TakeawayConsent'
-import TakeawayFields from './TakeawayFields'
+import { CustomerLookup } from './CustomerLookup'
+import { TakeawayConsent } from './TakeawayConsent'
+import { TakeawayFields } from './TakeawayFields'
 import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, fromCustomer, newOrderPath, takeawaySchema, type TakeawayValues } from './takeawaySchema'
 
@@ -34,7 +34,7 @@ interface TakeawayFormProps {
  * correcta. Si es delivery, el nombre, el teléfono y la dirección son
  * obligatorios. El pedido no se crea aca, sino al enviarlo a cocina.
  */
-export default function TakeawayForm({ onClose }: TakeawayFormProps) {
+export function TakeawayForm({ onClose }: TakeawayFormProps) {
   const [fallo, setFallo] = useState<string | null>(null)
   const navigate = useNavigate()
   const form = useForm<TakeawayValues>({ resolver: zodResolver(takeawaySchema), defaultValues: EMPTY_TAKEAWAY })

@@ -1,7 +1,7 @@
 import { cn } from 'cn'
 import type { ReactNode } from 'react'
 
-import Icon from './Icon'
+import { Icon } from './Icon'
 import type { IconName } from './icons'
 
 interface FieldIconProps {
@@ -19,7 +19,7 @@ interface FieldIconProps {
  * para el lector de pantalla y deja pasar los clics, así tocarlo enfoca el campo
  * igual. El relleno del campo se corre desde acá, sin que cada campo lo sepa.
  */
-export default function FieldIcon({ icon, multiline = false, children }: FieldIconProps) {
+export function FieldIcon({ icon, multiline = false, children }: FieldIconProps) {
   return (
     <div
       className={cn(

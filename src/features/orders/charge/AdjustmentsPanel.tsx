@@ -1,14 +1,15 @@
 import { useState } from 'react'
 
 import { applyDiscount } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { formatPercent, toCents } from '@/services/format'
 import { useCan } from '@/store/session'
 import { useOrderAction } from '@/features/orders/useOrderAction'
-import CourtesyItem from './CourtesyItem'
-import DiscountForm from './DiscountForm'
+import { CourtesyItem } from './CourtesyItem'
+import { DiscountForm } from './DiscountForm'
 
 interface AdjustmentsPanelProps {
   readonly order: OrderResponse
@@ -20,9 +21,9 @@ interface AdjustmentsPanelProps {
  * Después de un pago ya no aparecen: cambiar el total dejaría de cuadrar con
  * lo que pagó cada uno. Las cortesías son del encargado.
  */
-export default function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
+export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
   const [descontando, setDescontando] = useState(false)
-  const invita = useCan('orders.discount_any')
+  const invita = useCan(PERMISSION.ordersDiscountAny)
   const quitar = useOrderAction({
     mutationFn: () => applyDiscount(order.id, { percent: '0', reason: '' }),
     success: () => 'Descuento quitado.',

@@ -15,7 +15,7 @@ interface PermissionOptionProps {
 }
 
 /** Un permiso del catálogo, con su casilla y, si no se puede dar, por qué. */
-export default function PermissionOption({
+export function PermissionOption({
   permission,
   checked,
   missing,

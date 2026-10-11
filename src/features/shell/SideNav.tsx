@@ -1,9 +1,10 @@
 import type { CurrentUserResponse } from '@/api/types'
-import Brand from './Brand'
+import { paths } from '@/services/paths'
+import { Brand } from './Brand'
 import type { NavEntry } from './navigation'
-import NavList from './NavList'
-import RestaurantName from './RestaurantName'
-import SessionActions from './SessionActions'
+import { NavList } from './NavList'
+import { RestaurantName } from './RestaurantName'
+import { SessionActions } from './SessionActions'
 
 interface SideNavProps {
   readonly entries: readonly NavEntry[]
@@ -11,13 +12,13 @@ interface SideNavProps {
 }
 
 /** La barra lateral de escritorio, donde trabaja el encargado. */
-export default function SideNav({ entries, account }: SideNavProps) {
+export function SideNav({ entries, account }: SideNavProps) {
   return (
     // La columna pinta el fondo de punta a punta; adentro, el menú queda fijo al desplazarse.
     <div className="hidden border-r bg-card lg:block">
       <aside className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-5 p-4">
         <div className="px-1 pt-1">
-          <Brand to="/" />
+          <Brand to={paths.home} />
         </div>
         <RestaurantName name={account.restaurant.name} variant="sidebar" />
         <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto">

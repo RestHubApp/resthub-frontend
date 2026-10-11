@@ -3,10 +3,10 @@ import { useForm } from 'react-hook-form'
 
 import { createTable, tableName, updateTable } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
-import FormMessage from '@/components/FormMessage'
-import TextField from '@/components/TextField'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { onSubmit } from '@/hooks/formSubmit'
@@ -22,7 +22,7 @@ interface TableFormDialogProps {
 }
 
 /** Crear una mesa o cambiarle el nombre. */
-export default function TableFormDialog({ table, open, onOpenChange }: TableFormDialogProps) {
+export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogProps) {
   const { register, handleSubmit, formState, reset } = useForm<TableValues>({
     resolver: zodResolver(tableSchema),
     values: { label: table?.label ?? '' },

@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { insumo } from '#jest/fixtures/inventario'
 import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
 import type { Ingredient, PermissionCode } from '@/api/types'
-import InventoryView from './InventoryView'
+import { InventoryView } from './InventoryView'
 
 const INSUMOS = '/inventory/ingredients'
 const ALERTAS = '/inventory/alerts/low-stock'

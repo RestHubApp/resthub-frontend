@@ -1,6 +1,6 @@
 import { useId } from 'react'
 
-import FieldIcon from '@/components/FieldIcon'
+import { FieldIcon } from '@/components/FieldIcon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,7 +15,7 @@ interface IngredientFiltersProps {
 }
 
 /** Buscar por nombre y quedarse con lo que hay que reponer. */
-export default function IngredientFilters({
+export function IngredientFilters({
   search,
   onSearch,
   onlyLow,

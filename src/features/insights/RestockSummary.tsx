@@ -1,5 +1,5 @@
 import type { RestockAction } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { ACTION_LABELS, ACTION_ORDER, ACTION_STYLES, TONE_BADGE } from './restockActions'
 
 interface RestockSummaryProps {
@@ -12,7 +12,7 @@ interface RestockSummaryProps {
  * Cuántos insumos caen en cada acción. Cada tarjeta es también un filtro:
  * tocarla deja solo esos insumos en la lista; tocarla de nuevo, todos.
  */
-export default function RestockSummary({ counts, selected, onSelect }: RestockSummaryProps) {
+export function RestockSummary({ counts, selected, onSelect }: RestockSummaryProps) {
   return (
     <section aria-label="Resumen por acción" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {ACTION_ORDER.map((action) => {

@@ -9,7 +9,7 @@ interface Props {
 }
 
 /** Las tablas que no están a la vista no consumen JS ni piden datos aún. */
-export default function DeferredSection({ name, anchor, children }: Props) {
+export function DeferredSection({ name, anchor, children }: Props) {
   const [visible, setVisible] = useState(false)
   const target = useRef<HTMLDivElement>(null)
   useEffect(() => {

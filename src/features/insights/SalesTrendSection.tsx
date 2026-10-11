@@ -1,9 +1,9 @@
 import { fetchDailySales, insightsReportQuery } from '@/api/insights'
 import type { DailySalesPoint, InsightsRangeParams } from '@/api/types'
-import ChartCard from '@/components/charts/ChartCard'
-import DataGrid from '@/components/charts/DataGrid'
-import ReportState from './ReportState'
-import SalesChart from './SalesChart'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid } from '@/components/charts/DataGrid'
+import { ReportState } from './ReportState'
+import { SalesChart } from './SalesChart'
 import { useInsightsReport } from './useInsightsReport'
 import { formatInteger, formatLongDate, formatMoney } from '@/services/format'
 
@@ -19,7 +19,7 @@ const COLUMNS = [
 ]
 
 /** Ventas por día: la tendencia del período. */
-export default function SalesTrendSection({ range }: SalesTrendSectionProps) {
+export function SalesTrendSection({ range }: SalesTrendSectionProps) {
   const report = useInsightsReport(insightsReportQuery('sales-daily', range, fetchDailySales))
 
   return (

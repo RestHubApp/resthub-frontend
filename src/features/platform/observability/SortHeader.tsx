@@ -1,5 +1,5 @@
 import type { ObsRouteSort } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { TableHead } from '@/components/ui/table'
 import { ariaSort } from './routeSort'
 
@@ -11,7 +11,7 @@ interface SortHeaderProps {
 }
 
 /** La cabecera de una columna que ordena la tabla, de mayor a menor. */
-export default function SortHeader({ column, sort, label, onSort }: SortHeaderProps) {
+export function SortHeader({ column, sort, label, onSort }: SortHeaderProps) {
   const actual = column === sort
   return (
     <TableHead aria-sort={ariaSort(column, sort)} className="px-1 text-right">

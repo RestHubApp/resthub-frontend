@@ -3,10 +3,10 @@ import { act, render, renderHook, screen, waitFor } from '@testing-library/react
 
 import { notaConAlergia, pedido } from '#jest/fixtures/pedidos'
 import { entrarComo, PERMISOS_ENCARGADO, PERMISOS_MESERO, servidor } from '#jest/harness'
-import ItemNote from './ItemNote'
+import { ItemNote } from './ItemNote'
 import { nextStepFor } from './nextStep'
 import { prefetchBoard, prefetchFloor, prefetchKitchen } from './prefetchOrders'
-import QuantityStepper from './QuantityStepper'
+import { QuantityStepper } from './QuantityStepper'
 import { useCanTakeStep } from './useCanTakeStep'
 import { useNow } from './useNow'
 

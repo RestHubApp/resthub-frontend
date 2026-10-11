@@ -3,8 +3,8 @@ import type { ReactNode } from 'react'
 
 import { rolesQuery } from '@/api/roles'
 import type { Role } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import ListSkeleton from '@/components/ListSkeleton'
+import { FormMessage } from '@/components/FormMessage'
+import { ListSkeleton } from '@/components/ListSkeleton'
 import { errorMessage } from '@/services/api'
 import { usePermissions } from '@/store/session'
 import { roleOptions } from './roleOptions'
@@ -22,7 +22,7 @@ interface RoleOptionsGateProps {
  * Así el alta ya abre con el mesero elegido y la edición con el rol actual,
  * en vez de cambiar la lista bajo el dedo cuando llegan.
  */
-export default function RoleOptionsGate({ currentRoleId, children }: RoleOptionsGateProps) {
+export function RoleOptionsGate({ currentRoleId, children }: RoleOptionsGateProps) {
   const roles = useQuery(rolesQuery())
   const granted = usePermissions()
 

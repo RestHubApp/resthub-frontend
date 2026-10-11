@@ -4,7 +4,7 @@ import { fireEvent, screen } from '@testing-library/react'
 import { mesa, reserva } from '#jest/fixtures/panel'
 import { entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
 import type { Reservation } from '@/api/types'
-import ReservationsView from './ReservationsView'
+import { ReservationsView } from './ReservationsView'
 
 const ESTADO = '/reservations/21/status'
 

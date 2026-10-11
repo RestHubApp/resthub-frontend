@@ -1,5 +1,5 @@
 import type { AiDecision, DecisionEngine } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 
 interface EngineBadgeProps {
   readonly engine: DecisionEngine
@@ -24,7 +24,7 @@ const ENGINES: Record<DecisionEngine, { readonly name: string; readonly title: s
 }
 
 /** Qué motor tomó la decisión y, si fueron las reglas, por qué. */
-export default function EngineBadge({ engine, fallbackReason, fallbackLabel }: EngineBadgeProps) {
+export function EngineBadge({ engine, fallbackReason, fallbackLabel }: EngineBadgeProps) {
   const motor = ENGINES[engine]
   return (
     <span className="inline-flex flex-wrap items-center gap-1.5 text-xs">

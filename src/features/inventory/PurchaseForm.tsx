@@ -3,16 +3,16 @@ import { useForm, useWatch } from 'react-hook-form'
 
 import { registerPurchase } from '@/api/inventory'
 import type { Ingredient } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import ChoiceField from './ChoiceField'
-import FormButtons from './FormButtons'
+import { ChoiceField } from './ChoiceField'
+import { FormButtons } from './FormButtons'
 import { purchaseSchema, type PurchaseValues } from './inventorySchema'
 import { costHint, costLabel, purchaseDefaults, purchaseMath, purchasePayload } from './purchaseMath'
-import QuantityField from './QuantityField'
-import StockPreview from './StockPreview'
+import { QuantityField } from './QuantityField'
+import { StockPreview } from './StockPreview'
 import { inputUnits, priceUnit } from './units'
 import { useInventoryChange } from './useInventoryChange'
 import { formatQuantity } from '@/services/format'
@@ -23,7 +23,7 @@ interface PurchaseFormProps {
 }
 
 /** Registra una compra: entra stock y se actualiza lo que cuesta el insumo. */
-export default function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
+export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
   const unidades = inputUnits(ingredient.unit)
   const precio = priceUnit(ingredient.unit)
   const { register, handleSubmit, formState, control } = useForm<PurchaseValues>({

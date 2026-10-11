@@ -11,7 +11,7 @@ interface TodaySummaryProps {
  * marcar algo sin recorrer la carta entera. Se anuncia al cambiar, así quien
  * usa lector de pantalla oye el efecto del interruptor.
  */
-export default function TodaySummary({ categories }: TodaySummaryProps) {
+export function TodaySummary({ categories }: TodaySummaryProps) {
   const enCarta = categories
     .filter((categoria) => categoria.is_active)
     .flatMap((categoria) => categoria.items)

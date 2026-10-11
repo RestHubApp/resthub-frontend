@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 import type { OrderMenuItem } from '@/api/types'
-import FormDialog from '@/components/FormDialog'
-import FormMessage from '@/components/FormMessage'
+import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { formatCents, formatMoney, toCents } from '@/services/format'
-import ModifierOptionButton from './ModifierOptionButton'
+import { ModifierOptionButton } from './ModifierOptionButton'
 import type { DraftModifier } from './useOrderDraft'
 
 interface ModifierDialogProps {
@@ -33,7 +33,7 @@ function toggle(elegidas: Elegidas, grupo: string, opcion: string, maximo: numbe
  * Un grupo obligatorio (mínimo uno) no deja confirmar hasta elegir. El precio
  * se actualiza con lo elegido: es lo que se le va a cobrar a la mesa.
  */
-export default function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps) {
+export function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps) {
   const [elegidas, setElegidas] = useState<Elegidas>({})
   const [fallo, setFallo] = useState(false)
   if (item === null) {

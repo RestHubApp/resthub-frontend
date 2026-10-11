@@ -2,12 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 
 import { cashSessionQuery } from '@/api/cash'
 import type { CashSession } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import FormDialog from '@/components/FormDialog'
-import RetryQueryError from '@/components/RetryQueryError'
+import { EmptyState } from '@/components/EmptyState'
+import { FormDialog } from '@/components/FormDialog'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { errorMessage } from '@/services/api'
 import { formatMoney } from '@/services/format'
-import CashSummaryView from './CashSummaryView'
+import { CashSummaryView } from './CashSummaryView'
 
 interface CashSessionDialogProps {
   /** El turno a mostrar; `null` cierra la ventana. */
@@ -24,7 +24,7 @@ function countedLabel(session: CashSession | undefined): string | undefined {
 }
 
 /** El arqueo firmado de un turno ya cerrado. */
-export default function CashSessionDialog({ sessionId, onClose }: CashSessionDialogProps) {
+export function CashSessionDialog({ sessionId, onClose }: CashSessionDialogProps) {
   const turno = useQuery({ ...cashSessionQuery(sessionId ?? 0), enabled: sessionId !== null })
   if (sessionId === null) {
     return null

@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { ajustesFiscales, comprobante } from '#jest/fixtures/panel'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
 import type { BillingSettings, Invoice } from '@/api/types'
-import BillingView from './BillingView'
+import { BillingView } from './BillingView'
 
 const AJUSTES = '/billing/settings'
 const EMITIDOS = '/billing/invoices'

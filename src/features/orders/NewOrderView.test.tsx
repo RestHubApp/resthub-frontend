@@ -4,7 +4,7 @@ import { act, renderHook, screen } from '@testing-library/react'
 import { carta, mesa, pedido, resumenActivo, ultimoCuerpo } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, servidor } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
-import NewOrderView from './NewOrderView'
+import { NewOrderView } from './NewOrderView'
 import { useDraftActions } from './taking/useOrderDraft'
 
 const RUTA = '/pedidos/nuevo'

@@ -11,9 +11,9 @@ import {
 import { Fragment, type ReactNode, useMemo } from 'react'
 
 import { usePagination } from '@/hooks/usePagination'
-import DataTableSkeleton from './DataTableSkeleton'
-import EmptyState from './EmptyState'
-import TablePagination from './TablePagination'
+import { DataTableSkeleton } from './DataTableSkeleton'
+import { EmptyState } from './EmptyState'
+import { TablePagination } from './TablePagination'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 
 /** Lo que una celda sabe de su fila, ademas del dato. */
@@ -85,7 +85,7 @@ interface DataTableProps<TData extends RowData> {
  * exime a las tablas de datos del reflujo, y apilarla le quita las cabeceras
  * al lector de pantalla.
  */
-export default function DataTable<TData extends RowData>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   isLoading,

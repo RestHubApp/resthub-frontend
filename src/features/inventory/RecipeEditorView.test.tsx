@@ -4,8 +4,8 @@ import { act, screen, within } from '@testing-library/react'
 import { costoDePlato, insumo, receta } from '#jest/fixtures/inventario'
 import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
 import type { PermissionCode, Recipe } from '@/api/types'
-import InventoryView from './InventoryView'
-import RecipeEditorView from './RecipeEditorView'
+import { InventoryView } from './InventoryView'
+import { RecipeEditorView } from './RecipeEditorView'
 
 const RECETA = '/inventory/recipes/10'
 const CEBOLLA = insumo({ id: 2, name: 'Cebolla', unit_cost: '0.002' })

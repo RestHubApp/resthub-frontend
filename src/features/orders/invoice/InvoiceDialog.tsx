@@ -3,15 +3,15 @@ import { useState } from 'react'
 
 import { billingQueryKey, issueInvoice, orderInvoiceQueryKey } from '@/api/billing'
 import type { DocumentType, InvoiceKind, IssueInvoiceRequest, OrderResponse } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
-import FormMessage from '@/components/FormMessage'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { errorMessage } from '@/services/api'
 import { formatMoney, toCents } from '@/services/format'
-import CustomerFields from './CustomerFields'
+import { CustomerFields } from './CustomerFields'
 import { customerComplete, documentOptions, effectiveDocument } from './invoiceDocument'
 
 interface InvoiceDialogProps {
@@ -26,7 +26,7 @@ interface InvoiceDialogProps {
  * La factura pide RUC y razón social; una boleta de hasta S/ 700 puede ir a
  * «clientes varios». El servidor valida lo mismo y lo envía al proveedor.
  */
-export default function InvoiceDialog({ order, open, onClose }: InvoiceDialogProps) {
+export function InvoiceDialog({ order, open, onClose }: InvoiceDialogProps) {
   const [kind, setKind] = useState<InvoiceKind>('boleta')
   const [doc, setDoc] = useState<DocumentType>('none')
   const [numero, setNumero] = useState('')

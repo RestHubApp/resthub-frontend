@@ -1,7 +1,7 @@
 import { type ReactNode, useState } from 'react'
 
-import Icon from '@/components/Icon'
-import SectionCard from '@/components/SectionCard'
+import { Icon } from '@/components/Icon'
+import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 
 interface ChartCardProps {
@@ -22,7 +22,7 @@ interface ChartCardProps {
  * El cambio a tabla es para quien no ve el color o usa un lector de pantalla,
  * y también para quien quiere copiar los números.
  */
-export default function ChartCard({
+export function ChartCard({
   title,
   description,
   chart,

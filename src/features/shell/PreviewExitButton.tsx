@@ -1,9 +1,9 @@
-import ConfirmDialog from '@/components/ConfirmDialog'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { useQueuedOrders } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
 import { leavePreview } from './leavePreview'
-import ShellIcon from './ShellIcon'
+import { ShellIcon } from './ShellIcon'
 
 // En la franja, blanco sobre su color; en una pantalla, el botón principal de siempre.
 const ESTILOS = {
@@ -22,7 +22,7 @@ interface PreviewExitButtonProps {
  * Si quedaron pedidos sin enviar en el local de muestra, se avisa antes de
  * descartarlos: nada se pierde en silencio, ni siquiera en una prueba.
  */
-export default function PreviewExitButton({ tone = 'banner' }: PreviewExitButtonProps) {
+export function PreviewExitButton({ tone = 'banner' }: PreviewExitButtonProps) {
   const pendientes = useQueuedOrders(useSession((state) => state.account))
 
   const boton = (onClick?: () => void) => (

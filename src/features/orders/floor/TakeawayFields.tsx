@@ -1,6 +1,6 @@
 import type { UseFormReturn } from 'react-hook-form'
 
-import TextField from '@/components/TextField'
+import { TextField } from '@/components/TextField'
 import { MAX_CLIENTE, MAX_DIRECCION, MAX_REFERENCIA, MAX_TELEFONO, type TakeawayValues } from './takeawaySchema'
 
 interface TakeawayFieldsProps {
@@ -9,7 +9,7 @@ interface TakeawayFieldsProps {
 }
 
 /** Nombre del cliente y, si es delivery, teléfono, dirección y referencia. */
-export default function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
+export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
   const { register, formState } = form
   const errors = formState.errors
 

@@ -21,7 +21,7 @@ interface LogDetailBodyProps {
  * Los dos van como texto dentro de `<pre>`, nunca como HTML: los valores vienen
  * de lo que alguien le mandó al servidor.
  */
-export default function LogDetailBody({ entry, filters }: LogDetailBodyProps) {
+export function LogDetailBody({ entry, filters }: LogDetailBodyProps) {
   const campos = prettyFields(entry.fields)
   return (
     <div className="flex flex-col gap-4">

@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import type { Direction } from './menuOrder'
 
@@ -20,7 +20,7 @@ interface MoveButtonsProps {
  * Arrastrar se hace mal con el dedo y no se puede con el teclado; dos botones
  * sirven igual en la laptop, en el celular y con lector de pantalla.
  */
-export default function MoveButtons({ label, isFirst, isLast, onMove }: MoveButtonsProps) {
+export function MoveButtons({ label, isFirst, isLast, onMove }: MoveButtonsProps) {
   return (
     <div className="flex gap-1" role="group" aria-label={`Orden de ${label}`}>
       <Button

@@ -1,5 +1,5 @@
 import type { PlatformSandbox } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
+import { EmptyState } from '@/components/EmptyState'
 import { formatDateTime } from '@/services/format'
 import { PLATFORM_TIME_ZONE } from './platformTime'
 
@@ -11,7 +11,7 @@ interface SandboxSummaryProps {
 }
 
 /** El local de muestra vigente: cuándo se creó y con qué cuentas se entra. */
-export default function SandboxSummary({ sandbox }: SandboxSummaryProps) {
+export function SandboxSummary({ sandbox }: SandboxSummaryProps) {
   const local = sandbox.restaurant
   if (local === null) {
     return (

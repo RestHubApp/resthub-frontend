@@ -3,10 +3,10 @@ import { useState } from 'react'
 
 import { orderQuery } from '@/api/orders'
 import type { OrderResponse } from '@/api/types'
-import FormDialog from '@/components/FormDialog'
+import { FormDialog } from '@/components/FormDialog'
 import { orderPlace } from '@/features/orders/orderLabels'
-import ChargeForm from './ChargeForm'
-import ChargeReceipt from './ChargeReceipt'
+import { ChargeForm } from './ChargeForm'
+import { ChargeReceipt } from './ChargeReceipt'
 
 interface ChargeContentProps {
   readonly order: OrderResponse
@@ -17,7 +17,7 @@ interface ChargeContentProps {
  * El pedido se lee de su consulta y no de lo que llegó al abrir: en una
  * cuenta dividida cada pago cambia el saldo, y un descuento cambia el total.
  */
-export default function ChargeContent({ order, onClose }: ChargeContentProps) {
+export function ChargeContent({ order, onClose }: ChargeContentProps) {
   const [cobrado, setCobrado] = useState<OrderResponse | null>(null)
   const vivo = useQuery({ ...orderQuery(order.id), initialData: order })
   const actual = vivo.data

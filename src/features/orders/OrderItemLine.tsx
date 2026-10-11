@@ -1,6 +1,6 @@
 import type { OrderItemResponse } from '@/api/types'
 import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
-import ItemNote from './ItemNote'
+import { ItemNote } from './ItemNote'
 import { formatMoney } from '@/services/format'
 
 interface OrderItemLineProps {
@@ -12,7 +12,7 @@ interface OrderItemLineProps {
 }
 
 /** "2 × Lomo saltado", con su nota resaltada debajo. */
-export default function OrderItemLine({ item, showPrice = false, flag }: OrderItemLineProps) {
+export function OrderItemLine({ item, showPrice = false, flag }: OrderItemLineProps) {
   return (
     <li className="flex flex-col">
       <div className="flex items-baseline gap-2">

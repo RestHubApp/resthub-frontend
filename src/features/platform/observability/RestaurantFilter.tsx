@@ -16,7 +16,7 @@ const RESTAURANTES = { limit: 100, offset: 0 } as const
  * Un solo restaurante o todos. Mientras carga la lista, o si falla, sigue
  * ofreciendo «Todos» y el que ya estaba elegido, para no perder el filtro.
  */
-export default function RestaurantFilter({ value, onChange }: RestaurantFilterProps) {
+export function RestaurantFilter({ value, onChange }: RestaurantFilterProps) {
   const lista = useQuery(platformRestaurantsQuery(RESTAURANTES))
   const locales = lista.data?.items ?? []
   const falta = value !== null && !locales.some((local) => local.id === value)

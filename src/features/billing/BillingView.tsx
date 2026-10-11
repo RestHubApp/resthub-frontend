@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { billingSettingsQuery } from '@/api/billing'
-import PageHeader from '@/components/PageHeader'
-import ListSkeleton from '@/components/ListSkeleton'
-import SectionCard from '@/components/SectionCard'
-import BillingSettingsForm from './BillingSettingsForm'
-import InvoiceList from './InvoiceList'
+import { PageHeader } from '@/components/PageHeader'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { SectionCard } from '@/components/SectionCard'
+import { BillingSettingsForm } from './BillingSettingsForm'
+import { InvoiceList } from './InvoiceList'
 
 /**
  * Comprobantes electrónicos: los datos fiscales del local y lo emitido.
@@ -14,7 +14,7 @@ import InvoiceList from './InvoiceList'
  * después de cargar el token del proveedor. Los datos fiscales se abren solos
  * mientras falte algo para enviar a SUNAT.
  */
-export default function BillingView() {
+export function BillingView() {
   const ajustes = useQuery(billingSettingsQuery)
 
   return (

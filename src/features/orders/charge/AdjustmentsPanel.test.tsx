@@ -4,7 +4,7 @@ import { screen } from '@testing-library/react'
 import { pago, pedido, plato } from '#jest/fixtures/cobro'
 import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, primero, RespuestaDeError, servidor } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
-import AdjustmentsPanel from './AdjustmentsPanel'
+import { AdjustmentsPanel } from './AdjustmentsPanel'
 
 const DESCUENTO = '/orders/12/discount'
 const CORTESIA = '/orders/12/items/1/courtesy'

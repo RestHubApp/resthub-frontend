@@ -4,7 +4,7 @@ interface FieldHintProps {
 }
 
 /** La ayuda de un campo, o nada. */
-export default function FieldHint({ id, hint }: FieldHintProps) {
+export function FieldHint({ id, hint }: FieldHintProps) {
   if (hint === undefined) {
     return null
   }

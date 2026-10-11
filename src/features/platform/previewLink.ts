@@ -1,4 +1,5 @@
 import { appUrl } from '@/services/leaveTab'
+import { paths } from '@/services/paths'
 
 // El nombre del dato en el fragmento. Lo lee `/vista-previa` (`features/auth`).
 const PARAMETRO = 'codigo'
@@ -11,7 +12,7 @@ const PARAMETRO = 'codigo'
  * sus registros de acceso.
  */
 export function previewUrl(code: string, base?: string): string {
-  return `${appUrl('/vista-previa', base)}#${PARAMETRO}=${encodeURIComponent(code)}`
+  return `${appUrl(paths.previewEntry, base)}#${PARAMETRO}=${encodeURIComponent(code)}`
 }
 
 /**

@@ -1,8 +1,9 @@
 import { Link, useNavigate } from 'react-router'
 
-import ConfirmDialog from '@/components/ConfirmDialog'
-import ShellIcon from './ShellIcon'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { ShellIcon } from './ShellIcon'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 import { useQueuedOrders } from '@/store/offlineQueue'
 import { usePreview, useSession } from '@/store/session'
 
@@ -18,7 +19,7 @@ interface SessionActionsProps {
  * En una vista previa no hay «Cerrar sesión»: se sale desde la franja de
  * arriba, que ademas descarta la sesion de la pestana.
  */
-export default function SessionActions({ fullName, roleLabel, onNavigate }: SessionActionsProps) {
+export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActionsProps) {
   const signOut = useSession((state) => state.signOut)
   const preview = usePreview()
   const pendientes = useQueuedOrders(useSession((state) => state.account))
@@ -30,7 +31,7 @@ export default function SessionActions({ fullName, roleLabel, onNavigate }: Sess
     // los dos cambios juntos, asi que ninguna pantalla privada llega a
     // dibujarse sin cuenta.
     signOut()
-    void navigate('/acceso', { replace: true })
+    void navigate(paths.login, { replace: true })
   }
 
   const cuantos =
@@ -61,7 +62,7 @@ export default function SessionActions({ fullName, roleLabel, onNavigate }: Sess
   return (
     <div className="flex flex-col gap-1 border-t pt-3">
       <Button asChild variant="ghost" className="h-auto min-h-11 justify-start gap-3 px-3 py-2">
-        <Link to="/perfil" onClick={onNavigate}>
+        <Link to={paths.profile} onClick={onNavigate}>
           <ShellIcon name="perfil" size={18} />
           <span className="flex min-w-0 flex-col items-start leading-tight">
             <span className="max-w-full truncate">{fullName}</span>

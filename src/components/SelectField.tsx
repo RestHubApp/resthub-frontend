@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from './FieldError'
-import FieldHint from './FieldHint'
-import FieldIcon from './FieldIcon'
+import { FieldError } from './FieldError'
+import { FieldHint } from './FieldHint'
+import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
 import type { IconName } from './icons'
 import { Label } from './ui/label'
@@ -29,7 +29,7 @@ interface SelectFieldProps {
  * react-hook-form igual que un campo de texto, y en el celular abre la lista
  * del sistema, que es la que la persona ya sabe usar.
  */
-export default function SelectField({
+export function SelectField({
   id,
   label,
   field,

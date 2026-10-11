@@ -4,10 +4,10 @@ import { useForm } from 'react-hook-form'
 
 import { createCategory, menuQueryKey, updateCategory } from '@/api/menu'
 import type { MenuCategory } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import TextField from '@/components/TextField'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
@@ -21,7 +21,7 @@ interface CategoryFormProps {
   readonly onDone: () => void
 }
 
-export default function CategoryForm({ category, onDone }: CategoryFormProps) {
+export function CategoryForm({ category, onDone }: CategoryFormProps) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState } = useForm<CategoryValues>({
     resolver: zodResolver(categorySchema),

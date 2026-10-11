@@ -1,3 +1,4 @@
+import { paths } from '@/services/paths'
 // Dónde guarda esta pestaña la sesión de restaurante y la cola sin señal.
 //
 // Una pestaña normal usa `localStorage`: la sesión sobrevive a recargar y a
@@ -18,7 +19,7 @@ export const PREVIEW_SESSION_KEY = 'resthub.vista-previa.sesion.v1'
  */
 export const PREVIEW_TAB_KEY = 'resthub.vista-previa.pestana.v1'
 /** La ruta que canjea el código de vista previa, sin la base de la aplicación. */
-const PREVIEW_ENTRY_PATH = '/vista-previa'
+const PREVIEW_ENTRY_PATH = paths.previewEntry
 
 /** Lo que se usa de `Storage`: así las pruebas pasan un mapa en memoria. */
 export interface KeyValueStorage {

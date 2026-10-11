@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { carta, categoria, plato } from '#jest/fixtures/inventario'
 import { entrarComo, montar, primero, RespuestaDeError, servidor } from '#jest/harness'
 import type { MenuResponse } from '@/api/types'
-import MenuView from './MenuView'
+import { MenuView } from './MenuView'
 
 const MENU = '/menu'
 const ITEMS = '/menu/items'

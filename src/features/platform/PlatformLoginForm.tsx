@@ -4,10 +4,10 @@ import { useForm } from 'react-hook-form'
 
 import { PASSWORD_MUTATION_GC_TIME, platformLogin, platformMutationKeys } from '@/api/platform'
 import type { PlatformAdmin } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PasswordField from '@/components/PasswordField'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PasswordField } from '@/components/PasswordField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
@@ -20,7 +20,7 @@ interface PlatformLoginFormProps {
 }
 
 /** Correo y contraseña de una cuenta de plataforma. Un 429 dice cuándo volver a intentar. */
-export default function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProps) {
+export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProps) {
   const { register, handleSubmit, formState } = useForm<PlatformLoginValues>({
     resolver: zodResolver(platformLoginSchema),
     mode: 'onTouched',

@@ -16,7 +16,7 @@ const FILA = 'flex justify-between gap-2'
  * No es un comprobante de pago electrónico (boleta o factura): esos los emite
  * el sistema aparte y los imprime o envía el proveedor autorizado.
  */
-export default function BillTicket({ order, restaurant, timeZone }: BillTicketProps) {
+export function BillTicket({ order, restaurant, timeZone }: BillTicketProps) {
   const pagado = order.status === 'paid'
 
   return (

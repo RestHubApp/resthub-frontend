@@ -1,10 +1,10 @@
 import { tableName } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import Icon from '@/components/Icon'
-import StatusBadge from '@/components/StatusBadge'
+import { Icon } from '@/components/Icon'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
-import MoveButtons from './MoveButtons'
-import TableStatusButton from './TableStatusButton'
+import { MoveButtons } from './MoveButtons'
+import { TableStatusButton } from './TableStatusButton'
 
 interface TableAdminRowProps {
   readonly table: TableState
@@ -16,7 +16,7 @@ interface TableAdminRowProps {
 }
 
 /** Una mesa en la administracion: subir, bajar, renombrar, activar o desactivar. */
-export default function TableAdminRow({ table, isFirst, isLast, moving, onMove, onRename }: TableAdminRowProps) {
+export function TableAdminRow({ table, isFirst, isLast, moving, onMove, onRename }: TableAdminRowProps) {
   const pedido = table.active_order
 
   return (

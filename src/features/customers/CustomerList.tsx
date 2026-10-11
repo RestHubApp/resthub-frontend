@@ -2,13 +2,13 @@ import { useQuery } from '@tanstack/react-query'
 import { useDeferredValue, useState } from 'react'
 
 import { customerSearchQuery } from '@/api/customers'
-import EmptyState from '@/components/EmptyState'
-import ListSkeleton from '@/components/ListSkeleton'
-import RetryQueryError from '@/components/RetryQueryError'
-import SectionCard from '@/components/SectionCard'
+import { EmptyState } from '@/components/EmptyState'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { RetryQueryError } from '@/components/RetryQueryError'
+import { SectionCard } from '@/components/SectionCard'
 import { Input } from '@/components/ui/input'
 import { errorMessage } from '@/services/api'
-import CustomerRow from './CustomerRow'
+import { CustomerRow } from './CustomerRow'
 
 interface CustomerListProps {
   readonly onOpen: (customerId: number) => void
@@ -19,7 +19,7 @@ function cuantos(total: number): string {
 }
 
 /** Buscar en la libreta por nombre o teléfono. Muestra los 50 primeros que coinciden. */
-export default function CustomerList({ onOpen }: CustomerListProps) {
+export function CustomerList({ onOpen }: CustomerListProps) {
   const [texto, setTexto] = useState('')
   const busqueda = useDeferredValue(texto.trim())
   const clientes = useQuery(customerSearchQuery(busqueda))

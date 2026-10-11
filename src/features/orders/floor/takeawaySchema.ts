@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { textoOpcional } from '@/components/formRules'
 import type { Customer } from '@/api/types'
+import { paths } from '@/services/paths'
 
 // Los topes repiten los del backend (`orders/domain/orders.py`).
 export const MAX_CLIENTE = 80
@@ -74,5 +75,5 @@ export function newOrderPath(values: TakeawayValues): string {
     query.set('direccion', values.address)
     query.set('referencia', values.reference)
   }
-  return `/pedidos/nuevo?${query.toString()}`
+  return paths.orders.newWithQuery(query)
 }

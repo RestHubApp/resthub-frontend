@@ -1,8 +1,8 @@
 import type { Role } from '@/api/types'
-import Icon from '@/components/Icon'
-import StatusBadge from '@/components/StatusBadge'
+import { Icon } from '@/components/Icon'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
-import DeleteRoleButton from './DeleteRoleButton'
+import { DeleteRoleButton } from './DeleteRoleButton'
 import { KIND_LABELS, memberCountLabel, type PermissionGroup, permissionSummary } from './permissionGroups'
 import type { RoleAccess } from './roleAccess'
 
@@ -14,7 +14,7 @@ interface RoleRowProps {
 }
 
 /** Un rol en la lista: nombre, clase, cuántos lo tienen y qué pueden hacer. */
-export default function RoleRow({ role, groups, access, onOpen }: RoleRowProps) {
+export function RoleRow({ role, groups, access, onOpen }: RoleRowProps) {
   const editable = access === 'edit'
 
   return (

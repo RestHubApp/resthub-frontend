@@ -1,7 +1,7 @@
 import type { MenuSection } from '@/api/types'
-import FormDialog from '@/components/FormDialog'
-import CategoryForm from './CategoryForm'
-import MenuItemForm from './MenuItemForm'
+import { FormDialog } from '@/components/FormDialog'
+import { CategoryForm } from './CategoryForm'
+import { MenuItemForm } from './MenuItemForm'
 
 /**
  * Qué ventana de alta está abierta: una categoría nueva, o un plato nuevo en
@@ -19,7 +19,7 @@ interface NewMenuDialogsProps {
 }
 
 /** Las ventanas para crear una categoría o un plato. */
-export default function NewMenuDialogs({ dialog, categories, onClose }: NewMenuDialogsProps) {
+export function NewMenuDialogs({ dialog, categories, onClose }: NewMenuDialogsProps) {
   return (
     <>
       <FormDialog open={dialog?.tipo === 'categoria'} onOpenChange={onClose} title="Nueva categoría">

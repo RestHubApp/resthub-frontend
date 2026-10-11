@@ -1,4 +1,4 @@
-import RetryQueryError from './RetryQueryError'
+import { RetryQueryError } from './RetryQueryError'
 
 interface ApiFailureNoticeProps {
   readonly message: string | null
@@ -14,7 +14,7 @@ const CALLA_SI_HAY_OTRO =
   '[&:has(~_#contenido_[data-reintento])]:hidden [body:has([role=dialog]_[data-falla])_&]:hidden'
 
 /** El mismo error con reintento de las lecturas, en el armazón de cada área. */
-export default function ApiFailureNotice({ message, onRetry }: ApiFailureNoticeProps) {
+export function ApiFailureNotice({ message, onRetry }: ApiFailureNoticeProps) {
   if (message === null) return null
   return (
     <div className={`mx-auto w-full max-w-[1100px] px-4 pt-3 sm:px-6 ${CALLA_SI_HAY_OTRO}`}>

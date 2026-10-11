@@ -3,15 +3,16 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router'
 
 import { orderQuery } from '@/api/orders'
-import EmptyState from '@/components/EmptyState'
-import Icon from '@/components/Icon'
+import { EmptyState } from '@/components/EmptyState'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 import { useSession, useTimeZone } from '@/store/session'
-import BackLink from '@/components/BackLink'
-import BillTicket from './print/BillTicket'
-import KitchenTicket from './print/KitchenTicket'
+import { BackLink } from '@/components/BackLink'
+import { BillTicket } from './print/BillTicket'
+import { KitchenTicket } from './print/KitchenTicket'
 import { PRINT_CSS } from '@/components/printSheet'
-import QueryError from './QueryError'
+import { QueryError } from './QueryError'
 
 /**
  * Una hoja para la impresora térmica: la comanda para cocina o la cuenta.
@@ -20,7 +21,7 @@ import QueryError from './QueryError'
  * 80 mm. Al abrirla se lanza sola la impresión, y el botón queda por si se
  * cancela o hace falta otra copia.
  */
-export default function PrintView() {
+export function PrintView() {
   const params = useParams()
   const orderId = Number(params['orderId'])
   const comanda = params['kind'] === 'comanda'
@@ -48,7 +49,7 @@ export default function PrintView() {
       {/* La hoja no lleva título visible; el lector de pantalla sí lo necesita. */}
       <h1 className="sr-only">{`${comanda ? 'Comanda' : 'Precuenta'} del pedido #${String(pedido.data.number)}`}</h1>
       <div className="flex w-full max-w-sm items-center justify-between gap-2 print:hidden">
-        <BackLink to={`/pedidos/${String(orderId)}`} label="Pedido" />
+        <BackLink to={paths.orders.detail(orderId)} label="Pedido" />
         <Button type="button" onClick={() => {
           window.print()
         }}>

@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 
 import { itemDePedido, pedido } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import PrintView from './PrintView'
+import { PrintView } from './PrintView'
 
 const RUTA = '/imprimir/:orderId/:kind'
 const imprimir = jest.fn()

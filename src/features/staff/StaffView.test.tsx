@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { EQUIPO, miembro, rol, ROL_ENCARGADO, ROL_MESERO } from '#jest/fixtures/plataforma'
 import { entrarComo, montar, PERMISOS_ENCARGADO, primero, RespuestaDeError, servidor, type Peticion } from '#jest/harness'
 import type { PermissionCode } from '@/api/types'
-import StaffView from './StaffView'
+import { StaffView } from './StaffView'
 
 // Contraseña de prueba, no una credencial real.
 const OTRA_CLAVE_DE_PRUEBA = 'otra-clave-10'

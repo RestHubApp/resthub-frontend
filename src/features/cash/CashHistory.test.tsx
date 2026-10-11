@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { resumenDeCaja, turnoDeCaja } from '#jest/fixtures/cash'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
 import type { CashSession } from '@/api/types'
-import CashHistory from './CashHistory'
+import { CashHistory } from './CashHistory'
 
 const SESIONES = '/cash/sessions'
 const DOSCIENTOS = '200.00'

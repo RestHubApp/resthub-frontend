@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 
 interface FilterActionsProps {
@@ -8,7 +8,7 @@ interface FilterActionsProps {
 }
 
 /** «Buscar» envía el formulario de filtros; «Quitar filtros» vuelve a la lista entera. */
-export default function FilterActions({ active, onClear }: FilterActionsProps) {
+export function FilterActions({ active, onClear }: FilterActionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
       <Button type="submit" size="lg" className="h-11 px-4">

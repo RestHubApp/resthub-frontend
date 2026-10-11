@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { useLocation } from 'react-router'
 
 import { openAccessibilityMenu } from '@/components/accessibilityMenu'
-import ShellIcon from './ShellIcon'
+import { ShellIcon } from './ShellIcon'
 import { Button } from '@/components/ui/button'
 import type { CurrentUserResponse } from '@/api/types'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { paths } from '@/services/paths'
 import type { NavEntry } from './navigation'
-import NavList from './NavList'
-import SessionActions from './SessionActions'
+import { NavList } from './NavList'
+import { SessionActions } from './SessionActions'
 import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
 
 // Lo que tarda en cerrarse el panel (la animación de `sheet`).
@@ -27,14 +28,14 @@ interface MoreSheetProps {
  * como en la cuenta de un mesero, se llama "Cuenta" porque solo lleva el
  * perfil y la salida. Se marca activo cuando la pantalla actual vive adentro.
  */
-export default function MoreSheet({ entries, account }: MoreSheetProps) {
+export function MoreSheet({ entries, account }: MoreSheetProps) {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const close = () => {
     setOpen(false)
   }
   const etiqueta = entries.length > 0 ? 'Más' : 'Cuenta'
-  const adentro = pathname === '/perfil' || entries.some((entry) => entry.to === pathname)
+  const adentro = pathname === paths.profile || entries.some((entry) => entry.to === pathname)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

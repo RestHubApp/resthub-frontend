@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 
 interface RecipeFooterProps {
@@ -10,7 +10,7 @@ interface RecipeFooterProps {
 }
 
 /** El botón de guardar, que dice qué va a pasar: guardar o borrar la receta. */
-export default function RecipeFooter({ empty, hadRecipe, dirty, pending }: RecipeFooterProps) {
+export function RecipeFooter({ empty, hadRecipe, dirty, pending }: RecipeFooterProps) {
   const borra = empty && hadRecipe
   const etiqueta = borra ? 'Borrar receta' : 'Guardar receta'
 

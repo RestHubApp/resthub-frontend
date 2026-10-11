@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { celda, merma, reportesDelPanel } from '#jest/fixtures/panel'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import InsightsView from './InsightsView'
+import { InsightsView } from './InsightsView'
 
 const MERMAS = '/insights/waste'
 

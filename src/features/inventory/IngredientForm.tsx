@@ -3,15 +3,15 @@ import { useForm, useWatch } from 'react-hook-form'
 
 import { createIngredient, updateIngredient } from '@/api/inventory'
 import type { Ingredient, IngredientUnit } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import FormButtons from './FormButtons'
-import IngredientUnitField from './IngredientUnitField'
+import { FormButtons } from './FormButtons'
+import { IngredientUnitField } from './IngredientUnitField'
 import { EMPTY_INGREDIENT, ingredientNumbers, ingredientValuesOf } from './ingredientValues'
 import { ingredientSchema, type IngredientValues } from './inventorySchema'
-import QuantityField from './QuantityField'
+import { QuantityField } from './QuantityField'
 import { inputUnits, priceUnit } from './units'
 import { useInventoryChange } from './useInventoryChange'
 
@@ -30,7 +30,7 @@ function guardar(ingredient: Ingredient | undefined, valores: IngredientValues) 
 }
 
 /** Alta y edición de un insumo. */
-export default function IngredientForm({ ingredient, onDone }: IngredientFormProps) {
+export function IngredientForm({ ingredient, onDone }: IngredientFormProps) {
   const { register, handleSubmit, formState, control, setValue } = useForm<IngredientValues>({
     resolver: zodResolver(ingredientSchema),
     defaultValues: ingredient === undefined ? EMPTY_INGREDIENT : ingredientValuesOf(ingredient),

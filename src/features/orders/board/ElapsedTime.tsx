@@ -1,5 +1,5 @@
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { formatMinutes, minutesSince } from '@/services/format'
 
 interface ElapsedTimeProps {
@@ -18,7 +18,7 @@ const LATE_MINUTES = 25
  * que no cambia al editar una nota); abierto y servido, desde que se abrio. Pasados 15 minutos se tine
  * de ambar y pasados 25 se marca "Demorado", con texto y no solo con color.
  */
-export default function ElapsedTime({ order, now }: ElapsedTimeProps) {
+export function ElapsedTime({ order, now }: ElapsedTimeProps) {
   const vigilado = order.status === 'in_kitchen' || order.status === 'ready'
   const minutos = minutesSince(vigilado ? order.status_changed_at : order.created_at, now)
   const tarde = vigilado && minutos >= LATE_MINUTES

@@ -1,9 +1,9 @@
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { formatMoney, toCents } from '@/services/format'
-import InvoicePanel from '@/features/orders/invoice/InvoicePanel'
-import PaymentsDone from './PaymentsDone'
+import { InvoicePanel } from '@/features/orders/invoice/InvoicePanel'
+import { PaymentsDone } from './PaymentsDone'
 
 interface ChargeReceiptProps {
   readonly order: OrderResponse
@@ -16,7 +16,7 @@ interface ChargeReceiptProps {
  * El vuelto es el del último pago, el que se acaba de cobrar: es el número
  * que importa en la caja, así que va grande y se anuncia.
  */
-export default function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
+export function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
   const ultimo = order.payments.at(-1)
   const vuelto = ultimo?.change ?? null
   const recibido = ultimo?.amount_received ?? ''

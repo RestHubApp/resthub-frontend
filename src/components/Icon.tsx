@@ -23,7 +23,7 @@ const STROKE_WIDTH = 1.75
  * linea alli y verlo propagado por cada pantalla. `IconName` viene del mismo
  * registro, de modo que pedir un icono inexistente no compila.
  */
-export default function Icon({ name, size = DEFAULT_SIZE, label, className }: IconProps) {
+export function Icon({ name, size = DEFAULT_SIZE, label, className }: IconProps) {
   const nombrado = label !== undefined && label !== ''
   const Glyph = ICONS[name]
 

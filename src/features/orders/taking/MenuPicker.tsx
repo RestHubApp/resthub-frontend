@@ -3,14 +3,14 @@ import { useDeferredValue, useMemo, useState } from 'react'
 
 import { orderMenuQuery } from '@/api/orders'
 import type { OrderMenuItem } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import ListSkeleton from '@/components/ListSkeleton'
-import QueryError from '@/features/orders/QueryError'
-import CategoryChips from './CategoryChips'
-import DishRow from './DishRow'
+import { EmptyState } from '@/components/EmptyState'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { QueryError } from '@/features/orders/QueryError'
+import { CategoryChips } from './CategoryChips'
+import { DishRow } from './DishRow'
 import { visibleSections } from './menuFilter'
-import SearchBox from './SearchBox'
-import ModifierDialog from './ModifierDialog'
+import { SearchBox } from './SearchBox'
+import { ModifierDialog } from './ModifierDialog'
 import { type DraftLine, type DraftModifier, lineKeyFor } from './useOrderDraft'
 
 interface MenuPickerProps {
@@ -29,7 +29,7 @@ function countByDish(lines: readonly DraftLine[]): Map<number, number> {
 }
 
 /** La carta para elegir platos: busqueda, categorias y la lista. */
-export default function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) {
+export function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) {
   const carta = useQuery(orderMenuQuery)
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState<number | null>(null)

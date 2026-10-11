@@ -1,7 +1,8 @@
 import { Link } from 'react-router'
 
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import type { IconName } from '@/components/icons'
+import { paths } from '@/services/paths'
 
 interface Entry {
   readonly to: string
@@ -12,10 +13,10 @@ interface Entry {
 }
 
 const ENTRADAS: readonly Entry[] = [
-  { to: '/plataforma', label: 'Restaurantes', icon: 'restaurante', within: '/plataforma/restaurantes/' },
-  { to: '/plataforma/bitacora', label: 'Bitácora', icon: 'historial' },
-  { to: '/plataforma/vista-previa', label: 'Vista previa', icon: 'ver' },
-  { to: '/plataforma/observabilidad', label: 'Observabilidad', icon: 'observabilidad' },
+  { to: paths.platform.home, label: 'Restaurantes', icon: 'restaurante', within: paths.platform.restaurant('') },
+  { to: paths.platform.activity, label: 'Bitácora', icon: 'historial' },
+  { to: paths.platform.preview, label: 'Vista previa', icon: 'ver' },
+  { to: paths.platform.observability, label: 'Observabilidad', icon: 'observabilidad' },
 ]
 
 const BASE =
@@ -34,7 +35,7 @@ interface PlatformNavProps {
 }
 
 /** Las pantallas del área, en la franja de arriba; en un celular angosto bajan a otra fila. */
-export default function PlatformNav({ pathname }: PlatformNavProps) {
+export function PlatformNav({ pathname }: PlatformNavProps) {
   return (
     <nav aria-label="Administración del sistema" className="order-last w-full sm:order-none sm:w-auto">
       <ul className="m-0 flex list-none flex-wrap gap-1 p-0">

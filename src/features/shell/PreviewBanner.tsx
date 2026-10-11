@@ -4,8 +4,8 @@ import type { CurrentUserResponse } from '@/api/types'
 import { tokenExpiresAt } from '@/services/tokenExpiry'
 import { useSession } from '@/store/session'
 import { previewTimeLeft } from './previewCountdown'
-import PreviewExitButton from './PreviewExitButton'
-import ShellIcon from './ShellIcon'
+import { PreviewExitButton } from './PreviewExitButton'
+import { ShellIcon } from './ShellIcon'
 import { useSecondTick } from './useSecondTick'
 
 // El alto de la franja, para que la barra lateral y la cabecera del celular,
@@ -43,7 +43,7 @@ interface PreviewBannerProps {
  * venza (no se renueva) y ofrece salir. Tiene otro color que el armazón para
  * que nadie la confunda con un restaurante real.
  */
-export default function PreviewBanner({ account }: PreviewBannerProps) {
+export function PreviewBanner({ account }: PreviewBannerProps) {
   const token = useSession((state) => state.token)
   const ahora = useSecondTick()
   const ref = useAltoPublicado()

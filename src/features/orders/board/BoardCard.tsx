@@ -1,14 +1,15 @@
 import { Link } from 'react-router'
 
 import type { OrderResponse } from '@/api/types'
-import AllergyAlert from '@/features/orders/AllergyAlert'
-import ItemNote from '@/features/orders/ItemNote'
+import { AllergyAlert } from '@/features/orders/AllergyAlert'
+import { ItemNote } from '@/features/orders/ItemNote'
 import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
-import OrderItemLine from '@/features/orders/OrderItemLine'
+import { OrderItemLine } from '@/features/orders/OrderItemLine'
 import { orderPlace } from '@/features/orders/orderLabels'
-import BoardCardActions from './BoardCardActions'
-import ElapsedTime from './ElapsedTime'
+import { BoardCardActions } from './BoardCardActions'
+import { ElapsedTime } from './ElapsedTime'
 import { formatMoney, minutesSince } from '@/services/format'
+import { paths } from '@/services/paths'
 
 interface BoardCardProps {
   readonly order: OrderResponse
@@ -26,7 +27,7 @@ interface BoardCardProps {
  * rojo y "Con alergia" escrito en el encabezado. Un pedido que acaba de llegar lleva "Nuevo" durante
  * su primer minuto, para que se note que aparecio sin que nadie recargue.
  */
-export default function BoardCard({ order, now, flagFor, onCharge, onCancel }: BoardCardProps) {
+export function BoardCard({ order, now, flagFor, onCharge, onCancel }: BoardCardProps) {
   const tituloId = `pedido-${String(order.id)}`
   const nuevo = minutesSince(order.created_at, now) < 1
   const alergia = allergyIn(order, flagFor) !== undefined
@@ -38,7 +39,7 @@ export default function BoardCard({ order, now, flagFor, onCharge, onCancel }: B
     >
       <header className="flex items-start justify-between gap-2">
         <h3 id={tituloId} className="m-0 font-heading text-2xl leading-none font-black tabular-nums">
-          <Link to={`/pedidos/${String(order.id)}`} className="rounded outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50">
+          <Link to={paths.orders.detail(order.id)} className="rounded outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50">
             <span className="sr-only">Pedido </span>#{order.number}
           </Link>
         </h3>

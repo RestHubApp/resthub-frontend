@@ -1,8 +1,8 @@
 import type { ObsFilters } from './obsFilters'
-import RefreshControl from './RefreshControl'
-import RestaurantFilter from './RestaurantFilter'
+import { RefreshControl } from './RefreshControl'
+import { RestaurantFilter } from './RestaurantFilter'
 import type { ObsRefresh } from './useObsRefresh'
-import WindowPicker from './WindowPicker'
+import { WindowPicker } from './WindowPicker'
 
 interface ObsToolbarProps {
   readonly filters: ObsFilters
@@ -11,7 +11,7 @@ interface ObsToolbarProps {
 }
 
 /** Lo que vale para el panel entero: la ventana, el restaurante y la actualización. */
-export default function ObsToolbar({ filters, onChange, refresh }: ObsToolbarProps) {
+export function ObsToolbar({ filters, onChange, refresh }: ObsToolbarProps) {
   return (
     <section
       aria-label="Ventana, restaurante y actualización"

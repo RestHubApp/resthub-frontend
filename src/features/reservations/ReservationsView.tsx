@@ -1,22 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { PERMISSION } from '@/api/permissions'
 import { reservationsOfDayQuery } from '@/api/reservations'
 import { tableName, tablesQuery } from '@/api/tables'
 import type { Reservation } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import Icon from '@/components/Icon'
-import ListSkeleton from '@/components/ListSkeleton'
-import PageHeader from '@/components/PageHeader'
-import RetryQueryError from '@/components/RetryQueryError'
-import SectionCard from '@/components/SectionCard'
+import { EmptyState } from '@/components/EmptyState'
+import { Icon } from '@/components/Icon'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { PageHeader } from '@/components/PageHeader'
+import { RetryQueryError } from '@/components/RetryQueryError'
+import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { errorMessage } from '@/services/api'
 import { formatLongDate, todayIn } from '@/services/format'
 import { useCan, useTimeZone } from '@/store/session'
-import ReservationDialog from './ReservationDialog'
-import ReservationRow from './ReservationRow'
+import { ReservationDialog } from './ReservationDialog'
+import { ReservationRow } from './ReservationRow'
 import { useReservationStatus } from './useReservationMutations'
 
 type Editing = { readonly reservation: Reservation | null } | null
@@ -28,9 +29,9 @@ type Editing = { readonly reservation: Reservation | null } | null
  * mesa como siempre. Una reserva con mesa asignada no deja reservar esa mesa
  * en el mismo horario.
  */
-export default function ReservationsView() {
+export function ReservationsView() {
   const timeZone = useTimeZone()
-  const puedeGestionar = useCan('reservations.manage')
+  const puedeGestionar = useCan(PERMISSION.reservationsManage)
   const [dia, setDia] = useState(() => todayIn(timeZone))
   const reservas = useQuery(reservationsOfDayQuery(dia))
   const mesas = useQuery(tablesQuery(true))

@@ -1,5 +1,5 @@
 import type { RestockReport } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { formatDateTime } from '@/services/format'
 import { useTimeZone } from '@/store/session'
 
@@ -8,7 +8,7 @@ interface RestockNoticeProps {
 }
 
 /** Qué tan al día está la recomendación, y que la decisión es del encargado. */
-export default function RestockNotice({ report }: RestockNoticeProps) {
+export function RestockNotice({ report }: RestockNoticeProps) {
   const vencida = report.items.some((item) => item.is_stale)
   const guardada = report.refreshed_at !== null
   const timeZone = useTimeZone()

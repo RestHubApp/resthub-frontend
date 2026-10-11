@@ -3,19 +3,20 @@ import { useMemo, useState } from 'react'
 
 import { ordersQuery } from '@/api/orders'
 import type { OrderResponse } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
-import TablePagination from '@/components/TablePagination'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
+import { TablePagination } from '@/components/TablePagination'
 import { Button } from '@/components/ui/button'
-import BackLink from '@/components/BackLink'
-import HistoryFiltersBar from './history/HistoryFiltersBar'
+import { BackLink } from '@/components/BackLink'
+import { HistoryFiltersBar } from './history/HistoryFiltersBar'
 import { type HistoryFilters, PAGE_SIZE, toParams } from './history/historyFilters'
-import OrderSummary from './history/OrderSummary'
+import { OrderSummary } from './history/OrderSummary'
 import { orderPlace } from './orderLabels'
-import OrderStatusBadge from './OrderStatusBadge'
-import QueryError from './QueryError'
+import { OrderStatusBadge } from './OrderStatusBadge'
+import { QueryError } from './QueryError'
+import { paths } from '@/services/paths'
 import { useTimeZone } from '@/store/session'
 import { formatDateTime, formatMoney, todayIn } from '@/services/format'
 
@@ -55,7 +56,7 @@ function columnas(timeZone: string): DataColumn<OrderResponse>[] {
  * Se pagina en el servidor: un mes de pedidos no entra en una sola respuesta.
  * Arranca en el dia de hoy, que es lo que se revisa al cerrar la caja.
  */
-export default function HistoryView() {
+export function HistoryView() {
   const timeZone = useTimeZone()
   const hoy = todayIn(timeZone)
   const columns = useMemo(() => columnas(timeZone), [timeZone])
@@ -68,7 +69,7 @@ export default function HistoryView() {
 
   return (
     <div className="flex flex-col gap-5">
-      <BackLink to="/tablero" label="Tablero" />
+      <BackLink to={paths.board.list} label="Tablero" />
       <PageHeader title="Historial de pedidos" description="Todos los pedidos: pagados, cancelados o en curso." />
       <SectionCard title="Filtros" as="h2">
         <HistoryFiltersBar

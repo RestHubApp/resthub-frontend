@@ -4,10 +4,10 @@ import { z } from 'zod'
 
 import { saveSupplier } from '@/api/purchasing'
 import type { Supplier, SupplierRequest } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
 import { textoOpcional } from '@/components/formRules'
-import TextField from '@/components/TextField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { usePurchasingMutation } from './usePurchasingMutation'
@@ -38,7 +38,7 @@ function valuesOf(supplier: Supplier | null): Values {
 }
 
 /** Alta o edición de un proveedor: nombre, contacto, teléfono y una nota. */
-export default function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps) {
+export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps) {
   const { register, handleSubmit, formState, reset } = useForm<Values>({
     resolver: zodResolver(schema),
     values: valuesOf(supplier),

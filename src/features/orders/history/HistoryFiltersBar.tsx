@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { PERMISSION } from '@/api/permissions'
 import { MAX_STAFF_PAGE, staffQuery } from '@/api/staff'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { useCan } from '@/store/session'
 import { STATUS_OPTIONS, TYPE_OPTIONS } from '@/features/orders/orderLabels'
-import DateFilter from './DateFilter'
-import FilterSelect from './FilterSelect'
+import { DateFilter } from './DateFilter'
+import { FilterSelect } from './FilterSelect'
 import type { HistoryFilters } from './historyFilters'
 
 interface HistoryFiltersBarProps {
@@ -21,8 +22,8 @@ const PERSONAL = { limit: MAX_STAFF_PAGE, ordering: 'full_name' } as const
  * La lista de meseros sale del personal, que solo lee quien lo administra. Sin
  * ese permiso el filtro no aparece, en vez de mostrarse vacio.
  */
-export default function HistoryFiltersBar({ value, onChange }: HistoryFiltersBarProps) {
-  const verPersonal = useCan('staff.manage')
+export function HistoryFiltersBar({ value, onChange }: HistoryFiltersBarProps) {
+  const verPersonal = useCan(PERMISSION.staffManage)
   const personal = useQuery({ ...staffQuery(PERSONAL), enabled: verPersonal })
   const cambiar = (parcial: Partial<HistoryFilters>) => {
     onChange({ ...value, ...parcial })

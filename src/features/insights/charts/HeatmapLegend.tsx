@@ -8,7 +8,7 @@ interface HeatmapLegendProps {
 const SWATCH = 'inline-block h-3 w-5 rounded-[3px]'
 
 /** La escala del mapa de calor: de menos a más, y aparte el cero. */
-export default function HeatmapLegend({ max, unit }: HeatmapLegendProps) {
+export function HeatmapLegend({ max, unit }: HeatmapLegendProps) {
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
       <span className="flex items-center gap-1.5">

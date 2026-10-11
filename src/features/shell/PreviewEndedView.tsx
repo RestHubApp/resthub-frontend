@@ -1,8 +1,8 @@
-import EmptyState from '@/components/EmptyState'
+import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useSession } from '@/store/session'
 import { leavePreview } from './leavePreview'
-import ShellIcon from './ShellIcon'
+import { ShellIcon } from './ShellIcon'
 
 /**
  * Lo que queda en una pestaña de vista previa cuando su sesión terminó.
@@ -10,7 +10,7 @@ import ShellIcon from './ShellIcon'
  * No ofrece el acceso normal: esta pestaña no es para entrar con una cuenta
  * real. Una vista previa vencida se vuelve a abrir desde la administración.
  */
-export default function PreviewEndedView() {
+export function PreviewEndedView() {
   const expired = useSession((state) => state.expired)
 
   return (

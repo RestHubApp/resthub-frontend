@@ -17,7 +17,7 @@ const CASILLA_ID = 'ia-externa'
 const TITULO_ID = 'ia-externa-titulo'
 const DETALLE_ID = 'ia-externa-detalle'
 
-export default function ExternalAiCard() {
+export function ExternalAiCard() {
   const restaurante = useQuery(restaurantQuery)
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)

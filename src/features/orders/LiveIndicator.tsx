@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import type { LiveStatus } from './useLiveUpdates'
 
 interface LiveIndicatorProps {
@@ -18,7 +18,7 @@ const COPY: Record<LiveStatus, { label: string; className: string }> = {
  * recargar. Se anuncia con `role="status"` para que el lector de pantalla
  * avise cuando se corta o vuelve.
  */
-export default function LiveIndicator({ status }: LiveIndicatorProps) {
+export function LiveIndicator({ status }: LiveIndicatorProps) {
   const { label, className } = COPY[status]
 
   return (

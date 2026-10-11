@@ -12,7 +12,7 @@ interface PaymentMethodPickerProps {
  * Son radios nativos: se registran como cualquier campo, las flechas del
  * teclado recorren las opciones y el lector de pantalla dice cual esta elegida.
  */
-export default function PaymentMethodPicker({ field }: PaymentMethodPickerProps) {
+export function PaymentMethodPicker({ field }: PaymentMethodPickerProps) {
   return (
     <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
       <legend className="mb-2 text-sm font-medium">Medio de pago</legend>

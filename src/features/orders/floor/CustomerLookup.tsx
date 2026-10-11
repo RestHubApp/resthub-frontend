@@ -3,7 +3,7 @@ import { useDeferredValue, useState } from 'react'
 
 import { customerSearchQuery } from '@/api/customers'
 import type { Customer } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Input } from '@/components/ui/input'
 
 const MIN_BUSQUEDA = 3
@@ -19,7 +19,7 @@ interface CustomerLookupProps {
  * Es un atajo: el cliente que llama seguido no dicta su dirección cada vez.
  * Si no está, se escriben los datos a mano y el pedido lo agrega solo.
  */
-export default function CustomerLookup({ onPick }: CustomerLookupProps) {
+export function CustomerLookup({ onPick }: CustomerLookupProps) {
   const [texto, setTexto] = useState('')
   const busqueda = useDeferredValue(texto.trim())
   const activa = busqueda.length >= MIN_BUSQUEDA

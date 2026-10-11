@@ -1,20 +1,20 @@
 import { useState } from 'react'
 
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
-import CategorySection from './CategorySection'
-import MenuSkeleton from './MenuSkeleton'
-import NewMenuDialogs, { type NewMenuDialog } from './NewMenuDialogs'
-import TodaySummary from './TodaySummary'
+import { CategorySection } from './CategorySection'
+import { MenuSkeleton } from './MenuSkeleton'
+import { NewMenuDialogs, type NewMenuDialog } from './NewMenuDialogs'
+import { TodaySummary } from './TodaySummary'
 import { useMenuData } from './useMenuData'
 import { useMenuOrder } from './useMenuOrder'
 
 /** La carta del restaurante: categorías, platos, precios y lo que hay hoy. */
-export default function MenuView() {
+export function MenuView() {
   const { menu, costoPorPlato } = useMenuData()
   const categorias = menu.data?.categories ?? []
   const orden = useMenuOrder(categorias)

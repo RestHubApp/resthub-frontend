@@ -2,9 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { platformMutationKeys, updatePlatformRestaurant } from '@/api/platform'
 import type { PlatformRestaurantDetail } from '@/api/types'
-import ConfirmDialog from '@/components/ConfirmDialog'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { saveRestaurant } from './restaurantCache'
@@ -25,7 +25,7 @@ function personas(total: number): string {
  * directo. El botón se apaga mientras viaja la petición, así un doble toque
  * no la manda dos veces.
  */
-export default function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonProps) {
+export function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonProps) {
   const queryClient = useQueryClient()
   const estado = useMutation({
     mutationKey: platformMutationKeys.updateRestaurant,

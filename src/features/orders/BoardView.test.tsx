@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { pedido } from '#jest/fixtures/cobro'
 import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor, sinRespuesta } from '#jest/harness'
 import type { OrderResponse, PermissionCode } from '@/api/types'
-import BoardView from './BoardView'
+import { BoardView } from './BoardView'
 
 const ACTIVOS = '/orders/active'
 const MINUTO = 60_000

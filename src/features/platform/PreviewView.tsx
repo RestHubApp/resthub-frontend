@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { platformSandboxQuery } from '@/api/platform'
-import ListSkeleton from '@/components/ListSkeleton'
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
-import PlatformQueryError from './PlatformQueryError'
-import PreviewLauncher from './PreviewLauncher'
-import SandboxResetButton from './SandboxResetButton'
-import SandboxSummary from './SandboxSummary'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
+import { PlatformQueryError } from './PlatformQueryError'
+import { PreviewLauncher } from './PreviewLauncher'
+import { SandboxResetButton } from './SandboxResetButton'
+import { SandboxSummary } from './SandboxSummary'
 
 /**
  * «Vista previa»: RestHub como lo ve un encargado o un mesero, para depurar.
@@ -16,7 +16,7 @@ import SandboxSummary from './SandboxSummary'
  * un restaurante real desde acá. La vista previa se usa de verdad (tomar
  * pedidos, cobrar, encolar sin señal) y el local se reinicia cuando haga falta.
  */
-export default function PreviewView() {
+export function PreviewView() {
   const muestra = useQuery(platformSandboxQuery)
 
   let resumen = <ListSkeleton label="Cargando el local de muestra…" count={2} itemClassName="h-16 rounded-xl" />

@@ -1,7 +1,7 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from '@/components/FieldError'
-import Icon from '@/components/Icon'
+import { FieldError } from '@/components/FieldError'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { RecipeIngredient } from './recipeMath'
@@ -19,7 +19,7 @@ interface RecipeLineRowProps {
 }
 
 /** Un insumo de la receta: cuánto lleva una porción y cuánto cuesta eso. */
-export default function RecipeLineRow({
+export function RecipeLineRow({
   index,
   ingredient,
   field,

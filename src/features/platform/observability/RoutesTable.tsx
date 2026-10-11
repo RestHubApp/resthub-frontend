@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatInteger, formatMilliseconds } from '@/services/format'
 import { type ObsFilters, requestsOfRoute } from './obsFilters'
 import { ROUTE_SORTS } from './routeSort'
-import SortHeader from './SortHeader'
+import { SortHeader } from './SortHeader'
 
 interface RoutesTableProps {
   readonly routes: readonly ObsRouteStats[]
@@ -26,7 +26,7 @@ function p95(route: ObsRouteStats): string {
  * Las rutas por su plantilla (`/api/v1/orders/{order_id}`), con su tráfico,
  * sus errores y sus tiempos. Cada una enlaza a sus peticiones.
  */
-export default function RoutesTable({ routes, sort, onSort, filters }: RoutesTableProps) {
+export function RoutesTable({ routes, sort, onSort, filters }: RoutesTableProps) {
   const [peticiones, p95Col, errores] = ROUTE_SORTS
   return (
     <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">

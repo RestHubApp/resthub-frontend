@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from './FieldError'
-import FieldHint from './FieldHint'
-import FieldIcon from './FieldIcon'
+import { FieldError } from './FieldError'
+import { FieldHint } from './FieldHint'
+import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
-import Icon from './Icon'
+import { Icon } from './Icon'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -28,7 +28,7 @@ interface PasswordFieldProps {
  * diez caracteres hace que equivocarse cueste. El boton cambia su nombre
  * accesible segun el estado, asi el lector de pantalla anuncia que hara.
  */
-export default function PasswordField({
+export function PasswordField({
   id,
   label,
   field,

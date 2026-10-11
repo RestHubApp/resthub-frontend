@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 
 import { dishCostsQuery } from '@/api/inventory'
 import { menuQuery } from '@/api/menu'
+import { PERMISSION } from '@/api/permissions'
 import type { DishCost } from '@/api/types'
 import { useCan } from '@/store/session'
 
@@ -17,7 +18,7 @@ export const MENU_KEY = MENU_QUERY.queryKey
  * carta se muestra igual, solo que sin márgenes.
  */
 export function useMenuData() {
-  const puedeVerCostos = useCan('inventory.read')
+  const puedeVerCostos = useCan(PERMISSION.inventoryRead)
   const menu = useQuery(MENU_QUERY)
   const costos = useQuery({ ...dishCostsQuery, enabled: puedeVerCostos })
 

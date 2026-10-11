@@ -6,9 +6,9 @@ import {
   platformSandboxQueryKey,
   resetPlatformSandbox,
 } from '@/api/platform'
-import ConfirmDialog from '@/components/ConfirmDialog'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 
@@ -26,7 +26,7 @@ interface SandboxResetButtonProps {
  * uno nuevo con los datos de muestra de siempre. Quien tenga una vista previa
  * abierta en el viejo pierde el acceso.
  */
-export default function SandboxResetButton({ exists, onReset }: SandboxResetButtonProps) {
+export function SandboxResetButton({ exists, onReset }: SandboxResetButtonProps) {
   const queryClient = useQueryClient()
   const reinicio = useMutation({
     mutationKey: platformMutationKeys.resetSandbox,

@@ -3,18 +3,18 @@ import { useForm, useWatch } from 'react-hook-form'
 
 import { registerAdjustment } from '@/api/inventory'
 import type { Ingredient } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import SelectField from '@/components/SelectField'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { SelectField } from '@/components/SelectField'
+import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { adjustmentDelta, adjustmentPayload } from './adjustmentMath'
-import ChoiceField from './ChoiceField'
-import FormButtons from './FormButtons'
+import { ChoiceField } from './ChoiceField'
+import { FormButtons } from './FormButtons'
 import { adjustmentSchema, type AdjustmentValues } from './inventorySchema'
-import QuantityField from './QuantityField'
-import StockPreview from './StockPreview'
+import { QuantityField } from './QuantityField'
+import { StockPreview } from './StockPreview'
 import { inputUnits } from './units'
 import { useInventoryChange } from './useInventoryChange'
 import { formatQuantity, formatSignedQuantity } from '@/services/format'
@@ -35,7 +35,7 @@ const MODOS = [
  * Lo habitual es contar lo que hay en la despensa y escribirlo: el sistema
  * calcula la diferencia. Si ya se sabe la diferencia, se escribe directo.
  */
-export default function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
+export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
   const unidades = inputUnits(ingredient.unit)
   const { register, handleSubmit, formState, control } = useForm<AdjustmentValues>({
     resolver: zodResolver(adjustmentSchema),

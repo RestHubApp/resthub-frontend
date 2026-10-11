@@ -8,7 +8,7 @@ const JSON_BLOCK =
   'm-0 max-h-80 overflow-auto rounded-lg bg-card p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap break-words ring-1 ring-foreground/10'
 
 /** Lo que recibió el motor y lo que respondió, tal cual se guardó. */
-export default function AiDecisionDetail({ decision }: AiDecisionDetailProps) {
+export function AiDecisionDetail({ decision }: AiDecisionDetailProps) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <section className="flex min-w-0 flex-col gap-2">

@@ -1,4 +1,4 @@
-import FormMessage from './FormMessage'
+import { FormMessage } from './FormMessage'
 import { Button } from './ui/button'
 
 interface RetryQueryErrorProps {
@@ -9,7 +9,7 @@ interface RetryQueryErrorProps {
 }
 
 /** Un error de lectura con una acción explícita para repetirla al recuperar señal. */
-export default function RetryQueryError({ message, onRetry, fallback = false }: RetryQueryErrorProps) {
+export function RetryQueryError({ message, onRetry, fallback = false }: RetryQueryErrorProps) {
   return (
     // `data-reintento`: esta falla ya ofrece reintentar (ver `ApiFailureNotice`).
     <div className="flex flex-col items-start gap-3" data-reintento={fallback ? undefined : ''}>

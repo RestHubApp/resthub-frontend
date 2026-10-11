@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 
 import { cuenta, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
 import { useSession } from '@/store/session'
-import LoginView from './LoginView'
+import { LoginView } from './LoginView'
 
 const CORREO = 'Correo'
 const CLAVE = 'Contraseña'

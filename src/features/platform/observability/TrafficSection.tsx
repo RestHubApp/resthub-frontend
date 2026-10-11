@@ -1,11 +1,11 @@
 import type { ObsTimePoint, ObsWindowParams } from '@/api/types'
-import ChartCard from '@/components/charts/ChartCard'
-import DataGrid, { type GridColumn } from '@/components/charts/DataGrid'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid, type GridColumn } from '@/components/charts/DataGrid'
 import { formatInteger, formatMilliseconds } from '@/services/format'
 import { PLATFORM_TIME_ZONE } from '@/features/platform/platformTime'
 import { bucketTitle, formatBucket } from './obsLabels'
-import ObsQueryState from './ObsQueryState'
-import TrafficChart from './TrafficChart'
+import { ObsQueryState } from './ObsQueryState'
+import { TrafficChart } from './TrafficChart'
 import type { LiveOptions } from './useObsRefresh'
 import { useTimeseries } from './useTimeseries'
 
@@ -24,7 +24,7 @@ function columns(bucketSeconds: number): GridColumn<ObsTimePoint>[] {
 }
 
 /** Peticiones y errores 5xx a lo largo de la ventana. */
-export default function TrafficSection({ params, live }: TrafficSectionProps) {
+export function TrafficSection({ params, live }: TrafficSectionProps) {
   const serie = useTimeseries(params, live)
 
   return (

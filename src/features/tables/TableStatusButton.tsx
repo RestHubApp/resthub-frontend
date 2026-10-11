@@ -1,6 +1,6 @@
 import { tableName, updateTable } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { withTable } from './tableCache'
 import { useTableMutation } from './useTableMutation'
@@ -16,7 +16,7 @@ interface TableStatusButtonProps {
  * sus pedidos. Con un pedido en curso no se desactiva: el servidor lo
  * rechazaria y el pedido quedaria sin mesa a la vista.
  */
-export default function TableStatusButton({ table }: TableStatusButtonProps) {
+export function TableStatusButton({ table }: TableStatusButtonProps) {
   const estado = useTableMutation({
     mutationFn: () => updateTable(table.id, { is_active: !table.is_active }),
     failure: 'No se pudo cambiar la mesa.',

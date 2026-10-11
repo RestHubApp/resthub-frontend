@@ -1,20 +1,21 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
+import { lazyNamed } from '@/components/lazyNamed'
 
-import PageHeader from '@/components/PageHeader'
-import DeferredSection from './DeferredSection'
-import LatencySection from './LatencySection'
+import { PageHeader } from '@/components/PageHeader'
+import { DeferredSection } from './DeferredSection'
+import { LatencySection } from './LatencySection'
 import { windowParams } from './obsFilters'
-import ObsToolbar from './ObsToolbar'
-import StatusSection from './StatusSection'
-import SummarySection from './SummarySection'
-import TrafficSection from './TrafficSection'
+import { ObsToolbar } from './ObsToolbar'
+import { StatusSection } from './StatusSection'
+import { SummarySection } from './SummarySection'
+import { TrafficSection } from './TrafficSection'
 import { useHashFocus } from './useHashFocus'
 import { useObsFilters } from './useObsFilters'
 import { useObsRefresh } from './useObsRefresh'
 
-const RoutesSection = lazy(() => import('./RoutesSection'))
-const LogsSection = lazy(() => import('./LogsSection'))
-const RequestsSection = lazy(() => import('./RequestsSection'))
+const RoutesSection = lazyNamed(() => import('./RoutesSection'), 'RoutesSection')
+const LogsSection = lazyNamed(() => import('./LogsSection'), 'LogsSection')
+const RequestsSection = lazyNamed(() => import('./RequestsSection'), 'RequestsSection')
 
 /**
  * Cómo anda la aplicación: tráfico, errores, latencias, rutas y logs de la
@@ -23,7 +24,7 @@ const RequestsSection = lazy(() => import('./RequestsSection'))
  * Se relee cada 30 s mientras la pestaña está a la vista; los filtros van en
  * la dirección, así un enlace lleva al mismo panel.
  */
-export default function ObservabilityView() {
+export function ObservabilityView() {
   const { filters, update } = useObsFilters()
   const refresh = useObsRefresh()
   const { live } = refresh

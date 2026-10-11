@@ -1,7 +1,7 @@
 import { deleteCategory } from '@/api/menu'
 import type { MenuSection } from '@/api/types'
-import ConfirmDialog from '@/components/ConfirmDialog'
-import Icon from '@/components/Icon'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { withoutCategory } from './menuCache'
 import { useMenuAction } from './useMenuAction'
@@ -17,7 +17,7 @@ interface DeleteCategoryButtonProps {
  * persona le agregó uno mientras tanto, el servidor responde 409 y el aviso
  * lo explica.
  */
-export default function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
+export function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
   const borrar = useMenuAction({
     send: () => deleteCategory(category.id),
     updateCache: (menu) => withoutCategory(menu, category.id),

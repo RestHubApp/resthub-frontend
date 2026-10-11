@@ -4,13 +4,14 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
 import { changeOwnPassword, sessionOf } from '@/api/auth'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PasswordField from '@/components/PasswordField'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PasswordField } from '@/components/PasswordField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { MIN_PASSWORD } from '@/services/fieldRules'
+import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 import {
   type ChangePasswordForm as Formulario,
@@ -55,7 +56,7 @@ function seguirConElTokenNuevo(respuesta: Cambio, origen: string | null): 'renov
  * Pide la actual aunque la sesion este abierta: un celular prestado o una
  * laptop sin bloquear no deberian alcanzar para quedarse con la cuenta.
  */
-export default function ChangePasswordForm() {
+export function ChangePasswordForm() {
   const navigate = useNavigate()
   const { register, handleSubmit, formState, reset } = useForm<Formulario>({
     resolver: zodResolver(changePasswordSchema),
@@ -78,7 +79,7 @@ export default function ChangePasswordForm() {
       if (resultado === 'renovada') {
         reset(EMPTY_CHANGE_PASSWORD)
       } else if (resultado === 'cerrada') {
-        void navigate('/acceso', { replace: true })
+        void navigate(paths.login, { replace: true })
       }
     },
   })

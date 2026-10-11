@@ -133,7 +133,7 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
 - "Hoy" y las horas son las del restaurante (`restaurant.timezone` de
   `GET /auth/me`, con `useTimeZone()`), no las del navegador de quien mira.
 - Todas las pantallas, incluso acceso y pedidos, se descargan al abrirlas
-  (`lazy` en `src/router/index.tsx`): el archivo inicial no trae formularios
+  (`lazy` en `src/router/screens.ts` y `src/router/routes.tsx`): el archivo inicial no trae formularios
   de Zod y React Hook Form ni la toma de pedidos.
 - La precarga comienza con intención de navegación: al pasar el puntero,
   enfocar o tocar un enlace del menú se adelanta el código y la consulta de

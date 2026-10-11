@@ -1,9 +1,9 @@
 import type { AiDecision } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import Icon from '@/components/Icon'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import AiDecisionDetail from './AiDecisionDetail'
-import EngineBadge from './EngineBadge'
+import { AiDecisionDetail } from './AiDecisionDetail'
+import { EngineBadge } from './EngineBadge'
 import { ACTION_LABELS } from './restockActions'
 import { useMemo } from 'react'
 
@@ -96,7 +96,7 @@ interface AiDecisionTableProps {
 }
 
 /** Cada decisión guardada, con su entrada y salida a un clic. */
-export default function AiDecisionTable({ decisions, isLoading }: AiDecisionTableProps) {
+export function AiDecisionTable({ decisions, isLoading }: AiDecisionTableProps) {
   const timeZone = useTimeZone()
   const columnas = useMemo(() => columns(timeZone), [timeZone])
   return (

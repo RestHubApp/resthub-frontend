@@ -3,21 +3,21 @@ import { useState } from 'react'
 
 import { suppliersQuery } from '@/api/purchasing'
 import type { Supplier } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import ListSkeleton from '@/components/ListSkeleton'
-import SectionCard from '@/components/SectionCard'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
-import SupplierDialog from './SupplierDialog'
+import { SupplierDialog } from './SupplierDialog'
 
 interface SuppliersPanelProps {
   readonly canManage: boolean
 }
 
 /** A quién se le compra: los proveedores del local, con su contacto. */
-export default function SuppliersPanel({ canManage }: SuppliersPanelProps) {
+export function SuppliersPanel({ canManage }: SuppliersPanelProps) {
   const proveedores = useQuery(suppliersQuery)
   // `undefined` cerrada; `null` para crear; un proveedor para editarlo.
   const [editando, setEditando] = useState<Supplier | null | undefined>(undefined)

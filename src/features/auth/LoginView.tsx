@@ -5,19 +5,20 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 
 import { login, sessionOf } from '@/api/auth'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PasswordField from '@/components/PasswordField'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PasswordField } from '@/components/PasswordField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { correoRule, MAX_PASSWORD } from '@/services/fieldRules'
+import { paths } from '@/services/paths'
 import { isPreviewTab } from '@/services/tabStorage'
 import { useSession } from '@/store/session'
-import AuthAside from './AuthAside'
-import AuthCard from './AuthCard'
-import SessionExpiredNotice from './SessionExpiredNotice'
+import { AuthAside } from './AuthAside'
+import { AuthCard } from './AuthCard'
+import { SessionExpiredNotice } from './SessionExpiredNotice'
 
 const esquema = z.object({
   email: correoRule,
@@ -50,10 +51,10 @@ const ENLACE =
   'inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
 const PLATAFORMA = (
   <>
-    <Link to="/privacidad" className={ENLACE}>
+    <Link to={paths.privacy} className={ENLACE}>
       Privacidad
     </Link>
-    <Link to="/plataforma/acceso" className={ENLACE}>
+    <Link to={paths.platform.login} className={ENLACE}>
       Administración del sistema
     </Link>
   </>
@@ -68,10 +69,10 @@ const PLATAFORMA = (
 function destinoDe(estado: unknown): string {
   const desde =
     typeof estado === 'object' && estado !== null && 'from' in estado ? estado.from : undefined
-  return typeof desde === 'string' && desde.startsWith('/') && desde !== '/acceso' ? desde : '/'
+  return typeof desde === 'string' && desde.startsWith('/') && desde !== paths.login ? desde : paths.home
 }
 
-export default function LoginView() {
+export function LoginView() {
   const signIn = useSession((state) => state.signIn)
   const navigate = useNavigate()
   const destino = destinoDe(useLocation().state)
@@ -94,7 +95,7 @@ export default function LoginView() {
   // Una pestaña de vista previa no es para entrar con una cuenta real: su
   // sesion se guardaria en la pestaña, no en el navegador.
   if (isPreviewTab()) {
-    return <Navigate to="/" replace />
+    return <Navigate to={paths.home} replace />
   }
 
   return (

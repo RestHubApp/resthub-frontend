@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
 
+import { paths } from '@/services/paths'
+
 /**
  * La versión de este texto. Es la misma que `TERMS_VERSION` en el backend
  * (`accounts/domain/entities.py`): si el texto cambia, cambian las dos y cada
@@ -71,7 +73,7 @@ const SECCIONES: readonly Seccion[] = [
  * Pública: se abre sin sesión, desde el acceso o desde la pantalla que pide
  * aceptarlos.
  */
-export default function PrivacyView() {
+export function PrivacyView() {
   return (
     // Se dibuja dentro del armazón, que ya tiene su <main>: un artículo y no otro.
     <article className="mx-auto flex w-full max-w-3xl flex-col gap-6 py-2">
@@ -92,7 +94,7 @@ export default function PrivacyView() {
         </section>
       ))}
       <p className="m-0">
-        <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">
+        <Link to={paths.home} className="inline-flex min-h-11 items-center underline underline-offset-4">
           Volver a RestHub
         </Link>
       </p>

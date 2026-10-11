@@ -1,4 +1,4 @@
-import Icon from './Icon'
+import { Icon } from './Icon'
 import { Button } from './ui/button'
 
 interface TablePaginationProps {
@@ -9,7 +9,7 @@ interface TablePaginationProps {
 }
 
 /** Anterior y siguiente, con la página en la que se está anunciada al cambiar. */
-export default function TablePagination({ actual, total, onChange }: TablePaginationProps) {
+export function TablePagination({ actual, total, onChange }: TablePaginationProps) {
   return (
     <nav aria-label="Paginación" className="flex flex-wrap items-center justify-between gap-3">
       <p className="m-0 text-sm text-muted-foreground" aria-live="polite">

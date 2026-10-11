@@ -3,6 +3,7 @@ import { redirect } from 'react-router'
 import { exchangePreviewCode, sessionOf } from '@/api/auth'
 import { errorStatus } from '@/services/api'
 import { logger } from '@/services/logger'
+import { paths } from '@/services/paths'
 import { isPreviewTab, previewEntryUrl, takeEntryFragment } from '@/services/tabStorage'
 import { useSession } from '@/store/session'
 import { failureOf, previewCodeFrom, type PreviewEntryFailure, withoutHash } from './previewCode'
@@ -41,7 +42,7 @@ export async function previewEntryLoader(): Promise<PreviewEntryResult | Respons
   const codigo = previewCodeFrom(fragmento)
 
   if (codigo === null) {
-    return useSession.getState().account?.preview === true ? redirect('/') : 'missing'
+    return useSession.getState().account?.preview === true ? redirect(paths.home) : 'missing'
   }
 
   try {
@@ -51,7 +52,7 @@ export async function previewEntryLoader(): Promise<PreviewEntryResult | Respons
       return 'failed'
     }
     useSession.getState().startPreview(respuesta.access_token, sessionOf(respuesta))
-    return redirect('/')
+    return redirect(paths.home)
   } catch (error) {
     const motivo = failureOf(errorStatus(error))
     logger.warn({ reason: motivo }, 'auth.preview_exchange_failed')

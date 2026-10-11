@@ -1,5 +1,5 @@
 import type { Ingredient, IngredientUnit } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
@@ -17,7 +17,7 @@ interface PurchaseLineEditorProps {
 }
 
 /** Un insumo de la orden: cuál, cuánto (en su unidad) y a cuánto la unidad. */
-export default function PurchaseLineEditor({ index, line, ingredients, onChange, onRemove }: PurchaseLineEditorProps) {
+export function PurchaseLineEditor({ index, line, ingredients, onChange, onRemove }: PurchaseLineEditorProps) {
   const unidad = ingredients.find((ingredient) => String(ingredient.id) === line.ingredientId)?.unit
   const id = `linea-${String(index)}`
   const enUnidad = unidad === undefined ? '' : ` en ${UNIT_LABELS[unidad]}`

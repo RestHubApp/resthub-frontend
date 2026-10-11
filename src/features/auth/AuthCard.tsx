@@ -21,7 +21,7 @@ interface AuthCardProps {
  * vista en pantallas anchas, asi el orden del teclado empieza por el
  * formulario.
  */
-export default function AuthCard({ title, description, children, footer, aside }: AuthCardProps) {
+export function AuthCard({ title, description, children, footer, aside }: AuthCardProps) {
   const tarjeta = (
     <Card className="w-full gap-6 py-6 shadow-sm">
       <CardHeader className="gap-2 px-6 sm:px-8">

@@ -1,12 +1,12 @@
 import { fetchWasteReport, insightsReportQuery } from '@/api/insights'
 import type { InsightsRangeParams, WasteByIngredient } from '@/api/types'
-import ChartCard from '@/components/charts/ChartCard'
-import DataGrid from '@/components/charts/DataGrid'
-import ClassifyWasteButton from './ClassifyWasteButton'
-import ReportState from './ReportState'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid } from '@/components/charts/DataGrid'
+import { ClassifyWasteButton } from './ClassifyWasteButton'
+import { ReportState } from './ReportState'
 import { WASTE_REPORT } from './useClassifyWaste'
 import { useInsightsReport } from './useInsightsReport'
-import WasteCharts from './WasteCharts'
+import { WasteCharts } from './WasteCharts'
 import { formatInteger, formatMoney, formatQuantity } from '@/services/format'
 
 interface WasteSectionProps {
@@ -21,7 +21,7 @@ const COLUMNS = [
 ]
 
 /** Lo que se perdió, por qué y en qué insumos. La causa la clasifica la IA. */
-export default function WasteSection({ range }: WasteSectionProps) {
+export function WasteSection({ range }: WasteSectionProps) {
   const report = useInsightsReport(insightsReportQuery(WASTE_REPORT, range, fetchWasteReport))
 
   return (

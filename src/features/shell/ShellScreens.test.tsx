@@ -1,13 +1,14 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { cuenta, entrarComo, montar, montarRutas, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
+import { cuenta, entrarComo, montar, montarRutas, PANTALLAS, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
 import { useSession } from '@/store/session'
-import AppShell from './AppShell'
-import ComingSoonView from './ComingSoonView'
-import HomeRedirect from './HomeRedirect'
-import PreviewEndedView from './PreviewEndedView'
-import RequireSession from './RequireSession'
+import { AppShell } from './AppShell'
+import { ComingSoonView } from './ComingSoonView'
+import { HomeRedirect } from './HomeRedirect'
+import { PreviewEndedView } from './PreviewEndedView'
+import { RequireSession } from './RequireSession'
+import { ShellScreensContext } from './shellScreens'
 
 const RUTA = { name: 'Ruta actual' }
 
@@ -20,7 +21,7 @@ function tokenQueVenceEn(segundos: number): string {
 describe('HomeRedirect', () => {
   it('sin sesión lleva al acceso', async () => {
     servidor()
-    montar(<HomeRedirect />)
+    montar(<ShellScreensContext value={PANTALLAS}><HomeRedirect /></ShellScreensContext>)
 
     expect(await screen.findByRole('status', RUTA)).toHaveTextContent('/acceso')
   })
@@ -28,7 +29,7 @@ describe('HomeRedirect', () => {
   it('lleva a la primera pantalla que la cuenta puede abrir', async () => {
     servidor()
     entrarComo(['insights.read'])
-    montar(<HomeRedirect />)
+    montar(<ShellScreensContext value={PANTALLAS}><HomeRedirect /></ShellScreensContext>)
 
     expect(await screen.findByRole('status', RUTA)).toHaveTextContent('/panel')
   })
@@ -36,7 +37,7 @@ describe('HomeRedirect', () => {
   it('una cuenta sin pantallas va a su perfil', async () => {
     servidor()
     entrarComo([])
-    montar(<HomeRedirect />)
+    montar(<ShellScreensContext value={PANTALLAS}><HomeRedirect /></ShellScreensContext>)
 
     expect(await screen.findByRole('status', RUTA)).toHaveTextContent('/perfil')
   })
@@ -76,7 +77,7 @@ describe('RequireSession', () => {
 
 describe('ComingSoonView', () => {
   it('toma el título y la descripción de la entrada del menú', () => {
-    montar(<ComingSoonView />, { path: '/reservas' })
+    montar(<ShellScreensContext value={PANTALLAS}><ComingSoonView /></ShellScreensContext>, { path: '/reservas' })
 
     expect(screen.getByRole('heading', { name: 'Reservas', level: 1 })).toBeInTheDocument()
     expect(screen.getByText('Las reservas de cada día: a qué hora, cuántos y en qué mesa.')).toBeInTheDocument()
@@ -110,7 +111,7 @@ describe('franja de la vista previa', () => {
     servidor()
     entrarComo(PERMISOS_ENCARGADO, { preview: true })
     useSession.setState({ token: tokenQueVenceEn(segundos) })
-    return montarRutas([{ path: '/', element: <AppShell />, children: [{ index: true, element: <p>Inicio</p> }] }])
+    return montarRutas([{ path: '/', element: <AppShell screens={PANTALLAS} />, children: [{ index: true, element: <p>Inicio</p> }] }])
   }
 
   it('dice qué local se mira, como quién y cuánto falta, sin «Cerrar sesión»', () => {

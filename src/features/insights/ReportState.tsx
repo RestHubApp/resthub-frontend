@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
-import FormMessage from '@/components/FormMessage'
-import ListSkeleton from '@/components/ListSkeleton'
+import { FormMessage } from '@/components/FormMessage'
+import { ListSkeleton } from '@/components/ListSkeleton'
 import { errorMessage } from '@/services/api'
 
 interface ReportStateProps<T> {
@@ -16,7 +16,7 @@ interface ReportStateProps<T> {
 const BLOQUE = <ListSkeleton label="Cargando…" count={1} itemClassName="h-48 rounded-xl" />
 
 /** Carga, error o el contenido de un reporte, igual en cada sección. */
-export default function ReportState<T>({
+export function ReportState<T>({
   data,
   error,
   errorText,

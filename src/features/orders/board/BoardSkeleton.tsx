@@ -1,4 +1,4 @@
-import LoadingRegion from '@/components/LoadingRegion'
+import { LoadingRegion } from '@/components/LoadingRegion'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface BoardSkeletonProps {
@@ -9,7 +9,7 @@ interface BoardSkeletonProps {
 const TARJETAS = 2
 
 /** Las columnas del tablero con tarjetas vacías mientras llegan los pedidos. */
-export default function BoardSkeleton({ titles }: BoardSkeletonProps) {
+export function BoardSkeleton({ titles }: BoardSkeletonProps) {
   return (
     <LoadingRegion label="Cargando pedidos…" className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
       {titles.map((title) => (

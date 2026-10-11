@@ -16,7 +16,7 @@ interface FilterTextFieldProps {
  * Un filtro de texto que se aplica al enviar el formulario, no con cada letra:
  * cada búsqueda es una lectura del servidor.
  */
-export default function FilterTextField({
+export function FilterTextField({
   id,
   name,
   label,

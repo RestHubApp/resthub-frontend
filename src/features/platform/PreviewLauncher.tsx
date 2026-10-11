@@ -9,13 +9,13 @@ import {
   startPlatformPreview,
 } from '@/api/platform'
 import type { PreviewAs } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { errorMessage, errorStatus } from '@/services/api'
 import { openPreviewTab, PREVIEW_AS_LABELS, previewUrl } from './previewLink'
-import PreviewOpenedNotice from './PreviewOpenedNotice'
-import SandboxResetButton from './SandboxResetButton'
+import { PreviewOpenedNotice } from './PreviewOpenedNotice'
+import { SandboxResetButton } from './SandboxResetButton'
 
 // El local de muestra no tiene una cuenta activa de ese tipo: el servidor
 // sugiere reiniciarlo.
@@ -36,7 +36,7 @@ interface Opened {
  * local de muestra con su propia sesión. El código va en el caché de
  * mutaciones solo mientras alguien mira (`gcTime: 0`), como una contraseña.
  */
-export default function PreviewLauncher() {
+export function PreviewLauncher() {
   const queryClient = useQueryClient()
   const [abierta, setAbierta] = useState<Opened | null>(null)
   const inicio = useMutation({

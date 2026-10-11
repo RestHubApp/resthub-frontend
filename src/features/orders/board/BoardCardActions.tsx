@@ -1,6 +1,7 @@
 import { advanceOrder, type OrderStep } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
 import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
@@ -13,10 +14,10 @@ interface BoardCardActionsProps {
 }
 
 /** El paso siguiente del pedido y, aparte, cancelar. */
-export default function BoardCardActions({ order, onCharge, onCancel }: BoardCardActionsProps) {
+export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActionsProps) {
   const paso = nextStepFor(order.status)
-  const puede = useCan(paso?.permission ?? 'orders.take')
-  const puedeCancelar = useCan('orders.manage')
+  const puede = useCan(paso?.permission ?? PERMISSION.ordersTake)
+  const puedeCancelar = useCan(PERMISSION.ordersManage)
   const avanzar = useOrderAction({
     mutationFn: (step: OrderStep) => advanceOrder(order.id, step),
     success: stepDoneMessage,

@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +31,7 @@ interface CloseCashButtonProps {
  * monto contado y la diferencia a la vista. Sin un monto válido, el
  * formulario muestra su error y la confirmación no se abre.
  */
-export default function CloseCashButton({ pending, expected, difference, open, onCancel, onConfirm }: CloseCashButtonProps) {
+export function CloseCashButton({ pending, expected, difference, open, onCancel, onConfirm }: CloseCashButtonProps) {
   return (
     <>
       <Button type="submit" size="lg" variant="destructive" className="h-11 px-5" disabled={pending}>

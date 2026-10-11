@@ -1,10 +1,11 @@
 import { Link, Navigate, useLocation } from 'react-router'
 
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { paths } from '@/services/paths'
 import { usePlatformSession } from '@/store/platformSession'
-import PlatformLoginForm from './PlatformLoginForm'
+import { PlatformLoginForm } from './PlatformLoginForm'
 
-const INICIO = '/plataforma'
+const INICIO = paths.platform.home
 
 /** Vuelve a la pantalla que se quiso abrir, si era del área de plataforma. */
 function destinoDe(estado: unknown): string {
@@ -22,7 +23,7 @@ function destinoDe(estado: unknown): string {
  * ningún restaurante y su sesión se guarda aparte, así que entrar acá no
  * cierra ni reemplaza la sesión de un local abierta en el mismo navegador.
  */
-export default function PlatformLoginView() {
+export function PlatformLoginView() {
   const admin = usePlatformSession((state) => state.admin)
   const expired = usePlatformSession((state) => state.expired)
   const signIn = usePlatformSession((state) => state.signIn)
@@ -50,7 +51,7 @@ export default function PlatformLoginView() {
         </CardContent>
         <CardFooter className="justify-center px-6 py-4 text-sm sm:px-8">
           <Link
-            to="/acceso"
+            to={paths.login}
             className="inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             Ir al acceso de restaurantes

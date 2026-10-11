@@ -69,7 +69,7 @@ function cuandoTermineDeCargar(cargar: () => void): () => void {
   }
 }
 
-export default function AccessibilityWidget() {
+export function AccessibilityWidget() {
   useEffect(() => cuandoTermineDeCargar(() => void import('sienna-accessibility')), [])
 
   useEffect(() => {

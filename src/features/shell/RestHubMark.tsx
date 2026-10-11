@@ -10,7 +10,7 @@ interface RestHubMarkProps {
  * instalada. Va en linea y no como imagen para heredar el color de la marca
  * sin una peticion mas. Siempre acompana al nombre, asi que es decorativo.
  */
-export default function RestHubMark({ size = 32, className = '' }: RestHubMarkProps) {
+export function RestHubMark({ size = 32, className = '' }: RestHubMarkProps) {
   return (
     <svg
       aria-hidden="true"

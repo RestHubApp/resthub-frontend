@@ -1,7 +1,7 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import PasswordField from '@/components/PasswordField'
-import TextField from '@/components/TextField'
+import { PasswordField } from '@/components/PasswordField'
+import { TextField } from '@/components/TextField'
 import { MIN_PASSWORD, soloLetras } from '@/services/fieldRules'
 
 interface OwnerFieldsProps {
@@ -24,7 +24,7 @@ interface OwnerFieldsProps {
  * otro más desde la ficha. Recibe los campos ya registrados, así el alta
  * (`owner.full_name`) y «Agregar encargado» (`full_name`) los comparten.
  */
-export default function OwnerFields({ idPrefix, fields, errors }: OwnerFieldsProps) {
+export function OwnerFields({ idPrefix, fields, errors }: OwnerFieldsProps) {
   return (
     <div className="grid items-start gap-5 sm:grid-cols-2">
       <div className="sm:col-span-2">

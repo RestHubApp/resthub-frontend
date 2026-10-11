@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 
 interface QuantityStepperProps {
@@ -15,7 +15,7 @@ interface QuantityStepperProps {
 const BUTTON = 'size-11 rounded-full text-base'
 
 /** Menos, cantidad y mas, con blancos de 44 px para el pulgar. */
-export default function QuantityStepper({
+export function QuantityStepper({
   name,
   quantity,
   max,

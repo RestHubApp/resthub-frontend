@@ -1,4 +1,4 @@
-import FormMessage from '@/components/FormMessage'
+import { FormMessage } from '@/components/FormMessage'
 import { useSession } from '@/store/session'
 
 /**
@@ -8,7 +8,7 @@ import { useSession } from '@/store/session'
  * Sin este aviso, quien tenía una pantalla abierta ve el formulario de acceso
  * de golpe y no sabe si hizo algo mal.
  */
-export default function SessionExpiredNotice() {
+export function SessionExpiredNotice() {
   const expired = useSession((state) => state.expired)
   const passwordChanged = useSession((state) => state.passwordChanged)
 

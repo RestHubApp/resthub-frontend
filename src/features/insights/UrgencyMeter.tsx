@@ -7,7 +7,7 @@ interface UrgencyMeterProps {
 const STEPS = 3
 
 /** La urgencia en tres marcas y escrita: el texto la dice, las marcas la dejan comparar de un vistazo. */
-export default function UrgencyMeter({ urgency, label }: UrgencyMeterProps) {
+export function UrgencyMeter({ urgency, label }: UrgencyMeterProps) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span aria-hidden className="flex gap-0.5">

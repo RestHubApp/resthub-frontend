@@ -1,10 +1,10 @@
 import { fetchHourlySales, insightsReportQuery } from '@/api/insights'
 import type { HourlyCell, InsightsRangeParams } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import ChartCard from '@/components/charts/ChartCard'
-import DataGrid from '@/components/charts/DataGrid'
-import Heatmap from './charts/Heatmap'
-import ReportState from './ReportState'
+import { EmptyState } from '@/components/EmptyState'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid } from '@/components/charts/DataGrid'
+import { Heatmap } from './charts/Heatmap'
+import { ReportState } from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
 import { formatHourOfDay, formatInteger, formatMoney } from '@/services/format'
 
@@ -36,7 +36,7 @@ function describe(cell: HourlyCell) {
 }
 
 /** Cuándo se llena el local: día de la semana por hora, con la hora pico escrita. */
-export default function HourlySection({ range }: HourlySectionProps) {
+export function HourlySection({ range }: HourlySectionProps) {
   const report = useInsightsReport(insightsReportQuery('sales-hourly', range, fetchHourlySales))
 
   return (
