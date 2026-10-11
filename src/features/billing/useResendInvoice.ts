@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { billingQueryKey, resendInvoice } from '@/api/billing'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 
 /** Reenviar un comprobante al proveedor y avisar cómo quedó. */

@@ -1,17 +1,17 @@
-import type { FieldErrors, UseFormRegister } from 'react-hook-form'
+import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import { PasswordField } from '@/components/PasswordField'
 import { TextField } from '@/components/TextField'
-import type { LoginFormValues } from './loginSchema'
+import type { CredentialErrors, CredentialField } from '@/services/credentialRules'
 import { SessionExpiredNotice } from './SessionExpiredNotice'
 
 interface LoginFieldsProps {
-  readonly register: UseFormRegister<LoginFormValues>
-  readonly errors: FieldErrors<LoginFormValues>
+  readonly bind: (field: CredentialField) => UseFormRegisterReturn
+  readonly errors: CredentialErrors
 }
 
 /** Aviso de sesión vencida y campos de correo y contraseña del acceso. */
-export function LoginFields({ register, errors }: LoginFieldsProps) {
+export function LoginFields({ bind, errors }: LoginFieldsProps) {
   return (
     <>
       <SessionExpiredNotice />
@@ -23,8 +23,8 @@ export function LoginFields({ register, errors }: LoginFieldsProps) {
         inputMode="email"
         autoComplete="email"
         spellCheck={false}
-        field={register('email')}
-        error={errors.email?.message}
+        field={bind('email')}
+        error={errors.email}
       />
 
       <PasswordField
@@ -32,8 +32,8 @@ export function LoginFields({ register, errors }: LoginFieldsProps) {
         label="Contraseña"
         placeholder="Tu contraseña"
         autoComplete="current-password"
-        field={register('password')}
-        error={errors.password?.message}
+        field={bind('password')}
+        error={errors.password}
       />
     </>
   )

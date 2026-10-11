@@ -25,7 +25,7 @@ function account(userId: number, changes: Partial<CurrentUserResponse> = {}): Cu
 async function openTab(local: TestStorage, route = '/') {
   const { window, tab } = newTab(local, route)
   const { useSession } = await import('./session')
-  const { currentAuthToken } = await import('@/services/api')
+  const { currentAuthToken } = await import('@/services/apiCredentials')
   return { window, tab, useSession, currentAuthToken }
 }
 

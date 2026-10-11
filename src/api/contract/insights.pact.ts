@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { errorStatus } from '@/services/api'
+import { errorStatus } from '@/services/apiError'
 import { fetchSalesSummary } from '@/api/insights'
 import {
   API_PREFIX,

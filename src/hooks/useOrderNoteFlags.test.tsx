@@ -64,7 +64,7 @@ describe('useOrderNoteFlags', () => {
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     })
-    expect(api.calls('get', NOTES)[0]?.params).toEqual({ order_ids: [1, 2, 3] })
+    expect(api.calls('get', NOTES)[0]?.params).toEqual({ order_ids: ['1', '2', '3'] })
   })
 
   it('pide clasificar las notas pendientes una sola vez', async () => {

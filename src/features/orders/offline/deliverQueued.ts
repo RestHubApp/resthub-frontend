@@ -1,5 +1,5 @@
 import { advanceOrder, openOrder } from '@/api/orders'
-import { errorMessage, errorStatus } from '@/services/api'
+import { errorMessage, errorStatus } from '@/services/apiError'
 import { isOffline } from '@/features/orders/isOffline'
 import { removeQueued, type QueuedOrder } from '@/store/offlineQueue'
 

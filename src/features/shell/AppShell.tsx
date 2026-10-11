@@ -1,3 +1,4 @@
+import type { PermissionCode } from '@/api/types'
 import { isPreviewTab } from '@/services/tabStorage'
 import { useSession } from '@/store/session'
 import { PreviewEndedView } from './PreviewEndedView'
@@ -5,9 +6,11 @@ import type { ShellScreen } from './shellScreens'
 import { SignedInShell } from './SignedInShell'
 import { SignedOutShell } from './SignedOutShell'
 import { useAccountRefresh } from './useAccountRefresh'
+import { useOfflineWarmup } from './useOfflineWarmup'
 import { useSessionRenewal } from './useSessionRenewal'
 
 const WITHOUT_SCREENS: readonly ShellScreen[] = []
+const WITHOUT_PERMISSIONS: readonly PermissionCode[] = []
 
 interface AppShellProps {
   /** Las pantallas del registro: de ellas salen el menú y lo que se adelanta al acercarse a un enlace. */
@@ -27,6 +30,7 @@ export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
   const account = useSession((state) => state.account)
   useAccountRefresh()
   useSessionRenewal()
+  useOfflineWarmup(screens, account?.permissions ?? WITHOUT_PERMISSIONS)
 
   // Una pestaña de vista previa sin sesión no ofrece el acceso normal.
   if (account === null && isPreviewTab()) {

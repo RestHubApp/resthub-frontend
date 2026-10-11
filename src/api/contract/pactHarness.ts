@@ -2,13 +2,14 @@ import path from 'node:path'
 
 import { MatchersV3, PactV4, type V3MockServer } from '@pact-foundation/pact'
 
-import { api, setAuthToken, setPlatformAuthToken } from '@/services/api'
+import { setAuthToken, setPlatformAuthToken } from '@/services/apiCredentials'
+import { setApiOrigin } from '@/services/apiRouting'
 
 // Lo que comparten las pruebas de contrato del consumidor.
 //
 // Cada prueba declara una interacción (lo que el frontend manda y lo que
 // necesita de vuelta) y la ejercita con las funciones reales de `src/api`,
-// que salen por el cliente Axios real contra el servidor simulado de Pact.
+// que salen por el cliente HTTP real contra el servidor simulado de Pact.
 // Al terminar, Pact escribe el contrato en `pacts/`; el backend lo verifica
 // contra su aplicación real.
 
@@ -109,18 +110,18 @@ export function newPact(): PactV4 {
 /**
  * Apunta el cliente real al servidor simulado y abre las sesiones de ejemplo.
  *
- * Solo cambia la base de Axios: los interceptores (identificador de petición,
+ * Solo cambia el origen del cliente: lo demás (identificador de petición,
  * token por ruta, cierre de sesión en un 401) son los de la aplicación.
  */
 export function connectTo(mockServer: V3MockServer): void {
-  api.defaults.baseURL = `${mockServer.url}${API_PREFIX}`
+  setApiOrigin(mockServer.url)
   setAuthToken(EXAMPLE_TOKEN)
   setPlatformAuthToken(EXAMPLE_TOKEN)
 }
 
 /** Sin sesión abierta: el acceso sale sin credencial. */
 export function connectWithoutSession(mockServer: V3MockServer): void {
-  api.defaults.baseURL = `${mockServer.url}${API_PREFIX}`
+  setApiOrigin(mockServer.url)
   setAuthToken(null)
   setPlatformAuthToken(null)
 }

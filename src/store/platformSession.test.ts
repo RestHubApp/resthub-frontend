@@ -3,7 +3,6 @@
  */
 // Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
 // como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
-import { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
@@ -36,9 +35,11 @@ async function load(initial: Record<string, string> = {}) {
   stubGlobal('localStorage', storage)
   jest.resetModules()
   const { usePlatformSession } = await import('./platformSession')
-  const { api, setAuthToken } = await import('@/services/api')
+  const { setAuthToken } = await import('@/services/apiCredentials')
+  const { fetchTables } = await import('@/api/tables')
+  const { renewPlatformSession } = await import('@/api/platform')
   const { queryClient } = await import('@/services/queryClient')
-  return { storage, usePlatformSession, api, setAuthToken, queryClient }
+  return { storage, usePlatformSession, fetchTables, renewPlatformSession, setAuthToken, queryClient }
 }
 
 beforeEach(() => {
@@ -114,21 +115,22 @@ describe('sesión de plataforma', () => {
   })
 
   it('su token viaja solo a /platform/* y el del restaurante al resto', async () => {
-    const { usePlatformSession, api, setAuthToken } = await load()
+    const { usePlatformSession, fetchTables, renewPlatformSession, setAuthToken } = await load()
     const token = tokenThatExpires(3600)
     usePlatformSession.getState().signIn(token, ADMIN)
     setAuthToken('restaurante')
     const headers: Record<string, unknown> = {}
-    // Sin red: el adaptador anota la cabecera con la que salió cada petición.
-    const adapter = (config: InternalAxiosRequestConfig) => {
-      headers[config.url ?? ''] = config.headers.get('Authorization')
-      return Promise.resolve({ data: null, status: 204, statusText: '', headers: {}, config })
-    }
+    // Sin red: anota la cabecera con la que salió cada petición.
+    stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init)
+      headers[new URL(request.url).pathname] = request.headers.get('Authorization')
+      return Promise.resolve(new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+    })
 
-    await Promise.all([api.get('/platform/restaurants', { adapter }), api.get('/orders', { adapter })])
+    await Promise.all([renewPlatformSession(), fetchTables()])
 
-    expect(headers['/platform/restaurants']).toBe(`Bearer ${token}`)
-    expect(headers['/orders']).toBe('Bearer restaurante')
+    expect(headers['/api/v1/platform/auth/refresh']).toBe(`Bearer ${token}`)
+    expect(headers['/api/v1/tables']).toBe('Bearer restaurante')
   })
 })
 
@@ -176,8 +178,8 @@ async function loadInPreview(token: string) {
   stubGlobal('location', { pathname: '/vista-previa', search: '', hash: '' })
   jest.resetModules()
   const { usePlatformSession } = await import('./platformSession')
-  const { api } = await import('@/services/api')
-  return { storage, usePlatformSession, api }
+  const { renewPlatformSession } = await import('@/api/platform')
+  return { storage, usePlatformSession, renewPlatformSession }
 }
 
 describe('en una pestaña de vista previa', () => {
@@ -203,15 +205,12 @@ describe('en una pestaña de vista previa', () => {
   })
 
   it('un 401 de plataforma ahí no borra la sesión real', async () => {
-    const { storage, usePlatformSession, api } = await loadInPreview(tokenThatExpires(3600))
+    const { storage, usePlatformSession, renewPlatformSession } = await loadInPreview(tokenThatExpires(3600))
     const saved = storage.data.get(PLATFORM_STORAGE_KEY)
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
-    const adapter = (config: InternalAxiosRequestConfig) => {
-      const response = { data: {}, status: 401, statusText: 'Unauthorized', headers: {}, config }
-      return Promise.reject(new AxiosError('401', 'ERR_BAD_REQUEST', config, null, response))
-    }
+    stubGlobal('fetch', () => Promise.resolve(new Response('{}', { status: 401, headers: { 'Content-Type': 'application/json' } })))
 
-    await expect(api.get('/platform/restaurants', { adapter })).rejects.toThrow()
+    await expect(renewPlatformSession()).rejects.toThrow()
 
     expect(usePlatformSession.getState().token).toBeNull()
     expect(storage.data.get(PLATFORM_STORAGE_KEY)).toBe(saved)

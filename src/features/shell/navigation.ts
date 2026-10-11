@@ -26,7 +26,8 @@ export function entriesFor(
   screens: readonly ShellScreen[],
   permissions: readonly PermissionCode[],
 ): readonly NavEntry[] {
-  return allEntries(screens).filter((entry) => permissions.includes(entry.permission))
+  const granted = new Set(permissions)
+  return allEntries(screens).filter((entry) => granted.has(entry.permission))
 }
 
 export function entryFor(screens: readonly ShellScreen[], pathname: string): NavEntry | undefined {

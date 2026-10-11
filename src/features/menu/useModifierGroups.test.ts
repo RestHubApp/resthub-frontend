@@ -19,7 +19,7 @@ describe('useModifierGroups', () => {
   it('con un grupo sin nombre deja el motivo y devuelve null', () => {
     const { result } = renderHook(() => useModifierGroups(undefined))
     act(() => {
-      result.current.setGroups([{ name: '', max: '1', required: false, options: 'Personal' }])
+      result.current.setGroups([{ key: 'grupo-test', name: '', max: '1', required: false, options: 'Personal' }])
     })
 
     let collected: unknown

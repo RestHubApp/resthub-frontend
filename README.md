@@ -12,7 +12,7 @@ bajo `/api/v1`. La documentación del producto vive en Notion.
 - shadcn/ui sobre Radix y Tailwind CSS 4; iconos de Lucide.
 - React Router en modo librería, TanStack Query y TanStack Table.
 - React Hook Form + Zod para formularios, Zustand para el estado de cliente.
-- Axios como cliente HTTP, con tipos generados por openapi-typescript.
+- `openapi-fetch` como cliente HTTP, tipado de punta a punta con los tipos que genera openapi-typescript.
 - PWA instalable con vite-plugin-pwa; sin señal, el mesero puede tomar pedidos nuevos (ver abajo).
 - ESLint estricto (typescript-eslint, sonarjs, límites de arquitectura), Husky y lint-staged.
 - Jest 30 con React Testing Library para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones) y las pantallas.
@@ -46,6 +46,9 @@ contraseña `resthub123`; al área de administración del sistema
 | `pnpm build` | Tipos y compilación de producción en `dist/` |
 | `pnpm preview` | Sirve la compilación de producción |
 | `pnpm generate:api` | Regenera `src/api/schema.d.ts` desde el OpenAPI del backend |
+| `pnpm run doctor` | React Doctor (corrección, rendimiento, seguridad y accesibilidad de React) con `--no-score`; falla ante cualquier hallazgo. Se escribe `pnpm run doctor` porque `pnpm doctor` es un comando de pnpm. Exclusiones y motivos en `doctor.config.jsonc` |
+| `pnpm carbon` | Huella de carbono de la primera visita de cada ruta, en modo estático (tamaño comprimido según el manifest de Vite); falla si una ruta baja de A+ |
+| `pnpm carbon:browser` | Lo mismo midiendo con Chromium los bytes que viajan (el del CI) |
 
 ### Pruebas
 
@@ -60,7 +63,7 @@ está en `jest/`.
 - Las pruebas de pantallas usan el arnés `#jest/harness`: `montar(<Vista />)`
   la abre con un router en memoria y el caché de la aplicación, `entrarComo()`
   abre una sesión con los permisos dados y `servidor().on('get', '/ruta', datos)`
-  responde el API desde el adaptador de Axios (`llamadas()` dice qué se envió).
+  responde el API desde un `fetch` falso (`llamadas()` dice qué se envió; los parámetros de la consulta llegan como texto).
   El canal de avisos (SSE) falso está en `#jest/channel` y los datos de prueba
   en `jest/fixtures/`.
 - Las pruebas que simulan una pestaña sin DOM (reemplazan `window`, `location`
@@ -114,16 +117,71 @@ src/
   services/     cliente HTTP, logger, caché de consultas, reglas de campos
   store/        estado de cliente con Zustand (sesión, sesión de plataforma, avisos)
   main.tsx      raíz de composición
+scripts/        herramientas de línea de comandos (huella de carbono, fuente recortada)
 ```
 
 La dirección de dependencia la hace cumplir ESLint (`eslint-plugin-boundaries`):
 el router conoce a las características, las características no se importan
 entre sí, y las capas compartidas no conocen el dominio. Las pantallas no
-llaman a Axios: pasan por `src/services/api.ts` y por las funciones de `src/api/`.
+llaman a `openapi-fetch` ni a `fetch`: pasan por `src/services/api.ts` y por las funciones de `src/api/`.
 
 La navegación sale de `src/features/shell/navigation.ts`: cada entrada declara
 el permiso de `GET /auth/me` que la muestra. En pantallas anchas va en una barra
 lateral; en el celular, en una barra inferior al alcance del pulgar.
+
+## Huella de carbono y peso de la primera visita
+
+Una persona nueva paga con sus datos y el planeta lo que baja en la primera
+visita. La meta es la nota **A+** de [websitecarbon.com](https://www.websitecarbon.com/)
+(Sustainable Web Design v4, hasta 0,040 g de CO2e, unos 270 kB transferidos) en
+el acceso, el resto de las rutas públicas y la pantalla principal del mesero
+(Pedidos). `scripts/carbon.ts` lo comprueba y el CI falla si una ruta baja de A+:
+
+```bash
+pnpm carbon                # modo estático: compila a dist-carbon/ y suma el tamaño
+                           # comprimido (brotli) de lo que carga cada ruta según el
+                           # manifest de Vite, más lo que descarga el service worker.
+                           # Es una cota inferior: no ve lo que el código pide después
+pnpm carbon:browser        # modo navegador (el del CI): sirve la compilación con
+                           # `vite preview` y mide con Chromium los bytes que viajan
+                           # (cuerpo comprimido y cabeceras), esperando 10 s tras `load`
+pnpm carbon --verbose      # lista los archivos que más pesan de cada ruta
+```
+
+Cada visita es de un contexto nuevo (sin caché). La del mesero entra con una
+sesión de prueba y el API responde datos vacíos: sus bytes no se cuentan. Si
+Chromium no arranca en WSL (falta `libnspr4`), `pnpm carbon` no lo necesita; para
+el modo navegador se pueden extraer las librerías sin `sudo` como se explica en
+`e2e/README.md` (`apt-get download libnspr4 libnss3 libasound2t64`,
+`dpkg-deb -x` y `LD_LIBRARY_PATH`).
+
+Lo que mantiene la primera visita liviana:
+
+- **El acceso no carga Zod ni React Hook Form.** Su validación es de
+  `services/credentialRules.ts` y la usan también el acceso de plataforma; el
+  resto de formularios siguen con Zod.
+- **El widget de accesibilidad (Sienna, 20 kB) se baja al tocar su botón.** La
+  página dibuja un botón propio, igual al del widget, que lo importa y abre su
+  menú (`components/AccessibilityWidget.tsx`).
+- **La fuente es la Geist de 400 a 900 en Latin-1** (19 kB, no 29 kB):
+  `bash scripts/subsetFont.sh` la regenera desde `@fontsource-variable/geist`.
+- **El archivo inicial es uno solo** (`shell` en `vite.config.ts`): cada archivo
+  de más es una petición con ~1 kB de cabeceras de seguridad.
+- **El service worker precachea solo el armazón** (lo que enlaza `index.html`:
+  8 archivos, no los 123 de antes (casi todas las pantallas y bibliotecas)). Cada pantalla se
+  guarda la primera vez que se abre (`runtimeCaching`, con `clientsClaim` para
+  que lo haga desde la primera sesión) y, para no romper el modo sin señal, al
+  entrar con sesión y tres segundos después de que el service worker está
+  listo se bajan las pantallas que el mesero necesita sin conexión
+  (`offline: true` en `router/screens/ordersScreens.ts`,
+  `features/shell/useOfflineWarmup.ts`; los archivos que la página ya había
+  bajado antes de que el service worker tomara el control los guarda
+  `services/screenCache.ts`). Ese paquete sin señal (Pedidos, pedido nuevo,
+  detalle y agregar platos: ~65 kB con cabeceras, `pnpm carbon` lo imprime) se
+  baja una vez por celular y solo con sesión; el modo navegador de `pnpm carbon`
+  bloquea el service worker y no lo cuenta en la nota. Recargar la app sin
+  señal sigue funcionando; lo que ya no pasa es pagar, en la primera visita al
+  acceso, las pantallas de administración que nunca se abrirán.
 
 ## Formatos, zona horaria y carga
 
@@ -134,7 +192,8 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
   `GET /auth/me`, con `useTimeZone()`), no las del navegador de quien mira.
 - Todas las pantallas, incluso acceso y pedidos, se descargan al abrirlas
   (`lazy` en `src/router/screens.ts` y `src/router/routes.tsx`): el archivo inicial no trae formularios
-  de Zod y React Hook Form ni la toma de pedidos.
+  de Zod y React Hook Form ni la toma de pedidos. Si el archivo de una pantalla
+  no llega, `router/RouteError.tsx` la reemplaza por un aviso con «Recargar».
 - La precarga comienza con intención de navegación: al pasar el puntero,
   enfocar o tocar un enlace del menú se adelanta el código y la consulta de
   esa pantalla. No se descargan en segundo plano todas las pantallas al

@@ -1,6 +1,6 @@
 import { EmptyState } from '@/components/EmptyState'
 import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { MenuSkeleton } from './MenuSkeleton'
 
 interface MenuStatusProps {

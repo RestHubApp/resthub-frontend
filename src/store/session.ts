@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { setAuthToken, setUnauthorizedHandler } from '@/services/api'
+import { setAuthToken, setUnauthorizedHandler } from '@/services/apiCredentials'
 import { DEFAULT_TIME_ZONE } from '@/services/format'
 import { logger } from '@/services/logger'
 import { expiryTimer, isTokenExpired } from '@/services/tokenExpiry'

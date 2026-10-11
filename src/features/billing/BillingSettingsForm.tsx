@@ -9,7 +9,7 @@ import { FormMessage } from '@/components/FormMessage'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 
 const schema = z.object({

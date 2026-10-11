@@ -10,6 +10,7 @@ interface ModifierGroupProps {
 
 /** Un grupo de opciones del plato: su titulo (obligatorio u opcional, con su tope) y las fichas. */
 export function ModifierGroup({ group, chosen, onToggle }: ModifierGroupProps) {
+  const isChosen = new Set(chosen)
   return (
     <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
       <legend className="mb-1 text-sm font-medium">
@@ -25,7 +26,7 @@ export function ModifierGroup({ group, chosen, onToggle }: ModifierGroupProps) {
             key={option.name}
             name={option.name}
             price={option.price}
-            selected={chosen.includes(option.name)}
+            selected={isChosen.has(option.name)}
             onToggle={() => {
               onToggle(option.name)
             }}

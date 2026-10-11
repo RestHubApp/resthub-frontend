@@ -1,5 +1,5 @@
 import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 
 interface MutationErrorProps {
   /** Si la operación falló; si no, no se muestra nada. */

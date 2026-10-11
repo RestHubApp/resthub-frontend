@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
 import { buildAccount, signInAs, mountScreen, PERMISSIONS_WAITER, firstOf, ErrorResponse, server } from '#jest/harness'
-import { currentAuthToken } from '@/services/api'
+import { currentAuthToken } from '@/services/apiCredentials'
 import { useSession } from '@/store/session'
 import { ProfileView } from './ProfileView'
 import { SessionExpiredNotice } from './SessionExpiredNotice'

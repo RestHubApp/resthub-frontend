@@ -7,7 +7,7 @@ import { FormDialog } from '@/components/FormDialog'
 import { RetryQueryError } from '@/components/RetryQueryError'
 import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/services/format'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 
 interface TablePickerDialogProps {
   readonly open: boolean

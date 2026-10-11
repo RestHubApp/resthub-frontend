@@ -1,19 +1,26 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
+import { Icon } from './Icon'
+import { openAccessibilityMenu } from './accessibilityMenu'
 import { ATTRIBUTES_LABEL, patchMenuButton, pinWidgetMenu } from './accessibilityWidgetPatches'
+
+const WIDGET_BUTTON = '.asw-menu-btn'
 
 /**
  * Widget de accesibilidad Sienna (MIT, github.com/bennyluk/Sienna-Accessibility-Widget).
  *
  * El paquete se auto-inicializa como side-effect al importarse y corre en el
  * navegador del visitante, sin cuenta ni variable de entorno a diferencia de
- * UserWay. Se importa en su propio archivo, varios segundos después del
- * `load`: son 65 kB que la primera pantalla del celular no necesita para
- * dibujarse, y un `requestIdleCallback` los evaluaba en el primer hueco del
- * hilo, justo cuando Lighthouse mide el LCP. En el celular con sesión el
- * botón flotante se oculta (tapaba el "+" de los platos) y el
- * menú se abre desde "Más" (ver accessibilityMenu.ts). El paquete arma las URL de
- * su idioma y de la fuente de lectura contra cdn.jsdelivr.net; `vite.config.ts`
+ * UserWay. Son 65 kB (20 kB por la red) que casi nadie usa, así que no se baja
+ * hasta que alguien lo pide: la página dibuja un botón propio, igual al del
+ * widget (`.a11y-launcher` en index.css), y al tocarlo se importa el paquete,
+ * que dibuja el suyo, y se abre su menú (ver accessibilityMenu.ts). En cuanto
+ * existe el botón del widget, el nuestro se retira. En el celular con sesión el
+ * botón flotante se oculta (tapaba el "+" de los platos) y el menú se abre
+ * desde "Más".
+ *
+ * El paquete arma las URL de su idioma y de la fuente de lectura contra
+ * cdn.jsdelivr.net; `vite.config.ts`
  * (`siennaAutoalojado`) las reescribe a `/sienna/` y publica esos archivos con
  * la aplicación, así que no hay tercero en ejecución ni hace falta abrirle la
  * CSP. Solo está el español: en otro idioma el widget cae al inglés. Sí pide
@@ -29,56 +36,23 @@ import { ATTRIBUTES_LABEL, patchMenuButton, pinWidgetMenu } from './accessibilit
  * 'Abrir menú de accesibilidad' tanto al montarse como ante cualquier
  * mutación del DOM.
  */
-// Después del `load`, no en el primer hueco del hilo: el widget evalúa 65 kB
-// y pide su idioma a un CDN. Ese trabajo, si cae en los primeros segundos,
-// alarga el LCP y el TBT que Lighthouse simula con la CPU a 4×.
-const WAIT_AFTER_LOAD_MS = 8000
-
-declare global {
-  interface Window {
-    /** La pone el init script de Playwright. Lighthouse no la define. */
-    __RESTHUB_E2E?: boolean
-  }
-}
-
-/**
- * Corre `cargar` unos segundos después de `load`. Devuelve cómo cancelarlo.
- */
-function whenLoadFinishes(load: () => void): () => void {
-  let id = 0
-  const schedule = () => {
-    // Las pruebas E2E marcan la ventana: el menú tiene que existir dentro del
-    // tiempo de expect (8 s). Lighthouse no pone esa marca, así que sigue
-    // esperando y el widget no entra en la traza del LCP.
-    const wait = window.__RESTHUB_E2E === true ? 0 : WAIT_AFTER_LOAD_MS
-    id = window.setTimeout(load, wait)
-  }
-  if (document.readyState === 'complete') {
-    schedule()
-  } else {
-    window.addEventListener('load', schedule, { once: true })
-  }
-  return () => {
-    window.removeEventListener('load', schedule)
-    window.clearTimeout(id)
-  }
-}
-
 export function AccessibilityWidget() {
-  useEffect(() => whenLoadFinishes(() => void import('sienna-accessibility')), [])
+  // El widget ya dibujó su botón (se cargó desde «Más» o antes de montar esto): el de reserva sobra.
+  const [isLoaded, setIsLoaded] = useState(() => document.querySelector(WIDGET_BUTTON) !== null)
 
   useEffect(() => {
-    const existing = document.querySelector('.asw-menu-btn')
+    const existing = document.querySelector(WIDGET_BUTTON)
     if (existing) {
       patchMenuButton(existing)
     }
 
-    // El widget se importa después de montar y agrega su botón y su menú al
+    // El widget se importa al tocar el botón y agrega su botón y su menú al
     // final de <body>: se observa <body> y no un contenedor que aún no existe.
     const observer = new MutationObserver(() => {
-      const button = document.querySelector('.asw-menu-btn')
+      const button = document.querySelector(WIDGET_BUTTON)
       if (button) {
         patchMenuButton(button)
+        setIsLoaded(true)
       }
       pinWidgetMenu(document.querySelector<HTMLElement>('.asw-menu'))
     })
@@ -95,5 +69,20 @@ export function AccessibilityWidget() {
     }
   }, [])
 
-  return null
+  if (isLoaded) {
+    return null
+  }
+  return (
+    <button
+      type="button"
+      data-a11y-launcher=""
+      className="a11y-launcher"
+      title="Abrir menú de accesibilidad"
+      aria-label="Abrir menú de accesibilidad"
+      aria-expanded="false"
+      onClick={openAccessibilityMenu}
+    >
+      <Icon name="accessibility" size={30} />
+    </button>
+  )
 }

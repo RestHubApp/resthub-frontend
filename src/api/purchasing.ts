@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
+import { send } from './client'
 import { inventoryQueryKey } from './inventory'
 import type {
   CreatePurchaseOrderRequest,
@@ -20,25 +20,25 @@ const purchaseOrdersQueryKey = [...inventoryQueryKey, 'purchase-orders'] as cons
 const purchaseSuggestionsQueryKey = [...inventoryQueryKey, 'purchase-suggestions'] as const
 
 async function fetchSuppliers(): Promise<Supplier[]> {
-  const { data } = await api.get<Supplier[]>('/inventory/suppliers')
-  return data
+  return send((client) => client.GET('/api/v1/inventory/suppliers'))
 }
 
 export const suppliersQuery = queryOptions({ queryKey: suppliersQueryKey, queryFn: fetchSuppliers })
 
 export async function saveSupplier(payload: SupplierRequest, supplierId?: number): Promise<Supplier> {
-  const { data } =
-    supplierId === undefined
-      ? await api.post<Supplier>('/inventory/suppliers', payload)
-      : await api.put<Supplier>(`/inventory/suppliers/${String(supplierId)}`, payload)
-  return data
+  if (supplierId === undefined) {
+    return send((client) => client.POST('/api/v1/inventory/suppliers', { body: payload }))
+  }
+  return send((client) =>
+    client.PUT('/api/v1/inventory/suppliers/{supplier_id}', {
+      params: { path: { supplier_id: supplierId } },
+      body: payload,
+    }),
+  )
 }
 
 async function fetchPurchaseOrders(): Promise<PurchaseOrderPage> {
-  const { data } = await api.get<PurchaseOrderPage>('/inventory/purchase-orders', {
-    params: { limit: 100 },
-  })
-  return data
+  return send((client) => client.GET('/api/v1/inventory/purchase-orders', { params: { query: { limit: 100 } } }))
 }
 
 export const purchaseOrdersQuery = queryOptions({
@@ -47,8 +47,7 @@ export const purchaseOrdersQuery = queryOptions({
 })
 
 async function fetchPurchaseSuggestions(): Promise<PurchaseSuggestion[]> {
-  const { data } = await api.get<PurchaseSuggestion[]>('/inventory/purchase-suggestions')
-  return data
+  return send((client) => client.GET('/api/v1/inventory/purchase-suggestions'))
 }
 
 export const purchaseSuggestionsQuery = queryOptions({
@@ -57,12 +56,7 @@ export const purchaseSuggestionsQuery = queryOptions({
 })
 
 export async function createPurchaseOrder(payload: CreatePurchaseOrderRequest): Promise<PurchaseOrder> {
-  const { data } = await api.post<PurchaseOrder>('/inventory/purchase-orders', payload)
-  return data
-}
-
-function orderPath(orderId: number, action: string): string {
-  return `/inventory/purchase-orders/${String(orderId)}/${action}`
+  return send((client) => client.POST('/api/v1/inventory/purchase-orders', { body: payload }))
 }
 
 /** Enviar al proveedor o cancelar. */
@@ -70,14 +64,21 @@ export async function changePurchaseOrder(
   orderId: number,
   action: 'send' | 'cancel',
 ): Promise<PurchaseOrder> {
-  const { data } = await api.post<PurchaseOrder>(orderPath(orderId, action))
-  return data
+  const params = { path: { order_id: orderId } }
+  if (action === 'send') {
+    return send((client) => client.POST('/api/v1/inventory/purchase-orders/{order_id}/send', { params }))
+  }
+  return send((client) => client.POST('/api/v1/inventory/purchase-orders/{order_id}/cancel', { params }))
 }
 
 export async function receivePurchaseOrder(
   orderId: number,
   payload: ReceivePurchaseOrderRequest,
 ): Promise<PurchaseOrder> {
-  const { data } = await api.post<PurchaseOrder>(orderPath(orderId, 'receive'), payload)
-  return data
+  return send((client) =>
+    client.POST('/api/v1/inventory/purchase-orders/{order_id}/receive', {
+      params: { path: { order_id: orderId } },
+      body: payload,
+    }),
+  )
 }

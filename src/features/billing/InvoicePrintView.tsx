@@ -6,7 +6,7 @@ import { billingSettingsQuery, invoiceQuery } from '@/api/billing'
 import { PERMISSION } from '@/api/permissions'
 import { EmptyState } from '@/components/EmptyState'
 import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useCan, useTimeZone } from '@/store/session'
 import { InvoicePrintPaper } from './InvoicePrintPaper'
 

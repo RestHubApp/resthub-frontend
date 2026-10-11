@@ -8,10 +8,11 @@ import { useNotifications } from '@/store/notifications'
 function download(data: CustomerExport, customerId: number): void {
   const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const link = document.createElement('a')
-  link.href = URL.createObjectURL(file)
+  const url = URL.createObjectURL(file)
+  link.href = url
   link.download = `cliente-${String(customerId)}-datos.json`
   link.click()
-  URL.revokeObjectURL(link.href)
+  URL.revokeObjectURL(url)
 }
 
 /**

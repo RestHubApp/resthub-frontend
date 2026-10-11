@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { tablesQuery, tablesQueryKey } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 
 interface TableMutationOptions<TVariables, TResult> {

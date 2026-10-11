@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
-import type { Customer, CustomerExport, CustomerPage, CustomerRequest } from './types'
+import { send } from './client'
+import type { Customer, CustomerExport, CustomerRequest } from './types'
 
 // La libreta de clientes del local.
 
@@ -10,20 +10,15 @@ export const customersQueryKey = ['customers'] as const
 export function customerSearchQuery(text: string) {
   return queryOptions({
     queryKey: [...customersQueryKey, 'search', text],
-    queryFn: async () => {
-      const { data } = await api.get<CustomerPage>('/customers', { params: { q: text, limit: 50 } })
-      return data
-    },
+    queryFn: () => send((client) => client.GET('/api/v1/customers', { params: { query: { q: text, limit: 50 } } })),
   })
 }
 
 export function customerQuery(customerId: number) {
   return queryOptions({
     queryKey: [...customersQueryKey, 'detail', customerId],
-    queryFn: async () => {
-      const { data } = await api.get<Customer>(`/customers/${String(customerId)}`)
-      return data
-    },
+    queryFn: () =>
+      send((client) => client.GET('/api/v1/customers/{customer_id}', { params: { path: { customer_id: customerId } } })),
   })
 }
 
@@ -33,20 +28,26 @@ export async function saveCustomer(
   customerId?: number,
   options: { readonly timeout?: number } = {},
 ): Promise<Customer> {
-  const { data } =
-    customerId === undefined
-      ? await api.post<Customer>('/customers', payload, options)
-      : await api.put<Customer>(`/customers/${String(customerId)}`, payload, options)
-  return data
+  if (customerId === undefined) {
+    return send((client) => client.POST('/api/v1/customers', { body: payload }), options)
+  }
+  return send(
+    (client) =>
+      client.PUT('/api/v1/customers/{customer_id}', { params: { path: { customer_id: customerId } }, body: payload }),
+    options,
+  )
 }
 
 /** Derecho de acceso (Ley N.º 29733): lo que el local guarda de un cliente, completo. */
 export async function exportCustomer(customerId: number): Promise<CustomerExport> {
-  const { data } = await api.get<CustomerExport>(`/customers/${String(customerId)}/export`)
-  return data
+  return send((client) =>
+    client.GET('/api/v1/customers/{customer_id}/export', { params: { path: { customer_id: customerId } } }),
+  )
 }
 
 /** Derecho de cancelación: borra sus datos de la ficha, sus pedidos y sus reservas. No se deshace. */
 export async function anonymizeCustomer(customerId: number): Promise<void> {
-  await api.post(`/customers/${String(customerId)}/anonymize`)
+  await send((client) =>
+    client.POST('/api/v1/customers/{customer_id}/anonymize', { params: { path: { customer_id: customerId } } }),
+  )
 }

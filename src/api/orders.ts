@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
+import { send } from './client'
 import type {
   ChangeItemRequest,
   DiscountRequest,
@@ -33,31 +33,22 @@ function orderListQueryKey(params: OrderListParams) {
 // que invalide `['menu']` refresca tambien la que ve el mesero.
 const orderMenuQueryKey = ['menu', 'pedidos'] as const
 
-function orderPath(orderId: number, action = ''): string {
-  return `/orders/${String(orderId)}${action}`
-}
-
 /** La carta activa, con los platos agotados incluidos para mostrarlos como tales. */
 export async function fetchOrderMenu(): Promise<OrderMenu> {
-  const { data } = await api.get<OrderMenu>('/menu')
-  return data
+  return send((client) => client.GET('/api/v1/menu'))
 }
 
 export const orderMenuQuery = queryOptions({ queryKey: orderMenuQueryKey, queryFn: fetchOrderMenu })
 
 async function fetchOrders(params: OrderListParams = {}): Promise<OrderPageResponse> {
-  // El estado es una lista: FastAPI la espera como `status=a&status=b`.
-  const { data } = await api.get<OrderPageResponse>('/orders', {
-    params,
-    paramsSerializer: { indexes: null },
-  })
-  return data
+  // El estado es una lista: FastAPI la espera como `status=a&status=b`, la
+  // forma por defecto del cliente.
+  return send((client) => client.GET('/api/v1/orders', { params: { query: params } }))
 }
 
 /** Los pedidos en curso, del mas antiguo al mas nuevo. */
 async function fetchActiveOrders(): Promise<OrderResponse[]> {
-  const { data } = await api.get<OrderResponse[]>('/orders/active')
-  return data
+  return send((client) => client.GET('/api/v1/orders/active'))
 }
 
 export const activeOrdersQuery = queryOptions({
@@ -66,21 +57,20 @@ export const activeOrdersQuery = queryOptions({
 })
 
 export async function fetchOrder(orderId: number): Promise<OrderResponse> {
-  const { data } = await api.get<OrderResponse>(orderPath(orderId))
-  return data
+  return send((client) => client.GET('/api/v1/orders/{order_id}', { params: { path: { order_id: orderId } } }))
 }
 
 export async function openOrder(payload: OpenOrderRequest): Promise<OrderResponse> {
-  const { data } = await api.post<OrderResponse>('/orders', payload)
-  return data
+  return send((client) => client.POST('/api/v1/orders', { body: payload }))
 }
 
 export async function addOrderItems(
   orderId: number,
   items: NewItemRequest[],
 ): Promise<OrderResponse> {
-  const { data } = await api.post<OrderResponse>(orderPath(orderId, '/items'), { items })
-  return data
+  return send((client) =>
+    client.POST('/api/v1/orders/{order_id}/items', { params: { path: { order_id: orderId } }, body: { items } }),
+  )
 }
 
 export async function changeOrderItem(
@@ -88,35 +78,51 @@ export async function changeOrderItem(
   itemId: number,
   payload: ChangeItemRequest,
 ): Promise<OrderResponse> {
-  const { data } = await api.patch<OrderResponse>(
-    orderPath(orderId, `/items/${String(itemId)}`),
-    payload,
+  return send((client) =>
+    client.PATCH('/api/v1/orders/{order_id}/items/{item_id}', {
+      params: { path: { order_id: orderId, item_id: itemId } },
+      body: payload,
+    }),
   )
-  return data
 }
 
 export async function removeOrderItem(orderId: number, itemId: number): Promise<OrderResponse> {
-  const { data } = await api.delete<OrderResponse>(orderPath(orderId, `/items/${String(itemId)}`))
-  return data
+  return send((client) =>
+    client.DELETE('/api/v1/orders/{order_id}/items/{item_id}', {
+      params: { path: { order_id: orderId, item_id: itemId } },
+    }),
+  )
 }
 
 /** Las transiciones sin cuerpo: enviar a cocina, listo y servido. */
 export type OrderStep = 'send' | 'ready' | 'served'
 
 export async function advanceOrder(orderId: number, step: OrderStep): Promise<OrderResponse> {
-  const { data } = await api.post<OrderResponse>(orderPath(orderId, `/${step}`))
-  return data
+  const params = { path: { order_id: orderId } }
+  switch (step) {
+    case 'send': {
+      return send((client) => client.POST('/api/v1/orders/{order_id}/send', { params }))
+    }
+    case 'ready': {
+      return send((client) => client.POST('/api/v1/orders/{order_id}/ready', { params }))
+    }
+    case 'served': {
+      return send((client) => client.POST('/api/v1/orders/{order_id}/served', { params }))
+    }
+  }
 }
 
 export async function cancelOrder(orderId: number, reason: string): Promise<OrderResponse> {
-  const { data } = await api.post<OrderResponse>(orderPath(orderId, '/cancel'), { reason })
-  return data
+  return send((client) =>
+    client.POST('/api/v1/orders/{order_id}/cancel', { params: { path: { order_id: orderId } }, body: { reason } }),
+  )
 }
 
 /** Una parte de la cuenta: por monto, por platos o, sin ninguno, lo que falta. */
 export async function addPayment(orderId: number, payload: PaymentRequest): Promise<OrderResponse> {
-  const { data } = await api.post<OrderResponse>(orderPath(orderId, '/payments'), payload)
-  return data
+  return send((client) =>
+    client.POST('/api/v1/orders/{order_id}/payments', { params: { path: { order_id: orderId } }, body: payload }),
+  )
 }
 
 /** Descuento en porcentaje; cero lo quita. */
@@ -124,12 +130,9 @@ export async function applyDiscount(
   orderId: number,
   payload: DiscountRequest,
 ): Promise<OrderResponse> {
-  const { data } = await api.put<OrderResponse>(orderPath(orderId, '/discount'), payload)
-  return data
-}
-
-function courtesyPath(orderId: number, itemId: number): string {
-  return orderPath(orderId, `/items/${String(itemId)}/courtesy`)
+  return send((client) =>
+    client.PUT('/api/v1/orders/{order_id}/discount', { params: { path: { order_id: orderId } }, body: payload }),
+  )
 }
 
 /** La casa invita el plato: se sirve y no se cobra. */
@@ -138,27 +141,40 @@ export async function grantCourtesy(
   itemId: number,
   reason: string,
 ): Promise<OrderResponse> {
-  const { data } = await api.put<OrderResponse>(courtesyPath(orderId, itemId), { reason })
-  return data
+  return send((client) =>
+    client.PUT('/api/v1/orders/{order_id}/items/{item_id}/courtesy', {
+      params: { path: { order_id: orderId, item_id: itemId } },
+      body: { reason },
+    }),
+  )
 }
 
 export async function revokeCourtesy(orderId: number, itemId: number): Promise<OrderResponse> {
-  const { data } = await api.delete<OrderResponse>(courtesyPath(orderId, itemId))
-  return data
+  return send((client) =>
+    client.DELETE('/api/v1/orders/{order_id}/items/{item_id}/courtesy', {
+      params: { path: { order_id: orderId, item_id: itemId } },
+    }),
+  )
 }
 
 /** Los comensales se mudaron: el pedido pasa a otra mesa libre. */
 export async function moveOrder(orderId: number, tableId: number): Promise<OrderResponse> {
-  const { data } = await api.post<OrderResponse>(orderPath(orderId, '/move'), { table_id: tableId })
-  return data
+  return send((client) =>
+    client.POST('/api/v1/orders/{order_id}/move', {
+      params: { path: { order_id: orderId } },
+      body: { table_id: tableId },
+    }),
+  )
 }
 
 /** Une otra mesa a este pedido: sus platos pasan acá y ella queda libre. */
 export async function mergeOrders(orderId: number, sourceOrderId: number): Promise<OrderResponse> {
-  const { data } = await api.post<OrderResponse>(orderPath(orderId, '/merge'), {
-    source_order_id: sourceOrderId,
-  })
-  return data
+  return send((client) =>
+    client.POST('/api/v1/orders/{order_id}/merge', {
+      params: { path: { order_id: orderId } },
+      body: { source_order_id: sourceOrderId },
+    }),
+  )
 }
 
 export function orderQuery(orderId: number) {

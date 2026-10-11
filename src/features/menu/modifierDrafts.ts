@@ -5,6 +5,8 @@ import type { MenuItem } from '@/api/types'
 // lo que se escribe más rápido en la laptop del encargado y no pide una tabla.
 
 export interface GroupDraft {
+  /** Identidad estable del borrador en la lista: sobrevive a quitar o reordenar grupos. */
+  readonly key: string
   readonly name: string
   /** Obligatorio: el mesero no puede enviar el plato sin elegir. */
   readonly required: boolean
@@ -37,12 +39,20 @@ function failure<T>(error: string): Parsed<T> {
   return { ok: false, error }
 }
 
+const draftCounter = { last: 0 }
+
+function newDraftKey(): string {
+  draftCounter.last += 1
+  return `grupo-${String(draftCounter.last)}`
+}
+
 export function emptyGroup(): GroupDraft {
-  return { name: '', required: false, max: '1', options: '' }
+  return { key: newDraftKey(), name: '', required: false, max: '1', options: '' }
 }
 
 export function draftsOf(item: MenuItem | undefined): GroupDraft[] {
   return (item?.modifier_groups ?? []).map((group) => ({
+    key: newDraftKey(),
     name: group.name,
     required: group.min_choices > 0,
     max: String(group.max_choices),

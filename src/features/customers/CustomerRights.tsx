@@ -2,7 +2,7 @@ import type { Customer } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useCustomerRights } from './useCustomerRights'
 
 interface CustomerRightsProps {

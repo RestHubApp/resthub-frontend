@@ -1,47 +1,63 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
+
+import { QueryClient } from '@tanstack/react-query'
 
 import { PLATFORM_QUERY_ROOT } from '@/services/queryClient'
+import { setAuthToken } from '@/services/apiCredentials'
 import { exchangePreviewCode, sessionOf } from './auth'
 import { platformMutationKeys, platformSandboxQuery, resetPlatformSandbox, startPlatformPreview } from './platform'
 
-// Jest sube `jest.mock` por encima de los import; la fábrica solo puede usar
-// variables con prefijo `mock`, que se leen cuando se llama a la función.
-const mockGet = jest.fn<(...args: unknown[]) => Promise<unknown>>()
-const mockPost = jest.fn<(...args: unknown[]) => Promise<unknown>>()
-const get = mockGet
-const post = mockPost
+const originalFetch = globalThis.fetch
 
-jest.mock('@/services/api', () => ({
-  api: { get: (...args: unknown[]) => mockGet(...args), post: (...args: unknown[]) => mockPost(...args) },
-  shouldRetry: () => false,
-}))
+interface Sent {
+  readonly method: string
+  readonly path: string
+  readonly body: string
+  readonly authorization: string | null
+}
 
-beforeEach(() => {
-  get.mockReset()
-  post.mockReset()
+const sent: Sent[] = []
+
+// Responde sin red con ese cuerpo y anota lo que salió.
+function respondWith(body: unknown): void {
+  globalThis.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const request = new Request(input, init)
+    sent.push({
+      method: request.method,
+      path: new URL(request.url).pathname,
+      body: await request.text(),
+      authorization: request.headers.get('Authorization'),
+    })
+    return new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } })
+  })
+}
+
+afterEach(() => {
+  globalThis.fetch = originalFetch
+  sent.length = 0
+  setAuthToken(null)
 })
 
 describe('API de la vista previa', () => {
   it('lee el local de muestra bajo la raíz de plataforma', async () => {
     const sample = { restaurant: null, accounts: [] }
-    get.mockResolvedValue({ data: sample })
+    respondWith(sample)
 
-    const queryFn = platformSandboxQuery.queryFn as () => Promise<unknown>
-    await expect(queryFn()).resolves.toBe(sample)
-    expect(get).toHaveBeenCalledWith('/platform/sandbox')
+    await expect(new QueryClient().query(platformSandboxQuery)).resolves.toEqual(sample)
+    expect(sent).toMatchObject([{ method: 'GET', path: '/api/v1/platform/sandbox' }])
     expect(platformSandboxQuery.queryKey[0]).toBe(PLATFORM_QUERY_ROOT)
   })
 
   it('reinicia el local de muestra con POST sin cuerpo', async () => {
-    post.mockResolvedValue({ data: { restaurant: null, accounts: [] } })
+    respondWith({ restaurant: null, accounts: [] })
     await resetPlatformSandbox()
-    expect(post).toHaveBeenCalledWith('/platform/sandbox/reset')
+    expect(sent).toEqual([{ method: 'POST', path: '/api/v1/platform/sandbox/reset', body: '', authorization: null }])
   })
 
   it('pide el código diciendo como quién se entra', async () => {
-    post.mockResolvedValue({ data: { code: 'abc', expires_in: 60 } })
+    respondWith({ code: 'abc', expires_in: 60 })
     await expect(startPlatformPreview({ as: 'waiter' })).resolves.toEqual({ code: 'abc', expires_in: 60 })
-    expect(post).toHaveBeenCalledWith('/platform/preview', { as: 'waiter' })
+    expect(sent).toMatchObject([{ method: 'POST', path: '/api/v1/platform/preview', body: '{"as":"waiter"}' }])
   })
 
   it('las mutaciones de plataforma salen del caché con la sesión de plataforma', () => {
@@ -50,9 +66,10 @@ describe('API de la vista previa', () => {
   })
 
   it('canjea el código en la ruta de restaurante, sin credencial', async () => {
-    post.mockResolvedValue({ data: {} })
+    setAuthToken('sesion-abierta')
+    respondWith({})
     await exchangePreviewCode({ code: 'abc' })
-    expect(post).toHaveBeenCalledWith('/auth/preview', { code: 'abc' }, { withoutCredential: true })
+    expect(sent).toEqual([{ method: 'POST', path: '/api/v1/auth/preview', body: '{"code":"abc"}', authorization: null }])
   })
 
   it('la sesión conserva la marca de vista previa', () => {

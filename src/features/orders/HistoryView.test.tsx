@@ -39,7 +39,7 @@ describe('HistoryView', () => {
     expect(within(row).getByText('Yape')).toBeInTheDocument()
     expect(within(row).getByText('Pagado')).toBeInTheDocument()
     const today = todayIn('America/Lima')
-    expect(lastQuery(api)).toMatchObject({ date_from: today, date_to: today, status: null, limit: 25, offset: 0 })
+    expect(lastQuery(api)).toMatchObject({ date_from: today, date_to: today, limit: '25', offset: '0' })
     expect(screen.getByText('1 en total')).toBeInTheDocument()
   })
 
@@ -63,7 +63,7 @@ describe('HistoryView', () => {
     await user.selectOptions(screen.getByLabelText('Mesero'), await screen.findByRole('option', { name: 'Luis Paz' }))
     await user.clear(screen.getByLabelText('Desde'))
 
-    expect(lastQuery(api)).toMatchObject({ status: ['cancelled'], type: 'delivery', waiter_id: 8, date_from: null })
+    expect(lastQuery(api)).toMatchObject({ status: 'cancelled', type: 'delivery', waiter_id: '8' })
   })
 
   it('sin permiso sobre el personal no ofrece filtrar por mesero', async () => {
@@ -79,7 +79,7 @@ describe('HistoryView', () => {
 
     await user.click(await screen.findByRole('button', { name: /Siguiente/u }))
 
-    expect(lastQuery(api)).toMatchObject({ offset: 25 })
+    expect(lastQuery(api)).toMatchObject({ offset: '25' })
   })
 
   it('sin resultados lo dice', async () => {

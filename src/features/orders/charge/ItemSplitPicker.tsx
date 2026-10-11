@@ -18,8 +18,9 @@ interface ItemSplitPickerProps {
  */
 export function ItemSplitPicker({ order, selected, chargeCents, onChange }: ItemSplitPickerProps) {
   const pending = unpaidItems(order)
-  const toggle = (itemId: number, marked: boolean) => {
-    onChange(marked ? [...selected, itemId] : selected.filter((id) => id !== itemId))
+  const marked = new Set(selected)
+  const toggle = (itemId: number, isMarked: boolean) => {
+    onChange(isMarked ? [...selected, itemId] : selected.filter((id) => id !== itemId))
   }
 
   return (
@@ -31,7 +32,7 @@ export function ItemSplitPicker({ order, selected, chargeCents, onChange }: Item
             <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 ring-1 ring-input has-checked:bg-muted">
               <Checkbox
                 aria-labelledby={`plato-que-paga-${String(item.id)}`}
-                checked={selected.includes(item.id)}
+                checked={marked.has(item.id)}
                 onCheckedChange={(status) => {
                   toggle(item.id, status === true)
                 }}

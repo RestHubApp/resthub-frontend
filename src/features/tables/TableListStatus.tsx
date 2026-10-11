@@ -1,7 +1,7 @@
 import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { RetryQueryError } from '@/components/RetryQueryError'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 
 interface TableListStatusProps {
   readonly isPending: boolean

@@ -24,7 +24,7 @@ function closed(id: number, changes: Partial<CashSession> = {}): CashSession {
 
 function open(items: CashSession[], total = items.length) {
   const api = server().on('get', SESSIONS, (request: { params: Record<string, unknown> }) => ({
-    items: request.params['offset'] === 0 ? items : [closed(99, { opened_by_name: 'Turno viejo' })],
+    items: request.params['offset'] === '0' ? items : [closed(99, { opened_by_name: 'Turno viejo' })],
     total,
   }))
   signInAs()
@@ -58,8 +58,8 @@ describe('CashHistory', () => {
 
     expect(await screen.findByText(/abrió Turno viejo/u)).toBeInTheDocument()
     expect(api.calls('get', SESSIONS).map((p) => p.params)).toEqual([
-      { limit: 10, offset: 0 },
-      { limit: 10, offset: 10 },
+      { limit: '10', offset: '0' },
+      { limit: '10', offset: '10' },
     ])
   })
 

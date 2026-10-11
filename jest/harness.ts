@@ -1,19 +1,19 @@
 // Arnés de las pruebas de componentes: monta una pantalla como la ve el
 // usuario (router, caché de consultas y sesión) y responde el API con un
-// servidor falso a nivel del adaptador de Axios. Así se ejercitan también las
-// funciones de `src/api/` y los interceptores de `src/services/api.ts`.
+// servidor falso a nivel de `fetch`. Así se ejercitan también las funciones de
+// `src/api/`, el cliente tipado y el transporte de `src/services/api.ts`.
 import { afterEach, beforeEach } from '@jest/globals'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, type RenderResult } from '@testing-library/react'
 import { userEvent, type UserEvent } from '@testing-library/user-event'
-import { AxiosError, AxiosHeaders, type AxiosAdapter, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { createElement, type ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider, useLocation, type RouteObject } from 'react-router'
 
 import type { CurrentUserResponse, PermissionCode } from '../src/api/types'
+import { RouteError } from '../src/router/RouteError'
 import { SCREENS } from '../src/router/screens'
 import { ToastStack } from '../src/features/shell/ToastStack'
-import { api, setAuthToken } from '../src/services/api'
+import { setAuthToken } from '../src/services/apiCredentials'
 import { queryClient } from '../src/services/queryClient'
 import { useNotifications } from '../src/store/notifications'
 import { usePlatformSession } from '../src/store/platformSession'
@@ -28,7 +28,8 @@ export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 export interface Request {
   readonly method: Method
   readonly url: string
-  readonly params: Record<string, unknown>
+  /** La consulta de la URL: lo que viaja es texto, y una clave repetida (`kind=a&kind=b`) es una lista. */
+  readonly params: Record<string, string | string[]>
   readonly body: unknown
   readonly headers: Record<string, string>
 }
@@ -62,36 +63,39 @@ function coincide(route: Route, request: Request): boolean {
   return typeof route.path === 'string' ? route.path === request.url : route.path.test(request.url)
 }
 
-function bodyOf(data: unknown): unknown {
-  if (typeof data !== 'string') {
-    return data
-  }
+function bodyOf(text: string): unknown {
   try {
-    return JSON.parse(data) as unknown
+    return JSON.parse(text) as unknown
   } catch {
-    return data
+    return text === '' ? undefined : text
   }
-}
-
-function headersOf(config: InternalAxiosRequestConfig): Record<string, string> {
-  const flat: Record<string, string> = {}
-  for (const [key, value] of Object.entries(AxiosHeaders.from(config.headers).toJSON())) {
-    flat[key.toLowerCase()] = String(value)
-  }
-  return flat
 }
 
 function respondOf(response: unknown): Respond {
   return typeof response === 'function' ? (response as Respond) : () => response
 }
 
-function requestOf(config: InternalAxiosRequestConfig): Request {
+type HttpRequest = InstanceType<typeof globalThis.Request>
+
+// El prefijo del API no es parte de la ruta que las pruebas declaran.
+const API_PREFIX = /^\/api\/v1/u
+
+function paramsOf(url: URL): Record<string, string | string[]> {
+  const grouped = new Map<string, string[]>()
+  for (const [key, value] of url.searchParams) {
+    grouped.set(key, [...(grouped.get(key) ?? []), value])
+  }
+  return Object.fromEntries([...grouped].map(([key, values]) => [key, values.length === 1 ? values.join('') : values]))
+}
+
+async function requestOf(request: HttpRequest): Promise<Request> {
+  const url = new URL(request.url)
   return {
-    method: (config.method ?? 'get').toLowerCase() as Method,
-    url: config.url ?? '',
-    params: (config.params ?? {}) as Record<string, unknown>,
-    body: bodyOf(config.data),
-    headers: headersOf(config),
+    method: request.method.toLowerCase() as Method,
+    url: url.pathname.replace(API_PREFIX, ''),
+    params: paramsOf(url),
+    body: bodyOf(await request.text()),
+    headers: Object.fromEntries(request.headers),
   }
 }
 
@@ -132,20 +136,24 @@ export class FakeServer {
     return route
   }
 
-  readonly adapter: AxiosAdapter = async (config) => {
-    const request = requestOf(config)
+  /** El `fetch` de la aplicación mientras dura la prueba. */
+  readonly fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const request = await requestOf(new globalThis.Request(input, init))
     this.requests.push(request)
     const route = this.takeRoute(request)
     const value = route ? await route.respond(request) : new ErrorResponse(404, 'No existe (prueba)')
-    const error = value instanceof ErrorResponse ? value : null
-    const status = error?.status ?? route?.status ?? 404
-    const data = error ? { detail: error.detail } : value
-    const response: AxiosResponse = { data, status, statusText: String(status), headers: {}, config, request: {} }
-    if (status >= 400) {
-      throw new AxiosError(`Request failed with status code ${String(status)}`, AxiosError.ERR_BAD_REQUEST, config, {}, response)
-    }
-    return response
+    return responseOf(value, route?.status ?? 404)
   }
+}
+
+/** La respuesta HTTP de lo que declaró la prueba: un error del API, un valor JSON o nada. */
+function responseOf(value: unknown, routeStatus: number): Response {
+  const status = value instanceof ErrorResponse ? value.status : routeStatus
+  const data = value instanceof ErrorResponse ? { detail: value.detail } : value
+  if (status === 204 || data === undefined) {
+    return new Response(null, { status: status === 200 ? 204 : status })
+  }
+  return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
 }
 
 /** Una respuesta del API que no llega nunca, para ver el estado de carga. */
@@ -153,18 +161,18 @@ export function withoutResponse(): Promise<never> {
   return new Promise<never>(() => undefined)
 }
 
-/** Un corte de red: Axios falla sin respuesta. */
+/** Un corte de red: `fetch` falla sin respuesta. */
 export function withoutNetwork(): never {
-  throw new AxiosError('Network Error', AxiosError.ERR_NETWORK)
+  throw new TypeError('Failed to fetch')
 }
 
-const adapterOriginal = api.defaults.adapter
+const fetchOriginal = globalThis.fetch
 let currentServer: FakeServer | null = null
 
 /** Instala un servidor falso nuevo para la prueba en curso. */
 export function server(): FakeServer {
   currentServer = new FakeServer()
-  api.defaults.adapter = currentServer.adapter
+  globalThis.fetch = currentServer.fetch
   return currentServer
 }
 
@@ -251,9 +259,12 @@ function copy(routes: readonly RouteObject[]): RouteObject[] {
 
 /** Monta un router en memoria con estas rutas (p. ej. las de `src/router`). */
 export function mountRoutes(routes: RouteObject[], en = '/'): Mount {
-  const router = createMemoryRouter([...copy(routes), { path: '*', element: createElement(WhereAmI) }], {
-    initialEntries: [en],
-  })
+  const router = createMemoryRouter(
+    [...copy(routes).map((route) => ({ ErrorBoundary: RouteError, ...route })), { path: '*', element: createElement(WhereAmI), ErrorBoundary: RouteError }],
+    {
+      initialEntries: [en],
+    },
+  )
   const user = userEvent.setup()
   // Los avisos (`useNotifications`) se ven como en el armazón de la aplicación.
   const result = render(
@@ -273,11 +284,7 @@ beforeEach(() => {
 
 afterEach(() => {
   queryClient.clear()
-  if (adapterOriginal === undefined) {
-    delete api.defaults.adapter
-  } else {
-    api.defaults.adapter = adapterOriginal
-  }
+  globalThis.fetch = fetchOriginal
   currentServer = null
   setAuthToken(null)
   useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })

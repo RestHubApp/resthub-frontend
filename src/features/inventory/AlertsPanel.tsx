@@ -1,7 +1,7 @@
 import { EmptyState } from '@/components/EmptyState'
 import { FormMessage } from '@/components/FormMessage'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { AlertCard } from './AlertCard'
 import type { StockAction } from './StockActionDialog'
 import { useLowStock } from './useLowStock'

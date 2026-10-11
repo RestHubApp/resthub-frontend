@@ -1,7 +1,7 @@
 import { PERMISSION } from '@/api/permissions'
 import type { Customer } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useCan, useTimeZone } from '@/store/session'
 import { CustomerDetail } from './CustomerDetail'
 import { CustomerRights } from './CustomerRights'

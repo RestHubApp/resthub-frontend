@@ -6,10 +6,9 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
-import { AxiosError, AxiosHeaders } from 'axios'
-
 import { saveCustomer } from '@/api/customers'
 import type { Customer } from '@/api/types'
+import { ApiError } from '@/services/apiError'
 import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, type TakeawayValues } from './takeawaySchema'
 
@@ -65,14 +64,13 @@ describe('withCustomer', () => {
   })
 
   it('si el teléfono ya está en la libreta, sigue sin el alta y el servidor lo reconoce', async () => {
-    const config = { headers: new AxiosHeaders() }
     save.mockRejectedValue(
-      new AxiosError('conflicto', 'ERR_BAD_REQUEST', config, undefined, {
+      new ApiError({
+        method: 'post',
+        path: '/api/v1/customers',
+        requestId: 'req-1',
         status: 409,
-        statusText: 'Conflict',
-        headers: {},
-        config,
-        data: { detail: 'El teléfono 987654321 ya es de Ana.' },
+        body: { detail: 'El teléfono 987654321 ya es de Ana.' },
       }),
     )
     await expect(withCustomer(delivery)).resolves.toBe(delivery)

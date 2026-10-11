@@ -3,7 +3,7 @@ import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { TimeZoneField } from './TimeZoneField'
 import { useRestaurantSettings } from './useRestaurantSettings'
 

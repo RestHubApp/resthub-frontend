@@ -29,6 +29,12 @@ export interface ShellScreen {
   readonly load?: () => Promise<unknown>
   /** Pone en el caché la consulta principal de la pantalla. */
   readonly prefetch?: () => void
+  /**
+   * La pantalla tiene que estar en el celular aunque se corte la señal (tomar
+   * pedidos): se descarga al entrar, sin esperar a que se abra, para que el
+   * service worker la guarde (ver `useOfflineWarmup`).
+   */
+  readonly offline?: true
 }
 
 /** Las pantallas del armazón. Las entrega el router, que es quien las conoce. */

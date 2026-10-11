@@ -96,7 +96,7 @@ describe('ObservabilityView', () => {
     await user.selectOptions(selector, 'La Esquina de Lucho')
 
     await waitFor(() => {
-      expect(lastRead(api, SUMMARY)).toEqual({ window: '24h', restaurant_id: 4 })
+      expect(lastRead(api, SUMMARY)).toEqual({ window: '24h', restaurant_id: '4' })
     })
     expect(router.state.location.search).toBe('?restaurante=4')
   })
@@ -133,7 +133,7 @@ describe('ObservabilityView: actualización, rutas y errores', () => {
     await user.click(screen.getByRole('button', { name: /Errores 5xx/u }))
 
     await waitFor(() => {
-      expect(lastRead(api, ROUTES)).toEqual({ window: '24h', sort: 'errors', limit: 20 })
+      expect(lastRead(api, ROUTES)).toEqual({ window: '24h', sort: 'errors', limit: '20' })
     })
     const rows = within(screen.getByRole('table', { name: /Rutas de la ventana/u })).getAllByRole('row')
     expect(rows[1]).toHaveTextContent('/api/v1/orders/{order_id}/pay')
@@ -145,7 +145,7 @@ describe('ObservabilityView: actualización, rutas y errores', () => {
     await user.click(await screen.findByRole('link', { name: 'Ver peticiones de GET /api/v1/orders' }))
 
     await waitFor(() => {
-      expect(lastRead(api, `${BASE}/requests`)).toEqual({ window: '24h', route: '/api/v1/orders', limit: 50 })
+      expect(lastRead(api, `${BASE}/requests`)).toEqual({ window: '24h', route: '/api/v1/orders', limit: '50' })
     })
     expect(router.state.location.hash).toBe('#peticiones')
   })

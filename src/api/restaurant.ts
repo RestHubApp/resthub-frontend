@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
+import { send } from './client'
 import type { OwnRestaurant, UpdateRestaurantRequest } from './types'
 
 // El restaurante de la cuenta: cualquiera lo lee, el encargado lo edita.
@@ -8,8 +8,7 @@ import type { OwnRestaurant, UpdateRestaurantRequest } from './types'
 export const restaurantQueryKey = ['restaurant'] as const
 
 async function fetchRestaurant(): Promise<OwnRestaurant> {
-  const { data } = await api.get<OwnRestaurant>('/restaurant')
-  return data
+  return send((client) => client.GET('/api/v1/restaurant'))
 }
 
 export const restaurantQuery = queryOptions({
@@ -18,6 +17,5 @@ export const restaurantQuery = queryOptions({
 })
 
 export async function updateRestaurant(payload: UpdateRestaurantRequest): Promise<OwnRestaurant> {
-  const { data } = await api.patch<OwnRestaurant>('/restaurant', payload)
-  return data
+  return send((client) => client.PATCH('/api/v1/restaurant', { body: payload }))
 }

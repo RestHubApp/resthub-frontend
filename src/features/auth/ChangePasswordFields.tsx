@@ -1,7 +1,7 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 
 import { PasswordField } from '@/components/PasswordField'
-import { MIN_PASSWORD } from '@/services/fieldRules'
+import { MIN_PASSWORD } from '@/services/fieldLimits'
 import type { ChangePasswordForm } from './passwordSchema'
 
 interface ChangePasswordFieldsProps {

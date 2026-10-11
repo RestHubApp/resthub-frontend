@@ -31,7 +31,7 @@ describe('MenuView: la carta', () => {
     expect(within(entries).getByText('Agotado hoy')).toBeInTheDocument()
     expect(screen.getByText('Hoy: 1 de 2 platos disponibles')).toBeInTheDocument()
     expect(screen.getByText('Agotado hoy: Causa.')).toBeInTheDocument()
-    expect(api.calls('get', MENU)[0]?.params).toEqual({ include_inactive: true })
+    expect(api.calls('get', MENU)[0]?.params).toEqual({ include_inactive: 'true' })
   })
 
   it('con acceso al inventario muestra el margen de cada plato y el camino a su receta', async () => {

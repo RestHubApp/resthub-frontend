@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
+import { send } from './client'
 import type {
   CashSession,
   CashSessionPage,
@@ -27,8 +27,7 @@ function cashSessionQueryKey(sessionId: number) {
  * mesero, solo si la caja está abierta.
  */
 export async function fetchCurrentCash(): Promise<CurrentCash> {
-  const { data } = await api.get<CurrentCash>('/cash/current')
-  return data
+  return send((client) => client.GET('/api/v1/cash/current'))
 }
 
 export const currentCashQuery = queryOptions({
@@ -39,10 +38,7 @@ export const currentCashQuery = queryOptions({
 export const CASH_PAGE_SIZE = 10
 
 async function fetchCashSessions(offset: number): Promise<CashSessionPage> {
-  const { data } = await api.get<CashSessionPage>('/cash/sessions', {
-    params: { limit: CASH_PAGE_SIZE, offset },
-  })
-  return data
+  return send((client) => client.GET('/api/v1/cash/sessions', { params: { query: { limit: CASH_PAGE_SIZE, offset } } }))
 }
 
 export function cashSessionsQuery(offset: number) {
@@ -53,18 +49,17 @@ export function cashSessionsQuery(offset: number) {
 }
 
 async function fetchCashSession(sessionId: number): Promise<CashSession> {
-  const { data } = await api.get<CashSession>(`/cash/sessions/${String(sessionId)}`)
-  return data
+  return send((client) =>
+    client.GET('/api/v1/cash/sessions/{session_id}', { params: { path: { session_id: sessionId } } }),
+  )
 }
 
 export async function openCash(payload: OpenCashRequest): Promise<CashSession> {
-  const { data } = await api.post<CashSession>('/cash/open', payload)
-  return data
+  return send((client) => client.POST('/api/v1/cash/open', { body: payload }))
 }
 
 export async function closeCash(payload: CloseCashRequest): Promise<CashSession> {
-  const { data } = await api.post<CashSession>('/cash/close', payload)
-  return data
+  return send((client) => client.POST('/api/v1/cash/close', { body: payload }))
 }
 
 export function cashSessionQuery(sessionId: number) {

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 
-import { tokenFor } from '@/services/api'
+import { tokenFor } from '@/services/apiRouting'
 import { PLATFORM_STORAGE_KEY, usePlatformSession } from './platformSession'
 
 const ADMIN = { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' }

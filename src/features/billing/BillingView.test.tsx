@@ -125,7 +125,7 @@ describe('BillingView: emitidos', () => {
     await user.click(await screen.findByRole('button', { name: 'Siguiente' }))
 
     expect(await screen.findByText('Página 2 de 2')).toBeInTheDocument()
-    expect(api.calls('get', ISSUED).at(-1)?.params).toEqual({ limit: 25, offset: 25 })
+    expect(api.calls('get', ISSUED).at(-1)?.params).toEqual({ limit: '25', offset: '25' })
   })
 
   it('si la lista falla muestra el error', async () => {

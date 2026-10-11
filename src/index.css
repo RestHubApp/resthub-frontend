@@ -8,15 +8,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-/* Español y símbolos de la interfaz: se carga solo Latin. El paquete incluye
- * cuatro subsets adicionales (cirílico, vietnamita y Latin Extended), que
- * el frontend no necesita y aumentaban el CSS de la primera carga. */
+/* La fuente de la interfaz, recortada a lo que se usa: pesos de 400 a 900 y
+ * Latin-1 (español) con sus puntuaciones. Pesa 19 kB y no los 29 kB del
+ * subconjunto latino completo. `scripts/subsetFont.sh` la regenera. */
 @font-face {
     font-family: 'Geist Variable';
     font-style: normal;
     font-display: swap;
-    font-weight: 100 900;
-    src: url('@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2');
+    font-weight: 400 900;
+    src: url('./assets/fonts/geist-latin-wght.woff2') format('woff2');
 }
 @custom-variant dark (&:is(.dark *));
 @theme inline {
@@ -250,6 +250,40 @@
 }
 
 /*
+ * El boton de reserva del widget de accesibilidad (AccessibilityWidget.tsx):
+ * el widget pesa 20 kB por la red y no se baja hasta que alguien lo pide. Este
+ * boton se ve igual que el suyo (mismo tamano, color, borde y esquina) y lo
+ * reemplaza al tocarlo.
+ */
+.a11y-launcher {
+  --a11y-primary: #0848ca;
+  position: fixed;
+  z-index: 500000;
+  right: 30px;
+  bottom: 30px;
+  display: flex;
+  width: 58px;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 3px solid white;
+  border-radius: 50%;
+  outline: 5px solid var(--a11y-primary);
+  background: var(--a11y-primary);
+  color: white;
+  box-shadow: 0 5px 15px #252c6126, 0 2px 4px #5d649433;
+  cursor: pointer;
+}
+
+@media (width <= 768px) {
+  .a11y-launcher {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/*
  * El boton del widget de accesibilidad vive fijo en la esquina inferior
  * derecha. En el celular, con sesion, esa esquina es de la barra de
  * navegacion y de los botones "+" de los platos al tomar un pedido: el boton
@@ -257,7 +291,8 @@
  * su posicion con estilos en linea, por eso hace falta `!important`.
  */
 @media (width < 64rem) {
-  html:has([data-bottom-nav]) .asw-menu-btn {
+  html:has([data-bottom-nav]) .asw-menu-btn,
+  html:has([data-bottom-nav]) .a11y-launcher {
     display: none !important;
   }
 }
@@ -267,7 +302,8 @@
  * pie: el boton de accesibilidad sube por encima para no tapar "Enviar a cocina".
  */
 @media (width >= 64rem) {
-  html:has([data-cart-bar]) .asw-menu-btn {
+  html:has([data-cart-bar]) .asw-menu-btn,
+  html:has([data-cart-bar]) .a11y-launcher {
     bottom: 6rem !important;
   }
 }

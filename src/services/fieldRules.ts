@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { MAX_PASSWORD, MIN_PASSWORD } from './fieldLimits'
+
 // Reglas de los datos de una persona, compartidas por el acceso, el perfil y
 // el alta de personal.
 //
@@ -7,8 +9,6 @@ import { z } from 'zod'
 // sigue viviendo en el servidor: avisa mientras la persona escribe y no
 // despues de un viaje.
 
-export const MIN_PASSWORD = 10
-export const MAX_PASSWORD = 128
 export const MAX_COMPLETE_NAME = 120
 
 // Letras de cualquier idioma, con tildes y enie, separadas por un espacio, un

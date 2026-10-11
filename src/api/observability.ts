@@ -1,17 +1,10 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
+import { send } from './client'
 import type {
-  ObsLogDetail,
-  ObsLogPage,
   ObsLogsParams,
-  ObsRequestPage,
   ObsRequestsParams,
   ObsRoutesParams,
-  ObsRouteStats,
-  ObsStatusCount,
-  ObsSummary,
-  ObsTimeseries,
   ObsWindowParams,
 } from './types'
 import { platformQueryKey } from './platform'
@@ -27,44 +20,42 @@ import { platformQueryKey } from './platform'
 
 export const platformObservabilityQueryKey = [...platformQueryKey, 'observability'] as const
 
-const BASE = '/platform/observability'
-
 /** Lo que se pide por página de logs o de peticiones. */
 const OBS_PAGE_SIZE = 50
+
+/** Lo que se pide de una página: el tamaño y, desde la segunda, lo anterior al último que se ve. */
+function pageOf(beforeId: number | null) {
+  return beforeId === null ? { limit: OBS_PAGE_SIZE } : { limit: OBS_PAGE_SIZE, before_id: beforeId }
+}
 
 /** El `before_id` de la primera página: ninguno, empieza por lo más nuevo. */
 const FIRST_PAGE: number | null = null
 
-async function read<T>(path: string, params: object): Promise<T> {
-  const { data } = await api.get<T>(`${BASE}${path}`, { params })
-  return data
-}
-
 export function obsSummaryQuery(params: ObsWindowParams) {
   return queryOptions({
     queryKey: [...platformObservabilityQueryKey, 'summary', params],
-    queryFn: () => read<ObsSummary>('/summary', params),
+    queryFn: () => send((client) => client.GET('/api/v1/platform/observability/summary', { params: { query: params } })),
   })
 }
 
 export function obsTimeseriesQuery(params: ObsWindowParams) {
   return queryOptions({
     queryKey: [...platformObservabilityQueryKey, 'timeseries', params],
-    queryFn: () => read<ObsTimeseries>('/timeseries', params),
+    queryFn: () => send((client) => client.GET('/api/v1/platform/observability/timeseries', { params: { query: params } })),
   })
 }
 
 export function obsRoutesQuery(params: ObsRoutesParams) {
   return queryOptions({
     queryKey: [...platformObservabilityQueryKey, 'routes', params],
-    queryFn: () => read<ObsRouteStats[]>('/routes', params),
+    queryFn: () => send((client) => client.GET('/api/v1/platform/observability/routes', { params: { query: params } })),
   })
 }
 
 export function obsStatusQuery(params: ObsWindowParams) {
   return queryOptions({
     queryKey: [...platformObservabilityQueryKey, 'status', params],
-    queryFn: () => read<ObsStatusCount[]>('/status', params),
+    queryFn: () => send((client) => client.GET('/api/v1/platform/observability/status', { params: { query: params } })),
   })
 }
 
@@ -77,7 +68,11 @@ export function obsLogsQuery(params: Omit<ObsLogsParams, 'before_id' | 'limit'>)
   return infiniteQueryOptions({
     queryKey: [...platformObservabilityQueryKey, 'logs', params],
     queryFn: ({ pageParam }) =>
-      read<ObsLogPage>('/logs', { ...params, limit: OBS_PAGE_SIZE, before_id: pageParam ?? undefined }),
+      send((client) =>
+        client.GET('/api/v1/platform/observability/logs', {
+          params: { query: { ...params, ...pageOf(pageParam) } },
+        }),
+      ),
     initialPageParam: FIRST_PAGE,
     getNextPageParam: (last) => last.next_before_id,
   })
@@ -86,7 +81,10 @@ export function obsLogsQuery(params: Omit<ObsLogsParams, 'before_id' | 'limit'>)
 export function obsLogQuery(entryId: number) {
   return queryOptions({
     queryKey: [...platformObservabilityQueryKey, 'log', entryId],
-    queryFn: () => read<ObsLogDetail>(`/logs/${String(entryId)}`, {}),
+    queryFn: () =>
+      send((client) =>
+        client.GET('/api/v1/platform/observability/logs/{entry_id}', { params: { path: { entry_id: entryId } } }),
+      ),
   })
 }
 
@@ -95,7 +93,11 @@ export function obsRequestsQuery(params: Omit<ObsRequestsParams, 'before_id' | '
   return infiniteQueryOptions({
     queryKey: [...platformObservabilityQueryKey, 'requests', params],
     queryFn: ({ pageParam }) =>
-      read<ObsRequestPage>('/requests', { ...params, limit: OBS_PAGE_SIZE, before_id: pageParam ?? undefined }),
+      send((client) =>
+        client.GET('/api/v1/platform/observability/requests', {
+          params: { query: { ...params, ...pageOf(pageParam) } },
+        }),
+      ),
     initialPageParam: FIRST_PAGE,
     getNextPageParam: (last) => last.next_before_id,
   })

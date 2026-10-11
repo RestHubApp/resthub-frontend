@@ -30,7 +30,7 @@ describe('TablesView: lista y nombre', () => {
   it('pide todas las mesas, también las desactivadas', async () => {
     const { api } = openTables()
     await screen.findByText('Mesa 1')
-    expect(api.calls('get', TABLES)[0]?.params).toEqual({ include_inactive: true })
+    expect(api.calls('get', TABLES)[0]?.params).toEqual({ include_inactive: 'true' })
   })
 
   it('sin mesas invita a crear la primera', async () => {

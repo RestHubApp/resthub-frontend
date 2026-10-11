@@ -1,4 +1,4 @@
-import { errorStatus } from '@/services/api'
+import { errorStatus } from '@/services/apiError'
 
 // El servidor no llegó a atender: el proxy delante responde por él.
 const SERVER_UNREACHABLE = new Set([502, 503, 504])

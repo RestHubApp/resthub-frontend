@@ -88,7 +88,7 @@ export const OVERLAYS = [
   // Armazón.
   { id: 'o-mas', name: 'Sheet «Más» del encargado', type: 'Sheet', route: '/tablero', account: 'owner', views: ['mobile'], steps: [{ button: 'Más' }] },
   { id: 'o-cuenta', name: 'Sheet «Cuenta» del mesero', type: 'Sheet', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }] },
-  { id: 'o-widget', name: 'Menú del widget de accesibilidad (Sienna)', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['desktop'], steps: [{ click: '.asw-menu-btn' }], wait: '.asw-menu' },
+  { id: 'o-widget', name: 'Menú del widget de accesibilidad (Sienna)', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['desktop'], steps: [{ click: '[data-a11y-launcher]' }], wait: '.asw-menu' },
   { id: 'o-widget-movil', name: 'Menú del widget de accesibilidad desde «Cuenta»', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }, { button: 'Accesibilidad' }], wait: '.asw-menu' },
   { id: 'o-salir-pendientes', name: 'Confirmar salir con pedidos sin enviar', type: 'AlertDialog', route: '/pedidos', account: 'waiter', queue: true, steps: [{ button: 'Cerrar sesión' }], views: ['desktop'] },
   { id: 'o-salir-pendientes-movil', name: 'Confirmar salir con pedidos sin enviar (desde «Cuenta»)', type: 'AlertDialog', route: '/pedidos', account: 'waiter', queue: true, steps: [{ button: 'Cuenta' }, { button: 'Cerrar sesión' }], views: ['mobile'] },

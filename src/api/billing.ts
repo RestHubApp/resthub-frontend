@@ -1,6 +1,8 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api, errorStatus, SLOW_TIMEOUT_MS } from '@/services/api'
+import { SLOW_TIMEOUT_MS } from '@/services/api'
+import { errorStatus } from '@/services/apiError'
+import { send } from './client'
 import type {
   BillingSettings,
   BillingSettingsRequest,
@@ -24,8 +26,7 @@ function invoiceQueryKey(invoiceId: number) {
 }
 
 async function fetchBillingSettings(): Promise<BillingSettings> {
-  const { data } = await api.get<BillingSettings>('/billing/settings')
-  return data
+  return send((client) => client.GET('/api/v1/billing/settings'))
 }
 
 export const billingSettingsQuery = queryOptions({
@@ -34,13 +35,11 @@ export const billingSettingsQuery = queryOptions({
 })
 
 export async function updateBillingSettings(payload: BillingSettingsRequest): Promise<BillingSettings> {
-  const { data } = await api.put<BillingSettings>('/billing/settings', payload)
-  return data
+  return send((client) => client.PUT('/api/v1/billing/settings', { body: payload }))
 }
 
 async function fetchInvoices(offset = 0): Promise<InvoicePage> {
-  const { data } = await api.get<InvoicePage>('/billing/invoices', { params: { limit: 25, offset } })
-  return data
+  return send((client) => client.GET('/api/v1/billing/invoices', { params: { query: { limit: 25, offset } } }))
 }
 
 export function invoicesQuery(offset: number) {
@@ -48,15 +47,17 @@ export function invoicesQuery(offset: number) {
 }
 
 async function fetchInvoice(invoiceId: number): Promise<Invoice> {
-  const { data } = await api.get<Invoice>(`/billing/invoices/${String(invoiceId)}`)
-  return data
+  return send((client) =>
+    client.GET('/api/v1/billing/invoices/{invoice_id}', { params: { path: { invoice_id: invoiceId } } }),
+  )
 }
 
 /** El comprobante de un pedido, o `null` si todavía no se emitió. */
 export async function fetchOrderInvoice(orderId: number): Promise<Invoice | null> {
   try {
-    const { data } = await api.get<Invoice>(`/billing/orders/${String(orderId)}/invoice`)
-    return data
+    return await send((client) =>
+      client.GET('/api/v1/billing/orders/{order_id}/invoice', { params: { path: { order_id: orderId } } }),
+    )
   } catch (error: unknown) {
     if (errorStatus(error) === 404) {
       return null
@@ -67,15 +68,15 @@ export async function fetchOrderInvoice(orderId: number): Promise<Invoice | null
 
 /** El servidor lo manda al proveedor antes de responder: puede tardar más que una petición común. */
 export async function issueInvoice(payload: IssueInvoiceRequest): Promise<Invoice> {
-  const { data } = await api.post<Invoice>('/billing/invoices', payload, { timeout: SLOW_TIMEOUT_MS })
-  return data
+  return send((client) => client.POST('/api/v1/billing/invoices', { body: payload }), { timeout: SLOW_TIMEOUT_MS })
 }
 
 export async function resendInvoice(invoiceId: number): Promise<Invoice> {
-  const { data } = await api.post<Invoice>(`/billing/invoices/${String(invoiceId)}/resend`, undefined, {
-    timeout: SLOW_TIMEOUT_MS,
-  })
-  return data
+  return send(
+    (client) =>
+      client.POST('/api/v1/billing/invoices/{invoice_id}/resend', { params: { path: { invoice_id: invoiceId } } }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
 }
 
 export function invoiceQuery(invoiceId: number) {

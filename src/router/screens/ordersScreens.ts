@@ -14,9 +14,10 @@ export const ORDERS_SCREENS: readonly Screen[] = [
       description: 'Tomar pedidos por mesa o para llevar, enviarlos a cocina y marcarlos servidos.',
     },
     load: asDefault(() => import('@/features/orders/OrdersView'), 'OrdersView'),
+    offline: true,
     prefetch: prefetchOf(() => import('@/features/orders/prefetchOrders'), 'prefetchFloor'),
   },
-  { path: routePatterns.newOrder, permission: PERMISSION.ordersTake, load: asDefault(() => import('@/features/orders/NewOrderView'), 'NewOrderView') },
-  { path: routePatterns.orderDetail, permission: PERMISSION.ordersTake, load: asDefault(() => import('@/features/orders/OrderDetailView'), 'OrderDetailView') },
-  { path: routePatterns.addItems, permission: PERMISSION.ordersTake, load: asDefault(() => import('@/features/orders/AddItemsView'), 'AddItemsView') },
+  { path: routePatterns.newOrder, permission: PERMISSION.ordersTake, offline: true, load: asDefault(() => import('@/features/orders/NewOrderView'), 'NewOrderView') },
+  { path: routePatterns.orderDetail, permission: PERMISSION.ordersTake, offline: true, load: asDefault(() => import('@/features/orders/OrderDetailView'), 'OrderDetailView') },
+  { path: routePatterns.addItems, permission: PERMISSION.ordersTake, offline: true, load: asDefault(() => import('@/features/orders/AddItemsView'), 'AddItemsView') },
 ]

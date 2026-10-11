@@ -5,7 +5,7 @@ import type { Role } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
 import { onSubmit } from '@/hooks/formSubmit'
-import { MIN_PASSWORD } from '@/services/fieldRules'
+import { MIN_PASSWORD } from '@/services/fieldLimits'
 import { defaultRoleId } from './roleOptions'
 import { StaffFields } from './StaffFields'
 import {

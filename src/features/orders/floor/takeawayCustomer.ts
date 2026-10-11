@@ -1,5 +1,5 @@
 import { saveCustomer } from '@/api/customers'
-import { errorStatus } from '@/services/api'
+import { errorStatus } from '@/services/apiError'
 import type { TakeawayValues } from './takeawaySchema'
 
 // Guardar al cliente es un extra: con la señal lenta no se espera más que esto

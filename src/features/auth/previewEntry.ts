@@ -1,7 +1,7 @@
 import { redirect } from 'react-router'
 
 import { exchangePreviewCode, sessionOf } from '@/api/auth'
-import { errorStatus } from '@/services/api'
+import { errorStatus } from '@/services/apiError'
 import { logger } from '@/services/logger'
 import { paths } from '@/services/paths'
 import { isPreviewTab, previewEntryUrl, takeEntryFragment } from '@/services/tabStorage'

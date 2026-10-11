@@ -41,7 +41,7 @@ describe('CustomersView: lista', () => {
     await user.type(screen.getByLabelText(SEARCH), '999')
 
     expect(await screen.findByText('Nadie coincide con la búsqueda')).toBeInTheDocument()
-    expect(api.calls('get', LIST).at(-1)?.params).toEqual({ q: '999', limit: 50 })
+    expect(api.calls('get', LIST).at(-1)?.params).toEqual({ q: '999', limit: '50' })
   })
 
   it('sin clientes todavía lo dice', async () => {

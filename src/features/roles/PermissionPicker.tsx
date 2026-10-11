@@ -20,6 +20,8 @@ export function PermissionPicker({
   granted,
   readOnly,
 }: PermissionPickerProps) {
+  const marked = new Set(selected)
+  const available = new Set(granted)
   return (
     <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0">
       <legend className="mb-1 text-sm font-medium">Permisos</legend>
@@ -37,8 +39,8 @@ export function PermissionPicker({
                 <PermissionOption
                   key={permission.code}
                   permission={permission}
-                  checked={selected.includes(permission.code)}
-                  missing={!granted.includes(permission.code)}
+                  checked={marked.has(permission.code)}
+                  missing={!available.has(permission.code)}
                   readOnly={readOnly}
                   onCheckedChange={(marked) => {
                     onChange(togglePermission(selected, permission.code, marked))

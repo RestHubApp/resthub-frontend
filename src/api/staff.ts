@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
+import { send } from './client'
 import type {
   CreateStaffRequest,
   ResetStaffPasswordRequest,
@@ -17,22 +17,14 @@ export const staffQueryKey = ['staff'] as const
 /** El tope de pagina que acepta el servidor. */
 export const MAX_STAFF_PAGE = 100
 
-function staffPath(userId: number, action = ''): string {
-  return `/staff/${String(userId)}${action}`
-}
-
 function staffListQueryKey(params: StaffListParams) {
   return [...staffQueryKey, params] as const
 }
 
 async function fetchStaff(params: StaffListParams = {}): Promise<StaffListResponse> {
   // El filtro por rol es una lista: FastAPI la espera como `role_id=1&role_id=2`
-  // y no con los corchetes que Axios agrega por defecto.
-  const { data } = await api.get<StaffListResponse>('/staff', {
-    params,
-    paramsSerializer: { indexes: null },
-  })
-  return data
+  // (la forma por defecto del cliente) y no con corchetes.
+  return send((client) => client.GET('/api/v1/staff', { params: { query: params } }))
 }
 
 export function staffQuery(params: StaffListParams) {
@@ -40,8 +32,7 @@ export function staffQuery(params: StaffListParams) {
 }
 
 export async function createStaff(payload: CreateStaffRequest): Promise<StaffResponse> {
-  const { data } = await api.post<StaffResponse>('/staff', payload)
-  return data
+  return send((client) => client.POST('/api/v1/staff', { body: payload }))
 }
 
 /** Nombre y rol. El correo no se edita: es con lo que la persona entra. */
@@ -49,23 +40,28 @@ export async function updateStaff(
   userId: number,
   payload: UpdateStaffRequest,
 ): Promise<StaffResponse> {
-  const { data } = await api.patch<StaffResponse>(staffPath(userId), payload)
-  return data
+  return send((client) =>
+    client.PATCH('/api/v1/staff/{user_id}', { params: { path: { user_id: userId } }, body: payload }),
+  )
 }
 
 export async function changeStaffStatus(
   userId: number,
   isActive: boolean,
 ): Promise<StaffResponse> {
-  const { data } = await api.patch<StaffResponse>(staffPath(userId, '/status'), {
-    is_active: isActive,
-  })
-  return data
+  return send((client) =>
+    client.PATCH('/api/v1/staff/{user_id}/status', {
+      params: { path: { user_id: userId } },
+      body: { is_active: isActive },
+    }),
+  )
 }
 
 export async function resetStaffPassword(
   userId: number,
   payload: ResetStaffPasswordRequest,
 ): Promise<void> {
-  await api.post(staffPath(userId, '/password'), payload)
+  await send((client) =>
+    client.POST('/api/v1/staff/{user_id}/password', { params: { path: { user_id: userId } }, body: payload }),
+  )
 }

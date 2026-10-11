@@ -1,7 +1,7 @@
 import { type Query, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useSyncExternalStore } from 'react'
 
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { apiFailureMessage, clearApiFailure, subscribeApiFailure } from '@/services/apiFailure'
 
 /** Errores de consultas visibles, o el último corte si esta pantalla no consulta. */

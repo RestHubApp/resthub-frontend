@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { renderHook, waitFor } from '@testing-library/react'
 
 import { noticesChannel } from '#jest/channel'
-import { setAuthToken } from '@/services/api'
+import { setAuthToken } from '@/services/apiCredentials'
 import { useServerEvent } from './useServerEvent'
 
 const ORDERS = 'orders'

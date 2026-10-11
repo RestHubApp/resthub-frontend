@@ -3,7 +3,7 @@ import { describe, expect, it } from '@jest/globals'
 import type { MenuItem } from '@/api/types'
 import { draftsOf, type GroupDraft, parseGroups } from './modifierDrafts'
 
-const size: GroupDraft = { name: 'Tamaño', required: true, max: '1', options: 'Personal\nFamiliar = 10,50\n' }
+const size: GroupDraft = { key: 'grupo-test', name: 'Tamaño', required: true, max: '1', options: 'Personal\nFamiliar = 10,50\n' }
 
 describe('parseGroups', () => {
   it('lee una opción por línea con su precio adicional', () => {
@@ -54,7 +54,7 @@ describe('draftsOf', () => {
         },
       ],
     } as unknown as MenuItem
-    expect(draftsOf(dish)).toEqual([{ name: 'Salsa', required: false, max: '2', options: 'Ají\nQueso = 2.00' }])
+    expect(draftsOf(dish)).toEqual([{ key: expect.any(String), name: 'Salsa', required: false, max: '2', options: 'Ají\nQueso = 2.00' }])
     expect(draftsOf(undefined)).toEqual([])
   })
 })

@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { cashQueryKey, currentCashQueryKey } from '@/api/cash'
 import type { CashSession, CurrentCash } from '@/api/types'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 
 interface CashMutationOptions<TVariables> {

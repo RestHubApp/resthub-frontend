@@ -41,7 +41,7 @@ describe('KitchenView', () => {
     const { api } = open()
     const card = await screen.findByRole('article', { name: 'Pedido 12' })
     expect(await within(card).findByText('Con alergia')).toBeInTheDocument()
-    expect(api.calls('get', NOTES)[0]?.params).toEqual({ order_ids: [5, 6] })
+    expect(api.calls('get', NOTES)[0]?.params).toEqual({ order_ids: ['5', '6'] })
   })
 
   it('quien no ve el panel no pregunta por las alergias', async () => {

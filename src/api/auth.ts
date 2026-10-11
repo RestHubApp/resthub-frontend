@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
+import { send } from './client'
 import type {
   AcceptTermsRequest,
   AccessTokenResponse,
@@ -23,26 +23,22 @@ export function sessionOf(response: AccessTokenResponse): CurrentUserResponse {
 
 /** El token y, en la misma respuesta, la cuenta, su restaurante y sus permisos. */
 export async function login(payload: LoginRequest): Promise<AccessTokenResponse> {
-  const { data } = await api.post<AccessTokenResponse>('/auth/login', payload)
-  return data
+  return send((client) => client.POST('/api/v1/auth/login', { body: payload }))
 }
 
 /** Un token nuevo para la sesion actual, pedido antes de que venza el que hay. */
 export async function renewSession(): Promise<AccessTokenResponse> {
-  const { data } = await api.post<AccessTokenResponse>('/auth/refresh')
-  return data
+  return send((client) => client.POST('/api/v1/auth/refresh'))
 }
 
 /** La sesión al día. `background`: si falla, no avisa en el armazón (ver `useAccountRefresh`). */
 export async function fetchCurrentUser({ background = false } = {}): Promise<CurrentUserResponse> {
-  const { data } = await api.get<CurrentUserResponse>('/auth/me', { background })
-  return data
+  return send((client) => client.GET('/api/v1/auth/me'), { background })
 }
 
 /** Acepta los términos y la política de privacidad leídos; devuelve la sesión al día. */
 export async function acceptTerms(version: AcceptTermsRequest['version']): Promise<CurrentUserResponse> {
-  const { data } = await api.post<CurrentUserResponse>('/auth/me/terms', { version })
-  return data
+  return send((client) => client.POST('/api/v1/auth/me/terms', { body: { version } }))
 }
 
 /**
@@ -51,8 +47,7 @@ export async function acceptTerms(version: AcceptTermsRequest['version']): Promi
  * misma forma que el acceso).
  */
 export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<AccessTokenResponse> {
-  const { data } = await api.post<AccessTokenResponse>('/auth/me/password', payload)
-  return data
+  return send((client) => client.POST('/api/v1/auth/me/password', { body: payload }))
 }
 
 /**
@@ -67,8 +62,7 @@ export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Prom
  * muestran sin sesion abierta, asi que salen sin token.
  */
 export async function exchangePreviewCode(payload: PreviewExchangeRequest): Promise<AccessTokenResponse> {
-  const { data } = await api.post<AccessTokenResponse>('/auth/preview', payload, { withoutCredential: true })
-  return data
+  return send((client) => client.POST('/api/v1/auth/preview', { body: payload }), { withoutCredential: true })
 }
 
 /** La cuenta en curso, releida en segundo plano: un fallo no muestra aviso. */
