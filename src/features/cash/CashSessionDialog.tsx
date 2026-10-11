@@ -16,37 +16,37 @@ interface CashSessionDialogProps {
 }
 
 function countedLabel(session: CashSession | undefined): string | undefined {
-  const contado = session?.counted_cash ?? null
-  if (contado === null) {
+  const cash = session?.counted_cash ?? null
+  if (cash === null) {
     return undefined
   }
-  return `Contado ${formatMoney(contado)} · diferencia ${formatMoney(session?.difference ?? '0')}`
+  return `Contado ${formatMoney(cash)} · diferencia ${formatMoney(session?.difference ?? '0')}`
 }
 
 /** El arqueo firmado de un turno ya cerrado. */
 export function CashSessionDialog({ sessionId, onClose }: CashSessionDialogProps) {
-  const turno = useQuery({ ...cashSessionQuery(sessionId ?? 0), enabled: sessionId !== null })
+  const shift = useQuery({ ...cashSessionQuery(sessionId ?? 0), enabled: sessionId !== null })
   if (sessionId === null) {
     return null
   }
-  const datos = turno.data
+  const data = shift.data
 
   return (
     <FormDialog
       open
       size="lg"
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(open) => {
+        if (!open) {
           onClose()
         }
       }}
       title={`Turno de caja ${String(sessionId)}`}
-      description={countedLabel(datos)}
+      description={countedLabel(data)}
     >
-      {turno.isPending ? <EmptyState title="Cargando el arqueo…" /> : null}
-      {turno.isError ? <RetryQueryError message={errorMessage(turno.error, 'No se pudo cargar el turno.')} onRetry={() => { void turno.refetch() }} /> : null}
-      {datos?.summary ? <CashSummaryView session={datos} summary={datos.summary} /> : null}
-      {datos !== undefined && datos.closing_notes !== '' ? <p className="m-0 text-sm">Nota: {datos.closing_notes}</p> : null}
+      {shift.isPending ? <EmptyState title="Cargando el arqueo…" /> : null}
+      {shift.isError ? <RetryQueryError message={errorMessage(shift.error, 'No se pudo cargar el turno.')} onRetry={() => { void shift.refetch() }} /> : null}
+      {data?.summary ? <CashSummaryView session={data} summary={data.summary} /> : null}
+      {data !== undefined && data.closing_notes !== '' ? <p className="m-0 text-sm">Nota: {data.closing_notes}</p> : null}
     </FormDialog>
   )
 }

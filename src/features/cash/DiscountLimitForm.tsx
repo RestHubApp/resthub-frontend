@@ -10,7 +10,7 @@ import { formatPercent } from '@/services/format'
 import { useNotifications } from '@/store/notifications'
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-const PORCENTAJE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
+const PERCENTAGE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
 
 /**
  * Hasta cuánto puede descontar un mesero sin llamar al encargado.
@@ -19,33 +19,33 @@ const PORCENTAJE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
  * cambie. Por encima del tope, y las cortesías, solo el encargado.
  */
 export function DiscountLimitForm() {
-  const restaurante = useQuery(restaurantQuery)
-  const [valor, setValor] = useState<string | null>(null)
+  const restaurant = useQuery(restaurantQuery)
+  const [value, setValue] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const guardar = useMutation({
+  const save = useMutation({
     mutationFn: (percent: string) => updateRestaurant({ max_waiter_discount_percent: percent }),
-    onSuccess: (actualizado) => {
-      queryClient.setQueryData(restaurantQueryKey, actualizado)
-      setValor(null)
-      push({ tone: 'info', message: `El mesero descuenta hasta ${formatPercent(actualizado.max_waiter_discount_percent)}.` })
+    onSuccess: (updated) => {
+      queryClient.setQueryData(restaurantQueryKey, updated)
+      setValue(null)
+      push({ tone: 'info', message: `El mesero descuenta hasta ${formatPercent(updated.max_waiter_discount_percent)}.` })
     },
     onError: (error) => {
       push({ tone: 'warning', message: errorMessage(error, 'No se pudo guardar el tope.') })
     },
   })
-  const actual = restaurante.data?.max_waiter_discount_percent ?? ''
-  const escrito = valor ?? actual
-  const valido = PORCENTAJE.test(escrito.trim())
+  const actual = restaurant.data?.max_waiter_discount_percent ?? ''
+  const written = value ?? actual
+  const valid = PERCENTAGE.test(written.trim())
 
   return (
     <form
       noValidate
       className="flex flex-wrap items-end gap-3"
-      onSubmit={(evento) => {
-        evento.preventDefault()
-        if (valido) {
-          guardar.mutate(escrito.trim().replace(',', '.'))
+      onSubmit={(event) => {
+        event.preventDefault()
+        if (valid) {
+          save.mutate(written.trim().replace(',', '.'))
         }
       }}
     >
@@ -55,15 +55,15 @@ export function DiscountLimitForm() {
           id="tope-descuento"
           inputMode="decimal"
           className="w-32"
-          value={escrito}
-          aria-invalid={!valido}
-          onChange={(evento) => {
-            setValor(evento.target.value)
+          value={written}
+          aria-invalid={!valid}
+          onChange={(event) => {
+            setValue(event.target.value)
           }}
         />
       </div>
-      <Button type="submit" variant="outline" disabled={!valido || valor === null || guardar.isPending}>
-        {guardar.isPending ? 'Guardando…' : 'Guardar tope'}
+      <Button type="submit" variant="outline" disabled={!valid || value === null || save.isPending}>
+        {save.isPending ? 'Guardando…' : 'Guardar tope'}
       </Button>
     </form>
   )

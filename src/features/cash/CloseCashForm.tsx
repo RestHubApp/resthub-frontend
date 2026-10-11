@@ -18,7 +18,7 @@ interface CloseCashFormProps {
 }
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-const MONTO = /^\d{1,8}(?:[.,]\d{1,2})?$/u
+const AMOUNT = /^\d{1,8}(?:[.,]\d{1,2})?$/u
 
 /**
  * Cerrar el turno: se cuenta el efectivo del cajón y se compara con lo esperado.
@@ -28,31 +28,31 @@ const MONTO = /^\d{1,8}(?:[.,]\d{1,2})?$/u
  * no se deshace, así que se confirma con el monto y la diferencia a la vista.
  */
 export function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
-  const esperado = toCents(session.summary?.expected_cash ?? '0')
+  const expected = toCents(session.summary?.expected_cash ?? '0')
   const { register, handleSubmit, formState, control } = useForm<CloseCashValues>({
     resolver: zodResolver(closeCashSchema),
     defaultValues: { counted_cash: '', notes: '' },
   })
-  const contado = useWatch({ control, name: 'counted_cash' }).trim()
-  const diferencia = MONTO.test(contado) ? toCents(cashAmountForApi(contado)) - esperado : null
-  const cerrar = useCashMutation({
+  const cash = useWatch({ control, name: 'counted_cash' }).trim()
+  const difference = AMOUNT.test(cash) ? toCents(cashAmountForApi(cash)) - expected : null
+  const close = useCashMutation({
     mutationFn: (payload: CloseCashRequest) => closeCash(payload),
-    success: (cerrada) => `Caja cerrada. ${differenceLabel(toCents(cerrada.difference ?? '0'))}.`,
+    success: (closed) => `Caja cerrada. ${differenceLabel(toCents(closed.difference ?? '0'))}.`,
     failure: 'No se pudo cerrar la caja.',
     onSuccess: onClosed,
   })
 
   // Cerrar mueve dinero y no se deshace: un monto válido abre la confirmación
   // y solo al confirmarla sale el cierre. Enter en el monto hace lo mismo.
-  const [porConfirmar, setPorConfirmar] = useState<CloseCashRequest | null>(null)
+  const [toConfirm, setToConfirm] = useState<CloseCashRequest | null>(null)
 
   return (
     <form
       noValidate
       className="flex flex-col gap-4"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          setPorConfirmar({ counted_cash: cashAmountForApi(valores.counted_cash), notes: valores.notes })
+        handleSubmit((values) => {
+          setToConfirm({ counted_cash: cashAmountForApi(values.counted_cash), notes: values.notes })
         }),
       )}
     >
@@ -69,8 +69,8 @@ export function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
           icon="pago"
           inputMode="decimal"
           autoComplete="off"
-          placeholder={centsToApi(esperado)}
-          hint={`Esperado: ${formatCents(esperado)}`}
+          placeholder={centsToApi(expected)}
+          hint={`Esperado: ${formatCents(expected)}`}
           field={register('counted_cash')}
           error={formState.errors.counted_cash?.message}
         />
@@ -86,23 +86,23 @@ export function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
       <p aria-live="polite" className="m-0 flex items-baseline justify-between rounded-lg bg-muted px-4 py-3">
         <span className="font-medium">Diferencia</span>
         <span className="text-xl font-bold tabular-nums">
-          {diferencia === null ? '—' : differenceLabel(diferencia)}
+          {difference === null ? '—' : differenceLabel(difference)}
         </span>
       </p>
       <div className="flex justify-end">
         <CloseCashButton
-          pending={cerrar.isPending}
-          expected={esperado}
-          difference={diferencia}
-          open={porConfirmar !== null}
+          pending={close.isPending}
+          expected={expected}
+          difference={difference}
+          open={toConfirm !== null}
           onCancel={() => {
-            setPorConfirmar(null)
+            setToConfirm(null)
           }}
           onConfirm={() => {
-            if (porConfirmar !== null) {
-              cerrar.mutate(porConfirmar)
+            if (toConfirm !== null) {
+              close.mutate(toConfirm)
             }
-            setPorConfirmar(null)
+            setToConfirm(null)
           }}
         />
       </div>

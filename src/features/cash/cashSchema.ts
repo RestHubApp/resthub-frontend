@@ -5,21 +5,21 @@ import { textoOpcional } from '@/components/formRules'
 // El tope del servidor para la nota de la caja.
 export const MAX_CASH_NOTES = 300
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-const MONTO = /^\d{1,8}(?:[.,]\d{1,2})?$/u
-const FORMATO = 'Escribe un monto como 150 o 150.50'
+const AMOUNT = /^\d{1,8}(?:[.,]\d{1,2})?$/u
+const FORMAT = 'Escribe un monto como 150 o 150.50'
 
 /** Un monto de caja: cero vale (una caja puede abrir sin sencillo). */
-function montoDeCaja() {
-  return z.string().trim().min(1, 'Escribe el monto').regex(MONTO, FORMATO)
+function cashRegisterAmount() {
+  return z.string().trim().min(1, 'Escribe el monto').regex(AMOUNT, FORMAT)
 }
 
 export const openCashSchema = z.object({
-  opening_amount: montoDeCaja(),
+  opening_amount: cashRegisterAmount(),
   notes: textoOpcional(MAX_CASH_NOTES),
 })
 
 export const closeCashSchema = z.object({
-  counted_cash: montoDeCaja(),
+  counted_cash: cashRegisterAmount(),
   notes: textoOpcional(MAX_CASH_NOTES),
 })
 

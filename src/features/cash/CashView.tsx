@@ -24,13 +24,13 @@ import { OpenCashForm } from './OpenCashForm'
 export function CashView() {
   const timeZone = useTimeZone()
   const queryClient = useQueryClient()
-  const caja = useQuery(currentCashQuery)
-  const refrescar = () => {
+  const cashRegister = useQuery(currentCashQuery)
+  const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: cashQueryKey })
   }
-  useServerEvent('orders', refrescar)
-  useServerEvent('cash', refrescar)
-  const turno = caja.data?.session ?? null
+  useServerEvent('orders', refresh)
+  useServerEvent('cash', refresh)
+  const shift = cashRegister.data?.session ?? null
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,30 +38,30 @@ export function CashView() {
         title="Caja"
         description="Un turno a la vez: se abre con el efectivo inicial y se cierra contando el cajón."
       />
-      {caja.isPending ? <ListSkeleton label="Cargando la caja…" count={3} itemClassName="h-16 rounded-lg" /> : null}
-      {caja.isError ? <RetryQueryError message={errorMessage(caja.error, 'No se pudo cargar la caja.')} onRetry={() => { void caja.refetch() }} /> : null}
-      {caja.data?.is_open === false ? (
+      {cashRegister.isPending ? <ListSkeleton label="Cargando la caja…" count={3} itemClassName="h-16 rounded-lg" /> : null}
+      {cashRegister.isError ? <RetryQueryError message={errorMessage(cashRegister.error, 'No se pudo cargar la caja.')} onRetry={() => { void cashRegister.refetch() }} /> : null}
+      {cashRegister.data?.is_open === false ? (
         <SectionCard title="Abrir caja" description="Sin caja abierta, nadie puede cobrar.">
           <OpenCashForm />
         </SectionCard>
       ) : null}
-      {turno?.summary ? (
+      {shift?.summary ? (
         <>
           <SectionCard
             title="Turno en curso"
-            description={`Abrió ${turno.opened_by_name} el ${formatDateTime(turno.opened_at, timeZone)} con ${formatMoney(turno.opening_amount)}`}
+            description={`Abrió ${shift.opened_by_name} el ${formatDateTime(shift.opened_at, timeZone)} con ${formatMoney(shift.opening_amount)}`}
           >
-            <CashSummaryView session={turno} summary={turno.summary} />
+            <CashSummaryView session={shift} summary={shift.summary} />
           </SectionCard>
           <SectionCard title="Cerrar caja" description="Cuenta el efectivo del cajón, propinas en efectivo incluidas.">
-            <CloseCashForm session={turno} onClosed={refrescar} />
+            <CloseCashForm session={shift} onClosed={refresh} />
           </SectionCard>
         </>
       ) : null}
       {/* Lo de abajo aparece recién con la caja cargada: si no, el turno en
           curso lo empujaba hacia abajo al llegar (Lighthouse medía un CLS de 0,24
           en escritorio y 0,46 en el celular). */}
-      {caja.isPending ? null : (
+      {cashRegister.isPending ? null : (
         <>
           <SectionCard title="Descuentos del mesero" collapsible defaultOpen={false}>
             <DiscountLimitForm />

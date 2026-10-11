@@ -7,8 +7,8 @@ interface CashSummaryViewProps {
   readonly summary: CashSummary
 }
 
-const CELDA = 'px-3 py-2 text-right tabular-nums'
-const ENCABEZADO = 'px-3 py-2 text-left font-medium text-muted-foreground'
+const CELL = 'px-3 py-2 text-right tabular-nums'
+const HEADER = 'px-3 py-2 text-left font-medium text-muted-foreground'
 
 /**
  * El arqueo de un turno: lo que entró por cada medio, lo que tiene que haber
@@ -30,19 +30,19 @@ export function CashSummaryView({ session, summary }: CashSummaryViewProps) {
         <caption className="pb-2 text-left text-sm font-medium">Por medio de pago</caption>
         <thead>
           <tr className="border-b">
-            <th scope="col" className={ENCABEZADO}>Medio</th>
-            <th scope="col" className={`${ENCABEZADO} text-right`}>Pagos</th>
-            <th scope="col" className={`${ENCABEZADO} text-right`}>Cobrado</th>
-            <th scope="col" className={`${ENCABEZADO} text-right`}>Propinas</th>
+            <th scope="col" className={HEADER}>Medio</th>
+            <th scope="col" className={`${HEADER} text-right`}>Pagos</th>
+            <th scope="col" className={`${HEADER} text-right`}>Cobrado</th>
+            <th scope="col" className={`${HEADER} text-right`}>Propinas</th>
           </tr>
         </thead>
         <tbody>
-          {summary.by_method.map((fila) => (
-            <tr key={fila.method} className="border-b last:border-0">
-              <th scope="row" className="px-3 py-2 text-left font-normal">{fila.method_label}</th>
-              <td className={CELDA}>{formatInteger(fila.payments)}</td>
-              <td className={CELDA}>{formatMoney(fila.amount)}</td>
-              <td className={CELDA}>{formatMoney(fila.tips)}</td>
+          {summary.by_method.map((row) => (
+            <tr key={row.method} className="border-b last:border-0">
+              <th scope="row" className="px-3 py-2 text-left font-normal">{row.method_label}</th>
+              <td className={CELL}>{formatInteger(row.payments)}</td>
+              <td className={CELL}>{formatMoney(row.amount)}</td>
+              <td className={CELL}>{formatMoney(row.tips)}</td>
             </tr>
           ))}
         </tbody>
@@ -53,17 +53,17 @@ export function CashSummaryView({ session, summary }: CashSummaryViewProps) {
           <caption className="pb-2 text-left text-sm font-medium">Propinas por mesero (a entregar al cerrar)</caption>
           <thead>
             <tr className="border-b">
-              <th scope="col" className={ENCABEZADO}>Mesero</th>
-              <th scope="col" className={`${ENCABEZADO} text-right`}>Ventas</th>
-              <th scope="col" className={`${ENCABEZADO} text-right`}>Propinas</th>
+              <th scope="col" className={HEADER}>Mesero</th>
+              <th scope="col" className={`${HEADER} text-right`}>Ventas</th>
+              <th scope="col" className={`${HEADER} text-right`}>Propinas</th>
             </tr>
           </thead>
           <tbody>
-            {summary.by_waiter.map((fila) => (
-              <tr key={fila.waiter_id} className="border-b last:border-0">
-                <th scope="row" className="px-3 py-2 text-left font-normal">{fila.name}</th>
-                <td className={CELDA}>{formatMoney(fila.sales)}</td>
-                <td className={`${CELDA} font-semibold`}>{formatMoney(fila.tips)}</td>
+            {summary.by_waiter.map((row) => (
+              <tr key={row.waiter_id} className="border-b last:border-0">
+                <th scope="row" className="px-3 py-2 text-left font-normal">{row.name}</th>
+                <td className={CELL}>{formatMoney(row.sales)}</td>
+                <td className={`${CELL} font-semibold`}>{formatMoney(row.tips)}</td>
               </tr>
             ))}
           </tbody>
