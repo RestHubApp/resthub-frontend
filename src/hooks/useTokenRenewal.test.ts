@@ -3,26 +3,26 @@ import { renderHook } from '@testing-library/react'
 
 import { useTokenRenewal } from './useTokenRenewal'
 
-const MINUTO = 60_000
-const AHORA = new Date('2026-09-26T15:00:00Z').getTime()
+const MINUTE = 60_000
+const NOW = new Date('2026-09-26T15:00:00Z').getTime()
 
 // Un JWT sin firma válida: solo importa el vencimiento (`exp`, en segundos).
-function tokenQueVenceEn(ms: number): string {
-  const carga = btoa(JSON.stringify({ exp: (AHORA + ms) / 1000 }))
-  return `cabecera.${carga}.firma`
+function tokenThatExpiresIn(ms: number): string {
+  const load = btoa(JSON.stringify({ exp: (NOW + ms) / 1000 }))
+  return `cabecera.${load}.firma`
 }
 
-function renovarCon(token: string | null, renovar = jest.fn<(origen: string) => Promise<void>>(() => Promise.resolve())) {
+function renewWith(token: string | null, renew = jest.fn<(origin: string) => Promise<void>>(() => Promise.resolve())) {
   renderHook(() => {
-    useTokenRenewal(token, renovar)
+    useTokenRenewal(token, renew)
   })
   // Alguien tocó la pantalla recién (la actividad la escucha el hook ya montado).
   window.dispatchEvent(new Event('pointerdown'))
-  return renovar
+  return renew
 }
 
 beforeEach(() => {
-  jest.useFakeTimers({ now: AHORA })
+  jest.useFakeTimers({ now: NOW })
 })
 
 afterEach(() => {
@@ -31,39 +31,39 @@ afterEach(() => {
 
 describe('useTokenRenewal', () => {
   it('renueva cinco minutos antes del vencimiento, con el token que se renueva', async () => {
-    const token = tokenQueVenceEn(20 * MINUTO)
-    const renovar = renovarCon(token)
+    const token = tokenThatExpiresIn(20 * MINUTE)
+    const renew = renewWith(token)
 
-    await jest.advanceTimersByTimeAsync(15 * MINUTO - 1)
-    expect(renovar).not.toHaveBeenCalled()
+    await jest.advanceTimersByTimeAsync(15 * MINUTE - 1)
+    expect(renew).not.toHaveBeenCalled()
     await jest.advanceTimersByTimeAsync(1)
-    expect(renovar).toHaveBeenCalledWith(token)
+    expect(renew).toHaveBeenCalledWith(token)
   })
 
   it('un token a punto de vencer se renueva de inmediato', async () => {
-    const renovar = renovarCon(tokenQueVenceEn(2 * MINUTO))
+    const renew = renewWith(tokenThatExpiresIn(2 * MINUTE))
     await jest.advanceTimersByTimeAsync(0)
-    expect(renovar).toHaveBeenCalledTimes(1)
+    expect(renew).toHaveBeenCalledTimes(1)
   })
 
   it('una pantalla sin uso hace más de media hora no renueva', async () => {
-    const renovar = renovarCon(tokenQueVenceEn(60 * MINUTO))
-    await jest.advanceTimersByTimeAsync(55 * MINUTO)
-    expect(renovar).not.toHaveBeenCalled()
+    const renew = renewWith(tokenThatExpiresIn(60 * MINUTE))
+    await jest.advanceTimersByTimeAsync(55 * MINUTE)
+    expect(renew).not.toHaveBeenCalled()
   })
 
   it('sin token, o con uno sin vencimiento legible, no programa nada', async () => {
-    const sinToken = renovarCon(null)
-    const ilegible = renovarCon('no-es-un-jwt')
-    await jest.advanceTimersByTimeAsync(24 * 60 * MINUTO)
-    expect(sinToken).not.toHaveBeenCalled()
-    expect(ilegible).not.toHaveBeenCalled()
+    const withoutToken = renewWith(null)
+    const unreadable = renewWith('no-es-un-jwt')
+    await jest.advanceTimersByTimeAsync(24 * 60 * MINUTE)
+    expect(withoutToken).not.toHaveBeenCalled()
+    expect(unreadable).not.toHaveBeenCalled()
   })
 
   it('si la renovación falla, la sesión sigue sin romper la pantalla', async () => {
-    const falla = jest.fn<(origen: string) => Promise<void>>(() => Promise.reject(new Error('sin red')))
-    renovarCon(tokenQueVenceEn(MINUTO), falla)
+    const failure = jest.fn<(origin: string) => Promise<void>>(() => Promise.reject(new Error('sin red')))
+    renewWith(tokenThatExpiresIn(MINUTE), failure)
     await expect(jest.advanceTimersByTimeAsync(0)).resolves.toBeUndefined()
-    expect(falla).toHaveBeenCalledTimes(1)
+    expect(failure).toHaveBeenCalledTimes(1)
   })
 })

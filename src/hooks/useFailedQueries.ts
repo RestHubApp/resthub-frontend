@@ -9,11 +9,11 @@ export function useFailedQueries(scope: 'platform' | 'restaurant') {
   const client = useQueryClient()
   const cache = client.getQueryCache()
   const subscribe = useCallback((notify: () => void) => {
-    const dejarCache = cache.subscribe(notify)
-    const dejarCorte = subscribeApiFailure(notify)
+    const leaveCache = cache.subscribe(notify)
+    const leaveCutoff = subscribeApiFailure(notify)
     return () => {
-      dejarCache()
-      dejarCorte()
+      leaveCache()
+      leaveCutoff()
     }
   }, [cache])
   const belongs = useCallback((key: readonly unknown[]) =>
@@ -23,18 +23,18 @@ export function useFailedQueries(scope: 'platform' | 'restaurant') {
   const visible = useCallback((query: Query) =>
     belongs(query.queryKey) && query.isActive() && query.state.status === 'error' && query.meta?.['background'] !== true, [belongs])
   const snapshot = useCallback(() => {
-    const activas = cache.getAll()
+    const active = cache.getAll()
       .filter(visible)
       .map((query) => `${query.queryHash}:${String(query.state.errorUpdatedAt)}`).join('|')
-    return `${activas}#${apiFailureMessage(scope) ?? ''}`
+    return `${active}#${apiFailureMessage(scope) ?? ''}`
   }, [cache, visible, scope])
   const failed = useSyncExternalStore(subscribe, snapshot, snapshot)
   const first = failed.startsWith('#') ? undefined : cache.getAll().find(visible)
-  const latente = apiFailureMessage(scope)
+  const latent = apiFailureMessage(scope)
   return {
     message: first
       ? errorMessage(first.state.error, 'No se pudieron cargar los datos. Comprueba la conexión e inténtalo de nuevo.')
-      : latente,
+      : latent,
     retry: () => {
       clearApiFailure()
       void client.refetchQueries({ type: 'active', predicate: (query) => belongs(query.queryKey) && query.state.status === 'error' })

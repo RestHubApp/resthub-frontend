@@ -8,14 +8,14 @@ import { useMemo, useState } from 'react'
  * en vez de quedar vacía.
  */
 export function usePagination<T>(items: readonly T[], pageSize: number | undefined) {
-  const [pagina, setPagina] = useState(0)
-  const tamanio = pageSize ?? Math.max(items.length, 1)
-  const total = Math.max(1, Math.ceil(items.length / tamanio))
-  const actual = Math.min(pagina, total - 1)
-  const visibles = useMemo(
-    () => items.slice(actual * tamanio, (actual + 1) * tamanio),
-    [items, actual, tamanio],
+  const [page, setPage] = useState(0)
+  const size = pageSize ?? Math.max(items.length, 1)
+  const total = Math.max(1, Math.ceil(items.length / size))
+  const actual = Math.min(page, total - 1)
+  const visible = useMemo(
+    () => items.slice(actual * size, (actual + 1) * size),
+    [items, actual, size],
   )
 
-  return { visibles, actual, total, irA: setPagina }
+  return { visibles: visible, actual, total, irA: setPage }
 }
