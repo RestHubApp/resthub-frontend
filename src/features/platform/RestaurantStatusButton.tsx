@@ -27,25 +27,25 @@ function personas(total: number): string {
  */
 export function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonProps) {
   const queryClient = useQueryClient()
-  const estado = useMutation({
+  const status = useMutation({
     mutationKey: platformMutationKeys.updateRestaurant,
     mutationFn: () => updatePlatformRestaurant(restaurant.id, { is_active: !restaurant.is_active }),
-    onSuccess: (guardado) => {
-      saveRestaurant(queryClient, guardado)
+    onSuccess: (saved) => {
+      saveRestaurant(queryClient, saved)
     },
   })
-  const cambiar = () => {
-    estado.mutate()
+  const change = () => {
+    status.mutate()
   }
 
-  const boton = (
+  const button = (
     <Button
       type="button"
       size="lg"
       className="h-11 px-4"
       variant={restaurant.is_active ? 'danger' : 'success'}
-      disabled={estado.isPending}
-      onClick={restaurant.is_active ? undefined : cambiar}
+      disabled={status.isPending}
+      onClick={restaurant.is_active ? undefined : change}
     >
       <Icon name="encender" size={18} />
       <span>{restaurant.is_active ? 'Desactivar restaurante' : 'Activar restaurante'}</span>
@@ -56,17 +56,17 @@ export function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonPro
     <div className="flex flex-col items-start gap-3">
       {restaurant.is_active ? (
         <ConfirmDialog
-          trigger={boton}
+          trigger={button}
           title={`¿Desactivar ${restaurant.name}?`}
           description={`Se corta al instante el acceso de ${personas(restaurant.staff_count)} de su personal, encargados incluidos: quien tenga RestHub abierto sale de su sesión y nadie puede volver a entrar hasta que lo actives. Sus pedidos, ventas y datos se conservan.`}
           confirmLabel="Desactivar"
-          onConfirm={cambiar}
+          onConfirm={change}
         />
       ) : (
-        boton
+        button
       )}
-      {estado.isError ? (
-        <FormMessage tone="error">{errorMessage(estado.error, 'No se pudo cambiar el estado.')}</FormMessage>
+      {status.isError ? (
+        <FormMessage tone="error">{errorMessage(status.error, 'No se pudo cambiar el estado.')}</FormMessage>
       ) : null}
     </div>
   )

@@ -17,8 +17,8 @@ export function NewRestaurantView() {
         description="El local, su zona horaria y la cuenta de quien lo va a administrar."
       />
       <NewRestaurantForm
-        onCreated={(restaurante) => {
-          void navigate(paths.platform.restaurant(restaurante.id), {
+        onCreated={(restaurant) => {
+          void navigate(paths.platform.restaurant(restaurant.id), {
             replace: true,
             state: { created: true },
           })

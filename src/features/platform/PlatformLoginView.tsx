@@ -5,15 +5,15 @@ import { paths } from '@/services/paths'
 import { usePlatformSession } from '@/store/platformSession'
 import { PlatformLoginForm } from './PlatformLoginForm'
 
-const INICIO = paths.platform.home
+const START = paths.platform.home
 
 /** Vuelve a la pantalla que se quiso abrir, si era del área de plataforma. */
-function destinoDe(estado: unknown): string {
-  const desde =
-    typeof estado === 'object' && estado !== null && 'from' in estado ? estado.from : undefined
-  return typeof desde === 'string' && desde.startsWith(`${INICIO}/`) && desde !== `${INICIO}/acceso`
-    ? desde
-    : INICIO
+function destinationOf(status: unknown): string {
+  const from =
+    typeof status === 'object' && status !== null && 'from' in status ? status.from : undefined
+  return typeof from === 'string' && from.startsWith(`${START}/`) && from !== `${START}/acceso`
+    ? from
+    : START
 }
 
 /**
@@ -27,12 +27,12 @@ export function PlatformLoginView() {
   const admin = usePlatformSession((state) => state.admin)
   const expired = usePlatformSession((state) => state.expired)
   const signIn = usePlatformSession((state) => state.signIn)
-  const destino = destinoDe(useLocation().state)
+  const destination = destinationOf(useLocation().state)
 
   // Con la sesión abierta, o recién abierta con este formulario, se sigue
   // a la pantalla que se quería abrir.
   if (admin !== null) {
-    return <Navigate to={destino} replace />
+    return <Navigate to={destination} replace />
   }
 
   return (

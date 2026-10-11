@@ -20,8 +20,8 @@ import { SandboxResetButton } from './SandboxResetButton'
 // El local de muestra no tiene una cuenta activa de ese tipo: el servidor
 // sugiere reiniciarlo.
 const CONFLICT = 409
-const MS_POR_SEGUNDO = 1000
-const COMO: readonly PreviewAs[] = ['owner', 'waiter']
+const MS_BY_SECOND = 1000
+const AS: readonly PreviewAs[] = ['owner', 'waiter']
 
 interface Opened {
   readonly as: PreviewAs
@@ -38,15 +38,15 @@ interface Opened {
  */
 export function PreviewLauncher() {
   const queryClient = useQueryClient()
-  const [abierta, setAbierta] = useState<Opened | null>(null)
-  const inicio = useMutation({
+  const [open, setOpen] = useState<Opened | null>(null)
+  const start = useMutation({
     mutationKey: platformMutationKeys.startPreview,
     mutationFn: (as: PreviewAs) => startPlatformPreview({ as }),
     gcTime: PASSWORD_MUTATION_GC_TIME,
-    onSuccess: ({ code, expires_in: segundos }, as) => {
+    onSuccess: ({ code, expires_in: seconds }, as) => {
       const url = previewUrl(code)
       openPreviewTab(url)
-      setAbierta({ as, url, expiresInMs: segundos * MS_POR_SEGUNDO })
+      setOpen({ as, url, expiresInMs: seconds * MS_BY_SECOND })
       // La primera vista previa crea el local de muestra; y queda en la bitácora.
       void queryClient.invalidateQueries({ queryKey: platformSandboxQueryKey })
       void queryClient.invalidateQueries({ queryKey: platformActivityQueryKey })
@@ -55,58 +55,58 @@ export function PreviewLauncher() {
 
   // Vencido el código, el enlace de repuesto ya no sirve y se quita.
   useEffect(() => {
-    if (abierta === null) {
+    if (open === null) {
       return
     }
     const timer = window.setTimeout(() => {
-      setAbierta(null)
-    }, abierta.expiresInMs)
+      setOpen(null)
+    }, open.expiresInMs)
     return () => {
       window.clearTimeout(timer)
     }
-  }, [abierta])
+  }, [open])
 
-  const abrir = (as: PreviewAs) => {
-    setAbierta(null)
-    inicio.mutate(as)
+  const handleOpen = (as: PreviewAs) => {
+    setOpen(null)
+    start.mutate(as)
   }
 
   return (
     <div className="flex flex-col items-start gap-4">
       <div className="flex w-full flex-wrap gap-3">
-        {COMO.map((as) => (
+        {AS.map((as) => (
           <Button
             key={as}
             type="button"
             size="lg"
             className="h-11 w-full px-4 sm:w-auto"
-            disabled={inicio.isPending}
+            disabled={start.isPending}
             onClick={() => {
-              abrir(as)
+              handleOpen(as)
             }}
           >
             <Icon name="ver" size={18} />
-            <span>{inicio.isPending && inicio.variables === as ? 'Abriendo…' : `Ver como ${PREVIEW_AS_LABELS[as]}`}</span>
+            <span>{start.isPending && start.variables === as ? 'Abriendo…' : `Ver como ${PREVIEW_AS_LABELS[as]}`}</span>
           </Button>
         ))}
       </div>
-      {abierta === null ? null : (
+      {open === null ? null : (
         <PreviewOpenedNotice
-          label={PREVIEW_AS_LABELS[abierta.as]}
-          url={abierta.url}
+          label={PREVIEW_AS_LABELS[open.as]}
+          url={open.url}
           onUsed={() => {
-            setAbierta(null)
+            setOpen(null)
           }}
         />
       )}
-      {inicio.isError ? (
-        <FormMessage tone="error">{errorMessage(inicio.error, 'No se pudo abrir la vista previa.')}</FormMessage>
+      {start.isError ? (
+        <FormMessage tone="error">{errorMessage(start.error, 'No se pudo abrir la vista previa.')}</FormMessage>
       ) : null}
-      {errorStatus(inicio.error) === CONFLICT ? (
+      {errorStatus(start.error) === CONFLICT ? (
         <SandboxResetButton
           exists
           onReset={() => {
-            inicio.reset()
+            start.reset()
           }}
         />
       ) : null}

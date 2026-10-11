@@ -11,21 +11,21 @@ import {
 } from './obsLabels'
 
 const LIMA = 'America/Lima'
-const INICIO = '2026-09-25T19:00:00Z'
+const START = '2026-09-25T19:00:00Z'
 
 describe('rótulos de los cubos', () => {
   it('con cubos de minutos el eje dice solo la hora', () => {
-    expect(bucketAxisLabel(INICIO, 60, LIMA)).toBe('14:00')
-    expect(bucketAxisLabel(INICIO, 15 * 60, LIMA)).toBe('14:00')
+    expect(bucketAxisLabel(START, 60, LIMA)).toBe('14:00')
+    expect(bucketAxisLabel(START, 15 * 60, LIMA)).toBe('14:00')
   })
 
   it('con cubos de horas (7 días) el eje dice también el día', () => {
-    expect(bucketAxisLabel(INICIO, 2 * 3600, LIMA)).toBe('25 set., 14:00')
+    expect(bucketAxisLabel(START, 2 * 3600, LIMA)).toBe('25 set., 14:00')
   })
 
   it('la lectura dice dónde empieza y dónde termina el cubo', () => {
-    expect(bucketTitle(INICIO, 15 * 60, LIMA)).toBe('25 set., 14:00 – 14:15')
-    expect(bucketTitle(INICIO, 2 * 3600, LIMA)).toBe('25 set., 14:00 – 16:00')
+    expect(bucketTitle(START, 15 * 60, LIMA)).toBe('25 set., 14:00 – 14:15')
+    expect(bucketTitle(START, 2 * 3600, LIMA)).toBe('25 set., 14:00 – 16:00')
   })
 })
 
@@ -60,7 +60,7 @@ describe('formatBucket y toSeries', () => {
   })
 
   it('un punto por cubo con la medida elegida', () => {
-    const puntos = [{ t: INICIO, requests: 8, errors_5xx: 1, p95_ms: 120 }]
-    expect(toSeries(puntos, 60, LIMA, (p) => p.p95_ms)).toEqual([{ key: INICIO, axisLabel: '14:00', value: 120 }])
+    const points = [{ t: START, requests: 8, errors_5xx: 1, p95_ms: 120 }]
+    expect(toSeries(points, 60, LIMA, (p) => p.p95_ms)).toEqual([{ key: START, axisLabel: '14:00', value: 120 }])
   })
 })

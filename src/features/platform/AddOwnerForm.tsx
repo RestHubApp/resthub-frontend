@@ -26,24 +26,24 @@ export function AddOwnerForm({ restaurantId, onDone }: AddOwnerFormProps) {
     resolver: zodResolver(ownerSchema),
     defaultValues: EMPTY_OWNER,
   })
-  const alta = useMutation({
+  const registration = useMutation({
     mutationKey: platformMutationKeys.addOwner,
-    mutationFn: (valores: OwnerValues) => addPlatformOwner(restaurantId, valores),
+    mutationFn: (values: OwnerValues) => addPlatformOwner(restaurantId, values),
     gcTime: PASSWORD_MUTATION_GC_TIME,
-    onSuccess: (encargado) => {
-      saveOwner(queryClient, restaurantId, encargado)
+    onSuccess: (owner) => {
+      saveOwner(queryClient, restaurantId, owner)
       onDone()
     },
   })
-  const errores = formState.errors
+  const errors = formState.errors
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          alta.mutate(valores)
+        handleSubmit((values) => {
+          registration.mutate(values)
         }),
       )}
     >
@@ -51,21 +51,21 @@ export function AddOwnerForm({ restaurantId, onDone }: AddOwnerFormProps) {
         idPrefix="new-owner"
         fields={{ full_name: register('full_name'), email: register('email'), password: register('password') }}
         errors={{
-          full_name: errores.full_name?.message,
-          email: errores.email?.message,
-          password: errores.password?.message,
+          full_name: errors.full_name?.message,
+          email: errors.email?.message,
+          password: errors.password?.message,
         }}
       />
-      {alta.isError ? (
-        <FormMessage tone="error">{errorMessage(alta.error, 'No se pudo agregar al encargado.')}</FormMessage>
+      {registration.isError ? (
+        <FormMessage tone="error">{errorMessage(registration.error, 'No se pudo agregar al encargado.')}</FormMessage>
       ) : null}
       <DialogFormActions>
         <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
           Cancelar
         </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={alta.isPending}>
+        <Button type="submit" size="lg" className="h-10 px-4" disabled={registration.isPending}>
           <Icon name="agregar" size={16} />
-          <span>{alta.isPending ? 'Agregando…' : 'Agregar encargado'}</span>
+          <span>{registration.isPending ? 'Agregando…' : 'Agregar encargado'}</span>
         </Button>
       </DialogFormActions>
     </form>

@@ -18,7 +18,7 @@ import { PLATFORM_TIME_ZONE } from './platformTime'
 import { MAX_RESTAURANT_SEARCH, pageCount, restaurantListParams, staffSummary } from './restaurantList'
 import { RestaurantStatusBadge } from './RestaurantStatusBadge'
 
-const COLUMNAS: DataColumn<PlatformRestaurantSummary>[] = [
+const COLUMNS: DataColumn<PlatformRestaurantSummary>[] = [
   {
     id: 'nombre',
     header: 'Restaurante',
@@ -39,19 +39,19 @@ const COLUMNAS: DataColumn<PlatformRestaurantSummary>[] = [
   { id: 'alta', header: 'Alta', cell: (r) => formatDateTime(r.created_at, PLATFORM_TIME_ZONE) },
 ]
 
-function cuantos(total: number): string {
+function howMany(total: number): string {
   return total === 1 ? '1 restaurante' : `${String(total)} restaurantes`
 }
 
 /** Todos los restaurantes de RestHub, los más nuevos primero, con búsqueda por nombre o identificador. */
 export function RestaurantsView() {
-  const [texto, setTexto] = useState('')
-  const [pagina, setPagina] = useState(0)
-  const busqueda = useDeferredValue(texto)
-  const lista = useQuery({ ...platformRestaurantsQuery(restaurantListParams(busqueda, pagina)), placeholderData: keepPreviousData })
-  const total = lista.data?.total ?? 0
-  const paginas = pageCount(total)
-  const vacio = busqueda.trim() === '' ? 'Todavía no hay restaurantes.' : 'Ningún restaurante coincide con la búsqueda.'
+  const [text, setText] = useState('')
+  const [page, setPage] = useState(0)
+  const search = useDeferredValue(text)
+  const list = useQuery({ ...platformRestaurantsQuery(restaurantListParams(search, page)), placeholderData: keepPreviousData })
+  const total = list.data?.total ?? 0
+  const pages = pageCount(total)
+  const empty = search.trim() === '' ? 'Todavía no hay restaurantes.' : 'Ningún restaurante coincide con la búsqueda.'
 
   return (
     <div className="flex flex-col gap-6">
@@ -67,31 +67,31 @@ export function RestaurantsView() {
           </Button>
         }
       />
-      <SectionCard title={lista.isSuccess ? cuantos(total) : 'Restaurantes'}>
+      <SectionCard title={list.isSuccess ? howMany(total) : 'Restaurantes'}>
         <Input
           type="search"
           aria-label="Buscar por nombre o identificador"
           placeholder="Buscar por nombre o identificador"
           className="h-11"
           maxLength={MAX_RESTAURANT_SEARCH}
-          value={texto}
-          onChange={(evento) => {
-            setTexto(evento.target.value)
-            setPagina(0)
+          value={text}
+          onChange={(event) => {
+            setText(event.target.value)
+            setPage(0)
           }}
         />
-        {lista.isError ? (
-          <PlatformQueryError error={lista.error} fallback="No se pudo cargar la lista." onRetry={() => void lista.refetch()} />
+        {list.isError ? (
+          <PlatformQueryError error={list.error} fallback="No se pudo cargar la lista." onRetry={() => void list.refetch()} />
         ) : (
           <DataTable
-            columns={COLUMNAS}
-            data={lista.data?.items ?? []}
-            isLoading={lista.isPending}
-            emptyMessage={vacio}
+            columns={COLUMNS}
+            data={list.data?.items ?? []}
+            isLoading={list.isPending}
+            emptyMessage={empty}
             getRowId={(r) => String(r.id)}
           />
         )}
-        {paginas > 1 ? <TablePagination actual={pagina} total={paginas} onChange={setPagina} /> : null}
+        {pages > 1 ? <TablePagination actual={page} total={pages} onChange={setPage} /> : null}
       </SectionCard>
     </div>
   )

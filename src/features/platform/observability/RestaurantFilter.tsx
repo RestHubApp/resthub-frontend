@@ -10,16 +10,16 @@ interface RestaurantFilterProps {
 }
 
 // El máximo que da la lista del servidor por página: los 100 más nuevos.
-const RESTAURANTES = { limit: 100, offset: 0 } as const
+const RESTAURANTS = { limit: 100, offset: 0 } as const
 
 /**
  * Un solo restaurante o todos. Mientras carga la lista, o si falla, sigue
  * ofreciendo «Todos» y el que ya estaba elegido, para no perder el filtro.
  */
 export function RestaurantFilter({ value, onChange }: RestaurantFilterProps) {
-  const lista = useQuery(platformRestaurantsQuery(RESTAURANTES))
-  const locales = lista.data?.items ?? []
-  const falta = value !== null && !locales.some((local) => local.id === value)
+  const list = useQuery(platformRestaurantsQuery(RESTAURANTS))
+  const locales = list.data?.items ?? []
+  const missing = value !== null && !locales.some((local) => local.id === value)
 
   return (
     <div className="flex flex-col gap-2">
@@ -33,7 +33,7 @@ export function RestaurantFilter({ value, onChange }: RestaurantFilterProps) {
         }}
       >
         <NativeSelectOption value="">Todos los restaurantes</NativeSelectOption>
-        {falta ? <NativeSelectOption value={String(value)}>{`Restaurante #${String(value)}`}</NativeSelectOption> : null}
+        {missing ? <NativeSelectOption value={String(value)}>{`Restaurante #${String(value)}`}</NativeSelectOption> : null}
         {locales.map((local) => (
           <NativeSelectOption key={local.id} value={String(local.id)}>
             {local.name}

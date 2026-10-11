@@ -50,11 +50,11 @@ const slugRule = z
  * no se vuelve a validar, así una zona guardada que este navegador no conoce
  * no impide cambiarle el nombre.
  */
-function timeZoneRule(sinCambio?: string) {
+function timeZoneRule(withoutChange?: string) {
   return z
     .string()
     .min(1, 'Elige la zona horaria')
-    .refine((zona) => zona === sinCambio || isValidTimeZone(zona), 'Elige una zona horaria de la lista')
+    .refine((zone) => zone === withoutChange || isValidTimeZone(zone), 'Elige una zona horaria de la lista')
 }
 
 /** Un encargado: la primera cuenta del restaurante o una más. */
@@ -120,12 +120,12 @@ export function settingsPayload(
   edited: EditedSettings,
   current: PlatformRestaurantDetail,
 ): UpdatePlatformRestaurantRequest {
-  const cambios: UpdatePlatformRestaurantRequest = {}
+  const changes: UpdatePlatformRestaurantRequest = {}
   if (edited.name === true && values.name !== current.name) {
-    cambios.name = values.name
+    changes.name = values.name
   }
   if (edited.timezone === true && values.timezone !== current.timezone) {
-    cambios.timezone = values.timezone
+    changes.timezone = values.timezone
   }
-  return cambios
+  return changes
 }

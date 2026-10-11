@@ -35,18 +35,18 @@ interface RestaurantSettingsFormProps {
  */
 export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormProps) {
   const queryClient = useQueryClient()
-  const guardados = useMemo(() => settingsOf(restaurant), [restaurant])
+  const saved = useMemo(() => settingsOf(restaurant), [restaurant])
   const { register, handleSubmit, formState, reset } = useForm<RestaurantSettingsValues>({
     resolver: zodResolver(restaurantSettingsSchema(restaurant.timezone)),
-    values: guardados,
+    values: saved,
     resetOptions: { keepDirtyValues: true },
   })
-  const guardar = useMutation({
+  const save = useMutation({
     mutationKey: platformMutationKeys.updateRestaurant,
-    mutationFn: (cambios: UpdatePlatformRestaurantRequest) => updatePlatformRestaurant(restaurant.id, cambios),
-    onSuccess: (guardado) => {
-      saveRestaurant(queryClient, guardado)
-      reset(settingsOf(guardado))
+    mutationFn: (changes: UpdatePlatformRestaurantRequest) => updatePlatformRestaurant(restaurant.id, changes),
+    onSuccess: (saved) => {
+      saveRestaurant(queryClient, saved)
+      reset(settingsOf(saved))
     },
   })
 
@@ -55,14 +55,14 @@ export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormPro
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          const cambios = settingsPayload(valores, formState.dirtyFields, restaurant)
-          if (Object.keys(cambios).length === 0) {
+        handleSubmit((values) => {
+          const changes = settingsPayload(values, formState.dirtyFields, restaurant)
+          if (Object.keys(changes).length === 0) {
             // Lo tocado quedó igual a lo guardado: no hay nada que enviar.
-            reset(guardados)
+            reset(saved)
             return
           }
-          guardar.mutate(cambios)
+          save.mutate(changes)
         }),
       )}
     >
@@ -82,14 +82,14 @@ export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormPro
           current={restaurant.timezone}
         />
       </div>
-      {guardar.isError ? (
-        <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudieron guardar los cambios.')}</FormMessage>
+      {save.isError ? (
+        <FormMessage tone="error">{errorMessage(save.error, 'No se pudieron guardar los cambios.')}</FormMessage>
       ) : null}
-      {guardar.isSuccess && !formState.isDirty ? <FormMessage tone="ok">Cambios guardados.</FormMessage> : null}
+      {save.isSuccess && !formState.isDirty ? <FormMessage tone="ok">Cambios guardados.</FormMessage> : null}
       <div className="flex justify-end">
-        <Button type="submit" size="lg" className="h-11 px-4" disabled={guardar.isPending || !formState.isDirty}>
+        <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending || !formState.isDirty}>
           <Icon name="confirmar" size={18} />
-          <span>{guardar.isPending ? 'Guardando…' : 'Guardar cambios'}</span>
+          <span>{save.isPending ? 'Guardando…' : 'Guardar cambios'}</span>
         </Button>
       </div>
     </form>

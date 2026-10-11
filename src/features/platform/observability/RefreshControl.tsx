@@ -13,7 +13,7 @@ interface RefreshControlProps {
 /** Pausar o reanudar la actualización automática, y releer ya. */
 export function RefreshControl({ refresh }: RefreshControlProps) {
   const queryClient = useQueryClient()
-  const leyendo = useIsFetching({ queryKey: platformObservabilityQueryKey }) > 0
+  const reading = useIsFetching({ queryKey: platformObservabilityQueryKey }) > 0
   const { paused, setPaused, visibility } = refresh
 
   return (
@@ -38,11 +38,11 @@ export function RefreshControl({ refresh }: RefreshControlProps) {
           variant="ghost"
           size="lg"
           className="h-11 px-4"
-          disabled={leyendo}
+          disabled={reading}
           onClick={() => void queryClient.invalidateQueries({ queryKey: platformObservabilityQueryKey })}
         >
-          <Icon name="actualizar" size={16} className={leyendo ? 'motion-safe:animate-spin' : undefined} />
-          <span>{leyendo ? 'Actualizando…' : 'Actualizar ahora'}</span>
+          <Icon name="actualizar" size={16} className={reading ? 'motion-safe:animate-spin' : undefined} />
+          <span>{reading ? 'Actualizando…' : 'Actualizar ahora'}</span>
         </Button>
         <p role="status" className="m-0 text-sm text-muted-foreground">
           {refreshStatus(paused, visibility)}

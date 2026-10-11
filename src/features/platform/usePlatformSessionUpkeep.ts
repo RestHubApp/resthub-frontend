@@ -19,15 +19,15 @@ export function usePlatformSessionUpkeep(): void {
   const renew = usePlatformSession((state) => state.renew)
   const refresh = usePlatformSession((state) => state.refresh)
 
-  useTokenRenewal(token, async (origen) => {
-    const nuevo = await renewPlatformSession()
-    renew(origen, nuevo.access_token, nuevo.admin)
+  useTokenRenewal(token, async (origin) => {
+    const fresh = await renewPlatformSession()
+    renew(origin, fresh.access_token, fresh.admin)
   })
 
-  const yo = useQuery({ ...platformMeQuery, enabled: token !== null, staleTime: REFRESH_MS, refetchInterval: REFRESH_MS })
+  const me = useQuery({ ...platformMeQuery, enabled: token !== null, staleTime: REFRESH_MS, refetchInterval: REFRESH_MS })
   useEffect(() => {
-    if (yo.data !== undefined) {
-      refresh(yo.data.admin)
+    if (me.data !== undefined) {
+      refresh(me.data.admin)
     }
-  }, [yo.data, refresh])
+  }, [me.data, refresh])
 }

@@ -19,7 +19,7 @@ export function PlatformHeader() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
-  const salir = () => {
+  const handleSignOut = () => {
     signOut()
     void navigate(paths.platform.login, { replace: true })
   }
@@ -45,7 +45,7 @@ export function PlatformHeader() {
                 type="button"
                 variant="ghost"
                 className="h-11 gap-2 px-3 text-background hover:bg-background/10 hover:text-background focus-visible:ring-background/60"
-                onClick={salir}
+                onClick={handleSignOut}
               >
                 <Icon name="salir" size={18} />
                 <span>Cerrar sesión</span>

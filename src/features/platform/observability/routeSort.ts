@@ -32,10 +32,10 @@ const METRIC: Readonly<Record<ObsRouteSort, (route: ObsRouteStats) => number>> =
  * pueden ser otras: las 20 más lentas no son las 20 más usadas.
  */
 export function sortRoutes(routes: readonly ObsRouteStats[], sort: ObsRouteSort): ObsRouteStats[] {
-  const metrica = METRIC[sort]
+  const metric = METRIC[sort]
   return [...routes].sort(
     (a, b) =>
-      metrica(b) - metrica(a) ||
+      metric(b) - metric(a) ||
       b.requests - a.requests ||
       a.route.localeCompare(b.route) ||
       a.method.localeCompare(b.method),

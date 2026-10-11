@@ -23,9 +23,9 @@ export function TimeZoneField({ id, field, error, current }: TimeZoneFieldProps)
       field={field}
       error={error}
     >
-      {timeZoneOptions(current).map((zona) => (
-        <NativeSelectOption key={zona.value} value={zona.value}>
-          {timeZoneLabel(zona)}
+      {timeZoneOptions(current).map((zone) => (
+        <NativeSelectOption key={zone.value} value={zone.value}>
+          {timeZoneLabel(zone)}
         </NativeSelectOption>
       ))}
     </SelectField>

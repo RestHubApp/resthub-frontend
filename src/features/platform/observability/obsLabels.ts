@@ -18,8 +18,8 @@ export function bucketAxisLabel(start: string, bucketSeconds: number, timeZone: 
 
 /** El cubo entero, para la lectura y la tabla: `25 set., 14:00 – 14:15`. */
 export function bucketTitle(start: string, bucketSeconds: number, timeZone: string): string {
-  const fin = new Date(new Date(start).getTime() + bucketSeconds * MS_PER_SECOND).toISOString()
-  return `${formatShortDateTime(start, timeZone)} – ${formatClock(fin, timeZone)}`
+  const end = new Date(new Date(start).getTime() + bucketSeconds * MS_PER_SECOND).toISOString()
+  return `${formatShortDateTime(start, timeZone)} – ${formatClock(end, timeZone)}`
 }
 
 /** El ancho de un cubo: `15 min`, `2 h`. */
@@ -58,8 +58,8 @@ const STATUS_CLASSES: Readonly<Record<number, string>> = {
 
 /** `404 · error del cliente`: el código y qué clase de respuesta es. */
 export function statusLabel(status: number): string {
-  const clase = STATUS_CLASSES[Math.floor(status / PERCENT)] ?? 'otra'
-  return `${String(status)} · ${clase}`
+  const kind = STATUS_CLASSES[Math.floor(status / PERCENT)] ?? 'otra'
+  return `${String(status)} · ${kind}`
 }
 
 export const LEVEL_LABELS: Readonly<Record<ObsLogLevel, string>> = {

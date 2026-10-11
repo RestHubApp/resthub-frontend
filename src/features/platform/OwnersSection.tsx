@@ -20,7 +20,7 @@ interface OwnersSectionProps {
  * un encargado, lo hace el propio local desde «Personal».
  */
 export function OwnersSection({ restaurant }: OwnersSectionProps) {
-  const [agregando, setAgregando] = useState(false)
+  const [adding, setAdding] = useState(false)
 
   return (
     <SectionCard
@@ -32,7 +32,7 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
           size="lg"
           className="h-11 px-4"
           onClick={() => {
-            setAgregando(true)
+            setAdding(true)
           }}
         >
           <Icon name="agregar" size={18} />
@@ -44,23 +44,23 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
         <EmptyState title="Este restaurante no tiene encargados." description="Agrega uno para que alguien pueda administrarlo." />
       ) : (
         <ul className="m-0 flex list-none flex-col divide-y p-0">
-          {restaurant.owners.map((encargado) => (
-            <li key={encargado.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
+          {restaurant.owners.map((owner) => (
+            <li key={owner.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
               <span className="flex min-w-0 flex-col">
-                <span className="font-medium break-words">{encargado.full_name}</span>
-                <span className="text-sm break-all text-muted-foreground">{encargado.email}</span>
+                <span className="font-medium break-words">{owner.full_name}</span>
+                <span className="text-sm break-all text-muted-foreground">{owner.email}</span>
               </span>
               <StatusBadge
-                label={encargado.is_active ? 'Activa' : 'Inactiva'}
-                tone={encargado.is_active ? 'completed' : undefined}
+                label={owner.is_active ? 'Activa' : 'Inactiva'}
+                tone={owner.is_active ? 'completed' : undefined}
               />
             </li>
           ))}
         </ul>
       )}
       <FormDialog
-        open={agregando}
-        onOpenChange={setAgregando}
+        open={adding}
+        onOpenChange={setAdding}
         title="Agregar encargado"
         description={`Una cuenta más con el rol Encargado de ${restaurant.name}.`}
         size="lg"
@@ -68,7 +68,7 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
         <AddOwnerForm
           restaurantId={restaurant.id}
           onDone={() => {
-            setAgregando(false)
+            setAdding(false)
           }}
         />
       </FormDialog>
