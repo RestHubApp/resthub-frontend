@@ -292,10 +292,13 @@ jobs:
       - name: Entorno (backend, dependencias y base sembrada)
         uses: ./.github/actions/entorno-e2e
 
-      - name: La imagen es la de la versión instalada de Playwright
+      # Si `playwright` sube de versión y la imagen no, los navegadores que
+      # espera no están en ella.
+      - name: La imagen trae los navegadores de la versión instalada de Playwright
         run: |
-          version="$(node -p "require('playwright/package.json').version")"
-          test "${{ job.container.image }}" = "mcr.microsoft.com/playwright:v${version}-noble"
+          loc="$(pnpm exec playwright install --dry-run chromium-headless-shell | sed -n 's/.*Install location: *//p' | head -1)"
+          echo "Se espera: $loc"
+          test -d "$loc"
 
       - name: Regresión visual
         env:
