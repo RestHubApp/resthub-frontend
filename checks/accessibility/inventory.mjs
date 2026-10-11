@@ -177,7 +177,7 @@ export const OVERLAYS = [
   { id: 'o-desactivar-restaurante', name: 'Confirmar desactivar restaurante', type: 'AlertDialog', route: '/plataforma/restaurantes/:restaurant', account: 'platform', steps: [{ button: 'Desactivar restaurante' }] },
   { id: 'o-reiniciar-muestra', name: 'Confirmar reiniciar el local de muestra', type: 'AlertDialog', route: '/plataforma/vista-previa', account: 'platform', steps: [{ button: 'Reiniciar local de muestra' }] },
   { id: 'e-obs-tabla', name: 'Observabilidad: gráfico como tabla', type: 'Estado', route: '/plataforma/observabilidad', account: 'platform', steps: [{ button: 'Ver tabla' }], wait: 'main table' },
-  { id: 'e-obs-detalle', name: 'Observabilidad: detalle de un registro', type: 'Desplegable', route: '/plataforma/observabilidad', account: 'platform', steps: [{ button: 'Cargar logs' }, { button: 'Ver detalle' }], wait: 'main' },
+  { id: 'e-obs-detalle', name: 'Observabilidad: detalle de un registro', type: 'Desplegable', route: '/plataforma/observabilidad', account: 'platform', steps: [{ button: 'Cargar logs', optional: true }, { button: 'Ver detalle' }], wait: 'main' },
 ]
 
 /** Todos los estados, como una sola lista con su clase. */
