@@ -1,7 +1,7 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import SelectField from '../../components/SelectField'
-import { NativeSelectOption } from '../../components/ui/native-select'
+import SelectField from '@/components/SelectField'
+import { NativeSelectOption } from '@/components/ui/native-select'
 import { timeZoneLabel, timeZoneOptions } from './timeZones'
 
 interface TimeZoneFieldProps {

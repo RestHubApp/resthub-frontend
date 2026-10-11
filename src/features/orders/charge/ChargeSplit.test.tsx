@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { pagado, pago, pedido, plato } from '#jest/fixtures/cobro'
 import { entrarComo, montar, servidor, type Peticion } from '#jest/harness'
-import type { OrderResponse } from '../../../api/types'
+import type { OrderResponse } from '@/api/types'
 import ChargeDialog from './ChargeDialog'
 
 const PAGOS = '/orders/12/payments'

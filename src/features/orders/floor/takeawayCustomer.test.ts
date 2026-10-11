@@ -8,12 +8,12 @@ import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import { AxiosError, AxiosHeaders } from 'axios'
 
-import { saveCustomer } from '../../../api/customers'
-import type { Customer } from '../../../api/types'
+import { saveCustomer } from '@/api/customers'
+import type { Customer } from '@/api/types'
 import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, type TakeawayValues } from './takeawaySchema'
 
-jest.mock('../../../api/customers', () => ({ saveCustomer: jest.fn() }))
+jest.mock('@/api/customers', () => ({ saveCustomer: jest.fn() }))
 
 const guardar = jest.mocked(saveCustomer)
 

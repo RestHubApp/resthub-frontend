@@ -1,4 +1,4 @@
-import type { PermissionCode } from '../../api/types'
+import type { PermissionCode } from '@/api/types'
 import type { ShellIconName } from './ShellIcon'
 
 export interface NavEntry {

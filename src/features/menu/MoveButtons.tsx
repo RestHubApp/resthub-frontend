@@ -1,5 +1,5 @@
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import type { Direction } from './menuOrder'
 
 // `aria-disabled` y no `disabled`: al llegar al primer lugar, el botón que se

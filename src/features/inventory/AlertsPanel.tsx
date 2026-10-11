@@ -1,13 +1,13 @@
-import EmptyState from '../../components/EmptyState'
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import ListSkeleton from '../../components/ListSkeleton'
-import { Button } from '../../components/ui/button'
-import { errorMessage } from '../../services/api'
+import EmptyState from '@/components/EmptyState'
+import FormMessage from '@/components/FormMessage'
+import Icon from '@/components/Icon'
+import ListSkeleton from '@/components/ListSkeleton'
+import { Button } from '@/components/ui/button'
+import { errorMessage } from '@/services/api'
 import IngredientStatus from './IngredientStatus'
 import type { StockAction } from './StockActionDialog'
 import { useLowStock } from './useLowStock'
-import { formatQuantity } from '../../services/format'
+import { formatQuantity } from '@/services/format'
 
 interface AlertsPanelProps {
   readonly canManage: boolean

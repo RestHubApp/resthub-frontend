@@ -1,8 +1,8 @@
 import { Outlet } from 'react-router'
 
-import AccessibilityWidget from '../../components/AccessibilityWidget'
-import ApiFailureNotice from '../../components/ApiFailureNotice'
-import { useFailedQueries } from '../../hooks/useFailedQueries'
+import AccessibilityWidget from '@/components/AccessibilityWidget'
+import ApiFailureNotice from '@/components/ApiFailureNotice'
+import { useFailedQueries } from '@/hooks/useFailedQueries'
 import PlatformHeader from './PlatformHeader'
 import { usePlatformSessionUpkeep } from './usePlatformSessionUpkeep'
 

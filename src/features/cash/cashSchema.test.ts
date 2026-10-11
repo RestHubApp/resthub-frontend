@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 
 import { entrarComo, PERMISOS_MESERO, servidor } from '#jest/harness'
-import { queryClient } from '../../services/queryClient'
+import { queryClient } from '@/services/queryClient'
 import { cashAmountForApi, closeCashSchema, MAX_CASH_NOTES, openCashSchema } from './cashSchema'
 import { prefetchCash } from './prefetchCash'
 

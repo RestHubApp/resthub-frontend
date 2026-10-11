@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { entrarAPlataforma, fichaDeRestaurante, montarPlataforma } from '#jest/fixtures/plataforma'
 import { RespuestaDeError, servidor } from '#jest/harness'
-import type { PlatformRestaurantDetail } from '../../api/types'
+import type { PlatformRestaurantDetail } from '@/api/types'
 
 const LA_ESQUINA = 'La Esquina'
 const AMERICA_BOGOTA = 'America/Bogota'

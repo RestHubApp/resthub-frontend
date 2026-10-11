@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
-import type { CurrentUserResponse, OpenOrderRequest } from '../api/types'
-import { tabStorage } from '../services/tabStorage'
+import type { CurrentUserResponse, OpenOrderRequest } from '@/api/types'
+import { tabStorage } from '@/services/tabStorage'
 
 // Los pedidos que el mesero tomó sin señal, a la espera de enviarse.
 //

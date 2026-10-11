@@ -1,5 +1,5 @@
-import type { OrderResponse } from '../../../api/types'
-import { formatMoney, formatPercent, toCents } from '../../../services/format'
+import type { OrderResponse } from '@/api/types'
+import { formatMoney, formatPercent, toCents } from '@/services/format'
 
 interface BillSummaryProps {
   readonly order: OrderResponse

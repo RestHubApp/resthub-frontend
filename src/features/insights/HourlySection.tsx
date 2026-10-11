@@ -1,12 +1,12 @@
-import { fetchHourlySales, insightsReportQuery } from '../../api/insights'
-import type { HourlyCell, InsightsRangeParams } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import ChartCard from '../../components/charts/ChartCard'
-import DataGrid from '../../components/charts/DataGrid'
+import { fetchHourlySales, insightsReportQuery } from '@/api/insights'
+import type { HourlyCell, InsightsRangeParams } from '@/api/types'
+import EmptyState from '@/components/EmptyState'
+import ChartCard from '@/components/charts/ChartCard'
+import DataGrid from '@/components/charts/DataGrid'
 import Heatmap from './charts/Heatmap'
 import ReportState from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
-import { formatHourOfDay, formatInteger, formatMoney } from '../../services/format'
+import { formatHourOfDay, formatInteger, formatMoney } from '@/services/format'
 
 interface HourlySectionProps {
   readonly range: InsightsRangeParams

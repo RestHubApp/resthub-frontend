@@ -1,5 +1,5 @@
-import { canAssignRole } from '../../api/roles'
-import type { PermissionCode, Role, StaffResponse } from '../../api/types'
+import { canAssignRole } from '@/api/roles'
+import type { PermissionCode, Role, StaffResponse } from '@/api/types'
 
 /**
  * Los roles que se ofrecen al crear o editar una cuenta.

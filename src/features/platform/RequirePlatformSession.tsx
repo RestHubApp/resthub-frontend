@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 
-import { usePlatformSession } from '../../store/platformSession'
+import { usePlatformSession } from '@/store/platformSession'
 
 /**
  * Guarda del área de plataforma.

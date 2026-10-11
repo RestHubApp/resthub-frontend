@@ -1,8 +1,8 @@
 import { type QueryClient } from '@tanstack/react-query'
 
-import { ingredientsQuery, inventoryQueryKey, lowStockQuery } from '../../api/inventory'
-import type { Ingredient, StockChange } from '../../api/types'
-import { byName, removeFromList, upsertInList } from '../../services/cacheList'
+import { ingredientsQuery, inventoryQueryKey, lowStockQuery } from '@/api/inventory'
+import type { Ingredient, StockChange } from '@/api/types'
+import { byName, removeFromList, upsertInList } from '@/services/cacheList'
 
 /** Lo que devuelven el alta, la edición y los movimientos de un insumo. */
 export type IngredientResult = Ingredient | StockChange

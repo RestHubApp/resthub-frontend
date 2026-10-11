@@ -1,4 +1,4 @@
-import Icon from '../../components/Icon'
+import Icon from '@/components/Icon'
 import type { LiveStatus } from './useLiveUpdates'
 
 interface LiveIndicatorProps {

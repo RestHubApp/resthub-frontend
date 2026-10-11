@@ -1,4 +1,4 @@
-import { appUrl } from '../../services/leaveTab'
+import { appUrl } from '@/services/leaveTab'
 
 // El nombre del dato en el fragmento. Lo lee `/vista-previa` (`features/auth`).
 const PARAMETRO = 'codigo'

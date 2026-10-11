@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 
-import type { Ingredient, Recipe } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
+import type { Ingredient, Recipe } from '@/api/types'
+import FormMessage from '@/components/FormMessage'
+import { onSubmit } from '@/hooks/formSubmit'
+import { errorMessage } from '@/services/api'
 import AddRecipeLine from './AddRecipeLine'
 import { recipeSchema, type RecipeValues } from './inventorySchema'
 import {

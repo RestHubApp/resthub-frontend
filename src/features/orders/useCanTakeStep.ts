@@ -1,5 +1,5 @@
-import type { OrderResponse } from '../../api/types'
-import { useCan, useSession } from '../../store/session'
+import type { OrderResponse } from '@/api/types'
+import { useCan, useSession } from '@/store/session'
 import type { NextStep } from './nextStep'
 
 /**

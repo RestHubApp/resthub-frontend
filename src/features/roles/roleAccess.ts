@@ -1,5 +1,5 @@
-import { canAssignRole } from '../../api/roles'
-import type { PermissionCode, Role } from '../../api/types'
+import { canAssignRole } from '@/api/roles'
+import type { PermissionCode, Role } from '@/api/types'
 
 /**
  * Qué puede hacer quien mira con un rol.

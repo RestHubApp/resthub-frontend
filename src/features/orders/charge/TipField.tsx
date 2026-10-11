@@ -1,8 +1,8 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import TextField from '../../../components/TextField'
-import { Button } from '../../../components/ui/button'
-import { formatCents } from '../../../services/format'
+import TextField from '@/components/TextField'
+import { Button } from '@/components/ui/button'
+import { formatCents } from '@/services/format'
 
 interface TipFieldProps {
   readonly field: UseFormRegisterReturn

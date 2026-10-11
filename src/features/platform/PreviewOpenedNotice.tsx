@@ -1,5 +1,5 @@
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
+import FormMessage from '@/components/FormMessage'
+import Icon from '@/components/Icon'
 
 interface PreviewOpenedNoticeProps {
   /** `encargado` o `mesero`. */

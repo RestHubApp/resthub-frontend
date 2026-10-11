@@ -1,10 +1,10 @@
 import { Link, useNavigate } from 'react-router'
 
-import ConfirmDialog from '../../components/ConfirmDialog'
+import ConfirmDialog from '@/components/ConfirmDialog'
 import ShellIcon from './ShellIcon'
-import { Button } from '../../components/ui/button'
-import { useQueuedOrders } from '../../store/offlineQueue'
-import { usePreview, useSession } from '../../store/session'
+import { Button } from '@/components/ui/button'
+import { useQueuedOrders } from '@/store/offlineQueue'
+import { usePreview, useSession } from '@/store/session'
 
 interface SessionActionsProps {
   readonly fullName: string

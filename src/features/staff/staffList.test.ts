@@ -1,9 +1,9 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { QueryClient } from '@tanstack/react-query'
 
-import { rolesQueryKey } from '../../api/roles'
-import { staffQueryKey } from '../../api/staff'
-import type { StaffListResponse, StaffResponse } from '../../api/types'
+import { rolesQueryKey } from '@/api/roles'
+import { staffQueryKey } from '@/api/staff'
+import type { StaffListResponse, StaffResponse } from '@/api/types'
 import { saveStaffMember, STAFF_LIST_QUERY } from './staffList'
 
 const NOMBRE_ANA = 'Ana Pérez'

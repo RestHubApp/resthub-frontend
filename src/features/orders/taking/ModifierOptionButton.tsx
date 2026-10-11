@@ -1,5 +1,5 @@
-import { Button } from '../../../components/ui/button'
-import { formatMoney, toCents } from '../../../services/format'
+import { Button } from '@/components/ui/button'
+import { formatMoney, toCents } from '@/services/format'
 
 interface ModifierOptionButtonProps {
   readonly name: string

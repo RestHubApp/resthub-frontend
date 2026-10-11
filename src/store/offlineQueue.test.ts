@@ -6,7 +6,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
-import type { OpenOrderRequest } from '../api/types'
+import type { OpenOrderRequest } from '@/api/types'
 import type { QueuedOrder } from './offlineQueue'
 
 const V1 = 'resthub.pedidos-sin-enviar.v1'

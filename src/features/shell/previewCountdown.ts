@@ -1,4 +1,4 @@
-import { formatCountdown } from '../../services/format'
+import { formatCountdown } from '@/services/format'
 
 // Desde cuándo la franja avisa que la vista previa está por vencer.
 const AVISO_MS = 5 * 60_000

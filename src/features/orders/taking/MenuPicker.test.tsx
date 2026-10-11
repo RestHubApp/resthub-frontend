@@ -3,8 +3,8 @@ import { act, renderHook, screen, within } from '@testing-library/react'
 
 import { carta, pedido, plato, seccion, ultimoCuerpo } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import type { OpenOrderRequest } from '../../../api/types'
-import NewOrderView from '../NewOrderView'
+import type { OpenOrderRequest } from '@/api/types'
+import NewOrderView from '@/features/orders/NewOrderView'
 import { useDraftActions } from './useOrderDraft'
 
 const LOMO = 'Lomo saltado'

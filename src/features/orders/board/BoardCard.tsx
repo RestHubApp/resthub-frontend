@@ -1,14 +1,14 @@
 import { Link } from 'react-router'
 
-import type { OrderResponse } from '../../../api/types'
-import AllergyAlert from '../AllergyAlert'
-import ItemNote from '../ItemNote'
-import { allergyIn, type FlagFor } from '../noteFlags'
-import OrderItemLine from '../OrderItemLine'
-import { orderPlace } from '../orderLabels'
+import type { OrderResponse } from '@/api/types'
+import AllergyAlert from '@/features/orders/AllergyAlert'
+import ItemNote from '@/features/orders/ItemNote'
+import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
+import OrderItemLine from '@/features/orders/OrderItemLine'
+import { orderPlace } from '@/features/orders/orderLabels'
 import BoardCardActions from './BoardCardActions'
 import ElapsedTime from './ElapsedTime'
-import { formatMoney, minutesSince } from '../../../services/format'
+import { formatMoney, minutesSince } from '@/services/format'
 
 interface BoardCardProps {
   readonly order: OrderResponse

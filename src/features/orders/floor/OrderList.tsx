@@ -1,4 +1,4 @@
-import type { OrderResponse } from '../../../api/types'
+import type { OrderResponse } from '@/api/types'
 import OrderListItem from './OrderListItem'
 
 interface OrderListProps {

@@ -1,6 +1,6 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import { PAYMENT_METHODS } from '../orderLabels'
+import { PAYMENT_METHODS } from '@/features/orders/orderLabels'
 
 interface PaymentMethodPickerProps {
   readonly field: UseFormRegisterReturn

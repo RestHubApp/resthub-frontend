@@ -1,5 +1,5 @@
-import type { OrderResponse } from '../../../api/types'
-import Icon from '../../../components/Icon'
+import type { OrderResponse } from '@/api/types'
+import Icon from '@/components/Icon'
 
 interface DeliveryCardProps {
   readonly order: OrderResponse

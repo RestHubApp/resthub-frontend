@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import type { ObsLogDetail } from '../../../api/types'
+import type { ObsLogDetail } from '@/api/types'
 import { type ObsFilters, requestsOf } from './obsFilters'
 import { prettyFields } from './obsLabels'
 

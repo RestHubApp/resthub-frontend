@@ -3,8 +3,8 @@ import { screen, within } from '@testing-library/react'
 
 import { pedido } from '#jest/fixtures/cobro'
 import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
-import type { OrderResponse, PermissionCode } from '../../api/types'
-import { todayIn } from '../../services/format'
+import type { OrderResponse, PermissionCode } from '@/api/types'
+import { todayIn } from '@/services/format'
 import HistoryView from './HistoryView'
 
 const PEDIDOS = '/orders'

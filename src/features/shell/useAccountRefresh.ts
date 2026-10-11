@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-import { currentUserQuery } from '../../api/auth'
-import { useSession } from '../../store/session'
+import { currentUserQuery } from '@/api/auth'
+import { useSession } from '@/store/session'
 
 // El nombre del restaurante o los permisos cambian muy de vez en cuando: basta
 // con leerlos al abrir la aplicacion y cada tanto mientras sigue abierta.

@@ -1,7 +1,7 @@
 import { useId } from 'react'
 
-import { Label } from '../../components/ui/label'
-import { NativeSelect, NativeSelectOption } from '../../components/ui/native-select'
+import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 
 interface FilterSelectProps<T extends string> {
   readonly label: string

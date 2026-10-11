@@ -1,5 +1,5 @@
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 
 interface RecipeFooterProps {
   /** La receta quedó sin insumos: guardar la borra. */

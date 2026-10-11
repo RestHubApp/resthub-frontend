@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import type { ObsRouteStats } from '../../../api/types'
+import type { ObsRouteStats } from '@/api/types'
 import { ariaSort, sortRoutes } from './routeSort'
 
 function ruta(route: string, requests: number, p95: number, errors: number): ObsRouteStats {

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router'
 
-import Icon from '../../components/Icon'
-import type { IconName } from '../../components/icons'
+import Icon from '@/components/Icon'
+import type { IconName } from '@/components/icons'
 
 const TABS: readonly { to: string; label: string; icon: IconName; end?: boolean }[] = [
   { to: '/panel', label: 'Indicadores', icon: 'indicadores', end: true },

@@ -1,8 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { QueryClient } from '@tanstack/react-query'
 
-import { ingredientsQuery, inventoryQueryKey, lowStockQuery } from '../../api/inventory'
-import type { Ingredient, StockChange } from '../../api/types'
+import { ingredientsQuery, inventoryQueryKey, lowStockQuery } from '@/api/inventory'
+import type { Ingredient, StockChange } from '@/api/types'
 import { saveIngredient } from './ingredientCache'
 
 const ARROZ = 'Arroz'

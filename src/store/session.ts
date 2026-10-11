@@ -1,13 +1,13 @@
 import { create } from 'zustand'
 
-import { setAuthToken, setUnauthorizedHandler } from '../services/api'
-import { DEFAULT_TIME_ZONE } from '../services/format'
-import { logger } from '../services/logger'
-import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
-import { clearQueriesExcept, PLATFORM_QUERY_ROOT } from '../services/queryClient'
-import { isPreviewTab, setPreviewTabMark, tabStorage } from '../services/tabStorage'
+import { setAuthToken, setUnauthorizedHandler } from '@/services/api'
+import { DEFAULT_TIME_ZONE } from '@/services/format'
+import { logger } from '@/services/logger'
+import { expiryTimer, isTokenExpired } from '@/services/tokenExpiry'
+import { clearQueriesExcept, PLATFORM_QUERY_ROOT } from '@/services/queryClient'
+import { isPreviewTab, setPreviewTabMark, tabStorage } from '@/services/tabStorage'
 import { discardPreviewQueue } from './offlineQueue'
-import type { CurrentUserResponse, PermissionCode } from '../api/types'
+import type { CurrentUserResponse, PermissionCode } from '@/api/types'
 
 // Donde se guarda la sesion lo decide la pestana al cargarse (`tabStorage`):
 // `localStorage` en una pestana normal y `sessionStorage` en una de vista

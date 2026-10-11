@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
-import { grantCourtesy, revokeCourtesy } from '../../../api/orders'
-import type { OrderItemResponse, OrderResponse } from '../../../api/types'
-import { MIN_TEXTO } from '../../../components/formRules'
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
-import { Input } from '../../../components/ui/input'
-import { formatMoney } from '../../../services/format'
-import { useOrderAction } from '../useOrderAction'
+import { grantCourtesy, revokeCourtesy } from '@/api/orders'
+import type { OrderItemResponse, OrderResponse } from '@/api/types'
+import { MIN_TEXTO } from '@/components/formRules'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { formatMoney } from '@/services/format'
+import { useOrderAction } from '@/features/orders/useOrderAction'
 import { MAX_ADJUSTMENT_REASON } from './discountSchema'
 
 interface CourtesyItemProps {

@@ -2,7 +2,7 @@ import path from 'node:path'
 
 import { MatchersV3, PactV4, type V3MockServer } from '@pact-foundation/pact'
 
-import { api, setAuthToken, setPlatformAuthToken } from '../../services/api'
+import { api, setAuthToken, setPlatformAuthToken } from '@/services/api'
 
 // Lo que comparten las pruebas de contrato del consumidor.
 //

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { dishCostsQueryKey, replaceRecipe } from '../../api/inventory'
-import type { Recipe } from '../../api/types'
-import { useNotifications } from '../../store/notifications'
+import { dishCostsQueryKey, replaceRecipe } from '@/api/inventory'
+import type { Recipe } from '@/api/types'
+import { useNotifications } from '@/store/notifications'
 import type { RecipeValues } from './inventorySchema'
 import { recipePayload } from './recipeMath'
 

@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
+import { api } from '@/services/api'
 import type { PermissionCode, PermissionInfo, Role, RoleRequest } from './types'
 
 // Los roles del restaurante y el catálogo de permisos con que se arman.

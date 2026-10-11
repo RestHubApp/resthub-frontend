@@ -1,4 +1,4 @@
-import type { NewItemRequest, OpenOrderRequest } from '../../../api/types'
+import type { NewItemRequest, OpenOrderRequest } from '@/api/types'
 
 /** A dónde y a quién se entrega un delivery. */
 interface DeliveryInfo {

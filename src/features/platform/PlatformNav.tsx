@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 
-import Icon from '../../components/Icon'
-import type { IconName } from '../../components/icons'
+import Icon from '@/components/Icon'
+import type { IconName } from '@/components/icons'
 
 interface Entry {
   readonly to: string

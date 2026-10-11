@@ -1,5 +1,5 @@
-import { formatCents } from '../../../services/format'
-import QuantityStepper from '../QuantityStepper'
+import { formatCents } from '@/services/format'
+import QuantityStepper from '@/features/orders/QuantityStepper'
 
 interface EqualSplitFieldProps {
   /** Cuántas personas faltan pagar, contando a la que paga ahora. */

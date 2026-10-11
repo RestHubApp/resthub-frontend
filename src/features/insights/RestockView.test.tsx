@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { insumoARevisar, reposicion } from '#jest/fixtures/indicadores'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import type { RestockReport } from '../../api/types'
+import type { RestockReport } from '@/api/types'
 import RestockView from './RestockView'
 
 const RUTA = '/insights/restock'

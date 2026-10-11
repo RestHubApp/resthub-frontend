@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 
-import type { PermissionCode } from '../../api/types'
-import { hasPermission, useSession } from '../../store/session'
+import type { PermissionCode } from '@/api/types'
+import { hasPermission, useSession } from '@/store/session'
 import TermsGate from './TermsGate'
 
 interface RequireSessionProps {

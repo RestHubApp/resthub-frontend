@@ -1,4 +1,4 @@
-import type { OrderResponse } from '../../../api/types'
+import type { OrderResponse } from '@/api/types'
 import type { SplitMode } from './chargeMath'
 import EqualSplitField from './EqualSplitField'
 import ItemSplitPicker from './ItemSplitPicker'

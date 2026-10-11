@@ -1,6 +1,6 @@
-import Icon from '../../../components/Icon'
-import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
+import Icon from '@/components/Icon'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface SearchBoxProps {
   readonly value: string

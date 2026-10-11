@@ -4,8 +4,8 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 
 import { servidor } from '#jest/harness'
-import type { OrderNoteClassification } from '../api/types'
-import { queryClient } from '../services/queryClient'
+import type { OrderNoteClassification } from '@/api/types'
+import { queryClient } from '@/services/queryClient'
 import { useOrderNoteFlags, type OrderNoteFlagsOptions } from './useOrderNoteFlags'
 
 const NOTAS = '/insights/order-notes'

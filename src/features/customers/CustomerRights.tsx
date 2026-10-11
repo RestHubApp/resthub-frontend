@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { anonymizeCustomer, customersQueryKey, exportCustomer } from '../../api/customers'
-import type { Customer, CustomerExport } from '../../api/types'
-import ConfirmDialog from '../../components/ConfirmDialog'
-import FormMessage from '../../components/FormMessage'
-import { Button } from '../../components/ui/button'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { anonymizeCustomer, customersQueryKey, exportCustomer } from '@/api/customers'
+import type { Customer, CustomerExport } from '@/api/types'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import FormMessage from '@/components/FormMessage'
+import { Button } from '@/components/ui/button'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
 
 /** Entrega el archivo al navegador, como cualquier descarga. */
 function descargar(datos: CustomerExport, customerId: number): void {

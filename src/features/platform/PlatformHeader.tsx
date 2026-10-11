@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router'
 
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { usePlatformSession } from '../../store/platformSession'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { usePlatformSession } from '@/store/platformSession'
 import PlatformNav from './PlatformNav'
 
 /**

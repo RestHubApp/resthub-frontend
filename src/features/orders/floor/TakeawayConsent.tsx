@@ -1,6 +1,6 @@
 import { Controller, type UseFormReturn, useWatch } from 'react-hook-form'
 
-import ConsentField from '../../../components/ConsentField'
+import ConsentField from '@/components/ConsentField'
 import type { TakeawayValues } from './takeawaySchema'
 
 /**

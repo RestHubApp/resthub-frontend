@@ -1,6 +1,6 @@
-import type { OrderResponse } from '../../../api/types'
-import { formatDateTime, formatMoney, formatPercent, toCents } from '../../../services/format'
-import { deliveryLines, orderPlace } from '../orderLabels'
+import type { OrderResponse } from '@/api/types'
+import { formatDateTime, formatMoney, formatPercent, toCents } from '@/services/format'
+import { deliveryLines, orderPlace } from '@/features/orders/orderLabels'
 
 interface BillTicketProps {
   readonly order: OrderResponse

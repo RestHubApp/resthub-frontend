@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import { textoOpcional } from '../../../components/formRules'
-import type { Customer } from '../../../api/types'
+import { textoOpcional } from '@/components/formRules'
+import type { Customer } from '@/api/types'
 
 // Los topes repiten los del backend (`orders/domain/orders.py`).
 export const MAX_CLIENTE = 80

@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { changeStaffStatus } from '../../api/staff'
-import type { StaffResponse } from '../../api/types'
-import ConfirmDialog from '../../components/ConfirmDialog'
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { errorMessage } from '../../services/api'
+import { changeStaffStatus } from '@/api/staff'
+import type { StaffResponse } from '@/api/types'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import FormMessage from '@/components/FormMessage'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { errorMessage } from '@/services/api'
 import { saveStaffMember } from './staffList'
 
 interface StaffStatusButtonProps {

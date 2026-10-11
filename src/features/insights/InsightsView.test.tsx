@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { reportesDelPanel, resumenDeVentas } from '#jest/fixtures/panel'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import { todayIn } from '../../services/format'
+import { todayIn } from '@/services/format'
 import { addDays } from './dateRange'
 import InsightsView from './InsightsView'
 

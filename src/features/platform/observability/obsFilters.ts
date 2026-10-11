@@ -4,7 +4,7 @@ import type {
   ObsRequestsParams,
   ObsWindow,
   ObsWindowParams,
-} from '../../../api/types'
+} from '@/api/types'
 
 // Los filtros del panel viven en la dirección (`?ventana=6h&peticion=…`): se
 // comparten con un enlace, sobreviven a recargar y el detalle de un log enlaza

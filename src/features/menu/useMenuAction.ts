@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { dishCostsQueryKey } from '../../api/inventory'
-import { menuQueryKey } from '../../api/menu'
-import type { MenuResponse } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { dishCostsQueryKey } from '@/api/inventory'
+import { menuQueryKey } from '@/api/menu'
+import type { MenuResponse } from '@/api/types'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
 import { MENU_KEY } from './useMenuData'
 
 interface MenuAction<TResult> {

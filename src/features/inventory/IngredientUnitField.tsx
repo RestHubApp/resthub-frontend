@@ -1,8 +1,8 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import type { Ingredient } from '../../api/types'
-import SelectField from '../../components/SelectField'
-import { NativeSelectOption } from '../../components/ui/native-select'
+import type { Ingredient } from '@/api/types'
+import SelectField from '@/components/SelectField'
+import { NativeSelectOption } from '@/components/ui/native-select'
 import { UNIT_OPTIONS } from './units'
 
 interface IngredientUnitFieldProps {

@@ -1,7 +1,7 @@
-import DialogFormActions from '../../components/DialogFormActions'
-import Icon from '../../components/Icon'
-import type { IconName } from '../../components/icons'
-import { Button } from '../../components/ui/button'
+import DialogFormActions from '@/components/DialogFormActions'
+import Icon from '@/components/Icon'
+import type { IconName } from '@/components/icons'
+import { Button } from '@/components/ui/button'
 
 interface FormButtonsProps {
   readonly label: string

@@ -1,7 +1,7 @@
 import { cn } from 'cn'
 
-import { setAvailability } from '../../api/menu'
-import type { MenuItem } from '../../api/types'
+import { setAvailability } from '@/api/menu'
+import type { MenuItem } from '@/api/types'
 import { patchItem } from './menuCache'
 import { useMenuChange } from './useMenuChange'
 

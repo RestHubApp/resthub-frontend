@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
-import type { InsightsPeriod } from '../../api/types'
-import Icon from '../../components/Icon'
+import type { InsightsPeriod } from '@/api/types'
+import Icon from '@/components/Icon'
 import CustomRangeForm from './CustomRangeForm'
 import { RANGE_PRESETS } from './dateRange'
 import type { InsightsRange } from './useInsightsRange'
-import { formatLongDate, todayIn } from '../../services/format'
+import { formatLongDate, todayIn } from '@/services/format'
 
 interface RangeFilterProps {
   readonly range: InsightsRange

@@ -1,7 +1,7 @@
-import type { OrderItemResponse } from '../../api/types'
-import type { OrderNoteFlag } from '../../hooks/useOrderNoteFlags'
+import type { OrderItemResponse } from '@/api/types'
+import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 import ItemNote from './ItemNote'
-import { formatMoney } from '../../services/format'
+import { formatMoney } from '@/services/format'
 
 interface OrderItemLineProps {
   readonly item: OrderItemResponse

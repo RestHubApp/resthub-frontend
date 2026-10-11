@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { fetchOrderInvoice, issueInvoice } from '../billing'
-import type { IssueInvoiceRequest } from '../types'
+import { fetchOrderInvoice, issueInvoice } from '@/api/billing'
+import type { IssueInvoiceRequest } from '@/api/types'
 import {
   API_PREFIX,
   bearer,

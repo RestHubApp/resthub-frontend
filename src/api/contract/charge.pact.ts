@@ -1,9 +1,9 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { errorMessage, errorStatus } from '../../services/api'
-import { fetchCurrentCash } from '../cash'
-import { addPayment } from '../orders'
-import type { PaymentRequest } from '../types'
+import { errorMessage, errorStatus } from '@/services/api'
+import { fetchCurrentCash } from '@/api/cash'
+import { addPayment } from '@/api/orders'
+import type { PaymentRequest } from '@/api/types'
 import { orderShape, PAYMENT_METHODS, paymentShape } from './orderShapes'
 import {
   API_PREFIX,

@@ -1,8 +1,8 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef } from 'react'
 
-import { classifyOrderNotes, MAX_ORDER_NOTES_ORDERS, orderNotesQuery, orderNotesQueryKey } from '../api/insights'
-import type { OrderNoteClassification } from '../api/types'
+import { classifyOrderNotes, MAX_ORDER_NOTES_ORDERS, orderNotesQuery, orderNotesQueryKey } from '@/api/insights'
+import type { OrderNoteClassification } from '@/api/types'
 import { useServerEvent } from './useServerEvent'
 
 /** Cómo leyó la IA una nota: de un plato (`order_item_id`) o del pedido entero (`null`). */

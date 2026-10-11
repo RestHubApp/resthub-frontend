@@ -1,7 +1,7 @@
 import { type ReactNode, useState } from 'react'
 
-import { useLiveUpdates } from '../useLiveUpdates'
-import BackLink from '../../../components/BackLink'
+import { useLiveUpdates } from '@/features/orders/useLiveUpdates'
+import BackLink from '@/components/BackLink'
 import CartBar from './CartBar'
 import CartSheet from './CartSheet'
 import MenuPicker from './MenuPicker'

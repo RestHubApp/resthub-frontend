@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { decimalRule, textoObligatorio } from '../../../components/formRules'
+import { decimalRule, textoObligatorio } from '@/components/formRules'
 
 // Los topes del servidor: 100 % y un motivo de hasta 200 caracteres.
 const MAX_PORCENTAJE = 100

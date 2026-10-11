@@ -3,14 +3,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { billingQueryKey, billingSettingsQueryKey, updateBillingSettings } from '../../api/billing'
-import type { BillingSettings } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import TextField from '../../components/TextField'
-import { Button } from '../../components/ui/button'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { billingQueryKey, billingSettingsQueryKey, updateBillingSettings } from '@/api/billing'
+import type { BillingSettings } from '@/api/types'
+import FormMessage from '@/components/FormMessage'
+import TextField from '@/components/TextField'
+import { Button } from '@/components/ui/button'
+import { onSubmit } from '@/hooks/formSubmit'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
 
 const schema = z.object({
   // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import type { PermissionCode, Role } from '../../api/types'
+import type { PermissionCode, Role } from '@/api/types'
 import { canManageAccount, defaultRoleId, roleOptions } from './roleOptions'
 
 function role(id: number, kind: Role['kind'], permissions: PermissionCode[]): Role {

@@ -1,8 +1,8 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import type { Role } from '../../api/types'
-import ReadOnlyField from '../../components/ReadOnlyField'
-import TextField from '../../components/TextField'
+import type { Role } from '@/api/types'
+import ReadOnlyField from '@/components/ReadOnlyField'
+import TextField from '@/components/TextField'
 import { MAX_ROLE_NAME } from './roleSchema'
 
 interface RoleNameFieldProps {

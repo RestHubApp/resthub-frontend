@@ -2,8 +2,8 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
 import { cuenta, entrarComo, montar, PERMISOS_MESERO, primero, RespuestaDeError, servidor } from '#jest/harness'
-import { currentAuthToken } from '../../services/api'
-import { useSession } from '../../store/session'
+import { currentAuthToken } from '@/services/api'
+import { useSession } from '@/store/session'
 import ProfileView from './ProfileView'
 import SessionExpiredNotice from './SessionExpiredNotice'
 

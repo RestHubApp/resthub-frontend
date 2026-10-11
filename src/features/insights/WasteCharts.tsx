@@ -1,7 +1,7 @@
-import type { WasteReport } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import BarList from '../../components/charts/BarList'
-import { formatInteger, formatMoney, formatPercent, formatQuantity, toNumber } from '../../services/format'
+import type { WasteReport } from '@/api/types'
+import EmptyState from '@/components/EmptyState'
+import BarList from '@/components/charts/BarList'
+import { formatInteger, formatMoney, formatPercent, formatQuantity, toNumber } from '@/services/format'
 
 interface WasteChartsProps {
   readonly report: WasteReport

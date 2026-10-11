@@ -3,8 +3,8 @@ import { screen, within } from '@testing-library/react'
 
 import { ADMIN, entrarAPlataforma, montarPlataforma } from '#jest/fixtures/plataforma'
 import { entrarComo, RespuestaDeError, servidor } from '#jest/harness'
-import { usePlatformSession } from '../../store/platformSession'
-import { useSession } from '../../store/session'
+import { usePlatformSession } from '@/store/platformSession'
+import { useSession } from '@/store/session'
 
 // Contraseña de prueba, no una credencial real.
 const CLAVE_DE_PRUEBA = 'resthub123'

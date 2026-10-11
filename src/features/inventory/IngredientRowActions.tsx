@@ -1,7 +1,7 @@
-import type { Ingredient } from '../../api/types'
-import Icon from '../../components/Icon'
-import type { IconName } from '../../components/icons'
-import { Button } from '../../components/ui/button'
+import type { Ingredient } from '@/api/types'
+import Icon from '@/components/Icon'
+import type { IconName } from '@/components/icons'
+import { Button } from '@/components/ui/button'
 import type { StockAction } from './StockActionDialog'
 
 interface IngredientRowActionsProps {

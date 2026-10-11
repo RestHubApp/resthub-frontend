@@ -1,5 +1,5 @@
-import type { Ingredient } from '../../api/types'
-import StatusBadge from '../../components/StatusBadge'
+import type { Ingredient } from '@/api/types'
+import StatusBadge from '@/components/StatusBadge'
 
 interface IngredientStatusProps {
   readonly ingredient: Ingredient

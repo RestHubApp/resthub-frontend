@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it } from '@jest/globals'
 import { renderHook } from '@testing-library/react'
 
 import { cuenta, PERMISOS_MESERO } from '#jest/harness'
-import { currentAuthToken } from '../services/api'
-import { queryClient } from '../services/queryClient'
-import { RESTAURANT_SESSION_KEY } from '../services/tabStorage'
+import { currentAuthToken } from '@/services/api'
+import { queryClient } from '@/services/queryClient'
+import { RESTAURANT_SESSION_KEY } from '@/services/tabStorage'
 import {
   can,
   currentTimeZone,

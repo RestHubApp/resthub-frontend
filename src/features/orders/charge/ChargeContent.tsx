@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { orderQuery } from '../../../api/orders'
-import type { OrderResponse } from '../../../api/types'
-import FormDialog from '../../../components/FormDialog'
-import { orderPlace } from '../orderLabels'
+import { orderQuery } from '@/api/orders'
+import type { OrderResponse } from '@/api/types'
+import FormDialog from '@/components/FormDialog'
+import { orderPlace } from '@/features/orders/orderLabels'
 import ChargeForm from './ChargeForm'
 import ChargeReceipt from './ChargeReceipt'
 

@@ -1,11 +1,11 @@
-import { fetchDailySales, insightsReportQuery } from '../../api/insights'
-import type { DailySalesPoint, InsightsRangeParams } from '../../api/types'
-import ChartCard from '../../components/charts/ChartCard'
-import DataGrid from '../../components/charts/DataGrid'
+import { fetchDailySales, insightsReportQuery } from '@/api/insights'
+import type { DailySalesPoint, InsightsRangeParams } from '@/api/types'
+import ChartCard from '@/components/charts/ChartCard'
+import DataGrid from '@/components/charts/DataGrid'
 import ReportState from './ReportState'
 import SalesChart from './SalesChart'
 import { useInsightsReport } from './useInsightsReport'
-import { formatInteger, formatLongDate, formatMoney } from '../../services/format'
+import { formatInteger, formatLongDate, formatMoney } from '@/services/format'
 
 interface SalesTrendSectionProps {
   readonly range: InsightsRangeParams

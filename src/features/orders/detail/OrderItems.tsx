@@ -1,7 +1,7 @@
-import type { OrderResponse } from '../../../api/types'
-import SectionCard from '../../../components/SectionCard'
-import type { FlagFor } from '../noteFlags'
-import OrderItemLine from '../OrderItemLine'
+import type { OrderResponse } from '@/api/types'
+import SectionCard from '@/components/SectionCard'
+import type { FlagFor } from '@/features/orders/noteFlags'
+import OrderItemLine from '@/features/orders/OrderItemLine'
 import EditableItem from './EditableItem'
 
 interface OrderItemsProps {

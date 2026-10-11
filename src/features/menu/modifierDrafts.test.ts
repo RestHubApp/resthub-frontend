@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import type { MenuItem } from '../../api/types'
+import type { MenuItem } from '@/api/types'
 import { draftsOf, type GroupDraft, parseGroups } from './modifierDrafts'
 
 const tamano: GroupDraft = { name: 'Tamaño', required: true, max: '1', options: 'Personal\nFamiliar = 10,50\n' }

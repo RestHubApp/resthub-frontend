@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { lowStockQuery } from '../../api/insights'
-import EmptyState from '../../components/EmptyState'
-import Icon from '../../components/Icon'
-import SectionCard from '../../components/SectionCard'
-import { Button } from '../../components/ui/button'
+import { lowStockQuery } from '@/api/insights'
+import EmptyState from '@/components/EmptyState'
+import Icon from '@/components/Icon'
+import SectionCard from '@/components/SectionCard'
+import { Button } from '@/components/ui/button'
 import LowStockRow from './LowStockRow'
 import ReportState from './ReportState'
 

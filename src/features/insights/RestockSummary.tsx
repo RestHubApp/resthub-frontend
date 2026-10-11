@@ -1,5 +1,5 @@
-import type { RestockAction } from '../../api/types'
-import Icon from '../../components/Icon'
+import type { RestockAction } from '@/api/types'
+import Icon from '@/components/Icon'
 import { ACTION_LABELS, ACTION_ORDER, ACTION_STYLES, TONE_BADGE } from './restockActions'
 
 interface RestockSummaryProps {

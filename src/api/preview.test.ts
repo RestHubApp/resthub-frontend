@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 
-import { PLATFORM_QUERY_ROOT } from '../services/queryClient'
+import { PLATFORM_QUERY_ROOT } from '@/services/queryClient'
 import { exchangePreviewCode, sessionOf } from './auth'
 import { platformMutationKeys, platformSandboxQuery, resetPlatformSandbox, startPlatformPreview } from './platform'
 
@@ -11,7 +11,7 @@ const mockPost = jest.fn<(...args: unknown[]) => Promise<unknown>>()
 const get = mockGet
 const post = mockPost
 
-jest.mock('../services/api', () => ({
+jest.mock('@/services/api', () => ({
   api: { get: (...args: unknown[]) => mockGet(...args), post: (...args: unknown[]) => mockPost(...args) },
   debeReintentar: () => false,
 }))

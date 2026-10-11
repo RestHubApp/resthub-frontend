@@ -1,6 +1,6 @@
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
-import type { DataRowContext } from '../../../components/DataTable'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import type { DataRowContext } from '@/components/DataTable'
 
 /** Abre y cierra el detalle de una fila de la tabla. */
 export default function ExpandButton({ row }: { readonly row: DataRowContext }) {

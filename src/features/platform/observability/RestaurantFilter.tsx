@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { platformRestaurantsQuery } from '../../../api/platform'
-import { Label } from '../../../components/ui/label'
-import { NativeSelect, NativeSelectOption } from '../../../components/ui/native-select'
+import { platformRestaurantsQuery } from '@/api/platform'
+import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 
 interface RestaurantFilterProps {
   readonly value: number | null

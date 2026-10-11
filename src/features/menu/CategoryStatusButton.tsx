@@ -1,8 +1,8 @@
-import { updateCategory } from '../../api/menu'
-import type { MenuSection } from '../../api/types'
-import ConfirmDialog from '../../components/ConfirmDialog'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import { updateCategory } from '@/api/menu'
+import type { MenuSection } from '@/api/types'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import { withCategory } from './menuCache'
 import { useMenuAction } from './useMenuAction'
 

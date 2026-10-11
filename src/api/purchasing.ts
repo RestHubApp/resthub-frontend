@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
+import { api } from '@/services/api'
 import { inventoryQueryKey } from './inventory'
 import type {
   CreatePurchaseOrderRequest,

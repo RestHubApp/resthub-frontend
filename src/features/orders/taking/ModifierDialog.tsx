@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
-import type { OrderMenuItem } from '../../../api/types'
-import FormDialog from '../../../components/FormDialog'
-import FormMessage from '../../../components/FormMessage'
-import { Button } from '../../../components/ui/button'
-import { formatCents, formatMoney, toCents } from '../../../services/format'
+import type { OrderMenuItem } from '@/api/types'
+import FormDialog from '@/components/FormDialog'
+import FormMessage from '@/components/FormMessage'
+import { Button } from '@/components/ui/button'
+import { formatCents, formatMoney, toCents } from '@/services/format'
 import ModifierOptionButton from './ModifierOptionButton'
 import type { DraftModifier } from './useOrderDraft'
 

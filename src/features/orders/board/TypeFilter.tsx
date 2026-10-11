@@ -1,4 +1,4 @@
-import type { OrderType } from '../../../api/types'
+import type { OrderType } from '@/api/types'
 
 export type TypeFilterValue = OrderType | 'all'
 

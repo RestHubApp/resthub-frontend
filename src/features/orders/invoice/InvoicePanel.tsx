@@ -2,11 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
-import { orderInvoiceQuery } from '../../../api/billing'
-import type { OrderResponse } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
-import { useCan } from '../../../store/session'
+import { orderInvoiceQuery } from '@/api/billing'
+import type { OrderResponse } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { useCan } from '@/store/session'
 import InvoiceDialog from './InvoiceDialog'
 
 interface InvoicePanelProps {

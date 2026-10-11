@@ -1,7 +1,7 @@
-import ConfirmDialog from '../../components/ConfirmDialog'
-import { Button } from '../../components/ui/button'
-import { useQueuedOrders } from '../../store/offlineQueue'
-import { useSession } from '../../store/session'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import { Button } from '@/components/ui/button'
+import { useQueuedOrders } from '@/store/offlineQueue'
+import { useSession } from '@/store/session'
 import { leavePreview } from './leavePreview'
 import ShellIcon from './ShellIcon'
 

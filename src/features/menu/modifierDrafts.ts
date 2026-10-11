@@ -1,4 +1,4 @@
-import type { MenuItem } from '../../api/types'
+import type { MenuItem } from '@/api/types'
 
 // Los grupos de opciones se editan como texto simple: una opción por línea,
 // con su precio adicional después de un signo igual («Familiar = 10.50»). Es

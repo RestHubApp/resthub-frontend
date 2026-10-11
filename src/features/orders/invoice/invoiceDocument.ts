@@ -1,4 +1,4 @@
-import type { DocumentType, InvoiceKind } from '../../../api/types'
+import type { DocumentType, InvoiceKind } from '@/api/types'
 
 // Sobre este monto una boleta necesita el documento del cliente (SUNAT).
 const LIMITE_ANONIMA = 70000

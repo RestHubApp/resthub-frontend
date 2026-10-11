@@ -1,5 +1,5 @@
-import Icon from '../../components/Icon'
-import type { IconName } from '../../components/icons'
+import Icon from '@/components/Icon'
+import type { IconName } from '@/components/icons'
 
 interface AuthAsideItem {
   readonly icon: IconName

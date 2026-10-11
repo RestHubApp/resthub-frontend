@@ -1,5 +1,5 @@
-import { reorderCategories, reorderItems } from '../../api/menu'
-import type { MenuSection } from '../../api/types'
+import { reorderCategories, reorderItems } from '@/api/menu'
+import type { MenuSection } from '@/api/types'
 import { withCategoryOrder, withItemOrder } from './menuCache'
 import { type Direction, moveId } from './menuOrder'
 import { useMenuChange } from './useMenuChange'

@@ -4,7 +4,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { createElement, type ReactNode } from 'react'
 
 import { entrarComo } from '#jest/harness'
-import { queryClient } from '../../services/queryClient'
+import { queryClient } from '@/services/queryClient'
 import { useLiveUpdates } from './useLiveUpdates'
 
 // Un canal de avisos controlado por la prueba: cada conexión es un flujo al

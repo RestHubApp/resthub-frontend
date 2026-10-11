@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import PageHeader from '../../components/PageHeader'
+import PageHeader from '@/components/PageHeader'
 import PanelTabs from './PanelTabs'
 
 interface PanelHeaderProps {

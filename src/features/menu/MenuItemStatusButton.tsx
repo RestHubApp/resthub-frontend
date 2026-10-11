@@ -1,8 +1,8 @@
-import { updateMenuItem } from '../../api/menu'
-import type { MenuItem } from '../../api/types'
-import ConfirmDialog from '../../components/ConfirmDialog'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import { updateMenuItem } from '@/api/menu'
+import type { MenuItem } from '@/api/types'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import { withItem } from './menuCache'
 import { useMenuAction } from './useMenuAction'
 

@@ -1,12 +1,12 @@
 import { useState } from 'react'
 
-import type { PlatformRestaurantDetail } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import FormDialog from '../../components/FormDialog'
-import Icon from '../../components/Icon'
-import SectionCard from '../../components/SectionCard'
-import StatusBadge from '../../components/StatusBadge'
-import { Button } from '../../components/ui/button'
+import type { PlatformRestaurantDetail } from '@/api/types'
+import EmptyState from '@/components/EmptyState'
+import FormDialog from '@/components/FormDialog'
+import Icon from '@/components/Icon'
+import SectionCard from '@/components/SectionCard'
+import StatusBadge from '@/components/StatusBadge'
+import { Button } from '@/components/ui/button'
 import AddOwnerForm from './AddOwnerForm'
 
 interface OwnersSectionProps {

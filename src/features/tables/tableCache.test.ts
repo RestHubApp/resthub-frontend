@@ -3,7 +3,7 @@ import { waitFor } from '@testing-library/react'
 
 import { mesa, pedidoEnMesa } from '#jest/fixtures/inventario'
 import { entrarComo, PERMISOS_MESERO, servidor } from '#jest/harness'
-import type { TableResponse } from '../../api/types'
+import type { TableResponse } from '@/api/types'
 import { prefetchTables } from './prefetchTables'
 import { withOrder, withTable } from './tableCache'
 

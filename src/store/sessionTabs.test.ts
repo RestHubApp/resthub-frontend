@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { unstubAllGlobals } from '#jest/globals'
 import { type AlmacenDePrueba, avisar, fakeStorage, guardado, nuevaPestana, tokenQueVence } from '#jest/pestanas'
 
-import type { CurrentUserResponse } from '../api/types'
+import type { CurrentUserResponse } from '@/api/types'
 
 const CLAVE = 'resthub.session.v2'
 const PREVIA = 'resthub.vista-previa.sesion.v1'
@@ -25,7 +25,7 @@ function cuenta(userId: number, cambios: Partial<CurrentUserResponse> = {}): Cur
 async function abrirPestana(local: AlmacenDePrueba, ruta = '/') {
   const { ventana, pestana } = nuevaPestana(local, ruta)
   const { useSession } = await import('./session')
-  const { currentAuthToken } = await import('../services/api')
+  const { currentAuthToken } = await import('@/services/api')
   return { ventana, pestana, useSession, currentAuthToken }
 }
 

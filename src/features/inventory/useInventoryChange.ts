@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { useNotifications } from '../../store/notifications'
+import { useNotifications } from '@/store/notifications'
 import { type IngredientResult, saveIngredient } from './ingredientCache'
 
 interface InventoryChange<TVars, TResult extends IngredientResult> {

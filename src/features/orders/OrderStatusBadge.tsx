@@ -1,5 +1,5 @@
-import type { OrderStatus } from '../../api/types'
-import StatusBadge from '../../components/StatusBadge'
+import type { OrderStatus } from '@/api/types'
+import StatusBadge from '@/components/StatusBadge'
 import { STATUS_LABELS, STATUS_TONE } from './orderLabels'
 
 interface OrderStatusBadgeProps {

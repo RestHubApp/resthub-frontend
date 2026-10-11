@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { currentUserQueryKey } from '../../api/auth'
-import { rolesQuery, rolesQueryKey } from '../../api/roles'
-import { staffQueryKey } from '../../api/staff'
-import type { Role } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
-import { useSession } from '../../store/session'
+import { currentUserQueryKey } from '@/api/auth'
+import { rolesQuery, rolesQueryKey } from '@/api/roles'
+import { staffQueryKey } from '@/api/staff'
+import type { Role } from '@/api/types'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
+import { useSession } from '@/store/session'
 
 interface RoleMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>

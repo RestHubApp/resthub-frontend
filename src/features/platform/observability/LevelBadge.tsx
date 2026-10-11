@@ -1,5 +1,5 @@
-import type { ObsLogLevel } from '../../../api/types'
-import StatusBadge from '../../../components/StatusBadge'
+import type { ObsLogLevel } from '@/api/types'
+import StatusBadge from '@/components/StatusBadge'
 import { LEVEL_LABELS } from './obsLabels'
 
 /** El nivel de un log, escrito y con su color: ámbar la advertencia, rojo el error. */

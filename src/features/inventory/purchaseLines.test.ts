@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import type { PurchaseSuggestion } from '../../api/types'
+import type { PurchaseSuggestion } from '@/api/types'
 import { type LineDraft, linesForApi, linesFromSuggestions } from './purchaseLines'
 
 function line(ingredientId: string, quantity: string, unitCost = ''): LineDraft {

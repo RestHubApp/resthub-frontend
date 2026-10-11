@@ -1,5 +1,5 @@
-import type { IngredientUnit } from '../../api/types'
-import { formatMoney } from '../../services/format'
+import type { IngredientUnit } from '@/api/types'
+import { formatMoney } from '@/services/format'
 
 // El inventario guarda cada cantidad en la unidad base (gramos, mililitros o
 // unidades), que es la que suma sin errores. La gente, en cambio, compra por

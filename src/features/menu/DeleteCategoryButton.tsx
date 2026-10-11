@@ -1,8 +1,8 @@
-import { deleteCategory } from '../../api/menu'
-import type { MenuSection } from '../../api/types'
-import ConfirmDialog from '../../components/ConfirmDialog'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import { deleteCategory } from '@/api/menu'
+import type { MenuSection } from '@/api/types'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import { withoutCategory } from './menuCache'
 import { useMenuAction } from './useMenuAction'
 

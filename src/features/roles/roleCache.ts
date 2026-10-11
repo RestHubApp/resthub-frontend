@@ -1,5 +1,5 @@
-import type { Role, RoleKind } from '../../api/types'
-import { upsertInList } from '../../services/cacheList'
+import type { Role, RoleKind } from '@/api/types'
+import { upsertInList } from '@/services/cacheList'
 
 // El mismo orden que el servidor: encargado, mesero y los demás por nombre.
 const KIND_ORDER: Record<RoleKind, number> = { owner: 0, waiter: 1, custom: 2 }

@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
-import type { insightsReportQuery } from '../../api/insights'
+import type { insightsReportQuery } from '@/api/insights'
 
 /**
  * Un reporte del panel para el rango elegido.

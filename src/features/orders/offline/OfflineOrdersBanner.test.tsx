@@ -3,8 +3,8 @@ import { act, screen } from '@testing-library/react'
 
 import { pedido } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, RespuestaDeError, servidor, sinRed } from '#jest/harness'
-import type { OpenOrderRequest } from '../../../api/types'
-import { enqueueOrder, queuedOrders, removeQueued } from '../../../store/offlineQueue'
+import type { OpenOrderRequest } from '@/api/types'
+import { enqueueOrder, queuedOrders, removeQueued } from '@/store/offlineQueue'
 import OfflineOrdersBanner from './OfflineOrdersBanner'
 
 const DUENA = { userId: 7, restaurantId: 1 }

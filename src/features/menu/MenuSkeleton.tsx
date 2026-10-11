@@ -1,5 +1,5 @@
-import LoadingRegion from '../../components/LoadingRegion'
-import { Skeleton } from '../../components/ui/skeleton'
+import LoadingRegion from '@/components/LoadingRegion'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Dos categorías de muestra, con distinta cantidad de platos.
 const CATEGORIAS = [4, 3]

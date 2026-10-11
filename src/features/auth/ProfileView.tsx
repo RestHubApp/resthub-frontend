@@ -1,6 +1,6 @@
-import PageHeader from '../../components/PageHeader'
-import SectionCard from '../../components/SectionCard'
-import { usePreview, useSession } from '../../store/session'
+import PageHeader from '@/components/PageHeader'
+import SectionCard from '@/components/SectionCard'
+import { usePreview, useSession } from '@/store/session'
 import ChangePasswordForm from './ChangePasswordForm'
 
 const TERMINO = 'm-0 text-sm text-muted-foreground'

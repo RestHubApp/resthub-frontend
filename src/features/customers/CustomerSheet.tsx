@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { customerQuery } from '../../api/customers'
-import type { Customer } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../../components/ui/sheet'
-import { errorMessage } from '../../services/api'
-import { useCan, useTimeZone } from '../../store/session'
+import { customerQuery } from '@/api/customers'
+import type { Customer } from '@/api/types'
+import FormMessage from '@/components/FormMessage'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { errorMessage } from '@/services/api'
+import { useCan, useTimeZone } from '@/store/session'
 import CustomerDetail from './CustomerDetail'
 import CustomerRights from './CustomerRights'
 

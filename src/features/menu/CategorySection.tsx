@@ -1,7 +1,7 @@
 import { useId } from 'react'
 
-import type { DishCost, MenuSection } from '../../api/types'
-import { Card } from '../../components/ui/card'
+import type { DishCost, MenuSection } from '@/api/types'
+import { Card } from '@/components/ui/card'
 import CategoryHeader from './CategoryHeader'
 import MenuItemRow from './MenuItemRow'
 import type { Direction } from './menuOrder'

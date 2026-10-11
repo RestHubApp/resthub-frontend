@@ -1,7 +1,7 @@
-import { activeOrdersQuery, orderMenuQuery } from '../../api/orders'
-import { tablesQuery } from '../../api/tables'
-import { prefetch } from '../../services/queryClient'
-import { can } from '../../store/session'
+import { activeOrdersQuery, orderMenuQuery } from '@/api/orders'
+import { tablesQuery } from '@/api/tables'
+import { prefetch } from '@/services/queryClient'
+import { can } from '@/store/session'
 
 /** Pedidos: las mesas del salón y la carta con la que el mesero toma el pedido. */
 export function prefetchFloor(): void {

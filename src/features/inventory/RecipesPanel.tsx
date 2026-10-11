@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { dishCostsQuery } from '../../api/inventory'
-import type { DishCost } from '../../api/types'
-import DataTable, { type DataColumn } from '../../components/DataTable'
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import StatusBadge from '../../components/StatusBadge'
-import { buttonVariants } from '../../components/ui/button'
-import { errorMessage } from '../../services/api'
-import { formatMoney, formatPercent } from '../../services/format'
+import { dishCostsQuery } from '@/api/inventory'
+import type { DishCost } from '@/api/types'
+import DataTable, { type DataColumn } from '@/components/DataTable'
+import FormMessage from '@/components/FormMessage'
+import Icon from '@/components/Icon'
+import StatusBadge from '@/components/StatusBadge'
+import { buttonVariants } from '@/components/ui/button'
+import { errorMessage } from '@/services/api'
+import { formatMoney, formatPercent } from '@/services/format'
 
 interface RecipesPanelProps {
   readonly canManage: boolean

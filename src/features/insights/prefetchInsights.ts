@@ -1,7 +1,7 @@
-import { salesSummaryQuery } from '../../api/insights'
-import { todayIn } from '../../services/format'
-import { prefetch } from '../../services/queryClient'
-import { can, currentTimeZone } from '../../store/session'
+import { salesSummaryQuery } from '@/api/insights'
+import { todayIn } from '@/services/format'
+import { prefetch } from '@/services/queryClient'
+import { can, currentTimeZone } from '@/store/session'
 import { DEFAULT_PRESET, presetRange } from './dateRange'
 
 /**

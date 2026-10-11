@@ -1,14 +1,14 @@
-import type { AiDecision } from '../../api/types'
-import DataTable, { type DataColumn } from '../../components/DataTable'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import type { AiDecision } from '@/api/types'
+import DataTable, { type DataColumn } from '@/components/DataTable'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import AiDecisionDetail from './AiDecisionDetail'
 import EngineBadge from './EngineBadge'
 import { ACTION_LABELS } from './restockActions'
 import { useMemo } from 'react'
 
-import { formatConfidence, formatDateTime } from '../../services/format'
-import { useTimeZone } from '../../store/session'
+import { formatConfidence, formatDateTime } from '@/services/format'
+import { useTimeZone } from '@/store/session'
 
 const SUBJECTS: Record<AiDecision['subject_type'], string> = {
   ingredient: 'Insumo',

@@ -1,8 +1,8 @@
-import { tableName } from '../../api/tables'
-import type { TableState } from '../../api/types'
-import Icon from '../../components/Icon'
-import StatusBadge from '../../components/StatusBadge'
-import { Button } from '../../components/ui/button'
+import { tableName } from '@/api/tables'
+import type { TableState } from '@/api/types'
+import Icon from '@/components/Icon'
+import StatusBadge from '@/components/StatusBadge'
+import { Button } from '@/components/ui/button'
 import MoveButtons from './MoveButtons'
 import TableStatusButton from './TableStatusButton'
 

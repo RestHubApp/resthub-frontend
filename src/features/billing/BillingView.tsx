@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { billingSettingsQuery } from '../../api/billing'
-import PageHeader from '../../components/PageHeader'
-import ListSkeleton from '../../components/ListSkeleton'
-import SectionCard from '../../components/SectionCard'
+import { billingSettingsQuery } from '@/api/billing'
+import PageHeader from '@/components/PageHeader'
+import ListSkeleton from '@/components/ListSkeleton'
+import SectionCard from '@/components/SectionCard'
 import BillingSettingsForm from './BillingSettingsForm'
 import InvoiceList from './InvoiceList'
 

@@ -1,7 +1,7 @@
-import type { ObsTimeseries } from '../../../api/types'
-import AreaChart from '../../../components/charts/AreaChart'
-import { formatInteger } from '../../../services/format'
-import { PLATFORM_TIME_ZONE } from '../platformTime'
+import type { ObsTimeseries } from '@/api/types'
+import AreaChart from '@/components/charts/AreaChart'
+import { formatInteger } from '@/services/format'
+import { PLATFORM_TIME_ZONE } from '@/features/platform/platformTime'
 import { bucketTitle, formatBucket, toSeries } from './obsLabels'
 import SeriesLegend from './SeriesLegend'
 

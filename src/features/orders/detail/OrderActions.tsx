@@ -1,14 +1,14 @@
 import { Link } from 'react-router'
 
-import { advanceOrder, type OrderStep } from '../../../api/orders'
-import type { OrderResponse } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
-import { useCan } from '../../../store/session'
-import { nextStepFor, stepDoneMessage } from '../nextStep'
-import { isActive } from '../orderLabels'
-import { useCanTakeStep } from '../useCanTakeStep'
-import { useOrderAction } from '../useOrderAction'
+import { advanceOrder, type OrderStep } from '@/api/orders'
+import type { OrderResponse } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { useCan } from '@/store/session'
+import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
+import { isActive } from '@/features/orders/orderLabels'
+import { useCanTakeStep } from '@/features/orders/useCanTakeStep'
+import { useOrderAction } from '@/features/orders/useOrderAction'
 
 interface OrderActionsProps {
   readonly order: OrderResponse

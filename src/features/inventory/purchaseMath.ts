@@ -1,7 +1,7 @@
-import type { Ingredient, IngredientUnit } from '../../api/types'
+import type { Ingredient, IngredientUnit } from '@/api/types'
 import type { PurchaseValues } from './inventorySchema'
 import { findInputUnit, fromBase, inputUnits, parseDecimal, priceUnit, toBaseCost, toBaseQuantity } from './units'
-import { formatMoney } from '../../services/format'
+import { formatMoney } from '@/services/format'
 
 function positivo(numero: number): boolean {
   return Number.isFinite(numero) && numero > 0

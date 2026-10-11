@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '../../api/restaurant'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
-import { errorMessage } from '../../services/api'
-import { formatPercent } from '../../services/format'
-import { useNotifications } from '../../store/notifications'
+import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '@/api/restaurant'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { errorMessage } from '@/services/api'
+import { formatPercent } from '@/services/format'
+import { useNotifications } from '@/store/notifications'
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const PORCENTAJE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u

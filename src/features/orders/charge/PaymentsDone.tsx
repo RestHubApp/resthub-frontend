@@ -1,6 +1,6 @@
-import type { OrderResponse } from '../../../api/types'
-import { formatMoney, formatTime, toCents } from '../../../services/format'
-import { useTimeZone } from '../../../store/session'
+import type { OrderResponse } from '@/api/types'
+import { formatMoney, formatTime, toCents } from '@/services/format'
+import { useTimeZone } from '@/store/session'
 
 interface PaymentsDoneProps {
   readonly order: OrderResponse

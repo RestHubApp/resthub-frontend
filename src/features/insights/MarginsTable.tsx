@@ -10,11 +10,11 @@ import {
 } from '@tanstack/react-table'
 import { useState } from 'react'
 
-import type { DishMargin } from '../../api/types'
-import Icon from '../../components/Icon'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
+import type { DishMargin } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import MarginBar from './MarginBar'
-import { formatInteger, formatMoney, toNumber } from '../../services/format'
+import { formatInteger, formatMoney, toNumber } from '@/services/format'
 
 const features = tableFeatures({
   rowSortingFeature,

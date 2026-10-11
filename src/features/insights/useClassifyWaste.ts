@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { aiDecisionsQueryKey, classifyWaste, insightsReportRootKey } from '../../api/insights'
+import { aiDecisionsQueryKey, classifyWaste, insightsReportRootKey } from '@/api/insights'
 
 export const WASTE_REPORT = 'waste'
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import type { OwnRestaurant } from '../../api/types'
+import type { OwnRestaurant } from '@/api/types'
 import DiscountLimitForm from './DiscountLimitForm'
 
 const CAMPO = 'Descuento máximo del mesero (%)'

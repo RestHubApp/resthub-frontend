@@ -1,9 +1,9 @@
 import type { QueryClient } from '@tanstack/react-query'
 
-import { rolesQueryKey } from '../../api/roles'
-import { MAX_STAFF_PAGE, staffQuery, staffQueryKey } from '../../api/staff'
-import type { StaffListResponse, StaffResponse } from '../../api/types'
-import { upsertInList } from '../../services/cacheList'
+import { rolesQueryKey } from '@/api/roles'
+import { MAX_STAFF_PAGE, staffQuery, staffQueryKey } from '@/api/staff'
+import type { StaffListResponse, StaffResponse } from '@/api/types'
+import { upsertInList } from '@/services/cacheList'
 
 // Un restaurante pequeno tiene pocas cuentas: se piden todas en una pagina
 // del servidor y la tabla pagina en el navegador.

@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { orderQueryKey, ordersQueryKey } from '../../api/orders'
-import { tablesQueryKey } from '../../api/tables'
-import type { OrderResponse } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { orderQueryKey, ordersQueryKey } from '@/api/orders'
+import { tablesQueryKey } from '@/api/tables'
+import type { OrderResponse } from '@/api/types'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
 
 interface OrderActionOptions<TVariables> {
   readonly mutationFn: (variables: TVariables) => Promise<OrderResponse>

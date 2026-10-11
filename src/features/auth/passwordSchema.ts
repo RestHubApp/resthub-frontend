@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { passwordRule } from '../../services/fieldRules'
+import { passwordRule } from '@/services/fieldRules'
 
 export const changePasswordSchema = z
   .object({

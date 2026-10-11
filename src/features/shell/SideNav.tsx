@@ -1,4 +1,4 @@
-import type { CurrentUserResponse } from '../../api/types'
+import type { CurrentUserResponse } from '@/api/types'
 import Brand from './Brand'
 import type { NavEntry } from './navigation'
 import NavList from './NavList'

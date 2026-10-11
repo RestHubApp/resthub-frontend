@@ -1,6 +1,6 @@
-import type { OrderResponse } from '../../../api/types'
-import { Checkbox } from '../../../components/ui/checkbox'
-import { formatCents, formatMoney } from '../../../services/format'
+import type { OrderResponse } from '@/api/types'
+import { Checkbox } from '@/components/ui/checkbox'
+import { formatCents, formatMoney } from '@/services/format'
 import { unpaidItems } from './chargeMath'
 
 interface ItemSplitPickerProps {

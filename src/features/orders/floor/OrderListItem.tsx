@@ -1,10 +1,10 @@
 import { Link } from 'react-router'
 
-import type { OrderResponse } from '../../../api/types'
-import { orderPlace } from '../orderLabels'
-import OrderStatusBadge from '../OrderStatusBadge'
-import { formatMoney, formatTime } from '../../../services/format'
-import { useTimeZone } from '../../../store/session'
+import type { OrderResponse } from '@/api/types'
+import { orderPlace } from '@/features/orders/orderLabels'
+import OrderStatusBadge from '@/features/orders/OrderStatusBadge'
+import { formatMoney, formatTime } from '@/services/format'
+import { useTimeZone } from '@/store/session'
 
 interface OrderListItemProps {
   readonly order: OrderResponse

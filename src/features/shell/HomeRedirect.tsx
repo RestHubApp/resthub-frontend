@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router'
 
-import { useSession } from '../../store/session'
+import { useSession } from '@/store/session'
 import { entriesFor } from './navigation'
 
 /**

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { PermissionCode, Role, RoleRequest } from '../../api/types'
+import type { PermissionCode, Role, RoleRequest } from '@/api/types'
 
 // El mismo tope que el servidor.
 export const MAX_ROLE_NAME = 40

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { usePageVisibility } from '../../../hooks/usePageVisibility'
+import { usePageVisibility } from '@/hooks/usePageVisibility'
 import { refreshInterval } from './autoRefresh'
 
 /** Lo que cada lectura del panel agrega a su consulta para releerse sola. */

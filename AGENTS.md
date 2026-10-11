@@ -29,6 +29,9 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip` y
   sin `../` redundantes, sin dependencias no declaradas, sin `export let`, y
   los imports van primero. Un ciclo se rompe subiendo lo compartido; no se
   silencia.
+- **Rutas de import** (`no-relative-import-paths`): dentro de `src`, lo que no
+  está en la misma carpeta se importa con `@/` (`@/api/auth`, no
+  `../../api/auth`). Vale también para `import()` dinámicos y `jest.mock`.
 - **Accesibilidad** (`jsx-a11y` estricto): nada de `tabIndex` ni manejadores
   en elementos no interactivos. Si un control de verdad no tiene rol ARIA que
   lo describa, la excepción va en su línea con el motivo.

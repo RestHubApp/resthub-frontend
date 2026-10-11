@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 
-import { api, currentAuthToken } from '../services/api'
-import { EventStreamError, readEventStream } from '../services/eventStream'
-import { logger } from '../services/logger'
+import { api, currentAuthToken } from '@/services/api'
+import { EventStreamError, readEventStream } from '@/services/eventStream'
+import { logger } from '@/services/logger'
 
 const RETRY_MS = 3000
 const UNAUTHORIZED = 401

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { textoOpcional } from '../../components/formRules'
+import { textoOpcional } from '@/components/formRules'
 
 // El tope del servidor para la nota de la caja.
 export const MAX_CASH_NOTES = 300

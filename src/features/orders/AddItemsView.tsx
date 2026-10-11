@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
 
-import { orderQuery } from '../../api/orders'
-import FormMessage from '../../components/FormMessage'
+import { orderQuery } from '@/api/orders'
+import FormMessage from '@/components/FormMessage'
 import { isActive, orderPlace } from './orderLabels'
 import TakeOrder from './taking/TakeOrder'
 

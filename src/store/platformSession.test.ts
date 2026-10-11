@@ -36,8 +36,8 @@ async function cargar(inicial: Record<string, string> = {}) {
   stubGlobal('localStorage', storage)
   jest.resetModules()
   const { usePlatformSession } = await import('./platformSession')
-  const { api, setAuthToken } = await import('../services/api')
-  const { queryClient } = await import('../services/queryClient')
+  const { api, setAuthToken } = await import('@/services/api')
+  const { queryClient } = await import('@/services/queryClient')
   return { storage, usePlatformSession, api, setAuthToken, queryClient }
 }
 
@@ -99,7 +99,7 @@ describe('sesión de plataforma', () => {
 
   it('al cerrarse saca del caché las mutaciones de plataforma y sus contraseñas', async () => {
     const { usePlatformSession, queryClient } = await cargar()
-    const { platformMutationKeys } = await import('../api/platform')
+    const { platformMutationKeys } = await import('@/api/platform')
     usePlatformSession.getState().signIn(tokenQueVence(3600), ADMIN)
     const mutaciones = queryClient.getMutationCache()
     const mutationFn = () => Promise.resolve(null)
@@ -176,7 +176,7 @@ async function cargarEnVistaPrevia(token: string) {
   stubGlobal('location', { pathname: '/vista-previa', search: '', hash: '' })
   jest.resetModules()
   const { usePlatformSession } = await import('./platformSession')
-  const { api } = await import('../services/api')
+  const { api } = await import('@/services/api')
   return { storage, usePlatformSession, api }
 }
 

@@ -1,6 +1,6 @@
-import type { SeriesPoint } from '../../../components/charts/areaGeometry'
-import type { ObsAccountKind, ObsLogLevel, ObsTimePoint } from '../../../api/types'
-import { formatClock, formatPercent, formatShortDateTime } from '../../../services/format'
+import type { SeriesPoint } from '@/components/charts/areaGeometry'
+import type { ObsAccountKind, ObsLogLevel, ObsTimePoint } from '@/api/types'
+import { formatClock, formatPercent, formatShortDateTime } from '@/services/format'
 
 const SECONDS_PER_HOUR = 3600
 const SECONDS_PER_MINUTE = 60

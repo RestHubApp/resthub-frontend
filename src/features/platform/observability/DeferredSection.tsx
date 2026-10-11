@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 
-import { Button } from '../../../components/ui/button'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   readonly name: string

@@ -1,10 +1,10 @@
 import { redirect } from 'react-router'
 
-import { exchangePreviewCode, sessionOf } from '../../api/auth'
-import { errorStatus } from '../../services/api'
-import { logger } from '../../services/logger'
-import { isPreviewTab, previewEntryUrl, takeEntryFragment } from '../../services/tabStorage'
-import { useSession } from '../../store/session'
+import { exchangePreviewCode, sessionOf } from '@/api/auth'
+import { errorStatus } from '@/services/api'
+import { logger } from '@/services/logger'
+import { isPreviewTab, previewEntryUrl, takeEntryFragment } from '@/services/tabStorage'
+import { useSession } from '@/store/session'
 import { failureOf, previewCodeFrom, type PreviewEntryFailure, withoutHash } from './previewCode'
 
 /** Lo que ve la pantalla de canje: por qué falló, o que la pestaña se está recargando. */

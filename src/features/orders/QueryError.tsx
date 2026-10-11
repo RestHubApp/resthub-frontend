@@ -1,7 +1,7 @@
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { errorMessage } from '../../services/api'
+import FormMessage from '@/components/FormMessage'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { errorMessage } from '@/services/api'
 
 interface QueryErrorProps {
   readonly error: unknown

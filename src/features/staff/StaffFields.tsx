@@ -1,11 +1,11 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import type { Role } from '../../api/types'
-import ReadOnlyField from '../../components/ReadOnlyField'
-import SelectField from '../../components/SelectField'
-import TextField from '../../components/TextField'
-import { NativeSelectOption } from '../../components/ui/native-select'
-import { soloLetras } from '../../services/fieldRules'
+import type { Role } from '@/api/types'
+import ReadOnlyField from '@/components/ReadOnlyField'
+import SelectField from '@/components/SelectField'
+import TextField from '@/components/TextField'
+import { NativeSelectOption } from '@/components/ui/native-select'
+import { soloLetras } from '@/services/fieldRules'
 
 interface StaffFieldsProps {
   /** Lo que devuelve `register(...)` para cada campo. */

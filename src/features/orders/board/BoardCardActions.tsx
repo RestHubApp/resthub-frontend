@@ -1,10 +1,10 @@
-import { advanceOrder, type OrderStep } from '../../../api/orders'
-import type { OrderResponse } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
-import { useCan } from '../../../store/session'
-import { nextStepFor, stepDoneMessage } from '../nextStep'
-import { useOrderAction } from '../useOrderAction'
+import { advanceOrder, type OrderStep } from '@/api/orders'
+import type { OrderResponse } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { useCan } from '@/store/session'
+import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
+import { useOrderAction } from '@/features/orders/useOrderAction'
 
 interface BoardCardActionsProps {
   readonly order: OrderResponse

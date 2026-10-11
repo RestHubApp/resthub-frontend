@@ -1,6 +1,6 @@
-import type { OrderResponse } from '../../../api/types'
-import OrderClosedInfo from '../detail/OrderClosedInfo'
-import OrderItemLine from '../OrderItemLine'
+import type { OrderResponse } from '@/api/types'
+import OrderClosedInfo from '@/features/orders/detail/OrderClosedInfo'
+import OrderItemLine from '@/features/orders/OrderItemLine'
 
 interface OrderSummaryProps {
   readonly order: OrderResponse

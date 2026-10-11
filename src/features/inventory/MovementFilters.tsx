@@ -1,8 +1,8 @@
 import { useId } from 'react'
 
-import type { Ingredient } from '../../api/types'
-import { Label } from '../../components/ui/label'
-import { NativeSelect, NativeSelectOption } from '../../components/ui/native-select'
+import type { Ingredient } from '@/api/types'
+import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { KIND_OPTIONS } from './movementKinds'
 
 interface MovementFiltersProps {

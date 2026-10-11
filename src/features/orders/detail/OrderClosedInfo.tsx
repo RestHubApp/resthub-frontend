@@ -1,8 +1,8 @@
-import type { OrderResponse } from '../../../api/types'
-import { formatDateTime, formatMoney, formatPercent, toCents } from '../../../services/format'
-import { useTimeZone } from '../../../store/session'
-import PaymentsDone from '../charge/PaymentsDone'
-import InvoicePanel from '../invoice/InvoicePanel'
+import type { OrderResponse } from '@/api/types'
+import { formatDateTime, formatMoney, formatPercent, toCents } from '@/services/format'
+import { useTimeZone } from '@/store/session'
+import PaymentsDone from '@/features/orders/charge/PaymentsDone'
+import InvoicePanel from '@/features/orders/invoice/InvoicePanel'
 
 interface OrderClosedInfoProps {
   readonly order: OrderResponse
