@@ -46,7 +46,7 @@ describe('prefetchTables', () => {
     await waitFor(() => {
       expect(api.calls('get', '/tables')).toHaveLength(1)
     })
-    expect(api.calls('get', '/tables')[0]?.params).toEqual({ include_inactive: true })
+    expect(api.calls('get', '/tables')[0]?.params).toEqual({ include_inactive: 'true' })
   })
 
   it('el mesero no las pide: el servidor respondería 403', () => {

@@ -63,7 +63,7 @@ describe('logs del panel', () => {
     await user.click(screen.getByRole('link', { name: /Ver las peticiones de/u }))
 
     await waitFor(() => {
-      expect(api.calls('get', REQUESTS).at(-1)?.params).toEqual({ window: '24h', request_id: 'req-abc', limit: 50 })
+      expect(api.calls('get', REQUESTS).at(-1)?.params).toEqual({ window: '24h', request_id: 'req-abc', limit: '50' })
     })
     expect(router.state.location.hash).toBe('#peticiones')
   })
@@ -77,7 +77,7 @@ describe('logs del panel', () => {
     await user.click(within(filters(FILTER_LOGS)).getByRole('button', { name: 'Buscar' }))
 
     await waitFor(() => {
-      expect(api.calls('get', LOGS).at(-1)?.params).toEqual({ window: '24h', level: 'error', search: 'payment', limit: 50 })
+      expect(api.calls('get', LOGS).at(-1)?.params).toEqual({ window: '24h', level: 'error', search: 'payment', limit: '50' })
     })
     await user.click(within(filters(FILTER_LOGS)).getByRole('button', { name: 'Quitar filtros' }))
     // Sin filtros vuelve la lista inicial, que ya estaba en el caché.
@@ -94,7 +94,7 @@ describe('logs del panel', () => {
     await user.click(screen.getByRole('button', { name: 'Cargar más' }))
 
     expect(await screen.findByRole('row', { name: /stock\.low/u })).toBeInTheDocument()
-    expect(api.calls('get', LOGS).at(-1)?.params).toEqual({ window: '24h', limit: 50, before_id: 50 })
+    expect(api.calls('get', LOGS).at(-1)?.params).toEqual({ window: '24h', limit: '50', before_id: '50' })
     expect(screen.getByText('2 entradas')).toBeInTheDocument()
   })
 
@@ -116,7 +116,7 @@ describe('peticiones del panel', () => {
     await user.click(within(row).getByRole('link', { name: 'Ver los logs de req-abc' }))
 
     await waitFor(() => {
-      expect(api.calls('get', LOGS).at(-1)?.params).toEqual({ window: '24h', request_id: 'req-abc', limit: 50 })
+      expect(api.calls('get', LOGS).at(-1)?.params).toEqual({ window: '24h', request_id: 'req-abc', limit: '50' })
     })
     expect(router.state.location.hash).toBe('#logs')
   })
@@ -130,7 +130,7 @@ describe('peticiones del panel', () => {
     await user.click(within(filters(FILTER_REQUESTS)).getByRole('button', { name: 'Buscar' }))
 
     await waitFor(() => {
-      expect(api.calls('get', REQUESTS).at(-1)?.params).toEqual({ window: '24h', status_min: 500, request_id: 'req-xyz', limit: 50 })
+      expect(api.calls('get', REQUESTS).at(-1)?.params).toEqual({ window: '24h', status_min: '500', request_id: 'req-xyz', limit: '50' })
     })
   })
 

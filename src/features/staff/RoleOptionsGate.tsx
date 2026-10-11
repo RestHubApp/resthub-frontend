@@ -5,7 +5,7 @@ import { rolesQuery } from '@/api/roles'
 import type { Role } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { usePermissions } from '@/store/session'
 import { roleOptions } from './roleOptions'
 

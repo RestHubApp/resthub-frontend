@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { menuQueryKey } from '@/api/menu'
 import type { MenuResponse } from '@/api/types'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 import { MENU_KEY } from './useMenuData'
 

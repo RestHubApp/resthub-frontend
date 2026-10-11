@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 
 import { acceptTerms, fetchCurrentUser } from '@/api/auth'
-import { errorStatus } from '@/services/api'
+import { errorStatus } from '@/services/apiError'
 import { useSession } from '@/store/session'
 
 // La versión cambió mientras se leía: se relee la sesión y se pide la nueva.

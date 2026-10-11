@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { errorMessage, errorStatus } from '@/services/api'
+import { errorMessage, errorStatus } from '@/services/apiError'
 import { fetchCurrentCash } from '@/api/cash'
 import { addPayment } from '@/api/orders'
 import type { PaymentRequest } from '@/api/types'

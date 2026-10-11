@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-import { api } from '@/services/api'
+import { apiUrl } from '@/services/apiRouting'
 import { EventStreamError, readEventStream } from '@/services/eventStream'
 import { logger } from '@/services/logger'
 import { useSession } from '@/store/session'
@@ -53,7 +53,7 @@ export function useLiveUpdates(): LiveStatus {
 
     function connect(): void {
       readEventStream({
-        url: `${api.defaults.baseURL ?? ''}/events`,
+        url: apiUrl('/events'),
         token: token ?? '',
         signal: controller.signal,
         onEvent,

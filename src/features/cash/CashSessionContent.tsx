@@ -3,7 +3,7 @@ import type { UseQueryResult } from '@tanstack/react-query'
 import type { CashSession } from '@/api/types'
 import { EmptyState } from '@/components/EmptyState'
 import { RetryQueryError } from '@/components/RetryQueryError'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { CashSummaryView } from './CashSummaryView'
 
 interface CashSessionContentProps {

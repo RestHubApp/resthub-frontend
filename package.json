@@ -35,10 +35,10 @@
     "@hookform/resolvers": "^5.9.1",
     "@tanstack/react-query": "^5.102.8",
     "@tanstack/react-table": "^9.2.4",
-    "axios": "^1.20.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "lucide-react": "^1.45.0",
+    "openapi-fetch": "0.17.0",
     "radix-ui": "^1.6.7",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -140,7 +140,7 @@
       "name": "Bundle principal",
       "path": "dist/assets/index-*.js",
       "gzip": true,
-      "limit": "33.3 kB"
+      "limit": "37.1 kB"
     },
     {
       "name": "Chunk de React",
@@ -161,12 +161,6 @@
       "limit": "22.7 kB"
     },
     {
-      "name": "Chunk compartido de API",
-      "path": "dist/assets/api-*.js",
-      "gzip": true,
-      "limit": "23.4 kB"
-    },
-    {
       "name": "Chunk compartido de hooks",
       "path": "dist/assets/hooks-*.js",
       "gzip": true,
@@ -176,7 +170,7 @@
       "name": "Todo el JS",
       "path": "dist/assets/*.js",
       "gzip": true,
-      "limit": "487.6 kB"
+      "limit": "471.4 kB"
     }
   ]
 }

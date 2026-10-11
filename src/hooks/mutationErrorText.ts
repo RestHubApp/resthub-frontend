@@ -1,4 +1,4 @@
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 
 /**
  * El texto de error de una mutación fallida, o `null` si no falló: el mensaje

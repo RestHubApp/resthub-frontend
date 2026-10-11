@@ -4,7 +4,7 @@ import { Icon } from '@/components/Icon'
 import { PasswordField } from '@/components/PasswordField'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { usePlatformLogin } from './usePlatformLogin'
 
 interface PlatformLoginFormProps {

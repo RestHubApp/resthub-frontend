@@ -2,7 +2,7 @@ import type { UseQueryResult } from '@tanstack/react-query'
 
 import type { AiDecisionPage } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { AiDecisionTable } from './AiDecisionTable'
 
 interface AiDecisionsListProps {

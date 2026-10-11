@@ -1,15 +1,10 @@
-import { AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
-import {
-  api,
-  isPlatformPath,
-  setAuthToken,
-  setPlatformAuthToken,
-  setPlatformUnauthorizedHandler,
-  setUnauthorizedHandler,
-  tokenFor,
-} from './api'
+import { readRestaurant, writePlatform, writeWithoutCredential } from '#jest/apiCalls'
+import { SLOW_TIMEOUT_MS } from './api'
+import { setAuthToken, setPlatformAuthToken, setPlatformUnauthorizedHandler, setUnauthorizedHandler } from './apiCredentials'
+import { ApiError } from './apiError'
+import { isPlatformPath, tokenFor } from './apiRouting'
 
 const T_RESTAURANT = 'tok-restaurante'
 const T_PLATFORM = 'tok-plataforma'
@@ -20,29 +15,36 @@ const WITHOUT_BAR = 'platform/restaurants'
 const LEAVES_PLATFORM = '/platform/../orders'
 const OTHER_ORIGIN = '//evil.com/platform'
 
-// Responde sin red con la cabecera que llevó la petición.
-function echo(config: InternalAxiosRequestConfig): Promise<AxiosResponse<string | null>> {
-  const header = config.headers.get('Authorization')
-  return Promise.resolve({
-    data: typeof header === 'string' ? header : null,
-    status: 200,
-    statusText: 'OK',
-    headers: {},
-    config,
+const originalFetch = globalThis.fetch
+
+/** Lo que llegó al servidor falso: la ruta y la cabecera `Authorization` de cada petición. */
+const received: { path: string; authorization: string | null; requestId: string | null }[] = []
+
+// Sin red: responde con ese código y anota con qué cabeceras salió la petición.
+function respondWith(status: number, body: unknown = []): void {
+  globalThis.fetch = jest.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const request = new Request(input, init)
+    received.push({
+      path: new URL(request.url).pathname,
+      authorization: request.headers.get('Authorization'),
+      requestId: request.headers.get('X-Request-ID'),
+    })
+    return Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }))
   })
 }
 
-function rejection(config: InternalAxiosRequestConfig): Promise<never> {
-  const response = { data: {}, status: 401, statusText: 'Unauthorized', headers: {}, config }
-  return Promise.reject(new AxiosError('401', 'ERR_BAD_REQUEST', config, null, response))
-}
-
-async function headerOf(url: string): Promise<string | null> {
-  const { data } = await api.get<string | null>(url, { adapter: echo })
-  return data
+// Una conexión que no responde: solo termina cuando se aborta su señal.
+function hangingFetch(_input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  return new Promise<Response>((_resolve, reject) => {
+    init?.signal?.addEventListener('abort', () => {
+      reject(new DOMException('Abortado', 'AbortError'))
+    })
+  })
 }
 
 afterEach(() => {
+  globalThis.fetch = originalFetch
+  received.length = 0
   setAuthToken(null)
   setPlatformAuthToken(null)
   setUnauthorizedHandler(null)
@@ -67,7 +69,6 @@ describe('isPlatformPath', () => {
     expect(isPlatformPath(WITHOUT_BAR)).toBe(true)
     expect(isPlatformPath(LEAVES_PLATFORM)).toBe(false)
     expect(isPlatformPath('/orders/../platform/restaurants')).toBe(true)
-    expect(isPlatformPath({ url: '/restaurants', baseURL: '/api/v1/platform' })).toBe(true)
   })
 
   it('una dirección de otro origen no es de plataforma', () => {
@@ -103,26 +104,34 @@ describe('cabecera Authorization de cada petición', () => {
   it('lleva la credencial de la sesión dueña de la ruta', async () => {
     setAuthToken('r1')
     setPlatformAuthToken('p1')
-    expect(await headerOf('/orders')).toBe('Bearer r1')
-    expect(await headerOf(RESTAURANTS)).toBe('Bearer p1')
-  })
-
-  it('no sale ninguna credencial hacia otro origen', async () => {
-    setAuthToken('r1')
-    setPlatformAuthToken('p1')
-    expect(await headerOf('https://evil.com/api/v1/platform/restaurants')).toBeNull()
-    expect(await headerOf(OTHER_ORIGIN)).toBeNull()
-    expect(await headerOf('https://evil.com/orders')).toBeNull()
-    expect(await headerOf(WITHOUT_BAR)).toBe('Bearer p1')
-    expect(await headerOf(LEAVES_PLATFORM)).toBe('Bearer r1')
+    respondWith(200)
+    await readRestaurant()
+    respondWith(200, { access_token: 'x' })
+    await writePlatform()
+    expect(received.map((r) => [r.path, r.authorization])).toEqual([
+      ['/api/v1/tables', 'Bearer r1'],
+      ['/api/v1/platform/auth/refresh', 'Bearer p1'],
+    ])
   })
 
   it('cerrar una sesión no toca la otra', async () => {
     setAuthToken('r1')
     setPlatformAuthToken('p1')
     setPlatformAuthToken(null)
-    expect(await headerOf(RESTAURANTS)).toBeNull()
-    expect(await headerOf('/orders')).toBe('Bearer r1')
+    respondWith(200, { access_token: 'x' })
+    await writePlatform()
+    respondWith(200)
+    await readRestaurant()
+    expect(received.map((r) => r.authorization)).toEqual([null, 'Bearer r1'])
+  })
+
+  it('cada petición lleva un identificador propio', async () => {
+    respondWith(200)
+    await readRestaurant()
+    await readRestaurant()
+    const [first, second] = received
+    expect(first?.requestId).toBeTruthy()
+    expect(first?.requestId).not.toBe(second?.requestId)
   })
 
   it('un 401 cierra solo la sesión dueña de la ruta', async () => {
@@ -132,8 +141,9 @@ describe('cabecera Authorization de cada petición', () => {
     setPlatformUnauthorizedHandler(onExpirePlatform)
     setAuthToken('r1')
     setPlatformAuthToken('p1')
+    respondWith(401, { detail: 'vencida' })
 
-    await expect(api.get(RESTAURANTS, { adapter: rejection })).rejects.toThrow()
+    await expect(writePlatform()).rejects.toThrow()
     expect(onExpirePlatform).toHaveBeenCalledTimes(1)
     expect(onExpireRestaurant).not.toHaveBeenCalled()
   })
@@ -141,28 +151,56 @@ describe('cabecera Authorization de cada petición', () => {
   it('`withoutCredential` no manda ningún token aunque haya sesiones abiertas', async () => {
     setAuthToken('r1')
     setPlatformAuthToken('p1')
-    const withoutCredential = async (url: string) =>
-      (await api.post<string | null>(url, {}, { adapter: echo, withoutCredential: true })).data
-    expect(await withoutCredential('/auth/preview')).toBeNull()
-    expect(await withoutCredential(RESTAURANTS)).toBeNull()
-    // Las demás peticiones siguen con su credencial.
-    expect(await headerOf('/orders')).toBe('Bearer r1')
+    respondWith(200, { access_token: 'x' })
+    await writeWithoutCredential()
+    await readRestaurant()
+    expect(received.map((r) => r.authorization)).toEqual([null, 'Bearer r1'])
   })
 
   it('un 401 de una petición `withoutCredential` no cierra la sesión abierta', async () => {
     const onExpireRestaurant = jest.fn()
     setUnauthorizedHandler(onExpireRestaurant)
     setAuthToken('r1')
+    respondWith(401)
 
-    await expect(api.post('/auth/preview', {}, { adapter: rejection, withoutCredential: true })).rejects.toThrow()
+    await expect(writeWithoutCredential()).rejects.toThrow()
     expect(onExpireRestaurant).not.toHaveBeenCalled()
   })
 
   it('un 401 sin credencial (contraseña equivocada) no cierra nada', async () => {
     const onExpirePlatform = jest.fn()
     setPlatformUnauthorizedHandler(onExpirePlatform)
+    respondWith(401)
 
-    await expect(api.post('/platform/auth/login', {}, { adapter: rejection })).rejects.toThrow()
+    await expect(writePlatform()).rejects.toThrow()
     expect(onExpirePlatform).not.toHaveBeenCalled()
+  })
+})
+
+describe('errores de la petición', () => {
+  it('un error del servidor rechaza con ApiError, su código y su cuerpo', async () => {
+    respondWith(409, { detail: 'El pedido cambió' })
+    const error: unknown = await readRestaurant().catch((cause: unknown) => cause)
+    expect(error).toBeInstanceOf(ApiError)
+    expect(error).toMatchObject({ status: 409, body: { detail: 'El pedido cambió' }, method: 'get', path: '/api/v1/tables' })
+  })
+
+  it('un corte de red rechaza sin código HTTP', async () => {
+    globalThis.fetch = jest.fn(() => Promise.reject(new TypeError('Failed to fetch')))
+    const error: unknown = await readRestaurant().catch((cause: unknown) => cause)
+    expect(error).toMatchObject({ status: undefined, code: 'network' })
+  })
+
+  it('una petición que no responde a tiempo rechaza con `timeout`', async () => {
+    jest.useFakeTimers()
+    globalThis.fetch = hangingFetch
+    const pending = readRestaurant().catch((cause: unknown) => cause)
+    await jest.advanceTimersByTimeAsync(15_001)
+    expect(await pending).toMatchObject({ code: 'timeout' })
+    jest.useRealTimers()
+  })
+
+  it('el plazo de lo lento es mayor que el de una petición común', () => {
+    expect(SLOW_TIMEOUT_MS).toBeGreaterThan(15_000)
   })
 })

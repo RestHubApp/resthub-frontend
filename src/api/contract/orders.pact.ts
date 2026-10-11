@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { errorStatus } from '@/services/api'
+import { errorStatus } from '@/services/apiError'
 import { addOrderItems, fetchOrder, openOrder } from '@/api/orders'
 import type { OpenOrderRequest } from '@/api/types'
 import { orderItemShape, orderShape } from './orderShapes'

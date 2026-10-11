@@ -1,6 +1,6 @@
 import { QueryClient, type QueryExecuteOptions, type QueryKey } from '@tanstack/react-query'
 
-import { shouldRetry } from './api'
+import { shouldRetry } from './apiError'
 
 /**
  * El caché de datos de la aplicación.

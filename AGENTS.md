@@ -23,7 +23,7 @@ los PR tampoco pueden llevar esas marcas (lo revisa el workflow `Atribución`).
 ## Reglas de calidad (CI)
 
 Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
-`pnpm dup`, `pnpm type-coverage` y `pnpm size`. Lo que hay que saber al escribir código:
+`pnpm dup`, `pnpm type-coverage`, `pnpm size` y `pnpm run doctor` (React Doctor; ver abajo). Lo que hay que saber al escribir código:
 
 - **Imports** (`import-x`): sin ciclos, sin imports duplicados ni a sí mismo,
   sin `../` redundantes, sin dependencias no declaradas, sin `export let`, y
@@ -85,8 +85,9 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
   (`queryKey: [...]` fuera de allí está prohibido); los colores son tokens de
   `index.css` (sin `#fff` ni `rgb()` fuera de `components/ui` y `printSheet.ts`);
   el rol no se compara fuera de `features/roles` y `features/staff` (se pregunta
-  por permisos); `localStorage`, `sessionStorage` y `fetch` solo en `services/`
-  y `store/`; Axios solo en `services/api.ts`; `schema.d.ts` solo lo importa
+  por permisos); `localStorage` y `sessionStorage` solo en `services/` y
+  `store/`; `openapi-fetch` y `fetch` solo en `services/api.ts` (y `fetch` en
+  `services/eventStream.ts`, el lector del canal de avisos); `schema.d.ts` solo lo importa
   `api/types.ts`; los iconos salen de `components/icons.ts`
   (`no-restricted-imports`). Un cambio de ruta o de permiso se hace en su
   módulo y el compilador señala el resto.
@@ -129,12 +130,19 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
   queda fuera porque lo gestiona el CLI de shadcn.
 - **Duplicación** (`jscpd`, `.jscpd.json`): tope del 0,5 % (bloques de 5 líneas o
   50 tokens), sin contar pruebas, `ui/` ni `schema.d.ts`.
+- **React Doctor** (`pnpm run doctor`, no `pnpm doctor`: ese nombre es un comando
+  de pnpm; `react-doctor` con versión fija, `--no-score` para que no llame a su
+  API de puntuación ni mande fallos, y sin el escaneo de dependencias de
+  Socket.dev): corrección, rendimiento, seguridad y accesibilidad de React.
+  Cualquier hallazgo, advertencias incluidas, falla el CI. Se arregla en el
+  código; solo lo que choca con una decisión del proyecto se excluye en
+  `doctor.config.jsonc`, con el motivo escrito al lado.
 - **Cobertura de tipos** (`pnpm type-coverage`, configuración `typeCoverage` del
   `package.json`): modo estricto, mínimo 99,7 % de expresiones con tipo. Un
   `any` colado lo baja; no se baja el umbral para que pase.
 - **Tamaño del paquete** (`pnpm size`, `size-limit` en el `package.json`, gzip,
   necesita `dist/` de `pnpm build`): presupuestos del bundle principal, de los
-  chunks grandes (React, zod, Sienna, API y hooks compartidos) y del total, con
+  chunks grandes (React, zod, Sienna y hooks compartidos) y del total, con
   un 10 % de holgura sobre lo medido. Si crece, se investiga qué entró; el
   presupuesto se sube solo con una razón escrita en el PR.
 - **Pruebas** (`testing-library` y `jest-dom`, solo en `*.test.*`): consultas por
@@ -201,9 +209,13 @@ El aislamiento lo garantiza el backend; el frontend no debe abrirle huecos.
 
 - `src/api/schema.d.ts` es generado: no se edita a mano. Un cambio de contrato
   se hace regenerándolo (`pnpm generate:api`) en el mismo PR.
-- Las pantallas no llaman a Axios ni a `fetch`: pasan por
-  `src/services/api.ts` y las funciones de `src/api/`. Cada consulta se define
-  una vez con `queryOptions` y la usan la vista y la precarga.
+- Las pantallas no llaman a `openapi-fetch` ni a `fetch`: pasan por
+  `src/services/api.ts` y las funciones de `src/api/`, que escriben cada
+  petición con el cliente tipado (`send((client) => client.GET('/api/v1/tables'))`,
+  de `src/api/client.ts`): ruta, parámetros, cuerpo y respuesta salen de
+  `schema.d.ts`, sin `as`. Un error HTTP rechaza con `ApiError`
+  (`errorMessage(error, fallback)`, `errorStatus(error)`). Cada consulta se
+  define una vez con `queryOptions` y la usan la vista y la precarga.
 - Después de guardar se muestra lo que devolvió el servidor, no lo que se
   envió.
 - Si el servidor rechaza un cambio porque el pedido cambió mientras tanto

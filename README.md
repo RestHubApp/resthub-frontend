@@ -12,7 +12,7 @@ bajo `/api/v1`. La documentación del producto vive en Notion.
 - shadcn/ui sobre Radix y Tailwind CSS 4; iconos de Lucide.
 - React Router en modo librería, TanStack Query y TanStack Table.
 - React Hook Form + Zod para formularios, Zustand para el estado de cliente.
-- Axios como cliente HTTP, con tipos generados por openapi-typescript.
+- `openapi-fetch` como cliente HTTP, tipado de punta a punta con los tipos que genera openapi-typescript.
 - PWA instalable con vite-plugin-pwa; sin señal, el mesero puede tomar pedidos nuevos (ver abajo).
 - ESLint estricto (typescript-eslint, sonarjs, límites de arquitectura), Husky y lint-staged.
 - Jest 30 con React Testing Library para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones) y las pantallas.
@@ -60,7 +60,7 @@ está en `jest/`.
 - Las pruebas de pantallas usan el arnés `#jest/harness`: `montar(<Vista />)`
   la abre con un router en memoria y el caché de la aplicación, `entrarComo()`
   abre una sesión con los permisos dados y `servidor().on('get', '/ruta', datos)`
-  responde el API desde el adaptador de Axios (`llamadas()` dice qué se envió).
+  responde el API desde un `fetch` falso (`llamadas()` dice qué se envió; los parámetros de la consulta llegan como texto).
   El canal de avisos (SSE) falso está en `#jest/channel` y los datos de prueba
   en `jest/fixtures/`.
 - Las pruebas que simulan una pestaña sin DOM (reemplazan `window`, `location`
@@ -119,7 +119,7 @@ src/
 La dirección de dependencia la hace cumplir ESLint (`eslint-plugin-boundaries`):
 el router conoce a las características, las características no se importan
 entre sí, y las capas compartidas no conocen el dominio. Las pantallas no
-llaman a Axios: pasan por `src/services/api.ts` y por las funciones de `src/api/`.
+llaman a `openapi-fetch` ni a `fetch`: pasan por `src/services/api.ts` y por las funciones de `src/api/`.
 
 La navegación sale de `src/features/shell/navigation.ts`: cada entrada declara
 el permiso de `GET /auth/me` que la muestra. En pantallas anchas va en una barra

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 import type { PlatformAdmin } from '@/api/types'
-import { setPlatformAuthToken, setPlatformUnauthorizedHandler } from '@/services/api'
+import { setPlatformAuthToken, setPlatformUnauthorizedHandler } from '@/services/apiCredentials'
 import { logger } from '@/services/logger'
 import { clearQueriesOf, PLATFORM_QUERY_ROOT } from '@/services/queryClient'
 import { isPreviewTab } from '@/services/tabStorage'

@@ -26,7 +26,7 @@ import { PreviewView } from '../../src/features/platform/PreviewView'
 import { RequirePlatformSession } from '../../src/features/platform/RequirePlatformSession'
 import { RestaurantDetailView } from '../../src/features/platform/RestaurantDetailView'
 import { RestaurantsView } from '../../src/features/platform/RestaurantsView'
-import { setPlatformAuthToken } from '../../src/services/api'
+import { setPlatformAuthToken } from '../../src/services/apiCredentials'
 import { usePlatformSession } from '../../src/store/platformSession'
 import { mountRoutes, type Mount } from '../harness'
 

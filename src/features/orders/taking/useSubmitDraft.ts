@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 
 import { ordersQueryKey } from '@/api/orders'
 import { tablesQueryKey } from '@/api/tables'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { paths } from '@/services/paths'
 import { useNotifications } from '@/store/notifications'
 import { ownerOf } from '@/store/offlineQueue'

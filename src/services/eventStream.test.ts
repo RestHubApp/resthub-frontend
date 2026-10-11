@@ -3,7 +3,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 
-import { anyOf, readEventStream } from './eventStream'
+import { readEventStream } from './eventStream'
+import { anyOf } from './signals'
 
 const originalFetch = globalThis.fetch
 

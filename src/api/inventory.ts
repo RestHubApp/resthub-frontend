@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
+import { send } from './client'
 import type {
   AdjustmentRequest,
   CreateIngredientRequest,
@@ -34,19 +34,12 @@ function movementListQueryKey(params: MovementListParams) {
   return [...movementsQueryKey, params] as const
 }
 
-function ingredientPath(ingredientId: number): string {
-  return `/inventory/ingredients/${String(ingredientId)}`
-}
-
-function recipePath(menuItemId: number): string {
-  return `/inventory/recipes/${String(menuItemId)}`
-}
-
 async function fetchIngredients(includeInactive = false): Promise<Ingredient[]> {
-  const { data } = await api.get<Ingredient[]>('/inventory/ingredients', {
-    params: includeInactive ? { include_inactive: true } : undefined,
-  })
-  return data
+  return send((client) =>
+    client.GET('/api/v1/inventory/ingredients', {
+      params: { query: includeInactive ? { include_inactive: true } : {} },
+    }),
+  )
 }
 
 /** Los insumos activos, que comparten la tabla, las recetas y la precarga. */
@@ -56,8 +49,7 @@ export const ingredientsQuery = queryOptions({
 })
 
 export async function createIngredient(payload: CreateIngredientRequest): Promise<Ingredient> {
-  const { data } = await api.post<Ingredient>('/inventory/ingredients', payload)
-  return data
+  return send((client) => client.POST('/api/v1/inventory/ingredients', { body: payload }))
 }
 
 /** La unidad no se edita: cambiarla reinterpretaría el libro de movimientos entero. */
@@ -65,54 +57,51 @@ export async function updateIngredient(
   ingredientId: number,
   payload: UpdateIngredientRequest,
 ): Promise<Ingredient> {
-  const { data } = await api.patch<Ingredient>(ingredientPath(ingredientId), payload)
-  return data
+  return send((client) =>
+    client.PATCH('/api/v1/inventory/ingredients/{ingredient_id}', {
+      params: { path: { ingredient_id: ingredientId } },
+      body: payload,
+    }),
+  )
 }
 
 /** Insumos con stock por debajo del mínimo, incluidos los negativos. */
 async function fetchLowStock(): Promise<Ingredient[]> {
-  const { data } = await api.get<Ingredient[]>('/inventory/alerts/low-stock')
-  return data
+  return send((client) => client.GET('/api/v1/inventory/alerts/low-stock'))
 }
 
 export const lowStockQuery = queryOptions({ queryKey: lowStockQueryKey, queryFn: fetchLowStock })
 
 async function fetchMovements(params: MovementListParams): Promise<MovementPage> {
-  // El tipo es una lista: FastAPI la espera como `kind=a&kind=b`, sin corchetes.
-  const { data } = await api.get<MovementPage>('/inventory/movements', {
-    params,
-    paramsSerializer: { indexes: null },
-  })
-  return data
+  // El tipo es una lista: FastAPI la espera como `kind=a&kind=b`, sin corchetes
+  // (la forma por defecto del cliente).
+  return send((client) => client.GET('/api/v1/inventory/movements', { params: { query: params } }))
 }
 
 export async function registerPurchase(payload: PurchaseRequest): Promise<StockChange> {
-  const { data } = await api.post<StockChange>('/inventory/purchases', payload)
-  return data
+  return send((client) => client.POST('/api/v1/inventory/purchases', { body: payload }))
 }
 
 export async function registerWaste(payload: WasteRequest): Promise<StockChange> {
-  const { data } = await api.post<StockChange>('/inventory/waste', payload)
-  return data
+  return send((client) => client.POST('/api/v1/inventory/waste', { body: payload }))
 }
 
 /** Con `counted_stock`, el servidor calcula la diferencia; con `quantity`, se aplica tal cual. */
 export async function registerAdjustment(payload: AdjustmentRequest): Promise<StockChange> {
-  const { data } = await api.post<StockChange>('/inventory/adjustments', payload)
-  return data
+  return send((client) => client.POST('/api/v1/inventory/adjustments', { body: payload }))
 }
 
 /** Costo, margen y porcentaje de margen de cada plato, tenga o no receta. */
 async function fetchDishCosts(): Promise<DishCost[]> {
-  const { data } = await api.get<DishCost[]>('/inventory/recipes')
-  return data
+  return send((client) => client.GET('/api/v1/inventory/recipes'))
 }
 
 export const dishCostsQuery = queryOptions({ queryKey: dishCostsQueryKey, queryFn: fetchDishCosts })
 
 async function fetchRecipe(menuItemId: number): Promise<Recipe> {
-  const { data } = await api.get<Recipe>(recipePath(menuItemId))
-  return data
+  return send((client) =>
+    client.GET('/api/v1/inventory/recipes/{menu_item_id}', { params: { path: { menu_item_id: menuItemId } } }),
+  )
 }
 
 /** Reemplaza la receta entera. Una lista vacía la borra. */
@@ -120,8 +109,12 @@ export async function replaceRecipe(
   menuItemId: number,
   payload: ReplaceRecipeRequest,
 ): Promise<Recipe> {
-  const { data } = await api.put<Recipe>(recipePath(menuItemId), payload)
-  return data
+  return send((client) =>
+    client.PUT('/api/v1/inventory/recipes/{menu_item_id}', {
+      params: { path: { menu_item_id: menuItemId } },
+      body: payload,
+    }),
+  )
 }
 
 export function movementsQuery(params: MovementListParams) {

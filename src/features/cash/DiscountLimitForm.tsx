@@ -5,7 +5,7 @@ import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '@/api/res
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { formatPercent } from '@/services/format'
 import { useNotifications } from '@/store/notifications'
 

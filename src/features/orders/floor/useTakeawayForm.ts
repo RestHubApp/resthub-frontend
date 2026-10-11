@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, newOrderPath, takeawaySchema, type TakeawayValues } from './takeawaySchema'
 

@@ -1,18 +1,15 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '@/services/api'
 import { PLATFORM_QUERY_ROOT } from '@/services/queryClient'
+import { send } from './client'
 import type {
   CreatePlatformRestaurantRequest,
-  PlatformActivityPage,
   PlatformActivityParams,
   PlatformLoginRequest,
-  PlatformMeResponse,
   PlatformOwner,
   PlatformOwnerRequest,
   PlatformRestaurantDetail,
   PlatformRestaurantListParams,
-  PlatformRestaurantPage,
   PlatformSandbox,
   PlatformTokenResponse,
   PreviewCodeResponse,
@@ -51,36 +48,24 @@ export const PASSWORD_MUTATION_GC_TIME = 0
 /** Lo que el servidor devuelve por página si no se le pide otra cosa. */
 export const PLATFORM_PAGE_SIZE = 25
 
-function restaurantPath(restaurantId: number, action = ''): string {
-  return `/platform/restaurants/${String(restaurantId)}${action}`
-}
-
 export async function platformLogin(payload: PlatformLoginRequest): Promise<PlatformTokenResponse> {
-  const { data } = await api.post<PlatformTokenResponse>('/platform/auth/login', payload)
-  return data
+  return send((client) => client.POST('/api/v1/platform/auth/login', { body: payload }))
 }
 
 /** Un token nuevo para la sesión de plataforma, pedido antes de que venza el que hay. */
 export async function renewPlatformSession(): Promise<PlatformTokenResponse> {
-  const { data } = await api.post<PlatformTokenResponse>('/platform/auth/refresh')
-  return data
+  return send((client) => client.POST('/api/v1/platform/auth/refresh'))
 }
 
 export const platformMeQuery = queryOptions({
   queryKey: [...platformQueryKey, 'me'],
-  queryFn: async () => {
-    const { data } = await api.get<PlatformMeResponse>('/platform/auth/me')
-    return data
-  },
+  queryFn: () => send((client) => client.GET('/api/v1/platform/auth/me')),
 })
 
 export function platformRestaurantsQuery(params: PlatformRestaurantListParams) {
   return queryOptions({
     queryKey: [...platformRestaurantsQueryKey, 'list', params],
-    queryFn: async () => {
-      const { data } = await api.get<PlatformRestaurantPage>('/platform/restaurants', { params })
-      return data
-    },
+    queryFn: () => send((client) => client.GET('/api/v1/platform/restaurants', { params: { query: params } })),
   })
 }
 
@@ -91,10 +76,12 @@ export function platformRestaurantQueryKey(restaurantId: number) {
 export function platformRestaurantQuery(restaurantId: number) {
   return queryOptions({
     queryKey: platformRestaurantQueryKey(restaurantId),
-    queryFn: async () => {
-      const { data } = await api.get<PlatformRestaurantDetail>(restaurantPath(restaurantId))
-      return data
-    },
+    queryFn: () =>
+      send((client) =>
+        client.GET('/api/v1/platform/restaurants/{restaurant_id}', {
+          params: { path: { restaurant_id: restaurantId } },
+        }),
+      ),
   })
 }
 
@@ -102,8 +89,7 @@ export function platformRestaurantQuery(restaurantId: number) {
 export async function createPlatformRestaurant(
   payload: CreatePlatformRestaurantRequest,
 ): Promise<PlatformRestaurantDetail> {
-  const { data } = await api.post<PlatformRestaurantDetail>('/platform/restaurants', payload)
-  return data
+  return send((client) => client.POST('/api/v1/platform/restaurants', { body: payload }))
 }
 
 /** Nombre, zona horaria o estado. Desactivar corta al instante el acceso de su personal entero. */
@@ -111,41 +97,42 @@ export async function updatePlatformRestaurant(
   restaurantId: number,
   payload: UpdatePlatformRestaurantRequest,
 ): Promise<PlatformRestaurantDetail> {
-  const { data } = await api.patch<PlatformRestaurantDetail>(restaurantPath(restaurantId), payload)
-  return data
+  return send((client) =>
+    client.PATCH('/api/v1/platform/restaurants/{restaurant_id}', {
+      params: { path: { restaurant_id: restaurantId } },
+      body: payload,
+    }),
+  )
 }
 
 export async function addPlatformOwner(
   restaurantId: number,
   payload: PlatformOwnerRequest,
 ): Promise<PlatformOwner> {
-  const { data } = await api.post<PlatformOwner>(restaurantPath(restaurantId, '/owners'), payload)
-  return data
+  return send((client) =>
+    client.POST('/api/v1/platform/restaurants/{restaurant_id}/owners', {
+      params: { path: { restaurant_id: restaurantId } },
+      body: payload,
+    }),
+  )
 }
 
 export function platformActivityQuery(params: PlatformActivityParams) {
   return queryOptions({
     queryKey: [...platformActivityQueryKey, params],
-    queryFn: async () => {
-      const { data } = await api.get<PlatformActivityPage>('/platform/activity', { params })
-      return data
-    },
+    queryFn: () => send((client) => client.GET('/api/v1/platform/activity', { params: { query: params } })),
   })
 }
 
 /** El local de muestra vigente y sus cuentas; `restaurant` es `null` si todavía no existe. */
 export const platformSandboxQuery = queryOptions({
   queryKey: platformSandboxQueryKey,
-  queryFn: async () => {
-    const { data } = await api.get<PlatformSandbox>('/platform/sandbox')
-    return data
-  },
+  queryFn: () => send((client) => client.GET('/api/v1/platform/sandbox')),
 })
 
 /** Archiva el local de muestra vigente (si hay) y crea uno nuevo con los datos de muestra. */
 export async function resetPlatformSandbox(): Promise<PlatformSandbox> {
-  const { data } = await api.post<PlatformSandbox>('/platform/sandbox/reset')
-  return data
+  return send((client) => client.POST('/api/v1/platform/sandbox/reset'))
 }
 
 /**
@@ -154,6 +141,5 @@ export async function resetPlatformSandbox(): Promise<PlatformSandbox> {
  * `POST /auth/preview`.
  */
 export async function startPlatformPreview(payload: PreviewRequest): Promise<PreviewCodeResponse> {
-  const { data } = await api.post<PreviewCodeResponse>('/platform/preview', payload)
-  return data
+  return send((client) => client.POST('/api/v1/platform/preview', { body: payload }))
 }

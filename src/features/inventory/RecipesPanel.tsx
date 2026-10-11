@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { dishCostsQuery } from '@/api/inventory'
 import { DataTable } from '@/components/DataTable'
 import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { buildRecipeColumns } from './RecipeColumns'
 
 interface RecipesPanelProps {

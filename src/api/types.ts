@@ -1,7 +1,10 @@
 // Alias sobre el contrato generado desde OpenAPI. Nadie escribe estas formas a
 // mano: si el backend cambia un campo, `pnpm generate:api` lo propaga y el
 // build del frontend falla en compilacion en vez de fallar en ejecucion.
-import type { components, operations } from './schema'
+import type { components, operations, paths } from './schema'
+
+/** Todas las rutas del contrato: el cliente tipado de `src/api/client.ts` se arma con ellas. */
+export type ApiPaths = paths
 
 
 export type AccessTokenResponse = components['schemas']['AccessTokenResponse']
@@ -151,7 +154,6 @@ export type DocumentType = components['schemas']['DocumentType']
 
 // Clientes frecuentes y reservas de mesa.
 export type Customer = components['schemas']['CustomerResponse']
-export type CustomerPage = components['schemas']['CustomerPageResponse']
 export type CustomerRequest = components['schemas']['CustomerRequest']
 export type Reservation = components['schemas']['ReservationResponse']
 export type ReservationRequest = components['schemas']['ReservationRequest']
@@ -162,7 +164,6 @@ export type ReservationStatus = components['schemas']['ReservationStatus']
 export type PlatformAdmin = components['schemas']['PlatformAdminResponse']
 export type PlatformLoginRequest = components['schemas']['PlatformLoginRequest']
 export type PlatformTokenResponse = components['schemas']['PlatformAccessTokenResponse']
-export type PlatformMeResponse = components['schemas']['PlatformSessionResponse']
 export type PlatformRestaurantSummary = components['schemas']['RestaurantSummaryResponse']
 export type PlatformRestaurantPage = components['schemas']['RestaurantPageResponse']
 export type PlatformRestaurantListParams = NonNullable<
@@ -201,10 +202,8 @@ export type ObsTimePoint = components['schemas']['TimePointResponse']
 export type ObsRouteStats = components['schemas']['RouteStatsResponse']
 export type ObsStatusCount = components['schemas']['StatusCountResponse']
 export type ObsLogEntry = components['schemas']['LogEntryResponse']
-export type ObsLogPage = components['schemas']['LogPageResponse']
 export type ObsLogDetail = components['schemas']['LogDetailResponse']
 export type ObsRequestEntry = components['schemas']['RequestEntryResponse']
-export type ObsRequestPage = components['schemas']['RequestPageResponse']
 export type ObsAccountKind = ObsRequestEntry['account_kind']
 export type ObsWindowParams = ObsQuery<'read_summary_api_v1_platform_observability_summary_get'>
 export type ObsRoutesParams = ObsQuery<'read_routes_api_v1_platform_observability_routes_get'>

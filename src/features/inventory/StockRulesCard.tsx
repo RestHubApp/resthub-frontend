@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { menuQueryKey } from '@/api/menu'
 import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '@/api/restaurant'
 import { Checkbox } from '@/components/ui/checkbox'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 
 /**

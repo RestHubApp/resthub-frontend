@@ -69,7 +69,7 @@ if (typeof window !== 'undefined') {
   window.print = () => undefined
   // Nada sale a la red: una petición con `fetch` (el canal de avisos) queda
   // abierta hasta que se aborta, como una conexión que todavía no responde.
-  // Las del API pasan por el adaptador de Axios de cada prueba.
+  // Las del API pasan por el `fetch` falso de cada prueba (`server()` del arnés).
   window.fetch = (_entry: RequestInfo | URL, options?: RequestInit) =>
     new Promise<Response>((_resolver, reject) => {
       options?.signal?.addEventListener('abort', () => {

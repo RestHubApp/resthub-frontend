@@ -81,16 +81,22 @@ const SYNTAX_SOURCES = {
     ],
   },
   storage: {
-    message: 'El almacenamiento del navegador y la red pasan por src/services (tabStorage, api) y src/store, que ya limpian al cerrar sesion.',
+    message: 'El almacenamiento del navegador pasa por src/services (tabStorage) y src/store, que ya limpian al cerrar sesion.',
     selectors: [
-      String.raw`MemberExpression[object.name=/^(window|globalThis)$/][property.name=/^(localStorage|sessionStorage|fetch)$/]`,
+      String.raw`MemberExpression[object.name=/^(window|globalThis)$/][property.name=/^(localStorage|sessionStorage)$/]`,
       String.raw`Identifier[name=/^(localStorage|sessionStorage)$/]:not(MemberExpression > Identifier.property, Property > Identifier.key)`,
-      "CallExpression[callee.name='fetch']",
     ],
   },
-  axios: {
-    message: 'Solo src/services/api.ts habla con Axios; las pantallas usan las funciones de src/api.',
-    selectors: ["ImportDeclaration[source.value='axios']"],
+  network: {
+    message:
+      'Solo src/services/api.ts habla con la red (openapi-fetch y fetch); el canal de avisos, src/services/eventStream.ts. Las pantallas usan las funciones de src/api.',
+    selectors: [
+      "ImportDeclaration[source.value='openapi-fetch']",
+      "ExportNamedDeclaration[source.value='openapi-fetch']",
+      "ImportExpression[source.value='openapi-fetch']",
+      String.raw`MemberExpression[object.name=/^(window|globalThis|self)$/][property.name='fetch']`,
+      "CallExpression[callee.name='fetch']",
+    ],
   },
   apiSchema: {
     message: 'schema.d.ts es generado: solo src/api/types.ts lo importa y expone los tipos con nombre.',
@@ -320,7 +326,7 @@ export default tseslint.config(
 
   // ---------------------------------------------------------------------
   // Fuentes unicas: rutas, permisos, claves de consulta, colores, roles,
-  // almacenamiento, Axios y el esquema generado.
+  // almacenamiento, red y el esquema generado.
   //
   // Cada dato vive en un solo modulo (ver SYNTAX_SOURCES arriba) y fuera de el
   // un literal es una copia que se desfasa. Los bloques de mas abajo dejan
@@ -355,8 +361,8 @@ export default tseslint.config(
     rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage', 'routes') },
   },
   {
-    files: ['src/services/api.ts'],
-    rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage', 'axios') },
+    files: ['src/services/api.ts', 'src/services/eventStream.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage', 'network') },
   },
   {
     files: ['src/components/ui/**/*.{ts,tsx}', 'src/components/printSheet.ts'],

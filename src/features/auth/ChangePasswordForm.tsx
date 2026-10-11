@@ -5,7 +5,7 @@ import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { ChangePasswordFields } from './ChangePasswordFields'
 import {
   type ChangePasswordForm as Form,

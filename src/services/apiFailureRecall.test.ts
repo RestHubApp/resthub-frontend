@@ -1,42 +1,45 @@
-import { AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
-import { afterEach, describe, expect, it } from '@jest/globals'
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
-import { api } from './api'
+import { readPlatform, readRestaurant, writeRestaurant } from '#jest/apiCalls'
 import { apiFailureMessage, clearApiFailure } from './apiFailure'
 
 const CUTOFF = 'Servicio no disponible.'
-const TABLES = '/tables'
 
-function down(config: InternalAxiosRequestConfig): Promise<never> {
-  const response = { data: { detail: CUTOFF }, status: 503, statusText: 'Unavailable', headers: {}, config }
-  return Promise.reject(new AxiosError('503', 'ERR_BAD_RESPONSE', config, null, response))
-}
+const originalFetch = globalThis.fetch
 
-function healthy(config: InternalAxiosRequestConfig): Promise<AxiosResponse<object>> {
-  return Promise.resolve({ data: {}, status: 200, statusText: 'OK', headers: {}, config })
+function respondWith(status: number, body: unknown): void {
+  globalThis.fetch = jest.fn(() =>
+    Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })),
+  )
 }
 
 afterEach(() => {
+  globalThis.fetch = originalFetch
   clearApiFailure()
 })
 
 describe('el corte que recuerda el armazón', () => {
   it('una lectura caída se recuerda y se olvida cuando otra lectura responde', async () => {
-    await expect(api.get(TABLES, { adapter: down })).rejects.toThrow()
+    respondWith(503, { detail: CUTOFF })
+    await expect(readRestaurant()).rejects.toThrow()
     expect(apiFailureMessage('restaurant')).toBe(CUTOFF)
 
-    await api.get(TABLES, { adapter: healthy })
+    respondWith(200, [])
+    await readRestaurant()
     expect(apiFailureMessage('restaurant')).toBeNull()
   })
 
   it('una escritura caída no queda en el armazón: la avisa su formulario', async () => {
-    await expect(api.post('/customers', {}, { adapter: down })).rejects.toThrow()
+    respondWith(503, { detail: CUTOFF })
+    await expect(writeRestaurant()).rejects.toThrow()
     expect(apiFailureMessage('restaurant')).toBeNull()
   })
 
   it('una lectura de plataforma que responde no borra el corte del restaurante', async () => {
-    await expect(api.get(TABLES, { adapter: down })).rejects.toThrow()
-    await api.get('/platform/restaurants', { adapter: healthy })
+    respondWith(503, { detail: CUTOFF })
+    await expect(readRestaurant()).rejects.toThrow()
+    respondWith(200, { restaurant: null })
+    await readPlatform()
     expect(apiFailureMessage('restaurant')).toBe(CUTOFF)
   })
 })

@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { changeReservationStatus, reservationsQueryKey, saveReservation } from '@/api/reservations'
 import type { ReservationRequest, ReservationStatus } from '@/api/types'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 
 /** Guardar una reserva (nueva o editada). El error lo muestra el formulario. */

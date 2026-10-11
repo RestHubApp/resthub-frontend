@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 
-import { api, currentAuthToken } from '@/services/api'
+import { currentAuthToken } from '@/services/apiCredentials'
+import { apiUrl } from '@/services/apiRouting'
 import { EventStreamError, readEventStream } from '@/services/eventStream'
 import { logger } from '@/services/logger'
 
@@ -47,7 +48,7 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
 
     function connect(): void {
       readEventStream({
-        url: `${api.defaults.baseURL ?? ''}/events`,
+        url: apiUrl('/events'),
         token: token ?? '',
         signal: controller.signal,
         onEvent: (event) => {

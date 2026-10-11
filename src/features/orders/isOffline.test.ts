@@ -1,22 +1,21 @@
-import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios'
 import { describe, expect, it } from '@jest/globals'
 
+import { ApiError } from '@/services/apiError'
 import { isOffline } from './isOffline'
 
-function errorResponse(status: number): AxiosError {
-  const config = { headers: new AxiosHeaders() }
-  const response = { status, data: {}, statusText: '', headers: {}, config } as AxiosResponse
-  return new AxiosError('rechazado', AxiosError.ERR_BAD_REQUEST, config, null, response)
+const REQUEST = { method: 'post', path: '/api/v1/orders', requestId: 'req-1' }
+
+function errorResponse(status: number): ApiError {
+  return new ApiError({ ...REQUEST, status, body: {} })
 }
 
 describe('isOffline', () => {
   it('una petición que venció su plazo cuenta como sin señal', () => {
-    expect(isOffline(new AxiosError('timeout of 15000ms exceeded', AxiosError.ECONNABORTED))).toBe(true)
-    expect(isOffline(new AxiosError('timeout exceeded', AxiosError.ETIMEDOUT))).toBe(true)
+    expect(isOffline(new ApiError({ ...REQUEST, code: 'timeout' }))).toBe(true)
   })
 
   it('un corte de red o el proxy sin servidor también', () => {
-    expect(isOffline(new AxiosError('Network Error', AxiosError.ERR_NETWORK))).toBe(true)
+    expect(isOffline(new ApiError({ ...REQUEST, code: 'network' }))).toBe(true)
     expect(isOffline(errorResponse(503))).toBe(true)
   })
 

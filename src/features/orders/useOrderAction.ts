@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { orderQueryKey, ordersQueryKey } from '@/api/orders'
 import { tablesQueryKey } from '@/api/tables'
 import type { OrderResponse } from '@/api/types'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 
 interface OrderActionOptions<TVariables> {

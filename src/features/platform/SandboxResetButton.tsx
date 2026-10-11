@@ -10,7 +10,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/api'
+import { errorMessage } from '@/services/apiError'
 
 interface SandboxResetButtonProps {
   /** Si ya existe un local de muestra: la confirmación explica que se archiva. */

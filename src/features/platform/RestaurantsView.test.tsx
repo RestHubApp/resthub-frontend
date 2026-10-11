@@ -40,7 +40,7 @@ describe('RestaurantsView', () => {
     await user.type(screen.getByRole('searchbox', { name: SEARCH }), 'pollos')
 
     expect(await screen.findByText('Ningún restaurante coincide con la búsqueda.')).toBeInTheDocument()
-    expect(api.calls('get', LIST).at(-1)?.params).toEqual({ limit: 25, offset: 0, search: 'pollos' })
+    expect(api.calls('get', LIST).at(-1)?.params).toEqual({ limit: '25', offset: '0', search: 'pollos' })
   })
 
   it('con más de una página ofrece pasar a la siguiente', async () => {
@@ -50,7 +50,7 @@ describe('RestaurantsView', () => {
     await user.click(screen.getByRole('button', { name: /siguiente/iu }))
 
     await waitFor(() => {
-      expect(api.calls('get', LIST).at(-1)?.params).toEqual({ limit: 25, offset: 25 })
+      expect(api.calls('get', LIST).at(-1)?.params).toEqual({ limit: '25', offset: '25' })
     })
   })
 
