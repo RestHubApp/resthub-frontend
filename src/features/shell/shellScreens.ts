@@ -39,12 +39,12 @@ export function useShellScreens(): readonly ShellScreen[] {
 }
 
 /** Un archivo que no se pudo bajar se vuelve a pedir al abrir la pantalla. */
-function ignorar(): undefined {
+function ignore(): undefined {
   return undefined
 }
 
 function preloadScreen(screen: ShellScreen): void {
-  void screen.load?.().catch(ignorar)
+  void screen.load?.().catch(ignore)
   screen.prefetch?.()
 }
 

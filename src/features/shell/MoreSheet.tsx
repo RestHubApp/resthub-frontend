@@ -34,25 +34,25 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
   const close = () => {
     setOpen(false)
   }
-  const etiqueta = entries.length > 0 ? 'Más' : 'Cuenta'
-  const adentro = pathname === paths.profile || entries.some((entry) => entry.to === pathname)
+  const label = entries.length > 0 ? 'Más' : 'Cuenta'
+  const inside = pathname === paths.profile || entries.some((entry) => entry.to === pathname)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <button
           type="button"
-          className={adentro ? TAB_ACTIVE : TAB_IDLE}
+          className={inside ? TAB_ACTIVE : TAB_IDLE}
         >
           <ShellIcon name={entries.length > 0 ? 'mas' : 'perfil'} size={22} />
-          <span>{etiqueta}</span>
+          <span>{label}</span>
         </button>
       </SheetTrigger>
       <SheetContent
         side="bottom"
         className="max-h-[85dvh] gap-3 overflow-y-auto rounded-t-2xl px-4 pt-5 pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
-        <SheetTitle className="m-0 px-3 font-heading text-lg font-semibold">{etiqueta}</SheetTitle>
+        <SheetTitle className="m-0 px-3 font-heading text-lg font-semibold">{label}</SheetTitle>
         <SheetDescription className="sr-only">
           Otras pantallas, accesibilidad, tu perfil y la salida.
         </SheetDescription>

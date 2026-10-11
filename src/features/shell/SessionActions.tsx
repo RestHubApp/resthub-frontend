@@ -22,10 +22,10 @@ interface SessionActionsProps {
 export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActionsProps) {
   const signOut = useSession((state) => state.signOut)
   const preview = usePreview()
-  const pendientes = useQueuedOrders(useSession((state) => state.account))
+  const pending = useQueuedOrders(useSession((state) => state.account))
   const navigate = useNavigate()
 
-  const cerrarSesion = () => {
+  const handleSignOut = () => {
     onNavigate?.()
     // Se vacia la sesion y se va al acceso en el mismo evento: React aplica
     // los dos cambios juntos, asi que ninguna pantalla privada llega a
@@ -34,28 +34,28 @@ export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActio
     void navigate(paths.login, { replace: true })
   }
 
-  const cuantos =
-    pendientes.length === 1 ? 'Un pedido tuyo espera' : `${String(pendientes.length)} pedidos tuyos esperan`
-  const salir = (onClick?: () => void) => (
+  const howMany =
+    pending.length === 1 ? 'Un pedido tuyo espera' : `${String(pending.length)} pedidos tuyos esperan`
+  const signOutItem = (onClick?: () => void) => (
     <Button type="button" variant="ghost" className="h-11 justify-start gap-3 px-3" onClick={onClick}>
       <ShellIcon name="salir" size={18} />
       <span>Cerrar sesión</span>
     </Button>
   )
 
-  const salida =
-    pendientes.length === 0 ? (
-      salir(cerrarSesion)
+  const output =
+    pending.length === 0 ? (
+      signOutItem(handleSignOut)
     ) : (
       // Los pedidos no se borran, pero no salen hasta que esta cuenta vuelva
       // a entrar: quien cierra la sesion tiene que saberlo.
       <ConfirmDialog
-        trigger={salir()}
+        trigger={signOutItem()}
         title="¿Cerrar sesión con pedidos sin enviar?"
-        description={`${cuantos} señal: ${pendientes.map((pedido) => pedido.label).join(', ')}. Quedan guardados en este celular y se envían cuando vuelvas a entrar con tu cuenta.`}
+        description={`${howMany} señal: ${pending.map((order) => order.label).join(', ')}. Quedan guardados en este celular y se envían cuando vuelvas a entrar con tu cuenta.`}
         confirmLabel="Cerrar sesión"
         confirmVariant="default"
-        onConfirm={cerrarSesion}
+        onConfirm={handleSignOut}
       />
     )
 
@@ -70,7 +70,7 @@ export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActio
           </span>
         </Link>
       </Button>
-      {preview ? null : salida}
+      {preview ? null : output}
     </div>
   )
 }

@@ -25,11 +25,11 @@ export function ToastItem({ id, tone, message }: ToastItemProps) {
   const dismiss = useNotifications((state) => state.dismiss)
 
   useEffect(() => {
-    const temporizador = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       dismiss(id)
     }, AUTO_DISMISS_MS)
     return () => {
-      window.clearTimeout(temporizador)
+      window.clearTimeout(timer)
     }
   }, [id, dismiss])
 

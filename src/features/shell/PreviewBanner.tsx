@@ -10,23 +10,23 @@ import { useSecondTick } from './useSecondTick'
 
 // El alto de la franja, para que la barra lateral y la cabecera del celular,
 // que también se quedan fijas arriba, se acomoden debajo y no detrás.
-const ALTO = '--preview-banner-h'
+const HEIGHT = '--preview-banner-h'
 
-function useAltoPublicado(): RefObject<HTMLElement | null> {
+function usePublishedHeight(): RefObject<HTMLElement | null> {
   const ref = useRef<HTMLElement>(null)
   useEffect(() => {
-    const franja = ref.current
-    const raiz = document.documentElement
-    if (franja === null) {
+    const slot = ref.current
+    const root = document.documentElement
+    if (slot === null) {
       return
     }
-    const observador = new ResizeObserver(() => {
-      raiz.style.setProperty(ALTO, `${String(franja.offsetHeight)}px`)
+    const observer = new ResizeObserver(() => {
+      root.style.setProperty(HEIGHT, `${String(slot.offsetHeight)}px`)
     })
-    observador.observe(franja)
+    observer.observe(slot)
     return () => {
-      observador.disconnect()
-      raiz.style.removeProperty(ALTO)
+      observer.disconnect()
+      root.style.removeProperty(HEIGHT)
     }
   }, [])
   return ref
@@ -45,9 +45,9 @@ interface PreviewBannerProps {
  */
 export function PreviewBanner({ account }: PreviewBannerProps) {
   const token = useSession((state) => state.token)
-  const ahora = useSecondTick()
-  const ref = useAltoPublicado()
-  const restante = previewTimeLeft(token === null ? null : tokenExpiresAt(token), ahora)
+  const now = useSecondTick()
+  const ref = usePublishedHeight()
+  const remaining = previewTimeLeft(token === null ? null : tokenExpiresAt(token), now)
 
   return (
     <section
@@ -62,12 +62,12 @@ export function PreviewBanner({ account }: PreviewBannerProps) {
             Vista previa · {account.restaurant.name} · como {account.user.role_label}
           </span>
         </p>
-        {restante === null ? null : (
+        {remaining === null ? null : (
           <span
             role="timer"
-            className={`rounded-md px-2 py-0.5 text-sm font-semibold tabular-nums ${restante.soon ? 'bg-white text-warning' : ''}`}
+            className={`rounded-md px-2 py-0.5 text-sm font-semibold tabular-nums ${remaining.soon ? 'bg-white text-warning' : ''}`}
           >
-            {restante.label}
+            {remaining.label}
           </span>
         )}
         <PreviewExitButton />

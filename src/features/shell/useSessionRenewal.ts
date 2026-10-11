@@ -15,8 +15,8 @@ export function useSessionRenewal(): void {
   const renew = useSession((state) => state.renew)
   const preview = usePreview()
 
-  useTokenRenewal(preview ? null : token, async (origen) => {
-    const nuevo = await renewSession()
-    renew(origen, nuevo.access_token, sessionOf(nuevo))
+  useTokenRenewal(preview ? null : token, async (origin) => {
+    const fresh = await renewSession()
+    renew(origin, fresh.access_token, sessionOf(fresh))
   })
 }

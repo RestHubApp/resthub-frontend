@@ -3,7 +3,7 @@ import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 
 /** Adónde vuelve la pestaña si el navegador no la deja cerrar. */
-const VUELTA = paths.platform.preview
+const ROUND = paths.platform.preview
 
 /**
  * Sale de la vista previa: borra su sesión y su cola entera (`exitPreview`) y
@@ -15,5 +15,5 @@ const VUELTA = paths.platform.preview
  */
 export function leavePreview(): void {
   useSession.getState().exitPreview()
-  closeTabOrGo(VUELTA)
+  closeTabOrGo(ROUND)
 }

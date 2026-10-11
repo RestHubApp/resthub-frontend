@@ -12,13 +12,13 @@ import type { ShellScreen } from './shellScreens'
 
 const ORDERS_TAKE = 'orders.take'
 const CASH_MANAGE = 'cash.manage'
-const FORMULARIO_DE_ACCESO = 'Formulario de acceso'
+const ACCESS_FORM = 'Formulario de acceso'
 
 const MENU = { name: 'Navegación principal' }
-const SALIR = { name: 'Cerrar sesión' }
+const SIGN_OUT = { name: 'Cerrar sesión' }
 
-function abrirArmazon(screens: readonly ShellScreen[] = PANTALLAS, en = '/') {
-  const rutas = [
+function openShell(screens: readonly ShellScreen[] = PANTALLAS, en = '/') {
+  const routes = [
     {
       path: '/',
       element: <AppShell screens={screens} />,
@@ -30,32 +30,32 @@ function abrirArmazon(screens: readonly ShellScreen[] = PANTALLAS, en = '/') {
       ],
     },
   ]
-  return montarRutas(rutas, en)
+  return montarRutas(routes, en)
 }
 
 // Las pantallas reales del registro, con otra carga o precarga en las que se indican.
-function conCambios(cambios: Record<string, Partial<ShellScreen>>): readonly ShellScreen[] {
-  return PANTALLAS.map((pantalla) => ({ ...pantalla, ...cambios[pantalla.path] }))
+function withChanges(changes: Record<string, Partial<ShellScreen>>): readonly ShellScreen[] {
+  return PANTALLAS.map((screenValue) => ({ ...screenValue, ...changes[screenValue.path] }))
 }
 
-function barraLateral() {
+function sidebar() {
   return primero(screen.getAllByRole('navigation', MENU))
 }
 
-function contenedorDeLaBarra(): HTMLElement {
-  const contenedor = barraLateral().parentElement
-  if (contenedor === null) {
+function barContainer(): HTMLElement {
+  const container = sidebar().parentElement
+  if (container === null) {
     throw new Error('La barra lateral no tiene contenedor.')
   }
-  return contenedor
+  return container
 }
 
-function barraInferior() {
+function bottomBar() {
   return segundo(screen.getAllByRole('navigation', MENU))
 }
 
-function enlaces(zona: HTMLElement): string[] {
-  return within(zona).getAllByRole('link').map((enlace) => enlace.textContent)
+function links(zone: HTMLElement): string[] {
+  return within(zone).getAllByRole('link').map((link) => link.textContent)
 }
 
 afterEach(() => {
@@ -66,7 +66,7 @@ describe('AppShell', () => {
   it('si falla la actualización de la cuenta en segundo plano, no avisa: la sesión guardada sigue sirviendo', async () => {
     servidor().on('get', '/auth/me', new RespuestaDeError(503, 'No hay conexión con la base de datos.'))
     entrarComo(PERMISOS_MESERO)
-    abrirArmazon()
+    openShell()
 
     await waitFor(() => {
       expect(queryClient.getQueryState(currentUserQueryKey)?.status).toBe('error')
@@ -78,11 +78,11 @@ describe('AppShell', () => {
   it('el mesero solo ve en el menú las pantallas de sus permisos', () => {
     servidor()
     entrarComo(PERMISOS_MESERO)
-    abrirArmazon()
+    openShell()
 
-    expect(enlaces(barraLateral())).toEqual(expect.arrayContaining(['Pedidos', 'Cocina', 'Reservas', 'Clientes']))
-    expect(within(barraLateral()).queryByRole('link', { name: 'Caja' })).not.toBeInTheDocument()
-    expect(within(barraLateral()).queryByRole('link', { name: 'Panel BI' })).not.toBeInTheDocument()
+    expect(links(sidebar())).toEqual(expect.arrayContaining(['Pedidos', 'Cocina', 'Reservas', 'Clientes']))
+    expect(within(sidebar()).queryByRole('link', { name: 'Caja' })).not.toBeInTheDocument()
+    expect(within(sidebar()).queryByRole('link', { name: 'Panel BI' })).not.toBeInTheDocument()
     expect(screen.getByText('Pantalla de inicio')).toBeInTheDocument()
   })
 
@@ -91,19 +91,19 @@ describe('AppShell', () => {
     entrarComo([ORDERS_TAKE, CASH_MANAGE], {
       user: { id: 7, email: 'ana@resthub.dev', full_name: 'Ana Torres', role_id: 9, role_label: 'Mesero' },
     })
-    abrirArmazon()
+    openShell()
 
-    expect(within(barraLateral()).getByRole('link', { name: 'Caja' })).toBeInTheDocument()
-    expect(within(barraLateral()).queryByRole('link', { name: 'Reservas' })).not.toBeInTheDocument()
+    expect(within(sidebar()).getByRole('link', { name: 'Caja' })).toBeInTheDocument()
+    expect(within(sidebar()).queryByRole('link', { name: 'Reservas' })).not.toBeInTheDocument()
   })
 
   it('en el celular caben cuatro pantallas y el resto va en «Más»', async () => {
     servidor()
     entrarComo(PERMISOS_ENCARGADO)
-    const { user } = abrirArmazon()
+    const { user } = openShell()
 
-    expect(enlaces(barraInferior())).toEqual(['Pedidos', 'Tablero', 'Cocina', 'Reservas'])
-    await user.click(within(barraInferior()).getByRole('button', { name: 'Más' }))
+    expect(links(bottomBar())).toEqual(['Pedidos', 'Tablero', 'Cocina', 'Reservas'])
+    await user.click(within(bottomBar()).getByRole('button', { name: 'Más' }))
 
     const panel = await screen.findByRole('dialog')
     expect(within(panel).getByRole('link', { name: 'Caja' })).toBeInTheDocument()
@@ -114,9 +114,9 @@ describe('AppShell', () => {
   it('sin pantallas de sobra, el último botón es «Cuenta»', () => {
     servidor()
     entrarComo([ORDERS_TAKE])
-    abrirArmazon()
+    openShell()
 
-    expect(within(barraInferior()).getByRole('button', { name: 'Cuenta' })).toBeInTheDocument()
+    expect(within(bottomBar()).getByRole('button', { name: 'Cuenta' })).toBeInTheDocument()
   })
 })
 
@@ -124,47 +124,47 @@ describe('AppShell: sesión y precargas', () => {
   it('cerrar sesión vacía la sesión y lleva al acceso', async () => {
     servidor()
     entrarComo(PERMISOS_MESERO)
-    const { user } = abrirArmazon()
+    const { user } = openShell()
 
-    await user.click(within(contenedorDeLaBarra()).getByRole('button', SALIR))
+    await user.click(within(barContainer()).getByRole('button', SIGN_OUT))
 
-    expect(await screen.findByText(FORMULARIO_DE_ACCESO)).toBeInTheDocument()
+    expect(await screen.findByText(ACCESS_FORM)).toBeInTheDocument()
     expect(useSession.getState().account).toBeNull()
   })
 
   it('con pedidos sin enviar, pregunta antes de cerrar la sesión', async () => {
     servidor()
-    const cuenta = entrarComo(PERMISOS_MESERO)
+    const account = entrarComo(PERMISOS_MESERO)
     enqueueOrder({
-      userId: cuenta.user.id,
-      restaurantId: cuenta.restaurant.id,
+      userId: account.user.id,
+      restaurantId: account.restaurant.id,
       request: { client_request_id: 'pedido-en-cola' } as OpenOrderRequest,
       queuedAt: '2026-09-26T13:00:00Z',
       label: 'Mesa 3',
     })
-    const { user } = abrirArmazon()
+    const { user } = openShell()
 
-    await user.click(within(contenedorDeLaBarra()).getByRole('button', SALIR))
+    await user.click(within(barContainer()).getByRole('button', SIGN_OUT))
 
-    const aviso = await screen.findByRole('alertdialog')
-    expect(within(aviso).getByText(/Un pedido tuyo espera señal: Mesa 3/u)).toBeInTheDocument()
+    const notice = await screen.findByRole('alertdialog')
+    expect(within(notice).getByText(/Un pedido tuyo espera señal: Mesa 3/u)).toBeInTheDocument()
     expect(useSession.getState().account).not.toBeNull()
-    await user.click(within(aviso).getByRole('button', SALIR))
-    expect(await screen.findByText(FORMULARIO_DE_ACCESO)).toBeInTheDocument()
+    await user.click(within(notice).getByRole('button', SIGN_OUT))
+    expect(await screen.findByText(ACCESS_FORM)).toBeInTheDocument()
   })
 
   it('sin sesión solo muestra la marca y el contenido del acceso', () => {
     servidor()
-    abrirArmazon(PANTALLAS, '/acceso')
+    openShell(PANTALLAS, '/acceso')
 
-    expect(screen.getByText(FORMULARIO_DE_ACCESO)).toBeInTheDocument()
+    expect(screen.getByText(ACCESS_FORM)).toBeInTheDocument()
     expect(screen.queryByRole('navigation', MENU)).not.toBeInTheDocument()
   })
 
   it('relee la cuenta con /auth/me y muestra el nombre nuevo del local', async () => {
-    const actualizada = entrarComo(PERMISOS_MESERO)
-    servidor().on('get', '/auth/me', { ...actualizada, restaurant: { ...actualizada.restaurant, name: 'Picantería Renovada' } })
-    abrirArmazon()
+    const updated = entrarComo(PERMISOS_MESERO)
+    servidor().on('get', '/auth/me', { ...updated, restaurant: { ...updated.restaurant, name: 'Picantería Renovada' } })
+    openShell()
 
     expect((await screen.findAllByText('Picantería Renovada')).length).toBeGreaterThan(0)
   })
@@ -172,24 +172,24 @@ describe('AppShell: sesión y precargas', () => {
   it('no baja pantallas en reposo; al acercarse al enlace baja solo la permitida', async () => {
     servidor()
     entrarComo(PERMISOS_MESERO)
-    const caja = jest.fn(() => Promise.resolve())
-    const cocina = jest.fn(() => Promise.resolve())
-    const { user } = abrirArmazon(conCambios({ '/caja': { load: caja }, '/cocina': { load: cocina } }))
+    const cashRegister = jest.fn(() => Promise.resolve())
+    const kitchen = jest.fn(() => Promise.resolve())
+    const { user } = openShell(withChanges({ '/caja': { load: cashRegister }, '/cocina': { load: kitchen } }))
 
-    expect(cocina).not.toHaveBeenCalled()
-    expect(caja).not.toHaveBeenCalled()
-    await user.hover(within(barraLateral()).getByRole('link', { name: 'Cocina' }))
-    expect(cocina).toHaveBeenCalledTimes(1)
-    expect(caja).not.toHaveBeenCalled()
+    expect(kitchen).not.toHaveBeenCalled()
+    expect(cashRegister).not.toHaveBeenCalled()
+    await user.hover(within(sidebar()).getByRole('link', { name: 'Cocina' }))
+    expect(kitchen).toHaveBeenCalledTimes(1)
+    expect(cashRegister).not.toHaveBeenCalled()
   })
 
   it('acercarse a un enlace del menú adelanta los datos de esa pantalla', async () => {
     servidor()
     entrarComo(PERMISOS_ENCARGADO)
     const prefetch = jest.fn()
-    const { user } = abrirArmazon(conCambios({ '/caja': { prefetch } }))
+    const { user } = openShell(withChanges({ '/caja': { prefetch } }))
 
-    await user.hover(within(barraLateral()).getByRole('link', { name: 'Caja' }))
+    await user.hover(within(sidebar()).getByRole('link', { name: 'Caja' }))
 
     expect(prefetch).toHaveBeenCalled()
   })
