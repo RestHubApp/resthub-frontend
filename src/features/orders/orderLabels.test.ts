@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { notaConAlergia, pedido } from '#jest/fixtures/pedidos'
+import { noteWithAllergy, order } from '#jest/fixtures/pedidos'
 import { nextStepFor, stepDoneMessage } from './nextStep'
 import { allergyIn } from './noteFlags'
 import { deliveryLines, dishCount, isActive, orderPlace, STATUS_LABELS, STATUS_OPTIONS } from './orderLabels'
@@ -73,24 +73,24 @@ describe('nextStepFor', () => {
 
 describe('stepDoneMessage', () => {
   it('el aviso dice el estado en que quedó el pedido', () => {
-    expect(stepDoneMessage(pedido({ status: 'in_kitchen' }))).toBe('Pedido #12 enviado a cocina.')
-    expect(stepDoneMessage(pedido({ status: 'ready' }))).toBe('Pedido #12 listo.')
-    expect(stepDoneMessage(pedido({ status: 'served' }))).toBe('Pedido #12 servido, por cobrar.')
-    expect(stepDoneMessage(pedido({ status: 'paid' }))).toBe('Pedido #12 actualizado.')
+    expect(stepDoneMessage(order({ status: 'in_kitchen' }))).toBe('Pedido #12 enviado a cocina.')
+    expect(stepDoneMessage(order({ status: 'ready' }))).toBe('Pedido #12 listo.')
+    expect(stepDoneMessage(order({ status: 'served' }))).toBe('Pedido #12 servido, por cobrar.')
+    expect(stepDoneMessage(order({ status: 'paid' }))).toBe('Pedido #12 actualizado.')
   })
 })
 
 describe('allergyIn', () => {
   it('encuentra la nota de un plato que menciona una alergia', () => {
-    const allergy = notaConAlergia()
+    const allergy = noteWithAllergy()
     const flagFor = (orderId: number, itemId: number | null) => (orderId === 5 && itemId === 101 ? allergy : undefined)
-    expect(allergyIn(pedido(), flagFor)).toBe(allergy)
+    expect(allergyIn(order(), flagFor)).toBe(allergy)
   })
 
   it('también mira la nota del pedido, e ignora las que no son alergia', () => {
-    const ofOrder = notaConAlergia({ order_item_id: null, scope: 'order' })
-    const preference = notaConAlergia({ mentions_allergy: false })
-    expect(allergyIn(pedido(), (_, itemId) => (itemId === null ? ofOrder : preference))).toBe(ofOrder)
-    expect(allergyIn(pedido(), () => preference)).toBeUndefined()
+    const ofOrder = noteWithAllergy({ order_item_id: null, scope: 'order' })
+    const preference = noteWithAllergy({ mentions_allergy: false })
+    expect(allergyIn(order(), (_, itemId) => (itemId === null ? ofOrder : preference))).toBe(ofOrder)
+    expect(allergyIn(order(), () => preference)).toBeUndefined()
   })
 })

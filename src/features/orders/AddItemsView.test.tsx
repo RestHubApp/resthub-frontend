@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen } from '@testing-library/react'
 
-import { carta, pedido, ultimoCuerpo } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, servidor } from '#jest/harness'
+import { handleMenu, order, lastBody } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, server } from '#jest/harness'
 import { AddItemsView } from './AddItemsView'
 import { useDraftActions } from './taking/useOrderDraft'
 
-function open(actual = pedido({ status: 'served', status_label: 'Servido, por cobrar' })) {
-  const api = servidor()
+function open(actual = order({ status: 'served', status_label: 'Servido, por cobrar' })) {
+  const api = server()
     .on('get', '/orders/5', actual)
-    .on('get', '/menu', carta())
-    .on('post', '/orders/5/items', pedido({ status: 'in_kitchen' }))
-  entrarComo()
-  return { api, ...montar(<AddItemsView />, { path: '/pedidos/:orderId/agregar', en: '/pedidos/5/agregar' }) }
+    .on('get', '/menu', handleMenu())
+    .on('post', '/orders/5/items', order({ status: 'in_kitchen' }))
+  signInAs()
+  return { api, ...handleMount(<AddItemsView />, { path: '/pedidos/:orderId/agregar', en: '/pedidos/5/agregar' }) }
 }
 
 afterEach(() => {
@@ -31,14 +31,14 @@ describe('AddItemsView', () => {
     await user.click(screen.getByRole('button', { name: /agregar al pedido/i }))
 
     expect(await screen.findByText('Platos agregados al pedido #12.')).toBeInTheDocument()
-    expect(ultimoCuerpo(api.llamadas('post', '/orders/5/items'))).toEqual({
+    expect(lastBody(api.llamadas('post', '/orders/5/items'))).toEqual({
       items: [{ menu_item_id: 12, quantity: 1, notes: '', modifiers: [] }],
     })
     expect(await screen.findByRole('status', { name: 'Ruta actual' })).toHaveTextContent('/pedidos/5')
   })
 
   it('un pedido ya pagado avisa que no admite más platos', async () => {
-    open(pedido({ status: 'paid', status_label: 'Pagado' }))
+    open(order({ status: 'paid', status_label: 'Pagado' }))
     expect(await screen.findByText('Este pedido ya está pagado: no admite más platos.')).toBeInTheDocument()
   })
 })

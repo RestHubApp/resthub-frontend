@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen, within } from '@testing-library/react'
 
-import { carta, mesa, pedido, ultimoCuerpo } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, primero, RespuestaDeError, servidor, sinRed } from '#jest/harness'
+import { handleMenu, table, order, lastBody } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, handleFirst, ErrorResponse, server, withoutNetwork } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { ownerOf, queuedOrders, removeQueued } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
@@ -16,13 +16,13 @@ const OWNER = { userId: 7, restaurantId: 1 }
 const LOMO = 'Lomo saltado'
 
 function takeOrderInTable() {
-  const api = servidor()
-    .on('get', '/tables', [mesa()])
-    .on('get', '/menu', carta())
-    .on('post', ORDERS, pedido({ status: 'open' }))
-    .on('post', SEND, pedido())
-  entrarComo()
-  return { api, ...montar(<NewOrderView />, { path: '/pedidos/nuevo', en: '/pedidos/nuevo?mesa=3' }) }
+  const api = server()
+    .on('get', '/tables', [table()])
+    .on('get', '/menu', handleMenu())
+    .on('post', ORDERS, order({ status: 'open' }))
+    .on('post', SEND, order())
+  signInAs()
+  return { api, ...handleMount(<NewOrderView />, { path: '/pedidos/nuevo', en: '/pedidos/nuevo?mesa=3' }) }
 }
 
 async function select(user: ReturnType<typeof takeOrderInTable>['user'], name: string) {
@@ -32,7 +32,7 @@ async function select(user: ReturnType<typeof takeOrderInTable>['user'], name: s
 
 async function send(user: ReturnType<typeof takeOrderInTable>['user']) {
   // El botón de la barra; el del resumen solo está con el resumen abierto.
-  await user.click(primero(screen.getAllByRole('button', SEND_TO_KITCHEN)))
+  await user.click(handleFirst(screen.getAllByRole('button', SEND_TO_KITCHEN)))
 }
 
 function currentRoute() {
@@ -61,7 +61,7 @@ describe('tomar un pedido en una mesa', () => {
     await send(user)
 
     expect(await screen.findByText('Pedido #12 enviado a cocina.')).toBeInTheDocument()
-    const body = ultimoCuerpo(api.llamadas('post', ORDERS)) as OpenOrderRequest
+    const body = lastBody(api.llamadas('post', ORDERS)) as OpenOrderRequest
     expect(body).toMatchObject({ type: 'dine_in', table_id: 3, customer_name: '' })
     expect(body.items?.map((item) => item.menu_item_id)).toEqual([11, 12])
     expect(body.client_request_id).toEqual(expect.any(String))
@@ -81,13 +81,13 @@ describe('tomar un pedido en una mesa', () => {
     await user.click(within(summary).getByRole('button', SEND_TO_KITCHEN))
 
     await screen.findByText('Pedido #12 enviado a cocina.')
-    const body = ultimoCuerpo(api.llamadas('post', ORDERS)) as OpenOrderRequest
+    const body = lastBody(api.llamadas('post', ORDERS)) as OpenOrderRequest
     expect(body.items).toEqual([{ menu_item_id: 11, quantity: 2, notes: 'sin cebolla', modifiers: [] }])
   })
 
   it('si la cocina no lo recibe, el pedido queda abierto y lleva a su detalle', async () => {
     const { api, user } = takeOrderInTable()
-    api.on('post', SEND, new RespuestaDeError(500, 'La cocina no respondió'))
+    api.on('post', SEND, new ErrorResponse(500, 'La cocina no respondió'))
     await select(user, LOMO)
     await send(user)
 
@@ -97,7 +97,7 @@ describe('tomar un pedido en una mesa', () => {
 
   it('sin señal, el pedido queda guardado en el celular para enviarse solo', async () => {
     const { api, user } = takeOrderInTable()
-    api.on('post', ORDERS, sinRed)
+    api.on('post', ORDERS, withoutNetwork)
     await select(user, LOMO)
     await send(user)
 
@@ -109,7 +109,7 @@ describe('tomar un pedido en una mesa', () => {
 
   it('un rechazo del servidor se avisa y el borrador sigue ahí para corregirlo', async () => {
     const { api, user } = takeOrderInTable()
-    api.on('post', ORDERS, new RespuestaDeError(409, 'La mesa ya tiene un pedido abierto.'))
+    api.on('post', ORDERS, new ErrorResponse(409, 'La mesa ya tiene un pedido abierto.'))
     await select(user, LOMO)
     await send(user)
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { entrarComo, PERMISOS_MESERO, servidor } from '#jest/harness'
+import { signInAs, PERMISSIONS_WAITER, server } from '#jest/harness'
 import { queryClient } from '@/services/queryClient'
 import { cashAmountForApi, closeCashSchema, MAX_CASH_NOTES, openCashSchema } from './cashSchema'
 import { prefetchCash } from './prefetchCash'
@@ -34,16 +34,16 @@ describe('esquemas de caja', () => {
 
 describe('prefetchCash', () => {
   it('el encargado adelanta la caja actual y la primera página de turnos', async () => {
-    const api = servidor().on('get', '/cash/current', { is_open: false, session: null }).on('get', '/cash/sessions', { items: [], total: 0 })
-    entrarComo()
+    const api = server().on('get', '/cash/current', { is_open: false, session: null }).on('get', '/cash/sessions', { items: [], total: 0 })
+    signInAs()
     prefetchCash()
     await queryClient.getQueryCache().find({ queryKey: ['cash', 'current'] })?.promise
     expect(api.peticiones.map((p) => p.url).sort((a, b) => a.localeCompare(b))).toEqual(['/cash/current', '/cash/sessions'])
   })
 
   it('sin permiso de caja no pide nada', () => {
-    const api = servidor()
-    entrarComo(PERMISOS_MESERO)
+    const api = server()
+    signInAs(PERMISSIONS_WAITER)
     prefetchCash()
     expect(api.peticiones).toHaveLength(0)
   })

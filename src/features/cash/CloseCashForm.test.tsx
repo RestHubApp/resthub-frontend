@@ -1,8 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { resumenDeCaja, turnoDeCaja } from '#jest/fixtures/cash'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { cashRegisterSummary, cashRegisterShift } from '#jest/fixtures/cash'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import type { CashSession } from '@/api/types'
 import { CloseCashForm } from './CloseCashForm'
 
@@ -10,18 +10,18 @@ const CASH = 'Efectivo contado'
 const CLOSE = { name: 'Cerrar caja' }
 
 /** «Cerrar caja» y, en la confirmación, «Cerrar caja» otra vez. */
-async function closeAndConfirm(user: ReturnType<typeof montar>['user']) {
+async function closeAndConfirm(user: ReturnType<typeof handleMount>['user']) {
   await user.click(screen.getByRole('button', CLOSE))
   const confirmation = await screen.findByRole('alertdialog', { name: '¿Cerrar la caja?' })
   await user.click(within(confirmation).getByRole('button', CLOSE))
 }
 const CLOSE_URL = '/cash/close'
 
-function closeShift(shift: CashSession = turnoDeCaja({ summary: resumenDeCaja({ expected_cash: '200.00' }) })) {
-  const api = servidor().on('get', '/cash/current', { is_open: true, session: shift })
-  entrarComo()
+function closeShift(shift: CashSession = cashRegisterShift({ summary: cashRegisterSummary({ expected_cash: '200.00' }) })) {
+  const api = server().on('get', '/cash/current', { is_open: true, session: shift })
+  signInAs()
   const onClosed = jest.fn<(session: CashSession) => void>()
-  return { api, onClosed, ...montar(<CloseCashForm session={shift} onClosed={onClosed} />) }
+  return { api, onClosed, ...handleMount(<CloseCashForm session={shift} onClosed={onClosed} />) }
 }
 
 describe('CloseCashForm', () => {
@@ -45,7 +45,7 @@ describe('CloseCashForm', () => {
 
   it('cierra con el monto contado y avisa cuánto faltó', async () => {
     const { api, user, onClosed } = closeShift()
-    const closed = turnoDeCaja({ is_open: false, counted_cash: '196.00', difference: '-4.00' })
+    const closed = cashRegisterShift({ is_open: false, counted_cash: '196.00', difference: '-4.00' })
     api.on('post', CLOSE_URL, closed)
 
     await user.type(screen.getByLabelText(CASH), '196,00')
@@ -67,18 +67,18 @@ describe('CloseCashForm', () => {
   })
 
   it('avisa de los pedidos sin cobrar, en singular y en plural', () => {
-    closeShift(turnoDeCaja({ open_orders: 1 }))
+    closeShift(cashRegisterShift({ open_orders: 1 }))
     expect(screen.getByRole('status')).toHaveTextContent('Hay 1 pedido sin cobrar')
   })
 
   it('con varios pedidos abiertos los cuenta', () => {
-    closeShift(turnoDeCaja({ open_orders: 3 }))
+    closeShift(cashRegisterShift({ open_orders: 3 }))
     expect(screen.getByRole('status')).toHaveTextContent('Hay 3 pedidos sin cobrar')
   })
 
   it('si el servidor rechaza el cierre, muestra su motivo', async () => {
     const { api, user, onClosed } = closeShift()
-    api.on('post', CLOSE_URL, new RespuestaDeError(409, 'La caja ya estaba cerrada'))
+    api.on('post', CLOSE_URL, new ErrorResponse(409, 'La caja ya estaba cerrada'))
 
     await user.type(screen.getByLabelText(CASH), '200')
     await closeAndConfirm(user)

@@ -1,13 +1,13 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { montarRutas, servidor } from '#jest/harness'
+import { mountRoutes, server } from '#jest/harness'
 import type { PreviewEntryResult } from './previewEntry'
 import { PreviewEntryView } from './PreviewEntryView'
 
 function openWithResult(result: PreviewEntryResult) {
-  servidor()
-  return montarRutas([{ path: '/vista-previa', loader: () => result, Component: PreviewEntryView }], '/vista-previa')
+  server()
+  return mountRoutes([{ path: '/vista-previa', loader: () => result, Component: PreviewEntryView }], '/vista-previa')
 }
 
 describe('PreviewEntryView', () => {

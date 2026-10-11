@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { entrarComo, montarRutas, PANTALLAS, PERMISOS_ENCARGADO, PERMISOS_MESERO, primero, RespuestaDeError, segundo, servidor } from '#jest/harness'
+import { signInAs, mountRoutes, SCREENSValue, PERMISSIONS_OWNER, PERMISSIONS_WAITER, handleFirst, ErrorResponse, second, server } from '#jest/harness'
 import { currentUserQueryKey } from '@/api/auth'
 import { queryClient } from '@/services/queryClient'
 import type { OpenOrderRequest } from '@/api/types'
@@ -17,7 +17,7 @@ const ACCESS_FORM = 'Formulario de acceso'
 const MENU = { name: 'Navegación principal' }
 const SIGN_OUT = { name: 'Cerrar sesión' }
 
-function openShell(screens: readonly ShellScreen[] = PANTALLAS, en = '/') {
+function openShell(screens: readonly ShellScreen[] = SCREENSValue, en = '/') {
   const routes = [
     {
       path: '/',
@@ -30,16 +30,16 @@ function openShell(screens: readonly ShellScreen[] = PANTALLAS, en = '/') {
       ],
     },
   ]
-  return montarRutas(routes, en)
+  return mountRoutes(routes, en)
 }
 
 // Las pantallas reales del registro, con otra carga o precarga en las que se indican.
 function withChanges(changes: Record<string, Partial<ShellScreen>>): readonly ShellScreen[] {
-  return PANTALLAS.map((screenValue) => ({ ...screenValue, ...changes[screenValue.path] }))
+  return SCREENSValue.map((screenValue) => ({ ...screenValue, ...changes[screenValue.path] }))
 }
 
 function sidebar() {
-  return primero(screen.getAllByRole('navigation', MENU))
+  return handleFirst(screen.getAllByRole('navigation', MENU))
 }
 
 function barContainer(): HTMLElement {
@@ -51,7 +51,7 @@ function barContainer(): HTMLElement {
 }
 
 function bottomBar() {
-  return segundo(screen.getAllByRole('navigation', MENU))
+  return second(screen.getAllByRole('navigation', MENU))
 }
 
 function links(zone: HTMLElement): string[] {
@@ -64,8 +64,8 @@ afterEach(() => {
 
 describe('AppShell', () => {
   it('si falla la actualización de la cuenta en segundo plano, no avisa: la sesión guardada sigue sirviendo', async () => {
-    servidor().on('get', '/auth/me', new RespuestaDeError(503, 'No hay conexión con la base de datos.'))
-    entrarComo(PERMISOS_MESERO)
+    server().on('get', '/auth/me', new ErrorResponse(503, 'No hay conexión con la base de datos.'))
+    signInAs(PERMISSIONS_WAITER)
     openShell()
 
     await waitFor(() => {
@@ -76,8 +76,8 @@ describe('AppShell', () => {
   })
 
   it('el mesero solo ve en el menú las pantallas de sus permisos', () => {
-    servidor()
-    entrarComo(PERMISOS_MESERO)
+    server()
+    signInAs(PERMISSIONS_WAITER)
     openShell()
 
     expect(links(sidebar())).toEqual(expect.arrayContaining(['Pedidos', 'Cocina', 'Reservas', 'Clientes']))
@@ -87,8 +87,8 @@ describe('AppShell', () => {
   })
 
   it('el menú sigue a los permisos y no al nombre del rol', () => {
-    servidor()
-    entrarComo([ORDERS_TAKE, CASH_MANAGE], {
+    server()
+    signInAs([ORDERS_TAKE, CASH_MANAGE], {
       user: { id: 7, email: 'ana@resthub.dev', full_name: 'Ana Torres', role_id: 9, role_label: 'Mesero' },
     })
     openShell()
@@ -98,8 +98,8 @@ describe('AppShell', () => {
   })
 
   it('en el celular caben cuatro pantallas y el resto va en «Más»', async () => {
-    servidor()
-    entrarComo(PERMISOS_ENCARGADO)
+    server()
+    signInAs(PERMISSIONS_OWNER)
     const { user } = openShell()
 
     expect(links(bottomBar())).toEqual(['Pedidos', 'Tablero', 'Cocina', 'Reservas'])
@@ -112,8 +112,8 @@ describe('AppShell', () => {
   })
 
   it('sin pantallas de sobra, el último botón es «Cuenta»', () => {
-    servidor()
-    entrarComo([ORDERS_TAKE])
+    server()
+    signInAs([ORDERS_TAKE])
     openShell()
 
     expect(within(bottomBar()).getByRole('button', { name: 'Cuenta' })).toBeInTheDocument()
@@ -122,8 +122,8 @@ describe('AppShell', () => {
 
 describe('AppShell: sesión y precargas', () => {
   it('cerrar sesión vacía la sesión y lleva al acceso', async () => {
-    servidor()
-    entrarComo(PERMISOS_MESERO)
+    server()
+    signInAs(PERMISSIONS_WAITER)
     const { user } = openShell()
 
     await user.click(within(barContainer()).getByRole('button', SIGN_OUT))
@@ -133,8 +133,8 @@ describe('AppShell: sesión y precargas', () => {
   })
 
   it('con pedidos sin enviar, pregunta antes de cerrar la sesión', async () => {
-    servidor()
-    const account = entrarComo(PERMISOS_MESERO)
+    server()
+    const account = signInAs(PERMISSIONS_WAITER)
     enqueueOrder({
       userId: account.user.id,
       restaurantId: account.restaurant.id,
@@ -154,24 +154,24 @@ describe('AppShell: sesión y precargas', () => {
   })
 
   it('sin sesión solo muestra la marca y el contenido del acceso', () => {
-    servidor()
-    openShell(PANTALLAS, '/acceso')
+    server()
+    openShell(SCREENSValue, '/acceso')
 
     expect(screen.getByText(ACCESS_FORM)).toBeInTheDocument()
     expect(screen.queryByRole('navigation', MENU)).not.toBeInTheDocument()
   })
 
   it('relee la cuenta con /auth/me y muestra el nombre nuevo del local', async () => {
-    const updated = entrarComo(PERMISOS_MESERO)
-    servidor().on('get', '/auth/me', { ...updated, restaurant: { ...updated.restaurant, name: 'Picantería Renovada' } })
+    const updated = signInAs(PERMISSIONS_WAITER)
+    server().on('get', '/auth/me', { ...updated, restaurant: { ...updated.restaurant, name: 'Picantería Renovada' } })
     openShell()
 
     expect((await screen.findAllByText('Picantería Renovada')).length).toBeGreaterThan(0)
   })
 
   it('no baja pantallas en reposo; al acercarse al enlace baja solo la permitida', async () => {
-    servidor()
-    entrarComo(PERMISOS_MESERO)
+    server()
+    signInAs(PERMISSIONS_WAITER)
     const cashRegister = jest.fn(() => Promise.resolve())
     const kitchen = jest.fn(() => Promise.resolve())
     const { user } = openShell(withChanges({ '/caja': { load: cashRegister }, '/cocina': { load: kitchen } }))
@@ -184,8 +184,8 @@ describe('AppShell: sesión y precargas', () => {
   })
 
   it('acercarse a un enlace del menú adelanta los datos de esa pantalla', async () => {
-    servidor()
-    entrarComo(PERMISOS_ENCARGADO)
+    server()
+    signInAs(PERMISSIONS_OWNER)
     const prefetch = jest.fn()
     const { user } = openShell(withChanges({ '/caja': { prefetch } }))
 

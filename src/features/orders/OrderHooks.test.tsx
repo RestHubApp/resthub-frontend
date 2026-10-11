@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
 
-import { notaConAlergia, pedido } from '#jest/fixtures/pedidos'
-import { entrarComo, PERMISOS_ENCARGADO, PERMISOS_MESERO, servidor } from '#jest/harness'
+import { noteWithAllergy, order } from '#jest/fixtures/pedidos'
+import { signInAs, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
 import { ItemNote } from './ItemNote'
 import { nextStepFor } from './nextStep'
 import { prefetchBoard, prefetchFloor, prefetchKitchen } from './prefetchOrders'
@@ -10,8 +10,8 @@ import { QuantityStepper } from './QuantityStepper'
 import { useCanTakeStep } from './useCanTakeStep'
 import { useNow } from './useNow'
 
-const SERVED = pedido({ status: 'served', waiter_id: 7 })
-const OF_OTHER = pedido({ status: 'served', waiter_id: 8 })
+const SERVED = order({ status: 'served', waiter_id: 7 })
+const OF_OTHER = order({ status: 'served', waiter_id: 8 })
 const ACTIVE = '/orders/active'
 
 afterEach(() => {
@@ -24,28 +24,28 @@ describe('useCanTakeStep', () => {
   }
 
   it('el mesero cobra lo que atendió, pero no la mesa de otro', () => {
-    entrarComo(PERMISOS_MESERO)
+    signInAs(PERMISSIONS_WAITER)
     expect(can()).toBe(true)
     expect(can(OF_OTHER)).toBe(false)
   })
 
   it('quien ve todos los pedidos cobra cualquiera', () => {
-    entrarComo(PERMISOS_ENCARGADO)
+    signInAs(PERMISSIONS_OWNER)
     expect(can(OF_OTHER)).toBe(true)
   })
 
   it('sin el permiso del paso, o sin paso, no hay botón; servir una mesa ajena sí vale', () => {
-    entrarComo(PERMISOS_MESERO)
-    expect(can(pedido({ status: 'in_kitchen' }))).toBe(false)
-    expect(can(pedido({ status: 'paid' }))).toBe(false)
-    expect(can(pedido({ status: 'ready', waiter_id: 8 }))).toBe(true)
+    signInAs(PERMISSIONS_WAITER)
+    expect(can(order({ status: 'in_kitchen' }))).toBe(false)
+    expect(can(order({ status: 'paid' }))).toBe(false)
+    expect(can(order({ status: 'ready', waiter_id: 8 }))).toBe(true)
   })
 })
 
 describe('precargas de pedidos', () => {
   it('el salón adelanta mesas y carta según los permisos', async () => {
-    const api = servidor().on('get', '/tables', []).on('get', '/menu', { categories: [] })
-    entrarComo(['orders.take', 'menu.read'])
+    const api = server().on('get', '/tables', []).on('get', '/menu', { categories: [] })
+    signInAs(['orders.take', 'menu.read'])
     prefetchFloor()
     await waitFor(() => {
       expect(api.llamadas('get', '/menu')).toHaveLength(1)
@@ -54,13 +54,13 @@ describe('precargas de pedidos', () => {
   })
 
   it('cocina y tablero adelantan los pedidos en curso solo con su permiso', async () => {
-    const api = servidor().on('get', ACTIVE, [])
-    entrarComo(['menu.read'])
+    const api = server().on('get', ACTIVE, [])
+    signInAs(['menu.read'])
     prefetchKitchen()
     prefetchBoard()
     expect(api.llamadas('get', ACTIVE)).toHaveLength(0)
 
-    entrarComo(PERMISOS_MESERO)
+    signInAs(PERMISSIONS_WAITER)
     prefetchKitchen()
     await waitFor(() => {
       expect(api.llamadas('get', ACTIVE)).toHaveLength(1)
@@ -95,7 +95,7 @@ describe('ItemNote', () => {
   })
 
   it('una nota con alergia lleva la palabra «Alergia» y su etiqueta', () => {
-    render(<ItemNote note="alérgico al maní" label="Nota del pedido" flag={notaConAlergia()} />)
+    render(<ItemNote note="alérgico al maní" label="Nota del pedido" flag={noteWithAllergy()} />)
     expect(screen.getByText('Alergia')).toBeInTheDocument()
     expect(screen.getByText(/Nota del pedido:/u)).toBeInTheDocument()
   })

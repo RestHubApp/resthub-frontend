@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { entrarAPlataforma, fichaDeRestaurante, montarPlataforma, resumenDeRestaurante } from '#jest/fixtures/plataforma'
-import { RespuestaDeError, servidor } from '#jest/harness'
+import { signInToPlatform, restaurantCard, mountPlatform, restaurantSummary } from '#jest/fixtures/plataforma'
+import { ErrorResponse, server } from '#jest/harness'
 
 // Contraseña de prueba, no una credencial real.
 const TEST_SECRET = 'clave-segura-1'
@@ -15,10 +15,10 @@ const CREATE_RESTAURANT = 'Crear restaurante'
 const LIST = '/platform/restaurants'
 const SEARCH = 'Buscar por nombre o identificador'
 
-function openList(response: unknown = { items: [resumenDeRestaurante()], total: 1 }) {
-  const api = servidor().on('get', LIST, response)
-  entrarAPlataforma()
-  return { api, ...montarPlataforma('/plataforma') }
+function openList(response: unknown = { items: [restaurantSummary()], total: 1 }) {
+  const api = server().on('get', LIST, response)
+  signInToPlatform()
+  return { api, ...mountPlatform('/plataforma') }
 }
 
 describe('RestaurantsView', () => {
@@ -44,7 +44,7 @@ describe('RestaurantsView', () => {
   })
 
   it('con más de una página ofrece pasar a la siguiente', async () => {
-    const { api, user } = openList({ items: [resumenDeRestaurante()], total: 30 })
+    const { api, user } = openList({ items: [restaurantSummary()], total: 30 })
     await screen.findByText('30 restaurantes')
 
     await user.click(screen.getByRole('button', { name: /siguiente/iu }))
@@ -55,10 +55,10 @@ describe('RestaurantsView', () => {
   })
 
   it('si la lista falla, deja reintentar', async () => {
-    const { api, user } = openList(new RespuestaDeError(500, 'Servidor caído'))
+    const { api, user } = openList(new ErrorResponse(500, 'Servidor caído'))
 
     expect(await screen.findByText('Servidor caído')).toBeInTheDocument()
-    api.on('get', LIST, { items: [resumenDeRestaurante()], total: 1 })
+    api.on('get', LIST, { items: [restaurantSummary()], total: 1 })
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
 
     expect(await screen.findByRole('row', { name: /La Esquina de Lucho/u })).toBeInTheDocument()
@@ -72,7 +72,7 @@ describe('RestaurantsView', () => {
 })
 
 describe('NewRestaurantView', () => {
-  async function fillRegistration(user: ReturnType<typeof montarPlataforma>['user']) {
+  async function fillRegistration(user: ReturnType<typeof mountPlatform>['user']) {
     await user.type(await screen.findByLabelText('Nombre'), CAFE_NANDU)
     await user.type(screen.getByLabelText('Nombre completo'), 'Rosa Díaz')
     await user.type(screen.getByLabelText('Correo'), 'rosa@nandu.pe')
@@ -80,11 +80,11 @@ describe('NewRestaurantView', () => {
   }
 
   it('sugiere el identificador desde el nombre y crea el local con su encargado', async () => {
-    const api = servidor().on('get', LIST, { items: [], total: 0 })
-    api.on('post', LIST, fichaDeRestaurante({ id: 12, name: CAFE_NANDU, slug: SLUG_CAFE_NANDU }))
-    api.on('get', `${LIST}/12`, fichaDeRestaurante({ id: 12, name: CAFE_NANDU, slug: SLUG_CAFE_NANDU }))
-    entrarAPlataforma()
-    const { user, router } = montarPlataforma(PLATFORM_NEW_RESTAURANTS)
+    const api = server().on('get', LIST, { items: [], total: 0 })
+    api.on('post', LIST, restaurantCard({ id: 12, name: CAFE_NANDU, slug: SLUG_CAFE_NANDU }))
+    api.on('get', `${LIST}/12`, restaurantCard({ id: 12, name: CAFE_NANDU, slug: SLUG_CAFE_NANDU }))
+    signInToPlatform()
+    const { user, router } = mountPlatform(PLATFORM_NEW_RESTAURANTS)
 
     await fillRegistration(user)
     expect(screen.getByLabelText('Identificador')).toHaveValue(SLUG_CAFE_NANDU)
@@ -101,9 +101,9 @@ describe('NewRestaurantView', () => {
   })
 
   it('un identificador editado a mano ya no sigue al nombre', async () => {
-    servidor()
-    entrarAPlataforma()
-    const { user } = montarPlataforma(PLATFORM_NEW_RESTAURANTS)
+    server()
+    signInToPlatform()
+    const { user } = mountPlatform(PLATFORM_NEW_RESTAURANTS)
 
     await user.type(await screen.findByLabelText('Nombre'), 'Pollos')
     await user.clear(screen.getByLabelText('Identificador'))
@@ -114,9 +114,9 @@ describe('NewRestaurantView', () => {
   })
 
   it('si el identificador ya existe, muestra el motivo y no sale del alta', async () => {
-    const api = servidor().on('post', LIST, new RespuestaDeError(409, 'Ya hay un restaurante con ese identificador.'))
-    entrarAPlataforma()
-    const { user, router } = montarPlataforma(PLATFORM_NEW_RESTAURANTS)
+    const api = server().on('post', LIST, new ErrorResponse(409, 'Ya hay un restaurante con ese identificador.'))
+    signInToPlatform()
+    const { user, router } = mountPlatform(PLATFORM_NEW_RESTAURANTS)
 
     await fillRegistration(user)
     await user.click(screen.getByRole('button', { name: CREATE_RESTAURANT }))
@@ -127,9 +127,9 @@ describe('NewRestaurantView', () => {
   })
 
   it('valida los datos antes de enviar y cancelar vuelve a la lista', async () => {
-    const api = servidor().on('get', LIST, { items: [], total: 0 })
-    entrarAPlataforma()
-    const { user, router } = montarPlataforma(PLATFORM_NEW_RESTAURANTS)
+    const api = server().on('get', LIST, { items: [], total: 0 })
+    signInToPlatform()
+    const { user, router } = mountPlatform(PLATFORM_NEW_RESTAURANTS)
 
     await user.click(await screen.findByRole('button', { name: CREATE_RESTAURANT }))
     expect(await screen.findByText('Escribe el nombre del restaurante')).toBeInTheDocument()

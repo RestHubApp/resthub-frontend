@@ -6,10 +6,10 @@
 // configuración, pero no el que declara un archivo en su docblock.
 const { TestEnvironment } = require('jest-environment-node')
 
-let Entorno = TestEnvironment
+let Environment = TestEnvironment
 if (process.env.STRYKER_MUTATOR_WORKER !== undefined) {
   const { mixinJestEnvironment } = require('@stryker-mutator/jest-runner')
-  Entorno = mixinJestEnvironment(TestEnvironment)
+  Environment = mixinJestEnvironment(TestEnvironment)
 }
 
-module.exports = Entorno
+module.exports = Environment

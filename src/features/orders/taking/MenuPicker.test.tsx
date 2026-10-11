@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen, within } from '@testing-library/react'
 
-import { carta, pedido, plato, seccion, ultimoCuerpo } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { handleMenu, order, dish, section, lastBody } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { NewOrderView } from '@/features/orders/NewOrderView'
 import { useDraftActions } from './useOrderDraft'
@@ -11,13 +11,13 @@ const LOMO = 'Lomo saltado'
 const SEARCH = 'Buscar plato'
 const CHICHA = 'Chicha morada'
 
-function openMenu(menu: unknown = carta()) {
-  const api = servidor()
+function openMenu(menu: unknown = handleMenu()) {
+  const api = server()
     .on('get', '/menu', menu)
-    .on('post', '/orders', pedido({ status: 'open', type: 'takeaway' }))
-    .on('post', '/orders/5/send', pedido({ type: 'takeaway' }))
-  entrarComo()
-  return { api, ...montar(<NewOrderView />, { path: '/pedidos/nuevo', en: '/pedidos/nuevo?tipo=llevar' }) }
+    .on('post', '/orders', order({ status: 'open', type: 'takeaway' }))
+    .on('post', '/orders/5/send', order({ type: 'takeaway' }))
+  signInAs()
+  return { api, ...handleMount(<NewOrderView />, { path: '/pedidos/nuevo', en: '/pedidos/nuevo?tipo=llevar' }) }
 }
 
 function plat(name: string) {
@@ -55,7 +55,7 @@ describe('la carta para tomar el pedido', () => {
   })
 
   it('un plato agotado se ve pero no se puede elegir; uno sin insumos, tampoco', async () => {
-    const menu = { categories: [seccion({ items: [plato({ is_available: false }), plato({ id: 12, name: 'Tacu tacu', out_of_stock: true })] })] }
+    const menu = { categories: [section({ items: [dish({ is_available: false }), dish({ id: 12, name: 'Tacu tacu', out_of_stock: true })] })] }
     openMenu(menu)
     expect(await plat(LOMO)).toBeDisabled()
     expect(screen.getByText('Agotado')).toBeInTheDocument()
@@ -75,9 +75,9 @@ describe('la carta para tomar el pedido', () => {
   })
 
   it('si la carta no carga, lo dice y deja reintentar', async () => {
-    const { api, user } = openMenu(new RespuestaDeError(500, 'Sin carta'))
+    const { api, user } = openMenu(new ErrorResponse(500, 'Sin carta'))
     expect(await screen.findByText('Sin carta')).toBeInTheDocument()
-    api.on('get', '/menu', carta())
+    api.on('get', '/menu', handleMenu())
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
     expect(await plat(LOMO)).toBeInTheDocument()
   })
@@ -110,7 +110,7 @@ describe('las opciones de un plato', () => {
     await user.click(screen.getByRole('button', { name: /enviar a cocina/i }))
 
     await screen.findByText('Pedido #12 enviado a cocina.')
-    const body = ultimoCuerpo(api.llamadas('post', '/orders')) as OpenOrderRequest
+    const body = lastBody(api.llamadas('post', '/orders')) as OpenOrderRequest
     expect(body.items?.[0]?.modifiers).toEqual([{ group: 'Tamaño', option: 'Vaso' }])
   })
 

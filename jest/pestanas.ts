@@ -5,29 +5,29 @@ import { jest } from '@jest/globals'
 
 import { stubGlobal } from './globals'
 
-export function tokenQueVence(segundosDesdeAhora: number, sello = ''): string {
-  const exp = Math.floor(Date.now() / 1000) + segundosDesdeAhora
-  return `cabecera.${btoa(JSON.stringify({ exp, sello }))}.firma`
+export function tokenThatExpires(secondsFromNow: number, stamp = ''): string {
+  const exp = Math.floor(Date.now() / 1000) + secondsFromNow
+  return `cabecera.${btoa(JSON.stringify({ exp, sello: stamp }))}.firma`
 }
 
-export interface AlmacenDePrueba {
-  getItem: (clave: string) => string | null
-  setItem: (clave: string, valor: string) => void
-  removeItem: (clave: string) => void
+export interface TestStorage {
+  getItem: (password: string) => string | null
+  setItem: (password: string, value: string) => void
+  removeItem: (password: string) => void
   readonly datos: Map<string, string>
 }
 
-export function fakeStorage(): AlmacenDePrueba {
-  const datos = new Map<string, string>()
+export function fakeStorage(): TestStorage {
+  const data = new Map<string, string>()
   return {
-    getItem: (clave) => datos.get(clave) ?? null,
-    setItem: (clave, valor) => {
-      datos.set(clave, valor)
+    getItem: (password) => data.get(password) ?? null,
+    setItem: (password, value) => {
+      data.set(password, value)
     },
-    removeItem: (clave) => {
-      datos.delete(clave)
+    removeItem: (password) => {
+      data.delete(password)
     },
-    datos,
+    datos: data,
   }
 }
 
@@ -36,26 +36,26 @@ export function fakeStorage(): AlmacenDePrueba {
  * se cargó y módulos recién cargados. Lo que la prueba importe después es de
  * esta pestaña.
  */
-export function nuevaPestana(local: AlmacenDePrueba, ruta = '/', pestana: AlmacenDePrueba = fakeStorage()) {
-  const ventana = new EventTarget()
-  stubGlobal('window', ventana)
+export function newTab(local: TestStorage, route = '/', tab: TestStorage = fakeStorage()) {
+  const window = new EventTarget()
+  stubGlobal('window', window)
   stubGlobal('localStorage', local)
-  stubGlobal('sessionStorage', pestana)
-  stubGlobal('location', { pathname: ruta })
+  stubGlobal('sessionStorage', tab)
+  stubGlobal('location', { pathname: route })
   jest.resetModules()
-  return { ventana, pestana }
+  return { ventana: window, pestana: tab }
 }
 
 /**
  * El aviso `storage` que el navegador entrega a las demás pestañas del mismo
  * origen cuando una cambia `localStorage`; la que lo cambió no lo recibe.
  */
-export function avisar(ventana: EventTarget, storageArea: unknown, key: string | null): void {
-  ventana.dispatchEvent(Object.assign(new Event('storage'), { key, storageArea }))
+export function notify(window: EventTarget, storageArea: unknown, key: string | null): void {
+  window.dispatchEvent(Object.assign(new Event('storage'), { key, storageArea }))
 }
 
 /** Lo guardado en `localStorage` bajo esa clave, ya leído. */
-export function guardado(local: AlmacenDePrueba, clave: string): unknown {
-  const raw = local.datos.get(clave)
+export function handleSaved(local: TestStorage, password: string): unknown {
+  const raw = local.datos.get(password)
   return raw === undefined ? null : JSON.parse(raw)
 }

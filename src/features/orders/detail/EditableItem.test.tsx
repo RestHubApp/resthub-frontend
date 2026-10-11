@@ -1,19 +1,19 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { pedido, plato } from '#jest/fixtures/cobro'
-import { entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { handleOrder, dish } from '#jest/fixtures/cobro'
+import { signInAs, handleMount, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { OrderItems } from './OrderItems'
 
 const DISH = '/orders/12/items/1'
 const NOTE = 'Sin cebolla'
-const open = pedido({ status: 'open', items: [plato({ notes: NOTE })], item_count: 1 })
+const open = handleOrder({ status: 'open', items: [dish({ notes: NOTE })], item_count: 1 })
 const withoutFlag = () => undefined
 
 function edit(order = open) {
-  const api = servidor()
-  entrarComo(PERMISOS_MESERO)
-  return { api, ...montar(<OrderItems order={order} flagFor={withoutFlag} />) }
+  const api = server()
+  signInAs(PERMISSIONS_WAITER)
+  return { api, ...handleMount(<OrderItems order={order} flagFor={withoutFlag} />) }
 }
 
 describe('platos de un pedido abierto', () => {
@@ -35,7 +35,7 @@ describe('platos de un pedido abierto', () => {
 
   it('con uno solo, «−» quita el plato y lo avisa', async () => {
     const { api, user } = edit()
-    api.on('delete', DISH, pedido({ status: 'open', items: [] }))
+    api.on('delete', DISH, handleOrder({ status: 'open', items: [] }))
 
     await user.click(screen.getByRole('button', { name: 'Quitar Lomo saltado' }))
 
@@ -61,7 +61,7 @@ describe('platos de un pedido abierto', () => {
 
   it('si la cocina ya lo tiene, el servidor rechaza el cambio y se avisa', async () => {
     const { api, user } = edit()
-    api.on('patch', DISH, new RespuestaDeError(409, 'El pedido ya está en cocina.'))
+    api.on('patch', DISH, new ErrorResponse(409, 'El pedido ya está en cocina.'))
 
     await user.click(screen.getByRole('button', { name: 'Uno más de Lomo saltado' }))
 
@@ -71,8 +71,8 @@ describe('platos de un pedido abierto', () => {
 
 describe('platos de un pedido en cocina', () => {
   it('se muestran sin controles, con modificadores y precio', () => {
-    const withOptions = plato({ modifiers: [{ group: 'Término', option: 'Tres cuartos', price: '0.00' }] })
-    edit(pedido({ status: 'in_kitchen', items: [withOptions] }))
+    const withOptions = dish({ modifiers: [{ group: 'Término', option: 'Tres cuartos', price: '0.00' }] })
+    edit(handleOrder({ status: 'in_kitchen', items: [withOptions] }))
 
     expect(screen.getByText('Tres cuartos')).toBeInTheDocument()
     expect(screen.getByText('S/ 30.00')).toBeInTheDocument()
@@ -80,7 +80,7 @@ describe('platos de un pedido en cocina', () => {
   })
 
   it('un pedido sin platos lo dice', () => {
-    edit(pedido({ status: 'in_kitchen', items: [] }))
+    edit(handleOrder({ status: 'in_kitchen', items: [] }))
 
     expect(screen.getByText('Este pedido no tiene platos.')).toBeInTheDocument()
   })

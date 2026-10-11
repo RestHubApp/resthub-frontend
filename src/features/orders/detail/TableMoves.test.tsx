@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { mesa, pago, pedido } from '#jest/fixtures/cobro'
-import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, servidor } from '#jest/harness'
+import { table, payment, handleOrder } from '#jest/fixtures/cobro'
+import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
 import type { ActiveOrderSummary, OrderResponse, PermissionCode } from '@/api/types'
 import { TableMoves } from './TableMoves'
 
@@ -28,22 +28,22 @@ function summary(id: number, waiterId: number): ActiveOrderSummary {
 }
 
 const SALON = [
-  mesa({ id: 3, label: '3', status: 'occupied', active_order: summary(12, 7) }),
-  mesa({ id: 4, label: '4' }),
-  mesa({ id: 5, label: 'Terraza', status: 'occupied', active_order: summary(20, 7) }),
-  mesa({ id: 6, label: '6', status: 'occupied', active_order: summary(21, 8) }),
+  table({ id: 3, label: '3', status: 'occupied', active_order: summary(12, 7) }),
+  table({ id: 4, label: '4' }),
+  table({ id: 5, label: 'Terraza', status: 'occupied', active_order: summary(20, 7) }),
+  table({ id: 6, label: '6', status: 'occupied', active_order: summary(21, 8) }),
 ]
 
-function move(permissions: readonly PermissionCode[] = PERMISOS_MESERO, order: OrderResponse = pedido()) {
-  const api = servidor().on('get', '/tables', SALON)
-  entrarComo(permissions)
-  return { api, ...montar(<TableMoves order={order} />) }
+function move(permissions: readonly PermissionCode[] = PERMISSIONS_WAITER, order: OrderResponse = handleOrder()) {
+  const api = server().on('get', '/tables', SALON)
+  signInAs(permissions)
+  return { api, ...handleMount(<TableMoves order={order} />) }
 }
 
 describe('TableMoves', () => {
   it('cambiar de mesa ofrece solo las libres y muda el pedido', async () => {
     const { api, user } = move()
-    api.on('post', '/orders/12/move', pedido({ table_id: 4, table_label: '4' }))
+    api.on('post', '/orders/12/move', handleOrder({ table_id: 4, table_label: '4' }))
 
     await user.click(screen.getByRole('button', MOVE))
     const window = within(await screen.findByRole('dialog', MOVE))
@@ -56,7 +56,7 @@ describe('TableMoves', () => {
 
   it('el mesero solo une mesas suyas, y nunca la misma', async () => {
     const { api, user } = move()
-    api.on('post', '/orders/12/merge', pedido())
+    api.on('post', '/orders/12/merge', handleOrder())
 
     await user.click(screen.getByRole('button', JOIN))
     const window = within(await screen.findByRole('dialog', { name: 'Unir otra mesa a esta' }))
@@ -71,7 +71,7 @@ describe('TableMoves', () => {
   })
 
   it('el encargado puede unir mesas de cualquier mesero', async () => {
-    const { user } = move(PERMISOS_ENCARGADO)
+    const { user } = move(PERMISSIONS_OWNER)
 
     await user.click(screen.getByRole('button', JOIN))
 
@@ -88,8 +88,8 @@ describe('TableMoves', () => {
   })
 
   it('con un pago hecho, o en la mesa de otro mesero, no se ofrece unir', () => {
-    move(PERMISOS_MESERO, pedido({ payments: [pago()] }))
-    move(PERMISOS_MESERO, pedido({ waiter_id: 8 }))
+    move(PERMISSIONS_WAITER, handleOrder({ payments: [payment()] }))
+    move(PERMISSIONS_WAITER, handleOrder({ waiter_id: 8 }))
 
     expect(screen.queryByRole('button', JOIN)).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', MOVE)).toHaveLength(2)

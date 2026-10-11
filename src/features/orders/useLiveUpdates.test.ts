@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { createElement, type ReactNode } from 'react'
 
-import { entrarComo } from '#jest/harness'
+import { signInAs } from '#jest/harness'
 import { queryClient } from '@/services/queryClient'
 import { useLiveUpdates } from './useLiveUpdates'
 
@@ -43,7 +43,7 @@ function wrapper({ children }: { readonly children: ReactNode }) {
 }
 
 function listen() {
-  entrarComo()
+  signInAs()
   return renderHook(() => useLiveUpdates(), { wrapper: wrapper })
 }
 

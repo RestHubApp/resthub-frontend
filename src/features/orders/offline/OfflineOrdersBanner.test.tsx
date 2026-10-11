@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, screen } from '@testing-library/react'
 
-import { pedido } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, RespuestaDeError, servidor, sinRed } from '#jest/harness'
+import { order } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, ErrorResponse, server, withoutNetwork } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { enqueueOrder, queuedOrders, removeQueued } from '@/store/offlineQueue'
 import { OfflineOrdersBanner } from './OfflineOrdersBanner'
@@ -27,10 +27,10 @@ function enqueue(label: string, id: string, owner = OWNER) {
   enqueueOrder({ ...owner, request, label, queuedAt: '2026-09-26T17:00:00Z' })
 }
 
-function open(responseOnOpen: unknown = pedido({ status: 'open' })) {
-  const api = servidor().on('post', ORDERS, responseOnOpen).on('post', SEND, pedido())
-  entrarComo()
-  return { api, ...montar(<OfflineOrdersBanner />) }
+function open(responseOnOpen: unknown = order({ status: 'open' })) {
+  const api = server().on('post', ORDERS, responseOnOpen).on('post', SEND, order())
+  signInAs()
+  return { api, ...handleMount(<OfflineOrdersBanner />) }
 }
 
 afterEach(() => {
@@ -45,7 +45,7 @@ describe('pedidos que esperan señal', () => {
   it('sin señal se quedan en la cola y el aviso los nombra', async () => {
     enqueue('Mesa 3', 'a')
     enqueue('Delivery · Ana', 'b')
-    const { api } = open(sinRed)
+    const { api } = open(withoutNetwork)
     expect(await screen.findByText(/2 pedidos esperan señal: Mesa 3, Delivery · Ana\./u)).toBeInTheDocument()
     expect(api.llamadas('post', ORDERS)).toHaveLength(1)
     expect(queuedOrders(OWNER)).toHaveLength(2)
@@ -63,26 +63,26 @@ describe('pedidos que esperan señal', () => {
   it('si ya estaba en cocina (409), cuenta como enviado', async () => {
     enqueue('Mesa 3', 'a')
     const { api } = open()
-    api.on('post', SEND, new RespuestaDeError(409, 'El pedido ya está en cocina.'))
+    api.on('post', SEND, new ErrorResponse(409, 'El pedido ya está en cocina.'))
     expect(await screen.findByText(SENT)).toBeInTheDocument()
     expect(queuedOrders(OWNER)).toHaveLength(0)
   })
 
   it('un rechazo de verdad se avisa y sale de la cola', async () => {
     enqueue('Mesa 3', 'a')
-    open(new RespuestaDeError(422, 'El lomo se agotó.'))
+    open(new ErrorResponse(422, 'El lomo se agotó.'))
     expect(await screen.findByText('Mesa 3: El lomo se agotó.')).toBeInTheDocument()
     expect(queuedOrders(OWNER)).toHaveLength(0)
   })
 
   it('«Reintentar» y el evento de conexión vuelven a enviar', async () => {
     enqueue('Mesa 3', 'a')
-    const { api, user } = open(sinRed)
+    const { api, user } = open(withoutNetwork)
     await screen.findByText(/1 pedido espera señal/u)
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
     expect(api.llamadas('post', ORDERS)).toHaveLength(2)
 
-    api.on('post', ORDERS, pedido({ status: 'open' }))
+    api.on('post', ORDERS, order({ status: 'open' }))
     act(() => {
       window.dispatchEvent(new Event('online'))
     })

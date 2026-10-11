@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { pedido } from '#jest/fixtures/cobro'
-import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
+import { handleOrder } from '#jest/fixtures/cobro'
+import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse, PermissionCode } from '@/api/types'
 import { todayIn } from '@/services/format'
 import { HistoryView } from './HistoryView'
@@ -13,20 +13,20 @@ function page(items: OrderResponse[], total = items.length) {
   return { items, total, limit: 25, offset: 0 }
 }
 
-const CHARGED = pedido({ status: 'paid', payment_method_label: 'Yape', notes: 'Sin ají', paid_at: '2026-09-26T18:00:00Z' })
+const CHARGED = handleOrder({ status: 'paid', payment_method_label: 'Yape', notes: 'Sin ají', paid_at: '2026-09-26T18:00:00Z' })
 
-function history(response: unknown = page([CHARGED]), permissions: readonly PermissionCode[] = PERMISOS_ENCARGADO) {
-  const api = servidor()
+function history(response: unknown = page([CHARGED]), permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
+  const api = server()
     .on('get', ORDERS, response)
     .on('get', '/staff', {
       items: [{ id: 8, full_name: 'Luis Paz', email: 'l@r.dev', is_active: true, role_id: 2, role_label: 'Mesero', created_at: '' }],
       total: 1,
     })
-  entrarComo(permissions)
-  return { api, ...montar(<HistoryView />, { path: '/tablero/historial' }) }
+  signInAs(permissions)
+  return { api, ...handleMount(<HistoryView />, { path: '/tablero/historial' }) }
 }
 
-function lastQuery(api: ReturnType<typeof servidor>) {
+function lastQuery(api: ReturnType<typeof server>) {
   return api.llamadas('get', ORDERS).at(-1)?.params
 }
 
@@ -88,7 +88,7 @@ describe('HistoryView', () => {
   })
 
   it('si el servidor falla muestra su mensaje', async () => {
-    history(new RespuestaDeError(500, 'Consulta muy pesada'))
+    history(new ErrorResponse(500, 'Consulta muy pesada'))
 
     expect(await screen.findByText('Consulta muy pesada')).toBeInTheDocument()
   })

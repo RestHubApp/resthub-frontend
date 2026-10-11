@@ -10,12 +10,12 @@ import type {
 } from '../../src/api/types'
 
 type Item = OrderResponse['items'][number]
-type Resumen = NonNullable<TableState['active_order']>
+type Summary = NonNullable<TableState['active_order']>
 
-const CREADO = '2026-09-26T17:00:00Z'
+const CREATED = '2026-09-26T17:00:00Z'
 const LOMO = 'Lomo saltado'
 
-export function itemDePedido(cambios: Partial<Item> = {}): Item {
+export function orderItem(changes: Partial<Item> = {}): Item {
   return {
     id: 101,
     menu_item_id: 11,
@@ -28,12 +28,12 @@ export function itemDePedido(cambios: Partial<Item> = {}): Item {
     is_courtesy: false,
     courtesy_reason: '',
     is_paid: false,
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
-export function pedido(cambios: Partial<OrderResponse> = {}): OrderResponse {
+export function order(changes: Partial<OrderResponse> = {}): OrderResponse {
   return {
     id: 5,
     number: 12,
@@ -49,7 +49,7 @@ export function pedido(cambios: Partial<OrderResponse> = {}): OrderResponse {
     delivery_address: '',
     delivery_reference: '',
     notes: '',
-    items: [itemDePedido()],
+    items: [orderItem()],
     item_count: 1,
     subtotal: '32.00',
     total: '32.00',
@@ -71,16 +71,16 @@ export function pedido(cambios: Partial<OrderResponse> = {}): OrderResponse {
     cancelled_at: null,
     paid_at: null,
     business_date: '2026-09-26',
-    created_at: CREADO,
-    updated_at: CREADO,
-    status_changed_at: CREADO,
+    created_at: CREATED,
+    updated_at: CREATED,
+    status_changed_at: CREATED,
     waiter_id: 7,
     waiter_name: 'Ana Torres',
-    ...cambios,
+    ...changes,
   }
 }
 
-export function resumenActivo(cambios: Partial<Resumen> = {}): Resumen {
+export function activeSummary(changes: Partial<Summary> = {}): Summary {
   return {
     id: 5,
     number: 12,
@@ -91,14 +91,14 @@ export function resumenActivo(cambios: Partial<Resumen> = {}): Resumen {
     balance: '64.00',
     waiter_id: 7,
     waiter_name: 'Ana Torres',
-    created_at: CREADO,
-    updated_at: CREADO,
-    status_changed_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    updated_at: CREATED,
+    status_changed_at: CREATED,
+    ...changes,
   }
 }
 
-export function mesa(cambios: Partial<TableState> = {}): TableState {
+export function table(changes: Partial<TableState> = {}): TableState {
   return {
     id: 3,
     label: '3',
@@ -107,12 +107,12 @@ export function mesa(cambios: Partial<TableState> = {}): TableState {
     status: 'free',
     status_label: 'Libre',
     active_order: null,
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
-export function plato(cambios: Partial<OrderMenuItem> = {}): OrderMenuItem {
+export function dish(changes: Partial<OrderMenuItem> = {}): OrderMenuItem {
   return {
     id: 11,
     category_id: 1,
@@ -124,32 +124,32 @@ export function plato(cambios: Partial<OrderMenuItem> = {}): OrderMenuItem {
     is_available: true,
     out_of_stock: false,
     modifier_groups: [],
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
-export function seccion(cambios: Partial<OrderMenuSection> = {}): OrderMenuSection {
-  return { id: 1, name: 'Fondos', position: 1, is_active: true, items: [plato()], created_at: CREADO, ...cambios }
+export function section(changes: Partial<OrderMenuSection> = {}): OrderMenuSection {
+  return { id: 1, name: 'Fondos', position: 1, is_active: true, items: [dish()], created_at: CREATED, ...changes }
 }
 
 /** Una carta con fondos, bebidas (con opciones en la chicha) y un plato agotado. */
-export function carta(): OrderMenu {
+export function handleMenu(): OrderMenu {
   return {
     categories: [
-      seccion({
+      section({
         items: [
-          plato(),
-          plato({ id: 12, name: 'Ají de gallina', price: '28.00', position: 2 }),
-          plato({ id: 13, name: 'Seco de cabrito', price: '35.00', position: 3, is_available: false }),
+          dish(),
+          dish({ id: 12, name: 'Ají de gallina', price: '28.00', position: 2 }),
+          dish({ id: 13, name: 'Seco de cabrito', price: '35.00', position: 3, is_available: false }),
         ],
       }),
-      seccion({
+      section({
         id: 2,
         name: 'Bebidas',
         position: 2,
         items: [
-          plato({
+          dish({
             id: 21,
             category_id: 2,
             name: 'Chicha morada',
@@ -181,7 +181,7 @@ export function carta(): OrderMenu {
   }
 }
 
-export function cliente(cambios: Partial<Customer> = {}): Customer {
+export function customer(changes: Partial<Customer> = {}): Customer {
   return {
     id: 40,
     name: 'Rosa Quispe',
@@ -194,17 +194,17 @@ export function cliente(cambios: Partial<Customer> = {}): Customer {
     visits: 4,
     spent: '240.00',
     average_ticket: '60.00',
-    last_visit: CREADO,
+    last_visit: CREATED,
     recent_orders: [],
-    created_at: CREADO,
-    consent_at: CREADO,
+    created_at: CREATED,
+    consent_at: CREATED,
     consent_version: '2026-10',
-    ...cambios,
+    ...changes,
   }
 }
 
 /** La lectura de la IA de una nota que menciona una alergia. */
-export function notaConAlergia(cambios: Partial<OrderNoteClassification> = {}): OrderNoteClassification {
+export function noteWithAllergy(changes: Partial<OrderNoteClassification> = {}): OrderNoteClassification {
   return {
     order_id: 5,
     order_item_id: 101,
@@ -218,12 +218,12 @@ export function notaConAlergia(cambios: Partial<OrderNoteClassification> = {}): 
     engine: 'jev',
     note_type: 'allergy',
     note_type_label: 'Alergia',
-    decided_at: CREADO,
-    ...cambios,
+    decided_at: CREATED,
+    ...changes,
   }
 }
 
 /** El cuerpo de la última petición con ese método y esa ruta. */
-export function ultimoCuerpo(peticiones: readonly { readonly body: unknown }[]): unknown {
-  return peticiones.at(-1)?.body
+export function lastBody(requests: readonly { readonly body: unknown }[]): unknown {
+  return requests.at(-1)?.body
 }

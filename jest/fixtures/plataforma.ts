@@ -28,20 +28,20 @@ import { RestaurantDetailView } from '../../src/features/platform/RestaurantDeta
 import { RestaurantsView } from '../../src/features/platform/RestaurantsView'
 import { setPlatformAuthToken } from '../../src/services/api'
 import { usePlatformSession } from '../../src/store/platformSession'
-import { montarRutas, type Montaje } from '../harness'
+import { mountRoutes, type Mount } from '../harness'
 
-const GRUPO_PEDIDOS = 'Pedidos'
-const TOMAR: PermissionCode = 'orders.take'
-const COBRAR: PermissionCode = 'orders.charge'
+const GROUP_ORDERS = 'Pedidos'
+const TAKE: PermissionCode = 'orders.take'
+const CHARGE: PermissionCode = 'orders.charge'
 
-export const CATALOGO: PermissionInfo[] = [
-  { code: TOMAR, group: GRUPO_PEDIDOS, label: 'Tomar pedidos' },
-  { code: COBRAR, group: GRUPO_PEDIDOS, label: 'Cobrar pedidos' },
+export const CATALOG: PermissionInfo[] = [
+  { code: TAKE, group: GROUP_ORDERS, label: 'Tomar pedidos' },
+  { code: CHARGE, group: GROUP_ORDERS, label: 'Cobrar pedidos' },
   { code: 'cash.manage', group: 'Caja', label: 'Abrir y cerrar la caja' },
   { code: 'insights.read', group: 'Panel', label: 'Ver el panel BI' },
 ]
 
-export function rol(cambios: Partial<Role> = {}): Role {
+export function role(changes: Partial<Role> = {}): Role {
   return {
     id: 5,
     name: 'Cocina',
@@ -49,31 +49,31 @@ export function rol(cambios: Partial<Role> = {}): Role {
     is_editable: true,
     is_deletable: true,
     member_count: 0,
-    permissions: [TOMAR],
-    ...cambios,
+    permissions: [TAKE],
+    ...changes,
   }
 }
 
-export const ROL_ENCARGADO = rol({
+export const ROLE_OWNER = role({
   id: 1,
   name: 'Encargado',
   kind: 'owner',
   is_editable: false,
   is_deletable: false,
   member_count: 1,
-  permissions: [TOMAR, COBRAR, 'cash.manage', 'insights.read'],
+  permissions: [TAKE, CHARGE, 'cash.manage', 'insights.read'],
 })
 
-export const ROL_MESERO = rol({
+export const ROLE_WAITER = role({
   id: 2,
   name: 'Mesero',
   kind: 'waiter',
   is_deletable: false,
   member_count: 3,
-  permissions: [TOMAR, COBRAR],
+  permissions: [TAKE, CHARGE],
 })
 
-export interface MiembroDePrueba {
+export interface TestMember {
   id: number
   full_name: string
   email: string
@@ -83,7 +83,7 @@ export interface MiembroDePrueba {
   created_at: string
 }
 
-export function miembro(cambios: Partial<MiembroDePrueba> = {}): MiembroDePrueba {
+export function member(changes: Partial<TestMember> = {}): TestMember {
   return {
     id: 8,
     full_name: 'Luis Quispe',
@@ -92,21 +92,21 @@ export function miembro(cambios: Partial<MiembroDePrueba> = {}): MiembroDePrueba
     role_label: 'Mesero',
     is_active: true,
     created_at: '2026-09-01T12:00:00Z',
-    ...cambios,
+    ...changes,
   }
 }
 
 /** La cuenta de quien mira (id 7 en el arnés), un mesero activo y una cocinera inactiva. */
-export const EQUIPO = [
-  miembro({ id: 7, full_name: 'Ana Torres', email: 'ana@resthub.dev', role_id: 1, role_label: 'Encargado' }),
-  miembro(),
-  miembro({ id: 9, full_name: 'Rosa Mamani', email: 'rosa@resthub.dev', role_id: 5, role_label: 'Cocina', is_active: false }),
+export const TEAM = [
+  member({ id: 7, full_name: 'Ana Torres', email: 'ana@resthub.dev', role_id: 1, role_label: 'Encargado' }),
+  member(),
+  member({ id: 9, full_name: 'Rosa Mamani', email: 'rosa@resthub.dev', role_id: 5, role_label: 'Cocina', is_active: false }),
 ]
 
 export const ADMIN: PlatformAdmin = { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' }
 
 /** Abre la sesión del administrador del sistema sin pasar por su acceso. */
-export function entrarAPlataforma(admin: PlatformAdmin = ADMIN): PlatformAdmin {
+export function signInToPlatform(admin: PlatformAdmin = ADMIN): PlatformAdmin {
   setPlatformAuthToken('token-de-plataforma')
   usePlatformSession.setState({ token: 'token-de-plataforma', admin, expired: false })
   return admin
@@ -118,7 +118,7 @@ afterEach(() => {
 })
 
 // Las mismas rutas que `src/router` arma para `/plataforma`, sin la carga perezosa.
-const RUTAS_DE_PLATAFORMA: RouteObject[] = [
+const PLATFORM_ROUTES: RouteObject[] = [
   {
     path: '/plataforma',
     element: createElement(PlatformShell),
@@ -139,11 +139,11 @@ const RUTAS_DE_PLATAFORMA: RouteObject[] = [
   },
 ]
 
-export function montarPlataforma(en = '/plataforma'): Montaje {
-  return montarRutas(RUTAS_DE_PLATAFORMA, en)
+export function mountPlatform(en = '/plataforma'): Mount {
+  return mountRoutes(PLATFORM_ROUTES, en)
 }
 
-export function resumenDeRestaurante(cambios: Partial<PlatformRestaurantSummary> = {}): PlatformRestaurantSummary {
+export function restaurantSummary(changes: Partial<PlatformRestaurantSummary> = {}): PlatformRestaurantSummary {
   return {
     id: 4,
     name: 'La Esquina de Lucho',
@@ -153,19 +153,19 @@ export function resumenDeRestaurante(cambios: Partial<PlatformRestaurantSummary>
     staff_count: 4,
     active_staff_count: 3,
     created_at: '2026-09-20T15:00:00Z',
-    ...cambios,
+    ...changes,
   }
 }
 
-export function fichaDeRestaurante(cambios: Partial<PlatformRestaurantDetail> = {}): PlatformRestaurantDetail {
+export function restaurantCard(changes: Partial<PlatformRestaurantDetail> = {}): PlatformRestaurantDetail {
   return {
-    ...resumenDeRestaurante(),
+    ...restaurantSummary(),
     owners: [{ id: 30, full_name: 'Lucho Ramos', email: 'lucho@esquina.pe', is_active: true }],
-    ...cambios,
+    ...changes,
   }
 }
 
-export function registroDeBitacora(cambios: Partial<PlatformActivityEntry> = {}): PlatformActivityEntry {
+export function logRecord(changes: Partial<PlatformActivityEntry> = {}): PlatformActivityEntry {
   return {
     id: 1,
     admin_id: 1,
@@ -174,17 +174,17 @@ export function registroDeBitacora(cambios: Partial<PlatformActivityEntry> = {})
     kind: 'restaurant.created',
     kind_label: 'Alta de restaurante',
     detail: 'La Esquina de Lucho',
-    ...cambios,
+    ...changes,
   }
 }
 
 /** Lo que responde cada lectura del panel de observabilidad, sin filtros. */
-export const RESUMEN_OBS: ObsSummary = {
+export const SUMMARY_OBS: ObsSummary = {
   window: '24h', requests: 1520, active_restaurants: 3, error_rate: 0.0125, errors_4xx: 12, errors_5xx: 7,
   p50_ms: 18, p95_ms: 52, p99_ms: 140, avg_db_ms: 6, dropped_events: 0, sampled: false,
 }
 
-export const SERIE_OBS = {
+export const SERIES_OBS = {
   bucket_seconds: 3600,
   sampled: false,
   points: [
@@ -193,28 +193,28 @@ export const SERIE_OBS = {
   ],
 }
 
-export const RUTAS_OBS = [
+export const ROUTES_OBS = [
   { method: 'GET', route: '/api/v1/orders', requests: 900, errors_5xx: 0, p50_ms: 12, p95_ms: 40, avg_db_ms: 4, sampled: false },
   { method: 'POST', route: '/api/v1/orders/{order_id}/pay', requests: 120, errors_5xx: 5, p50_ms: 30, p95_ms: 90, avg_db_ms: 9, sampled: true },
 ]
 
-export const ESTADOS_OBS = [
+export const STATUSES_OBS = [
   { status: 200, count: 1480 },
   { status: 404, count: 33 },
   { status: 500, count: 7 },
 ]
 
-export function logObs(cambios: Partial<ObsLogEntry> = {}): ObsLogEntry {
+export function logObs(changes: Partial<ObsLogEntry> = {}): ObsLogEntry {
   return {
     id: 50, at: '2026-09-26T14:10:00Z', level: 'error', event: 'payment.failed', logger: 'resthub.orders',
-    has_traceback: true, request_id: 'req-abc', restaurant_id: 4, ...cambios,
+    has_traceback: true, request_id: 'req-abc', restaurant_id: 4, ...changes,
   }
 }
 
-export function peticionObs(cambios: Partial<ObsRequestEntry> = {}): ObsRequestEntry {
+export function requestObs(changes: Partial<ObsRequestEntry> = {}): ObsRequestEntry {
   return {
     id: 80, at: '2026-09-26T14:10:00Z', method: 'POST', route: '/api/v1/orders/{order_id}/pay', status: 500,
     duration_ms: 95, db_ms: 12, db_queries: 3, account_kind: 'staff', account_id: 7, restaurant_id: 4,
-    request_id: 'req-abc', ...cambios,
+    request_id: 'req-abc', ...changes,
   }
 }

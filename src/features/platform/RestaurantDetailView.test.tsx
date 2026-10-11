@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { entrarAPlataforma, fichaDeRestaurante, montarPlataforma } from '#jest/fixtures/plataforma'
-import { RespuestaDeError, servidor } from '#jest/harness'
+import { signInToPlatform, restaurantCard, mountPlatform } from '#jest/fixtures/plataforma'
+import { ErrorResponse, server } from '#jest/harness'
 import type { PlatformRestaurantDetail } from '@/api/types'
 
 const LA_ESQUINA = 'La Esquina'
@@ -15,16 +15,16 @@ const SECRET_SAFE_1 = 'clave-segura-1'
 const CARD = '/platform/restaurants/4'
 const SAVE = { name: 'Guardar cambios' }
 
-function openCard(initial: PlatformRestaurantDetail | RespuestaDeError = fichaDeRestaurante()) {
+function openCard(initial: PlatformRestaurantDetail | ErrorResponse = restaurantCard()) {
   // Como el servidor: lo que se guarda es lo que devuelve la ficha al releerla.
   let actual = initial
   const save = (card: PlatformRestaurantDetail) => {
     actual = card
     return card
   }
-  const api = servidor().on('get', CARD, () => (actual instanceof RespuestaDeError ? actual : { ...actual }))
-  entrarAPlataforma()
-  return { api, guardar: save, ...montarPlataforma('/plataforma/restaurantes/4') }
+  const api = server().on('get', CARD, () => (actual instanceof ErrorResponse ? actual : { ...actual }))
+  signInToPlatform()
+  return { api, guardar: save, ...mountPlatform('/plataforma/restaurantes/4') }
 }
 
 describe('RestaurantDetailView', () => {
@@ -39,7 +39,7 @@ describe('RestaurantDetailView', () => {
 
   it('guarda solo el campo que se cambió y muestra lo que devolvió el servidor', async () => {
     const { api, guardar: save, user } = openCard()
-    api.on('patch', CARD, () => save(fichaDeRestaurante({ name: LA_ESQUINA })))
+    api.on('patch', CARD, () => save(restaurantCard({ name: LA_ESQUINA })))
     const name = await screen.findByLabelText('Nombre')
     expect(screen.getByRole('button', SAVE)).toBeDisabled()
 
@@ -54,7 +54,7 @@ describe('RestaurantDetailView', () => {
 
   it('cambiar la zona horaria manda solo la zona', async () => {
     const { api, guardar: save, user } = openCard()
-    api.on('patch', CARD, () => save(fichaDeRestaurante({ timezone: AMERICA_BOGOTA })))
+    api.on('patch', CARD, () => save(restaurantCard({ timezone: AMERICA_BOGOTA })))
 
     await user.selectOptions(await screen.findByRole('combobox', { name: 'Zona horaria' }), AMERICA_BOGOTA)
     await user.click(screen.getByRole('button', SAVE))
@@ -65,7 +65,7 @@ describe('RestaurantDetailView', () => {
 
   it('desactivar se confirma explicando cuántas cuentas pierden el acceso', async () => {
     const { api, guardar: save, user } = openCard()
-    api.on('patch', CARD, () => save(fichaDeRestaurante({ is_active: false })))
+    api.on('patch', CARD, () => save(restaurantCard({ is_active: false })))
 
     await user.click(await screen.findByRole('button', { name: 'Desactivar restaurante' }))
     const notice = await screen.findByRole('alertdialog', { name: '¿Desactivar La Esquina de Lucho?' })
@@ -78,8 +78,8 @@ describe('RestaurantDetailView', () => {
   })
 
   it('activar un local desactivado va directo', async () => {
-    const { api, guardar: save, user } = openCard(fichaDeRestaurante({ is_active: false }))
-    api.on('patch', CARD, () => save(fichaDeRestaurante()))
+    const { api, guardar: save, user } = openCard(restaurantCard({ is_active: false }))
+    api.on('patch', CARD, () => save(restaurantCard()))
 
     await user.click(await screen.findByRole('button', { name: 'Activar restaurante' }))
 
@@ -93,7 +93,7 @@ describe('RestaurantDetailView: encargados y errores', () => {
     const { api, guardar: save, user } = openCard()
     const marta = { id: 31, full_name: MARTA_RIOS, email: MARTA_ESQUINA_PE, is_active: true }
     api.on('post', `${CARD}/owners`, () => {
-      const card = fichaDeRestaurante()
+      const card = restaurantCard()
       save({ ...card, owners: [...card.owners, marta] })
       return marta
     })
@@ -115,8 +115,8 @@ describe('RestaurantDetailView: encargados y errores', () => {
   })
 
   it('un correo ya usado lo rechaza el servidor dentro de la ventana', async () => {
-    const { api, user } = openCard(fichaDeRestaurante({ owners: [] }))
-    api.on('post', `${CARD}/owners`, new RespuestaDeError(409, 'Ese correo ya tiene una cuenta.'))
+    const { api, user } = openCard(restaurantCard({ owners: [] }))
+    api.on('post', `${CARD}/owners`, new ErrorResponse(409, 'Ese correo ya tiene una cuenta.'))
 
     expect(await screen.findByText('Este restaurante no tiene encargados.')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: ADD_OWNER }))
@@ -130,22 +130,22 @@ describe('RestaurantDetailView: encargados y errores', () => {
   })
 
   it('un restaurante que no existe se muestra como «no existe»', async () => {
-    openCard(new RespuestaDeError(404, 'No existe'))
+    openCard(new ErrorResponse(404, 'No existe'))
 
     expect(await screen.findByText('Este restaurante no existe.')).toBeInTheDocument()
   })
 
   it('un identificador inválido en la dirección no llega al servidor', async () => {
-    const api = servidor()
-    entrarAPlataforma()
-    montarPlataforma('/plataforma/restaurantes/abc')
+    const api = server()
+    signInToPlatform()
+    mountPlatform('/plataforma/restaurantes/abc')
 
     expect(await screen.findByText('Este restaurante no existe.')).toBeInTheDocument()
     expect(api.peticiones.filter((p) => p.url.startsWith('/platform/restaurants/'))).toHaveLength(0)
   })
 
   it('otro error se puede reintentar', async () => {
-    openCard(new RespuestaDeError(500, 'Servidor caído'))
+    openCard(new ErrorResponse(500, 'Servidor caído'))
 
     expect(await screen.findByText('Servidor caído')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument()

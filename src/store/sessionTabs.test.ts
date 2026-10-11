@@ -5,7 +5,7 @@
 // carga su propio almacén (módulos nuevos) sobre el mismo `localStorage`.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { unstubAllGlobals } from '#jest/globals'
-import { type AlmacenDePrueba, avisar, fakeStorage, guardado, nuevaPestana, tokenQueVence } from '#jest/pestanas'
+import { type TestStorage, notify, fakeStorage, handleSaved, newTab, tokenThatExpires } from '#jest/pestanas'
 
 import type { CurrentUserResponse } from '@/api/types'
 
@@ -22,15 +22,15 @@ function account(userId: number, changes: Partial<CurrentUserResponse> = {}): Cu
   } as unknown as CurrentUserResponse
 }
 
-async function openTab(local: AlmacenDePrueba, route = '/') {
-  const { ventana: window, pestana: tab } = nuevaPestana(local, route)
+async function openTab(local: TestStorage, route = '/') {
+  const { ventana: window, pestana: tab } = newTab(local, route)
   const { useSession } = await import('./session')
   const { currentAuthToken } = await import('@/services/api')
   return { ventana: window, pestana: tab, useSession, currentAuthToken }
 }
 
-function saved(local: AlmacenDePrueba) {
-  return guardado(local, SECRET) as { token: string; account: CurrentUserResponse } | null
+function saved(local: TestStorage) {
+  return handleSaved(local, SECRET) as { token: string; account: CurrentUserResponse } | null
 }
 
 beforeEach(() => {
@@ -49,16 +49,16 @@ describe('sesión de restaurante entre pestañas', () => {
   // B y la siguiente recarga dejaba a B operando como A.
   it('una pestaña que no se enteró del cierre no pisa la sesión de la otra cuenta al renovar', async () => {
     const local = fakeStorage()
-    const tokenA = tokenQueVence(3600, 'a')
+    const tokenA = tokenThatExpires(3600, 'a')
     const one = await openTab(local)
     one.useSession.getState().signIn(tokenA, account(1))
     const two = await openTab(local)
     expect(two.useSession.getState().token).toBe(tokenA)
 
     one.useSession.getState().signOut()
-    const tokenB = tokenQueVence(3600, 'b')
+    const tokenB = tokenThatExpires(3600, 'b')
     one.useSession.getState().signIn(tokenB, account(2))
-    two.useSession.getState().renew(tokenA, tokenQueVence(7200, 'a2'), account(1))
+    two.useSession.getState().renew(tokenA, tokenThatExpires(7200, 'a2'), account(1))
 
     expect(saved(local)).toEqual({ token: tokenB, account: account(2) })
     // La pestaña vieja deja de ser A.
@@ -71,7 +71,7 @@ describe('sesión de restaurante entre pestañas', () => {
 
   it('una pestaña que no se enteró del cierre no lo revierte al releer la cuenta', async () => {
     const local = fakeStorage()
-    const tokenA = tokenQueVence(3600, 'a')
+    const tokenA = tokenThatExpires(3600, 'a')
     const one = await openTab(local)
     one.useSession.getState().signIn(tokenA, account(1))
     const two = await openTab(local)
@@ -89,11 +89,11 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
   it('cerrar sesión en una pestaña la cierra en las demás', async () => {
     const local = fakeStorage()
     const one = await openTab(local)
-    one.useSession.getState().signIn(tokenQueVence(3600), account(1))
+    one.useSession.getState().signIn(tokenThatExpires(3600), account(1))
     const two = await openTab(local)
 
     one.useSession.getState().signOut()
-    avisar(two.ventana, local, SECRET)
+    notify(two.ventana, local, SECRET)
 
     expect(two.useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
     expect(two.currentAuthToken()).toBeNull()
@@ -102,13 +102,13 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
   it('si entra otra cuenta en otra pestaña, esta cierra la suya sin borrar la nueva', async () => {
     const local = fakeStorage()
     const one = await openTab(local)
-    one.useSession.getState().signIn(tokenQueVence(3600, 'a'), account(1))
+    one.useSession.getState().signIn(tokenThatExpires(3600, 'a'), account(1))
     const two = await openTab(local)
-    const tokenB = tokenQueVence(3600, 'b')
+    const tokenB = tokenThatExpires(3600, 'b')
 
     // Entrar como B sin pasar por «Cerrar sesión» (otra ventana de la PWA).
     one.useSession.getState().signIn(tokenB, account(2))
-    avisar(two.ventana, local, SECRET)
+    notify(two.ventana, local, SECRET)
 
     expect(two.useSession.getState().token).toBeNull()
     expect(saved(local)).toEqual({ token: tokenB, account: account(2) })
@@ -116,34 +116,34 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
 
   it('adopta el token que renovó otra pestaña de la misma cuenta', async () => {
     const local = fakeStorage()
-    const old = tokenQueVence(3600, 'a')
+    const old = tokenThatExpires(3600, 'a')
     const one = await openTab(local)
     one.useSession.getState().signIn(old, account(1))
     const two = await openTab(local)
-    const fresh = tokenQueVence(7200, 'a2')
+    const fresh = tokenThatExpires(7200, 'a2')
 
     one.useSession.getState().renew(old, fresh, account(1))
-    avisar(two.ventana, local, SECRET)
+    notify(two.ventana, local, SECRET)
 
     expect(two.useSession.getState()).toMatchObject({ token: fresh, account: account(1) })
     expect(two.currentAuthToken()).toBe(fresh)
     // Si su propia renovación llega tarde, ya no es la sesión de esa respuesta.
-    two.useSession.getState().renew(old, tokenQueVence(7300, 'tarde'), account(1))
+    two.useSession.getState().renew(old, tokenThatExpires(7300, 'tarde'), account(1))
     expect(saved(local)?.token).toBe(fresh)
   })
 
   it('tras cambiar la contraseña, la otra pestaña adopta el token nuevo y no se queda con el revocado', async () => {
     const local = fakeStorage()
-    const old = tokenQueVence(3600, 'a')
+    const old = tokenThatExpires(3600, 'a')
     const one = await openTab(local)
     one.useSession.getState().signIn(old, account(1))
     const two = await openTab(local)
-    const fresh = tokenQueVence(3600, 'clave-nueva')
+    const fresh = tokenThatExpires(3600, 'clave-nueva')
 
     // La pestaña que cambia la clave renueva con el token de la respuesta.
     one.useSession.getState().renew(old, fresh, account(1))
     expect(saved(local)?.token).toBe(fresh)
-    avisar(two.ventana, local, SECRET)
+    notify(two.ventana, local, SECRET)
 
     expect(two.useSession.getState()).toMatchObject({ token: fresh, account: account(1) })
     expect(two.currentAuthToken()).toBe(fresh)
@@ -151,14 +151,14 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
 
   it('si otra pestaña ya renovó y esta no se enteró, adopta lo guardado en vez de pisarlo', async () => {
     const local = fakeStorage()
-    const old = tokenQueVence(3600, 'a')
+    const old = tokenThatExpires(3600, 'a')
     const one = await openTab(local)
     one.useSession.getState().signIn(old, account(1))
     const two = await openTab(local)
-    const fresh = tokenQueVence(7200, 'a2')
+    const fresh = tokenThatExpires(7200, 'a2')
 
     one.useSession.getState().renew(old, fresh, account(1))
-    two.useSession.getState().renew(old, tokenQueVence(7300, 'a3'), account(1))
+    two.useSession.getState().renew(old, tokenThatExpires(7300, 'a3'), account(1))
 
     expect(saved(local)?.token).toBe(fresh)
     expect(two.useSession.getState()).toMatchObject({ token: fresh, account: account(1) })
@@ -171,10 +171,10 @@ describe('sesión de restaurante: casos de borde', () => {
     const local = fakeStorage()
     const one = await openTab(local)
     const two = await openTab(local)
-    const token = tokenQueVence(3600)
+    const token = tokenThatExpires(3600)
 
     one.useSession.getState().signIn(token, account(1))
-    avisar(two.ventana, local, SECRET)
+    notify(two.ventana, local, SECRET)
 
     expect(two.useSession.getState()).toMatchObject({ token, account: account(1), expired: false })
   })
@@ -182,25 +182,25 @@ describe('sesión de restaurante: casos de borde', () => {
   it('vaciar todo el almacenamiento (key null) también cierra la sesión', async () => {
     const local = fakeStorage()
     const one = await openTab(local)
-    one.useSession.getState().signIn(tokenQueVence(3600), account(1))
+    one.useSession.getState().signIn(tokenThatExpires(3600), account(1))
     const two = await openTab(local)
 
     local.datos.clear()
-    avisar(two.ventana, local, null)
+    notify(two.ventana, local, null)
 
     expect(two.useSession.getState().token).toBeNull()
   })
 
   it('ignora los cambios de otras claves y de otro almacenamiento', async () => {
     const local = fakeStorage()
-    const token = tokenQueVence(3600)
+    const token = tokenThatExpires(3600)
     const one = await openTab(local)
     one.useSession.getState().signIn(token, account(1))
     const two = await openTab(local)
 
     local.datos.delete(SECRET)
-    avisar(two.ventana, local, 'resthub.pedidos-sin-enviar.v2')
-    avisar(two.ventana, fakeStorage(), SECRET)
+    notify(two.ventana, local, 'resthub.pedidos-sin-enviar.v2')
+    notify(two.ventana, fakeStorage(), SECRET)
 
     expect(two.useSession.getState().token).toBe(token)
   })
@@ -208,14 +208,14 @@ describe('sesión de restaurante: casos de borde', () => {
   it('una pestaña de vista previa no se entera ni se cierra por la sesión real del navegador', async () => {
     const local = fakeStorage()
     const real = await openTab(local)
-    real.useSession.getState().signIn(tokenQueVence(3600, 'real'), account(1))
+    real.useSession.getState().signIn(tokenThatExpires(3600, 'real'), account(1))
     const preview = await openTab(local, '/vista-previa')
-    const previewToken = tokenQueVence(1800, 'previa')
+    const previewToken = tokenThatExpires(1800, 'previa')
     preview.useSession.getState().startPreview(previewToken, account(9, { preview: true }))
 
     real.useSession.getState().signOut()
-    avisar(preview.ventana, local, SECRET)
-    const renewed = tokenQueVence(3600, 'previa2')
+    notify(preview.ventana, local, SECRET)
+    const renewed = tokenThatExpires(3600, 'previa2')
     preview.useSession.getState().renew(previewToken, renewed, account(9, { preview: true }))
 
     expect(preview.useSession.getState().token).toBe(renewed)
@@ -227,13 +227,13 @@ describe('sesión de restaurante: casos de borde', () => {
   it('sin almacenamiento la renovación sigue funcionando en la pestaña', async () => {
     const local = fakeStorage()
     const tab = await openTab(local)
-    const old = tokenQueVence(3600, 'a')
+    const old = tokenThatExpires(3600, 'a')
     tab.useSession.getState().signIn(old, account(1))
     // El navegador empieza a rechazar el almacenamiento (p. ej. se llenó).
     local.getItem = () => {
       throw new Error('bloqueado')
     }
-    const fresh = tokenQueVence(7200, 'a2')
+    const fresh = tokenThatExpires(7200, 'a2')
 
     tab.useSession.getState().renew(old, fresh, account(1))
 

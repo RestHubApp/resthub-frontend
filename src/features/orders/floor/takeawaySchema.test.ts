@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { cliente } from '#jest/fixtures/pedidos'
+import { customer } from '#jest/fixtures/pedidos'
 import { EMPTY_TAKEAWAY, fromCustomer, newOrderPath, takeawaySchema } from './takeawaySchema'
 
 describe('takeawaySchema', () => {
@@ -26,7 +26,7 @@ describe('newOrderPath', () => {
   })
 
   it('un delivery de la libreta lleva el id del cliente y sus datos de entrega', () => {
-    const route = newOrderPath(fromCustomer(cliente(), 'delivery'))
+    const route = newOrderPath(fromCustomer(customer(), 'delivery'))
     const params = new URL(route, 'http://localhost').searchParams
     expect(Object.fromEntries(params)).toEqual({
       tipo: 'delivery',

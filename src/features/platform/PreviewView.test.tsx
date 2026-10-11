@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { entrarAPlataforma, montarPlataforma, registroDeBitacora, resumenDeRestaurante } from '#jest/fixtures/plataforma'
-import { RespuestaDeError, servidor } from '#jest/harness'
+import { signInToPlatform, mountPlatform, logRecord, restaurantSummary } from '#jest/fixtures/plataforma'
+import { ErrorResponse, server } from '#jest/harness'
 
 const PLATFORM_ACTIVITY = '/platform/activity'
 
 const SAMPLE = '/platform/sandbox'
 const PREVIEW = '/platform/preview'
 const RESET = { name: 'Reiniciar local de muestra' }
-const LOCAL = { restaurant: resumenDeRestaurante({ id: 99, name: 'Muestra RestHub', slug: 'muestra' }), accounts: [
+const LOCAL = { restaurant: restaurantSummary({ id: 99, name: 'Muestra RestHub', slug: 'muestra' }), accounts: [
   { full_name: 'Encargada de muestra', kind: 'owner' as const, role_label: 'Encargado' },
   { full_name: 'Mesero de muestra', kind: 'waiter' as const, role_label: 'Mesero' },
 ] }
@@ -25,9 +25,9 @@ afterEach(() => {
 })
 
 function openPreview(sample: unknown = LOCAL) {
-  const api = servidor().on('get', SAMPLE, sample)
-  entrarAPlataforma()
-  return { api, ...montarPlataforma('/plataforma/vista-previa') }
+  const api = server().on('get', SAMPLE, sample)
+  signInToPlatform()
+  return { api, ...mountPlatform('/plataforma/vista-previa') }
 }
 
 describe('PreviewView', () => {
@@ -62,7 +62,7 @@ describe('PreviewView', () => {
 
   it('si al local le falta esa cuenta (409), ofrece reiniciarlo', async () => {
     const { api, user } = openPreview()
-    api.on('post', PREVIEW, new RespuestaDeError(409, 'El local de muestra no tiene un mesero activo.'))
+    api.on('post', PREVIEW, new ErrorResponse(409, 'El local de muestra no tiene un mesero activo.'))
 
     await user.click(await screen.findByRole('button', { name: 'Ver como mesero' }))
 
@@ -87,7 +87,7 @@ describe('PreviewView', () => {
   })
 
   it('si no se puede leer el local de muestra, deja reintentar', async () => {
-    openPreview(new RespuestaDeError(500, 'Servidor caído'))
+    openPreview(new ErrorResponse(500, 'Servidor caído'))
 
     expect(await screen.findByText('Servidor caído')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument()
@@ -96,9 +96,9 @@ describe('PreviewView', () => {
 
 describe('ActivityView', () => {
   it('lista lo que hizo cada administrador, en horas de Lima', async () => {
-    servidor().on('get', PLATFORM_ACTIVITY, { items: [registroDeBitacora()], total: 1 })
-    entrarAPlataforma()
-    montarPlataforma('/plataforma/bitacora')
+    server().on('get', PLATFORM_ACTIVITY, { items: [logRecord()], total: 1 })
+    signInToPlatform()
+    mountPlatform('/plataforma/bitacora')
 
     const row = await screen.findByRole('row', { name: /Alta de restaurante/u })
     expect(within(row).getByText('Equipo RestHub')).toBeInTheDocument()
@@ -107,9 +107,9 @@ describe('ActivityView', () => {
   })
 
   it('sin registros lo dice y un error se puede reintentar', async () => {
-    const api = servidor().on('get', PLATFORM_ACTIVITY, new RespuestaDeError(500, 'Bitácora caída'))
-    entrarAPlataforma()
-    const { user } = montarPlataforma('/plataforma/bitacora')
+    const api = server().on('get', PLATFORM_ACTIVITY, new ErrorResponse(500, 'Bitácora caída'))
+    signInToPlatform()
+    const { user } = mountPlatform('/plataforma/bitacora')
 
     expect(await screen.findByText('Bitácora caída')).toBeInTheDocument()
     api.on('get', PLATFORM_ACTIVITY, { items: [], total: 0 })

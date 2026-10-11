@@ -8,9 +8,9 @@ import type {
   TableState,
 } from '../../src/api/types'
 
-const CREADO = '2026-09-26T17:00:00Z'
+const CREATED = '2026-09-26T17:00:00Z'
 
-export function plato(cambios: Partial<OrderItemResponse> = {}): OrderItemResponse {
+export function dish(changes: Partial<OrderItemResponse> = {}): OrderItemResponse {
   return {
     id: 1,
     menu_item_id: 10,
@@ -23,30 +23,30 @@ export function plato(cambios: Partial<OrderItemResponse> = {}): OrderItemRespon
     is_courtesy: false,
     courtesy_reason: '',
     is_paid: false,
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
-export function pago(cambios: Partial<PaymentResponse> = {}): PaymentResponse {
+export function payment(changes: Partial<PaymentResponse> = {}): PaymentResponse {
   return {
     id: 50,
     amount: '30.00',
     amount_received: null,
     change: null,
-    created_at: CREADO,
+    created_at: CREATED,
     item_ids: [],
     method: 'yape',
     method_label: 'Yape',
     received_by: 7,
     received_by_name: 'Ana Torres',
     tip: '0.00',
-    ...cambios,
+    ...changes,
   }
 }
 
 /** Un pedido en mesa servido y por cobrar: dos platos de S/ 30 y S/ 20. */
-export function pedido(cambios: Partial<OrderResponse> = {}): OrderResponse {
+export function handleOrder(changes: Partial<OrderResponse> = {}): OrderResponse {
   return {
     id: 12,
     number: 34,
@@ -64,7 +64,7 @@ export function pedido(cambios: Partial<OrderResponse> = {}): OrderResponse {
     delivery_address: '',
     delivery_reference: '',
     notes: '',
-    items: [plato(), plato({ id: 2, menu_item_id: 11, name: 'Chicha morada', unit_price: '20.00', subtotal: '20.00' })],
+    items: [dish(), dish({ id: 2, menu_item_id: 11, name: 'Chicha morada', unit_price: '20.00', subtotal: '20.00' })],
     item_count: 2,
     subtotal: '50.00',
     courtesy_amount: '0.00',
@@ -86,31 +86,31 @@ export function pedido(cambios: Partial<OrderResponse> = {}): OrderResponse {
     cancel_reason: '',
     merged_into_id: null,
     business_date: '2026-09-26',
-    created_at: CREADO,
-    updated_at: CREADO,
-    status_changed_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    updated_at: CREATED,
+    status_changed_at: CREATED,
+    ...changes,
   }
 }
 
 /** El pedido después de cobrarse entero con ese pago. */
-export function pagado(base: OrderResponse, ultimo: PaymentResponse): OrderResponse {
+export function paid(base: OrderResponse, last: PaymentResponse): OrderResponse {
   return {
     ...base,
     status: 'paid',
     status_label: 'Pagado',
-    payments: [...base.payments, ultimo],
+    payments: [...base.payments, last],
     paid_amount: base.total,
     balance: '0.00',
-    payment_method: ultimo.method,
-    payment_method_label: ultimo.method_label,
-    amount_received: ultimo.amount_received,
-    change: ultimo.change,
-    paid_at: CREADO,
+    payment_method: last.method,
+    payment_method_label: last.method_label,
+    amount_received: last.amount_received,
+    change: last.change,
+    paid_at: CREATED,
   }
 }
 
-export function mesa(cambios: Partial<TableState> = {}): TableState {
+export function table(changes: Partial<TableState> = {}): TableState {
   return {
     id: 4,
     label: '4',
@@ -119,12 +119,12 @@ export function mesa(cambios: Partial<TableState> = {}): TableState {
     status: 'free',
     status_label: 'Libre',
     active_order: null,
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
-export function comprobante(cambios: Partial<Invoice> = {}): Invoice {
+export function invoice(changes: Partial<Invoice> = {}): Invoice {
   return {
     id: 90,
     order_id: 12,
@@ -147,7 +147,7 @@ export function comprobante(cambios: Partial<Invoice> = {}): Invoice {
     lines: [],
     pdf_url: '',
     provider_message: '',
-    issued_at: CREADO,
-    ...cambios,
+    issued_at: CREATED,
+    ...changes,
   }
 }

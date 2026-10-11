@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { celda } from '#jest/fixtures/panel'
-import { entrarComo, PERMISOS_MESERO, servidor } from '#jest/harness'
+import { cell } from '#jest/fixtures/panel'
+import { signInAs, PERMISSIONS_WAITER, server } from '#jest/harness'
 import { queryClient } from '@/services/queryClient'
 import { heatColor, heatmapModel, heatStep } from './charts/heatmapModel'
 import { addDays, customRangeProblem, daysBetween, isRangePreset, MAX_RANGE_DAYS, presetRange } from './dateRange'
@@ -45,7 +45,7 @@ describe('rangos del panel', () => {
 describe('mapa de calor', () => {
   it('recorta las horas sin ventas y ordena los días de lunes a domingo', () => {
     // El API manda la semana completa (7 × 24 celdas); aquí basta con una parte.
-    const model = heatmapModel([celda(6, 12, 0), celda(6, 15, 0), celda(2, 13, 4), celda(0, 20, 2), celda(0, 9, 0), celda(2, 20, 8)])
+    const model = heatmapModel([cell(6, 12, 0), cell(6, 15, 0), cell(2, 13, 4), cell(0, 20, 2), cell(0, 9, 0), cell(2, 20, 8)])
     expect(model.hours).toEqual([13, 14, 15, 16, 17, 18, 19, 20])
     expect(model.rows.map((row) => row.label)).toEqual(['Lunes', 'Miércoles', 'Domingo'])
     expect(model.rows[1]?.cells.map((c) => c.hour)).toEqual([13, 20])
@@ -53,7 +53,7 @@ describe('mapa de calor', () => {
   })
 
   it('sin pedidos no hay horas ni filas', () => {
-    expect(heatmapModel([celda(0, 12, 0)])).toEqual({ hours: [], rows: [], max: 0 })
+    expect(heatmapModel([cell(0, 12, 0)])).toEqual({ hours: [], rows: [], max: 0 })
   })
 
   it('reparte los valores en cinco escalones y el cero va en gris', () => {
@@ -66,8 +66,8 @@ describe('mapa de calor', () => {
 
 describe('prefetchInsights', () => {
   it('el encargado adelanta el resumen de los últimos 30 días', async () => {
-    const api = servidor().on('get', '/insights/summary', {})
-    entrarComo()
+    const api = server().on('get', '/insights/summary', {})
+    signInAs()
     prefetchInsights()
     await queryClient.getQueryCache().findAll({ queryKey: ['insights', 'summary'] })[0]?.promise
     expect(api.llamadas('get', '/insights/summary')).toHaveLength(1)
@@ -76,8 +76,8 @@ describe('prefetchInsights', () => {
   })
 
   it('sin permiso del panel no pide nada', () => {
-    const api = servidor()
-    entrarComo(PERMISOS_MESERO)
+    const api = server()
+    signInAs(PERMISSIONS_WAITER)
     prefetchInsights()
     expect(api.peticiones).toHaveLength(0)
   })

@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook } from '@testing-library/react'
 
-import { carta, plato, seccion } from '#jest/fixtures/pedidos'
+import { handleMenu, dish, section } from '#jest/fixtures/pedidos'
 import { cartTotals } from './cartTotals'
 import { visibleSections } from './menuFilter'
 import { lineKeyFor, MAX_QUANTITY, toNewItems, useDraftActions, useDraftLines } from './useOrderDraft'
 
 const PASSWORD = 'mesa-3'
-const LOMO = plato()
+const LOMO = dish()
 const JUG = { group: 'Tamaño', option: 'Jarra', price: '12.00' }
 const LIMON = { group: 'Extras', option: 'Limón', price: '0.50' }
 
@@ -34,7 +34,7 @@ describe('lineKeyFor', () => {
 describe('borrador del pedido', () => {
   it('tocar dos veces un plato suma uno, y las opciones hacen otra línea con su precio', () => {
     const { result } = draft()
-    const chicha = plato({ id: 21, name: 'Chicha morada', price: '8.00' })
+    const chicha = dish({ id: 21, name: 'Chicha morada', price: '8.00' })
     act(() => {
       result.current.add(PASSWORD, LOMO)
       result.current.add(PASSWORD, LOMO)
@@ -79,7 +79,7 @@ describe('borrador del pedido', () => {
   it('al API viajan solo el grupo y la opción de cada extra', () => {
     const { result } = draft()
     act(() => {
-      result.current.add(PASSWORD, plato({ id: 21 }), [JUG])
+      result.current.add(PASSWORD, dish({ id: 21 }), [JUG])
     })
     expect(toNewItems(result.current.lines)[0]?.modifiers).toEqual([{ group: 'Tamaño', option: 'Jarra' }])
   })
@@ -89,9 +89,9 @@ describe('cartTotals', () => {
   it('suma platos y soles en centavos', () => {
     const { result } = draft()
     act(() => {
-      result.current.add(PASSWORD, plato({ price: '10.10' }))
+      result.current.add(PASSWORD, dish({ price: '10.10' }))
       result.current.setQuantity(PASSWORD, '11', 3)
-      result.current.add(PASSWORD, plato({ id: 12, price: '0.20' }))
+      result.current.add(PASSWORD, dish({ id: 12, price: '0.20' }))
     })
     const { platos: dishes, count, total } = cartTotals(result.current.lines)
     expect([dishes, count]).toEqual([4, '4 platos'])
@@ -101,7 +101,7 @@ describe('cartTotals', () => {
 })
 
 describe('visibleSections', () => {
-  const sections = carta().categories
+  const sections = handleMenu().categories
 
   it('sin búsqueda muestra la categoría elegida, o la carta entera', () => {
     expect(visibleSections(sections, '', null).map((s) => s.name)).toEqual(['Fondos', 'Bebidas'])
@@ -116,8 +116,8 @@ describe('visibleSections', () => {
 
   it('no muestra categorías ni platos inactivos, ni secciones que quedan vacías', () => {
     const withInactive = [
-      seccion({ id: 3, name: 'Postres', is_active: false }),
-      seccion({ id: 4, name: 'Entradas', items: [plato({ is_active: false })] }),
+      section({ id: 3, name: 'Postres', is_active: false }),
+      section({ id: 4, name: 'Entradas', items: [dish({ is_active: false })] }),
       ...sections,
     ]
     expect(visibleSections(withInactive, '', null).map((s) => s.name)).toEqual(['Fondos', 'Bebidas'])

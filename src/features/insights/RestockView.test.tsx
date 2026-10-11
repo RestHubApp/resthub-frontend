@@ -1,16 +1,16 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { insumoARevisar, reposicion } from '#jest/fixtures/indicadores'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { ingredientToReview, restock } from '#jest/fixtures/indicadores'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import type { RestockReport } from '@/api/types'
 import { RestockView } from './RestockView'
 
 const ROUTE = '/insights/restock'
 const UPDATE = { name: 'Actualizar recomendaciones' }
 
-const LIMON = insumoARevisar()
-const ARROZ = insumoARevisar({
+const LIMON = ingredientToReview()
+const ARROZ = ingredientToReview({
   ingredient_id: 2,
   name: 'Arroz',
   action: 'wait',
@@ -27,12 +27,12 @@ const ARROZ = insumoARevisar({
   fallback_reason: 'unavailable',
   fallback_label: 'Jev no respondió a tiempo',
 })
-const PAPA = insumoARevisar({ ingredient_id: 3, name: 'Papa', action: 'buy_this_week', action_label: 'Comprar esta semana', urgency_score: 50 })
+const PAPA = ingredientToReview({ ingredient_id: 3, name: 'Papa', action: 'buy_this_week', action_label: 'Comprar esta semana', urgency_score: 50 })
 
-function open(report: RestockReport | RespuestaDeError = reposicion([ARROZ, PAPA, LIMON])) {
-  const api = servidor().on('get', ROUTE, report)
-  entrarComo()
-  return { api, ...montar(<RestockView />, { path: '/panel/reposicion' }) }
+function open(report: RestockReport | ErrorResponse = restock([ARROZ, PAPA, LIMON])) {
+  const api = server().on('get', ROUTE, report)
+  signInAs()
+  return { api, ...handleMount(<RestockView />, { path: '/panel/reposicion' }) }
 }
 
 function names(): string[] {
@@ -86,19 +86,19 @@ describe('RestockView', () => {
   })
 
   it('una vista previa sin guardar lo avisa y no dice cuándo se actualizó', async () => {
-    open(reposicion([LIMON], { refreshed_at: null }))
+    open(restock([LIMON], { refreshed_at: null }))
     expect(await screen.findByText(/Es una vista previa calculada con las reglas fijas/u)).toBeInTheDocument()
     expect(screen.queryByText(/Última actualización/u)).not.toBeInTheDocument()
   })
 
   it('con recomendaciones de más de un día pide actualizarlas', async () => {
-    open(reposicion([insumoARevisar({ is_stale: true })]))
+    open(restock([ingredientToReview({ is_stale: true })]))
     expect(await screen.findByText('Algunas recomendaciones tienen más de un día. Actualízalas antes de comprar.')).toBeInTheDocument()
   })
 
   it('«Actualizar recomendaciones» decide de nuevo y muestra lo nuevo', async () => {
-    const { api, user } = open(reposicion([LIMON]))
-    api.on('post', '/insights/restock/refresh', reposicion([PAPA]))
+    const { api, user } = open(restock([LIMON]))
+    api.on('post', '/insights/restock/refresh', restock([PAPA]))
     await screen.findByRole('heading', { name: 'Limón' })
 
     await user.click(screen.getByRole('button', UPDATE))
@@ -108,8 +108,8 @@ describe('RestockView', () => {
   })
 
   it('si actualizar falla lo dice y deja la recomendación anterior', async () => {
-    const { api, user } = open(reposicion([LIMON]))
-    api.on('post', '/insights/restock/refresh', new RespuestaDeError(504, 'La IA tardó demasiado'))
+    const { api, user } = open(restock([LIMON]))
+    api.on('post', '/insights/restock/refresh', new ErrorResponse(504, 'La IA tardó demasiado'))
     await screen.findByRole('heading', { name: 'Limón' })
 
     await user.click(screen.getByRole('button', UPDATE))
@@ -119,7 +119,7 @@ describe('RestockView', () => {
   })
 
   it('si no se puede cargar lo dice', async () => {
-    open(new RespuestaDeError(500, []))
+    open(new ErrorResponse(500, []))
     expect(await screen.findByText('No se pudo cargar la reposición.')).toBeInTheDocument()
   })
 })

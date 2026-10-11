@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { cuenta, entrarComo, montar, montarRutas, PANTALLAS, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
+import { handleAccount, signInAs, handleMount, mountRoutes, SCREENSValue, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import { useSession } from '@/store/session'
 import { AppShell } from './AppShell'
 import { ComingSoonView } from './ComingSoonView'
@@ -20,24 +20,24 @@ function tokenThatExpiresIn(seconds: number): string {
 
 describe('HomeRedirect', () => {
   it('sin sesión lleva al acceso', async () => {
-    servidor()
-    montar(<ShellScreensContext value={PANTALLAS}><HomeRedirect /></ShellScreensContext>)
+    server()
+    handleMount(<ShellScreensContext value={SCREENSValue}><HomeRedirect /></ShellScreensContext>)
 
     expect(await screen.findByRole('status', ROUTE)).toHaveTextContent('/acceso')
   })
 
   it('lleva a la primera pantalla que la cuenta puede abrir', async () => {
-    servidor()
-    entrarComo(['insights.read'])
-    montar(<ShellScreensContext value={PANTALLAS}><HomeRedirect /></ShellScreensContext>)
+    server()
+    signInAs(['insights.read'])
+    handleMount(<ShellScreensContext value={SCREENSValue}><HomeRedirect /></ShellScreensContext>)
 
     expect(await screen.findByRole('status', ROUTE)).toHaveTextContent('/panel')
   })
 
   it('una cuenta sin pantallas va a su perfil', async () => {
-    servidor()
-    entrarComo([])
-    montar(<ShellScreensContext value={PANTALLAS}><HomeRedirect /></ShellScreensContext>)
+    server()
+    signInAs([])
+    handleMount(<ShellScreensContext value={SCREENSValue}><HomeRedirect /></ShellScreensContext>)
 
     expect(await screen.findByRole('status', ROUTE)).toHaveTextContent('/perfil')
   })
@@ -46,20 +46,20 @@ describe('HomeRedirect', () => {
 describe('RequireSession', () => {
   function openProtected() {
     const routes = [{ element: <RequireSession permission="cash.manage" />, children: [{ path: '/caja', element: <p>Caja privada</p> }] }]
-    return montarRutas(routes, '/caja')
+    return mountRoutes(routes, '/caja')
   }
 
   it('deja pasar a quien tiene el permiso', () => {
-    servidor()
-    entrarComo(['cash.manage'])
+    server()
+    signInAs(['cash.manage'])
     openProtected()
 
     expect(screen.getByText('Caja privada')).toBeInTheDocument()
   })
 
   it('sin el permiso vuelve al inicio sin mostrar la pantalla', async () => {
-    servidor()
-    entrarComo(['orders.take'])
+    server()
+    signInAs(['orders.take'])
     openProtected()
 
     expect(await screen.findByRole('status', ROUTE)).toHaveTextContent(/^\/$/u)
@@ -67,7 +67,7 @@ describe('RequireSession', () => {
   })
 
   it('sin sesión va al acceso recordando adónde se quería ir', async () => {
-    servidor()
+    server()
     const { router } = openProtected()
 
     expect(await screen.findByRole('status', ROUTE)).toHaveTextContent('/acceso')
@@ -77,14 +77,14 @@ describe('RequireSession', () => {
 
 describe('ComingSoonView', () => {
   it('toma el título y la descripción de la entrada del menú', () => {
-    montar(<ShellScreensContext value={PANTALLAS}><ComingSoonView /></ShellScreensContext>, { path: '/reservas' })
+    handleMount(<ShellScreensContext value={SCREENSValue}><ComingSoonView /></ShellScreensContext>, { path: '/reservas' })
 
     expect(screen.getByRole('heading', { name: 'Reservas', level: 1 })).toBeInTheDocument()
     expect(screen.getByText('Las reservas de cada día: a qué hora, cuántos y en qué mesa.')).toBeInTheDocument()
   })
 
   it('en una ruta sin entrada dice «Próximamente»', () => {
-    montar(<ComingSoonView />, { path: '/otra' })
+    handleMount(<ComingSoonView />, { path: '/otra' })
 
     expect(screen.getByRole('heading', { name: 'Próximamente', level: 1 })).toBeInTheDocument()
   })
@@ -93,14 +93,14 @@ describe('ComingSoonView', () => {
 describe('PreviewEndedView', () => {
   it('si venció lo explica y ofrece cerrar la pestaña', () => {
     useSession.setState({ expired: true })
-    montar(<PreviewEndedView />)
+    handleMount(<PreviewEndedView />)
 
     expect(screen.getByText('La vista previa venció')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Cerrar la vista previa' })).toBeInTheDocument()
   })
 
   it('si se salió, dice que la pestaña ya no tiene sesión', () => {
-    montar(<PreviewEndedView />)
+    handleMount(<PreviewEndedView />)
 
     expect(screen.getByText('Saliste de la vista previa')).toBeInTheDocument()
   })
@@ -108,10 +108,10 @@ describe('PreviewEndedView', () => {
 
 describe('franja de la vista previa', () => {
   function openPreview(seconds: number) {
-    servidor()
-    entrarComo(PERMISOS_ENCARGADO, { preview: true })
+    server()
+    signInAs(PERMISSIONS_OWNER, { preview: true })
     useSession.setState({ token: tokenThatExpiresIn(seconds) })
-    return montarRutas([{ path: '/', element: <AppShell screens={PANTALLAS} />, children: [{ index: true, element: <p>Inicio</p> }] }])
+    return mountRoutes([{ path: '/', element: <AppShell screens={SCREENSValue} />, children: [{ index: true, element: <p>Inicio</p> }] }])
   }
 
   it('dice qué local se mira, como quién y cuánto falta, sin «Cerrar sesión»', () => {
@@ -136,14 +136,14 @@ describe('RequireSession: términos y privacidad', () => {
 
   function openProtected() {
     const routes = [{ element: <RequireSession />, children: [{ path: '/pedidos', element: <p>Pedidos</p> }] }]
-    return montarRutas(routes, '/pedidos')
+    return mountRoutes(routes, '/pedidos')
   }
 
   it('sin aceptar los términos vigentes no se trabaja, y al aceptarlos se entra', async () => {
-    const api = servidor()
-    const accepted = cuenta(PERMISOS_ENCARGADO, { terms_accepted: true })
+    const api = server()
+    const accepted = handleAccount(PERMISSIONS_OWNER, { terms_accepted: true })
     api.on('post', TERMS, accepted)
-    entrarComo(PERMISOS_ENCARGADO, { terms_accepted: false })
+    signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
     const { user } = openProtected()
 
     expect(screen.getByRole('heading', { name: 'Antes de empezar' })).toBeInTheDocument()
@@ -156,10 +156,10 @@ describe('RequireSession: términos y privacidad', () => {
   })
 
   it('si la versión cambió mientras se leía, la relee y la vuelve a pedir', async () => {
-    const api = servidor()
-    api.on('post', TERMS, new RespuestaDeError(409, 'Los términos cambiaron.'))
-    api.on('get', '/auth/me', cuenta(PERMISOS_ENCARGADO, { terms_accepted: false, terms_version: '2027-01' }))
-    entrarComo(PERMISOS_ENCARGADO, { terms_accepted: false })
+    const api = server()
+    api.on('post', TERMS, new ErrorResponse(409, 'Los términos cambiaron.'))
+    api.on('get', '/auth/me', handleAccount(PERMISSIONS_OWNER, { terms_accepted: false, terms_version: '2027-01' }))
+    signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
     const { user } = openProtected()
 
     await user.click(screen.getByRole('button', { name: 'Acepto los términos' }))
@@ -168,8 +168,8 @@ describe('RequireSession: términos y privacidad', () => {
   })
 
   it('una vista previa no los pide: quien mira no es el dueño de la cuenta', () => {
-    servidor()
-    entrarComo(PERMISOS_ENCARGADO, { terms_accepted: false, preview: true })
+    server()
+    signInAs(PERMISSIONS_OWNER, { terms_accepted: false, preview: true })
     openProtected()
 
     expect(screen.getByText('Pedidos')).toBeInTheDocument()

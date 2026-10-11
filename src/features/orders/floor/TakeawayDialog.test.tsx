@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { cliente, ultimoCuerpo } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, servidor, sinRespuesta } from '#jest/harness'
+import { customer, lastBody } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, server, withoutResponse } from '#jest/harness'
 import { TakeawayDialog } from './TakeawayDialog'
 
 const ADDRESS = 'Dirección de entrega'
@@ -15,11 +15,11 @@ const NAME = 'Nombre del cliente (opcional)'
 const SEARCH = 'Buscar cliente frecuente (opcional)'
 
 function open() {
-  const api = servidor()
+  const api = server()
     .on('get', CUSTOMERS, { items: [], total: 0 })
-    .on('post', CUSTOMERS, cliente({ id: 55 }))
-  entrarComo()
-  const mount = montar(<TakeawayDialog />, { path: '/pedidos' })
+    .on('post', CUSTOMERS, customer({ id: 55 }))
+  signInAs()
+  const mount = handleMount(<TakeawayDialog />, { path: '/pedidos' })
   return { api, ...mount }
 }
 
@@ -76,7 +76,7 @@ describe('TakeawayDialog', () => {
     await mount.user.click(within(window).getByRole('button', SELECT))
 
     await screen.findByRole('status', CURRENT_ROUTE)
-    expect(ultimoCuerpo(mount.api.llamadas('post', CUSTOMERS))).toMatchObject({ name: 'Ana', phone: '912345678', consent: true })
+    expect(lastBody(mount.api.llamadas('post', CUSTOMERS))).toMatchObject({ name: 'Ana', phone: '912345678', consent: true })
     expect(destination().searchParams.get('clienteId')).toBe('55')
     expect(destination().searchParams.get('direccion')).toBe(AREQUIPA)
   })
@@ -98,7 +98,7 @@ describe('TakeawayDialog', () => {
 
   it('elegir un cliente frecuente llena sus datos', async () => {
     const mount = open()
-    mount.api.on('get', CUSTOMERS, { items: [cliente()], total: 1 })
+    mount.api.on('get', CUSTOMERS, { items: [customer()], total: 1 })
     const window = await openWindow(mount)
     await mount.user.click(within(window).getByRole('radio', { name: 'Delivery' }))
     await mount.user.type(within(window).getByLabelText(SEARCH), 'Rosa')
@@ -121,7 +121,7 @@ describe('TakeawayDialog', () => {
 
   it('cancelar cierra la ventana y la siguiente vez empieza vacía', async () => {
     const mount = open()
-    mount.api.on('get', CUSTOMERS, sinRespuesta)
+    mount.api.on('get', CUSTOMERS, withoutResponse)
     let window = await openWindow(mount)
     await mount.user.type(within(window).getByLabelText(NAME), 'Luis')
     await mount.user.click(within(window).getByRole('button', { name: 'Cancelar' }))

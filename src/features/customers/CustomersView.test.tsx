@@ -1,8 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { cliente } from '#jest/fixtures/panel'
-import { entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { customer } from '#jest/fixtures/panel'
+import { signInAs, handleMount, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import type { Customer } from '@/api/types'
 import { CustomersView } from './CustomersView'
 
@@ -14,19 +14,19 @@ const NEW = 'Nuevo cliente'
 const ROSA_QUISPE = 'Rosa Quispe'
 const EDITED = 'Rosa Q. Mamani'
 
-function open(customers: Customer[] = [cliente()], permissions?: Parameters<typeof entrarComo>[0]) {
-  const api = servidor().on('get', LIST, (request: { params: Record<string, unknown> }) => {
+function open(customers: Customer[] = [customer()], permissions?: Parameters<typeof signInAs>[0]) {
+  const api = server().on('get', LIST, (request: { params: Record<string, unknown> }) => {
     const q = String(request.params['q']).toLowerCase()
     const items = customers.filter((c) => c.name.toLowerCase().includes(q) || c.phone.includes(q))
     return { items, total: items.length }
   })
-  entrarComo(permissions)
-  return { api, ...montar(<CustomersView />) }
+  signInAs(permissions)
+  return { api, ...handleMount(<CustomersView />) }
 }
 
 describe('CustomersView: lista', () => {
   it('muestra cuántos hay, sus visitas y quién es frecuente', async () => {
-    open([cliente(), cliente({ id: 12, name: 'Juan Pérez', phone: '', visits: 1, spent: '35.00', is_frequent: false })])
+    open([customer(), customer({ id: 12, name: 'Juan Pérez', phone: '', visits: 1, spent: '35.00', is_frequent: false })])
     expect(await screen.findByRole('heading', { name: '2 clientes' })).toBeInTheDocument()
     expect(screen.getByText('4 visitas · S/ 240.00')).toBeInTheDocument()
     expect(screen.getByText('1 visita · S/ 35.00')).toBeInTheDocument()
@@ -35,7 +35,7 @@ describe('CustomersView: lista', () => {
   })
 
   it('busca por teléfono y avisa cuando nadie coincide', async () => {
-    const { api, user } = open([cliente()])
+    const { api, user } = open([customer()])
     await screen.findByText(ROSA_QUISPE)
 
     await user.type(screen.getByLabelText(SEARCH), '999')
@@ -51,16 +51,16 @@ describe('CustomersView: lista', () => {
   })
 
   it('si la búsqueda falla muestra el error', async () => {
-    servidor().on('get', LIST, new RespuestaDeError(500, 'Sin base'))
-    entrarComo()
-    montar(<CustomersView />)
+    server().on('get', LIST, new ErrorResponse(500, 'Sin base'))
+    signInAs()
+    handleMount(<CustomersView />)
     expect(await screen.findByText('Sin base')).toBeInTheDocument()
   })
 })
 
 describe('CustomersView: ficha y edición', () => {
   it('la ficha muestra cifras, dirección, notas y los últimos pedidos', async () => {
-    const detail = cliente({
+    const detail = customer({
       notes: 'Alérgica al maní',
       email: 'rosa@correo.pe',
       recent_orders: [{ order_id: 40, number: 17, type: 'Delivery', status: 'paid', total: '58.00', created_at: '2026-09-20T19:00:00Z' }],
@@ -79,8 +79,8 @@ describe('CustomersView: ficha y edición', () => {
   })
 
   it('el mesero ve la ficha pero no puede editar ni crear', async () => {
-    const { api, user } = open([cliente()], PERMISOS_MESERO)
-    api.on('get', ROSA, cliente({ phone: '', recent_orders: [] }))
+    const { api, user } = open([customer()], PERMISSIONS_WAITER)
+    api.on('get', ROSA, customer({ phone: '', recent_orders: [] }))
     expect(screen.queryByRole('button', { name: NEW })).not.toBeInTheDocument()
 
     await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
@@ -93,7 +93,7 @@ describe('CustomersView: ficha y edición', () => {
 
   it('el encargado edita desde la ficha y guarda con PUT', async () => {
     const { api, user } = open()
-    api.on('get', ROSA, cliente()).on('put', ROSA, cliente({ name: EDITED }))
+    api.on('get', ROSA, customer()).on('put', ROSA, customer({ name: EDITED }))
 
     await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
     await user.click(await screen.findByRole('button', { name: 'Editar datos' }))
@@ -108,7 +108,7 @@ describe('CustomersView: ficha y edición', () => {
 
   it('un cliente nuevo exige nombre, valida el correo y muestra el rechazo del servidor', async () => {
     const { api, user } = open()
-    api.on('post', LIST, new RespuestaDeError(409, 'Ya hay un cliente con ese teléfono'))
+    api.on('post', LIST, new ErrorResponse(409, 'Ya hay un cliente con ese teléfono'))
 
     await user.click(screen.getByRole('button', { name: NEW }))
     const window = await screen.findByRole('dialog', { name: NEW })
@@ -148,7 +148,7 @@ describe('CustomersView: derechos ARCO', () => {
 
   it('el encargado descarga los datos del cliente', async () => {
     const { api, user } = open()
-    api.on('get', ROSA, cliente())
+    api.on('get', ROSA, customer())
     api.on('get', EXPORT, { name: ROSA_QUISPE, orders: [], reservations: [] })
     const create = jest.fn(() => 'blob:datos')
     const drop = jest.fn()
@@ -166,7 +166,7 @@ describe('CustomersView: derechos ARCO', () => {
 
   it('borrar pide confirmación, cierra la ficha y lo avisa', async () => {
     const { api, user } = open()
-    api.on('get', ROSA, cliente())
+    api.on('get', ROSA, customer())
     api.on('post', DELETE, null)
 
     await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
@@ -185,8 +185,8 @@ describe('CustomersView: derechos ARCO', () => {
 
   it('con pedidos en curso, el servidor lo rechaza y la ficha lo dice', async () => {
     const { api, user } = open()
-    api.on('get', ROSA, cliente())
-    api.on('post', DELETE, new RespuestaDeError(409, 'El cliente tiene pedidos en curso.'))
+    api.on('get', ROSA, customer())
+    api.on('post', DELETE, new ErrorResponse(409, 'El cliente tiene pedidos en curso.'))
 
     await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
     const card = await screen.findByRole('dialog', { name: ROSA_QUISPE })
@@ -197,8 +197,8 @@ describe('CustomersView: derechos ARCO', () => {
   })
 
   it('el mesero no ve cómo exportar ni borrar', async () => {
-    const { api, user } = open([cliente()], PERMISOS_MESERO)
-    api.on('get', ROSA, cliente())
+    const { api, user } = open([customer()], PERMISSIONS_WAITER)
+    api.on('get', ROSA, customer())
 
     await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
     const card = await screen.findByRole('dialog')

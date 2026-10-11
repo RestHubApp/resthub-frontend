@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { cuenta, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { handleAccount, handleMount, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { useSession } from '@/store/session'
 import { LoginView } from './LoginView'
 
@@ -13,13 +13,13 @@ const LOGIN = '/auth/login'
 const TEST_SECRET = 'resthub123'
 
 function accessResponse() {
-  const { user, restaurant, permissions, preview } = cuenta(PERMISOS_MESERO)
+  const { user, restaurant, permissions, preview } = handleAccount(PERMISSIONS_WAITER)
   return { access_token: 'token-nuevo', token_type: 'bearer', expires_in: 3600, user, restaurant, permissions, preview }
 }
 
 function openAccess(status?: { from: string }) {
-  const api = servidor()
-  const mount = montar(<LoginView />, { path: '/acceso' })
+  const api = server()
+  const mount = handleMount(<LoginView />, { path: '/acceso' })
   if (status) {
     void mount.router.navigate('/acceso', { state: status })
   }
@@ -38,7 +38,7 @@ describe('LoginView', () => {
     expect(await screen.findByRole('status', { name: 'Ruta actual' })).toHaveTextContent(/^\/$/u)
     expect(api.llamadas('post', LOGIN)[0]?.body).toEqual({ email: 'mesero@resthub.dev', password: TEST_SECRET })
     expect(useSession.getState().token).toBe('token-nuevo')
-    expect(useSession.getState().account?.permissions).toEqual([...PERMISOS_MESERO])
+    expect(useSession.getState().account?.permissions).toEqual([...PERMISSIONS_WAITER])
   })
 
   it('vuelve a la pantalla que se quiso abrir antes de entrar', async () => {
@@ -54,7 +54,7 @@ describe('LoginView', () => {
 
   it('con una contraseña equivocada muestra el mensaje del servidor y no abre sesión', async () => {
     const { api, user } = openAccess()
-    api.on('post', LOGIN, new RespuestaDeError(401, 'Correo o contraseña incorrectos.'))
+    api.on('post', LOGIN, new ErrorResponse(401, 'Correo o contraseña incorrectos.'))
 
     await user.type(screen.getByLabelText(EMAIL), 'ana@resthub.dev')
     await user.type(screen.getByLabelText(SECRET), 'otra-clave')

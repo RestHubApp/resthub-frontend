@@ -14,9 +14,9 @@ import type {
   TableState,
 } from '../../src/api/types'
 
-const CREADO = '2026-09-26T13:00:00Z'
+const CREATED = '2026-09-26T13:00:00Z'
 
-export function insumo(cambios: Partial<Ingredient> = {}): Ingredient {
+export function ingredient(changes: Partial<Ingredient> = {}): Ingredient {
   return {
     id: 1,
     name: 'Limón',
@@ -28,15 +28,15 @@ export function insumo(cambios: Partial<Ingredient> = {}): Ingredient {
     is_active: true,
     is_low: false,
     is_negative: false,
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
-export function movimiento(cambios: Partial<Movement> = {}): Movement {
+export function movement(changes: Partial<Movement> = {}): Movement {
   return {
     id: 1,
-    created_at: CREADO,
+    created_at: CREATED,
     created_by: 7,
     ingredient_id: 1,
     ingredient_name: 'Limón',
@@ -49,16 +49,16 @@ export function movimiento(cambios: Partial<Movement> = {}): Movement {
     reason: 'Mercado',
     unit: 'g',
     unit_cost: '0.004',
-    ...cambios,
+    ...changes,
   }
 }
 
 /** Lo que devuelven compra, merma y ajuste: el insumo como quedó y su movimiento. */
-export function cambioDeStock(ingrediente: Ingredient, mov: Partial<Movement> = {}): StockChange {
-  return { ingredient: ingrediente, movement: movimiento({ ingredient_id: ingrediente.id, ...mov }) }
+export function stockChange(ingredientValue: Ingredient, mov: Partial<Movement> = {}): StockChange {
+  return { ingredient: ingredientValue, movement: movement({ ingredient_id: ingredientValue.id, ...mov }) }
 }
 
-export function costoDePlato(cambios: Partial<DishCost> = {}): DishCost {
+export function dishCost(changes: Partial<DishCost> = {}): DishCost {
   return {
     menu_item_id: 10,
     menu_item_name: 'Ceviche',
@@ -68,11 +68,11 @@ export function costoDePlato(cambios: Partial<DishCost> = {}): DishCost {
     margin_percent: '60.0',
     has_recipe: true,
     is_active: true,
-    ...cambios,
+    ...changes,
   }
 }
 
-export function receta(cambios: Partial<Recipe> = {}): Recipe {
+export function recipe(changes: Partial<Recipe> = {}): Recipe {
   return {
     menu_item_id: 10,
     menu_item_name: 'Ceviche',
@@ -85,11 +85,11 @@ export function receta(cambios: Partial<Recipe> = {}): Recipe {
     lines: [
       { ingredient_id: 1, ingredient_name: 'Limón', quantity: '250', unit: 'g', unit_cost: '0.004', cost: '1.00' },
     ],
-    ...cambios,
+    ...changes,
   }
 }
 
-export function proveedor(cambios: Partial<Supplier> = {}): Supplier {
+export function supplier(changes: Partial<Supplier> = {}): Supplier {
   return {
     id: 4,
     name: 'Mercado Central',
@@ -97,12 +97,12 @@ export function proveedor(cambios: Partial<Supplier> = {}): Supplier {
     phone: '987654321',
     notes: '',
     is_active: true,
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
-export function ordenDeCompra(cambios: Partial<PurchaseOrder> = {}): PurchaseOrder {
+export function purchaseOrder(changes: Partial<PurchaseOrder> = {}): PurchaseOrder {
   return {
     id: 20,
     number: 3,
@@ -111,7 +111,7 @@ export function ordenDeCompra(cambios: Partial<PurchaseOrder> = {}): PurchaseOrd
     status: 'draft',
     status_label: 'Borrador',
     notes: '',
-    created_at: CREADO,
+    created_at: CREATED,
     sent_at: null,
     received_at: null,
     cancelled_at: null,
@@ -130,11 +130,11 @@ export function ordenDeCompra(cambios: Partial<PurchaseOrder> = {}): PurchaseOrd
         received_unit_cost: null,
       },
     ],
-    ...cambios,
+    ...changes,
   }
 }
 
-export function sugerencia(cambios: Partial<PurchaseSuggestion> = {}): PurchaseSuggestion {
+export function suggestion(changes: Partial<PurchaseSuggestion> = {}): PurchaseSuggestion {
   return {
     ingredient_id: 1,
     ingredient_name: 'Limón',
@@ -144,11 +144,11 @@ export function sugerencia(cambios: Partial<PurchaseSuggestion> = {}): PurchaseS
     stock: '500',
     min_stock: '2000',
     average_daily_use: '400',
-    ...cambios,
+    ...changes,
   }
 }
 
-export function mesa(cambios: Partial<TableState> = {}): TableState {
+export function table(changes: Partial<TableState> = {}): TableState {
   return {
     id: 1,
     label: '1',
@@ -157,21 +157,21 @@ export function mesa(cambios: Partial<TableState> = {}): TableState {
     status: 'free',
     status_label: 'Libre',
     active_order: null,
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
 /** Un resumen de pedido en curso, para una mesa ocupada. */
-export function pedidoEnMesa(numero = 12): NonNullable<TableState['active_order']> {
+export function orderInTable(number = 12): NonNullable<TableState['active_order']> {
   return {
-    id: 100 + numero,
-    number: numero,
+    id: 100 + number,
+    number: number,
     status: 'open',
     status_label: 'Abierto',
-    status_changed_at: CREADO,
-    created_at: CREADO,
-    updated_at: CREADO,
+    status_changed_at: CREATED,
+    created_at: CREATED,
+    updated_at: CREATED,
     item_count: 2,
     total: '40.00',
     balance: '40.00',
@@ -180,7 +180,7 @@ export function pedidoEnMesa(numero = 12): NonNullable<TableState['active_order'
   }
 }
 
-export function plato(cambios: Partial<MenuItem> = {}): MenuItem {
+export function dish(changes: Partial<MenuItem> = {}): MenuItem {
   return {
     id: 10,
     category_id: 1,
@@ -192,23 +192,23 @@ export function plato(cambios: Partial<MenuItem> = {}): MenuItem {
     is_available: true,
     out_of_stock: false,
     modifier_groups: [],
-    created_at: CREADO,
-    ...cambios,
+    created_at: CREATED,
+    ...changes,
   }
 }
 
-export function categoria(cambios: Partial<MenuSection> = {}): MenuSection {
-  return { id: 1, name: 'Entradas', position: 0, is_active: true, created_at: CREADO, items: [plato()], ...cambios }
+export function category(changes: Partial<MenuSection> = {}): MenuSection {
+  return { id: 1, name: 'Entradas', position: 0, is_active: true, created_at: CREATED, items: [dish()], ...changes }
 }
 
 /** Dos categorías: Entradas (Ceviche y Causa, esta agotada) y Bebidas vacía. */
-export function carta(): MenuResponse {
+export function handleMenu(): MenuResponse {
   return {
     categories: [
-      categoria({
-        items: [plato(), plato({ id: 11, name: 'Causa', price: '18.00', position: 1, is_available: false, description: '' })],
+      category({
+        items: [dish(), dish({ id: 11, name: 'Causa', price: '18.00', position: 1, is_available: false, description: '' })],
       }),
-      categoria({ id: 2, name: 'Bebidas', position: 1, items: [] }),
+      category({ id: 2, name: 'Bebidas', position: 1, items: [] }),
     ],
   }
 }

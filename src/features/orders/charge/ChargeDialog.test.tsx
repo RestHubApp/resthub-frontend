@@ -1,8 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { pagado, pago, pedido } from '#jest/fixtures/cobro'
-import { entrarComo, montar, RespuestaDeError, servidor, type Peticion } from '#jest/harness'
+import { paid, payment, handleOrder } from '#jest/fixtures/cobro'
+import { signInAs, handleMount, ErrorResponse, server, type Request } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { ChargeDialog } from './ChargeDialog'
 
@@ -13,34 +13,34 @@ const REGISTERED = { name: 'Cobro registrado' }
 const CHARGING = { name: 'Cobrar pedido #34' }
 
 // Un servidor que recuerda el pedido: cada pago lo cambia y la consulta lo relee.
-type OnPay = (request: Peticion, actual: OrderResponse) => OrderResponse | RespuestaDeError
+type OnPay = (request: Request, actual: OrderResponse) => OrderResponse | ErrorResponse
 
-function charge(initial: OrderResponse = pedido(), respond?: OnPay) {
+function charge(initial: OrderResponse = handleOrder(), respond?: OnPay) {
   let actual = initial
-  const api = servidor()
+  const api = server()
     .on('get', '/cash/current', { is_open: true, session: null })
     .on('get', '/orders/12', () => actual)
-  api.on('post', PAYMENTS, (request: Peticion) => {
-    const response = respond ? respond(request, actual) : pagado(actual, pago({ method: 'cash', method_label: 'Efectivo' }))
-    if (!(response instanceof RespuestaDeError)) {
+  api.on('post', PAYMENTS, (request: Request) => {
+    const response = respond ? respond(request, actual) : paid(actual, payment({ method: 'cash', method_label: 'Efectivo' }))
+    if (!(response instanceof ErrorResponse)) {
       actual = response
     }
     return response
   })
-  entrarComo()
+  signInAs()
   const onClose = jest.fn()
-  const mount = montar(<ChargeDialog order={initial} onClose={onClose} />)
+  const mount = handleMount(<ChargeDialog order={initial} onClose={onClose} />)
   return { api, onClose, ...mount }
 }
 
-function paymentBody(api: ReturnType<typeof servidor>) {
+function paymentBody(api: ReturnType<typeof server>) {
   return api.llamadas('post', PAYMENTS)[0]?.body
 }
 
 describe('ChargeDialog: todo junto', () => {
   it('en efectivo calcula el vuelto en vivo y envía el saldo esperado', async () => {
-    const { api, user } = charge(pedido(), (_p, actual) =>
-      pagado(actual, pago({ method: 'cash', method_label: 'Efectivo', amount: '50.00', amount_received: '100.00', change: '50.00' })),
+    const { api, user } = charge(handleOrder(), (_p, actual) =>
+      paid(actual, payment({ method: 'cash', method_label: 'Efectivo', amount: '50.00', amount_received: '100.00', change: '50.00' })),
     )
 
     expect(await screen.findByRole('dialog', CHARGING)).toBeInTheDocument()
@@ -108,16 +108,16 @@ describe('ChargeDialog: todo junto', () => {
 
 describe('ChargeDialog: sin caja o con error', () => {
   it('con la caja cerrada lo avisa y no deja confirmar', async () => {
-    servidor().on('get', '/cash/current', { is_open: false, session: null })
-    entrarComo()
-    montar(<ChargeDialog order={pedido()} onClose={jest.fn()} />)
+    server().on('get', '/cash/current', { is_open: false, session: null })
+    signInAs()
+    handleMount(<ChargeDialog order={handleOrder()} onClose={jest.fn()} />)
 
     expect(await screen.findByText('La caja está cerrada.')).toBeInTheDocument()
     expect(screen.getByRole('button', CONFIRM)).toBeDisabled()
   })
 
   it('si el servidor rechaza el pago muestra su motivo y la ventana sigue abierta', async () => {
-    const { api, user } = charge(pedido(), () => new RespuestaDeError(409, 'El saldo cambió: vuelve a revisar la cuenta.'))
+    const { api, user } = charge(handleOrder(), () => new ErrorResponse(409, 'El saldo cambió: vuelve a revisar la cuenta.'))
 
     await user.click(await screen.findByRole('button', CONFIRM))
 
@@ -145,9 +145,9 @@ describe('ChargeDialog: sin caja o con error', () => {
   })
 
   it('sin pedido no muestra nada', () => {
-    servidor()
-    entrarComo()
-    montar(<ChargeDialog order={null} onClose={jest.fn()} />)
+    server()
+    signInAs()
+    handleMount(<ChargeDialog order={null} onClose={jest.fn()} />)
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })

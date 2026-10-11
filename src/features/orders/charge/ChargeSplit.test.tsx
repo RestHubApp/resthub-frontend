@@ -1,8 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { pagado, pago, pedido, plato } from '#jest/fixtures/cobro'
-import { entrarComo, montar, servidor, type Peticion } from '#jest/harness'
+import { paid, payment, handleOrder, dish } from '#jest/fixtures/cobro'
+import { signInAs, handleMount, server, type Request } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { ChargeDialog } from './ChargeDialog'
 
@@ -12,15 +12,15 @@ const EQUAL = { name: 'Partes iguales' }
 
 // Tras un pago parcial, el pedido baja su saldo; con el último, queda pagado.
 function tras(actual: OrderResponse, amount: string): OrderResponse {
-  const fresh = pago({ id: 50 + actual.payments.length, amount: amount })
+  const fresh = payment({ id: 50 + actual.payments.length, amount: amount })
   const balance = (Number(actual.balance) - Number(amount)).toFixed(2)
   if (balance === '0.00') {
-    return pagado(actual, fresh)
+    return paid(actual, fresh)
   }
   return { ...actual, payments: [...actual.payments, fresh], paid_amount: amount, balance: balance }
 }
 
-function amountOf(request: Peticion, actual: OrderResponse): string {
+function amountOf(request: Request, actual: OrderResponse): string {
   const body = request.body as { amount?: string; item_ids?: number[] }
   if (body.item_ids) {
     const selected = actual.items.filter((item) => body.item_ids?.includes(item.id) === true)
@@ -29,17 +29,17 @@ function amountOf(request: Peticion, actual: OrderResponse): string {
   return body.amount ?? actual.balance
 }
 
-function chargeSplit(initial: OrderResponse = pedido()) {
+function chargeSplit(initial: OrderResponse = handleOrder()) {
   let actual = initial
-  const api = servidor()
+  const api = server()
     .on('get', '/cash/current', { is_open: true, session: null })
     .on('get', '/orders/12', () => actual)
-    .on('post', PAYMENTS, (request: Peticion) => {
+    .on('post', PAYMENTS, (request: Request) => {
       actual = tras(actual, amountOf(request, actual))
       return actual
     })
-  entrarComo()
-  return { api, ...montar(<ChargeDialog order={initial} onClose={jest.fn()} />) }
+  signInAs()
+  return { api, ...handleMount(<ChargeDialog order={initial} onClose={jest.fn()} />) }
 }
 
 describe('cobro en partes iguales', () => {
@@ -71,7 +71,7 @@ describe('cobro en partes iguales', () => {
   })
 
   it('entre tres, el redondeo queda para el último', async () => {
-    const { user } = chargeSplit(pedido({ balance: '100.00', total: '100.00' }))
+    const { user } = chargeSplit(handleOrder({ balance: '100.00', total: '100.00' }))
 
     await user.click(await screen.findByRole('radio', EQUAL))
     await user.click(screen.getByRole('button', { name: 'Uno más de personas' }))
@@ -97,15 +97,15 @@ describe('cobro por platos', () => {
   })
 
   it('los platos ya pagados no se ofrecen y una cortesía no cuesta', async () => {
-    const order = pedido({
+    const order = handleOrder({
       items: [
-        plato({ is_paid: true }),
-        plato({ id: 2, name: 'Chicha morada', subtotal: '20.00' }),
-        plato({ id: 3, name: 'Postre', subtotal: '8.00', is_courtesy: true, courtesy_reason: 'Cumpleaños' }),
+        dish({ is_paid: true }),
+        dish({ id: 2, name: 'Chicha morada', subtotal: '20.00' }),
+        dish({ id: 3, name: 'Postre', subtotal: '8.00', is_courtesy: true, courtesy_reason: 'Cumpleaños' }),
       ],
       paid_amount: '30.00',
       balance: '20.00',
-      payments: [pago()],
+      payments: [payment()],
     })
     const { user } = chargeSplit(order)
 
@@ -120,14 +120,14 @@ describe('cobro por platos', () => {
 describe('la cuenta', () => {
   it('muestra cortesías, descuento y lo ya pagado antes de lo que falta', async () => {
     chargeSplit(
-      pedido({
+      handleOrder({
         subtotal: '58.00',
         courtesy_amount: '8.00',
         discount_amount: '5.00',
         discount_percent: '10.00',
         paid_amount: '20.00',
         balance: '25.00',
-        payments: [pago({ amount: '20.00', tip: '2.00' })],
+        payments: [payment({ amount: '20.00', tip: '2.00' })],
       }),
     )
 

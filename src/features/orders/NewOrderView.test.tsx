@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen } from '@testing-library/react'
 
-import { carta, mesa, pedido, resumenActivo, ultimoCuerpo } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, servidor } from '#jest/harness'
+import { handleMenu, table, order, activeSummary, lastBody } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, server } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { NewOrderView } from './NewOrderView'
 import { useDraftActions } from './taking/useOrderDraft'
@@ -10,21 +10,21 @@ import { useDraftActions } from './taking/useOrderDraft'
 const ROUTE = '/pedidos/nuevo'
 const ORDERS = '/orders'
 
-function open(query: string, tables = [mesa()]) {
-  const api = servidor()
+function open(query: string, tables = [table()]) {
+  const api = server()
     .on('get', '/tables', tables)
-    .on('get', '/menu', carta())
-    .on('post', ORDERS, pedido({ status: 'open' }))
-    .on('post', '/orders/5/send', pedido())
-  entrarComo()
-  return { api, ...montar(<NewOrderView />, { path: ROUTE, en: `${ROUTE}?${query}` }) }
+    .on('get', '/menu', handleMenu())
+    .on('post', ORDERS, order({ status: 'open' }))
+    .on('post', '/orders/5/send', order())
+  signInAs()
+  return { api, ...handleMount(<NewOrderView />, { path: ROUTE, en: `${ROUTE}?${query}` }) }
 }
 
 async function sendUnLomo(mount: ReturnType<typeof open>) {
   await mount.user.click(await screen.findByRole('button', { name: /Lomo saltado/u }))
   await mount.user.click(screen.getByRole('button', { name: /enviar a cocina/i }))
   await screen.findByText('Pedido #12 enviado a cocina.')
-  return ultimoCuerpo(mount.api.llamadas('post', ORDERS)) as OpenOrderRequest
+  return lastBody(mount.api.llamadas('post', ORDERS)) as OpenOrderRequest
 }
 
 afterEach(() => {
@@ -67,7 +67,7 @@ describe('NewOrderView', () => {
   })
 
   it('si otro mesero ocupó la mesa, lo avisa con el enlace a su pedido', async () => {
-    open('mesa=3', [mesa({ status: 'occupied', active_order: resumenActivo({ id: 8, number: 30 }) })])
+    open('mesa=3', [table({ status: 'occupied', active_order: activeSummary({ id: 8, number: 30 }) })])
     expect(await screen.findByText(/Esta mesa ya tiene el pedido #30\./u)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Ver el pedido' })).toHaveAttribute('href', '/pedidos/8')
   })

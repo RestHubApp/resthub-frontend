@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { pedido } from '#jest/fixtures/cobro'
-import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor, sinRespuesta } from '#jest/harness'
+import { handleOrder } from '#jest/fixtures/cobro'
+import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server, withoutResponse } from '#jest/harness'
 import type { OrderResponse, PermissionCode } from '@/api/types'
 import { BoardView } from './BoardView'
 
@@ -13,9 +13,9 @@ function minutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * MINUTE).toISOString()
 }
 
-const IN_TABLE = pedido({ id: 1, number: 1, status: 'open', created_at: minutesAgo(0) })
-const IN_KITCHEN = pedido({ id: 2, number: 2, status: 'in_kitchen', created_at: minutesAgo(40), status_changed_at: minutesAgo(30) })
-const READY = pedido({
+const IN_TABLE = handleOrder({ id: 1, number: 1, status: 'open', created_at: minutesAgo(0) })
+const IN_KITCHEN = handleOrder({ id: 2, number: 2, status: 'in_kitchen', created_at: minutesAgo(40), status_changed_at: minutesAgo(30) })
+const READY = handleOrder({
   id: 3,
   number: 3,
   status: 'ready',
@@ -25,12 +25,12 @@ const READY = pedido({
   created_at: minutesAgo(20),
   status_changed_at: minutesAgo(16),
 })
-const SERVED = pedido({ id: 12, number: 34, status: 'served', created_at: minutesAgo(50) })
+const SERVED = handleOrder({ id: 12, number: 34, status: 'served', created_at: minutesAgo(50) })
 
-function board(orders: OrderResponse[] | RespuestaDeError = [IN_TABLE, IN_KITCHEN, READY, SERVED], permissions: readonly PermissionCode[] = PERMISOS_ENCARGADO) {
-  const api = servidor().on('get', ACTIVE, orders).on('get', '/cash/current', { is_open: true, session: null })
-  entrarComo(permissions)
-  return { api, ...montar(<BoardView />, { path: '/tablero' }) }
+function board(orders: OrderResponse[] | ErrorResponse = [IN_TABLE, IN_KITCHEN, READY, SERVED], permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
+  const api = server().on('get', ACTIVE, orders).on('get', '/cash/current', { is_open: true, session: null })
+  signInAs(permissions)
+  return { api, ...handleMount(<BoardView />, { path: '/tablero' }) }
 }
 
 function column(name: RegExp) {
@@ -70,7 +70,7 @@ describe('BoardView', () => {
 
   it('el paso siguiente se da desde la tarjeta y se avisa', async () => {
     const { api, user } = board()
-    api.on('post', '/orders/2/ready', pedido({ id: 2, number: 2, status: 'ready' }))
+    api.on('post', '/orders/2/ready', handleOrder({ id: 2, number: 2, status: 'ready' }))
 
     await screen.findByRole('region', { name: /^En cocina/u })
     await user.click(column(/^En cocina/u).getByRole('button', { name: 'Marcar listo' }))
@@ -99,7 +99,7 @@ describe('BoardView', () => {
   })
 
   it('si no se pueden leer los pedidos lo dice', async () => {
-    board(new RespuestaDeError(500, 'Sin base de datos'))
+    board(new ErrorResponse(500, 'Sin base de datos'))
 
     expect(await screen.findByText('Sin base de datos')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument()
@@ -109,9 +109,9 @@ describe('BoardView', () => {
 
 describe('BoardView mientras carga', () => {
   it('muestra las cuatro columnas vacías como esqueleto', async () => {
-    servidor().on('get', ACTIVE, () => sinRespuesta())
-    entrarComo()
-    montar(<BoardView />)
+    server().on('get', ACTIVE, () => withoutResponse())
+    signInAs()
+    handleMount(<BoardView />)
 
     expect(await screen.findByText('Servido, por cobrar')).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: /: \d/u })).not.toBeInTheDocument()

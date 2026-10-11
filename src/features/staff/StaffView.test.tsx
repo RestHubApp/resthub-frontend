@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { EQUIPO, miembro, rol, ROL_ENCARGADO, ROL_MESERO } from '#jest/fixtures/plataforma'
-import { entrarComo, montar, PERMISOS_ENCARGADO, primero, RespuestaDeError, servidor, type Peticion } from '#jest/harness'
+import { TEAM, member, role, ROLE_OWNER, ROLE_WAITER } from '#jest/fixtures/plataforma'
+import { signInAs, handleMount, PERMISSIONS_OWNER, handleFirst, ErrorResponse, server, type Request } from '#jest/harness'
 import type { PermissionCode } from '@/api/types'
 import { StaffView } from './StaffView'
 
@@ -13,24 +13,24 @@ const NEW_ACCOUNT = 'Nueva cuenta'
 const SECRET_SAFE_1 = 'clave-segura-1'
 const CREATE_ACCOUNT = 'Crear cuenta'
 
-const ROLES = [ROL_ENCARGADO, ROL_MESERO, rol()]
+const ROLES = [ROLE_OWNER, ROLE_WAITER, role()]
 const NAME = 'Nombre completo'
 
-type Member = (typeof EQUIPO)[number]
+type Member = (typeof TEAM)[number]
 
-function openStaff(permissions: readonly PermissionCode[] = PERMISOS_ENCARGADO) {
+function openStaff(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
   // Como el servidor: lo que se guarda se ve al releer la lista.
-  const team = EQUIPO.map((account) => ({ ...account }))
+  const team = TEAM.map((account) => ({ ...account }))
   const save = (account: Member): Member => {
     const index = team.findIndex((actual) => actual.id === account.id)
     team.splice(index === -1 ? team.length : index, index === -1 ? 0 : 1, account)
     return account
   }
-  const api = servidor()
+  const api = server()
     .on('get', '/staff', () => ({ items: team.map((account) => ({ ...account })), total: team.length }))
     .on('get', '/roles', ROLES)
-  entrarComo(permissions)
-  return { api, guardar: save, ...montar(<StaffView />, { path: '/personal' }) }
+  signInAs(permissions)
+  return { api, guardar: save, ...handleMount(<StaffView />, { path: '/personal' }) }
 }
 
 async function rowOf(name: string | RegExp): Promise<HTMLElement> {
@@ -48,7 +48,7 @@ describe('StaffView', () => {
 
   it('da de alta una cuenta con el mesero elegido por omisión', async () => {
     const { api, guardar: save, user } = openStaff()
-    api.on('post', '/staff', (request: Peticion) => save(miembro({ id: 10, ...(request.body as object), role_label: 'Mesero' })))
+    api.on('post', '/staff', (request: Request) => save(member({ id: 10, ...(request.body as object), role_label: 'Mesero' })))
     await rowOf(/Luis Quispe/u)
 
     await user.click(screen.getByRole('button', { name: NEW_ACCOUNT }))
@@ -74,7 +74,7 @@ describe('StaffView', () => {
 
   it('si el correo ya existe, el alta muestra el motivo', async () => {
     const { api, user } = openStaff()
-    api.on('post', '/staff', new RespuestaDeError(409, 'Ya hay una cuenta con ese correo.'))
+    api.on('post', '/staff', new ErrorResponse(409, 'Ya hay una cuenta con ese correo.'))
     await rowOf(/Luis Quispe/u)
 
     await user.click(screen.getByRole('button', { name: NEW_ACCOUNT }))
@@ -89,7 +89,7 @@ describe('StaffView', () => {
 
   it('la cuenta propia cambia el nombre pero no el rol, ni se desactiva', async () => {
     const { api, guardar: save, user } = openStaff()
-    api.on('patch', '/staff/7', (request: Peticion) => save({ ...primero(EQUIPO), ...(request.body as object) }))
+    api.on('patch', '/staff/7', (request: Request) => save({ ...handleFirst(TEAM), ...(request.body as object) }))
     const own = await rowOf(/Ana Torres/u)
 
     expect(within(own).queryByRole('button', { name: 'Contraseña' })).not.toBeInTheDocument()
@@ -108,7 +108,7 @@ describe('StaffView', () => {
 describe('StaffView: cambios sobre otras cuentas', () => {
   it('cambia el rol de otra cuenta', async () => {
     const { api, guardar: save, user } = openStaff()
-    api.on('patch', '/staff/8', () => save(miembro({ role_id: 5, role_label: 'Cocina' })))
+    api.on('patch', '/staff/8', () => save(member({ role_id: 5, role_label: 'Cocina' })))
 
     await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Editar' }))
     const window = await screen.findByRole('dialog', { name: 'Editar a Luis Quispe' })
@@ -134,8 +134,8 @@ describe('StaffView: cambios sobre otras cuentas', () => {
 
   it('desactivar se confirma; activar va directo', async () => {
     const { api, guardar: save, user } = openStaff()
-    api.on('patch', '/staff/8/status', () => save(miembro({ is_active: false })))
-    api.on('patch', '/staff/9/status', () => save({ ...(EQUIPO.at(2) ?? primero(EQUIPO)), is_active: true }))
+    api.on('patch', '/staff/8/status', () => save(member({ is_active: false })))
+    api.on('patch', '/staff/9/status', () => save({ ...(TEAM.at(2) ?? handleFirst(TEAM)), is_active: true }))
 
     await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Desactivar' }))
     const notice = await screen.findByRole('alertdialog', { name: '¿Desactivar a Luis Quispe?' })
@@ -166,9 +166,9 @@ describe('StaffView: cambios sobre otras cuentas', () => {
   })
 
   it('si no se puede cargar el personal, lo dice', async () => {
-    servidor().on('get', '/staff', new RespuestaDeError(500, 'Sin conexión con la base')).on('get', '/roles', ROLES)
-    entrarComo()
-    montar(<StaffView />)
+    server().on('get', '/staff', new ErrorResponse(500, 'Sin conexión con la base')).on('get', '/roles', ROLES)
+    signInAs()
+    handleMount(<StaffView />)
 
     expect(await screen.findByText('Sin conexión con la base')).toBeInTheDocument()
   })

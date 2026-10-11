@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { itemDePedido, pedido } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { orderItem, order } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import { PrintView } from './PrintView'
 
 const ROUTE = '/imprimir/:orderId/:kind'
 const print = jest.fn()
 const originalPrint = window.print.bind(window)
 
-const DELIVERY_PAID = pedido({
+const DELIVERY_PAID = order({
   type: 'delivery',
   table_label: null,
   customer_name: 'Ana',
@@ -18,8 +18,8 @@ const DELIVERY_PAID = pedido({
   status: 'paid',
   notes: 'tocar el timbre',
   items: [
-    itemDePedido({ quantity: 2, subtotal: '64.00', notes: 'sin cebolla', modifiers: [{ group: 'Término', option: 'Tres cuartos', price: '0.00' }] }),
-    itemDePedido({ id: 102, name: 'Chicha morada', subtotal: '8.00', is_courtesy: true }),
+    orderItem({ quantity: 2, subtotal: '64.00', notes: 'sin cebolla', modifiers: [{ group: 'Término', option: 'Tres cuartos', price: '0.00' }] }),
+    orderItem({ id: 102, name: 'Chicha morada', subtotal: '8.00', is_courtesy: true }),
   ],
   courtesy_amount: '8.00',
   discount_amount: '6.40',
@@ -33,9 +33,9 @@ const DELIVERY_PAID = pedido({
 })
 
 function open(kind: string, response: unknown = DELIVERY_PAID) {
-  servidor().on('get', '/orders/5', response)
-  entrarComo()
-  return montar(<PrintView />, { path: ROUTE, en: `/imprimir/5/${kind}` })
+  server().on('get', '/orders/5', response)
+  signInAs()
+  return handleMount(<PrintView />, { path: ROUTE, en: `/imprimir/5/${kind}` })
 }
 
 beforeEach(() => {
@@ -71,7 +71,7 @@ describe('PrintView', () => {
   })
 
   it('antes de pagar es la precuenta, y el botón vuelve a imprimir', async () => {
-    const { user } = open('cuenta', pedido({ status: 'served' }))
+    const { user } = open('cuenta', order({ status: 'served' }))
     expect(await screen.findByText('Precuenta')).toBeInTheDocument()
     expect(screen.queryByText('Vuelto')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Imprimir' }))
@@ -80,7 +80,7 @@ describe('PrintView', () => {
   })
 
   it('si el pedido no carga, no imprime una hoja vacía', async () => {
-    open('cuenta', new RespuestaDeError(404, 'Ese pedido no existe.'))
+    open('cuenta', new ErrorResponse(404, 'Ese pedido no existe.'))
     expect(await screen.findByText('Ese pedido no existe.')).toBeInTheDocument()
     expect(print).not.toHaveBeenCalled()
   })

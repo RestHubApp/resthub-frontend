@@ -1,7 +1,7 @@
 // Datos de caja para las pruebas, con la forma del API.
 import type { CashSession, CashSummary, CurrentCash } from '../../src/api/types'
 
-export function resumenDeCaja(cambios: Partial<CashSummary> = {}): CashSummary {
+export function cashRegisterSummary(changes: Partial<CashSummary> = {}): CashSummary {
   return {
     by_method: [],
     by_waiter: [],
@@ -13,11 +13,11 @@ export function resumenDeCaja(cambios: Partial<CashSummary> = {}): CashSummary {
     paid_orders: 0,
     sales: '0.00',
     tips: '0.00',
-    ...cambios,
+    ...changes,
   }
 }
 
-export function turnoDeCaja(cambios: Partial<CashSession> = {}): CashSession {
+export function cashRegisterShift(changes: Partial<CashSession> = {}): CashSession {
   return {
     id: 3,
     is_open: true,
@@ -34,13 +34,13 @@ export function turnoDeCaja(cambios: Partial<CashSession> = {}): CashSession {
     difference: null,
     expected_cash: null,
     open_orders: 0,
-    summary: resumenDeCaja(),
-    ...cambios,
+    summary: cashRegisterSummary(),
+    ...changes,
   }
 }
 
-export const CAJA_CERRADA: CurrentCash = { is_open: false, session: null }
+export const CLOSED_CASH_REGISTER: CurrentCash = { is_open: false, session: null }
 
-export function cajaAbierta(turno: CashSession = turnoDeCaja()): CurrentCash {
-  return { is_open: true, session: turno }
+export function handleOpenCashRegister(shift: CashSession = cashRegisterShift()): CurrentCash {
+  return { is_open: true, session: shift }
 }

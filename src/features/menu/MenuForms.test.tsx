@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { carta, categoria, plato } from '#jest/fixtures/inventario'
-import { entrarComo, montar, primero, RespuestaDeError, servidor } from '#jest/harness'
+import { handleMenu, category, dish } from '#jest/fixtures/inventario'
+import { signInAs, handleMount, handleFirst, ErrorResponse, server } from '#jest/harness'
 import type { MenuResponse } from '@/api/types'
 import { MenuView } from './MenuView'
 
@@ -17,9 +17,9 @@ const DISH_10 = '/menu/items/10'
 const CATEGORY_1 = '/menu/categories/1'
 
 function openMenu() {
-  const api = servidor().on('get', MENU, carta()).on('get', '/inventory/recipes', [])
-  entrarComo()
-  return { api, ...montar(<MenuView />, { path: '/menu' }) }
+  const api = server().on('get', MENU, handleMenu()).on('get', '/inventory/recipes', [])
+  signInAs()
+  return { api, ...handleMount(<MenuView />, { path: '/menu' }) }
 }
 
 // Como el servidor: después del cambio, la carta que se relee ya lo trae.
@@ -31,7 +31,7 @@ function andThen(api: ReturnType<typeof openMenu>['api'], response: unknown, aft
 }
 
 function withCategory(extra: MenuResponse['categories'][number]): MenuResponse {
-  return { categories: [...carta().categories, extra] }
+  return { categories: [...handleMenu().categories, extra] }
 }
 
 async function openNewDish(user: ReturnType<typeof openMenu>['user']) {
@@ -56,8 +56,8 @@ describe('crear en la carta', () => {
 
   it('un plato con opciones viaja con el precio con punto y sus grupos', async () => {
     const { api, user } = openMenu()
-    const chicha = plato({ id: 12, name: 'Chicha', category_id: 2, price: '6.50' })
-    const after = carta()
+    const chicha = dish({ id: 12, name: 'Chicha', category_id: 2, price: '6.50' })
+    const after = handleMenu()
     after.categories[1]?.items.push(chicha)
     api.on('post', ITEMS, andThen(api, chicha, after))
     const window = await openNewDish(user)
@@ -115,7 +115,7 @@ describe('crear en la carta', () => {
 describe('editar la carta', () => {
   it('editar un plato parte de sus datos y muestra el error del servidor', async () => {
     const { api, user } = openMenu()
-    api.on('patch', DISH_10, new RespuestaDeError(409, 'Ya existe un plato con ese nombre.'))
+    api.on('patch', DISH_10, new ErrorResponse(409, 'Ya existe un plato con ese nombre.'))
 
     await user.click(await screen.findByRole('button', { name: 'Editar Ceviche' }))
     const window = await screen.findByRole('dialog', { name: 'Editar Ceviche' })
@@ -128,9 +128,9 @@ describe('editar la carta', () => {
 
   it('sacar un plato de la carta se confirma antes de enviarse', async () => {
     const { api, user } = openMenu()
-    const outside = carta()
-    outside.categories[0] = { ...primero(carta().categories), items: [plato({ is_active: false }), plato({ id: 11, name: 'Causa' })] }
-    api.on('patch', DISH_10, andThen(api, plato({ is_active: false }), outside))
+    const outside = handleMenu()
+    outside.categories[0] = { ...handleFirst(handleMenu().categories), items: [dish({ is_active: false }), dish({ id: 11, name: 'Causa' })] }
+    api.on('patch', DISH_10, andThen(api, dish({ is_active: false }), outside))
 
     const row = (await screen.findByRole('heading', { name: 'Ceviche' })).closest('li') as HTMLElement
     await user.click(within(row).getByRole('button', { name: 'Desactivar' }))
@@ -144,14 +144,14 @@ describe('editar la carta', () => {
 
   it('una categoría vacía se puede eliminar; si el servidor se niega, lo explica', async () => {
     const { api, user } = openMenu()
-    api.once('delete', '/menu/categories/2', new RespuestaDeError(409, 'La categoría tiene platos.'))
+    api.once('delete', '/menu/categories/2', new ErrorResponse(409, 'La categoría tiene platos.'))
 
     await user.click(await screen.findByRole('button', { name: 'Eliminar la categoría Bebidas' }))
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }))
     expect(await screen.findByText('La categoría tiene platos.')).toBeInTheDocument()
 
     api.on('delete', '/menu/categories/2', null, 204)
-    api.on('get', MENU, { categories: [carta().categories[0]] })
+    api.on('get', MENU, { categories: [handleMenu().categories[0]] })
     await user.click(screen.getByRole('button', { name: 'Eliminar la categoría Bebidas' }))
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }))
     expect(await screen.findByText('Categoría Bebidas eliminada.')).toBeInTheDocument()
@@ -171,10 +171,10 @@ describe('editar la carta', () => {
   })
 
   it('una categoría inactiva se activa con un toque, sin confirmar', async () => {
-    const api = servidor().on('get', MENU, { categories: [categoria({ is_active: false })] }).on('get', '/inventory/recipes', [])
+    const api = server().on('get', MENU, { categories: [category({ is_active: false })] }).on('get', '/inventory/recipes', [])
     api.on('patch', CATEGORY_1, { id: 1, name: 'Entradas', position: 0, is_active: true, created_at: CREATED })
-    entrarComo()
-    const { user } = montar(<MenuView />)
+    signInAs()
+    const { user } = handleMount(<MenuView />)
 
     expect(await screen.findByText('Inactiva')).toBeInTheDocument()
     expect(screen.getByText('Hoy: 0 de 0 platos disponibles')).toBeInTheDocument()

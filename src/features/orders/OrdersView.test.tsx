@@ -1,24 +1,24 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { mesa, pedido, resumenActivo } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { table, order, activeSummary } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { OrdersView } from './OrdersView'
 
 const SALON = [
-  mesa(),
-  mesa({ id: 4, label: '4', status: 'occupied', active_order: resumenActivo({ id: 8, number: 31 }) }),
-  mesa({ id: 5, label: 'Terraza', status: 'occupied', active_order: resumenActivo({ id: 9, number: 32, status: 'ready' }) }),
+  table(),
+  table({ id: 4, label: '4', status: 'occupied', active_order: activeSummary({ id: 8, number: 31 }) }),
+  table({ id: 5, label: 'Terraza', status: 'occupied', active_order: activeSummary({ id: 9, number: 32, status: 'ready' }) }),
 ]
-const TAKEAWAY = pedido({ id: 20, number: 40, type: 'takeaway', table_id: null, table_label: null, customer_name: 'Ana' })
+const TAKEAWAY = order({ id: 20, number: 40, type: 'takeaway', table_id: null, table_label: null, customer_name: 'Ana' })
 
-function open(en = '/pedidos', permissions = PERMISOS_MESERO) {
-  const api = servidor()
+function open(en = '/pedidos', permissions = PERMISSIONS_WAITER) {
+  const api = server()
     .on('get', '/tables', SALON)
-    .on('get', '/orders/active', [pedido(), TAKEAWAY])
-    .on('get', '/orders', { items: [pedido(), pedido({ id: 6, number: 13, status: 'paid' })], total: 2 })
-  entrarComo(permissions)
-  return { api, ...montar(<OrdersView />, { path: '/pedidos', en }) }
+    .on('get', '/orders/active', [order(), TAKEAWAY])
+    .on('get', '/orders', { items: [order(), order({ id: 6, number: 13, status: 'paid' })], total: 2 })
+  signInAs(permissions)
+  return { api, ...handleMount(<OrdersView />, { path: '/pedidos', en }) }
 }
 
 describe('el salón del mesero', () => {
@@ -39,23 +39,23 @@ describe('el salón del mesero', () => {
   })
 
   it('sin mesas, el encargado puede ir a crearlas y el mesero no', async () => {
-    servidor().on('get', '/tables', [])
-    entrarComo(PERMISOS_ENCARGADO)
-    const { unmount } = montar(<OrdersView />, { path: '/pedidos' })
+    server().on('get', '/tables', [])
+    signInAs(PERMISSIONS_OWNER)
+    const { unmount } = handleMount(<OrdersView />, { path: '/pedidos' })
     expect(await screen.findByText('No hay mesas activas')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Crear mesas' })).toHaveAttribute('href', '/mesas')
     unmount()
 
-    servidor().on('get', '/tables', [])
-    entrarComo(PERMISOS_MESERO)
-    montar(<OrdersView />, { path: '/pedidos' })
+    server().on('get', '/tables', [])
+    signInAs(PERMISSIONS_WAITER)
+    handleMount(<OrdersView />, { path: '/pedidos' })
     expect(await screen.findByText('No hay mesas activas')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Crear mesas' })).not.toBeInTheDocument()
   })
 
   it('si las mesas no cargan, reintentar vuelve a pedirlas', async () => {
     const { api, user } = open()
-    api.on('get', '/tables', new RespuestaDeError(503, 'Servidor ocupado'))
+    api.on('get', '/tables', new ErrorResponse(503, 'Servidor ocupado'))
     expect(await screen.findByText('Servidor ocupado')).toBeInTheDocument()
     api.on('get', '/tables', SALON)
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
@@ -75,7 +75,7 @@ describe('las otras pestañas', () => {
 
   it('sin pedidos para llevar lo dice', async () => {
     const { api } = open('/pedidos?vista=llevar')
-    api.on('get', '/orders/active', [pedido()])
+    api.on('get', '/orders/active', [order()])
     expect(await screen.findByText('No hay pedidos para llevar ni delivery en curso')).toBeInTheDocument()
   })
 

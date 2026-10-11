@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { renderHook, waitFor } from '@testing-library/react'
 
-import { canalDeAvisos } from '#jest/canal'
+import { noticesChannel } from '#jest/canal'
 import { setAuthToken } from '@/services/api'
 import { useServerEvent } from './useServerEvent'
 
@@ -21,7 +21,7 @@ afterEach(() => {
 
 describe('useServerEvent', () => {
   it('abre el canal con el token en la cabecera, nunca en la URL', async () => {
-    const channel = canalDeAvisos()
+    const channel = noticesChannel()
     setAuthToken('token-secreto')
     listen(ORDERS)
 
@@ -32,7 +32,7 @@ describe('useServerEvent', () => {
   })
 
   it('entrega solo los avisos de su tema', async () => {
-    const channel = canalDeAvisos()
+    const channel = noticesChannel()
     setAuthToken('t')
     const { recibidos: received } = listen(ORDERS)
     await waitFor(() => {
@@ -48,7 +48,7 @@ describe('useServerEvent', () => {
   })
 
   it('sin sesión o desactivado no abre ninguna conexión', () => {
-    const channel = canalDeAvisos()
+    const channel = noticesChannel()
     setAuthToken(null)
     listen(ORDERS)
     setAuthToken('t')
@@ -58,7 +58,7 @@ describe('useServerEvent', () => {
 
   it('si el canal se corta, reintenta a los tres segundos', async () => {
     jest.useFakeTimers()
-    const channel = canalDeAvisos()
+    const channel = noticesChannel()
     setAuthToken('t')
     listen(ORDERS)
     await jest.advanceTimersByTimeAsync(0)
@@ -73,7 +73,7 @@ describe('useServerEvent', () => {
 
   it('con 401 no reintenta: la credencial no va a mejorar sola', async () => {
     jest.useFakeTimers()
-    const channel = canalDeAvisos()
+    const channel = noticesChannel()
     channel.responderCon(401)
     setAuthToken('vencido')
     listen(ORDERS)
@@ -84,7 +84,7 @@ describe('useServerEvent', () => {
 
   it('al desmontarse cierra la conexión y no reintenta', async () => {
     jest.useFakeTimers()
-    const channel = canalDeAvisos()
+    const channel = noticesChannel()
     setAuthToken('t')
     const { unmount } = listen(ORDERS)
     await jest.advanceTimersByTimeAsync(0)

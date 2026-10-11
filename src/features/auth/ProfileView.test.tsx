@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
-import { cuenta, entrarComo, montar, PERMISOS_MESERO, primero, RespuestaDeError, servidor } from '#jest/harness'
+import { handleAccount, signInAs, handleMount, PERMISSIONS_WAITER, handleFirst, ErrorResponse, server } from '#jest/harness'
 import { currentAuthToken } from '@/services/api'
 import { useSession } from '@/store/session'
 import { ProfileView } from './ProfileView'
@@ -20,9 +20,9 @@ const NEW_TOKEN = 'token-nuevo'
 const NOTICE = 'Tu contraseña cambió. Vuelve a iniciar sesión.'
 
 function openProfile(preview = false) {
-  const api = servidor()
-  entrarComo(PERMISOS_MESERO, { preview })
-  return { api, ...montar(<ProfileView />, { path: '/perfil', rutas: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
+  const api = server()
+  signInAs(PERMISSIONS_WAITER, { preview })
+  return { api, ...handleMount(<ProfileView />, { path: '/perfil', rutas: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
 }
 
 describe('ProfileView', () => {
@@ -45,7 +45,7 @@ describe('ProfileView', () => {
 
   it('cambia la contraseña y sigue con el token nuevo, sin un segundo acceso', async () => {
     const { api, user } = openProfile()
-    api.on('post', CHANGEValue, { ...cuenta(PERMISOS_MESERO), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 })
+    api.on('post', CHANGEValue, { ...handleAccount(PERMISSIONS_WAITER), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 })
 
     await changePassword(user)
 
@@ -74,7 +74,7 @@ describe('ProfileView', () => {
     const { api, user } = openProfile()
     api.on('post', CHANGEValue, () => {
       useSession.setState({ token: 'token-de-otra-cuenta' })
-      return { ...cuenta(PERMISOS_MESERO), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 }
+      return { ...handleAccount(PERMISSIONS_WAITER), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 }
     })
 
     await changePassword(user)
@@ -100,7 +100,7 @@ describe('ProfileView', () => {
 
   it('si la actual está mal, muestra el motivo del servidor', async () => {
     const { api, user } = openProfile()
-    api.on('post', CHANGEValue, new RespuestaDeError(400, 'La contraseña actual no coincide.'))
+    api.on('post', CHANGEValue, new ErrorResponse(400, 'La contraseña actual no coincide.'))
 
     await user.type(screen.getByLabelText(ACTUAL), 'equivocada1')
     await user.type(screen.getByLabelText(NEW), NEW_SECRET)
@@ -122,7 +122,7 @@ describe('ProfileView', () => {
     const field = screen.getByLabelText(ACTUAL)
     expect(field).toHaveAttribute('type', 'password')
 
-    await user.click(primero(screen.getAllByRole('button', { name: /mostrar/i })))
+    await user.click(handleFirst(screen.getAllByRole('button', { name: /mostrar/i })))
 
     expect(field).toHaveAttribute('type', 'text')
   })

@@ -1,21 +1,21 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { CATALOGO, rol, ROL_ENCARGADO, ROL_MESERO } from '#jest/fixtures/plataforma'
-import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor, type Peticion } from '#jest/harness'
+import { CATALOG, role, ROLE_OWNER, ROLE_WAITER } from '#jest/fixtures/plataforma'
+import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server, type Request } from '#jest/harness'
 import type { PermissionCode, Role } from '@/api/types'
 import { RolesView } from './RolesView'
 
 const ORDERS_TAKE = 'orders.take'
 const TAKE_ORDERS = 'Tomar pedidos'
 
-const KITCHEN = rol()
+const KITCHEN = role()
 const SAVE = { name: 'Guardar' }
 
-function openRoles(permissions: readonly PermissionCode[] = PERMISOS_ENCARGADO, roles: Role[] = [ROL_ENCARGADO, ROL_MESERO, KITCHEN]) {
-  const api = servidor().on('get', '/roles', roles).on('get', '/permissions', CATALOGO)
-  entrarComo(permissions)
-  return { api, ...montar(<RolesView />, { path: '/roles' }) }
+function openRoles(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, roles: Role[] = [ROLE_OWNER, ROLE_WAITER, KITCHEN]) {
+  const api = server().on('get', '/roles', roles).on('get', '/permissions', CATALOG)
+  signInAs(permissions)
+  return { api, ...handleMount(<RolesView />, { path: '/roles' }) }
 }
 
 function row(name: string): HTMLElement {
@@ -54,7 +54,7 @@ describe('RolesView', () => {
 
   it('crea un rol con el nombre y los permisos marcados', async () => {
     const { api, user } = openRoles()
-    api.on('post', '/roles', (request: Peticion) => rol({ id: 9, ...(request.body as Partial<Role>) }))
+    api.on('post', '/roles', (request: Request) => role({ id: 9, ...(request.body as Partial<Role>) }))
     await screen.findByText('3 roles')
 
     await user.click(screen.getByRole('button', { name: 'Nuevo rol' }))
@@ -97,7 +97,7 @@ describe('RolesView', () => {
 describe('RolesView: edición y borrado', () => {
   it('al editar el mesero conserva su nombre y cambia los permisos', async () => {
     const { api, user } = openRoles()
-    api.on('put', '/roles/2', (request: Peticion) => ({ ...ROL_MESERO, ...(request.body as Partial<Role>) }))
+    api.on('put', '/roles/2', (request: Request) => ({ ...ROLE_WAITER, ...(request.body as Partial<Role>) }))
     await screen.findByText('3 roles')
 
     await user.click(within(row('Mesero')).getByRole('button', { name: 'Editar el rol Mesero' }))
@@ -112,7 +112,7 @@ describe('RolesView: edición y borrado', () => {
 
   it('si el servidor rechaza el cambio, lo dice dentro de la ventana', async () => {
     const { api, user } = openRoles()
-    api.on('put', '/roles/5', new RespuestaDeError(409, 'Ya hay un rol con ese nombre.'))
+    api.on('put', '/roles/5', new ErrorResponse(409, 'Ya hay un rol con ese nombre.'))
     await screen.findByText('3 roles')
 
     await user.click(within(row('Cocina')).getByRole('button', { name: 'Editar el rol Cocina' }))
@@ -151,9 +151,9 @@ describe('RolesView: edición y borrado', () => {
   })
 
   it('si no se pueden leer los roles, lo avisa', async () => {
-    servidor().on('get', '/roles', new RespuestaDeError(500, 'Servidor caído')).on('get', '/permissions', CATALOGO)
-    entrarComo()
-    montar(<RolesView />)
+    server().on('get', '/roles', new ErrorResponse(500, 'Servidor caído')).on('get', '/permissions', CATALOG)
+    signInAs()
+    handleMount(<RolesView />)
 
     expect(await screen.findByText('Servidor caído')).toBeInTheDocument()
   })

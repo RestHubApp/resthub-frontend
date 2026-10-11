@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { pago, pedido, plato } from '#jest/fixtures/cobro'
-import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, primero, RespuestaDeError, servidor } from '#jest/harness'
+import { payment, handleOrder, dish } from '#jest/fixtures/cobro'
+import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, handleFirst, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { AdjustmentsPanel } from './AdjustmentsPanel'
 
@@ -13,15 +13,15 @@ const APPLY = { name: 'Aplicar descuento' }
 const PERCENTAGE = 'Descuento %'
 const REASON = 'Motivo'
 
-function adjust(order: OrderResponse = pedido(), permissions = PERMISOS_MESERO) {
-  const api = servidor()
+function adjust(order: OrderResponse = handleOrder(), permissions = PERMISSIONS_WAITER) {
+  const api = server()
     .on('get', '/restaurant', { max_waiter_discount_percent: '10.00' })
     .on('put', DISCOUNT, (request: { body: unknown }) => ({
       ...order,
       discount_percent: (request.body as { percent: string }).percent,
     }))
-  entrarComo(permissions)
-  return { api, ...montar(<AdjustmentsPanel order={order} />) }
+  signInAs(permissions)
+  return { api, ...handleMount(<AdjustmentsPanel order={order} />) }
 }
 
 describe('descuento del pedido', () => {
@@ -40,7 +40,7 @@ describe('descuento del pedido', () => {
   })
 
   it('el encargado descuenta sin tope y no consulta el del mesero', async () => {
-    const { api, user } = adjust(pedido(), PERMISOS_ENCARGADO)
+    const { api, user } = adjust(handleOrder(), PERMISSIONS_OWNER)
 
     await user.click(screen.getByRole('button', APPLY))
 
@@ -63,7 +63,7 @@ describe('descuento del pedido', () => {
 
   it('si el servidor rechaza el descuento del mesero, muestra por qué', async () => {
     const { api, user } = adjust()
-    api.on('put', DISCOUNT, new RespuestaDeError(403, 'Supera el tope del mesero.'))
+    api.on('put', DISCOUNT, new ErrorResponse(403, 'Supera el tope del mesero.'))
 
     await user.click(screen.getByRole('button', APPLY))
     await user.type(screen.getByLabelText(PERCENTAGE), '20')
@@ -74,7 +74,7 @@ describe('descuento del pedido', () => {
   })
 
   it('con descuento se puede cambiar o quitar, y quitarlo envía cero', async () => {
-    const { api, user } = adjust(pedido({ discount_amount: '5.00', discount_percent: '10.00' }))
+    const { api, user } = adjust(handleOrder({ discount_amount: '5.00', discount_percent: '10.00' }))
 
     expect(screen.getByRole('button', { name: 'Cambiar descuento (10.0 %)' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Quitar descuento' }))
@@ -84,7 +84,7 @@ describe('descuento del pedido', () => {
   })
 
   it('después del primer pago ya no se puede ajustar la cuenta', () => {
-    adjust(pedido({ payments: [pago()] }), PERMISOS_ENCARGADO)
+    adjust(handleOrder({ payments: [payment()] }), PERMISSIONS_OWNER)
 
     expect(screen.queryByRole('region', { name: 'Descuentos y cortesías' })).not.toBeInTheDocument()
   })
@@ -98,11 +98,11 @@ describe('cortesías', () => {
   })
 
   it('invitar pide un motivo de al menos cinco letras', async () => {
-    const { api, user } = adjust(pedido(), PERMISOS_ENCARGADO)
-    api.on('put', COURTESY, pedido())
+    const { api, user } = adjust(handleOrder(), PERMISSIONS_OWNER)
+    api.on('put', COURTESY, handleOrder())
 
     await user.click(screen.getByText(INVITE_DISH))
-    await user.click(primero(screen.getAllByRole('button', { name: 'Invitar' })))
+    await user.click(handleFirst(screen.getAllByRole('button', { name: 'Invitar' })))
     const reason = screen.getByLabelText('Motivo de la cortesía de Lomo saltado')
     await user.type(reason, 'Cump')
     expect(screen.getByRole('button', { name: 'Confirmar' })).toBeDisabled()
@@ -114,9 +114,9 @@ describe('cortesías', () => {
   })
 
   it('un plato invitado muestra el motivo y se puede volver a cobrar', async () => {
-    const invited = plato({ is_courtesy: true, courtesy_reason: 'Error de cocina' })
-    const { api, user } = adjust(pedido({ items: [invited] }), PERMISOS_ENCARGADO)
-    api.on('delete', COURTESY, pedido())
+    const invited = dish({ is_courtesy: true, courtesy_reason: 'Error de cocina' })
+    const { api, user } = adjust(handleOrder({ items: [invited] }), PERMISSIONS_OWNER)
+    api.on('delete', COURTESY, handleOrder())
 
     expect(screen.getByText('Invita la casa: Error de cocina')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Cobrar' }))

@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { fireEvent, screen, within } from '@testing-library/react'
 
-import { mesa, reserva } from '#jest/fixtures/panel'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { table, reservation } from '#jest/fixtures/panel'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import { ReservationsView } from './ReservationsView'
 
 const EDIT_URL = '/reservations/21'
@@ -16,11 +16,11 @@ const SAVE = { name: 'Guardar' }
 const PERSONAS = 'Personas'
 
 function open() {
-  const api = servidor()
-    .on('get', LIST, (request: { params: Record<string, unknown> }) => (request.params['day'] === DAY ? [reserva()] : []))
-    .on('get', '/tables', [mesa(1, '1'), mesa(2, '2'), mesa(3, TERRACE)])
-  entrarComo()
-  const mount = montar(<ReservationsView />)
+  const api = server()
+    .on('get', LIST, (request: { params: Record<string, unknown> }) => (request.params['day'] === DAY ? [reservation()] : []))
+    .on('get', '/tables', [table(1, '1'), table(2, '2'), table(3, TERRACE)])
+  signInAs()
+  const mount = handleMount(<ReservationsView />)
   fireEvent.change(screen.getByLabelText('Día'), { target: { value: DAY } })
   return { api, ...mount }
 }
@@ -33,7 +33,7 @@ async function fresh(user: ReturnType<typeof open>['user']) {
 describe('ReservationDialog', () => {
   it('una reserva nueva viaja con la hora del local en UTC y la mesa elegida', async () => {
     const { api, user } = open()
-    api.on('post', LIST, reserva({ id: 22, customer_name: 'Carlos' }))
+    api.on('post', LIST, reservation({ id: 22, customer_name: 'Carlos' }))
     const window = within(await fresh(user))
 
     expect(window.getByLabelText('Día')).toHaveValue(DAY)
@@ -74,7 +74,7 @@ describe('ReservationDialog', () => {
 
   it('editar parte de los datos guardados y, sin tocar nada, conserva la mesa y la hora', async () => {
     const { api, user } = open()
-    api.on('put', EDIT_URL, reserva())
+    api.on('put', EDIT_URL, reservation())
 
     await user.click(await screen.findByRole('button', { name: 'Editar' }))
     const window = within(await screen.findByRole('dialog', { name: 'Reserva de Familia Huamán' }))
@@ -96,7 +96,7 @@ describe('ReservationDialog', () => {
 
   it('quitar la mesa al editar la envía como null', async () => {
     const { api, user } = open()
-    api.on('put', EDIT_URL, reserva({ table_id: null }))
+    api.on('put', EDIT_URL, reservation({ table_id: null }))
 
     await user.click(await screen.findByRole('button', { name: 'Editar' }))
     const window = within(await screen.findByRole('dialog'))
@@ -111,7 +111,7 @@ describe('ReservationDialog', () => {
 
   it('si la mesa ya está tomada en ese horario, el error queda en la ventana', async () => {
     const { api, user } = open()
-    api.on('post', LIST, new RespuestaDeError(409, 'La mesa ya está reservada a esa hora'))
+    api.on('post', LIST, new ErrorResponse(409, 'La mesa ya está reservada a esa hora'))
     const dialog = await fresh(user)
     const window = within(dialog)
 

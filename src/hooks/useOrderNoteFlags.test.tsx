@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 
-import { servidor } from '#jest/harness'
+import { server } from '#jest/harness'
 import type { OrderNoteClassification } from '@/api/types'
 import { queryClient } from '@/services/queryClient'
 import { useOrderNoteFlags, type OrderNoteFlagsOptions } from './useOrderNoteFlags'
@@ -40,7 +40,7 @@ function marks(ids: readonly number[], options: OrderNoteFlagsOptions = { live: 
 
 describe('useOrderNoteFlags', () => {
   it('encuentra la lectura de la nota de un plato y la del pedido entero', async () => {
-    servidor().on('get', NOTES, {
+    server().on('get', NOTES, {
       items: [
         note({ order_item_id: 10, mentions_allergy: true }),
         note({ order_item_id: null, scope: 'order', note: 'mesa con niños' }),
@@ -58,7 +58,7 @@ describe('useOrderNoteFlags', () => {
   })
 
   it('pregunta una sola vez por cada pedido, ordenados y sin repetir', async () => {
-    const api = servidor().on('get', NOTES, { items: [] })
+    const api = server().on('get', NOTES, { items: [] })
     const { result } = marks([3, 1, 3, 2])
 
     await waitFor(() => {
@@ -68,7 +68,7 @@ describe('useOrderNoteFlags', () => {
   })
 
   it('pide clasificar las notas pendientes una sola vez', async () => {
-    const api = servidor()
+    const api = server()
       .on('get', NOTES, { items: [note({ status: 'pending' })] })
       .on('post', CLASSIFY, null)
     marks([1])
@@ -83,7 +83,7 @@ describe('useOrderNoteFlags', () => {
   })
 
   it('sin permiso o sin pedidos no pregunta al servidor', () => {
-    const api = servidor()
+    const api = server()
     const withoutPermission = marks([1], { enabled: false, live: false }).result.current
     marks([])
     expect(api.peticiones).toHaveLength(0)

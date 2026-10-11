@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { insumo, receta } from '#jest/fixtures/inventario'
+import { ingredient, recipe } from '#jest/fixtures/inventario'
 import { adjustmentDelta, adjustmentPayload } from './adjustmentMath'
 import { EMPTY_INGREDIENT, ingredientNumbers, ingredientValuesOf } from './ingredientValues'
 import { adjustmentSchema, ingredientSchema, purchaseSchema, recipeSchema, wasteSchema } from './inventorySchema'
@@ -8,7 +8,7 @@ import { costHint, costLabel, purchaseDefaults, purchaseMath, purchasePayload } 
 import { availableIngredients, lineCost, recipeCatalog, recipeCost, recipePayload, recipeValuesOf } from './recipeMath'
 import { findInputUnit, formatUnitCost, fromBase, inputUnits, priceUnit, toBaseCost, toBaseQuantity } from './units'
 
-const LIMON = insumo()
+const LIMON = ingredient()
 
 // Intl separa «S/» del monto con un espacio que no se corta.
 function flat(text: string | undefined): string | undefined {
@@ -59,7 +59,7 @@ describe('purchaseMath', () => {
 
   it('propone el costo actual del insumo por kilo y la unidad grande', () => {
     expect(purchaseDefaults(LIMON)).toMatchObject({ quantity_unit: 'kg', cost: '4', cost_mode: 'unit' })
-    expect(purchaseDefaults(insumo({ unit_cost: '0' })).cost).toBe('')
+    expect(purchaseDefaults(ingredient({ unit_cost: '0' })).cost).toBe('')
     expect(costLabel('total', 'kg')).toBe('Total pagado (S/)')
     expect(costLabel('unit', 'kg')).toBe('Costo por kg (S/)')
   })
@@ -88,7 +88,7 @@ describe('adjustmentMath', () => {
 describe('ingredientValues', () => {
   it('muestra un insumo en kilos para editarlo', () => {
     expect(ingredientValuesOf(LIMON)).toEqual({ name: 'Limón', unit: 'g', min_stock: '2', min_stock_unit: 'kg', unit_cost: '4' })
-    expect(ingredientValuesOf(insumo({ unit_cost: '0' })).unit_cost).toBe('')
+    expect(ingredientValuesOf(ingredient({ unit_cost: '0' })).unit_cost).toBe('')
   })
 
   it('vacío vale cero, y lo escrito se lleva a la unidad base', () => {
@@ -101,7 +101,7 @@ describe('ingredientValues', () => {
 })
 
 describe('recipeMath', () => {
-  const catalog = recipeCatalog([LIMON, insumo({ id: 2, name: 'Cebolla', unit_cost: '0.002' })], receta())
+  const catalog = recipeCatalog([LIMON, ingredient({ id: 2, name: 'Cebolla', unit_cost: '0.002' })], recipe())
 
   it('costea cada línea y la receta con el costo actual de los insumos', () => {
     expect(lineCost('250', catalog.get(1))).toBe(1)
@@ -111,18 +111,18 @@ describe('recipeMath', () => {
   })
 
   it('una línea con un insumo que ya no está activo se costea con lo que trae la receta', () => {
-    const onlyRecipe = recipeCatalog([], receta())
+    const onlyRecipe = recipeCatalog([], recipe())
     expect(onlyRecipe.get(1)).toEqual({ id: 1, name: 'Limón', unit: 'g', unitCost: 0.004 })
   })
 
   it('ofrece para agregar solo lo que no está en la receta', () => {
-    const free = availableIngredients([LIMON, insumo({ id: 2, name: 'Cebolla' })], recipeValuesOf(receta()).lines, catalog)
+    const free = availableIngredients([LIMON, ingredient({ id: 2, name: 'Cebolla' })], recipeValuesOf(recipe()).lines, catalog)
     expect(free.map((i) => i.name)).toEqual(['Cebolla'])
   })
 
   it('envía las cantidades con punto decimal', () => {
     expect(recipePayload({ lines: [{ ingredient_id: 1, quantity: ' 2,5 ' }] })).toEqual({ lines: [{ ingredient_id: 1, quantity: '2.5' }] })
-    expect(recipeValuesOf(receta()).lines).toEqual([{ ingredient_id: 1, quantity: '250' }])
+    expect(recipeValuesOf(recipe()).lines).toEqual([{ ingredient_id: 1, quantity: '250' }])
   })
 })
 

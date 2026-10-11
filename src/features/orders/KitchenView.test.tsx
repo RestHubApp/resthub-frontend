@@ -1,27 +1,27 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { itemDePedido, notaConAlergia, pedido } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { orderItem, noteWithAllergy, order } from '#jest/fixtures/pedidos'
+import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { KitchenView } from './KitchenView'
 
-const IN_KITCHEN = pedido({
+const IN_KITCHEN = order({
   notes: 'Mesa de cumpleaños',
   items: [
-    itemDePedido({ quantity: 2, notes: 'alérgico al maní' }),
-    itemDePedido({ id: 102, name: 'Chicha morada', modifiers: [{ group: 'Tamaño', option: 'Jarra', price: '12.00' }] }),
+    orderItem({ quantity: 2, notes: 'alérgico al maní' }),
+    orderItem({ id: 102, name: 'Chicha morada', modifiers: [{ group: 'Tamaño', option: 'Jarra', price: '12.00' }] }),
   ],
 })
-const READY = pedido({ id: 6, number: 13, status: 'ready', type: 'takeaway', table_label: null, customer_name: 'Luis' })
+const READY = order({ id: 6, number: 13, status: 'ready', type: 'takeaway', table_label: null, customer_name: 'Luis' })
 const NOTES = '/insights/order-notes'
 
-function open(permissions = PERMISOS_ENCARGADO, active = [IN_KITCHEN, READY]) {
-  const api = servidor()
+function open(permissions = PERMISSIONS_OWNER, active = [IN_KITCHEN, READY]) {
+  const api = server()
     .on('get', '/orders/active', active)
-    .on('get', NOTES, { items: [notaConAlergia()] })
-    .on('post', '/orders/5/ready', pedido({ status: 'ready' }))
-  entrarComo(permissions)
-  return { api, ...montar(<KitchenView />, { path: '/cocina' }) }
+    .on('get', NOTES, { items: [noteWithAllergy()] })
+    .on('post', '/orders/5/ready', order({ status: 'ready' }))
+  signInAs(permissions)
+  return { api, ...handleMount(<KitchenView />, { path: '/cocina' }) }
 }
 
 describe('KitchenView', () => {
@@ -45,7 +45,7 @@ describe('KitchenView', () => {
   })
 
   it('quien no ve el panel no pregunta por las alergias', async () => {
-    const { api } = open(PERMISOS_MESERO)
+    const { api } = open(PERMISSIONS_WAITER)
     const card = await screen.findByRole('article', { name: 'Pedido 12' })
     expect(within(card).getByText('alérgico al maní')).toBeInTheDocument()
     expect(within(card).queryByText('Con alergia')).not.toBeInTheDocument()
@@ -62,21 +62,21 @@ describe('KitchenView', () => {
   })
 
   it('un mesero no tiene el botón de listo', async () => {
-    open(PERMISOS_MESERO)
+    open(PERMISSIONS_WAITER)
     const card = await screen.findByRole('article', { name: 'Pedido 12' })
     expect(within(card).queryByRole('button', { name: 'Listo' })).not.toBeInTheDocument()
   })
 
   it('sin pedidos lo dice en cada columna', async () => {
-    open(PERMISOS_MESERO, [])
+    open(PERMISSIONS_WAITER, [])
     expect(await screen.findByText('Nada pendiente en cocina')).toBeInTheDocument()
     expect(screen.getByText('Nada esperando a salir')).toBeInTheDocument()
   })
 
   it('si los pedidos no cargan, avisa', async () => {
-    servidor().on('get', '/orders/active', new RespuestaDeError(500, 'Error del servidor'))
-    entrarComo(PERMISOS_MESERO)
-    montar(<KitchenView />)
+    server().on('get', '/orders/active', new ErrorResponse(500, 'Error del servidor'))
+    signInAs(PERMISSIONS_WAITER)
+    handleMount(<KitchenView />)
     expect(await screen.findByText('Error del servidor')).toBeInTheDocument()
   })
 })

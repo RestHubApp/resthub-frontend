@@ -2,8 +2,8 @@
 import type { AiDecision, RestockItem, RestockReport } from '../../src/api/types'
 
 
-const DECIDIDO = '2026-09-26T12:00:00Z'
-export function insumoARevisar(cambios: Partial<RestockItem> = {}): RestockItem {
+const DECIDED = '2026-09-26T12:00:00Z'
+export function ingredientToReview(changes: Partial<RestockItem> = {}): RestockItem {
   return {
     ingredient_id: 1,
     name: 'Limón',
@@ -32,22 +32,22 @@ export function insumoARevisar(cambios: Partial<RestockItem> = {}): RestockItem 
     model: 'jev-1',
     fallback_reason: null,
     fallback_label: null,
-    decided_at: DECIDIDO,
+    decided_at: DECIDED,
     decision_id: 50,
     is_stale: false,
-    ...cambios,
+    ...changes,
   }
 }
 
-export function reposicion(items: RestockItem[], cambios: Partial<RestockReport> = {}): RestockReport {
+export function restock(items: RestockItem[], changes: Partial<RestockReport> = {}): RestockReport {
   const counts: Record<string, number> = {}
   for (const item of items) {
     counts[item.action] = (counts[item.action] ?? 0) + 1
   }
-  return { items, counts, refreshed_at: DECIDIDO, ...cambios }
+  return { items, counts, refreshed_at: DECIDED, ...changes }
 }
 
-export function decision(cambios: Partial<AiDecision> = {}): AiDecision {
+export function decision(changes: Partial<AiDecision> = {}): AiDecision {
   return {
     id: 1,
     kind: 'restock',
@@ -66,7 +66,7 @@ export function decision(cambios: Partial<AiDecision> = {}): AiDecision {
     order_number: null,
     input_state: { stock: '0.5' },
     output: { action: 'buy_today' },
-    created_at: DECIDIDO,
-    ...cambios,
+    created_at: DECIDED,
+    ...changes,
   }
 }

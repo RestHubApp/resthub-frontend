@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook } from '@testing-library/react'
 
-import { cuenta, PERMISOS_MESERO } from '#jest/harness'
+import { handleAccount, PERMISSIONS_WAITER } from '#jest/harness'
 import { enqueueOrder, queuedOrders, removeQueued, subscribeQueue, useQueuedOrders, type QueuedOrder } from './offlineQueue'
 
-const ANA = cuenta(PERMISOS_MESERO)
-const LUIS = cuenta(PERMISOS_MESERO, { user: { ...ANA.user, id: 8, full_name: 'Luis' } })
+const ANA = handleAccount(PERMISSIONS_WAITER)
+const LUIS = handleAccount(PERMISSIONS_WAITER, { user: { ...ANA.user, id: 8, full_name: 'Luis' } })
 
 function order(id: string, userId = ANA.user.id): QueuedOrder {
   return {

@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { reportesDelPanel, resumenDeVentas } from '#jest/fixtures/panel'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { panelReports, salesSummary } from '#jest/fixtures/panel'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import { todayIn } from '@/services/format'
 import { addDays } from './dateRange'
 import { InsightsView } from './InsightsView'
@@ -10,12 +10,12 @@ import { InsightsView } from './InsightsView'
 const SUMMARY = '/insights/summary'
 
 function open(en = '/panel', changes: Record<string, unknown> = {}) {
-  const api = servidor()
-  for (const [route, data] of Object.entries({ ...reportesDelPanel(), ...changes })) {
+  const api = server()
+  for (const [route, data] of Object.entries({ ...panelReports(), ...changes })) {
     api.on('get', route, data)
   }
-  entrarComo()
-  return { api, ...montar(<InsightsView />, { path: '/panel', en }) }
+  signInAs()
+  return { api, ...handleMount(<InsightsView />, { path: '/panel', en }) }
 }
 
 function today(): string {
@@ -87,9 +87,9 @@ describe('InsightsView: indicadores', () => {
   })
 
   it('sin período anterior lo dice en vez de inventar una variación', async () => {
-    const base = resumenDeVentas()
+    const base = salesSummary()
     open('/panel', {
-      [SUMMARY]: resumenDeVentas({
+      [SUMMARY]: salesSummary({
         sales_change_percent: null,
         cancelled_amount: '0',
         previous: { ...base.previous, cancelled_orders: 0 },
@@ -101,7 +101,7 @@ describe('InsightsView: indicadores', () => {
   })
 
   it('si el resumen falla lo dice y el resto del panel sigue', async () => {
-    open('/panel', { [SUMMARY]: new RespuestaDeError(500, 'El resumen no responde') })
+    open('/panel', { [SUMMARY]: new ErrorResponse(500, 'El resumen no responde') })
     expect(await screen.findByText('El resumen no responde')).toBeInTheDocument()
     expect(await screen.findByText('Platos más vendidos')).toBeInTheDocument()
   })

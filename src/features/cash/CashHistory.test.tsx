@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { resumenDeCaja, turnoDeCaja } from '#jest/fixtures/cash'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { cashRegisterSummary, cashRegisterShift } from '#jest/fixtures/cash'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import type { CashSession } from '@/api/types'
 import { CashHistory } from './CashHistory'
 
@@ -11,7 +11,7 @@ const TWO_HUNDRED = '200.00'
 const LUIS = 'Luis Rojas'
 
 function closed(id: number, changes: Partial<CashSession> = {}): CashSession {
-  return turnoDeCaja({
+  return cashRegisterShift({
     id,
     is_open: false,
     closed_by_name: LUIS,
@@ -23,12 +23,12 @@ function closed(id: number, changes: Partial<CashSession> = {}): CashSession {
 }
 
 function open(items: CashSession[], total = items.length) {
-  const api = servidor().on('get', SESSIONS, (request: { params: Record<string, unknown> }) => ({
+  const api = server().on('get', SESSIONS, (request: { params: Record<string, unknown> }) => ({
     items: request.params['offset'] === 0 ? items : [closed(99, { opened_by_name: 'Turno viejo' })],
     total,
   }))
-  entrarComo()
-  return { api, ...montar(<CashHistory />) }
+  signInAs()
+  return { api, ...handleMount(<CashHistory />) }
 }
 
 describe('CashHistory', () => {
@@ -41,7 +41,7 @@ describe('CashHistory', () => {
     open([
       closed(1),
       closed(2, { difference: '-4.00', counted_cash: '196.00' }),
-      turnoDeCaja({ id: 3, is_open: true, expected_cash: null }),
+      cashRegisterShift({ id: 3, is_open: true, expected_cash: null }),
     ])
     expect(await screen.findByText('Cuadró')).toHaveClass('text-success')
     expect(screen.getByText('Diferencia -S/ 4.00')).toHaveClass('text-destructive')
@@ -64,7 +64,7 @@ describe('CashHistory', () => {
   })
 
   it('al tocar un turno abre su arqueo firmado con la nota del cierre', async () => {
-    const summary = resumenDeCaja({
+    const summary = cashRegisterSummary({
       discounts: '5.00',
       courtesies: '3.00',
       discounted_orders: 1,
@@ -86,7 +86,7 @@ describe('CashHistory', () => {
 
   it('si el turno no se puede leer lo dice dentro de la ventana', async () => {
     const { api, user } = open([closed(1)])
-    api.on('get', '/cash/sessions/1', new RespuestaDeError(404, 'Ese turno no existe'))
+    api.on('get', '/cash/sessions/1', new ErrorResponse(404, 'Ese turno no existe'))
 
     await user.click(await screen.findByRole('button', { name: /Cuadró/u }))
 
@@ -95,9 +95,9 @@ describe('CashHistory', () => {
   })
 
   it('si la lista falla muestra el error', async () => {
-    servidor().on('get', SESSIONS, new RespuestaDeError(500, 'Sin conexión con la base'))
-    entrarComo()
-    montar(<CashHistory />)
+    server().on('get', SESSIONS, new ErrorResponse(500, 'Sin conexión con la base'))
+    signInAs()
+    handleMount(<CashHistory />)
     expect(await screen.findByText('Sin conexión con la base')).toBeInTheDocument()
   })
 })

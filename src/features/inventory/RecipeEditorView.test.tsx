@@ -1,24 +1,24 @@
 import { describe, expect, it } from '@jest/globals'
 import { act, screen, within } from '@testing-library/react'
 
-import { costoDePlato, insumo, receta } from '#jest/fixtures/inventario'
-import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
+import { dishCost, ingredient, recipe } from '#jest/fixtures/inventario'
+import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import type { PermissionCode, Recipe } from '@/api/types'
 import { InventoryView } from './InventoryView'
 import { RecipeEditorView } from './RecipeEditorView'
 
 const RECIPE = '/inventory/recipes/10'
-const CEBOLLA = insumo({ id: 2, name: 'Cebolla', unit_cost: '0.002' })
+const CEBOLLA = ingredient({ id: 2, name: 'Cebolla', unit_cost: '0.002' })
 const ONLY_READ: PermissionCode[] = ['inventory.read']
 const SAVE = { name: 'Guardar receta' }
 const INGREDIENTS = '/inventory/ingredients'
 const EN = '/inventario/recetas/10'
 const ROUTE = { path: '/inventario/recetas/:menuItemId', en: EN }
 
-function openRecipe(initial: Recipe = receta(), permissions: readonly PermissionCode[] = PERMISOS_ENCARGADO) {
-  const api = servidor().on('get', RECIPE, initial).on('get', INGREDIENTS, [insumo(), CEBOLLA])
-  entrarComo(permissions)
-  return { api, ...montar(<RecipeEditorView />, ROUTE) }
+function openRecipe(initial: Recipe = recipe(), permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
+  const api = server().on('get', RECIPE, initial).on('get', INGREDIENTS, [ingredient(), CEBOLLA])
+  signInAs(permissions)
+  return { api, ...handleMount(<RecipeEditorView />, ROUTE) }
 }
 
 function value(term: string) {
@@ -38,7 +38,7 @@ describe('RecipeEditorView', () => {
 
   it('agregar un insumo y escribir su cantidad recalcula el costo al instante y se guarda completo', async () => {
     const { api, user } = openRecipe()
-    api.on('put', RECIPE, receta({ cost: '1.20' }))
+    api.on('put', RECIPE, recipe({ cost: '1.20' }))
 
     const save = await screen.findByRole('button', SAVE)
     expect(save).toBeDisabled()
@@ -62,7 +62,7 @@ describe('RecipeEditorView', () => {
 
   it('quitar el último insumo avisa que guardar borra la receta', async () => {
     const { api, user } = openRecipe()
-    api.on('put', RECIPE, receta({ has_recipe: false, lines: [], cost: null, margin: null, margin_percent: null }))
+    api.on('put', RECIPE, recipe({ has_recipe: false, lines: [], cost: null, margin: null, margin_percent: null }))
 
     await user.click(await screen.findByRole('button', { name: 'Quitar Limón' }))
     expect(screen.getByText('Sin insumos: al guardar, el plato queda sin receta y sin costo.')).toBeInTheDocument()
@@ -74,7 +74,7 @@ describe('RecipeEditorView', () => {
   })
 
   it('una cantidad en cero no se guarda y un margen negativo se marca', async () => {
-    const { api, user } = openRecipe(receta({ price: '0.50' }))
+    const { api, user } = openRecipe(recipe({ price: '0.50' }))
     const field = await screen.findByLabelText('Limón')
     expect(value('Margen')).toHaveTextContent('-S/ 0.50')
     await user.clear(field)
@@ -86,7 +86,7 @@ describe('RecipeEditorView', () => {
   })
 
   it('quien solo consulta ve la receta sin poder cambiarla', async () => {
-    openRecipe(receta(), ONLY_READ)
+    openRecipe(recipe(), ONLY_READ)
     expect(await screen.findByLabelText('Limón')).toHaveAttribute('readonly')
     expect(screen.queryByRole('button', { name: 'Quitar Limón' })).not.toBeInTheDocument()
     expect(screen.queryByLabelText('Agregar insumo')).not.toBeInTheDocument()
@@ -95,16 +95,16 @@ describe('RecipeEditorView', () => {
 
   it('si el servidor rechaza el guardado, el error queda junto a la receta', async () => {
     const { api, user } = openRecipe()
-    api.on('put', RECIPE, new RespuestaDeError(422, 'Un insumo ya no existe.'))
+    api.on('put', RECIPE, new ErrorResponse(422, 'Un insumo ya no existe.'))
     await user.type(await screen.findByLabelText('Limón'), '0')
     await user.click(screen.getByRole('button', SAVE))
     expect(await screen.findByText('Un insumo ya no existe.')).toBeInTheDocument()
   })
 
   it('llegando desde el menú, vuelve al menú', async () => {
-    servidor().on('get', RECIPE, new RespuestaDeError(404, 'Ese plato no existe.')).on('get', INGREDIENTS, [])
-    entrarComo()
-    const { router } = montar(<RecipeEditorView />, ROUTE)
+    server().on('get', RECIPE, new ErrorResponse(404, 'Ese plato no existe.')).on('get', INGREDIENTS, [])
+    signInAs()
+    const { router } = handleMount(<RecipeEditorView />, ROUTE)
     await act(() => router.navigate(EN, { state: { from: '/menu' } }))
 
     expect(await screen.findByText('Ese plato no existe.')).toBeInTheDocument()
@@ -114,15 +114,15 @@ describe('RecipeEditorView', () => {
 
 describe('RecipesPanel', () => {
   it('lista el costo y margen de cada plato, y avisa los que no tienen receta', async () => {
-    servidor()
+    server()
       .on('get', '/inventory/recipes', [
-        costoDePlato(),
-        costoDePlato({ menu_item_id: 11, menu_item_name: 'Causa', has_recipe: false, cost: null, margin: null, margin_percent: null, is_active: false }),
+        dishCost(),
+        dishCost({ menu_item_id: 11, menu_item_name: 'Causa', has_recipe: false, cost: null, margin: null, margin_percent: null, is_active: false }),
       ])
       .on('get', INGREDIENTS, [])
       .on('get', '/inventory/alerts/low-stock', [])
-    entrarComo(ONLY_READ)
-    montar(<InventoryView />, { path: '/inventario', en: '/inventario?vista=recetas' })
+    signInAs(ONLY_READ)
+    handleMount(<InventoryView />, { path: '/inventario', en: '/inventario?vista=recetas' })
 
     const row = (await screen.findByText('Ceviche')).closest('tr') as HTMLElement
     expect(within(row).getByText('S/ 18.00')).toBeInTheDocument()

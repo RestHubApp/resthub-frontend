@@ -1,19 +1,19 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { celda, merma, reportesDelPanel } from '#jest/fixtures/panel'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { cell, waste, panelReports } from '#jest/fixtures/panel'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import { InsightsView } from './InsightsView'
 
 const WASTES = '/insights/waste'
 
 function open(changes: Record<string, unknown> = {}) {
-  const api = servidor()
-  for (const [route, data] of Object.entries({ ...reportesDelPanel(), ...changes })) {
+  const api = server()
+  for (const [route, data] of Object.entries({ ...panelReports(), ...changes })) {
     api.on('get', route, data)
   }
-  entrarComo()
-  return { api, ...montar(<InsightsView />, { path: '/panel' }) }
+  signInAs()
+  return { api, ...handleMount(<InsightsView />, { path: '/panel' }) }
 }
 
 function section(title: string): HTMLElement {
@@ -78,7 +78,7 @@ describe('InsightsView: secciones', () => {
 
   it('si la IA falla al clasificar, lo dice', async () => {
     const { api, user } = open()
-    api.on('post', '/insights/waste/classify', new RespuestaDeError(503, 'Jev no responde'))
+    api.on('post', '/insights/waste/classify', new ErrorResponse(503, 'Jev no responde'))
 
     await user.click(await screen.findByRole('button', { name: 'Clasificar mermas pendientes (2)' }))
 
@@ -88,13 +88,13 @@ describe('InsightsView: secciones', () => {
   it('un período sin movimiento muestra cada sección vacía con su aviso', async () => {
     open({
       '/insights/sales/daily': { days: [{ date: '2026-09-26', sales: '0', paid_orders: 0, average_ticket: '0' }] },
-      '/insights/sales/hourly': { cells: [celda(0, 12, 0)], peak: null },
+      '/insights/sales/hourly': { cells: [cell(0, 12, 0)], peak: null },
       '/insights/dishes/top': { dishes: [] },
       '/insights/payments': { methods: [], total: '0' },
       '/insights/dishes/margins': { dishes: [] },
       '/insights/waiters': { waiters: [] },
       '/insights/low-stock': [],
-      [WASTES]: merma({ events: 0, pending_classification: 0, by_cause: [], by_ingredient: [] }),
+      [WASTES]: waste({ events: 0, pending_classification: 0, by_cause: [], by_ingredient: [] }),
     })
     expect(await screen.findByText('Con un solo día no hay tendencia')).toBeInTheDocument()
     expect(screen.getByText('No hubo pedidos pagados en este rango.')).toBeInTheDocument()
@@ -108,7 +108,7 @@ describe('InsightsView: secciones', () => {
   })
 
   it('cada sección que falla lo dice por su cuenta', async () => {
-    const error = new RespuestaDeError(500, [])
+    const error = new ErrorResponse(500, [])
     open({ '/insights/sales/daily': error, '/insights/sales/hourly': error, [WASTES]: error, '/insights/waiters': error })
     expect(await screen.findByText('No se pudieron cargar las ventas por día.')).toBeInTheDocument()
     expect(screen.getByText('No se pudo cargar el mapa por hora.')).toBeInTheDocument()

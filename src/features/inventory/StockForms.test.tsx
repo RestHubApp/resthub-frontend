@@ -1,12 +1,12 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { cambioDeStock, insumo } from '#jest/fixtures/inventario'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { stockChange, ingredient } from '#jest/fixtures/inventario'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import { InventoryView } from './InventoryView'
 
 const INGREDIENTS = '/inventory/ingredients'
-const LIMON = insumo()
+const LIMON = ingredient()
 const NEW = 'Nuevo insumo'
 const MIN = 'Stock mínimo'
 const CREATE = { name: 'Crear insumo' }
@@ -14,9 +14,9 @@ const PURCHASES = '/inventory/purchases'
 const SETTINGS = '/inventory/adjustments'
 
 function open() {
-  const api = servidor().on('get', INGREDIENTS, [LIMON]).on('get', '/inventory/alerts/low-stock', []).on('get', '/restaurant', new RespuestaDeError(404))
-  entrarComo()
-  return { api, ...montar(<InventoryView />, { path: '/inventario' }) }
+  const api = server().on('get', INGREDIENTS, [LIMON]).on('get', '/inventory/alerts/low-stock', []).on('get', '/restaurant', new ErrorResponse(404))
+  signInAs()
+  return { api, ...handleMount(<InventoryView />, { path: '/inventario' }) }
 }
 
 async function action(user: ReturnType<typeof open>['user'], button: string, title: string) {
@@ -27,7 +27,7 @@ async function action(user: ReturnType<typeof open>['user'], button: string, tit
 describe('alta y edición de insumos', () => {
   it('crea un insumo con el mínimo en kilos y el costo por kilo, enviados en gramos', async () => {
     const { api, user } = open()
-    api.on('post', INGREDIENTS, insumo({ id: 5, name: 'Pollo' }))
+    api.on('post', INGREDIENTS, ingredient({ id: 5, name: 'Pollo' }))
     const window = await action(user, NEW, NEW)
 
     await user.type(within(window).getByLabelText('Nombre'), 'Pollo')
@@ -41,7 +41,7 @@ describe('alta y edición de insumos', () => {
 
   it('al elegir unidades, el mínimo y el costo se piden por unidad', async () => {
     const { api, user } = open()
-    api.on('post', INGREDIENTS, insumo({ id: 6, name: 'Gaseosa', unit: 'unit' }))
+    api.on('post', INGREDIENTS, ingredient({ id: 6, name: 'Gaseosa', unit: 'unit' }))
     const window = await action(user, NEW, NEW)
 
     await user.selectOptions(within(window).getByLabelText('Cómo se mide'), 'unit')
@@ -57,7 +57,7 @@ describe('alta y edición de insumos', () => {
 
   it('editar parte de los datos en kilos, no deja cambiar la unidad y muestra el error del servidor', async () => {
     const { api, user } = open()
-    api.on('patch', `${INGREDIENTS}/1`, new RespuestaDeError(409, 'Ya hay un insumo con ese nombre.'))
+    api.on('patch', `${INGREDIENTS}/1`, new ErrorResponse(409, 'Ya hay un insumo con ese nombre.'))
     const window = await action(user, 'Editar Limón', 'Editar: Limón')
 
     expect(within(window).getByLabelText(MIN)).toHaveValue('2')
@@ -80,7 +80,7 @@ describe('alta y edición de insumos', () => {
 describe('compras, mermas y ajustes', () => {
   it('una compra por kilo muestra el total, cómo queda el stock y lo envía en gramos', async () => {
     const { api, user } = open()
-    api.on('post', PURCHASES, cambioDeStock(insumo({ stock: '10000' })))
+    api.on('post', PURCHASES, stockChange(ingredient({ stock: '10000' })))
     const window = await action(user, 'Compra de Limón', 'Registrar compra: Limón')
 
     expect(within(window).getByLabelText('Costo por kg (S/)')).toHaveValue('4')
@@ -95,7 +95,7 @@ describe('compras, mermas y ajustes', () => {
 
   it('con el total pagado, el costo por gramo sale de dividir', async () => {
     const { api, user } = open()
-    api.on('post', PURCHASES, cambioDeStock(insumo({ stock: '5500' })))
+    api.on('post', PURCHASES, stockChange(ingredient({ stock: '5500' })))
     const window = await action(user, 'Compra de Limón', 'Registrar compra: Limón')
 
     await user.type(within(window).getByLabelText('Cantidad comprada'), '500')
@@ -112,7 +112,7 @@ describe('compras, mermas y ajustes', () => {
 
   it('una merma exige motivo, avisa si deja el stock bajo el mínimo y se envía en gramos', async () => {
     const { api, user } = open()
-    api.on('post', '/inventory/waste', cambioDeStock(insumo({ stock: '1000' })))
+    api.on('post', '/inventory/waste', stockChange(ingredient({ stock: '1000' })))
     const window = await action(user, 'Merma de Limón', 'Registrar merma: Limón')
 
     await user.type(within(window).getByLabelText('Cantidad perdida'), '4000')
@@ -128,7 +128,7 @@ describe('compras, mermas y ajustes', () => {
 
   it('un conteo envía lo contado y el servidor calcula la diferencia', async () => {
     const { api, user } = open()
-    api.on('post', SETTINGS, cambioDeStock(insumo({ stock: '3000' }), { kind: 'adjustment', quantity: '-2000' }))
+    api.on('post', SETTINGS, stockChange(ingredient({ stock: '3000' }), { kind: 'adjustment', quantity: '-2000' }))
     const window = await action(user, 'Ajuste de Limón', 'Ajustar stock: Limón')
 
     await user.type(within(window).getByLabelText('Stock contado'), '3')
@@ -141,7 +141,7 @@ describe('compras, mermas y ajustes', () => {
 
   it('una diferencia que sobra se suma; si falla, el error queda en el formulario', async () => {
     const { api, user } = open()
-    api.on('post', SETTINGS, new RespuestaDeError(422, 'El motivo es muy corto.'))
+    api.on('post', SETTINGS, new ErrorResponse(422, 'El motivo es muy corto.'))
     const window = await action(user, 'Ajuste de Limón', 'Ajustar stock: Limón')
 
     await user.click(within(window).getByLabelText('Sé cuánto sobra o falta'))

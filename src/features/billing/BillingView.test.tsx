@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { ajustesFiscales, comprobante } from '#jest/fixtures/panel'
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { taxSettings, invoice } from '#jest/fixtures/panel'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import type { BillingSettings, Invoice } from '@/api/types'
 import { BillingView } from './BillingView'
 
@@ -11,10 +11,10 @@ const ISSUED = '/billing/invoices'
 const RUC = 'RUC del local'
 const SAVE = { name: 'Guardar datos fiscales' }
 
-function open(settings: BillingSettings = ajustesFiscales(), issued: Invoice[] = []) {
-  const api = servidor().on('get', SETTINGS, settings).on('get', ISSUED, { items: issued, total: issued.length })
-  entrarComo()
-  return { api, ...montar(<BillingView />) }
+function open(settings: BillingSettings = taxSettings(), issued: Invoice[] = []) {
+  const api = server().on('get', SETTINGS, settings).on('get', ISSUED, { items: issued, total: issued.length })
+  signInAs()
+  return { api, ...handleMount(<BillingView />) }
 }
 
 describe('BillingView: datos fiscales', () => {
@@ -25,14 +25,14 @@ describe('BillingView: datos fiscales', () => {
   })
 
   it('si falta algo para enviar a SUNAT se abren solos y dicen que falta el token', async () => {
-    open(ajustesFiscales({ is_ready: false, has_provider_token: false }))
+    open(taxSettings({ is_ready: false, has_provider_token: false }))
     expect(await screen.findByRole('button', { name: /Datos fiscales/u })).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByText('Todavía no cargado.')).toBeInTheDocument()
   })
 
   it('guarda con la tasa en punto decimal, series en mayúsculas y sin tocar el token vacío', async () => {
-    const { api, user } = open(ajustesFiscales({ is_ready: false }))
-    api.on('put', SETTINGS, ajustesFiscales())
+    const { api, user } = open(taxSettings({ is_ready: false }))
+    api.on('put', SETTINGS, taxSettings())
     const igv = await screen.findByLabelText('IGV (%)')
 
     await user.clear(igv)
@@ -51,7 +51,7 @@ describe('BillingView: datos fiscales', () => {
   })
 
   it('valida el RUC y las series antes de enviar', async () => {
-    const { api, user } = open(ajustesFiscales({ is_ready: false }))
+    const { api, user } = open(taxSettings({ is_ready: false }))
     const ruc = await screen.findByLabelText(RUC)
 
     await user.clear(ruc)
@@ -66,8 +66,8 @@ describe('BillingView: datos fiscales', () => {
   })
 
   it('un error del servidor al guardar se muestra en el formulario', async () => {
-    const { api, user } = open(ajustesFiscales({ is_ready: false }))
-    api.on('put', SETTINGS, new RespuestaDeError(422, 'El proveedor rechazó el token'))
+    const { api, user } = open(taxSettings({ is_ready: false }))
+    api.on('put', SETTINGS, new ErrorResponse(422, 'El proveedor rechazó el token'))
 
     await user.type(await screen.findByLabelText('Token del proveedor'), 'secreto')
     await user.click(screen.getByRole('button', SAVE))
@@ -84,7 +84,7 @@ describe('BillingView: emitidos', () => {
   })
 
   it('un comprobante aceptado se imprime pero no se reenvía', async () => {
-    open(ajustesFiscales(), [comprobante()])
+    open(taxSettings(), [invoice()])
     const row = (await screen.findByText(/B001-12 · S\/ 60.00/u)).closest('li')
     expect(row).not.toBeNull()
     const inRow = within(row as HTMLElement)
@@ -93,8 +93,8 @@ describe('BillingView: emitidos', () => {
   })
 
   it('reenvía un comprobante rechazado y avisa cómo quedó', async () => {
-    const rejected = comprobante({ id: 6, code: 'F001-3', status: 'rejected', status_label: 'Rechazado' })
-    const { api, user } = open(ajustesFiscales(), [rejected])
+    const rejected = invoice({ id: 6, code: 'F001-3', status: 'rejected', status_label: 'Rechazado' })
+    const { api, user } = open(taxSettings(), [rejected])
     api.on('post', '/billing/invoices/6/resend', { ...rejected, status: 'accepted', status_label: 'Aceptado por SUNAT' })
 
     await user.click(await screen.findByRole('button', { name: 'Reenviar' }))
@@ -103,9 +103,9 @@ describe('BillingView: emitidos', () => {
   })
 
   it('si el reenvío falla lo avisa', async () => {
-    const pending = comprobante({ id: 7, status: 'pending', status_label: 'Sin enviar' })
-    const { api, user } = open(ajustesFiscales(), [pending])
-    api.on('post', '/billing/invoices/7/resend', new RespuestaDeError(502, 'El proveedor no responde'))
+    const pending = invoice({ id: 7, status: 'pending', status_label: 'Sin enviar' })
+    const { api, user } = open(taxSettings(), [pending])
+    api.on('post', '/billing/invoices/7/resend', new ErrorResponse(502, 'El proveedor no responde'))
 
     await user.click(await screen.findByRole('button', { name: 'Reenviar' }))
 
@@ -113,11 +113,11 @@ describe('BillingView: emitidos', () => {
   })
 
   it('pagina de a 25 comprobantes', async () => {
-    const api = servidor()
-      .on('get', SETTINGS, ajustesFiscales())
-      .on('get', ISSUED, { items: [comprobante()], total: 30 })
-    entrarComo()
-    const { user } = montar(<BillingView />)
+    const api = server()
+      .on('get', SETTINGS, taxSettings())
+      .on('get', ISSUED, { items: [invoice()], total: 30 })
+    signInAs()
+    const { user } = handleMount(<BillingView />)
 
     await user.click(await screen.findByRole('button', { name: 'Siguiente' }))
 
@@ -126,9 +126,9 @@ describe('BillingView: emitidos', () => {
   })
 
   it('si la lista falla muestra el error', async () => {
-    servidor().on('get', SETTINGS, ajustesFiscales()).on('get', ISSUED, new RespuestaDeError(500, 'Sin base'))
-    entrarComo()
-    montar(<BillingView />)
+    server().on('get', SETTINGS, taxSettings()).on('get', ISSUED, new ErrorResponse(500, 'Sin base'))
+    signInAs()
+    handleMount(<BillingView />)
     expect(await screen.findByText('Sin base')).toBeInTheDocument()
   })
 })

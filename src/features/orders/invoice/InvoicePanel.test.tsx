@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { comprobante, pagado, pago, pedido } from '#jest/fixtures/cobro'
-import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { invoice, paid, payment, handleOrder } from '#jest/fixtures/cobro'
+import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { InvoicePanel } from './InvoicePanel'
 
@@ -13,27 +13,27 @@ const DIALOG = { name: 'Comprobante del pedido #34' }
 const ISSUE_SALES_RECEIPT = { name: 'Emitir boleta' }
 
 function paidBy(total: string): OrderResponse {
-  return pagado(pedido({ total, balance: total }), pago({ amount: total }))
+  return paid(handleOrder({ total, balance: total }), payment({ amount: total }))
 }
 
 // Como el servidor: emitido, el comprobante queda como el del pedido.
-function onIssue(api: ReturnType<typeof servidor>, issued: ReturnType<typeof comprobante>) {
+function onIssue(api: ReturnType<typeof server>, issued: ReturnType<typeof invoice>) {
   api.on('post', ISSUE, () => {
     api.on('get', OF_ORDER, issued)
     return issued
   })
 }
 
-function issueFor(order: OrderResponse = paidBy('50.00'), permissions = PERMISOS_ENCARGADO) {
-  const api = servidor()
-  entrarComo(permissions)
-  return { api, ...montar(<InvoicePanel order={order} />) }
+function issueFor(order: OrderResponse = paidBy('50.00'), permissions = PERMISSIONS_OWNER) {
+  const api = server()
+  signInAs(permissions)
+  return { api, ...handleMount(<InvoicePanel order={order} />) }
 }
 
 describe('InvoicePanel', () => {
   it('una boleta chica puede ir a «clientes varios» sin pedir datos', async () => {
     const { api, user } = issueFor()
-    onIssue(api, comprobante())
+    onIssue(api, invoice())
 
     await user.click(await screen.findByRole('button', OPEN))
     const dialog = within(await screen.findByRole('dialog', DIALOG))
@@ -71,7 +71,7 @@ describe('InvoicePanel', () => {
 
   it('la factura va con RUC, razón social y dirección fiscal', async () => {
     const { api, user } = issueFor()
-    onIssue(api, comprobante({ kind: 'factura', kind_label: 'Factura', code: 'F001-3' }))
+    onIssue(api, invoice({ kind: 'factura', kind_label: 'Factura', code: 'F001-3' }))
 
     await user.click(await screen.findByRole('button', OPEN))
     const dialog = within(await screen.findByRole('dialog', DIALOG))
@@ -94,7 +94,7 @@ describe('InvoicePanel', () => {
 
   it('si el proveedor rechaza la emisión, lo dice dentro de la ventana', async () => {
     const { api, user } = issueFor()
-    api.on('post', ISSUE, new RespuestaDeError(502, 'El proveedor no respondió.'))
+    api.on('post', ISSUE, new ErrorResponse(502, 'El proveedor no respondió.'))
 
     await user.click(await screen.findByRole('button', OPEN))
     await user.click(await screen.findByRole('button', ISSUE_SALES_RECEIPT))
@@ -105,7 +105,7 @@ describe('InvoicePanel', () => {
 
   it('ya emitido muestra el estado y el PDF del proveedor', async () => {
     const { api } = issueFor()
-    api.on('get', OF_ORDER, comprobante({ status: 'rejected', status_label: 'Rechazada', pdf_url: 'https://pse.pe/b.pdf' }))
+    api.on('get', OF_ORDER, invoice({ status: 'rejected', status_label: 'Rechazada', pdf_url: 'https://pse.pe/b.pdf' }))
 
     expect(await screen.findByText('Rechazada')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'PDF' })).toHaveAttribute('href', 'https://pse.pe/b.pdf')
@@ -113,8 +113,8 @@ describe('InvoicePanel', () => {
   })
 
   it('sin permiso para emitir, o con el pedido sin pagar, no aparece ni consulta', () => {
-    const { api } = issueFor(paidBy('50.00'), PERMISOS_MESERO)
-    montar(<InvoicePanel order={pedido()} />)
+    const { api } = issueFor(paidBy('50.00'), PERMISSIONS_WAITER)
+    handleMount(<InvoicePanel order={handleOrder()} />)
 
     expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
     expect(api.llamadas('get', OF_ORDER)).toHaveLength(0)

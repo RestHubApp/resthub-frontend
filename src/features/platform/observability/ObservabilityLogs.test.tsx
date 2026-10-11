@@ -2,16 +2,16 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
 import {
-  entrarAPlataforma,
-  ESTADOS_OBS,
+  signInToPlatform,
+  STATUSES_OBS,
   logObs,
-  montarPlataforma,
-  peticionObs,
-  RESUMEN_OBS,
-  RUTAS_OBS,
-  SERIE_OBS,
+  mountPlatform,
+  requestObs,
+  SUMMARY_OBS,
+  ROUTES_OBS,
+  SERIES_OBS,
 } from '#jest/fixtures/plataforma'
-import { servidor } from '#jest/harness'
+import { server } from '#jest/harness'
 
 const FILTER_LOGS = 'Filtrar logs'
 const FILTER_REQUESTS = 'Filtrar peticiones'
@@ -23,16 +23,16 @@ const EMPTY = { items: [], next_before_id: null }
 const VIEW_DETAIL = { name: 'Ver detalle' }
 
 function openPanel(logs: unknown = { items: [logObs()], next_before_id: null }, requests: unknown = EMPTY) {
-  const api = servidor()
-    .on('get', `${BASE}/summary`, RESUMEN_OBS)
-    .on('get', `${BASE}/timeseries`, SERIE_OBS)
-    .on('get', `${BASE}/status`, ESTADOS_OBS)
-    .on('get', `${BASE}/routes`, RUTAS_OBS)
+  const api = server()
+    .on('get', `${BASE}/summary`, SUMMARY_OBS)
+    .on('get', `${BASE}/timeseries`, SERIES_OBS)
+    .on('get', `${BASE}/status`, STATUSES_OBS)
+    .on('get', `${BASE}/routes`, ROUTES_OBS)
     .on('get', LOGS, logs)
     .on('get', REQUESTS, requests)
     .on('get', '/platform/restaurants', { items: [], total: 0 })
-  entrarAPlataforma()
-  return { api, ...montarPlataforma('/plataforma/observabilidad') }
+  signInToPlatform()
+  return { api, ...mountPlatform('/plataforma/observabilidad') }
 }
 
 function filters(name: string): HTMLElement {
@@ -107,7 +107,7 @@ describe('logs del panel', () => {
 
 describe('peticiones del panel', () => {
   it('muestra cada petición con su estado, tiempos y cuenta, y lleva a sus logs', async () => {
-    const { api, user, router } = openPanel(EMPTY, { items: [peticionObs()], next_before_id: null })
+    const { api, user, router } = openPanel(EMPTY, { items: [requestObs()], next_before_id: null })
 
     // La ruta también está en la tabla de rutas: la fila de la petición es la que lleva su request_id.
     const row = await screen.findByRole('row', { name: /req-abc/u })
@@ -122,7 +122,7 @@ describe('peticiones del panel', () => {
   })
 
   it('filtra desde un estado y por request_id', async () => {
-    const { api, user } = openPanel(EMPTY, { items: [peticionObs()], next_before_id: null })
+    const { api, user } = openPanel(EMPTY, { items: [requestObs()], next_before_id: null })
     await screen.findByRole('row', { name: /order_id/u })
 
     await user.selectOptions(within(filters(FILTER_REQUESTS)).getByRole('combobox'), 'Solo 5xx')

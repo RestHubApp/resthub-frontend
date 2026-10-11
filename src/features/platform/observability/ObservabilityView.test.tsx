@@ -2,15 +2,15 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
 import {
-  entrarAPlataforma,
-  ESTADOS_OBS,
-  montarPlataforma,
-  RESUMEN_OBS,
-  resumenDeRestaurante,
-  RUTAS_OBS,
-  SERIE_OBS,
+  signInToPlatform,
+  STATUSES_OBS,
+  mountPlatform,
+  SUMMARY_OBS,
+  restaurantSummary,
+  ROUTES_OBS,
+  SERIES_OBS,
 } from '#jest/fixtures/plataforma'
-import { RespuestaDeError, servidor } from '#jest/harness'
+import { ErrorResponse, server } from '#jest/harness'
 
 const WINDOW_INDICATORS = 'Indicadores de la ventana'
 const ARIA_PRESSED = 'aria-pressed'
@@ -21,16 +21,16 @@ const ROUTES = `${BASE}/routes`
 const PAGE = { items: [], next_before_id: null }
 
 function openPanel(en = '/plataforma/observabilidad') {
-  const api = servidor()
-    .on('get', SUMMARY, RESUMEN_OBS)
-    .on('get', `${BASE}/timeseries`, SERIE_OBS)
-    .on('get', `${BASE}/status`, ESTADOS_OBS)
-    .on('get', ROUTES, RUTAS_OBS)
+  const api = server()
+    .on('get', SUMMARY, SUMMARY_OBS)
+    .on('get', `${BASE}/timeseries`, SERIES_OBS)
+    .on('get', `${BASE}/status`, STATUSES_OBS)
+    .on('get', ROUTES, ROUTES_OBS)
     .on('get', `${BASE}/logs`, PAGE)
     .on('get', `${BASE}/requests`, PAGE)
-    .on('get', '/platform/restaurants', { items: [resumenDeRestaurante()], total: 1 })
-  entrarAPlataforma()
-  return { api, ...montarPlataforma(en) }
+    .on('get', '/platform/restaurants', { items: [restaurantSummary()], total: 1 })
+  signInToPlatform()
+  return { api, ...mountPlatform(en) }
 }
 
 // La tarjeta de un gráfico: la que tiene su título como encabezado.
@@ -156,7 +156,7 @@ describe('ObservabilityView: actualización, rutas y errores', () => {
 
   it('avisa de eventos perdidos y de una ventana muestreada', async () => {
     const { api } = openPanel()
-    api.on('get', SUMMARY, { ...RESUMEN_OBS, dropped_events: 5, sampled: true })
+    api.on('get', SUMMARY, { ...SUMMARY_OBS, dropped_events: 5, sampled: true })
 
     expect(await screen.findByText('Eventos perdidos')).toBeInTheDocument()
     expect(screen.getByText(/los percentiles salen de una muestra pareja/u)).toBeInTheDocument()
@@ -164,7 +164,7 @@ describe('ObservabilityView: actualización, rutas y errores', () => {
 
   it('una lectura que falla muestra su error sin tumbar el resto', async () => {
     const { api } = openPanel()
-    api.on('get', SUMMARY, new RespuestaDeError(500, 'Resumen caído'))
+    api.on('get', SUMMARY, new ErrorResponse(500, 'Resumen caído'))
 
     expect(await screen.findByText('Resumen caído')).toBeInTheDocument()
     expect(await screen.findByRole('list', { name: 'Respuestas por estado HTTP' })).toBeInTheDocument()

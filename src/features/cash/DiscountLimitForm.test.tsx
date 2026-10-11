@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
+import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import type { OwnRestaurant } from '@/api/types'
 import { DiscountLimitForm } from './DiscountLimitForm'
 
@@ -25,9 +25,9 @@ function restaurant(changes: Partial<OwnRestaurant> = {}): OwnRestaurant {
 }
 
 function open() {
-  const api = servidor().on('get', ROUTE, restaurant())
-  entrarComo()
-  return { api, ...montar(<DiscountLimitForm />) }
+  const api = server().on('get', ROUTE, restaurant())
+  signInAs()
+  return { api, ...handleMount(<DiscountLimitForm />) }
 }
 
 describe('DiscountLimitForm', () => {
@@ -63,7 +63,7 @@ describe('DiscountLimitForm', () => {
 
   it('si el servidor lo rechaza, lo avisa', async () => {
     const { api, user } = open()
-    api.on('patch', ROUTE, new RespuestaDeError(403, 'Solo el encargado cambia el tope'))
+    api.on('patch', ROUTE, new ErrorResponse(403, 'Solo el encargado cambia el tope'))
     const field = await screen.findByDisplayValue('10.00')
 
     await user.clear(field)
