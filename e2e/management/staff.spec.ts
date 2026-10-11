@@ -17,9 +17,9 @@ test.beforeEach(() => {
 test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la contraseña, la desactiva y la vuelve a activar', async ({ page, local }) => {
   covers(
     'ruta:/personal',
-    'dialogo:staff/StaffView',
-    'dialogo:staff/StaffRowActions#1',
-    'dialogo:staff/StaffRowActions#2',
+    'dialogo:staff/StaffCreateDialog',
+    'dialogo:staff/StaffRowDialogs#1',
+    'dialogo:staff/StaffRowDialogs#2',
     'confirmacion:staff/StaffStatusButton',
     'funcion:personal.crear',
     'funcion:personal.correo-repetido',

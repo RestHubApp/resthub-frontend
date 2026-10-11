@@ -99,7 +99,7 @@ test('SAL-29 el historial filtra por fecha, estado, tipo y mesero, y despliega e
 }) => {
   covers(
     'ruta:/tablero/historial',
-    'desplegable:orders/HistoryView',
+    'desplegable:orders/history/HistoryColumns',
     'funcion:historial.filtrar-fecha',
     'funcion:historial.filtrar-estado',
     'funcion:historial.filtrar-tipo',

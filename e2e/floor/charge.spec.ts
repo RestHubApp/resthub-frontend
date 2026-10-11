@@ -175,7 +175,7 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
   restaurantWithCashRegister: local,
 }) => {
   covers(
-    'desplegable:orders/charge/AdjustmentsPanel',
+    'desplegable:orders/charge/CourtesyList',
     'funcion:cobro.cortesia',
     'funcion:cobro.quitar-cortesia',
     'funcion:cobro.descuento-sin-tope',

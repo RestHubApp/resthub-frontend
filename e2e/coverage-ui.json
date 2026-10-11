@@ -307,16 +307,16 @@
       "origin": "src/features/insights/AiDecisionTable.tsx"
     },
     {
-      "id": "desplegable:orders/charge/AdjustmentsPanel",
+      "id": "desplegable:orders/charge/CourtesyList",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/features/orders/charge/AdjustmentsPanel.tsx"
+      "origin": "src/features/orders/charge/CourtesyList.tsx"
     },
     {
-      "id": "desplegable:orders/HistoryView",
+      "id": "desplegable:orders/history/HistoryColumns",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/features/orders/HistoryView.tsx"
+      "origin": "src/features/orders/history/HistoryColumns.tsx"
     },
     {
       "id": "desplegable:platform/observability/ExpandButton",
@@ -327,7 +327,7 @@
     {
       "id": "dialogo:cash/CashSessionDialog",
       "type": "dialogo",
-      "description": "Cargando el arqueo…",
+      "description": "`Turno de caja ${String(sessionId)}`",
       "origin": "src/features/cash/CashSessionDialog.tsx"
     },
     {
@@ -445,22 +445,22 @@
       "origin": "src/features/roles/RoleFormDialog.tsx"
     },
     {
-      "id": "dialogo:staff/StaffRowActions#1",
-      "type": "dialogo",
-      "description": "`Editar a ${account.full_name}`",
-      "origin": "src/features/staff/StaffRowActions.tsx"
-    },
-    {
-      "id": "dialogo:staff/StaffRowActions#2",
-      "type": "dialogo",
-      "description": "`Restablecer la contraseña de ${account.full_name}`",
-      "origin": "src/features/staff/StaffRowActions.tsx"
-    },
-    {
-      "id": "dialogo:staff/StaffView",
+      "id": "dialogo:staff/StaffCreateDialog",
       "type": "dialogo",
       "description": "Nueva cuenta",
-      "origin": "src/features/staff/StaffView.tsx"
+      "origin": "src/features/staff/StaffCreateDialog.tsx"
+    },
+    {
+      "id": "dialogo:staff/StaffRowDialogs#1",
+      "type": "dialogo",
+      "description": "`Editar a ${account.full_name}`",
+      "origin": "src/features/staff/StaffRowDialogs.tsx"
+    },
+    {
+      "id": "dialogo:staff/StaffRowDialogs#2",
+      "type": "dialogo",
+      "description": "`Restablecer la contraseña de ${account.full_name}`",
+      "origin": "src/features/staff/StaffRowDialogs.tsx"
     },
     {
       "id": "dialogo:tables/TableFormDialog",

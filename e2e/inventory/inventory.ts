@@ -52,6 +52,7 @@ function routerRoutes(): Element[] {
 
 const OVERLAYS = [
   { label: 'FormDialog', type: 'dialogo' },
+  { label: 'SaveFormDialog', type: 'dialogo' },
   { label: 'ConfirmDialog', type: 'confirmacion' },
   { label: 'AlertDialog', type: 'confirmacion' },
   { label: 'Sheet', type: 'hoja' },
@@ -78,9 +79,10 @@ function codeOverlays(): Element[] {
       route.endsWith('.tsx') &&
       !route.endsWith('.test.tsx') &&
       !route.includes(join('components', 'ui')) &&
-      // Las dos envolturas compartidas, no las ventanas que las usan
-      // (`TableFormDialog`, `RoleFormDialog`).
+      // Las envolturas compartidas, no las ventanas que las usan
+      // (`TableFormDialog`, `RoleFormDialog`, `CustomerDialog`).
       !route.endsWith(join('components', 'FormDialog.tsx')) &&
+      !route.endsWith(join('components', 'SaveFormDialog.tsx')) &&
       !route.endsWith(join('components', 'ConfirmDialog.tsx')),
   )
   for (const route of sources) {
