@@ -64,7 +64,14 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Cambiar la contraseña propia */
+        /**
+         * Cambiar la contraseña propia
+         * @description Cambia la contraseña, cierra las demás sesiones y devuelve una nueva.
+         *
+         *     El cambio corta todos los tokens emitidos antes, el de esta petición
+         *     incluido. La respuesta trae el token nuevo y la sesión, con la forma del
+         *     login, para que quien cambió la contraseña siga dentro sin volver a entrar.
+         */
         post: operations["change_own_password_api_v1_auth_me_password_post"];
         delete?: never;
         options?: never;
@@ -4745,11 +4752,13 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AccessTokenResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
