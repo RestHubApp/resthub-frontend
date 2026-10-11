@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { grantCourtesy, revokeCourtesy } from '@/api/orders'
 import type { OrderItemResponse, OrderResponse } from '@/api/types'
-import { MIN_TEXTO } from '@/components/formRules'
+import { MIN_TEXT } from '@/components/formRules'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,7 +31,7 @@ export function CourtesyItem({ order, item }: CourtesyItemProps) {
       setReason(null)
     },
   })
-  const valid = (reason ?? '').trim().length >= MIN_TEXTO
+  const valid = (reason ?? '').trim().length >= MIN_TEXT
 
   return (
     <li className="flex flex-col gap-2 rounded-md px-3 py-2 ring-1 ring-input">

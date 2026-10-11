@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 
 import { repairAccessibilityMenu } from './accessibilityMenu'
 
-const ETIQUETA_ESPANOL = 'Abrir menú de accesibilidad'
-const ETIQUETA_CERRAR = 'Cerrar menú de accesibilidad'
+const LABEL_SPANISH = 'Abrir menú de accesibilidad'
+const LABEL_CLOSE = 'Cerrar menú de accesibilidad'
 const ARIA_LABEL = 'aria-label'
-const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
+const ATTRIBUTES_LABEL = [ARIA_LABEL, 'title'] as const
 
 /**
  * Widget de accesibilidad Sienna (MIT, github.com/bennyluk/Sienna-Accessibility-Widget).
@@ -37,7 +37,7 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
 // Después del `load`, no en el primer hueco del hilo: el widget evalúa 65 kB
 // y pide su idioma a un CDN. Ese trabajo, si cae en los primeros segundos,
 // alarga el LCP y el TBT que Lighthouse simula con la CPU a 4×.
-const ESPERA_TRAS_CARGA_MS = 8000
+const WAIT_AFTER_LOAD_MS = 8000
 
 declare global {
   interface Window {
@@ -49,42 +49,42 @@ declare global {
 /**
  * Corre `cargar` unos segundos después de `load`. Devuelve cómo cancelarlo.
  */
-function cuandoTermineDeCargar(cargar: () => void): () => void {
+function whenLoadFinishes(load: () => void): () => void {
   let id = 0
-  const programar = () => {
+  const schedule = () => {
     // Las pruebas E2E marcan la ventana: el menú tiene que existir dentro del
     // tiempo de expect (8 s). Lighthouse no pone esa marca, así que sigue
     // esperando y el widget no entra en la traza del LCP.
-    const espera = window.__RESTHUB_E2E === true ? 0 : ESPERA_TRAS_CARGA_MS
-    id = window.setTimeout(cargar, espera)
+    const wait = window.__RESTHUB_E2E === true ? 0 : WAIT_AFTER_LOAD_MS
+    id = window.setTimeout(load, wait)
   }
   if (document.readyState === 'complete') {
-    programar()
+    schedule()
   } else {
-    window.addEventListener('load', programar, { once: true })
+    window.addEventListener('load', schedule, { once: true })
   }
   return () => {
-    window.removeEventListener('load', programar)
+    window.removeEventListener('load', schedule)
     window.clearTimeout(id)
   }
 }
 
 export function AccessibilityWidget() {
-  useEffect(() => cuandoTermineDeCargar(() => void import('sienna-accessibility')), [])
+  useEffect(() => whenLoadFinishes(() => void import('sienna-accessibility')), [])
 
   useEffect(() => {
-    function parchearBoton(boton: Element) {
+    function patchButton(button: Element) {
       // Solo escribe si cambió: así el propio parche no vuelve a disparar el observer.
-      for (const atributo of ATRIBUTOS_ETIQUETA) {
-        if (boton.getAttribute(atributo) !== ETIQUETA_ESPANOL) {
-          boton.setAttribute(atributo, ETIQUETA_ESPANOL)
+      for (const attribute of ATTRIBUTES_LABEL) {
+        if (button.getAttribute(attribute) !== LABEL_SPANISH) {
+          button.setAttribute(attribute, LABEL_SPANISH)
         }
       }
     }
 
-    const existente = document.querySelector('.asw-menu-btn')
-    if (existente) {
-      parchearBoton(existente)
+    const existing = document.querySelector('.asw-menu-btn')
+    if (existing) {
+      patchButton(existing)
     }
 
     // El widget crea su menú la primera vez que se abre, visible pero sin
@@ -92,30 +92,30 @@ export function AccessibilityWidget() {
     // toque en la X lo pasaba a "block" y el menú seguía abierto. Se deja
     // escrito para que el primer cierre funcione. Su X, además, se anuncia en
     // inglés ("Close").
-    function fijarMenu(menu: HTMLElement | null) {
-      const capa = menu?.parentElement
-      if (capa?.style.display === '') {
-        capa.style.display = 'block'
+    function pinMenu(menu: HTMLElement | null) {
+      const layer = menu?.parentElement
+      if (layer?.style.display === '') {
+        layer.style.display = 'block'
       }
-      const cerrar = menu?.querySelector('.asw-menu-close')
-      if (cerrar && cerrar.getAttribute(ARIA_LABEL) !== ETIQUETA_CERRAR) {
-        cerrar.setAttribute(ARIA_LABEL, ETIQUETA_CERRAR)
+      const close = menu?.querySelector('.asw-menu-close')
+      if (close && close.getAttribute(ARIA_LABEL) !== LABEL_CLOSE) {
+        close.setAttribute(ARIA_LABEL, LABEL_CLOSE)
       }
       if (menu) {
         repairAccessibilityMenu(menu)
       }
-      nombrarOpciones(menu)
+      nameOptions(menu)
     }
 
     // Las opciones muestran su texto en español («Alto contraste») pero el
     // widget les deja un `aria-label` fijo en inglés («High Contrast»): un
     // lector de pantalla o el control por voz no las encuentran por lo que se
     // ve (WCAG 2.5.3). El nombre pasa a ser el texto visible.
-    function nombrarOpciones(menu: HTMLElement | null) {
-      for (const opcion of menu?.querySelectorAll('button[aria-label]') ?? []) {
-        const visible = opcion.textContent.trim()
-        if (visible !== '' && opcion.getAttribute(ARIA_LABEL) !== visible) {
-          opcion.setAttribute(ARIA_LABEL, visible)
+    function nameOptions(menu: HTMLElement | null) {
+      for (const option of menu?.querySelectorAll('button[aria-label]') ?? []) {
+        const visible = option.textContent.trim()
+        if (visible !== '' && option.getAttribute(ARIA_LABEL) !== visible) {
+          option.setAttribute(ARIA_LABEL, visible)
         }
       }
     }
@@ -123,18 +123,18 @@ export function AccessibilityWidget() {
     // El widget se importa después de montar y agrega su botón y su menú al
     // final de <body>: se observa <body> y no un contenedor que aún no existe.
     const observer = new MutationObserver(() => {
-      const boton = document.querySelector('.asw-menu-btn')
-      if (boton) {
-        parchearBoton(boton)
+      const button = document.querySelector('.asw-menu-btn')
+      if (button) {
+        patchButton(button)
       }
-      fijarMenu(document.querySelector<HTMLElement>('.asw-menu'))
+      pinMenu(document.querySelector<HTMLElement>('.asw-menu'))
     })
 
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: [...ATRIBUTOS_ETIQUETA],
+      attributeFilter: [...ATTRIBUTES_LABEL],
     })
 
     return () => {

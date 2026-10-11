@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 
 import { addPayment } from '@/api/orders'
 import type { OrderResponse, PaymentRequest } from '@/api/types'
-import { decimalParaApi } from '@/components/formRules'
+import { decimalForApi } from '@/components/formRules'
 import { centsToApi, formatMoney } from '@/services/format'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { balanceCents, chargeCents, type SplitMode } from './chargeMath'
@@ -24,8 +24,8 @@ function payloadFor(order: OrderResponse, values: ChargeValues, { modo: mode, pa
   const cash = values.payment_method === 'cash'
   const base: PaymentRequest = {
     payment_method: values.payment_method,
-    amount_received: cash ? decimalParaApi(values.amount_received) : null,
-    tip: decimalParaApi(values.tip) ?? '0',
+    amount_received: cash ? decimalForApi(values.amount_received) : null,
+    tip: decimalForApi(values.tip) ?? '0',
     // El saldo que ve quien cobra: si cambió (otro pago, un doble toque), el
     // servidor no cobra dos veces.
     expected_balance: order.balance,

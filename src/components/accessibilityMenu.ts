@@ -1,10 +1,10 @@
 // En el celular el boton flotante del widget se oculta (index.css): tapaba el
 // "+" de los platos al tomar un pedido. El menu se abre desde "Más" con esto.
 
-const BOTON_DEL_WIDGET = '.asw-menu-btn'
+const WIDGET_BUTTON = '.asw-menu-btn'
 // Cuánto se espera a que el widget recién importado dibuje su botón.
-const ESPERA_BOTON_MS = 5000
-const PASO_MS = 50
+const WAIT_BUTTON_MS = 5000
+const STEP_MS = 50
 
 /**
  * Abre el menú del widget de accesibilidad como si se tocara su botón.
@@ -14,60 +14,60 @@ const PASO_MS = 50
  * se abre en cuanto aparece el botón: antes el toque no hacía nada.
  */
 export function openAccessibilityMenu(): void {
-  const boton = document.querySelector<HTMLElement>(BOTON_DEL_WIDGET)
-  if (boton) {
-    boton.click()
+  const button = document.querySelector<HTMLElement>(WIDGET_BUTTON)
+  if (button) {
+    button.click()
     return
   }
   void import('sienna-accessibility').then(() => {
-    abrirCuandoAparezca(Date.now() + ESPERA_BOTON_MS)
+    openWhenAppears(Date.now() + WAIT_BUTTON_MS)
   })
 }
 
-function abrirCuandoAparezca(limite: number): void {
-  const boton = document.querySelector<HTMLElement>(BOTON_DEL_WIDGET)
-  if (boton) {
-    boton.click()
-  } else if (Date.now() < limite) {
+function openWhenAppears(limit: number): void {
+  const button = document.querySelector<HTMLElement>(WIDGET_BUTTON)
+  if (button) {
+    button.click()
+  } else if (Date.now() < limit) {
     window.setTimeout(() => {
-      abrirCuandoAparezca(limite)
-    }, PASO_MS)
+      openWhenAppears(limit)
+    }, STEP_MS)
   }
 }
 
-const ETIQUETA = 'aria-label'
-const TRADUCCIONES = new Map<string, string>([['Select Language', 'Elegir idioma']])
+const LABEL = 'aria-label'
+const TRANSLATIONS = new Map<string, string>([['Select Language', 'Elegir idioma']])
 
 /** Pone `valor` en el atributo solo si cambió, para no volver a disparar al observer. */
-function fijar(elemento: Element, atributo: string, valor: string): void {
-  if (elemento.getAttribute(atributo) !== valor) {
-    elemento.setAttribute(atributo, valor)
+function pin(element: Element, attribute: string, value: string): void {
+  if (element.getAttribute(attribute) !== value) {
+    element.setAttribute(attribute, value)
   }
 }
 
 /** El nombre de cada control es su `title`, que el widget sí traduce. */
-function nombrarControles(menu: HTMLElement): void {
+function nameControls(menu: HTMLElement): void {
   for (const control of menu.querySelectorAll('[data-key][title]')) {
-    fijar(control, ETIQUETA, control.getAttribute('title') ?? '')
+    pin(control, LABEL, control.getAttribute('title') ?? '')
   }
-  for (const enlace of menu.querySelectorAll('a[aria-pressed]')) {
-    enlace.removeAttribute('aria-pressed')
+  for (const link of menu.querySelectorAll('a[aria-pressed]')) {
+    link.removeAttribute('aria-pressed')
   }
 }
 
 /** Los textos que el widget deja en inglés. */
-function traducirRestantes(menu: HTMLElement): void {
-  for (const control of menu.querySelectorAll(`[${ETIQUETA}]`)) {
-    const traducida = TRADUCCIONES.get(control.getAttribute(ETIQUETA) ?? '')
-    if (traducida !== undefined) {
-      fijar(control, ETIQUETA, traducida)
-      fijar(control, 'title', traducida)
+function translateRemaining(menu: HTMLElement): void {
+  for (const control of menu.querySelectorAll(`[${LABEL}]`)) {
+    const translated = TRANSLATIONS.get(control.getAttribute(LABEL) ?? '')
+    if (translated !== undefined) {
+      pin(control, LABEL, translated)
+      pin(control, 'title', translated)
     }
   }
-  for (const enlace of menu.querySelectorAll('a[aria-label^="Learn more about"]')) {
-    const tarjeta = enlace.closest('.asw-card')?.querySelector('.asw-card-title')?.textContent.trim() ?? ''
-    fijar(enlace, ETIQUETA, tarjeta === '' ? 'Más información' : `Más información sobre ${tarjeta}`)
-    fijar(enlace, 'title', 'Más información')
+  for (const link of menu.querySelectorAll('a[aria-label^="Learn more about"]')) {
+    const card = link.closest('.asw-card')?.querySelector('.asw-card-title')?.textContent.trim() ?? ''
+    pin(link, LABEL, card === '' ? 'Más información' : `Más información sobre ${card}`)
+    pin(link, 'title', 'Más información')
   }
 }
 
@@ -83,8 +83,8 @@ function traducirRestantes(menu: HTMLElement): void {
  * - El menú no está en ninguna región: se nombra como región propia (axe: region).
  */
 export function repairAccessibilityMenu(menu: HTMLElement): void {
-  fijar(menu, 'role', 'region')
-  fijar(menu, ETIQUETA, 'Menú de accesibilidad')
-  nombrarControles(menu)
-  traducirRestantes(menu)
+  pin(menu, 'role', 'region')
+  pin(menu, LABEL, 'Menú de accesibilidad')
+  nameControls(menu)
+  translateRemaining(menu)
 }

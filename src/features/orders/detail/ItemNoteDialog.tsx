@@ -4,14 +4,14 @@ import { z } from 'zod'
 
 import { DialogFormActions } from '@/components/DialogFormActions'
 import { FormDialog } from '@/components/FormDialog'
-import { textoOpcional } from '@/components/formRules'
+import { textOptional } from '@/components/formRules'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 
 // El mismo tope que el servidor.
 const MAX_NOTE = 200
-const schema = z.object({ notes: textoOpcional(MAX_NOTE) })
+const schema = z.object({ notes: textOptional(MAX_NOTE) })
 type Values = z.infer<typeof schema>
 
 interface ItemNoteDialogProps {

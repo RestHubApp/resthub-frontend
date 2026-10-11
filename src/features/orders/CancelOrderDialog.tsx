@@ -6,7 +6,7 @@ import { cancelOrder } from '@/api/orders'
 import type { OrderResponse } from '@/api/types'
 import { DialogFormActions } from '@/components/DialogFormActions'
 import { FormDialog } from '@/components/FormDialog'
-import { textoObligatorio } from '@/components/formRules'
+import { textRequired } from '@/components/formRules'
 import { TextareaField } from '@/components/TextareaField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
@@ -15,7 +15,7 @@ import { useOrderAction } from './useOrderAction'
 
 // El mismo tope que el servidor.
 const MAX_REASON = 300
-const schema = z.object({ reason: textoObligatorio(MAX_REASON, 'Escribe el motivo') })
+const schema = z.object({ reason: textRequired(MAX_REASON, 'Escribe el motivo') })
 type Values = z.infer<typeof schema>
 
 interface CancelOrderDialogProps {

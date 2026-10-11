@@ -44,22 +44,22 @@ export function BarList({ data, label }: BarListProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const [anchor, setAnchor] = useState<Anchor | null>(null)
   const max = Math.max(0, ...data.map((datum) => datum.value))
-  const reserva = Math.max(0, ...data.map((datum) => datum.valueLabel.length)) * REM_PER_CHAR + REM_GAP
-  const [ancho, setAncho] = useState(0)
+  const reservation = Math.max(0, ...data.map((datum) => datum.valueLabel.length)) * REM_PER_CHAR + REM_GAP
+  const [width, setWidth] = useState(0)
 
   const señalar = (index: number) => (event: PointerEvent<HTMLLIElement> | FocusEvent<HTMLLIElement>) => {
-    const caja = listRef.current?.getBoundingClientRect()
-    const fila = event.currentTarget.getBoundingClientRect()
-    if (caja === undefined) {
+    const cashRegister = listRef.current?.getBoundingClientRect()
+    const row = event.currentTarget.getBoundingClientRect()
+    if (cashRegister === undefined) {
       return
     }
-    setAncho(caja.width)
-    setAnchor({ index, x: fila.left - caja.left + fila.width * 0.55, y: fila.top - caja.top })
+    setWidth(cashRegister.width)
+    setAnchor({ index, x: row.left - cashRegister.left + row.width * 0.55, y: row.top - cashRegister.top })
   }
-  const soltar = () => {
+  const drop = () => {
     setAnchor(null)
   }
-  const activo = anchor === null ? undefined : data[anchor.index]
+  const active = anchor === null ? undefined : data[anchor.index]
 
   return (
     <div ref={listRef} className="relative">
@@ -72,9 +72,9 @@ export function BarList({ data, label }: BarListProps) {
             tabIndex={0}
             aria-label={`${datum.label}: ${datum.valueLabel}`}
             onPointerEnter={señalar(index)}
-            onPointerLeave={soltar}
+            onPointerLeave={drop}
             onFocus={señalar(index)}
-            onBlur={soltar}
+            onBlur={drop}
             className="grid grid-cols-[minmax(7rem,38%)_1fr] items-center gap-3 rounded-md px-1 py-1.5 outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <span className="flex min-w-0 items-center gap-2 text-sm">
@@ -87,7 +87,7 @@ export function BarList({ data, label }: BarListProps) {
               <span
                 className="h-3.5 shrink-0 rounded-r-[4px]"
                 style={{
-                  width: `calc((100% - ${String(reserva)}rem) * ${String(max > 0 ? datum.value / max : 0)})`,
+                  width: `calc((100% - ${String(reservation)}rem) * ${String(max > 0 ? datum.value / max : 0)})`,
                   minWidth: datum.value > 0 ? 2 : 0,
                   background: TONES[datum.tone ?? 'series'],
                 }}
@@ -97,13 +97,13 @@ export function BarList({ data, label }: BarListProps) {
           </li>
         ))}
       </ul>
-      {activo === undefined || anchor === null || activo.details === undefined ? null : (
+      {active === undefined || anchor === null || active.details === undefined ? null : (
         <ChartTooltip
           x={anchor.x}
           y={anchor.y}
-          containerWidth={ancho}
-          title={activo.label}
-          rows={activo.details}
+          containerWidth={width}
+          title={active.label}
+          rows={active.details}
         />
       )}
     </div>

@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import type { Reservation, ReservationRequest, ReservationStatus } from '@/api/types'
 import type { StatusTone } from '@/components/StatusBadge'
-import { textoOpcional } from '@/components/formRules'
+import { textOptional } from '@/components/formRules'
 import { wallClockIn, zonedInstant } from '@/services/format'
 
 // Los topes repiten los del backend (`reservations/domain/reservations.py`).
@@ -18,13 +18,13 @@ const integer = (min: number, max: number, that: string) =>
 
 export const reservationSchema = z.object({
   customer_name: z.string().trim().min(1, 'Escribe a nombre de quién').max(LIMITS.name, `Usa como máximo ${String(LIMITS.name)} caracteres`),
-  phone: textoOpcional(LIMITS.phone),
+  phone: textOptional(LIMITS.phone),
   party_size: integer(1, LIMITS.party, 'cuántos vienen'),
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, 'Elige el día'),
   time: z.string().regex(/^\d{2}:\d{2}$/u, 'Elige la hora'),
   duration_minutes: integer(LIMITS.minDuration, LIMITS.maxDuration, 'los minutos'),
   table_id: z.string(),
-  notes: textoOpcional(LIMITS.notes),
+  notes: textOptional(LIMITS.notes),
 })
 
 export type ReservationValues = z.infer<typeof reservationSchema>

@@ -6,7 +6,7 @@ import { applyDiscount } from '@/api/orders'
 import { PERMISSION } from '@/api/permissions'
 import { restaurantQuery } from '@/api/restaurant'
 import type { DiscountRequest, OrderResponse } from '@/api/types'
-import { decimalParaApi } from '@/components/formRules'
+import { decimalForApi } from '@/components/formRules'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
@@ -56,7 +56,7 @@ export function DiscountForm({ order, onDone }: DiscountFormProps) {
       className="flex flex-col gap-3 rounded-lg bg-muted p-3"
       onSubmit={onSubmit(
         handleSubmit((values) => {
-          discount.mutate({ percent: decimalParaApi(values.percent) ?? '0', reason: values.reason })
+          discount.mutate({ percent: decimalForApi(values.percent) ?? '0', reason: values.reason })
         }),
       )}
     >

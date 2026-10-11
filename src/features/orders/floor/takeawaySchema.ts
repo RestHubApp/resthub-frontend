@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { textoOpcional } from '@/components/formRules'
+import { textOptional } from '@/components/formRules'
 import type { Customer } from '@/api/types'
 import { paths } from '@/services/paths'
 
@@ -13,10 +13,10 @@ export const MAX_REFERENCE = 150
 export const takeawaySchema = z
   .object({
     mode: z.enum(['takeaway', 'delivery']),
-    customer_name: textoOpcional(MAX_CUSTOMER),
-    phone: textoOpcional(MAX_PHONE),
-    address: textoOpcional(MAX_ADDRESS),
-    reference: textoOpcional(MAX_REFERENCE),
+    customer_name: textOptional(MAX_CUSTOMER),
+    phone: textOptional(MAX_PHONE),
+    address: textOptional(MAX_ADDRESS),
+    reference: textOptional(MAX_REFERENCE),
     customer_id: z.number().int().positive().nullable(),
     // El cliente nuevo de un delivery aceptó quedar en la libreta (Ley N.º 29733).
     consent: z.boolean(),

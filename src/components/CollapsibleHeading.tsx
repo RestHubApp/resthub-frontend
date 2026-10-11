@@ -2,9 +2,9 @@ import type { ReactNode } from 'react'
 
 import { Icon } from './Icon'
 
-type Nivel = 'h2' | 'h3' | 'h4'
+type Level = 'h2' | 'h3' | 'h4'
 
-const TAMAÑOS: Record<Nivel, string> = {
+const TAMAÑOS: Record<Level, string> = {
   h2: 'text-lg',
   h3: 'text-lg',
   h4: 'text-base',
@@ -12,7 +12,7 @@ const TAMAÑOS: Record<Nivel, string> = {
 
 interface CollapsibleHeadingProps {
   readonly title: string
-  readonly as: Nivel
+  readonly as: Level
   readonly description?: ReactNode
   readonly open: boolean
   readonly onToggle: () => void

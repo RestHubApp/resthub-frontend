@@ -6,7 +6,7 @@ import { saveSupplier } from '@/api/purchasing'
 import type { Supplier, SupplierRequest } from '@/api/types'
 import { DialogFormActions } from '@/components/DialogFormActions'
 import { FormDialog } from '@/components/FormDialog'
-import { textoOpcional } from '@/components/formRules'
+import { textOptional } from '@/components/formRules'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
@@ -15,9 +15,9 @@ import { usePurchasingMutation } from './usePurchasingMutation'
 // Los topes del servidor.
 const schema = z.object({
   name: z.string().trim().min(1, 'Escribe el nombre del proveedor').max(80, 'Usa como máximo 80 caracteres'),
-  contact: textoOpcional(80),
-  phone: textoOpcional(20),
-  notes: textoOpcional(300),
+  contact: textOptional(80),
+  phone: textOptional(20),
+  notes: textOptional(300),
 })
 type Values = z.infer<typeof schema>
 

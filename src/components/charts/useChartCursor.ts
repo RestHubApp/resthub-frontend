@@ -21,13 +21,13 @@ export function useChartCursor(total: number, rowStep = 1) {
   const [active, setActive] = useState<number | null>(null)
 
   const onKeyDown = (event: KeyboardEvent) => {
-    const mover = MOVES[event.key]
-    if (mover === undefined || total === 0) {
+    const move = MOVES[event.key]
+    if (move === undefined || total === 0) {
       return
     }
     event.preventDefault()
-    const siguiente = mover(active ?? total - 1, total, rowStep)
-    setActive(Math.min(total - 1, Math.max(0, siguiente)))
+    const next = move(active ?? total - 1, total, rowStep)
+    setActive(Math.min(total - 1, Math.max(0, next)))
   }
 
   return {
@@ -35,7 +35,7 @@ export function useChartCursor(total: number, rowStep = 1) {
     setActive,
     onKeyDown,
     onFocus: () => {
-      setActive((valor) => valor ?? total - 1)
+      setActive((value) => value ?? total - 1)
     },
     onBlur: () => {
       setActive(null)

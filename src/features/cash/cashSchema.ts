@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { textoOpcional } from '@/components/formRules'
+import { textOptional } from '@/components/formRules'
 
 // El tope del servidor para la nota de la caja.
 export const MAX_CASH_NOTES = 300
@@ -15,12 +15,12 @@ function cashRegisterAmount() {
 
 export const openCashSchema = z.object({
   opening_amount: cashRegisterAmount(),
-  notes: textoOpcional(MAX_CASH_NOTES),
+  notes: textOptional(MAX_CASH_NOTES),
 })
 
 export const closeCashSchema = z.object({
   counted_cash: cashRegisterAmount(),
-  notes: textoOpcional(MAX_CASH_NOTES),
+  notes: textOptional(MAX_CASH_NOTES),
 })
 
 export type OpenCashValues = z.infer<typeof openCashSchema>

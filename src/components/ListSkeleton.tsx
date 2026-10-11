@@ -22,8 +22,8 @@ export function ListSkeleton({
 }: ListSkeletonProps) {
   return (
     <LoadingRegion label={label} className={className}>
-      {Array.from({ length: count }, (_, indice) => (
-        <Skeleton key={indice} className={cn('w-full', itemClassName)} />
+      {Array.from({ length: count }, (_, index) => (
+        <Skeleton key={index} className={cn('w-full', itemClassName)} />
       ))}
     </LoadingRegion>
   )

@@ -30,7 +30,7 @@ interface ConsentFieldProps {
  */
 export function ConsentField({ id, checked, onChange, error }: ConsentFieldProps) {
   const { errorId, describedBy } = fieldIds(id, undefined, error)
-  const textoId = `${id}-texto`
+  const textId = `${id}-texto`
   return (
     <div className="flex flex-col gap-1">
       <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md border border-input p-3 text-sm">
@@ -38,14 +38,14 @@ export function ConsentField({ id, checked, onChange, error }: ConsentFieldProps
           id={id}
           className="mt-0.5"
           checked={checked}
-          onCheckedChange={(valor) => {
-            onChange(valor === true)
+          onCheckedChange={(value) => {
+            onChange(value === true)
           }}
-          aria-labelledby={textoId}
+          aria-labelledby={textId}
           aria-invalid={error === undefined ? undefined : true}
           aria-describedby={describedBy}
         />
-        <span id={textoId}>{CONSENT_TEXT}</span>
+        <span id={textId}>{CONSENT_TEXT}</span>
       </label>
       <FieldError id={errorId} message={error} />
     </div>

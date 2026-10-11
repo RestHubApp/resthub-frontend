@@ -5,7 +5,7 @@ interface TablePaginationProps {
   /** Página actual, desde cero. */
   readonly actual: number
   readonly total: number
-  readonly onChange: (pagina: number) => void
+  readonly onChange: (page: number) => void
 }
 
 /** Anterior y siguiente, con la página en la que se está anunciada al cambiar. */

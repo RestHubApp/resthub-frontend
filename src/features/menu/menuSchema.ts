@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import type { MenuItem } from '@/api/types'
-import { decimalParaApi, decimalRule, textoOpcional } from '@/components/formRules'
+import { decimalForApi, decimalRule, textOptional } from '@/components/formRules'
 
 // Los limites repiten los del backend: avisan mientras se escribe.
 const MAX_CATEGORY = 60
@@ -27,7 +27,7 @@ export const menuItemSchema = z.object({
     .trim()
     .min(1, 'Escribe el nombre del plato')
     .max(MAX_DISH, `Usa como máximo ${String(MAX_DISH)} caracteres`),
-  description: textoOpcional(MAX_DESCRIPTION),
+  description: textOptional(MAX_DESCRIPTION),
   price: decimalRule({ max: MAX_PRICE, decimales: 2, unidad: 'soles', obligatorio: true }),
 })
 
@@ -57,6 +57,6 @@ export function menuItemPayload(values: MenuItemValues) {
     category_id: Number(values.category_id),
     name: values.name,
     description: values.description,
-    price: decimalParaApi(values.price) ?? '0',
+    price: decimalForApi(values.price) ?? '0',
   }
 }

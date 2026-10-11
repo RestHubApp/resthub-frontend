@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { decimalRule, textoObligatorio, textoOpcional } from '@/components/formRules'
+import { decimalRule, textRequired, textOptional } from '@/components/formRules'
 import { parseDecimal } from './units'
 
 // Los limites repiten los del backend: avisan mientras se escribe.
@@ -46,7 +46,7 @@ export const purchaseSchema = z.object({
   quantity_unit: z.string(),
   cost_mode: z.enum(['unit', 'total']),
   cost: costRule,
-  reason: textoOpcional(MAX_REASON),
+  reason: textOptional(MAX_REASON),
 })
 
 export type PurchaseValues = z.infer<typeof purchaseSchema>
@@ -54,7 +54,7 @@ export type PurchaseValues = z.infer<typeof purchaseSchema>
 export const wasteSchema = z.object({
   quantity: quantityRule({ permiteCero: false }),
   quantity_unit: z.string(),
-  reason: textoObligatorio(MAX_REASON, 'Escribe el motivo de la merma'),
+  reason: textRequired(MAX_REASON, 'Escribe el motivo de la merma'),
 })
 
 export type WasteValues = z.infer<typeof wasteSchema>
@@ -65,7 +65,7 @@ export const adjustmentSchema = z
     quantity: quantityRule({ permiteCero: true }),
     quantity_unit: z.string(),
     sign: z.enum(['add', 'subtract']),
-    reason: textoObligatorio(MAX_REASON, 'Escribe el motivo del ajuste'),
+    reason: textRequired(MAX_REASON, 'Escribe el motivo del ajuste'),
   })
   .refine((values) => values.mode === 'count' || parseDecimal(values.quantity) > 0, {
     path: ['quantity'],

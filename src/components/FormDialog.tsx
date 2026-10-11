@@ -14,7 +14,7 @@ interface FormDialogProps {
   readonly children: ReactNode
 }
 
-const ANCHOS = { md: 'sm:max-w-lg', lg: 'sm:max-w-2xl' } as const
+const WIDTHS = { md: 'sm:max-w-lg', lg: 'sm:max-w-2xl' } as const
 
 /**
  * Un formulario en una ventana sobre la pantalla.
@@ -35,29 +35,29 @@ export function FormDialog({
   // La ventana se abre desde estado y no desde su propio disparador, así que
   // Radix no sabe a dónde devolver el foco. Se recuerda lo que lo tenía al
   // abrir: quien usa teclado vuelve al botón que la abrió y no al inicio.
-  const retorno = useRef<HTMLElement | null>(null)
-  const [abiertaDesde, setAbiertaDesde] = useState(0)
-  const fallos = useMutationState({
+  const returnValue = useRef<HTMLElement | null>(null)
+  const [openFrom, setOpenFrom] = useState(0)
+  const failures = useMutationState({
     filters: { status: 'error' },
     select: (mutation) => mutation.state.submittedAt,
   })
-  const falloEnEsteDialogo = open && fallos.some((momento) => momento >= abiertaDesde)
+  const failureInThisDialog = open && failures.some((moment) => moment >= openFrom)
   // Sin descripción, Radix pide decirlo explícitamente para no anunciar un vacío.
-  const sinDescripcion = description === undefined ? { 'aria-describedby': undefined } : {}
+  const withoutDescription = description === undefined ? { 'aria-describedby': undefined } : {}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        {...sinDescripcion}
-        className={`max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto p-5 sm:p-6 ${ANCHOS[size]}`}
+        {...withoutDescription}
+        className={`max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto p-5 sm:p-6 ${WIDTHS[size]}`}
         onOpenAutoFocus={() => {
-          retorno.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-          setAbiertaDesde(Date.now())
+          returnValue.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+          setOpenFrom(Date.now())
         }}
-        onCloseAutoFocus={(evento) => {
-          if (retorno.current?.isConnected === true) {
-            evento.preventDefault()
-            retorno.current.focus()
+        onCloseAutoFocus={(event) => {
+          if (returnValue.current?.isConnected === true) {
+            event.preventDefault()
+            returnValue.current.focus()
           }
         }}
       >
@@ -65,7 +65,7 @@ export function FormDialog({
           <DialogTitle className="text-lg leading-tight font-semibold">{title}</DialogTitle>
           {description === undefined ? null : <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        {falloEnEsteDialogo ? (
+        {failureInThisDialog ? (
           // De respaldo: si el formulario ya dice por qué no se guardó, no se repite.
           <div className="[[role=dialog]:has([data-falla=propia])_&]:hidden">
             <FormMessage tone="error" fallback>

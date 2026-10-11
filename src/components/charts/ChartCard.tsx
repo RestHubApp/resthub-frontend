@@ -30,7 +30,7 @@ export function ChartCard({
   refreshing = false,
   actions,
 }: ChartCardProps) {
-  const [comoTabla, setComoTabla] = useState(false)
+  const [asTable, setAsTable] = useState(false)
 
   return (
     <SectionCard
@@ -43,13 +43,13 @@ export function ChartCard({
             type="button"
             variant="outline"
             size="sm"
-            aria-pressed={comoTabla}
+            aria-pressed={asTable}
             onClick={() => {
-              setComoTabla((valor) => !valor)
+              setAsTable((value) => !value)
             }}
           >
-            <Icon name={comoTabla ? 'grafico' : 'tabla'} size={14} />
-            <span>{comoTabla ? 'Ver gráfico' : 'Ver tabla'}</span>
+            <Icon name={asTable ? 'grafico' : 'tabla'} size={14} />
+            <span>{asTable ? 'Ver gráfico' : 'Ver tabla'}</span>
           </Button>
         </>
       }
@@ -58,7 +58,7 @@ export function ChartCard({
         aria-busy={refreshing}
         className={`transition-opacity ${refreshing ? 'opacity-50' : 'opacity-100'}`}
       >
-        {comoTabla ? table : chart}
+        {asTable ? table : chart}
       </div>
     </SectionCard>
   )
