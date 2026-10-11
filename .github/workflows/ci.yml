@@ -235,8 +235,7 @@ jobs:
 
   # Pruebas de extremo a extremo con Playwright (solo Chromium) contra el
   # backend de develop, con una base SQLite propia migrada y sembrada. La
-  # regresión visual no corre aquí: sus líneas base dependen del sistema
-  # operativo (se corre en local con `pnpm test:visual`).
+  # regresión visual corre en el job `visual`, dentro de la imagen de Playwright.
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest
@@ -247,34 +246,8 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - name: Traer el backend (develop)
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          repository: RestHubApp/resthub-backend
-          ref: develop
-          path: resthub-backend
-
-      - name: Instalar pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
-
-      - name: Instalar Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Instalar uv
-        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
-        with:
-          python-version: '3.12'
-
-      - name: Instalar dependencias
-        run: |
-          pnpm install --frozen-lockfile
-          uv sync --frozen --directory resthub-backend
-
-      - name: Migrar y sembrar la base de pruebas
-        run: bash e2e/server/backend.sh --prepare
+      - name: Entorno (backend, dependencias y base sembrada)
+        uses: ./.github/actions/entorno-e2e
 
       - name: Instalar Chromium de Playwright
         run: npx playwright install --with-deps chromium
@@ -295,5 +268,47 @@ jobs:
           path: |
             e2e/.report
             e2e/.report-coverage-ui.json
+            e2e/.results
+          retention-days: 14
+
+  # Regresión visual de Chromium (escritorio y celular) dentro de la imagen
+  # oficial de Playwright, la misma con la que se generaron las líneas base
+  # (`pnpm test:visual:update` y el workflow «Líneas base visuales»). La versión
+  # de la imagen debe ser la exacta de `playwright` en package.json. Firefox y
+  # WebKit se corren en local con `pnpm test:visual`.
+  visual:
+    name: Regresión visual (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    env:
+      E2E_BACKEND_DIR: resthub-backend
+      E2E_DB: ${{ github.workspace }}/.e2e/e2e.db
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Entorno (backend, dependencias y base sembrada)
+        uses: ./.github/actions/entorno-e2e
+
+      - name: La imagen es la de la versión instalada de Playwright
+        run: |
+          version="$(node -p "require('playwright/package.json').version")"
+          test "${{ job.container.image }}" = "mcr.microsoft.com/playwright:v${version}-noble"
+
+      - name: Regresión visual
+        env:
+          E2E_DB_PREPARED: '1'
+        run: pnpm test:visual:ci
+
+      - name: Subir el reporte y las diferencias
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: regresion-visual
+          include-hidden-files: true
+          path: |
+            e2e/.report
             e2e/.results
           retention-days: 14

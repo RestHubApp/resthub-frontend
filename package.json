@@ -25,6 +25,8 @@
     "prepare": "husky",
     "test:e2e": "playwright test --project=coverage --project=desktop --project=mobile",
     "test:visual": "playwright test --project=visual-chromium-desktop --project=visual-chromium-mobile --project=visual-firefox-desktop --project=visual-firefox-mobile --project=visual-webkit-desktop --project=visual-webkit-mobile",
+    "test:visual:ci": "playwright test --project=visual-chromium-desktop --project=visual-chromium-mobile",
+    "test:visual:update": "bash scripts/visual-docker.sh",
     "e2e:inventory": "node e2e/inventory/generate.ts",
     "type-coverage": "type-coverage",
     "size": "size-limit",
