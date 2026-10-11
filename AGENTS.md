@@ -15,8 +15,35 @@ Las pruebas son de Jest (no de Vitest): importan de `@jest/globals` y las de
 componentes usan React Testing Library. Los detalles están en el `README.md`.
 
 Commits en Conventional Commits en español (`feat(pedidos): …`). El hook
-`.husky/commit-msg` comprueba la forma y que no haya líneas `Co-authored-by`;
-el español es convención del equipo, no lo comprueba el hook.
+`.husky/commit-msg` comprueba la forma y rechaza cualquier línea
+`Co-authored-by` y las marcas de IA («Generated with…», 🤖); el español es
+convención del equipo, no lo comprueba el hook. El título y la descripción de
+los PR tampoco pueden llevar esas marcas (lo revisa el workflow `Atribución`).
+
+## Reglas de calidad (CI)
+
+Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip` y
+`pnpm dup`. Lo que hay que saber al escribir código:
+
+- **Imports** (`import-x`): sin ciclos, sin imports duplicados ni a sí mismo,
+  sin `../` redundantes, sin dependencias no declaradas, sin `export let`, y
+  los imports van primero. Un ciclo se rompe subiendo lo compartido; no se
+  silencia.
+- **Accesibilidad** (`jsx-a11y` estricto): nada de `tabIndex` ni manejadores
+  en elementos no interactivos. Si un control de verdad no tiene rol ARIA que
+  lo describa, la excepción va en su línea con el motivo.
+- **TanStack Query**: toda consulta se define con `queryOptions` en `src/api/`
+  (clave y `queryFn` juntas) y la vista la usa con `useQuery(xQuery(...))`.
+  No se escriben `queryKey` a mano fuera de `src/api/`.
+- **TypeScript**: `switch` exhaustivo, condiciones booleanas explícitas
+  (`strict-boolean-expressions`), nada usado antes de declararse, y los accesos
+  por índice (`lista[0]`, `params['id']`) pueden ser `undefined`.
+- **Efectos**: lo que reacciona a un evento va en el manejador, no en un
+  `useEffect` (`react-you-might-not-need-an-effect`).
+- **Código sin uso** (`knip`): no se exporta lo que nadie importa. `src/components/ui/`
+  queda fuera porque lo gestiona el CLI de shadcn.
+- **Duplicación** (`jscpd`, `.jscpd.json`): tope del 1 % (bloques de 5 líneas o
+  50 tokens), sin contar pruebas, `ui/` ni `schema.d.ts`.
 
 ## Búsqueda de código
 

@@ -1,0 +1,28 @@
+# Falla si el título o la descripción del PR traen atribución de una
+# herramienta de IA. Los textos llegan por variables de entorno y nunca se
+# interpolan en el script.
+name: Atribución
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  sin-atribucion:
+    name: Sin atribución de IA en el PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Revisar título y descripción
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          patron='(generated with|🤖|co-authored-by:.*(claude|anthropic))'
+          if printf '%s\n%s\n' "$PR_TITLE" "$PR_BODY" | grep -Eiq "$patron"; then
+            echo "::error::El título o la descripción del PR contienen atribución de una herramienta de IA. Quítala."
+            exit 1
+          fi
