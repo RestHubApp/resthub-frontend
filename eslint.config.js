@@ -5,6 +5,7 @@ import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescrip
 import importX from 'eslint-plugin-import-x'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 import pluginQuery from '@tanstack/eslint-plugin-query'
+import reactEffect from 'eslint-plugin-react-you-might-not-need-an-effect'
 import noBarrelFiles from 'eslint-plugin-no-barrel-files'
 import checkFile from 'eslint-plugin-check-file'
 import react from 'eslint-plugin-react'
@@ -413,6 +414,39 @@ export default tseslint.config(
       ...pluginQuery.configs['flat/recommended'][0].rules,
       '@tanstack/query/prefer-query-options': 'error',
     },
+  },
+
+  // ---------------------------------------------------------------------
+  // TypeScript: reglas que strictTypeChecked no trae.
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/switch-exhaustiveness-check': ['error', { requireDefaultForNonUnion: true }],
+      '@typescript-eslint/strict-boolean-expressions': 'error',
+      '@typescript-eslint/no-use-before-define': ['error', {
+          functions: false,
+          classes: true,
+          // Un cierre puede nombrar una constante declarada despues (los
+          // almacenes de sesion y su temporizador de vencimiento se necesitan
+          // mutuamente); el uso en el mismo ambito antes de declarar sigue
+          // prohibido, y tsc ya marca el acceso real antes de inicializar.
+          variables: false,
+        }],
+      '@typescript-eslint/consistent-type-exports': 'error',
+      '@typescript-eslint/method-signature-style': 'error',
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Efectos innecesarios.
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.tsx', 'src/**/use*.ts'],
+    ...reactEffect.configs.recommended,
+    rules: Object.fromEntries(
+      Object.keys(reactEffect.configs.recommended.rules ?? {}).map((rule) => [rule, 'error']),
+    ),
   },
 
   // ---------------------------------------------------------------------

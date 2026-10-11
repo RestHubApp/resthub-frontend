@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -25,7 +24,7 @@ interface CustomerDialogProps {
 }
 
 /** Alta o edición de un cliente de la libreta. */
-export default function CustomerDialog({ open, customer, onClose }: CustomerDialogProps) {
+export default function CustomerDialog({ open, customer, onClose: alCerrar }: CustomerDialogProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   // El alta exige el consentimiento; un cliente guardado antes de pedirlo
@@ -36,12 +35,11 @@ export default function CustomerDialog({ open, customer, onClose }: CustomerDial
   })
   // Al guardar, la ventana se cierra sin pasar por `onOpenChange` y el
   // formulario conservaba lo escrito: «Nuevo cliente» volvía a abrir con los
-  // datos del anterior. Cada vez que se abre, arranca de sus valores.
-  useEffect(() => {
-    if (open) {
-      reset(customerDefaults(customer))
-    }
-  }, [open, customer, reset])
+  // datos del anterior. Al cerrarse, el formulario vuelve a sus valores.
+  const onClose = () => {
+    reset(customerDefaults(customer))
+    alCerrar()
+  }
   const guardar = useMutation({
     mutationFn: (values: CustomerValues) => saveCustomer(customerRequest(values), customer?.id),
     onSuccess: async (saved) => {

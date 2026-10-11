@@ -72,19 +72,24 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
     const vigentes = new Set(ids)
     return datos?.items.filter((item) => vigentes.has(item.order_id))
   }, [datos, ids])
+  // Lo pendiente de clasificar; vacio si la pantalla no lo pidio.
+  const pendientes = useMemo(
+    () =>
+      classifyPending
+        ? (items ?? []).filter((item) => item.status === 'pending').map((item) => keyOf(item.order_id, item.order_item_id))
+        : [],
+    [items, classifyPending],
+  )
   useEffect(() => {
-    const nuevas = (items ?? [])
-      .filter((item) => item.status === 'pending')
-      .map((item) => keyOf(item.order_id, item.order_item_id))
-      .filter((clave) => !pedidas.current.has(clave))
-    if (!classifyPending || nuevas.length === 0 || clasificando) {
+    const nuevas = pendientes.filter((clave) => !pedidas.current.has(clave))
+    if (nuevas.length === 0 || clasificando) {
       return
     }
     for (const clave of nuevas) {
       pedidas.current.add(clave)
     }
     clasificar()
-  }, [items, classifyPending, clasificar, clasificando])
+  }, [pendientes, clasificar, clasificando])
 
   return useMemo(() => {
     const lista = items ?? []

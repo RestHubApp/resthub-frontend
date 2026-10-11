@@ -24,6 +24,7 @@ const STROKE_WIDTH = 1.75
  * registro, de modo que pedir un icono inexistente no compila.
  */
 export default function Icon({ name, size = DEFAULT_SIZE, label, className }: IconProps) {
+  const nombrado = label !== undefined && label !== ''
   const Glyph = ICONS[name]
 
   return (
@@ -31,9 +32,9 @@ export default function Icon({ name, size = DEFAULT_SIZE, label, className }: Ic
       className={className}
       size={size}
       strokeWidth={STROKE_WIDTH}
-      role={label ? 'img' : undefined}
+      role={nombrado ? 'img' : undefined}
       aria-label={label}
-      aria-hidden={label ? undefined : true}
+      aria-hidden={nombrado ? undefined : true}
       focusable="false"
     />
   )

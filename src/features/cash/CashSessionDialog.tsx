@@ -46,7 +46,7 @@ export default function CashSessionDialog({ sessionId, onClose }: CashSessionDia
       {turno.isPending ? <EmptyState title="Cargando el arqueo…" /> : null}
       {turno.isError ? <RetryQueryError message={errorMessage(turno.error, 'No se pudo cargar el turno.')} onRetry={() => { void turno.refetch() }} /> : null}
       {datos?.summary ? <CashSummaryView session={datos} summary={datos.summary} /> : null}
-      {datos?.closing_notes ? <p className="m-0 text-sm">Nota: {datos.closing_notes}</p> : null}
+      {datos !== undefined && datos.closing_notes !== '' ? <p className="m-0 text-sm">Nota: {datos.closing_notes}</p> : null}
     </FormDialog>
   )
 }

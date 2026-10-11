@@ -76,6 +76,7 @@ const STROKE_WIDTH = 1.75
 
 /** La misma pinta que `Icon`, para el puñado de iconos que dibuja el armazón. */
 export default function ShellIcon({ name, size = DEFAULT_SIZE, label, className }: ShellIconProps) {
+  const nombrado = label !== undefined && label !== ''
   const Glyph = SHELL_ICONS[name]
 
   return (
@@ -83,9 +84,9 @@ export default function ShellIcon({ name, size = DEFAULT_SIZE, label, className 
       className={className}
       size={size}
       strokeWidth={STROKE_WIDTH}
-      role={label ? 'img' : undefined}
+      role={nombrado ? 'img' : undefined}
       aria-label={label}
-      aria-hidden={label ? undefined : true}
+      aria-hidden={nombrado ? undefined : true}
       focusable="false"
     />
   )

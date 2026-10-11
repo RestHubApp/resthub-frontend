@@ -179,8 +179,8 @@ export interface Local {
   /** Cliente del API como encargado, para preparar o comprobar datos. */
   readonly api: Cliente
   readonly http: APIRequestContext
-  plato(nombre: string): Plato
-  mesa(etiqueta: string): Mesa
+  readonly plato: (nombre: string) => Plato
+  readonly mesa: (etiqueta: string) => Mesa
 }
 
 async function crearCarta(api: Cliente): Promise<Plato[]> {

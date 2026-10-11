@@ -59,7 +59,7 @@ function nombrarControles(menu: HTMLElement): void {
 function traducirRestantes(menu: HTMLElement): void {
   for (const control of menu.querySelectorAll(`[${ETIQUETA}]`)) {
     const traducida = TRADUCCIONES.get(control.getAttribute(ETIQUETA) ?? '')
-    if (traducida) {
+    if (traducida !== undefined) {
       fijar(control, ETIQUETA, traducida)
       fijar(control, 'title', traducida)
     }

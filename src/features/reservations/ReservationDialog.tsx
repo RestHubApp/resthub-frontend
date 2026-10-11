@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -30,7 +29,7 @@ interface ReservationDialogProps {
  * La mesa es opcional: si se elige, el servidor revisa que no choque con otra
  * reserva de esa mesa en el mismo horario.
  */
-export default function ReservationDialog({ open, reservation, day, onClose }: ReservationDialogProps) {
+export default function ReservationDialog({ open, reservation, day, onClose: alCerrar }: ReservationDialogProps) {
   const timeZone = useTimeZone()
   const mesas = useQuery({ ...tablesQuery(false), enabled: open })
   const form = useForm<ReservationValues>({
@@ -40,13 +39,12 @@ export default function ReservationDialog({ open, reservation, day, onClose }: R
   // Al guardar, la ventana se cierra sin pasar por `onOpenChange` y el
   // formulario conservaba lo escrito: «Nueva reserva» volvía a abrir con el
   // teléfono, las personas y la mesa de la anterior. Cada vez que se abre,
-  // arranca de sus valores.
+  // vuelve a sus valores al cerrarse.
   const { reset } = form
-  useEffect(() => {
-    if (open) {
-      reset(reservationDefaults(reservation, day, timeZone))
-    }
-  }, [open, reservation, day, timeZone, reset])
+  const onClose = () => {
+    reset(reservationDefaults(reservation, day, timeZone))
+    alCerrar()
+  }
   const guardar = useSaveReservation(reservation?.id, onClose)
 
   return (
