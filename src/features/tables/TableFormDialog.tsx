@@ -27,9 +27,9 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
     resolver: zodResolver(tableSchema),
     values: { label: table?.label ?? '' },
   })
-  const guardar = useTableMutation({
-    mutationFn: (valores: TableValues) =>
-      table === null ? createTable(valores) : updateTable(table.id, valores),
+  const save = useTableMutation({
+    mutationFn: (values: TableValues) =>
+      table === null ? createTable(values) : updateTable(table.id, values),
     failure: 'No se pudo guardar la mesa.',
     success: table === null ? 'Mesa creada.' : 'Mesa renombrada.',
     updateCache: withTable,
@@ -51,8 +51,8 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
         noValidate
         className="flex flex-col gap-5"
         onSubmit={onSubmit(
-          handleSubmit((valores) => {
-            guardar.mutate(valores)
+          handleSubmit((values) => {
+            save.mutate(values)
           }),
         )}
       >
@@ -65,8 +65,8 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
           field={register('label')}
           error={formState.errors.label?.message}
         />
-        {guardar.isError ? (
-          <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudo guardar la mesa.')}</FormMessage>
+        {save.isError ? (
+          <FormMessage tone="error">{errorMessage(save.error, 'No se pudo guardar la mesa.')}</FormMessage>
         ) : null}
         <DialogFormActions>
           <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={() => {
@@ -74,8 +74,8 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
           }}>
             Cancelar
           </Button>
-          <Button type="submit" size="lg" className="h-11 px-4" disabled={guardar.isPending}>
-            {guardar.isPending ? 'Guardando…' : 'Guardar'}
+          <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
+            {save.isPending ? 'Guardando…' : 'Guardar'}
           </Button>
         </DialogFormActions>
       </form>

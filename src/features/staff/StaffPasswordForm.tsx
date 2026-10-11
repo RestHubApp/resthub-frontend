@@ -33,8 +33,8 @@ export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
   })
 
   const push = useNotifications((state) => state.push)
-  const restablecer = useMutation({
-    mutationFn: (valores: ResetPasswordValues) => resetStaffPassword(account.id, valores),
+  const reset = useMutation({
+    mutationFn: (values: ResetPasswordValues) => resetStaffPassword(account.id, values),
     onSuccess: () => {
       push({ tone: 'info', message: `Contraseña de ${account.full_name} restablecida.` })
       onDone()
@@ -46,8 +46,8 @@ export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          restablecer.mutate(valores)
+        handleSubmit((values) => {
+          reset.mutate(values)
         }),
       )}
     >
@@ -61,9 +61,9 @@ export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
         error={formState.errors.new_password?.message}
       />
 
-      {restablecer.isError ? (
+      {reset.isError ? (
         <FormMessage tone="error">
-          {errorMessage(restablecer.error, 'No se pudo restablecer la contraseña.')}
+          {errorMessage(reset.error, 'No se pudo restablecer la contraseña.')}
         </FormMessage>
       ) : null}
 
@@ -71,9 +71,9 @@ export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
         <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
           Cancelar
         </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={restablecer.isPending}>
+        <Button type="submit" size="lg" className="h-10 px-4" disabled={reset.isPending}>
           <Icon name="llave" size={16} />
-          <span>{restablecer.isPending ? 'Guardando…' : 'Restablecer'}</span>
+          <span>{reset.isPending ? 'Guardando…' : 'Restablecer'}</span>
         </Button>
       </DialogFormActions>
     </form>

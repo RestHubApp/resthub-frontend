@@ -46,19 +46,19 @@ export function MenuItemForm({
     defaultValues: item === undefined ? emptyMenuItem(defaultCategoryId) : menuItemValuesOf(item),
   })
 
-  const [grupos, setGrupos] = useState<GroupDraft[]>(() => draftsOf(item))
-  const [errorGrupos, setErrorGrupos] = useState<string | null>(null)
+  const [groups, setGroups] = useState<GroupDraft[]>(() => draftsOf(item))
+  const [errorGroups, setErrorGroups] = useState<string | null>(null)
 
-  const guardar = useMutation({
-    mutationFn: (valores: MenuItemValues & { modifier_groups: ParsedGroup[] }) => {
-      const cuerpo = { ...menuItemPayload(valores), modifier_groups: valores.modifier_groups }
+  const save = useMutation({
+    mutationFn: (values: MenuItemValues & { modifier_groups: ParsedGroup[] }) => {
+      const body = { ...menuItemPayload(values), modifier_groups: values.modifier_groups }
       // Un plato nuevo entra disponible: se crea para venderlo.
       return item === undefined
-        ? createMenuItem({ ...cuerpo, is_available: true })
-        : updateMenuItem(item.id, cuerpo)
+        ? createMenuItem({ ...body, is_available: true })
+        : updateMenuItem(item.id, body)
     },
-    onSuccess: (plato) => {
-      queryClient.setQueryData(MENU_KEY, (menu) => menu && withItem(menu, plato))
+    onSuccess: (dish) => {
+      queryClient.setQueryData(MENU_KEY, (menu) => menu && withItem(menu, dish))
       // La carta del mesero y el margen, que se calcula en el inventario con
       // el precio, se releen de fondo.
       void queryClient.invalidateQueries({ queryKey: menuQueryKey })
@@ -67,30 +67,30 @@ export function MenuItemForm({
     },
   })
 
-  const etiqueta = item === undefined ? 'Crear plato' : 'Guardar'
+  const label = item === undefined ? 'Crear plato' : 'Guardar'
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          const opciones = parseGroups(grupos)
-          if (!opciones.ok) {
-            setErrorGrupos(opciones.error)
+        handleSubmit((values) => {
+          const options = parseGroups(groups)
+          if (!options.ok) {
+            setErrorGroups(options.error)
             return
           }
-          setErrorGrupos(null)
-          guardar.mutate({ ...valores, modifier_groups: opciones.value })
+          setErrorGroups(null)
+          save.mutate({ ...values, modifier_groups: options.value })
         }),
       )}
     >
       <MenuItemFields register={register} errors={formState.errors} categories={categories} />
-      <ModifierGroupsEditor groups={grupos} error={errorGrupos} onChange={setGrupos} />
+      <ModifierGroupsEditor groups={groups} error={errorGroups} onChange={setGroups} />
 
-      {guardar.isError ? (
+      {save.isError ? (
         <FormMessage tone="error">
-          {errorMessage(guardar.error, 'No se pudo guardar el plato.')}
+          {errorMessage(save.error, 'No se pudo guardar el plato.')}
         </FormMessage>
       ) : null}
 
@@ -98,9 +98,9 @@ export function MenuItemForm({
         <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onDone}>
           Cancelar
         </Button>
-        <Button type="submit" size="lg" className="h-11 px-4" disabled={guardar.isPending}>
+        <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
           <Icon name={item === undefined ? 'agregar' : 'confirmar'} size={16} />
-          <span>{guardar.isPending ? 'Guardando…' : etiqueta}</span>
+          <span>{save.isPending ? 'Guardando…' : label}</span>
         </Button>
       </DialogFormActions>
     </form>

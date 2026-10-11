@@ -46,9 +46,9 @@ export function MenuItemFields({ register, errors, categories }: MenuItemFieldsP
         field={register('category_id')}
         error={errors.category_id?.message}
       >
-        {categories.map((categoria) => (
-          <NativeSelectOption key={categoria.id} value={String(categoria.id)}>
-            {categoria.is_active ? categoria.name : `${categoria.name} (inactiva)`}
+        {categories.map((category) => (
+          <NativeSelectOption key={category.id} value={String(category.id)}>
+            {category.is_active ? category.name : `${category.name} (inactiva)`}
           </NativeSelectOption>
         ))}
       </SelectField>

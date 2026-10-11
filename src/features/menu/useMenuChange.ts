@@ -30,15 +30,15 @@ export function useMenuChange<TVars>({ send, preview, failure }: MenuChange<TVar
     mutationFn: send,
     onMutate: async (vars: TVars) => {
       await queryClient.cancelQueries({ queryKey: MENU_KEY })
-      const previo = queryClient.getQueryData<MenuResponse>(MENU_KEY)
-      if (previo !== undefined) {
-        queryClient.setQueryData<MenuResponse>(MENU_KEY, preview(previo, vars))
+      const previous = queryClient.getQueryData<MenuResponse>(MENU_KEY)
+      if (previous !== undefined) {
+        queryClient.setQueryData<MenuResponse>(MENU_KEY, preview(previous, vars))
       }
-      return { previo }
+      return { previo: previous }
     },
-    onError: (error, _vars, contexto) => {
-      if (contexto?.previo !== undefined) {
-        queryClient.setQueryData(MENU_KEY, contexto.previo)
+    onError: (error, _vars, context) => {
+      if (context?.previo !== undefined) {
+        queryClient.setQueryData(MENU_KEY, context.previo)
       }
       push({ tone: 'warning', message: errorMessage(error, failure) })
     },

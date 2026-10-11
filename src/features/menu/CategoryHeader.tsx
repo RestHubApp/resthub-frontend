@@ -20,18 +20,18 @@ interface CategoryHeaderProps {
   readonly onAddItem: () => void
 }
 
-function contar(cantidad: number, singular: string, plural: string): string {
-  return `${String(cantidad)} ${cantidad === 1 ? singular : plural}`
+function count(quantity: number, singular: string, plural: string): string {
+  return `${String(quantity)} ${quantity === 1 ? singular : plural}`
 }
 
-function resumen(category: MenuSection): string {
-  const activos = category.items.filter((plato) => plato.is_active)
-  const agotados = activos.filter((plato) => !plato.is_available).length
-  const platos = contar(activos.length, 'plato en carta', 'platos en carta')
-  if (agotados === 0) {
-    return platos
+function summary(category: MenuSection): string {
+  const active = category.items.filter((dish) => dish.is_active)
+  const outOfStock = active.filter((dish) => !dish.is_available).length
+  const dishes = count(active.length, 'plato en carta', 'platos en carta')
+  if (outOfStock === 0) {
+    return dishes
   }
-  return `${platos}, ${contar(agotados, 'agotado', 'agotados')} hoy`
+  return `${dishes}, ${count(outOfStock, 'agotado', 'agotados')} hoy`
 }
 
 /** El título de una categoría, su resumen y lo que se hace con ella. */
@@ -43,7 +43,7 @@ export function CategoryHeader({
   onMove,
   onAddItem,
 }: CategoryHeaderProps) {
-  const [editando, setEditando] = useState(false)
+  const [editing, setEditing] = useState(false)
 
   return (
     <div className="flex flex-col gap-3 border-b px-5 pb-4 md:flex-row md:items-start md:justify-between">
@@ -54,7 +54,7 @@ export function CategoryHeader({
           </h2>
           {category.is_active ? null : <StatusBadge label="Inactiva" />}
         </div>
-        <p className="m-0 text-sm text-muted-foreground">{resumen(category)}</p>
+        <p className="m-0 text-sm text-muted-foreground">{summary(category)}</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -69,7 +69,7 @@ export function CategoryHeader({
           className="h-11 px-3"
           aria-label={`Editar la categoría ${category.name}`}
           onClick={() => {
-            setEditando(true)
+            setEditing(true)
           }}
         >
           <Icon name="editar" size={16} />
@@ -79,11 +79,11 @@ export function CategoryHeader({
         {category.items.length === 0 ? <DeleteCategoryButton category={category} /> : null}
       </div>
 
-      <FormDialog open={editando} onOpenChange={setEditando} title={`Editar ${category.name}`}>
+      <FormDialog open={editing} onOpenChange={setEditing} title={`Editar ${category.name}`}>
         <CategoryForm
           category={category}
           onDone={() => {
-            setEditando(false)
+            setEditing(false)
           }}
         />
       </FormDialog>

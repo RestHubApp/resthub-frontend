@@ -13,9 +13,9 @@ interface DishMarginProps {
 }
 
 // El editor de recetas vuelve a donde se lo abrió.
-const DESDE_MENU = { from: paths.menu } as const
+const FROM_MENU = { from: paths.menu } as const
 
-const ENLACE =
+const LINK =
   'inline-flex min-h-11 items-center gap-1.5 rounded-md px-1 font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
 
 /**
@@ -27,13 +27,13 @@ export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
   if (cost === undefined) {
     return null
   }
-  const destino = paths.inventory.recipe(itemId)
+  const destination = paths.inventory.recipe(itemId)
 
   if (!cost.has_recipe || cost.margin === null || cost.cost === null) {
     return (
       <p className="m-0 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
         <span>Sin receta: no se conoce su costo.</span>
-        <Link to={destino} state={DESDE_MENU} className={ENLACE} aria-label={`Agregar la receta de ${itemName}`}>
+        <Link to={destination} state={FROM_MENU} className={LINK} aria-label={`Agregar la receta de ${itemName}`}>
           <Icon name="receta" size={16} />
           <span>Agregar receta</span>
         </Link>
@@ -41,18 +41,18 @@ export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
     )
   }
 
-  const perdida = Number(cost.margin) < 0
+  const lost = Number(cost.margin) < 0
   return (
     <p className="m-0 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
       <span>
         Costo {formatMoney(cost.cost)} · Margen{' '}
-        <strong className={perdida ? 'text-destructive' : 'text-foreground'}>
+        <strong className={lost ? 'text-destructive' : 'text-foreground'}>
           {formatMoney(cost.margin)}
           {cost.margin_percent === null ? '' : ` (${formatPercent(cost.margin_percent)})`}
         </strong>
-        {perdida ? ' · se vende a pérdida' : ''}
+        {lost ? ' · se vende a pérdida' : ''}
       </span>
-      <Link to={destino} state={DESDE_MENU} className={ENLACE} aria-label={`Ver la receta de ${itemName}`}>
+      <Link to={destination} state={FROM_MENU} className={LINK} aria-label={`Ver la receta de ${itemName}`}>
         <Icon name="receta" size={16} />
         <span>Receta</span>
       </Link>

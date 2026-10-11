@@ -28,9 +28,9 @@ export function useMenuAction<TResult>({ send, updateCache, failure, success }: 
 
   return useMutation({
     mutationFn: send,
-    onSuccess: (resultado) => {
+    onSuccess: (result) => {
       if (updateCache !== undefined) {
-        queryClient.setQueryData(MENU_KEY, (menu) => menu && updateCache(menu, resultado))
+        queryClient.setQueryData(MENU_KEY, (menu) => menu && updateCache(menu, result))
       }
       void queryClient.invalidateQueries({ queryKey: menuQueryKey })
       void queryClient.invalidateQueries({ queryKey: dishCostsQueryKey })

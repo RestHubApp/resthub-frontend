@@ -20,11 +20,11 @@ import { STAFF_LIST_QUERY } from './staffList'
 import { StaffRowActions } from './StaffRowActions'
 
 // Una columna que en el celular se lee bajo el nombre.
-const SOLO_ANCHA = 'hidden sm:table-cell'
+const ONLY_WIDE = 'hidden sm:table-cell'
 
-function columnas(
-  propiaId: number | undefined,
-  puedeGestionar: (cuenta: StaffResponse) => boolean,
+function columns(
+  ownId: number | undefined,
+  canManage: (account: StaffResponse) => boolean,
 ): DataColumn<StaffResponse>[] {
   return [
     {
@@ -32,36 +32,36 @@ function columnas(
       header: 'Nombre',
       // En el celular el correo, el rol y el estado van bajo el nombre: la tabla de cinco
       // columnas dejaba las acciones fuera de la vista a 390 px.
-      cell: (cuenta) => (
+      cell: (account) => (
         <span className="flex flex-col">
-          <span>{cuenta.id === propiaId ? `${cuenta.full_name} (tú)` : cuenta.full_name}</span>
+          <span>{account.id === ownId ? `${account.full_name} (tú)` : account.full_name}</span>
           <span className="text-xs break-all text-muted-foreground sm:hidden">
-            {cuenta.email} · {cuenta.role_label} · {cuenta.is_active ? 'Activa' : 'Inactiva'}
+            {account.email} · {account.role_label} · {account.is_active ? 'Activa' : 'Inactiva'}
           </span>
         </span>
       ),
     },
-    { id: 'correo', header: 'Correo', className: SOLO_ANCHA, cell: (cuenta) => cuenta.email },
-    { id: 'rol', header: 'Rol', className: SOLO_ANCHA, cell: (cuenta) => cuenta.role_label },
+    { id: 'correo', header: 'Correo', className: ONLY_WIDE, cell: (account) => account.email },
+    { id: 'rol', header: 'Rol', className: ONLY_WIDE, cell: (account) => account.role_label },
     {
       id: 'estado',
       header: 'Estado',
-      className: SOLO_ANCHA,
-      cell: (cuenta) => (
+      className: ONLY_WIDE,
+      cell: (account) => (
         <StatusBadge
-          label={cuenta.is_active ? 'Activa' : 'Inactiva'}
-          tone={cuenta.is_active ? 'completed' : undefined}
+          label={account.is_active ? 'Activa' : 'Inactiva'}
+          tone={account.is_active ? 'completed' : undefined}
         />
       ),
     },
     {
       id: 'acciones',
       header: 'Acciones',
-      cell: (cuenta) => (
+      cell: (account) => (
         <StaffRowActions
-          account={cuenta}
-          isSelf={cuenta.id === propiaId}
-          manageable={puedeGestionar(cuenta)}
+          account={account}
+          isSelf={account.id === ownId}
+          manageable={canManage(account)}
         />
       ),
     },
@@ -70,12 +70,12 @@ function columnas(
 
 /** Las cuentas del restaurante, cada una con su rol. */
 export function StaffView() {
-  const personal = useQuery(STAFF_LIST_QUERY)
+  const staff = useQuery(STAFF_LIST_QUERY)
   const roles = useQuery(rolesQuery())
   const granted = usePermissions()
-  const propiaId = useSession((state) => state.account?.user.id)
-  const puedeGestionar = (cuenta: StaffResponse) => canManageAccount(cuenta, roles.data, granted)
-  const [creando, setCreando] = useState(false)
+  const ownId = useSession((state) => state.account?.user.id)
+  const canManage = (account: StaffResponse) => canManageAccount(account, roles.data, granted)
+  const [creating, setCreating] = useState(false)
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,7 +88,7 @@ export function StaffView() {
             size="lg"
             className="h-10 px-4"
             onClick={() => {
-              setCreando(true)
+              setCreating(true)
             }}
           >
             <Icon name="agregar" size={16} />
@@ -98,18 +98,18 @@ export function StaffView() {
       />
 
       <FormDialog
-        open={creando}
-        onOpenChange={setCreando}
+        open={creating}
+        onOpenChange={setCreating}
         title="Nueva cuenta"
         description="El rol decide qué puede hacer: un mesero toma pedidos desde su celular; un encargado administra el restaurante."
         size="lg"
       >
         <RoleOptionsGate>
-          {(opciones) => (
+          {(options) => (
             <StaffCreateForm
-              roles={opciones}
+              roles={options}
               onDone={() => {
-                setCreando(false)
+                setCreating(false)
               }}
             />
           )}
@@ -117,17 +117,17 @@ export function StaffView() {
       </FormDialog>
 
       <SectionCard title="Equipo">
-        {personal.isError ? (
+        {staff.isError ? (
           <FormMessage tone="error">
-            {errorMessage(personal.error, 'No se pudo cargar el personal.')}
+            {errorMessage(staff.error, 'No se pudo cargar el personal.')}
           </FormMessage>
         ) : (
           <DataTable
-            columns={columnas(propiaId, puedeGestionar)}
-            data={personal.data?.items ?? []}
-            isLoading={personal.isPending}
+            columns={columns(ownId, canManage)}
+            data={staff.data?.items ?? []}
+            isLoading={staff.isPending}
             emptyMessage="Todavía no hay cuentas registradas."
-            getRowId={(cuenta) => String(cuenta.id)}
+            getRowId={(account) => String(account.id)}
             pageSize={15}
           />
         )}

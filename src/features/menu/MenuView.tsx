@@ -15,17 +15,17 @@ import { useMenuOrder } from './useMenuOrder'
 
 /** La carta del restaurante: categorías, platos, precios y lo que hay hoy. */
 export function MenuView() {
-  const { menu, costoPorPlato } = useMenuData()
-  const categorias = menu.data?.categories ?? []
-  const orden = useMenuOrder(categorias)
-  const [dialogo, setDialogo] = useState<NewMenuDialog>(null)
-  const cerrar = () => {
-    setDialogo(null)
+  const { menu, costoPorPlato: costByDish } = useMenuData()
+  const categories = menu.data?.categories ?? []
+  const order = useMenuOrder(categories)
+  const [dialog, setDialog] = useState<NewMenuDialog>(null)
+  const close = () => {
+    setDialog(null)
   }
-  const abrir = (nuevo: NewMenuDialog) => () => {
-    setDialogo(nuevo)
+  const open = (fresh: NewMenuDialog) => () => {
+    setDialog(fresh)
   }
-  const ultima = categorias.length - 1
+  const last = categories.length - 1
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,7 +39,7 @@ export function MenuView() {
               variant="outline"
               size="lg"
               className="h-11 px-4"
-              onClick={abrir({ tipo: 'categoria' })}
+              onClick={open({ tipo: 'categoria' })}
             >
               <Icon name="agregar" size={16} />
               <span>Nueva categoría</span>
@@ -48,8 +48,8 @@ export function MenuView() {
               type="button"
               size="lg"
               className="h-11 px-4"
-              disabled={categorias.length === 0}
-              onClick={abrir({ tipo: 'plato' })}
+              disabled={categories.length === 0}
+              onClick={open({ tipo: 'plato' })}
             >
               <Icon name="agregar" size={16} />
               <span>Nuevo plato</span>
@@ -64,34 +64,34 @@ export function MenuView() {
           {errorMessage(menu.error, 'No se pudo cargar la carta.')}
         </FormMessage>
       ) : null}
-      {menu.isSuccess && categorias.length === 0 ? (
+      {menu.isSuccess && categories.length === 0 ? (
         <EmptyState
           title="La carta está vacía"
           description="Empieza por una categoría, como Entradas o Bebidas, y agrégale sus platos."
         />
       ) : null}
 
-      {categorias.length > 0 ? <TodaySummary categories={categorias} /> : null}
+      {categories.length > 0 ? <TodaySummary categories={categories} /> : null}
 
-      {categorias.map((categoria, indice) => (
+      {categories.map((category, index) => (
         <CategorySection
-          key={categoria.id}
-          category={categoria}
-          categories={categorias}
-          costs={costoPorPlato}
-          isFirst={indice === 0}
-          isLast={indice === ultima}
+          key={category.id}
+          category={category}
+          categories={categories}
+          costs={costByDish}
+          isFirst={index === 0}
+          isLast={index === last}
           onMoveCategory={(direction) => {
-            orden.moveCategory(categoria.id, direction)
+            order.moveCategory(category.id, direction)
           }}
           onMoveItem={(itemId, direction) => {
-            orden.moveItem(categoria, itemId, direction)
+            order.moveItem(category, itemId, direction)
           }}
-          onAddItem={abrir({ tipo: 'plato', categoryId: categoria.id })}
+          onAddItem={open({ tipo: 'plato', categoryId: category.id })}
         />
       ))}
 
-      <NewMenuDialogs dialog={dialogo} categories={categorias} onClose={cerrar} />
+      <NewMenuDialogs dialog={dialog} categories={categories} onClose={close} />
     </div>
   )
 }

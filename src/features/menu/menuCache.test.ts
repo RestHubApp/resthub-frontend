@@ -8,14 +8,14 @@ import { moveId, sortByIds } from './menuOrder'
 import { emptyMenuItem, menuItemPayload, menuItemSchema, menuItemValuesOf } from './menuSchema'
 import { prefetchMenu } from './prefetchMenu'
 
-const ENTRADAS = 'Entradas:Ceviche,Causa'
-const CATEGORIA = { id: 3, name: 'Postres', position: 2, is_active: true, created_at: '2026-09-26T13:00:00Z' }
+const ENTRIES = 'Entradas:Ceviche,Causa'
+const CATEGORY = { id: 3, name: 'Postres', position: 2, is_active: true, created_at: '2026-09-26T13:00:00Z' }
 
 function urls(api: { peticiones: readonly { url: string }[] }): string[] {
   return api.peticiones.map((p) => p.url).sort((a, b) => a.localeCompare(b))
 }
 
-function nombres(menu: ReturnType<typeof carta>) {
+function names(menu: ReturnType<typeof carta>) {
   return menu.categories.map((c) => `${c.name}:${c.items.map((p) => p.name).join(',')}`)
 }
 
@@ -29,9 +29,9 @@ describe('menuOrder', () => {
   })
 
   it('ordena por los ids sin tocar la lista original', () => {
-    const lista = [{ id: 1 }, { id: 2 }, { id: 3 }]
-    expect(sortByIds(lista, [3, 1, 2]).map((x) => x.id)).toEqual([3, 1, 2])
-    expect(lista.map((x) => x.id)).toEqual([1, 2, 3])
+    const list = [{ id: 1 }, { id: 2 }, { id: 3 }]
+    expect(sortByIds(list, [3, 1, 2]).map((x) => x.id)).toEqual([3, 1, 2])
+    expect(list.map((x) => x.id)).toEqual([1, 2, 3])
   })
 })
 
@@ -42,23 +42,23 @@ describe('menuCache', () => {
   })
 
   it('reordena categorías y platos de una categoría', () => {
-    expect(nombres(withCategoryOrder(carta(), [2, 1]))).toEqual(['Bebidas:', ENTRADAS])
-    expect(nombres(withItemOrder(carta(), 1, [11, 10]))[0]).toBe('Entradas:Causa,Ceviche')
+    expect(names(withCategoryOrder(carta(), [2, 1]))).toEqual(['Bebidas:', ENTRIES])
+    expect(names(withItemOrder(carta(), 1, [11, 10]))[0]).toBe('Entradas:Causa,Ceviche')
   })
 
   it('un plato nuevo entra al final de su categoría y uno movido sale de la anterior', () => {
-    expect(nombres(withItem(carta(), plato({ id: 12, name: 'Chicha', category_id: 2 })))).toEqual([
-      ENTRADAS,
+    expect(names(withItem(carta(), plato({ id: 12, name: 'Chicha', category_id: 2 })))).toEqual([
+      ENTRIES,
       'Bebidas:Chicha',
     ])
-    expect(nombres(withItem(carta(), plato({ category_id: 2 })))).toEqual(['Entradas:Causa', 'Bebidas:Ceviche'])
+    expect(names(withItem(carta(), plato({ category_id: 2 })))).toEqual(['Entradas:Causa', 'Bebidas:Ceviche'])
     expect(withItem(carta(), plato({ price: '32.00' })).categories[0]?.items[0]?.price).toBe('32.00')
   })
 
   it('una categoría nueva va al final vacía; una existente se renombra conservando sus platos', () => {
-    expect(nombres(withCategory(carta(), CATEGORIA))).toEqual([ENTRADAS, 'Bebidas:', 'Postres:'])
-    expect(nombres(withCategory(carta(), { ...CATEGORIA, id: 1, name: 'Piqueos' }))[0]).toBe('Piqueos:Ceviche,Causa')
-    expect(nombres(withoutCategory(carta(), 2))).toEqual([ENTRADAS])
+    expect(names(withCategory(carta(), CATEGORY))).toEqual([ENTRIES, 'Bebidas:', 'Postres:'])
+    expect(names(withCategory(carta(), { ...CATEGORY, id: 1, name: 'Piqueos' }))[0]).toBe('Piqueos:Ceviche,Causa')
+    expect(names(withoutCategory(carta(), 2))).toEqual([ENTRIES])
   })
 })
 

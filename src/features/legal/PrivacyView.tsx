@@ -9,13 +9,13 @@ import { paths } from '@/services/paths'
  */
 export const PRIVACY_VERSION = '2026-10'
 
-interface Seccion {
+interface Section {
   readonly titulo: string
   readonly parrafos: readonly string[]
 }
 
 // Ley N.º 29733, Ley de Protección de Datos Personales del Perú.
-const SECCIONES: readonly Seccion[] = [
+const SECTIONS: readonly Section[] = [
   {
     titulo: 'Quién trata tus datos',
     parrafos: [
@@ -83,12 +83,12 @@ export function PrivacyView() {
           {`Versión ${PRIVACY_VERSION}. Conforme a la Ley N.º 29733, Ley de Protección de Datos Personales del Perú.`}
         </p>
       </header>
-      {SECCIONES.map((seccion) => (
-        <section key={seccion.titulo} className="flex flex-col gap-2">
-          <h2 className="m-0 text-lg font-semibold">{seccion.titulo}</h2>
-          {seccion.parrafos.map((parrafo) => (
-            <p key={parrafo} className="m-0 leading-relaxed">
-              {parrafo}
+      {SECTIONS.map((section) => (
+        <section key={section.titulo} className="flex flex-col gap-2">
+          <h2 className="m-0 text-lg font-semibold">{section.titulo}</h2>
+          {section.parrafos.map((paragraph) => (
+            <p key={paragraph} className="m-0 leading-relaxed">
+              {paragraph}
             </p>
           ))}
         </section>

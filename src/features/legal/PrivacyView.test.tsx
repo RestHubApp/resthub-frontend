@@ -10,9 +10,9 @@ describe('PrivacyView', () => {
     montar(<PrivacyView />, { path: '/privacidad' })
 
     expect(screen.getByRole('heading', { level: 1, name: 'Términos de uso y política de privacidad' })).toBeInTheDocument()
-    expect(screen.getByText((texto) => texto.startsWith(`Versión ${PRIVACY_VERSION}.`))).toBeInTheDocument()
-    for (const seccion of ['Consentimiento', 'Inteligencia artificial y envíos fuera del Perú', 'Tus derechos (ARCO)']) {
-      expect(screen.getByRole('heading', { level: 2, name: seccion })).toBeInTheDocument()
+    expect(screen.getByText((text) => text.startsWith(`Versión ${PRIVACY_VERSION}.`))).toBeInTheDocument()
+    for (const section of ['Consentimiento', 'Inteligencia artificial y envíos fuera del Perú', 'Tus derechos (ARCO)']) {
+      expect(screen.getByRole('heading', { level: 2, name: section })).toBeInTheDocument()
     }
   })
 

@@ -7,162 +7,162 @@ import type { PermissionCode } from '@/api/types'
 import { StaffView } from './StaffView'
 
 // Contraseña de prueba, no una credencial real.
-const OTRA_CLAVE_DE_PRUEBA = 'otra-clave-10'
+const OTHER_TEST_SECRET = 'otra-clave-10'
 
-const NUEVA_CUENTA = 'Nueva cuenta'
-const CLAVE_SEGURA_1 = 'clave-segura-1'
-const CREAR_CUENTA = 'Crear cuenta'
+const NEW_ACCOUNT = 'Nueva cuenta'
+const SECRET_SAFE_1 = 'clave-segura-1'
+const CREATE_ACCOUNT = 'Crear cuenta'
 
 const ROLES = [ROL_ENCARGADO, ROL_MESERO, rol()]
-const NOMBRE = 'Nombre completo'
+const NAME = 'Nombre completo'
 
-type Miembro = (typeof EQUIPO)[number]
+type Member = (typeof EQUIPO)[number]
 
-function abrirPersonal(permisos: readonly PermissionCode[] = PERMISOS_ENCARGADO) {
+function openStaff(permissions: readonly PermissionCode[] = PERMISOS_ENCARGADO) {
   // Como el servidor: lo que se guarda se ve al releer la lista.
-  const equipo = EQUIPO.map((cuenta) => ({ ...cuenta }))
-  const guardar = (cuenta: Miembro): Miembro => {
-    const indice = equipo.findIndex((actual) => actual.id === cuenta.id)
-    equipo.splice(indice === -1 ? equipo.length : indice, indice === -1 ? 0 : 1, cuenta)
-    return cuenta
+  const team = EQUIPO.map((account) => ({ ...account }))
+  const save = (account: Member): Member => {
+    const index = team.findIndex((actual) => actual.id === account.id)
+    team.splice(index === -1 ? team.length : index, index === -1 ? 0 : 1, account)
+    return account
   }
   const api = servidor()
-    .on('get', '/staff', () => ({ items: equipo.map((cuenta) => ({ ...cuenta })), total: equipo.length }))
+    .on('get', '/staff', () => ({ items: team.map((account) => ({ ...account })), total: team.length }))
     .on('get', '/roles', ROLES)
-  entrarComo(permisos)
-  return { api, guardar, ...montar(<StaffView />, { path: '/personal' }) }
+  entrarComo(permissions)
+  return { api, guardar: save, ...montar(<StaffView />, { path: '/personal' }) }
 }
 
-async function filaDe(nombre: string | RegExp): Promise<HTMLElement> {
-  return screen.findByRole('row', { name: nombre })
+async function rowOf(name: string | RegExp): Promise<HTMLElement> {
+  return screen.findByRole('row', { name: name })
 }
 
 describe('StaffView', () => {
   it('lista al equipo con su rol, su estado y la cuenta propia marcada', async () => {
-    abrirPersonal()
+    openStaff()
 
-    expect(await filaDe(/Ana Torres \(tú\)/u)).toBeInTheDocument()
-    expect(within(await filaDe(/Luis Quispe/u)).getByText('Activa')).toBeInTheDocument()
-    expect(within(await filaDe(/Rosa Mamani/u)).getByText('Inactiva')).toBeInTheDocument()
+    expect(await rowOf(/Ana Torres \(tú\)/u)).toBeInTheDocument()
+    expect(within(await rowOf(/Luis Quispe/u)).getByText('Activa')).toBeInTheDocument()
+    expect(within(await rowOf(/Rosa Mamani/u)).getByText('Inactiva')).toBeInTheDocument()
   })
 
   it('da de alta una cuenta con el mesero elegido por omisión', async () => {
-    const { api, guardar, user } = abrirPersonal()
-    api.on('post', '/staff', (peticion: Peticion) => guardar(miembro({ id: 10, ...(peticion.body as object), role_label: 'Mesero' })))
-    await filaDe(/Luis Quispe/u)
+    const { api, guardar: save, user } = openStaff()
+    api.on('post', '/staff', (request: Peticion) => save(miembro({ id: 10, ...(request.body as object), role_label: 'Mesero' })))
+    await rowOf(/Luis Quispe/u)
 
-    await user.click(screen.getByRole('button', { name: NUEVA_CUENTA }))
-    const ventana = await screen.findByRole('dialog', { name: NUEVA_CUENTA })
-    expect(await within(ventana).findByRole('combobox', { name: 'Rol' })).toHaveDisplayValue('Mesero')
-    await user.type(within(ventana).getByLabelText(NOMBRE), 'María 3 Rojas')
-    expect(within(ventana).getByLabelText(NOMBRE)).toHaveValue('María  Rojas')
-    await user.clear(within(ventana).getByLabelText(NOMBRE))
-    await user.type(within(ventana).getByLabelText(NOMBRE), 'María Rojas')
-    await user.type(within(ventana).getByLabelText('Correo'), 'maria@resthub.dev')
-    await user.type(within(ventana).getByLabelText('Contraseña inicial'), CLAVE_SEGURA_1)
-    await user.click(within(ventana).getByRole('button', { name: CREAR_CUENTA }))
+    await user.click(screen.getByRole('button', { name: NEW_ACCOUNT }))
+    const window = await screen.findByRole('dialog', { name: NEW_ACCOUNT })
+    expect(await within(window).findByRole('combobox', { name: 'Rol' })).toHaveDisplayValue('Mesero')
+    await user.type(within(window).getByLabelText(NAME), 'María 3 Rojas')
+    expect(within(window).getByLabelText(NAME)).toHaveValue('María  Rojas')
+    await user.clear(within(window).getByLabelText(NAME))
+    await user.type(within(window).getByLabelText(NAME), 'María Rojas')
+    await user.type(within(window).getByLabelText('Correo'), 'maria@resthub.dev')
+    await user.type(within(window).getByLabelText('Contraseña inicial'), SECRET_SAFE_1)
+    await user.click(within(window).getByRole('button', { name: CREATE_ACCOUNT }))
 
-    expect(await filaDe(/María Rojas/u)).toBeInTheDocument()
+    expect(await rowOf(/María Rojas/u)).toBeInTheDocument()
     expect(api.llamadas('post', '/staff')[0]?.body).toEqual({
       full_name: 'María Rojas',
       email: 'maria@resthub.dev',
       role_id: 2,
-      password: CLAVE_SEGURA_1,
+      password: SECRET_SAFE_1,
     })
-    expect(screen.queryByRole('dialog', { name: NUEVA_CUENTA })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: NEW_ACCOUNT })).not.toBeInTheDocument()
   })
 
   it('si el correo ya existe, el alta muestra el motivo', async () => {
-    const { api, user } = abrirPersonal()
+    const { api, user } = openStaff()
     api.on('post', '/staff', new RespuestaDeError(409, 'Ya hay una cuenta con ese correo.'))
-    await filaDe(/Luis Quispe/u)
+    await rowOf(/Luis Quispe/u)
 
-    await user.click(screen.getByRole('button', { name: NUEVA_CUENTA }))
-    const ventana = await screen.findByRole('dialog')
-    await user.type(await within(ventana).findByLabelText(NOMBRE), 'Luis Quispe')
-    await user.type(within(ventana).getByLabelText('Correo'), 'luis@resthub.dev')
-    await user.type(within(ventana).getByLabelText('Contraseña inicial'), CLAVE_SEGURA_1)
-    await user.click(within(ventana).getByRole('button', { name: CREAR_CUENTA }))
+    await user.click(screen.getByRole('button', { name: NEW_ACCOUNT }))
+    const window = await screen.findByRole('dialog')
+    await user.type(await within(window).findByLabelText(NAME), 'Luis Quispe')
+    await user.type(within(window).getByLabelText('Correo'), 'luis@resthub.dev')
+    await user.type(within(window).getByLabelText('Contraseña inicial'), SECRET_SAFE_1)
+    await user.click(within(window).getByRole('button', { name: CREATE_ACCOUNT }))
 
-    expect(await within(ventana).findByText('Ya hay una cuenta con ese correo.')).toBeInTheDocument()
+    expect(await within(window).findByText('Ya hay una cuenta con ese correo.')).toBeInTheDocument()
   })
 
   it('la cuenta propia cambia el nombre pero no el rol, ni se desactiva', async () => {
-    const { api, guardar, user } = abrirPersonal()
-    api.on('patch', '/staff/7', (peticion: Peticion) => guardar({ ...primero(EQUIPO), ...(peticion.body as object) }))
-    const propia = await filaDe(/Ana Torres/u)
+    const { api, guardar: save, user } = openStaff()
+    api.on('patch', '/staff/7', (request: Peticion) => save({ ...primero(EQUIPO), ...(request.body as object) }))
+    const own = await rowOf(/Ana Torres/u)
 
-    expect(within(propia).queryByRole('button', { name: 'Contraseña' })).not.toBeInTheDocument()
-    expect(within(propia).getByRole('button', { name: 'Desactivar' })).toBeDisabled()
-    await user.click(within(propia).getByRole('button', { name: 'Editar' }))
-    const ventana = await screen.findByRole('dialog', { name: 'Editar a Ana Torres' })
-    expect(await within(ventana).findByText('No puedes cambiar el rol de tu propia cuenta.')).toBeInTheDocument()
-    await user.type(within(ventana).getByLabelText(NOMBRE), ' Luna')
-    await user.click(within(ventana).getByRole('button', { name: 'Guardar' }))
+    expect(within(own).queryByRole('button', { name: 'Contraseña' })).not.toBeInTheDocument()
+    expect(within(own).getByRole('button', { name: 'Desactivar' })).toBeDisabled()
+    await user.click(within(own).getByRole('button', { name: 'Editar' }))
+    const window = await screen.findByRole('dialog', { name: 'Editar a Ana Torres' })
+    expect(await within(window).findByText('No puedes cambiar el rol de tu propia cuenta.')).toBeInTheDocument()
+    await user.type(within(window).getByLabelText(NAME), ' Luna')
+    await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
-    expect(await filaDe(/Ana Torres Luna/u)).toBeInTheDocument()
+    expect(await rowOf(/Ana Torres Luna/u)).toBeInTheDocument()
     expect(api.llamadas('patch', '/staff/7')[0]?.body).toEqual({ full_name: 'Ana Torres Luna' })
   })
 })
 
 describe('StaffView: cambios sobre otras cuentas', () => {
   it('cambia el rol de otra cuenta', async () => {
-    const { api, guardar, user } = abrirPersonal()
-    api.on('patch', '/staff/8', () => guardar(miembro({ role_id: 5, role_label: 'Cocina' })))
+    const { api, guardar: save, user } = openStaff()
+    api.on('patch', '/staff/8', () => save(miembro({ role_id: 5, role_label: 'Cocina' })))
 
-    await user.click(within(await filaDe(/Luis Quispe/u)).getByRole('button', { name: 'Editar' }))
-    const ventana = await screen.findByRole('dialog', { name: 'Editar a Luis Quispe' })
-    await user.selectOptions(await within(ventana).findByRole('combobox', { name: 'Rol' }), 'Cocina')
-    await user.click(within(ventana).getByRole('button', { name: 'Guardar' }))
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Editar' }))
+    const window = await screen.findByRole('dialog', { name: 'Editar a Luis Quispe' })
+    await user.selectOptions(await within(window).findByRole('combobox', { name: 'Rol' }), 'Cocina')
+    await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
-    expect(await within(await filaDe(/Luis Quispe/u)).findByText('Cocina')).toBeInTheDocument()
+    expect(await within(await rowOf(/Luis Quispe/u)).findByText('Cocina')).toBeInTheDocument()
     expect(api.llamadas('patch', '/staff/8')[0]?.body).toEqual({ full_name: 'Luis Quispe', role_id: 5 })
   })
 
   it('restablece la contraseña de otra cuenta y lo avisa', async () => {
-    const { api, user } = abrirPersonal()
+    const { api, user } = openStaff()
     api.on('post', '/staff/8/password', null, 204)
 
-    await user.click(within(await filaDe(/Luis Quispe/u)).getByRole('button', { name: 'Contraseña' }))
-    const ventana = await screen.findByRole('dialog', { name: 'Restablecer la contraseña de Luis Quispe' })
-    await user.type(within(ventana).getByLabelText('Nueva contraseña'), OTRA_CLAVE_DE_PRUEBA)
-    await user.click(within(ventana).getByRole('button', { name: 'Restablecer' }))
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Contraseña' }))
+    const window = await screen.findByRole('dialog', { name: 'Restablecer la contraseña de Luis Quispe' })
+    await user.type(within(window).getByLabelText('Nueva contraseña'), OTHER_TEST_SECRET)
+    await user.click(within(window).getByRole('button', { name: 'Restablecer' }))
 
     expect(await screen.findByText('Contraseña de Luis Quispe restablecida.')).toBeInTheDocument()
-    expect(api.llamadas('post', '/staff/8/password')[0]?.body).toEqual({ new_password: OTRA_CLAVE_DE_PRUEBA })
+    expect(api.llamadas('post', '/staff/8/password')[0]?.body).toEqual({ new_password: OTHER_TEST_SECRET })
   })
 
   it('desactivar se confirma; activar va directo', async () => {
-    const { api, guardar, user } = abrirPersonal()
-    api.on('patch', '/staff/8/status', () => guardar(miembro({ is_active: false })))
-    api.on('patch', '/staff/9/status', () => guardar({ ...(EQUIPO.at(2) ?? primero(EQUIPO)), is_active: true }))
+    const { api, guardar: save, user } = openStaff()
+    api.on('patch', '/staff/8/status', () => save(miembro({ is_active: false })))
+    api.on('patch', '/staff/9/status', () => save({ ...(EQUIPO.at(2) ?? primero(EQUIPO)), is_active: true }))
 
-    await user.click(within(await filaDe(/Luis Quispe/u)).getByRole('button', { name: 'Desactivar' }))
-    const aviso = await screen.findByRole('alertdialog', { name: '¿Desactivar a Luis Quispe?' })
-    await user.click(within(aviso).getByRole('button', { name: 'Desactivar' }))
-    await user.click(within(await filaDe(/Rosa Mamani/u)).getByRole('button', { name: 'Activar' }))
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Desactivar' }))
+    const notice = await screen.findByRole('alertdialog', { name: '¿Desactivar a Luis Quispe?' })
+    await user.click(within(notice).getByRole('button', { name: 'Desactivar' }))
+    await user.click(within(await rowOf(/Rosa Mamani/u)).getByRole('button', { name: 'Activar' }))
 
     expect(api.llamadas('patch', '/staff/8/status')[0]?.body).toEqual({ is_active: false })
     expect(api.llamadas('patch', '/staff/9/status')[0]?.body).toEqual({ is_active: true })
-    expect(await within(await filaDe(/Rosa Mamani/u)).findByText('Activa')).toBeInTheDocument()
+    expect(await within(await rowOf(/Rosa Mamani/u)).findByText('Activa')).toBeInTheDocument()
   })
 
   it('no ofrece cambiar una cuenta cuyo rol tiene permisos que quien mira no tiene', async () => {
-    abrirPersonal(['staff.manage', 'orders.take', 'orders.charge'])
+    openStaff(['staff.manage', 'orders.take', 'orders.charge'])
 
-    const encargada = await filaDe(/Ana Torres/u)
-    expect(await within(encargada).findByText('Su rol tiene permisos que tu cuenta no tiene: no puedes cambiarla.')).toBeInTheDocument()
-    expect(within(await filaDe(/Luis Quispe/u)).getByRole('button', { name: 'Editar' })).toBeInTheDocument()
+    const owner = await rowOf(/Ana Torres/u)
+    expect(await within(owner).findByText('Su rol tiene permisos que tu cuenta no tiene: no puedes cambiarla.')).toBeInTheDocument()
+    expect(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Editar' })).toBeInTheDocument()
   })
 
   it('si no hay ningún rol que la cuenta pueda dar, el alta lo explica', async () => {
-    const { user } = abrirPersonal(['staff.manage'])
-    await filaDe(/Luis Quispe/u)
+    const { user } = openStaff(['staff.manage'])
+    await rowOf(/Luis Quispe/u)
 
-    await user.click(screen.getByRole('button', { name: NUEVA_CUENTA }))
+    await user.click(screen.getByRole('button', { name: NEW_ACCOUNT }))
 
     expect(await screen.findByText('Todos los roles tienen permisos que tu cuenta no tiene, así que no puedes dar ninguno.')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: CREAR_CUENTA })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: CREATE_ACCOUNT })).not.toBeInTheDocument()
   })
 
   it('si no se puede cargar el personal, lo dice', async () => {

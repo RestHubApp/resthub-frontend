@@ -6,10 +6,10 @@ import { staffQueryKey } from '@/api/staff'
 import type { StaffListResponse, StaffResponse } from '@/api/types'
 import { saveStaffMember, STAFF_LIST_QUERY } from './staffList'
 
-const NOMBRE_ANA = 'Ana Pérez'
-const NOMBRE_BEATRIZ = 'Beatriz Gómez'
+const NAME_ANA = 'Ana Pérez'
+const NAME_BEATRIZ = 'Beatriz Gómez'
 
-function miembro(id: number, full_name: string, role_id = 1): StaffResponse {
+function member(id: number, full_name: string, role_id = 1): StaffResponse {
   return {
     id,
     full_name,
@@ -24,34 +24,34 @@ function miembro(id: number, full_name: string, role_id = 1): StaffResponse {
 describe('saveStaffMember', () => {
   it('agrega un miembro nuevo en orden alfabético e incrementa el total', () => {
     const qc = new QueryClient()
-    const inicial: StaffListResponse = {
-      items: [miembro(1, NOMBRE_ANA), miembro(3, 'Carlos Soto')],
+    const initial: StaffListResponse = {
+      items: [member(1, NAME_ANA), member(3, 'Carlos Soto')],
       total: 2,
     }
-    qc.setQueryData(STAFF_LIST_QUERY.queryKey, inicial)
+    qc.setQueryData(STAFF_LIST_QUERY.queryKey, initial)
 
-    const nuevo = miembro(2, NOMBRE_BEATRIZ)
-    saveStaffMember(qc, nuevo)
+    const fresh = member(2, NAME_BEATRIZ)
+    saveStaffMember(qc, fresh)
 
     const actual = qc.getQueryData<StaffListResponse>(STAFF_LIST_QUERY.queryKey)
     expect(actual?.total).toBe(3)
-    expect(actual?.items.map((i) => i.full_name)).toEqual([NOMBRE_ANA, NOMBRE_BEATRIZ, 'Carlos Soto'])
+    expect(actual?.items.map((i) => i.full_name)).toEqual([NAME_ANA, NAME_BEATRIZ, 'Carlos Soto'])
   })
 
   it('actualiza un miembro existente manteniendo el total', () => {
     const qc = new QueryClient()
-    const inicial: StaffListResponse = {
-      items: [miembro(1, NOMBRE_ANA), miembro(2, NOMBRE_BEATRIZ)],
+    const initial: StaffListResponse = {
+      items: [member(1, NAME_ANA), member(2, NAME_BEATRIZ)],
       total: 2,
     }
-    qc.setQueryData(STAFF_LIST_QUERY.queryKey, inicial)
+    qc.setQueryData(STAFF_LIST_QUERY.queryKey, initial)
 
-    const editado = { ...miembro(2, 'Beatriz Zúñiga'), role_id: 2 }
-    saveStaffMember(qc, editado)
+    const edited = { ...member(2, 'Beatriz Zúñiga'), role_id: 2 }
+    saveStaffMember(qc, edited)
 
     const actual = qc.getQueryData<StaffListResponse>(STAFF_LIST_QUERY.queryKey)
     expect(actual?.total).toBe(2)
-    expect(actual?.items.map((i) => i.full_name)).toEqual([NOMBRE_ANA, 'Beatriz Zúñiga'])
+    expect(actual?.items.map((i) => i.full_name)).toEqual([NAME_ANA, 'Beatriz Zúñiga'])
     expect(actual?.items[1]?.role_id).toBe(2)
   })
 
@@ -59,7 +59,7 @@ describe('saveStaffMember', () => {
     const qc = new QueryClient()
     const spy = jest.spyOn(qc, 'invalidateQueries')
 
-    saveStaffMember(qc, miembro(1, NOMBRE_ANA))
+    saveStaffMember(qc, member(1, NAME_ANA))
 
     expect(spy).toHaveBeenCalledWith({ queryKey: staffQueryKey })
     expect(spy).toHaveBeenCalledWith({ queryKey: rolesQueryKey })
@@ -67,7 +67,7 @@ describe('saveStaffMember', () => {
 
   it('no falla si la lista de personal aún no está en caché', () => {
     const qc = new QueryClient()
-    saveStaffMember(qc, miembro(1, 'Ana Pérez'))
+    saveStaffMember(qc, member(1, 'Ana Pérez'))
     expect(qc.getQueryData(STAFF_LIST_QUERY.queryKey)).toBeUndefined()
   })
 })
