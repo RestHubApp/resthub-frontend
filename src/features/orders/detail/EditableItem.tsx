@@ -1,18 +1,19 @@
-import { lazy, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
+import { lazyNamed } from '@/components/lazyNamed'
 
 import { changeOrderItem, removeOrderItem } from '@/api/orders'
 import type { ChangeItemRequest, OrderItemResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 import { Button } from '@/components/ui/button'
-import ItemNote from '@/features/orders/ItemNote'
-import QuantityStepper from '@/features/orders/QuantityStepper'
+import { ItemNote } from '@/features/orders/ItemNote'
+import { QuantityStepper } from '@/features/orders/QuantityStepper'
 import { MAX_QUANTITY } from '@/features/orders/taking/useOrderDraft'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { formatMoney } from '@/services/format'
 
 // El diálogo trae react-hook-form y zod: se baja la primera vez que se edita una nota.
-const ItemNoteDialog = lazy(() => import('./ItemNoteDialog'))
+const ItemNoteDialog = lazyNamed(() => import('./ItemNoteDialog'), 'ItemNoteDialog')
 
 interface EditableItemProps {
   readonly orderId: number
@@ -26,7 +27,7 @@ interface EditableItemProps {
  * Solo mientras el pedido no llego a cocina; despues, cambiar un plato es algo
  * que se habla con la cocina y el servidor lo rechaza.
  */
-export default function EditableItem({ orderId, item, flag }: EditableItemProps) {
+export function EditableItem({ orderId, item, flag }: EditableItemProps) {
   const [editando, setEditando] = useState(false)
   const cambio = useOrderAction({
     mutationFn: (payload: ChangeItemRequest) => changeOrderItem(orderId, item.id, payload),

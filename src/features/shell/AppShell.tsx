@@ -1,19 +1,19 @@
 import { Outlet } from 'react-router'
 
-import AccessibilityWidget from '@/components/AccessibilityWidget'
-import ApiFailureNotice from '@/components/ApiFailureNotice'
+import { AccessibilityWidget } from '@/components/AccessibilityWidget'
+import { ApiFailureNotice } from '@/components/ApiFailureNotice'
 import { useFailedQueries } from '@/hooks/useFailedQueries'
 import { isPreviewTab } from '@/services/tabStorage'
 import { usePreview, useSession } from '@/store/session'
-import BottomNav from './BottomNav'
-import Brand from './Brand'
+import { BottomNav } from './BottomNav'
+import { Brand } from './Brand'
 import { entriesFor } from './navigation'
-import PreviewBanner from './PreviewBanner'
-import PreviewEndedView from './PreviewEndedView'
-import RestaurantName from './RestaurantName'
+import { PreviewBanner } from './PreviewBanner'
+import { PreviewEndedView } from './PreviewEndedView'
+import { RestaurantName } from './RestaurantName'
 import { type ScreenPreload, ScreenPreloadContext } from './screenPreload'
-import SideNav from './SideNav'
-import ToastStack from './ToastStack'
+import { SideNav } from './SideNav'
+import { ToastStack } from './ToastStack'
 import { useAccountRefresh } from './useAccountRefresh'
 import { useSessionRenewal } from './useSessionRenewal'
 
@@ -43,7 +43,7 @@ interface AppShellProps {
  * una barra inferior, y arriba queda el nombre del restaurante; el contenido
  * reserva abajo el alto de esa barra para que nada quede tapado.
  */
-export default function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
+export function AppShell({ screens = SIN_PANTALLAS }: AppShellProps) {
   const account = useSession((state) => state.account)
   const preview = usePreview()
   const failed = useFailedQueries('restaurant')

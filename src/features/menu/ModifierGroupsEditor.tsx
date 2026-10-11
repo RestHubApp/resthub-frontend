@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -22,7 +22,7 @@ const MAX_GRUPOS = 8
  * adicional después de «=». Un grupo obligatorio no deja enviar el plato sin
  * elegir; el máximo dice cuántas se pueden marcar.
  */
-export default function ModifierGroupsEditor({ groups, error, onChange }: ModifierGroupsEditorProps) {
+export function ModifierGroupsEditor({ groups, error, onChange }: ModifierGroupsEditorProps) {
   const cambiar = (indice: number, cambio: Partial<GroupDraft>) => {
     onChange(groups.map((grupo, i) => (i === indice ? { ...grupo, ...cambio } : grupo)))
   }

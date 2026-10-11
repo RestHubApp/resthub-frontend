@@ -12,7 +12,7 @@ interface InvoiceRowProps {
 }
 
 /** Un comprobante emitido: número, monto, cliente, estado y qué se puede hacer. */
-export default function InvoiceRow({ invoice, timeZone, resending, onResend }: InvoiceRowProps) {
+export function InvoiceRow({ invoice, timeZone, resending, onResend }: InvoiceRowProps) {
   return (
     <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 ring-1 ring-input">
       <span className="flex flex-col">

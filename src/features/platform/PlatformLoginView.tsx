@@ -2,7 +2,7 @@ import { Link, Navigate, useLocation } from 'react-router'
 
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { usePlatformSession } from '@/store/platformSession'
-import PlatformLoginForm from './PlatformLoginForm'
+import { PlatformLoginForm } from './PlatformLoginForm'
 
 const INICIO = '/plataforma'
 
@@ -22,7 +22,7 @@ function destinoDe(estado: unknown): string {
  * ningún restaurante y su sesión se guarda aparte, así que entrar acá no
  * cierra ni reemplaza la sesión de un local abierta en el mismo navegador.
  */
-export default function PlatformLoginView() {
+export function PlatformLoginView() {
   const admin = usePlatformSession((state) => state.admin)
   const expired = usePlatformSession((state) => state.expired)
   const signIn = usePlatformSession((state) => state.signIn)

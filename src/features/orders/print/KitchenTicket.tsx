@@ -13,7 +13,7 @@ interface KitchenTicketProps {
  * Sin precios. El número va enorme porque es lo que se grita, y las notas
  * de cada plato van debajo del plato, en mayúsculas, para que no se pierdan.
  */
-export default function KitchenTicket({ order, timeZone }: KitchenTicketProps) {
+export function KitchenTicket({ order, timeZone }: KitchenTicketProps) {
   return (
     <div className="flex flex-col gap-2">
       <p className="m-0 text-center text-xs uppercase">Comanda</p>

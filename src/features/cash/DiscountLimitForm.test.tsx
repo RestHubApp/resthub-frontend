@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
 import type { OwnRestaurant } from '@/api/types'
-import DiscountLimitForm from './DiscountLimitForm'
+import { DiscountLimitForm } from './DiscountLimitForm'
 
 const CAMPO = 'Descuento máximo del mesero (%)'
 const GUARDAR = { name: 'Guardar tope' }

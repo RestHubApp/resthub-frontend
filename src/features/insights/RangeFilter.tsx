@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 import type { InsightsPeriod } from '@/api/types'
-import Icon from '@/components/Icon'
-import CustomRangeForm from './CustomRangeForm'
+import { Icon } from '@/components/Icon'
+import { CustomRangeForm } from './CustomRangeForm'
 import { RANGE_PRESETS } from './dateRange'
 import type { InsightsRange } from './useInsightsRange'
 import { formatLongDate, todayIn } from '@/services/format'
@@ -27,7 +27,7 @@ function periodText(period: InsightsPeriod): string {
  * El filtro de fechas: una sola fila arriba de lo que acota. Primero los
  * rangos de siempre; el personalizado abre dos fechas.
  */
-export default function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
+export function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
   const [personalizando, setPersonalizando] = useState(range.preset === 'personalizado')
   const hoy = todayIn(timeZone)
 

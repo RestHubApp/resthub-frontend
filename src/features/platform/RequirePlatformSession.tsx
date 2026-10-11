@@ -9,7 +9,7 @@ import { usePlatformSession } from '@/store/platformSession'
  * entra acá. Es comodidad de la interfaz; el servidor rechaza con 401
  * cualquier token que no sea de plataforma.
  */
-export default function RequirePlatformSession() {
+export function RequirePlatformSession() {
   const admin = usePlatformSession((state) => state.admin)
   const location = useLocation()
 

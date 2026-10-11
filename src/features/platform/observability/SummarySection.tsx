@@ -2,9 +2,9 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { obsSummaryQuery } from '@/api/observability'
 import type { ObsWindowParams } from '@/api/types'
-import ObsQueryState from './ObsQueryState'
-import SampledNotice from './SampledNotice'
-import SummaryTiles from './SummaryTiles'
+import { ObsQueryState } from './ObsQueryState'
+import { SampledNotice } from './SampledNotice'
+import { SummaryTiles } from './SummaryTiles'
 import type { LiveOptions } from './useObsRefresh'
 
 interface SummarySectionProps {
@@ -13,7 +13,7 @@ interface SummarySectionProps {
 }
 
 /** Los indicadores de la ventana: tráfico, errores, latencias y base. */
-export default function SummarySection({ params, live }: SummarySectionProps) {
+export function SummarySection({ params, live }: SummarySectionProps) {
   const resumen = useQuery({ ...obsSummaryQuery(params), ...live, placeholderData: keepPreviousData })
 
   return (

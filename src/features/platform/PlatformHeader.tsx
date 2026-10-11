@@ -1,9 +1,9 @@
 import { Link, useLocation, useNavigate } from 'react-router'
 
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { usePlatformSession } from '@/store/platformSession'
-import PlatformNav from './PlatformNav'
+import { PlatformNav } from './PlatformNav'
 
 /**
  * La franja oscura de arriba, en cada pantalla del área de plataforma.
@@ -12,7 +12,7 @@ import PlatformNav from './PlatformNav'
  * su nombre; esto dice «Administración del sistema» para que nadie crea que
  * está cargando algo dentro de un local.
  */
-export default function PlatformHeader() {
+export function PlatformHeader() {
   const admin = usePlatformSession((state) => state.admin)
   const signOut = usePlatformSession((state) => state.signOut)
   const navigate = useNavigate()

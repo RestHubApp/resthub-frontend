@@ -1,7 +1,7 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
-import CartLine from './CartLine'
+import { CartLine } from './CartLine'
 import { cartTotals } from './cartTotals'
 import type { DraftLine } from './useOrderDraft'
 
@@ -23,7 +23,7 @@ interface CartSheetProps {
  * Sube desde abajo, como el resto de lo que se abre en el celular, y deja el
  * boton de enviar al alcance del pulgar al pie.
  */
-export default function CartSheet({
+export function CartSheet({
   open,
   onOpenChange,
   title,

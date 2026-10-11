@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { itemDePedido, notaConAlergia, pedido } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
-import KitchenView from './KitchenView'
+import { KitchenView } from './KitchenView'
 
 const EN_COCINA = pedido({
   notes: 'Mesa de cumpleaños',

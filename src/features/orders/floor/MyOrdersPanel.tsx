@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { MAX_ORDERS_PAGE, ordersQuery } from '@/api/orders'
-import EmptyState from '@/components/EmptyState'
-import ListSkeleton from '@/components/ListSkeleton'
+import { EmptyState } from '@/components/EmptyState'
+import { ListSkeleton } from '@/components/ListSkeleton'
 import { useSession, useTimeZone } from '@/store/session'
 import { isActive } from '@/features/orders/orderLabels'
-import QueryError from '@/features/orders/QueryError'
-import OrderList from './OrderList'
+import { QueryError } from '@/features/orders/QueryError'
+import { OrderList } from './OrderList'
 import { todayIn } from '@/services/format'
 
 /** Lo que tomo el mesero hoy: primero lo que sigue en curso, despues lo cerrado. */
-export default function MyOrdersPanel() {
+export function MyOrdersPanel() {
   const userId = useSession((state) => state.account?.user.id)
   const timeZone = useTimeZone()
   const hoy = todayIn(timeZone)

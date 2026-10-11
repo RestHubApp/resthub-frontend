@@ -1,12 +1,13 @@
 import type { ComponentType } from 'react'
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 
-import EmptyState from '@/components/EmptyState'
-import PreviewEntryPending from '@/features/auth/PreviewEntryPending'
-import AppShell from '@/features/shell/AppShell'
-import HomeRedirect from '@/features/shell/HomeRedirect'
-import PreviewPlatformGate from '@/features/shell/PreviewPlatformGate'
-import RequireSession from '@/features/shell/RequireSession'
+import { asDefault } from '@/components/lazyNamed'
+import { EmptyState } from '@/components/EmptyState'
+import { PreviewEntryPending } from '@/features/auth/PreviewEntryPending'
+import { AppShell } from '@/features/shell/AppShell'
+import { HomeRedirect } from '@/features/shell/HomeRedirect'
+import { PreviewPlatformGate } from '@/features/shell/PreviewPlatformGate'
+import { RequireSession } from '@/features/shell/RequireSession'
 import type { ScreenPreload } from '@/features/shell/screenPreload'
 
 const PANEL = 'insights.read'
@@ -34,30 +35,30 @@ type LazyScreen = Omit<ScreenPreload, 'load'> & { readonly load: () => Promise<{
  * el tablero, el inventario o el panel forman parte del archivo inicial.
  */
 const PANTALLAS: readonly LazyScreen[] = [
-  { path: 'perfil', load: () => import('@/features/auth/ProfileView') },
-  { path: 'tablero', permission: 'orders.read_all', load: () => import('@/features/orders/BoardView'), prefetch: consultar(() => import('@/features/orders/prefetchOrders'), 'prefetchBoard') },
-  { path: 'tablero/historial', permission: 'orders.read_all', load: () => import('@/features/orders/HistoryView') },
-  { path: 'cocina', permission: MESERO, load: () => import('@/features/orders/KitchenView'), prefetch: consultar(() => import('@/features/orders/prefetchOrders'), 'prefetchKitchen') },
-  { path: 'imprimir/:orderId/:kind', permission: MESERO, load: () => import('@/features/orders/PrintView') },
-  { path: 'comprobantes', permission: 'billing.manage', load: () => import('@/features/billing/BillingView') },
-  { path: 'comprobantes/:invoiceId/imprimir', permission: 'billing.issue', load: () => import('@/features/billing/InvoicePrintView') },
-  { path: 'reservas', permission: 'reservations.read', load: () => import('@/features/reservations/ReservationsView') },
-  { path: 'clientes', permission: 'customers.read', load: () => import('@/features/customers/CustomersView') },
-  { path: 'caja', permission: 'cash.manage', load: () => import('@/features/cash/CashView'), prefetch: consultar(() => import('@/features/cash/prefetchCash'), 'prefetchCash') },
-  { path: 'menu', permission: 'menu.manage', load: () => import('@/features/menu/MenuView'), prefetch: consultar(() => import('@/features/menu/prefetchMenu'), 'prefetchMenu') },
-  { path: 'mesas', permission: 'tables.manage', load: () => import('@/features/tables/TablesView'), prefetch: consultar(() => import('@/features/tables/prefetchTables'), 'prefetchTables') },
-  { path: 'inventario', permission: 'inventory.read', load: () => import('@/features/inventory/InventoryView'), prefetch: consultar(() => import('@/features/inventory/prefetchInventory'), 'prefetchInventory') },
-  { path: 'inventario/recetas/:menuItemId', permission: 'inventory.read', load: () => import('@/features/inventory/RecipeEditorView') },
-  { path: 'personal', permission: 'staff.manage', load: () => import('@/features/staff/StaffView'), prefetch: consultar(() => import('@/features/staff/prefetchStaff'), 'prefetchStaff') },
-  { path: 'roles', permission: 'roles.manage', load: () => import('@/features/roles/RolesView'), prefetch: consultar(() => import('@/features/roles/prefetchRoles'), 'prefetchRoles') },
-  { path: 'panel', permission: PANEL, load: () => import('@/features/insights/InsightsView'), prefetch: consultar(() => import('@/features/insights/prefetchInsights'), 'prefetchInsights') },
-  { path: 'panel/reposicion', permission: PANEL, load: () => import('@/features/insights/RestockView') },
-  { path: 'panel/ia', permission: PANEL, load: () => import('@/features/insights/AiAuditView') },
+  { path: 'perfil', load: asDefault(() => import('@/features/auth/ProfileView'), 'ProfileView') },
+  { path: 'tablero', permission: 'orders.read_all', load: asDefault(() => import('@/features/orders/BoardView'), 'BoardView'), prefetch: consultar(() => import('@/features/orders/prefetchOrders'), 'prefetchBoard') },
+  { path: 'tablero/historial', permission: 'orders.read_all', load: asDefault(() => import('@/features/orders/HistoryView'), 'HistoryView') },
+  { path: 'cocina', permission: MESERO, load: asDefault(() => import('@/features/orders/KitchenView'), 'KitchenView'), prefetch: consultar(() => import('@/features/orders/prefetchOrders'), 'prefetchKitchen') },
+  { path: 'imprimir/:orderId/:kind', permission: MESERO, load: asDefault(() => import('@/features/orders/PrintView'), 'PrintView') },
+  { path: 'comprobantes', permission: 'billing.manage', load: asDefault(() => import('@/features/billing/BillingView'), 'BillingView') },
+  { path: 'comprobantes/:invoiceId/imprimir', permission: 'billing.issue', load: asDefault(() => import('@/features/billing/InvoicePrintView'), 'InvoicePrintView') },
+  { path: 'reservas', permission: 'reservations.read', load: asDefault(() => import('@/features/reservations/ReservationsView'), 'ReservationsView') },
+  { path: 'clientes', permission: 'customers.read', load: asDefault(() => import('@/features/customers/CustomersView'), 'CustomersView') },
+  { path: 'caja', permission: 'cash.manage', load: asDefault(() => import('@/features/cash/CashView'), 'CashView'), prefetch: consultar(() => import('@/features/cash/prefetchCash'), 'prefetchCash') },
+  { path: 'menu', permission: 'menu.manage', load: asDefault(() => import('@/features/menu/MenuView'), 'MenuView'), prefetch: consultar(() => import('@/features/menu/prefetchMenu'), 'prefetchMenu') },
+  { path: 'mesas', permission: 'tables.manage', load: asDefault(() => import('@/features/tables/TablesView'), 'TablesView'), prefetch: consultar(() => import('@/features/tables/prefetchTables'), 'prefetchTables') },
+  { path: 'inventario', permission: 'inventory.read', load: asDefault(() => import('@/features/inventory/InventoryView'), 'InventoryView'), prefetch: consultar(() => import('@/features/inventory/prefetchInventory'), 'prefetchInventory') },
+  { path: 'inventario/recetas/:menuItemId', permission: 'inventory.read', load: asDefault(() => import('@/features/inventory/RecipeEditorView'), 'RecipeEditorView') },
+  { path: 'personal', permission: 'staff.manage', load: asDefault(() => import('@/features/staff/StaffView'), 'StaffView'), prefetch: consultar(() => import('@/features/staff/prefetchStaff'), 'prefetchStaff') },
+  { path: 'roles', permission: 'roles.manage', load: asDefault(() => import('@/features/roles/RolesView'), 'RolesView'), prefetch: consultar(() => import('@/features/roles/prefetchRoles'), 'prefetchRoles') },
+  { path: 'panel', permission: PANEL, load: asDefault(() => import('@/features/insights/InsightsView'), 'InsightsView'), prefetch: consultar(() => import('@/features/insights/prefetchInsights'), 'prefetchInsights') },
+  { path: 'panel/reposicion', permission: PANEL, load: asDefault(() => import('@/features/insights/RestockView'), 'RestockView') },
+  { path: 'panel/ia', permission: PANEL, load: asDefault(() => import('@/features/insights/AiAuditView'), 'AiAuditView') },
 ]
 
 /** Pedidos también se precarga con intención de navegar, sin descargarse al arrancar. */
 const PRECARGAS: readonly ScreenPreload[] = [
-  { path: 'pedidos', permission: MESERO, load: () => import('@/features/orders/OrdersView'), prefetch: consultar(() => import('@/features/orders/prefetchOrders'), 'prefetchFloor') },
+  { path: 'pedidos', permission: MESERO, load: asDefault(() => import('@/features/orders/OrdersView'), 'OrdersView'), prefetch: consultar(() => import('@/features/orders/prefetchOrders'), 'prefetchFloor') },
   ...PANTALLAS,
 ]
 
@@ -91,18 +92,18 @@ function plataforma(load: () => Promise<{ default: ComponentType }>) {
  */
 const PLATAFORMA: RouteObject = {
   path: '/plataforma',
-  ...plataforma(() => import('@/features/platform/PlatformShell')),
+  ...plataforma(asDefault(() => import('@/features/platform/PlatformShell'), 'PlatformShell')),
   children: [
-    { path: 'acceso', ...plataforma(() => import('@/features/platform/PlatformLoginView')) },
+    { path: 'acceso', ...plataforma(asDefault(() => import('@/features/platform/PlatformLoginView'), 'PlatformLoginView')) },
     {
-      ...plataforma(() => import('@/features/platform/RequirePlatformSession')),
+      ...plataforma(asDefault(() => import('@/features/platform/RequirePlatformSession'), 'RequirePlatformSession')),
       children: [
-        { index: true, ...plataforma(() => import('@/features/platform/RestaurantsView')) },
-        { path: 'restaurantes/nuevo', ...plataforma(() => import('@/features/platform/NewRestaurantView')) },
-        { path: 'restaurantes/:restaurantId', ...plataforma(() => import('@/features/platform/RestaurantDetailView')) },
-        { path: 'bitacora', ...plataforma(() => import('@/features/platform/ActivityView')) },
-        { path: 'vista-previa', ...plataforma(() => import('@/features/platform/PreviewView')) },
-        { path: 'observabilidad', ...plataforma(() => import('@/features/platform/observability/ObservabilityView')) },
+        { index: true, ...plataforma(asDefault(() => import('@/features/platform/RestaurantsView'), 'RestaurantsView')) },
+        { path: 'restaurantes/nuevo', ...plataforma(asDefault(() => import('@/features/platform/NewRestaurantView'), 'NewRestaurantView')) },
+        { path: 'restaurantes/:restaurantId', ...plataforma(asDefault(() => import('@/features/platform/RestaurantDetailView'), 'RestaurantDetailView')) },
+        { path: 'bitacora', ...plataforma(asDefault(() => import('@/features/platform/ActivityView'), 'ActivityView')) },
+        { path: 'vista-previa', ...plataforma(asDefault(() => import('@/features/platform/PreviewView'), 'PreviewView')) },
+        { path: 'observabilidad', ...plataforma(asDefault(() => import('@/features/platform/observability/ObservabilityView'), 'ObservabilityView')) },
       ],
     },
     { path: '*', element: <Navigate to="/plataforma" replace /> },
@@ -121,7 +122,7 @@ const VISTA_PREVIA: RouteObject = {
   hydrateFallbackElement: <PreviewEntryPending />,
   lazy: {
     loader: async () => (await import('@/features/auth/previewEntry')).previewEntryLoader,
-    Component: async () => (await import('@/features/auth/PreviewEntryView')).default,
+    Component: async () => (await asDefault(() => import('@/features/auth/PreviewEntryView'), 'PreviewEntryView')()).default,
   },
 }
 
@@ -135,16 +136,16 @@ const router = createBrowserRouter(
       element: <AppShell screens={PRECARGAS} />,
       children: [
         { index: true, Component: HomeRedirect },
-        { path: 'acceso', ...plataforma(() => import('@/features/auth/LoginView')) },
+        { path: 'acceso', ...plataforma(asDefault(() => import('@/features/auth/LoginView'), 'LoginView')) },
         // Pública: se lee antes de entrar o desde la pantalla que pide aceptarla.
-        { path: 'privacidad', ...plataforma(() => import('@/features/legal/PrivacyView')) },
+        { path: 'privacidad', ...plataforma(asDefault(() => import('@/features/legal/PrivacyView'), 'PrivacyView')) },
         {
           element: <RequireSession permission="orders.take" />,
           children: [
-            { path: 'pedidos', ...plataforma(() => import('@/features/orders/OrdersView')) },
-            { path: 'pedidos/nuevo', ...plataforma(() => import('@/features/orders/NewOrderView')) },
-            { path: 'pedidos/:orderId', ...plataforma(() => import('@/features/orders/OrderDetailView')) },
-            { path: 'pedidos/:orderId/agregar', ...plataforma(() => import('@/features/orders/AddItemsView')) },
+            { path: 'pedidos', ...plataforma(asDefault(() => import('@/features/orders/OrdersView'), 'OrdersView')) },
+            { path: 'pedidos/nuevo', ...plataforma(asDefault(() => import('@/features/orders/NewOrderView'), 'NewOrderView')) },
+            { path: 'pedidos/:orderId', ...plataforma(asDefault(() => import('@/features/orders/OrderDetailView'), 'OrderDetailView')) },
+            { path: 'pedidos/:orderId/agregar', ...plataforma(asDefault(() => import('@/features/orders/AddItemsView'), 'AddItemsView')) },
           ],
         },
         ...PANTALLAS.map(conPermiso),
@@ -158,4 +159,4 @@ const router = createBrowserRouter(
   },
 )
 
-export default router
+export { router }

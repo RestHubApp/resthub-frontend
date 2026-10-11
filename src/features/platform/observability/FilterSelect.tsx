@@ -10,7 +10,7 @@ interface FilterSelectProps {
 }
 
 /** Un filtro de lista que se aplica al elegir. */
-export default function FilterSelect({ id, label, value, options, onChange }: FilterSelectProps) {
+export function FilterSelect({ id, label, value, options, onChange }: FilterSelectProps) {
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>

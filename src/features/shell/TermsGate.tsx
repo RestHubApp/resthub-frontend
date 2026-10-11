@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 
 import { acceptTerms, fetchCurrentUser } from '@/api/auth'
 import type { CurrentUserResponse } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
+import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { errorMessage, errorStatus } from '@/services/api'
@@ -16,7 +16,7 @@ const VERSION_CAMBIADA = 409
  * Ley N.º 29733: antes de trabajar, cada cuenta acepta los términos de uso y
  * la política de privacidad vigentes. Si cambian, se vuelven a pedir.
  */
-export default function TermsGate({ account }: { readonly account: CurrentUserResponse }) {
+export function TermsGate({ account }: { readonly account: CurrentUserResponse }) {
   const refresh = useSession((state) => state.refresh)
   const signOut = useSession((state) => state.signOut)
   const aceptar = useMutation({

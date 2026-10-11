@@ -7,7 +7,7 @@ import { queryClient } from '@/services/queryClient'
 import type { OpenOrderRequest } from '@/api/types'
 import { enqueueOrder, removeQueued } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
-import AppShell from './AppShell'
+import { AppShell } from './AppShell'
 import type { ScreenPreload } from './screenPreload'
 
 const ORDERS_TAKE = 'orders.take'

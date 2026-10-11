@@ -4,7 +4,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { cliente } from '#jest/fixtures/panel'
 import { entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
 import type { Customer } from '@/api/types'
-import CustomersView from './CustomersView'
+import { CustomersView } from './CustomersView'
 
 const LISTA = '/customers'
 const BUSCAR = 'Buscar por nombre o teléfono'

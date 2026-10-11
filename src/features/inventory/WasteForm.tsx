@@ -3,14 +3,14 @@ import { useForm, useWatch } from 'react-hook-form'
 
 import { registerWaste } from '@/api/inventory'
 import type { Ingredient } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import TextareaField from '@/components/TextareaField'
+import { FormMessage } from '@/components/FormMessage'
+import { TextareaField } from '@/components/TextareaField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import FormButtons from './FormButtons'
+import { FormButtons } from './FormButtons'
 import { wasteSchema, type WasteValues } from './inventorySchema'
-import QuantityField from './QuantityField'
-import StockPreview from './StockPreview'
+import { QuantityField } from './QuantityField'
+import { StockPreview } from './StockPreview'
 import { findInputUnit, inputUnits, parseDecimal, toBaseQuantity } from './units'
 import { useInventoryChange } from './useInventoryChange'
 import { formatQuantity } from '@/services/format'
@@ -26,7 +26,7 @@ interface WasteFormProps {
  * El motivo es obligatorio y en texto libre: es lo que después explica por qué
  * se pierde plata y qué conviene cambiar.
  */
-export default function WasteForm({ ingredient, onDone }: WasteFormProps) {
+export function WasteForm({ ingredient, onDone }: WasteFormProps) {
   const unidades = inputUnits(ingredient.unit)
   const { register, handleSubmit, formState, control } = useForm<WasteValues>({
     resolver: zodResolver(wasteSchema),

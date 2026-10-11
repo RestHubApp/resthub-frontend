@@ -8,7 +8,7 @@ interface PageHeaderProps {
 }
 
 /** El titulo de cada pantalla, que es su unico `h1`. */
-export default function PageHeader({ title, description, actions }: PageHeaderProps) {
+export function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1">

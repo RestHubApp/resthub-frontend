@@ -4,10 +4,10 @@ import { useForm } from 'react-hook-form'
 
 import { resetStaffPassword } from '@/api/staff'
 import type { StaffResponse } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PasswordField from '@/components/PasswordField'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PasswordField } from '@/components/PasswordField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
@@ -26,7 +26,7 @@ interface StaffPasswordFormProps {
  * No hay recuperacion por correo: quien la olvida le pide al encargado una
  * nueva, que se la dicta en persona.
  */
-export default function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
+export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
   const { register, handleSubmit, formState } = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: { new_password: '' },

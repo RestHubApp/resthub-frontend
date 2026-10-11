@@ -3,12 +3,12 @@ import { useState } from 'react'
 
 import { platformActivityQuery } from '@/api/platform'
 import type { PlatformActivityEntry } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
-import TablePagination from '@/components/TablePagination'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
+import { TablePagination } from '@/components/TablePagination'
 import { formatDateTime } from '@/services/format'
-import PlatformQueryError from './PlatformQueryError'
+import { PlatformQueryError } from './PlatformQueryError'
 import { PLATFORM_TIME_ZONE } from './platformTime'
 import { activityParams, pageCount } from './restaurantList'
 
@@ -23,7 +23,7 @@ const COLUMNAS: DataColumn<PlatformActivityEntry>[] = [
  * Lo que hizo el equipo de RestHub: accesos, altas y ediciones de
  * restaurantes y encargados agregados. Las horas son las de Lima.
  */
-export default function ActivityView() {
+export function ActivityView() {
   const [pagina, setPagina] = useState(0)
   const bitacora = useQuery({ ...platformActivityQuery(activityParams(pagina)), placeholderData: keepPreviousData })
   const total = bitacora.data?.total ?? 0

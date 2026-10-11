@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import QuantityStepper from '@/features/orders/QuantityStepper'
+import { QuantityStepper } from '@/features/orders/QuantityStepper'
 import { type DraftLine, MAX_QUANTITY } from './useOrderDraft'
 import { formatCents, toCents } from '@/services/format'
 
@@ -14,7 +14,7 @@ interface CartLineProps {
 const MAX_NOTA = 200
 
 /** Un plato del borrador: cantidad, subtotal y la nota para la cocina. */
-export default function CartLine({ line, onQuantity, onNotes }: CartLineProps) {
+export function CartLine({ line, onQuantity, onNotes }: CartLineProps) {
   const notaId = `nota-${line.lineKey.replaceAll(/[^\w-]/gu, '-')}`
 
   return (

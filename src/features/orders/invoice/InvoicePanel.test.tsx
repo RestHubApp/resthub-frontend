@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { comprobante, pagado, pago, pedido } from '#jest/fixtures/cobro'
 import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
-import InvoicePanel from './InvoicePanel'
+import { InvoicePanel } from './InvoicePanel'
 
 const EMITIR = '/billing/invoices'
 const DEL_PEDIDO = '/billing/orders/12/invoice'

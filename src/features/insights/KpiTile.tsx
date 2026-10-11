@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { formatChange, toNumber } from '@/services/format'
 
 interface KpiTileProps {
@@ -40,7 +40,7 @@ function iconFor(change: number) {
  * La variación lleva flecha y signo escritos, además del color, que dice si
  * el cambio es bueno o malo para el negocio (más cancelados es malo).
  */
-export default function KpiTile({ label, value, change, higherIsBetter, comparedTo, detail }: KpiTileProps) {
+export function KpiTile({ label, value, change, higherIsBetter, comparedTo, detail }: KpiTileProps) {
   const numero = change === null ? null : toNumber(change)
 
   return (

@@ -386,6 +386,9 @@ export default tseslint.config(
         },
       ],
       'import-x/no-mutable-exports': 'error',
+      // Un solo nombre por simbolo: renombrar y buscar usos es seguro. Los
+      // archivos que una herramienta carga por default estan mas abajo.
+      'import-x/no-default-export': 'error',
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',
     },
@@ -535,7 +538,15 @@ export default tseslint.config(
     extends: [tseslint.configs.disableTypeChecked],
     rules: {
       'check-file/filename-naming-convention': 'off',
+      // Vite, Jest, Playwright, Stryker y ESLint leen la configuracion del
+      // export default del archivo; no admiten un export con nombre.
+      'import-x/no-default-export': 'off',
     },
+  },
+  // Playwright carga el reporter como `export default class`.
+  {
+    files: ['e2e/soporte/reporteCobertura.ts'],
+    rules: { 'import-x/no-default-export': 'off' },
   },
   // ---------------------------------------------------------------------
   // Scripts de medición de accesibilidad (Node, fuera de la aplicación).

@@ -3,11 +3,11 @@ import { screen, within } from '@testing-library/react'
 
 import { cuenta, entrarComo, montar, montarRutas, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
 import { useSession } from '@/store/session'
-import AppShell from './AppShell'
-import ComingSoonView from './ComingSoonView'
-import HomeRedirect from './HomeRedirect'
-import PreviewEndedView from './PreviewEndedView'
-import RequireSession from './RequireSession'
+import { AppShell } from './AppShell'
+import { ComingSoonView } from './ComingSoonView'
+import { HomeRedirect } from './HomeRedirect'
+import { PreviewEndedView } from './PreviewEndedView'
+import { RequireSession } from './RequireSession'
 
 const RUTA = { name: 'Ruta actual' }
 

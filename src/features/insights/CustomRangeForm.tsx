@@ -13,7 +13,7 @@ interface CustomRangeFormProps {
 }
 
 /** Dos fechas y un botón: el rango se aplica al confirmar, no con cada tecla. */
-export default function CustomRangeForm({ initialFrom, initialTo, max, onApply }: CustomRangeFormProps) {
+export function CustomRangeForm({ initialFrom, initialTo, max, onApply }: CustomRangeFormProps) {
   const [desde, setDesde] = useState(initialFrom)
   const [hasta, setHasta] = useState(initialTo)
   const [problema, setProblema] = useState<string | null>(null)

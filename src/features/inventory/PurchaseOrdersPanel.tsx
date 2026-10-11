@@ -3,17 +3,17 @@ import { useState } from 'react'
 
 import { changePurchaseOrder, purchaseOrdersQuery } from '@/api/purchasing'
 import type { PurchaseOrder } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import ListSkeleton from '@/components/ListSkeleton'
-import SectionCard from '@/components/SectionCard'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { formatDateTime, formatMoney } from '@/services/format'
 import { useTimeZone } from '@/store/session'
-import PurchaseOrderDialog from './PurchaseOrderDialog'
-import ReceiveOrderDialog from './ReceiveOrderDialog'
+import { PurchaseOrderDialog } from './PurchaseOrderDialog'
+import { ReceiveOrderDialog } from './ReceiveOrderDialog'
 import { usePurchasingMutation } from './usePurchasingMutation'
 
 interface PurchaseOrdersPanelProps {
@@ -33,7 +33,7 @@ const TONO: Record<PurchaseOrder['status'], string> = {
  * Recibir una orden es lo que la vuelve stock: cada insumo que llegó entra al
  * libro como compra, con su costo real.
  */
-export default function PurchaseOrdersPanel({ canManage }: PurchaseOrdersPanelProps) {
+export function PurchaseOrdersPanel({ canManage }: PurchaseOrdersPanelProps) {
   const timeZone = useTimeZone()
   const ordenes = useQuery(purchaseOrdersQuery)
   const [creando, setCreando] = useState(false)

@@ -71,7 +71,7 @@ const SECCIONES: readonly Seccion[] = [
  * Pública: se abre sin sesión, desde el acceso o desde la pantalla que pide
  * aceptarlos.
  */
-export default function PrivacyView() {
+export function PrivacyView() {
   return (
     // Se dibuja dentro del armazón, que ya tiene su <main>: un artículo y no otro.
     <article className="mx-auto flex w-full max-w-3xl flex-col gap-6 py-2">

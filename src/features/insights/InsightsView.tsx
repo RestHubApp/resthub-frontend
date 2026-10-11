@@ -1,19 +1,19 @@
 import { salesSummaryQuery } from '@/api/insights'
-import ListSkeleton from '@/components/ListSkeleton'
-import HourlySection from './HourlySection'
-import KpiRow from './KpiRow'
-import LowStockSection from './LowStockSection'
-import MarginsSection from './MarginsSection'
-import PanelHeader from './PanelHeader'
-import PaymentsSection from './PaymentsSection'
-import RangeFilter from './RangeFilter'
-import ReportState from './ReportState'
-import SalesTrendSection from './SalesTrendSection'
-import TopDishesSection from './TopDishesSection'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { HourlySection } from './HourlySection'
+import { KpiRow } from './KpiRow'
+import { LowStockSection } from './LowStockSection'
+import { MarginsSection } from './MarginsSection'
+import { PanelHeader } from './PanelHeader'
+import { PaymentsSection } from './PaymentsSection'
+import { RangeFilter } from './RangeFilter'
+import { ReportState } from './ReportState'
+import { SalesTrendSection } from './SalesTrendSection'
+import { TopDishesSection } from './TopDishesSection'
 import { useInsightsRange } from './useInsightsRange'
 import { useInsightsReport } from './useInsightsReport'
-import WaitersSection from './WaitersSection'
-import WasteSection from './WasteSection'
+import { WaitersSection } from './WaitersSection'
+import { WasteSection } from './WasteSection'
 import { useTimeZone } from '@/store/session'
 
 const KPI_CARGANDO = (
@@ -31,7 +31,7 @@ const KPI_CARGANDO = (
  * El filtro de fechas va una vez, arriba, y acota cada sección de abajo, así
  * los números de todas las tarjetas coinciden entre sí.
  */
-export default function InsightsView() {
+export function InsightsView() {
   const zona = useTimeZone()
   const range = useInsightsRange(zona)
   const summary = useInsightsReport(salesSummaryQuery(range.params))

@@ -1,8 +1,8 @@
 import { useLocation } from 'react-router'
 
-import EmptyState from '@/components/EmptyState'
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/EmptyState'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
 import { entryFor } from './navigation'
 
 /**
@@ -11,7 +11,7 @@ import { entryFor } from './navigation'
  * Toma el titulo y la descripcion de la entrada del menu, asi que la ruta ya
  * queda en su sitio y con su permiso, y reemplazarla es cambiar un componente.
  */
-export default function ComingSoonView() {
+export function ComingSoonView() {
   const entry = entryFor(useLocation().pathname)
 
   return (

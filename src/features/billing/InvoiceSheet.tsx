@@ -16,7 +16,7 @@ const FILA = 'flex justify-between gap-2'
  * detalle, base imponible, IGV y total. Si el proveedor ya dio su PDF, ese es
  * el oficial; esta hoja sirve para entregarla en el momento.
  */
-export default function InvoiceSheet({ invoice, settings, timeZone }: InvoiceSheetProps) {
+export function InvoiceSheet({ invoice, settings, timeZone }: InvoiceSheetProps) {
   return (
     <div className="flex flex-col gap-2 text-sm">
       {settings === null ? null : (

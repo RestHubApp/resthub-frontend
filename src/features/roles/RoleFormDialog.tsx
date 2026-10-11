@@ -2,14 +2,14 @@ import { useQuery } from '@tanstack/react-query'
 
 import { permissionsQuery } from '@/api/roles'
 import type { Role } from '@/api/types'
-import FormDialog from '@/components/FormDialog'
-import FormMessage from '@/components/FormMessage'
-import ListSkeleton from '@/components/ListSkeleton'
+import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { ListSkeleton } from '@/components/ListSkeleton'
 import { errorMessage } from '@/services/api'
 import { usePermissions } from '@/store/session'
 import { groupPermissions } from './permissionGroups'
 import { type RoleAccess, roleAccess } from './roleAccess'
-import RoleForm from './RoleForm'
+import { RoleForm } from './RoleForm'
 
 interface RoleFormDialogProps {
   /** `null` crea un rol; un rol, lo edita o lo muestra. */
@@ -32,7 +32,7 @@ function titulo(role: Role | null, access: RoleAccess): string {
 }
 
 /** Crear un rol, cambiar sus permisos o, si no se puede cambiar, verlos. */
-export default function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps) {
+export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps) {
   const granted = usePermissions()
   const catalogo = useQuery({ ...permissionsQuery(), select: groupPermissions, enabled: open })
   const access = role === null ? 'edit' : roleAccess(role, granted)

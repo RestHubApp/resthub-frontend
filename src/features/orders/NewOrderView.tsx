@@ -1,8 +1,8 @@
 import { useSearchParams } from 'react-router'
 
-import NewTableOrder from './taking/NewTableOrder'
+import { NewTableOrder } from './taking/NewTableOrder'
 import type { OrderTarget } from './taking/orderTarget'
-import TakeOrder from './taking/TakeOrder'
+import { TakeOrder } from './taking/TakeOrder'
 
 type AwayTarget = Extract<OrderTarget, { kind: 'takeaway' }>
 
@@ -33,7 +33,7 @@ function awayTitle(target: AwayTarget): string {
  * Un pedido nuevo: `?mesa=3` para una mesa, `?tipo=llevar&cliente=Ana` para
  * llevar, `?tipo=delivery&cliente=Ana&telefono=…&direccion=…` para delivery.
  */
-export default function NewOrderView() {
+export function NewOrderView() {
   const [params] = useSearchParams()
   const tableId = Number(params.get('mesa'))
 

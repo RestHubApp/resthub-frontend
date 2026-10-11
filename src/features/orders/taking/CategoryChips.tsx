@@ -18,7 +18,7 @@ const IDLE = `${CHIP} bg-card text-foreground ring-1 ring-foreground/15 hover:bg
  * Son botones con `aria-pressed` y no pestanas: filtran una sola lista, y asi
  * el lector de pantalla dice cual esta elegida sin prometer paneles.
  */
-export default function CategoryChips({ sections, selected, onSelect }: CategoryChipsProps) {
+export function CategoryChips({ sections, selected, onSelect }: CategoryChipsProps) {
   const opciones = [{ id: null, name: 'Toda la carta' }, ...sections.map(({ id, name }) => ({ id, name }))]
 
   return (

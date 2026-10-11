@@ -1,9 +1,9 @@
 import { Link } from 'react-router'
 
 import type { TableState } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { tableName } from '@/api/tables'
-import OrderStatusBadge from '@/features/orders/OrderStatusBadge'
+import { OrderStatusBadge } from '@/features/orders/OrderStatusBadge'
 import { formatMoney } from '@/services/format'
 import { dishCount } from '@/features/orders/orderLabels'
 
@@ -21,7 +21,7 @@ const BASE =
  * el pedido listo se marca con un borde verde y lo dice: es la que el mesero
  * tiene que atender primero.
  */
-export default function TableCard({ table }: TableCardProps) {
+export function TableCard({ table }: TableCardProps) {
   const order = table.active_order
   const nombre = tableName(table.label)
 

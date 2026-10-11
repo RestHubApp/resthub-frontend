@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
 import type { StaffResponse } from '@/api/types'
-import FormDialog from '@/components/FormDialog'
-import Icon from '@/components/Icon'
+import { FormDialog } from '@/components/FormDialog'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import RoleOptionsGate from './RoleOptionsGate'
-import StaffEditForm from './StaffEditForm'
-import StaffPasswordForm from './StaffPasswordForm'
-import StaffStatusButton from './StaffStatusButton'
+import { RoleOptionsGate } from './RoleOptionsGate'
+import { StaffEditForm } from './StaffEditForm'
+import { StaffPasswordForm } from './StaffPasswordForm'
+import { StaffStatusButton } from './StaffStatusButton'
 
 interface StaffRowActionsProps {
   readonly account: StaffResponse
@@ -20,7 +20,7 @@ interface StaffRowActionsProps {
 type Dialogo = 'editar' | 'contrasena' | null
 
 /** Lo que se hace con una cuenta del personal desde el listado. */
-export default function StaffRowActions({ account, isSelf, manageable }: StaffRowActionsProps) {
+export function StaffRowActions({ account, isSelf, manageable }: StaffRowActionsProps) {
   const [dialogo, setDialogo] = useState<Dialogo>(null)
   const cerrar = () => {
     setDialogo(null)

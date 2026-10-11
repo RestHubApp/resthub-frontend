@@ -7,7 +7,7 @@ interface MarginBarProps {
 const PERCENT = 100
 
 /** El margen porcentual de un plato: una barra de 0 a 100 % y el número a su lado. */
-export default function MarginBar({ percent }: MarginBarProps) {
+export function MarginBar({ percent }: MarginBarProps) {
   const valor = toNumber(percent)
   if (valor < 0) {
     return <span className="font-medium text-destructive">{`${formatPercent(valor)} (pérdida)`}</span>

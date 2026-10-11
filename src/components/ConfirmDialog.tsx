@@ -29,7 +29,7 @@ interface ConfirmDialogProps {
  * Reemplaza a `window.confirm`, que no toma el tema, no se puede leer bien en
  * todos los lectores de pantalla y en algunos navegadores se puede silenciar.
  */
-export default function ConfirmDialog({
+export function ConfirmDialog({
   trigger,
   title,
   description,

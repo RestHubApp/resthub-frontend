@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { type InventorySection, SECTIONS } from './inventorySections'
 
@@ -18,7 +18,7 @@ interface InventoryTabsProps {
  * En el celular la fila se desplaza de costado en vez de apretar los
  * nombres. Cada pestaña mide lo que un dedo necesita.
  */
-export default function InventoryTabs({ value, onChange, panels, alertCount }: InventoryTabsProps) {
+export function InventoryTabs({ value, onChange, panels, alertCount }: InventoryTabsProps) {
   return (
     <Tabs
       value={value}

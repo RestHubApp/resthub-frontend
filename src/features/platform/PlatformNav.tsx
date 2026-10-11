@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import type { IconName } from '@/components/icons'
 
 interface Entry {
@@ -34,7 +34,7 @@ interface PlatformNavProps {
 }
 
 /** Las pantallas del área, en la franja de arriba; en un celular angosto bajan a otra fila. */
-export default function PlatformNav({ pathname }: PlatformNavProps) {
+export function PlatformNav({ pathname }: PlatformNavProps) {
   return (
     <nav aria-label="Administración del sistema" className="order-last w-full sm:order-none sm:w-auto">
       <ul className="m-0 flex list-none flex-wrap gap-1 p-0">

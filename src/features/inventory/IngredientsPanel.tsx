@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 
 import type { Ingredient } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import FormMessage from '@/components/FormMessage'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { FormMessage } from '@/components/FormMessage'
 import { errorMessage } from '@/services/api'
-import IngredientFilters from './IngredientFilters'
-import IngredientRowActions from './IngredientRowActions'
-import IngredientStatus from './IngredientStatus'
+import { IngredientFilters } from './IngredientFilters'
+import { IngredientRowActions } from './IngredientRowActions'
+import { IngredientStatus } from './IngredientStatus'
 import type { StockAction } from './StockActionDialog'
 import { formatUnitCost } from './units'
 import { useIngredients } from './useIngredients'
@@ -64,7 +64,7 @@ function normalizar(texto: string): string {
 }
 
 /** Los insumos con su stock, para buscar, revisar y registrar. */
-export default function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps) {
+export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps) {
   const insumos = useIngredients()
   const [busqueda, setBusqueda] = useState('')
   const [soloBajos, setSoloBajos] = useState(false)

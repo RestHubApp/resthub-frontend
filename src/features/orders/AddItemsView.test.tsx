@@ -3,7 +3,7 @@ import { act, renderHook, screen } from '@testing-library/react'
 
 import { carta, pedido, ultimoCuerpo } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, servidor } from '#jest/harness'
-import AddItemsView from './AddItemsView'
+import { AddItemsView } from './AddItemsView'
 import { useDraftActions } from './taking/useOrderDraft'
 
 function abrir(actual = pedido({ status: 'served', status_label: 'Servido, por cobrar' })) {

@@ -1,7 +1,7 @@
 import { updateMenuItem } from '@/api/menu'
 import type { MenuItem } from '@/api/types'
-import ConfirmDialog from '@/components/ConfirmDialog'
-import Icon from '@/components/Icon'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { withItem } from './menuCache'
 import { useMenuAction } from './useMenuAction'
@@ -16,7 +16,7 @@ interface MenuItemStatusButtonProps {
  * No es lo mismo que "agotado hoy": un plato desactivado desaparece de la
  * carta del mesero hasta que alguien lo vuelva a activar. Por eso se confirma.
  */
-export default function MenuItemStatusButton({ item }: MenuItemStatusButtonProps) {
+export function MenuItemStatusButton({ item }: MenuItemStatusButtonProps) {
   const estado = useMenuAction({
     send: () => updateMenuItem(item.id, { is_active: !item.is_active }),
     updateCache: withItem,

@@ -1,6 +1,6 @@
 import { cn } from 'cn'
 
-import LoadingRegion from './LoadingRegion'
+import { LoadingRegion } from './LoadingRegion'
 import { Skeleton } from './ui/skeleton'
 
 interface ListSkeletonProps {
@@ -14,7 +14,7 @@ interface ListSkeletonProps {
 }
 
 /** La silueta de una lista o una grilla mientras cargan sus datos. */
-export default function ListSkeleton({
+export function ListSkeleton({
   label,
   count = 4,
   className = 'flex flex-col gap-2',

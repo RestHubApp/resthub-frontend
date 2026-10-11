@@ -29,7 +29,7 @@ async function pantallaDePlataforma(cargadaEn: string): Promise<string> {
   // el componente: con dos copias de React, los hooks no encuentran su contexto.
   const { renderToString } = await import('react-dom/server')
   const { createStaticHandler, createStaticRouter, StaticRouterProvider } = await import('react-router')
-  const { default: PreviewPlatformGate } = await import('./PreviewPlatformGate')
+  const { PreviewPlatformGate } = await import('./PreviewPlatformGate')
   const rutas = [
     { element: <PreviewPlatformGate />, children: [{ path: '/plataforma', element: <p>Área de plataforma</p> }] },
   ]

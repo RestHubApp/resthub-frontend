@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { cambioDeStock, insumo } from '#jest/fixtures/inventario'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import InventoryView from './InventoryView'
+import { InventoryView } from './InventoryView'
 
 const INSUMOS = '/inventory/ingredients'
 const LIMON = insumo()

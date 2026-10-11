@@ -1,11 +1,11 @@
-import LoadingRegion from '@/components/LoadingRegion'
+import { LoadingRegion } from '@/components/LoadingRegion'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dos categorías de muestra, con distinta cantidad de platos.
 const CATEGORIAS = [4, 3]
 
 /** Tarjetas de categoría con sus filas vacías mientras llega la carta. */
-export default function MenuSkeleton() {
+export function MenuSkeleton() {
   return (
     <LoadingRegion label="Cargando la carta…" className="flex flex-col gap-6">
       {CATEGORIAS.map((platos, categoria) => (

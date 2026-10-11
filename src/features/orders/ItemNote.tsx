@@ -1,5 +1,5 @@
-import AllergyBadge from '@/components/AllergyBadge'
-import Icon from '@/components/Icon'
+import { AllergyBadge } from '@/components/AllergyBadge'
+import { Icon } from '@/components/Icon'
 import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 
 interface ItemNoteProps {
@@ -21,7 +21,7 @@ interface ItemNoteProps {
  * que la cocina la vea de un vistazo; si es una alergia, además con la
  * palabra "Alergia", no solo en rojo.
  */
-export default function ItemNote({ note, flag, label }: ItemNoteProps) {
+export function ItemNote({ note, flag, label }: ItemNoteProps) {
   if (note === '') {
     return null
   }

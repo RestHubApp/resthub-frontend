@@ -1,7 +1,7 @@
 import type { PermissionCode } from '@/api/types'
 import type { PermissionGroup } from './permissionGroups'
 import { togglePermission } from './permissionGroups'
-import PermissionOption from './PermissionOption'
+import { PermissionOption } from './PermissionOption'
 
 interface PermissionPickerProps {
   readonly groups: readonly PermissionGroup[]
@@ -13,7 +13,7 @@ interface PermissionPickerProps {
 }
 
 /** Los permisos del rol, en casillas agrupadas como las ordena el servidor. */
-export default function PermissionPicker({
+export function PermissionPicker({
   groups,
   selected,
   onChange,

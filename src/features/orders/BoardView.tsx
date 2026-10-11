@@ -1,26 +1,27 @@
 import { useQuery } from '@tanstack/react-query'
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
+import { lazyNamed } from '@/components/lazyNamed'
 import { Link } from 'react-router'
 
 import { activeOrdersQuery } from '@/api/orders'
 import type { OrderResponse, OrderStatus } from '@/api/types'
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useOrderNoteFlags } from '@/hooks/useOrderNoteFlags'
 import { useCan } from '@/store/session'
-import BoardColumn from './board/BoardColumn'
-import BoardSkeleton from './board/BoardSkeleton'
-import TypeFilter, { type TypeFilterValue } from './board/TypeFilter'
-import LiveIndicator from './LiveIndicator'
-import QueryError from './QueryError'
+import { BoardColumn } from './board/BoardColumn'
+import { BoardSkeleton } from './board/BoardSkeleton'
+import { TypeFilter, type TypeFilterValue } from './board/TypeFilter'
+import { LiveIndicator } from './LiveIndicator'
+import { QueryError } from './QueryError'
 import { useLiveUpdates } from './useLiveUpdates'
 import { STATUS_LABELS } from './orderLabels'
 import { useNow } from './useNow'
 
 // Los diálogos traen react-hook-form y zod: se bajan al abrirlos, no con el tablero.
-const CancelOrderDialog = lazy(() => import('./CancelOrderDialog'))
-const ChargeDialog = lazy(() => import('./charge/ChargeDialog'))
+const CancelOrderDialog = lazyNamed(() => import('./CancelOrderDialog'), 'CancelOrderDialog')
+const ChargeDialog = lazyNamed(() => import('./charge/ChargeDialog'), 'ChargeDialog')
 
 const COLUMNAS: readonly OrderStatus[] = ['open', 'in_kitchen', 'ready', 'served']
 
@@ -36,7 +37,7 @@ function contar(orders: readonly OrderResponse[]): Record<TypeFilterValue, numbe
  * del servidor. Las ventanas de cobro y cancelacion viven aca y no en cada
  * tarjeta: al cobrar, la tarjeta sale del tablero y el vuelto sigue a la vista.
  */
-export default function BoardView() {
+export function BoardView() {
   const live = useLiveUpdates()
   const now = useNow()
   const activos = useQuery(activeOrdersQuery)

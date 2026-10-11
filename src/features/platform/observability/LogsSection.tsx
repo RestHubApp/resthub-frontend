@@ -1,11 +1,11 @@
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { obsLogsQuery } from '@/api/observability'
-import SectionCard from '@/components/SectionCard'
-import PlatformQueryError from '@/features/platform/PlatformQueryError'
-import LoadMoreButton from './LoadMoreButton'
-import LogFilters from './LogFilters'
-import LogTable from './LogTable'
+import { SectionCard } from '@/components/SectionCard'
+import { PlatformQueryError } from '@/features/platform/PlatformQueryError'
+import { LoadMoreButton } from './LoadMoreButton'
+import { LogFilters } from './LogFilters'
+import { LogTable } from './LogTable'
 import { logsParams, type ObsFilters } from './obsFilters'
 import type { LiveOptions } from './useObsRefresh'
 
@@ -16,7 +16,7 @@ interface LogsSectionProps {
 }
 
 /** Advertencias y errores que guardó el backend, con su detalle y su traceback. */
-export default function LogsSection({ filters, onChange, live }: LogsSectionProps) {
+export function LogsSection({ filters, onChange, live }: LogsSectionProps) {
   const logs = useInfiniteQuery({ ...obsLogsQuery(logsParams(filters)), ...live, placeholderData: keepPreviousData })
   const entradas = logs.data?.pages.flatMap((page) => page.items) ?? []
 

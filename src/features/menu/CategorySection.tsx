@@ -2,8 +2,8 @@ import { useId } from 'react'
 
 import type { DishCost, MenuSection } from '@/api/types'
 import { Card } from '@/components/ui/card'
-import CategoryHeader from './CategoryHeader'
-import MenuItemRow from './MenuItemRow'
+import { CategoryHeader } from './CategoryHeader'
+import { MenuItemRow } from './MenuItemRow'
 import type { Direction } from './menuOrder'
 
 interface CategorySectionProps {
@@ -18,7 +18,7 @@ interface CategorySectionProps {
 }
 
 /** Una categoría de la carta con sus platos, en el orden en que los ve el mesero. */
-export default function CategorySection({
+export function CategorySection({
   category,
   categories,
   costs,

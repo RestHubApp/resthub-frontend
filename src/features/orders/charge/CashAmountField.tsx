@@ -1,6 +1,6 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import TextField from '@/components/TextField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { centsToApi, formatCents } from '@/services/format'
 
@@ -22,7 +22,7 @@ const CENTS = 100
  * El vuelto se anuncia al cambiar: quien cobra mira el billete y la mano del
  * cliente, no la pantalla.
  */
-export default function CashAmountField({
+export function CashAmountField({
   field,
   error,
   totalCents,

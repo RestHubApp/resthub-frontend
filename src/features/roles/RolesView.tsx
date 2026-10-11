@@ -3,18 +3,18 @@ import { useState } from 'react'
 
 import { permissionsQuery, rolesQuery } from '@/api/roles'
 import type { Role } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import ListSkeleton from '@/components/ListSkeleton'
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { usePermissions } from '@/store/session'
 import { groupPermissions } from './permissionGroups'
 import { roleAccess } from './roleAccess'
-import RoleFormDialog from './RoleFormDialog'
-import RoleRow from './RoleRow'
+import { RoleFormDialog } from './RoleFormDialog'
+import { RoleRow } from './RoleRow'
 
 /**
  * Los roles del restaurante y qué puede hacer cada uno.
@@ -22,7 +22,7 @@ import RoleRow from './RoleRow'
  * El encargado y el mesero vienen con el local; los demás (cocina, caja) los
  * arma cada restaurante con los permisos del catálogo.
  */
-export default function RolesView() {
+export function RolesView() {
   const roles = useQuery(rolesQuery())
   // Solo da nombre a los grupos del resumen: sin él, la lista igual se muestra.
   const catalogo = useQuery({ ...permissionsQuery(), select: groupPermissions })

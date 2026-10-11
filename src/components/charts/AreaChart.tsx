@@ -1,8 +1,8 @@
 import type { PointerEvent } from 'react'
 
-import AreaAxes from './AreaAxes'
+import { AreaAxes } from './AreaAxes'
 import { AREA_MARGIN, areaGeometry, type SeriesPoint } from './areaGeometry'
-import ChartTooltip, { type TooltipRow } from './ChartTooltip'
+import { ChartTooltip, type TooltipRow } from './ChartTooltip'
 import { nearestIndex } from './scale'
 import { useChartCursor } from './useChartCursor'
 import { useElementWidth } from './useElementWidth'
@@ -38,7 +38,7 @@ const NO_OVERLAY: AreaOverlay = { values: [], color: 'none' }
  * punto más cercano, así nadie tiene que apuntar a una línea de 2 px. Solo el
  * máximo lleva rótulo; el resto está en el eje, la lectura y la tabla.
  */
-export default function AreaChart({ points, label, formatValue, formatTick, describe, overlay = NO_OVERLAY }: AreaChartProps) {
+export function AreaChart({ points, label, formatValue, formatTick, describe, overlay = NO_OVERLAY }: AreaChartProps) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const cursor = useChartCursor(points.length)
   const geometry = areaGeometry(points, width, HEIGHT, overlay.values)

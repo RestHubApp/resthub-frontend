@@ -2,15 +2,15 @@ import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
 import { activeOrdersQuery } from '@/api/orders'
-import EmptyState from '@/components/EmptyState'
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
+import { EmptyState } from '@/components/EmptyState'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
 import { useOrderNoteFlags } from '@/hooks/useOrderNoteFlags'
 import { useCan } from '@/store/session'
-import BoardSkeleton from './board/BoardSkeleton'
-import KitchenCard from './kitchen/KitchenCard'
-import LiveIndicator from './LiveIndicator'
-import QueryError from './QueryError'
+import { BoardSkeleton } from './board/BoardSkeleton'
+import { KitchenCard } from './kitchen/KitchenCard'
+import { LiveIndicator } from './LiveIndicator'
+import { QueryError } from './QueryError'
 import { useLiveUpdates } from './useLiveUpdates'
 import { useNow } from './useNow'
 
@@ -23,7 +23,7 @@ const REFRESCO_MS = 15_000
  * Pensada para una tablet o una pantalla en la cocina: tarjetas grandes, del
  * pedido más antiguo al más nuevo, sin precios ni cobro. Se actualiza sola.
  */
-export default function KitchenView() {
+export function KitchenView() {
   const live = useLiveUpdates()
   const now = useNow(REFRESCO_MS)
   const activos = useQuery(activeOrdersQuery)

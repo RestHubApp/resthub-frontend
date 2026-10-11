@@ -1,10 +1,10 @@
 import { type ReactNode, useState } from 'react'
 
 import { useLiveUpdates } from '@/features/orders/useLiveUpdates'
-import BackLink from '@/components/BackLink'
-import CartBar from './CartBar'
-import CartSheet from './CartSheet'
-import MenuPicker from './MenuPicker'
+import { BackLink } from '@/components/BackLink'
+import { CartBar } from './CartBar'
+import { CartSheet } from './CartSheet'
+import { MenuPicker } from './MenuPicker'
 import { backPath, draftKey, type OrderTarget } from './orderTarget'
 import { useDraftActions, useDraftLines } from './useOrderDraft'
 import { useSubmitDraft } from './useSubmitDraft'
@@ -24,7 +24,7 @@ interface TakeOrderProps {
  * asi una mesa no queda ocupada por un pedido vacio si el cliente se arrepiente.
  * Las notas y las cantidades finas se ajustan en el resumen, que es opcional.
  */
-export default function TakeOrder({ target, title, description, notice }: TakeOrderProps) {
+export function TakeOrder({ target, title, description, notice }: TakeOrderProps) {
   useLiveUpdates()
   const key = draftKey(target)
   const lines = useDraftLines(key)

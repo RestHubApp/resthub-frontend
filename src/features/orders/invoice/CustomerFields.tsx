@@ -21,7 +21,7 @@ interface CustomerFieldsProps {
  *
  * Mientras falte el número o el nombre, dice qué falta: el botón de emitir espera.
  */
-export default function CustomerFields({ documentType, withAddress, values, onChange }: CustomerFieldsProps) {
+export function CustomerFields({ documentType, withAddress, values, onChange }: CustomerFieldsProps) {
   const ruc = documentType === 'ruc'
 
   return (

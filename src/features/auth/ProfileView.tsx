@@ -1,7 +1,7 @@
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
 import { usePreview, useSession } from '@/store/session'
-import ChangePasswordForm from './ChangePasswordForm'
+import { ChangePasswordForm } from './ChangePasswordForm'
 
 const TERMINO = 'm-0 text-sm text-muted-foreground'
 const DATO = 'm-0 text-base font-medium break-words'
@@ -13,7 +13,7 @@ const DATO = 'm-0 text-base font-medium break-words'
  * cuenta los administra el encargado desde Personal. Lo unico propio es la
  * contraseña.
  */
-export default function ProfileView() {
+export function ProfileView() {
   const account = useSession((state) => state.account)
   const preview = usePreview()
 

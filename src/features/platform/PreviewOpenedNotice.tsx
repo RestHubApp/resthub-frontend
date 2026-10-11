@@ -1,5 +1,5 @@
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 
 interface PreviewOpenedNoticeProps {
   /** `encargado` o `mesero`. */
@@ -15,7 +15,7 @@ interface PreviewOpenedNoticeProps {
  * El navegador no dice si bloqueó la pestaña nueva, así que el enlace está
  * siempre, mientras el código siga valiendo.
  */
-export default function PreviewOpenedNotice({ label, url, onUsed }: PreviewOpenedNoticeProps) {
+export function PreviewOpenedNotice({ label, url, onUsed }: PreviewOpenedNoticeProps) {
   return (
     <div className="flex flex-col items-start gap-2">
       <FormMessage tone="ok">Se abrió la vista previa como {label} en otra pestaña.</FormMessage>

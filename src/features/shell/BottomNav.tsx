@@ -1,8 +1,8 @@
-import ShellIcon from './ShellIcon'
+import { ShellIcon } from './ShellIcon'
 import type { CurrentUserResponse } from '@/api/types'
-import MoreSheet from './MoreSheet'
+import { MoreSheet } from './MoreSheet'
 import type { NavEntry } from './navigation'
-import PreloadLink from './PreloadLink'
+import { PreloadLink } from './PreloadLink'
 import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
 
 interface BottomNavProps {
@@ -26,7 +26,7 @@ function tabClass({ isActive }: { isActive: boolean }): string {
  * barra, el perfil y la salida van en "Más". `data-bottom-nav` lo usa
  * index.css para subir el boton de accesibilidad por encima de la barra.
  */
-export default function BottomNav({ entries, account }: BottomNavProps) {
+export function BottomNav({ entries, account }: BottomNavProps) {
   const visibles = entries.slice(0, VISIBLES)
   const resto = entries.slice(VISIBLES)
 

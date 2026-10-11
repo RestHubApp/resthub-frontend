@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import RestHubMark from './RestHubMark'
+import { RestHubMark } from './RestHubMark'
 
 interface BrandProps {
   readonly to: string
@@ -8,7 +8,7 @@ interface BrandProps {
   readonly compact?: boolean
 }
 
-export default function Brand({ to, compact = false }: BrandProps) {
+export function Brand({ to, compact = false }: BrandProps) {
   return (
     <Link
       to={to}

@@ -2,21 +2,21 @@ import { useQuery } from '@tanstack/react-query'
 import { useLocation, useParams } from 'react-router'
 
 import { platformRestaurantQuery } from '@/api/platform'
-import BackLink from '@/components/BackLink'
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import ListSkeleton from '@/components/ListSkeleton'
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
+import { BackLink } from '@/components/BackLink'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
 import { errorStatus } from '@/services/api'
 import { formatDateTime } from '@/services/format'
-import OwnersSection from './OwnersSection'
-import PlatformQueryError from './PlatformQueryError'
+import { OwnersSection } from './OwnersSection'
+import { PlatformQueryError } from './PlatformQueryError'
 import { PLATFORM_TIME_ZONE } from './platformTime'
 import { staffSummary } from './restaurantList'
-import RestaurantSettingsForm from './RestaurantSettingsForm'
-import RestaurantStatusBadge from './RestaurantStatusBadge'
-import RestaurantStatusButton from './RestaurantStatusButton'
+import { RestaurantSettingsForm } from './RestaurantSettingsForm'
+import { RestaurantStatusBadge } from './RestaurantStatusBadge'
+import { RestaurantStatusButton } from './RestaurantStatusButton'
 
 const NOT_FOUND = 404
 const VOLVER = <BackLink to="/plataforma" label="Restaurantes" />
@@ -26,7 +26,7 @@ function recienCreado(estado: unknown): boolean {
 }
 
 /** La ficha de un restaurante: sus datos, su estado y sus encargados. */
-export default function RestaurantDetailView() {
+export function RestaurantDetailView() {
   const restaurantId = Number(useParams()['restaurantId'])
   const creado = recienCreado(useLocation().state)
   const valido = Number.isInteger(restaurantId) && restaurantId > 0

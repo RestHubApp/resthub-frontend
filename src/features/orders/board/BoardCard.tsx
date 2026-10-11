@@ -1,13 +1,13 @@
 import { Link } from 'react-router'
 
 import type { OrderResponse } from '@/api/types'
-import AllergyAlert from '@/features/orders/AllergyAlert'
-import ItemNote from '@/features/orders/ItemNote'
+import { AllergyAlert } from '@/features/orders/AllergyAlert'
+import { ItemNote } from '@/features/orders/ItemNote'
 import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
-import OrderItemLine from '@/features/orders/OrderItemLine'
+import { OrderItemLine } from '@/features/orders/OrderItemLine'
 import { orderPlace } from '@/features/orders/orderLabels'
-import BoardCardActions from './BoardCardActions'
-import ElapsedTime from './ElapsedTime'
+import { BoardCardActions } from './BoardCardActions'
+import { ElapsedTime } from './ElapsedTime'
 import { formatMoney, minutesSince } from '@/services/format'
 
 interface BoardCardProps {
@@ -26,7 +26,7 @@ interface BoardCardProps {
  * rojo y "Con alergia" escrito en el encabezado. Un pedido que acaba de llegar lleva "Nuevo" durante
  * su primer minuto, para que se note que aparecio sin que nadie recargue.
  */
-export default function BoardCard({ order, now, flagFor, onCharge, onCancel }: BoardCardProps) {
+export function BoardCard({ order, now, flagFor, onCharge, onCancel }: BoardCardProps) {
   const tituloId = `pedido-${String(order.id)}`
   const nuevo = minutesSince(order.created_at, now) < 1
   const alergia = allergyIn(order, flagFor) !== undefined

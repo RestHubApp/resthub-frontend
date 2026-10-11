@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router'
 
 import type { PermissionCode } from '@/api/types'
 import { hasPermission, useSession } from '@/store/session'
-import TermsGate from './TermsGate'
+import { TermsGate } from './TermsGate'
 
 interface RequireSessionProps {
   /** Permiso que exige la ruta. Sin el, basta con estar autenticado. */
@@ -17,7 +17,7 @@ interface RequireSessionProps {
  * autorizacion de verdad vive en el servidor. Sin el permiso, la guarda lleva
  * al inicio, que elige la primera pantalla que la cuenta si puede abrir.
  */
-export default function RequireSession({ permission }: RequireSessionProps) {
+export function RequireSession({ permission }: RequireSessionProps) {
   const account = useSession((state) => state.account)
   const location = useLocation()
 

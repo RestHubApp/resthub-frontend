@@ -1,13 +1,13 @@
 import { advanceOrder } from '@/api/orders'
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
-import AllergyAlert from '@/features/orders/AllergyAlert'
-import ElapsedTime from '@/features/orders/board/ElapsedTime'
-import ItemNote from '@/features/orders/ItemNote'
+import { AllergyAlert } from '@/features/orders/AllergyAlert'
+import { ElapsedTime } from '@/features/orders/board/ElapsedTime'
+import { ItemNote } from '@/features/orders/ItemNote'
 import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
-import OrderItemLine from '@/features/orders/OrderItemLine'
+import { OrderItemLine } from '@/features/orders/OrderItemLine'
 import { orderPlace } from '@/features/orders/orderLabels'
 import { stepDoneMessage } from '@/features/orders/nextStep'
 import { useOrderAction } from '@/features/orders/useOrderAction'
@@ -24,7 +24,7 @@ interface KitchenCardProps {
  * Sin precios ni cobro: en la cocina solo importa qué preparar y para quién.
  * Marcar listo lo hace quien tiene `orders.manage`; el resto solo mira.
  */
-export default function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
+export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
   const puedeMarcar = useCan('orders.manage') && order.status === 'in_kitchen'
   const listo = useOrderAction({
     mutationFn: () => advanceOrder(order.id, 'ready'),

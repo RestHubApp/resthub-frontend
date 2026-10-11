@@ -1,27 +1,28 @@
 import { useQuery } from '@tanstack/react-query'
-import { lazy, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
+import { lazyNamed } from '@/components/lazyNamed'
 import { useParams } from 'react-router'
 
 import { orderQuery } from '@/api/orders'
-import EmptyState from '@/components/EmptyState'
+import { EmptyState } from '@/components/EmptyState'
 import { useOrderNoteFlags } from '@/hooks/useOrderNoteFlags'
 import { useCan } from '@/store/session'
-import BackLink from '@/components/BackLink'
-import OrderActions from './detail/OrderActions'
-import DeliveryCard from './detail/DeliveryCard'
-import OrderClosedInfo from './detail/OrderClosedInfo'
-import OrderHeader from './detail/OrderHeader'
-import OrderItems from './detail/OrderItems'
-import PrintLinks from './detail/PrintLinks'
-import TableMoves from './detail/TableMoves'
-import LiveIndicator from './LiveIndicator'
+import { BackLink } from '@/components/BackLink'
+import { OrderActions } from './detail/OrderActions'
+import { DeliveryCard } from './detail/DeliveryCard'
+import { OrderClosedInfo } from './detail/OrderClosedInfo'
+import { OrderHeader } from './detail/OrderHeader'
+import { OrderItems } from './detail/OrderItems'
+import { PrintLinks } from './detail/PrintLinks'
+import { TableMoves } from './detail/TableMoves'
+import { LiveIndicator } from './LiveIndicator'
 import { isActive } from './orderLabels'
-import QueryError from './QueryError'
+import { QueryError } from './QueryError'
 import { useLiveUpdates } from './useLiveUpdates'
 
 // Los diálogos traen react-hook-form y zod: se bajan al abrirlos, no con el pedido.
-const CancelOrderDialog = lazy(() => import('./CancelOrderDialog'))
-const ChargeDialog = lazy(() => import('./charge/ChargeDialog'))
+const CancelOrderDialog = lazyNamed(() => import('./CancelOrderDialog'), 'CancelOrderDialog')
+const ChargeDialog = lazyNamed(() => import('./charge/ChargeDialog'), 'ChargeDialog')
 
 /**
  * Un pedido: sus platos, su estado y el paso que sigue.
@@ -30,7 +31,7 @@ const ChargeDialog = lazy(() => import('./charge/ChargeDialog'))
  * Se actualiza solo: si la cocina lo marca listo, el boton "Marcar servido"
  * aparece sin recargar.
  */
-export default function OrderDetailView() {
+export function OrderDetailView() {
   const orderId = Number(useParams()['orderId'])
   const live = useLiveUpdates()
   const pedido = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })

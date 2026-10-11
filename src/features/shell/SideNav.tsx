@@ -1,9 +1,9 @@
 import type { CurrentUserResponse } from '@/api/types'
-import Brand from './Brand'
+import { Brand } from './Brand'
 import type { NavEntry } from './navigation'
-import NavList from './NavList'
-import RestaurantName from './RestaurantName'
-import SessionActions from './SessionActions'
+import { NavList } from './NavList'
+import { RestaurantName } from './RestaurantName'
+import { SessionActions } from './SessionActions'
 
 interface SideNavProps {
   readonly entries: readonly NavEntry[]
@@ -11,7 +11,7 @@ interface SideNavProps {
 }
 
 /** La barra lateral de escritorio, donde trabaja el encargado. */
-export default function SideNav({ entries, account }: SideNavProps) {
+export function SideNav({ entries, account }: SideNavProps) {
   return (
     // La columna pinta el fondo de punta a punta; adentro, el menú queda fijo al desplazarse.
     <div className="hidden border-r bg-card lg:block">

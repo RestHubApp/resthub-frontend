@@ -3,13 +3,13 @@ import { useState } from 'react'
 
 import { obsRoutesQuery } from '@/api/observability'
 import type { ObsRouteSort } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import SectionCard from '@/components/SectionCard'
+import { EmptyState } from '@/components/EmptyState'
+import { SectionCard } from '@/components/SectionCard'
 import { type ObsFilters, windowParams } from './obsFilters'
-import ObsQueryState from './ObsQueryState'
+import { ObsQueryState } from './ObsQueryState'
 import { DEFAULT_ROUTE_SORT, ROUTES_LIMIT, sortRoutes } from './routeSort'
-import RoutesTable from './RoutesTable'
-import SampledNotice from './SampledNotice'
+import { RoutesTable } from './RoutesTable'
+import { SampledNotice } from './SampledNotice'
 import type { LiveOptions } from './useObsRefresh'
 
 interface RoutesSectionProps {
@@ -23,7 +23,7 @@ interface RoutesSectionProps {
  * Al cambiar de orden, lo que se ve se reordena al instante mientras llegan
  * las 20 de la columna nueva, que pueden ser otras rutas.
  */
-export default function RoutesSection({ filters, live }: RoutesSectionProps) {
+export function RoutesSection({ filters, live }: RoutesSectionProps) {
   const [sort, setSort] = useState<ObsRouteSort>(DEFAULT_ROUTE_SORT)
   const rutas = useQuery({
     ...obsRoutesQuery({ ...windowParams(filters), sort, limit: ROUTES_LIMIT }),

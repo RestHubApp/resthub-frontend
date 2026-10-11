@@ -9,7 +9,7 @@ import { entriesFor } from './navigation'
  * El mesero cae en Pedidos y el encargado en la primera entrada de su menu.
  * Una cuenta sin ninguna pantalla todavia puede ver su perfil.
  */
-export default function HomeRedirect() {
+export function HomeRedirect() {
   const account = useSession((state) => state.account)
 
   if (account === null) {

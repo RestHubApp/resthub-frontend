@@ -2,7 +2,7 @@ import { Link } from 'react-router'
 
 import type { OrderResponse } from '@/api/types'
 import { orderPlace } from '@/features/orders/orderLabels'
-import OrderStatusBadge from '@/features/orders/OrderStatusBadge'
+import { OrderStatusBadge } from '@/features/orders/OrderStatusBadge'
 import { formatMoney, formatTime } from '@/services/format'
 import { useTimeZone } from '@/store/session'
 
@@ -11,7 +11,7 @@ interface OrderListItemProps {
 }
 
 /** Un pedido en una lista del mesero: numero, lugar, estado y total. */
-export default function OrderListItem({ order }: OrderListItemProps) {
+export function OrderListItem({ order }: OrderListItemProps) {
   const timeZone = useTimeZone()
   return (
     <Link

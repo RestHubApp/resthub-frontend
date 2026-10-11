@@ -1,5 +1,5 @@
 import type { OrderResponse } from '@/api/types'
-import ChargeContent from './ChargeContent'
+import { ChargeContent } from './ChargeContent'
 
 interface ChargeDialogProps {
   /** El pedido a cobrar; `null` cierra la ventana. */
@@ -14,7 +14,7 @@ interface ChargeDialogProps {
  * sale del tablero y su tarjeta desaparece, pero el vuelto tiene que seguir a
  * la vista hasta que quien cobra cierre la ventana.
  */
-export default function ChargeDialog({ order, onClose }: ChargeDialogProps) {
+export function ChargeDialog({ order, onClose }: ChargeDialogProps) {
   if (order === null) {
     return null
   }

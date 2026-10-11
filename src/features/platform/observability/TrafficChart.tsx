@@ -1,9 +1,9 @@
 import type { ObsTimeseries } from '@/api/types'
-import AreaChart from '@/components/charts/AreaChart'
+import { AreaChart } from '@/components/charts/AreaChart'
 import { formatInteger } from '@/services/format'
 import { PLATFORM_TIME_ZONE } from '@/features/platform/platformTime'
 import { bucketTitle, formatBucket, toSeries } from './obsLabels'
-import SeriesLegend from './SeriesLegend'
+import { SeriesLegend } from './SeriesLegend'
 
 const PETICIONES = 'var(--chart-1)'
 const ERRORES = 'var(--chart-2)'
@@ -13,7 +13,7 @@ const LEYENDA = [
 ]
 
 /** Las peticiones como área y los errores 5xx como línea, en el mismo eje. */
-export default function TrafficChart({ series }: { readonly series: ObsTimeseries }) {
+export function TrafficChart({ series }: { readonly series: ObsTimeseries }) {
   const { points, bucket_seconds: bucket } = series
   return (
     <div className="flex flex-col gap-3">

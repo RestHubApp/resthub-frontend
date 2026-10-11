@@ -1,7 +1,7 @@
 import type { Ingredient } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import PurchaseLineEditor from './PurchaseLineEditor'
+import { PurchaseLineEditor } from './PurchaseLineEditor'
 import { emptyLine, type LineDraft } from './purchaseLines'
 
 interface PurchaseLinesListProps {
@@ -11,7 +11,7 @@ interface PurchaseLinesListProps {
 }
 
 /** Los insumos de la orden, con quitar y agregar. */
-export default function PurchaseLinesList({ lines, ingredients, onChange }: PurchaseLinesListProps) {
+export function PurchaseLinesList({ lines, ingredients, onChange }: PurchaseLinesListProps) {
   return (
     <>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">

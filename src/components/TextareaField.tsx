@@ -1,8 +1,8 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from './FieldError'
-import FieldHint from './FieldHint'
-import FieldIcon from './FieldIcon'
+import { FieldError } from './FieldError'
+import { FieldHint } from './FieldHint'
+import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
 import type { IconName } from './icons'
 import { Label } from './ui/label'
@@ -22,7 +22,7 @@ interface TextareaFieldProps {
 }
 
 /** Un texto largo con su etiqueta, su icono, su error y su ayuda. */
-export default function TextareaField({
+export function TextareaField({
   id,
   label,
   field,

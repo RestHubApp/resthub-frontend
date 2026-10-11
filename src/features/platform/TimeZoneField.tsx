@@ -1,6 +1,6 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import SelectField from '@/components/SelectField'
+import { SelectField } from '@/components/SelectField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { timeZoneLabel, timeZoneOptions } from './timeZones'
 
@@ -13,7 +13,7 @@ interface TimeZoneFieldProps {
 }
 
 /** La zona horaria del restaurante: decide qué es «hoy» y a qué hora se ve cada pedido. */
-export default function TimeZoneField({ id, field, error, current }: TimeZoneFieldProps) {
+export function TimeZoneField({ id, field, error, current }: TimeZoneFieldProps) {
   return (
     <SelectField
       id={id}

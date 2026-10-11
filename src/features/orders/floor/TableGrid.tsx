@@ -2,15 +2,15 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
 import { tablesQuery } from '@/api/tables'
-import EmptyState from '@/components/EmptyState'
-import ListSkeleton from '@/components/ListSkeleton'
+import { EmptyState } from '@/components/EmptyState'
+import { ListSkeleton } from '@/components/ListSkeleton'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
-import QueryError from '@/features/orders/QueryError'
-import TableCard from './TableCard'
+import { QueryError } from '@/features/orders/QueryError'
+import { TableCard } from './TableCard'
 
 /** Las mesas activas del salon, en el orden en que las acomodo el encargado. */
-export default function TableGrid() {
+export function TableGrid() {
   const mesas = useQuery(tablesQuery(false))
   const canManage = useCan('tables.manage')
 

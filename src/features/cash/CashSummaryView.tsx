@@ -1,6 +1,6 @@
 import type { CashSession, CashSummary } from '@/api/types'
 import { formatMoney, formatInteger, toCents } from '@/services/format'
-import CashTile from './CashTile'
+import { CashTile } from './CashTile'
 
 interface CashSummaryViewProps {
   readonly session: CashSession
@@ -14,7 +14,7 @@ const ENCABEZADO = 'px-3 py-2 text-left font-medium text-muted-foreground'
  * El arqueo de un turno: lo que entró por cada medio, lo que tiene que haber
  * en el cajón y las propinas que hay que entregar a cada mesero.
  */
-export default function CashSummaryView({ session, summary }: CashSummaryViewProps) {
+export function CashSummaryView({ session, summary }: CashSummaryViewProps) {
   return (
     <div className="flex flex-col gap-5">
       <dl className="m-0 grid grid-cols-2 gap-3 sm:grid-cols-4">

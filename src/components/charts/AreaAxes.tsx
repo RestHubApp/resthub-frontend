@@ -20,7 +20,7 @@ function anchorFor(index: number, length: number): 'start' | 'middle' | 'end' {
 }
 
 /** La grilla horizontal, las marcas del eje de valores y las fechas de abajo. */
-export default function AreaAxes({ geometry, points, formatTick, maxXLabels }: AreaAxesProps) {
+export function AreaAxes({ geometry, points, formatTick, maxXLabels }: AreaAxesProps) {
   const { ticks, plotLeft, plotRight, plotBottom, x, y } = geometry
 
   return (

@@ -2,10 +2,10 @@ import { useMemo } from 'react'
 import { Link } from 'react-router'
 
 import type { ObsRequestEntry } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
+import { DataTable, type DataColumn } from '@/components/DataTable'
 import { formatInteger, formatMilliseconds, formatTimestamp } from '@/services/format'
 import { PLATFORM_TIME_ZONE } from '@/features/platform/platformTime'
-import HttpStatusBadge from './HttpStatusBadge'
+import { HttpStatusBadge } from './HttpStatusBadge'
 import { logsOf, type ObsFilters } from './obsFilters'
 import { ACCOUNT_KIND_LABELS } from './obsLabels'
 
@@ -68,7 +68,7 @@ function columns(filters: ObsFilters): DataColumn<ObsRequestEntry>[] {
 }
 
 /** Las peticiones una por una; su `request_id` lleva a sus logs. */
-export default function RequestTable({ entries, isLoading, filters }: RequestTableProps) {
+export function RequestTable({ entries, isLoading, filters }: RequestTableProps) {
   const columnas = useMemo(() => columns(filters), [filters])
   return (
     <DataTable

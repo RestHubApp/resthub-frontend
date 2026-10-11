@@ -1,7 +1,7 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from '@/components/FieldError'
-import FieldHint from '@/components/FieldHint'
+import { FieldError } from '@/components/FieldError'
+import { FieldHint } from '@/components/FieldHint'
 import { fieldIds } from '@/components/fieldIds'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,7 +25,7 @@ interface QuantityFieldProps {
  * Quien compra cinco kilos escribe "5" y elige "kg"; nadie tiene que hacer la
  * cuenta a gramos. La conversión la hace el formulario al enviar.
  */
-export default function QuantityField({
+export function QuantityField({
   id,
   label,
   amount,

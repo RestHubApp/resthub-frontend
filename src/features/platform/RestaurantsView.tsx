@@ -4,18 +4,18 @@ import { Link } from 'react-router'
 
 import { platformRestaurantsQuery } from '@/api/platform'
 import type { PlatformRestaurantSummary } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
-import TablePagination from '@/components/TablePagination'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
+import { TablePagination } from '@/components/TablePagination'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatDateTime } from '@/services/format'
-import PlatformQueryError from './PlatformQueryError'
+import { PlatformQueryError } from './PlatformQueryError'
 import { PLATFORM_TIME_ZONE } from './platformTime'
 import { MAX_RESTAURANT_SEARCH, pageCount, restaurantListParams, staffSummary } from './restaurantList'
-import RestaurantStatusBadge from './RestaurantStatusBadge'
+import { RestaurantStatusBadge } from './RestaurantStatusBadge'
 
 const COLUMNAS: DataColumn<PlatformRestaurantSummary>[] = [
   {
@@ -43,7 +43,7 @@ function cuantos(total: number): string {
 }
 
 /** Todos los restaurantes de RestHub, los más nuevos primero, con búsqueda por nombre o identificador. */
-export default function RestaurantsView() {
+export function RestaurantsView() {
   const [texto, setTexto] = useState('')
   const [pagina, setPagina] = useState(0)
   const busqueda = useDeferredValue(texto)

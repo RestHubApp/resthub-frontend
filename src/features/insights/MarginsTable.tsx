@@ -11,9 +11,9 @@ import {
 import { useState } from 'react'
 
 import type { DishMargin } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import MarginBar from './MarginBar'
+import { MarginBar } from './MarginBar'
 import { formatInteger, formatMoney, toNumber } from '@/services/format'
 
 const features = tableFeatures({
@@ -75,7 +75,7 @@ interface MarginsTableProps {
  * Margen por plato: precio menos el costo de su receta. Se ordena tocando una
  * cabecera. Un plato sin receta no tiene costo: se marca y queda al final.
  */
-export default function MarginsTable({ dishes }: MarginsTableProps) {
+export function MarginsTable({ dishes }: MarginsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'bruto', desc: true }])
   const table = useTable({ features, columns, data: dishes, state: { sorting }, onSortingChange: setSorting })
 

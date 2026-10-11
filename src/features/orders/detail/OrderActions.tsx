@@ -2,7 +2,7 @@ import { Link } from 'react-router'
 
 import { advanceOrder, type OrderStep } from '@/api/orders'
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
 import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
@@ -24,7 +24,7 @@ const WIDE = 'h-12 w-full px-5 text-base sm:w-auto'
  * El paso depende del estado y del permiso: el mesero ve "Marcar servido"
  * cuando esta listo, el encargado ademas "Marcar listo" y "Cobrar".
  */
-export default function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
+export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
   const paso = nextStepFor(order.status)
   const puede = useCanTakeStep(order, paso)
   const puedeCancelar = useCan('orders.manage')

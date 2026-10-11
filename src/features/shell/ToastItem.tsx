@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useNotifications } from '@/store/notifications'
-import ShellIcon from './ShellIcon'
+import { ShellIcon } from './ShellIcon'
 
 const AUTO_DISMISS_MS = 8_000
 
@@ -21,7 +21,7 @@ interface ToastItemProps {
   readonly message: string
 }
 
-export default function ToastItem({ id, tone, message }: ToastItemProps) {
+export function ToastItem({ id, tone, message }: ToastItemProps) {
   const dismiss = useNotifications((state) => state.dismiss)
 
   useEffect(() => {

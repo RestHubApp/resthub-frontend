@@ -3,13 +3,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 import { addPlatformOwner, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } from '@/api/platform'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import OwnerFields from './OwnerFields'
+import { OwnerFields } from './OwnerFields'
 import { EMPTY_OWNER, ownerSchema, type OwnerValues } from './platformSchema'
 import { saveOwner } from './restaurantCache'
 
@@ -20,7 +20,7 @@ interface AddOwnerFormProps {
 }
 
 /** Otra cuenta con el rol Encargado del restaurante. Un correo ya usado lo rechaza el servidor (409). */
-export default function AddOwnerForm({ restaurantId, onDone }: AddOwnerFormProps) {
+export function AddOwnerForm({ restaurantId, onDone }: AddOwnerFormProps) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState } = useForm<OwnerValues>({
     resolver: zodResolver(ownerSchema),

@@ -1,9 +1,9 @@
 import type { Ingredient } from '@/api/types'
-import FormDialog from '@/components/FormDialog'
-import AdjustmentForm from './AdjustmentForm'
-import IngredientForm from './IngredientForm'
-import PurchaseForm from './PurchaseForm'
-import WasteForm from './WasteForm'
+import { FormDialog } from '@/components/FormDialog'
+import { AdjustmentForm } from './AdjustmentForm'
+import { IngredientForm } from './IngredientForm'
+import { PurchaseForm } from './PurchaseForm'
+import { WasteForm } from './WasteForm'
 
 /** Lo que se hace con un insumo desde cualquier sección del inventario. */
 export type StockAction =
@@ -47,7 +47,7 @@ function formulario(action: StockAction, onClose: () => void) {
  * Una sola para toda la pantalla: la tabla de insumos y las alertas abren la
  * misma compra, y la fila no carga cinco ventanas cerradas.
  */
-export default function StockActionDialog({ action, onClose }: StockActionDialogProps) {
+export function StockActionDialog({ action, onClose }: StockActionDialogProps) {
   return (
     <FormDialog
       open={action !== null}

@@ -4,12 +4,12 @@ import { useForm, useWatch } from 'react-hook-form'
 
 import { closeCash } from '@/api/cash'
 import type { CashSession, CloseCashRequest } from '@/api/types'
-import TextField from '@/components/TextField'
+import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { centsToApi, formatCents, toCents } from '@/services/format'
 import { cashAmountForApi, closeCashSchema, type CloseCashValues, MAX_CASH_NOTES } from './cashSchema'
 import { differenceLabel } from './cashDifference'
-import CloseCashButton from './CloseCashButton'
+import { CloseCashButton } from './CloseCashButton'
 import { useCashMutation } from './useCashMutation'
 
 interface CloseCashFormProps {
@@ -27,7 +27,7 @@ const MONTO = /^\d{1,8}(?:[.,]\d{1,2})?$/u
  * conviene volver a contar antes de firmar el arqueo. Cerrar mueve dinero y
  * no se deshace, así que se confirma con el monto y la diferencia a la vista.
  */
-export default function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
+export function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
   const esperado = toCents(session.summary?.expected_cash ?? '0')
   const { register, handleSubmit, formState, control } = useForm<CloseCashValues>({
     resolver: zodResolver(closeCashSchema),

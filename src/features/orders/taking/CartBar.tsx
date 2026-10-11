@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { cartTotals } from './cartTotals'
 import type { DraftLine } from './useOrderDraft'
@@ -19,7 +19,7 @@ interface CartBarProps {
  * quien usa lector de pantalla oye que el plato se agrego.
  * `data-cart-bar` lo usa index.css para subir el boton de accesibilidad.
  */
-export default function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartBarProps) {
+export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartBarProps) {
   const { platos, count, total } = cartTotals(lines)
 
   return (

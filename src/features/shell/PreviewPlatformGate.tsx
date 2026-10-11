@@ -1,8 +1,8 @@
 import { Outlet } from 'react-router'
 
-import EmptyState from '@/components/EmptyState'
+import { EmptyState } from '@/components/EmptyState'
 import { isPreviewTab } from '@/services/tabStorage'
-import PreviewExitButton from './PreviewExitButton'
+import { PreviewExitButton } from './PreviewExitButton'
 
 /**
  * La puerta del área de plataforma (`/plataforma`).
@@ -13,7 +13,7 @@ import PreviewExitButton from './PreviewExitButton'
  * «Salir de la vista previa», que la cierra o vuelve a la administración
  * como una pestaña normal.
  */
-export default function PreviewPlatformGate() {
+export function PreviewPlatformGate() {
   if (!isPreviewTab()) {
     return <Outlet />
   }

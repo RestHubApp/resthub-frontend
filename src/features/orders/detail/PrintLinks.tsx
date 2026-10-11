@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 
 interface PrintLinksProps {
@@ -14,7 +14,7 @@ interface PrintLinksProps {
  * La comanda tiene sentido desde que el pedido va a cocina; la cuenta, en
  * cualquier momento (antes de pagar es la precuenta, después el ticket).
  */
-export default function PrintLinks({ order }: PrintLinksProps) {
+export function PrintLinks({ order }: PrintLinksProps) {
   const base = `/imprimir/${String(order.id)}`
   const enCocina = order.status !== 'open' && order.status !== 'cancelled'
 

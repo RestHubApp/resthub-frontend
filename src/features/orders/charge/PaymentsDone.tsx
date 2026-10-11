@@ -7,7 +7,7 @@ interface PaymentsDoneProps {
 }
 
 /** Los pagos que ya entraron a esta cuenta, en el orden en que se cobraron. */
-export default function PaymentsDone({ order }: PaymentsDoneProps) {
+export function PaymentsDone({ order }: PaymentsDoneProps) {
   const timeZone = useTimeZone()
   if (order.payments.length === 0) {
     return null

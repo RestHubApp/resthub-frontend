@@ -3,21 +3,21 @@ import { useState } from 'react'
 
 import { rolesQuery } from '@/api/roles'
 import type { StaffResponse } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import FormDialog from '@/components/FormDialog'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
-import SectionCard from '@/components/SectionCard'
-import StatusBadge from '@/components/StatusBadge'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionCard } from '@/components/SectionCard'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { usePermissions, useSession } from '@/store/session'
 import { canManageAccount } from './roleOptions'
-import RoleOptionsGate from './RoleOptionsGate'
-import StaffCreateForm from './StaffCreateForm'
+import { RoleOptionsGate } from './RoleOptionsGate'
+import { StaffCreateForm } from './StaffCreateForm'
 import { STAFF_LIST_QUERY } from './staffList'
-import StaffRowActions from './StaffRowActions'
+import { StaffRowActions } from './StaffRowActions'
 
 // Una columna que en el celular se lee bajo el nombre.
 const SOLO_ANCHA = 'hidden sm:table-cell'
@@ -69,7 +69,7 @@ function columnas(
 }
 
 /** Las cuentas del restaurante, cada una con su rol. */
-export default function StaffView() {
+export function StaffView() {
   const personal = useQuery(STAFF_LIST_QUERY)
   const roles = useQuery(rolesQuery())
   const granted = usePermissions()

@@ -2,9 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { changeStaffStatus } from '@/api/staff'
 import type { StaffResponse } from '@/api/types'
-import ConfirmDialog from '@/components/ConfirmDialog'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { saveStaffMember } from './staffList'
@@ -21,7 +21,7 @@ interface StaffStatusButtonProps {
  * Desactivar se confirma, porque la persona deja de poder entrar en ese mismo
  * momento, quiza a mitad de un turno. Activar no quita nada y va directo.
  */
-export default function StaffStatusButton({ account, disabled }: StaffStatusButtonProps) {
+export function StaffStatusButton({ account, disabled }: StaffStatusButtonProps) {
   const queryClient = useQueryClient()
   const estado = useMutation({
     mutationFn: () => changeStaffStatus(account.id, !account.is_active),

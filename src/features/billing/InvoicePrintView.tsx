@@ -3,17 +3,17 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router'
 
 import { billingSettingsQuery, invoiceQuery } from '@/api/billing'
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { PRINT_CSS } from '@/components/printSheet'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { useCan, useTimeZone } from '@/store/session'
-import InvoiceSheet from './InvoiceSheet'
+import { InvoiceSheet } from './InvoiceSheet'
 
 /** La hoja del comprobante para la impresora térmica; se imprime sola al abrirla. */
-export default function InvoicePrintView() {
+export function InvoicePrintView() {
   const invoiceId = Number(useParams()["invoiceId"])
   const timeZone = useTimeZone()
   const veAjustes = useCan('billing.manage')

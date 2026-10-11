@@ -1,19 +1,19 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { cashQueryKey, currentCashQuery } from '@/api/cash'
-import ListSkeleton from '@/components/ListSkeleton'
-import PageHeader from '@/components/PageHeader'
-import RetryQueryError from '@/components/RetryQueryError'
-import SectionCard from '@/components/SectionCard'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { PageHeader } from '@/components/PageHeader'
+import { RetryQueryError } from '@/components/RetryQueryError'
+import { SectionCard } from '@/components/SectionCard'
 import { useServerEvent } from '@/hooks/useServerEvent'
 import { errorMessage } from '@/services/api'
 import { formatDateTime, formatMoney } from '@/services/format'
 import { useTimeZone } from '@/store/session'
-import CashHistory from './CashHistory'
-import CashSummaryView from './CashSummaryView'
-import CloseCashForm from './CloseCashForm'
-import DiscountLimitForm from './DiscountLimitForm'
-import OpenCashForm from './OpenCashForm'
+import { CashHistory } from './CashHistory'
+import { CashSummaryView } from './CashSummaryView'
+import { CloseCashForm } from './CloseCashForm'
+import { DiscountLimitForm } from './DiscountLimitForm'
+import { OpenCashForm } from './OpenCashForm'
 
 /**
  * La caja del local: abrir el turno, ver cómo va y cerrarlo con el arqueo.
@@ -21,7 +21,7 @@ import OpenCashForm from './OpenCashForm'
  * El arqueo en curso se actualiza solo: cada cobro de un mesero avisa por el
  * canal de pedidos, y abrir o cerrar la caja, por el de caja.
  */
-export default function CashView() {
+export function CashView() {
   const timeZone = useTimeZone()
   const queryClient = useQueryClient()
   const caja = useQuery(currentCashQuery)

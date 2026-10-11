@@ -4,10 +4,10 @@ import { Link } from 'react-router'
 
 import { orderInvoiceQuery } from '@/api/billing'
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
-import InvoiceDialog from './InvoiceDialog'
+import { InvoiceDialog } from './InvoiceDialog'
 
 interface InvoicePanelProps {
   readonly order: OrderResponse
@@ -35,7 +35,7 @@ function esEnlaceSeguro(url: string): boolean {
  * Aparece solo con el pedido pagado y para quien puede emitir. Ya emitido,
  * muestra el número, cómo lo recibió SUNAT y el PDF del proveedor.
  */
-export default function InvoicePanel({ order }: InvoicePanelProps) {
+export function InvoicePanel({ order }: InvoicePanelProps) {
   const puede = useCan('billing.issue')
   const [emitiendo, setEmitiendo] = useState(false)
   const comprobante = useQuery({ ...orderInvoiceQuery(order.id), enabled: puede && order.status === 'paid' })

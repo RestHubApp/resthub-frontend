@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { CAJA_CERRADA, cajaAbierta, resumenDeCaja, turnoDeCaja } from '#jest/fixtures/cash'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import CashView from './CashView'
+import { CashView } from './CashView'
 
 const PAGINA_VACIA = { items: [], total: 0, limit: 10, offset: 0 }
 const ACTUAL = '/cash/current'

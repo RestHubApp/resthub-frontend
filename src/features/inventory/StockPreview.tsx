@@ -14,7 +14,7 @@ interface StockPreviewProps {
  *
  * Se anuncia con cortesía mientras se escribe, sin interrumpir.
  */
-export default function StockPreview({ ingredient, delta }: StockPreviewProps) {
+export function StockPreview({ ingredient, delta }: StockPreviewProps) {
   const actual = Number(ingredient.stock)
   const quedara = delta === null ? null : actual + delta
   const minimo = Number(ingredient.min_stock)

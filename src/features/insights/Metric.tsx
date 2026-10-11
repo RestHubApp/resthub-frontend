@@ -6,7 +6,7 @@ interface MetricProps {
 }
 
 /** Un dato con su nombre, dentro de una lista de definiciones. */
-export default function Metric({ label, children }: MetricProps) {
+export function Metric({ label, children }: MetricProps) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
       <dt className="text-xs text-muted-foreground">{label}</dt>

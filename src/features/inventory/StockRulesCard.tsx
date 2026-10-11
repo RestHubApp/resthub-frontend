@@ -21,7 +21,7 @@ const CASILLA_ID = 'regla-agotado'
 const TITULO_ID = 'regla-agotado-titulo'
 const DETALLE_ID = 'regla-agotado-detalle'
 
-export default function StockRulesCard() {
+export function StockRulesCard() {
   const restaurante = useQuery(restaurantQuery)
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)

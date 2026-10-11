@@ -1,4 +1,4 @@
-import ShellIcon from './ShellIcon'
+import { ShellIcon } from './ShellIcon'
 
 interface RestaurantNameProps {
   readonly name: string
@@ -12,7 +12,7 @@ interface RestaurantNameProps {
  * RestHub atiende a varios restaurantes, pero cada persona trabaja en uno: su
  * nombre a la vista confirma donde se esta cargando cada pedido.
  */
-export default function RestaurantName({ name, variant }: RestaurantNameProps) {
+export function RestaurantName({ name, variant }: RestaurantNameProps) {
   if (variant === 'header') {
     return (
       <p className="m-0 min-w-0 flex-1 truncate font-heading text-base font-semibold text-foreground">

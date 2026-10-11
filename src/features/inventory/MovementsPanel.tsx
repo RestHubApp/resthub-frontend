@@ -4,14 +4,14 @@ import { Link } from 'react-router'
 
 import { movementsQuery } from '@/api/inventory'
 import type { Movement, MovementKind, MovementListParams } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import FormMessage from '@/components/FormMessage'
-import StatusBadge from '@/components/StatusBadge'
-import TablePagination from '@/components/TablePagination'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { FormMessage } from '@/components/FormMessage'
+import { StatusBadge } from '@/components/StatusBadge'
+import { TablePagination } from '@/components/TablePagination'
 import { errorMessage } from '@/services/api'
 import { formatDateTime, formatSignedQuantity } from '@/services/format'
 import { useTimeZone } from '@/store/session'
-import MovementFilters from './MovementFilters'
+import { MovementFilters } from './MovementFilters'
 import { KIND_TONES } from './movementKinds'
 import { formatUnitCost } from './units'
 import { useIngredients } from './useIngredients'
@@ -56,7 +56,7 @@ function columnas(timeZone: string): DataColumn<Movement>[] {
 }
 
 /** El libro de movimientos: cada entrada y salida de stock, la más reciente primero. */
-export default function MovementsPanel() {
+export function MovementsPanel() {
   const insumos = useIngredients()
   const timeZone = useTimeZone()
   const columns = useMemo(() => columnas(timeZone), [timeZone])

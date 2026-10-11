@@ -1,13 +1,13 @@
 import type { OrderResponse } from '@/api/types'
-import OrderClosedInfo from '@/features/orders/detail/OrderClosedInfo'
-import OrderItemLine from '@/features/orders/OrderItemLine'
+import { OrderClosedInfo } from '@/features/orders/detail/OrderClosedInfo'
+import { OrderItemLine } from '@/features/orders/OrderItemLine'
 
 interface OrderSummaryProps {
   readonly order: OrderResponse
 }
 
 /** El detalle de un pedido dentro del historial: platos y como termino. */
-export default function OrderSummary({ order }: OrderSummaryProps) {
+export function OrderSummary({ order }: OrderSummaryProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <ul className="m-0 flex list-none flex-col gap-2 p-0">

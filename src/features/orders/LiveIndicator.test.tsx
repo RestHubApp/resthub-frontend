@@ -2,9 +2,9 @@ import { describe, expect, it, jest } from '@jest/globals'
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 
-import LiveIndicator from './LiveIndicator'
-import OrderStatusBadge from './OrderStatusBadge'
-import QueryError from './QueryError'
+import { LiveIndicator } from './LiveIndicator'
+import { OrderStatusBadge } from './OrderStatusBadge'
+import { QueryError } from './QueryError'
 
 describe('LiveIndicator', () => {
   it.each([

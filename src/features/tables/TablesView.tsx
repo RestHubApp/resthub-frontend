@@ -3,17 +3,17 @@ import { useState } from 'react'
 
 import { reorderTables, tablesQuery } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import Icon from '@/components/Icon'
-import ListSkeleton from '@/components/ListSkeleton'
-import PageHeader from '@/components/PageHeader'
-import RetryQueryError from '@/components/RetryQueryError'
-import SectionCard from '@/components/SectionCard'
+import { EmptyState } from '@/components/EmptyState'
+import { Icon } from '@/components/Icon'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { PageHeader } from '@/components/PageHeader'
+import { RetryQueryError } from '@/components/RetryQueryError'
+import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
-import TableAdminRow from './TableAdminRow'
+import { TableAdminRow } from './TableAdminRow'
 import { withOrder } from './tableCache'
-import TableFormDialog from './TableFormDialog'
+import { TableFormDialog } from './TableFormDialog'
 import { useTableMutation } from './useTableMutation'
 
 /** El orden nuevo si se mueve una mesa un lugar hacia arriba o hacia abajo. */
@@ -36,7 +36,7 @@ function moved(tables: readonly TableState[], index: number, direction: -1 | 1):
  * El orden es el mismo en que el mesero ve la grilla, asi que conviene que
  * siga el recorrido del salon.
  */
-export default function TablesView() {
+export function TablesView() {
   const mesas = useQuery(tablesQuery(true))
   // `undefined` cerrada; `null` para crear; una mesa para renombrarla.
   const [editando, setEditando] = useState<TableState | null | undefined>(undefined)

@@ -2,15 +2,15 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
 import { lowStockQuery } from '@/api/insights'
-import EmptyState from '@/components/EmptyState'
-import Icon from '@/components/Icon'
-import SectionCard from '@/components/SectionCard'
+import { EmptyState } from '@/components/EmptyState'
+import { Icon } from '@/components/Icon'
+import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
-import LowStockRow from './LowStockRow'
-import ReportState from './ReportState'
+import { LowStockRow } from './LowStockRow'
+import { ReportState } from './ReportState'
 
 /** Los insumos que ya están por debajo de su mínimo. No depende del rango: es el stock de hoy. */
-export default function LowStockSection() {
+export function LowStockSection() {
   const insumos = useQuery(lowStockQuery)
 
   return (

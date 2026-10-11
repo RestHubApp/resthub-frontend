@@ -1,6 +1,6 @@
 import { type FocusEvent, type PointerEvent, type ReactNode, useRef, useState } from 'react'
 
-import ChartTooltip, { type TooltipRow } from './ChartTooltip'
+import { ChartTooltip, type TooltipRow } from './ChartTooltip'
 
 interface BarDatum {
   readonly key: string
@@ -40,7 +40,7 @@ interface Anchor {
  * lleva un solo color (el primero de la paleta): pintar cada barra distinto
  * repetiría con el color lo que ya dice el largo.
  */
-export default function BarList({ data, label }: BarListProps) {
+export function BarList({ data, label }: BarListProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const [anchor, setAnchor] = useState<Anchor | null>(null)
   const max = Math.max(0, ...data.map((datum) => datum.value))

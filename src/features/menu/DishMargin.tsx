@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 
 import type { DishCost } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { formatMoney, formatPercent } from '@/services/format'
 
 interface DishMarginProps {
@@ -22,7 +22,7 @@ const ENLACE =
  *
  * Un margen negativo se marca: el plato se vende por debajo de lo que cuesta.
  */
-export default function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
+export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
   if (cost === undefined) {
     return null
   }

@@ -1,5 +1,5 @@
 import type { RestockItem } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import type { IconName } from '@/components/icons'
 import { formatChange } from '@/services/format'
 
@@ -10,7 +10,7 @@ const TREND_ICONS: Partial<Record<string, IconName>> = {
 }
 
 /** La tendencia del consumo: la última semana contra las cuatro anteriores. */
-export default function TrendText({ item }: { readonly item: RestockItem }) {
+export function TrendText({ item }: { readonly item: RestockItem }) {
   const icono = TREND_ICONS[item.trend]
   return (
     <span className="inline-flex items-center gap-1">

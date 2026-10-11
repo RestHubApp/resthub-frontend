@@ -3,15 +3,15 @@ import { useState } from 'react'
 
 import { aiDecisionsQuery } from '@/api/insights'
 import type { AiDecisionParams, DecisionEngine, DecisionKind } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import SectionCard from '@/components/SectionCard'
-import TablePagination from '@/components/TablePagination'
+import { FormMessage } from '@/components/FormMessage'
+import { SectionCard } from '@/components/SectionCard'
+import { TablePagination } from '@/components/TablePagination'
 import { errorMessage } from '@/services/api'
 import { useCan } from '@/store/session'
-import AiDecisionTable from './AiDecisionTable'
-import ExternalAiCard from './ExternalAiCard'
-import FilterSelect from './FilterSelect'
-import PanelHeader from './PanelHeader'
+import { AiDecisionTable } from './AiDecisionTable'
+import { ExternalAiCard } from './ExternalAiCard'
+import { FilterSelect } from './FilterSelect'
+import { PanelHeader } from './PanelHeader'
 
 const PAGE_SIZE = 20
 
@@ -39,7 +39,7 @@ function queryParams(kind: DecisionKind | '', engine: DecisionEngine | '', pagin
  * La bitácora de la IA: cada decisión con lo que vio el motor, lo que
  * respondió, su confianza y si hubo que recurrir a las reglas.
  */
-export default function AiAuditView() {
+export function AiAuditView() {
   const [kind, setKind] = useState<DecisionKind | ''>('')
   const [engine, setEngine] = useState<DecisionEngine | ''>('')
   const [pagina, setPagina] = useState(0)

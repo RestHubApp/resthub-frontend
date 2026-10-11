@@ -1,7 +1,7 @@
 import type { OrderResponse } from '@/api/types'
 import type { SplitMode } from './chargeMath'
-import EqualSplitField from './EqualSplitField'
-import ItemSplitPicker from './ItemSplitPicker'
+import { EqualSplitField } from './EqualSplitField'
+import { ItemSplitPicker } from './ItemSplitPicker'
 
 interface SplitDraft {
   readonly modo: SplitMode
@@ -18,7 +18,7 @@ interface SplitDetailsProps {
 }
 
 /** Lo que pide cada forma de dividir: entre cuántos, o qué platos. Pagar junto no pide nada. */
-export default function SplitDetails({ order, draft }: SplitDetailsProps) {
+export function SplitDetails({ order, draft }: SplitDetailsProps) {
   if (draft.modo === 'equal') {
     return <EqualSplitField remaining={draft.personas} partCents={draft.parte} onChange={draft.setPersonas} />
   }

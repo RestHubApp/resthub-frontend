@@ -1,8 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { render } from '@testing-library/react'
 
-import FormMessage from './FormMessage'
-import RetryQueryError from './RetryQueryError'
+import { FormMessage } from './FormMessage'
+import { RetryQueryError } from './RetryQueryError'
 
 // El aviso del armazón (ApiFailureNotice) se calla solo si la pantalla ya
 // ofrece «Reintentar»: lo reconoce por `data-reintento`.

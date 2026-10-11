@@ -1,8 +1,8 @@
 import type { OrderResponse } from '@/api/types'
-import SectionCard from '@/components/SectionCard'
+import { SectionCard } from '@/components/SectionCard'
 import type { FlagFor } from '@/features/orders/noteFlags'
-import OrderItemLine from '@/features/orders/OrderItemLine'
-import EditableItem from './EditableItem'
+import { OrderItemLine } from '@/features/orders/OrderItemLine'
+import { EditableItem } from './EditableItem'
 
 interface OrderItemsProps {
   readonly order: OrderResponse
@@ -10,7 +10,7 @@ interface OrderItemsProps {
 }
 
 /** Los platos del pedido. Abierto, cada uno se puede cambiar o quitar. */
-export default function OrderItems({ order, flagFor }: OrderItemsProps) {
+export function OrderItems({ order, flagFor }: OrderItemsProps) {
   const editable = order.status === 'open'
 
   return (

@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
@@ -14,7 +14,7 @@ interface AddRecipeLineProps {
 }
 
 /** Elegir un insumo y sumarlo a la receta; la cantidad se escribe en su línea. */
-export default function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
+export function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
   const id = useId()
   const [elegido, setElegido] = useState('')
 

@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
 import { entrarAPlataforma, entrarComo, montarRutas, PERMISOS_ENCARGADO, PERMISOS_MESERO, servidor } from '#jest/harness'
-import router from './index'
+import { router } from './index'
 
 const PERFIL = '/perfil'
 const CAJA = '/caja'

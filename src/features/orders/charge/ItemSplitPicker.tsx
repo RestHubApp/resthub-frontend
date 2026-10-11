@@ -16,7 +16,7 @@ interface ItemSplitPickerProps {
  * El monto lo confirma el servidor: acá se muestra con el descuento del
  * pedido ya aplicado, igual que lo va a calcular.
  */
-export default function ItemSplitPicker({ order, selected, chargeCents, onChange }: ItemSplitPickerProps) {
+export function ItemSplitPicker({ order, selected, chargeCents, onChange }: ItemSplitPickerProps) {
   const pendientes = unpaidItems(order)
   const toggle = (itemId: number, marcado: boolean) => {
     onChange(marcado ? [...selected, itemId] : selected.filter((id) => id !== itemId))

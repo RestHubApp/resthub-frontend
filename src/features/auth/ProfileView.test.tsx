@@ -4,8 +4,8 @@ import { screen, waitFor } from '@testing-library/react'
 import { cuenta, entrarComo, montar, PERMISOS_MESERO, primero, RespuestaDeError, servidor } from '#jest/harness'
 import { currentAuthToken } from '@/services/api'
 import { useSession } from '@/store/session'
-import ProfileView from './ProfileView'
-import SessionExpiredNotice from './SessionExpiredNotice'
+import { ProfileView } from './ProfileView'
+import { SessionExpiredNotice } from './SessionExpiredNotice'
 
 // Contraseñas de prueba, no credenciales reales.
 const CLAVE_ACTUAL = 'resthub123'

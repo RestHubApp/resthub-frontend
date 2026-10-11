@@ -5,9 +5,9 @@ import { useForm } from 'react-hook-form'
 
 import { platformMutationKeys, updatePlatformRestaurant } from '@/api/platform'
 import type { PlatformRestaurantDetail, UpdatePlatformRestaurantRequest } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
@@ -18,7 +18,7 @@ import {
   settingsPayload,
 } from './platformSchema'
 import { saveRestaurant } from './restaurantCache'
-import TimeZoneField from './TimeZoneField'
+import { TimeZoneField } from './TimeZoneField'
 
 interface RestaurantSettingsFormProps {
   readonly restaurant: PlatformRestaurantDetail
@@ -33,7 +33,7 @@ interface RestaurantSettingsFormProps {
  * servidor: si recortó el nombre o rechazó algo, se ve eso y no lo que se
  * escribió.
  */
-export default function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormProps) {
+export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormProps) {
   const queryClient = useQueryClient()
   const guardados = useMemo(() => settingsOf(restaurant), [restaurant])
   const { register, handleSubmit, formState, reset } = useForm<RestaurantSettingsValues>({

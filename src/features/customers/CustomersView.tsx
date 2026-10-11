@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
 import type { Customer } from '@/api/types'
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
-import CustomerDialog from './CustomerDialog'
-import CustomerList from './CustomerList'
-import CustomerSheet from './CustomerSheet'
+import { CustomerDialog } from './CustomerDialog'
+import { CustomerList } from './CustomerList'
+import { CustomerSheet } from './CustomerSheet'
 
 type Editing = { readonly customer: Customer | null } | null
 
@@ -17,7 +17,7 @@ type Editing = { readonly customer: Customer | null } | null
  * Los pedidos de delivery agregan al cliente solos por su teléfono; acá se
  * busca, se corrigen datos y se anotan preferencias.
  */
-export default function CustomersView() {
+export function CustomersView() {
   const puedeEditar = useCan('customers.manage')
   const [abierto, setAbierto] = useState<number | null>(null)
   const [editando, setEditando] = useState<Editing>(null)

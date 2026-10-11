@@ -1,5 +1,5 @@
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { useClassifyWaste } from './useClassifyWaste'
@@ -14,7 +14,7 @@ function resumen(classified: number, remaining: number): string {
 }
 
 /** Clasifica con la IA el motivo escrito de cada merma sin clasificar. */
-export default function ClassifyWasteButton({ pending }: ClassifyWasteButtonProps) {
+export function ClassifyWasteButton({ pending }: ClassifyWasteButtonProps) {
   const clasificar = useClassifyWaste()
   const resultado = clasificar.data
 

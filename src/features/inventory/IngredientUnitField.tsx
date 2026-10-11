@@ -1,7 +1,7 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import type { Ingredient } from '@/api/types'
-import SelectField from '@/components/SelectField'
+import { SelectField } from '@/components/SelectField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { UNIT_OPTIONS } from './units'
 
@@ -18,7 +18,7 @@ interface IngredientUnitFieldProps {
  * Se elige al crearlo y después no cambia: el libro de movimientos entero
  * está escrito en esa unidad.
  */
-export default function IngredientUnitField({ ingredient, field, error }: IngredientUnitFieldProps) {
+export function IngredientUnitField({ ingredient, field, error }: IngredientUnitFieldProps) {
   if (ingredient !== undefined) {
     return (
       <p className="m-0 text-sm text-muted-foreground">

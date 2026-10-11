@@ -1,6 +1,6 @@
 import type { OrderResponse } from '@/api/types'
 import type { FlagFor } from '@/features/orders/noteFlags'
-import BoardCard from './BoardCard'
+import { BoardCard } from './BoardCard'
 
 interface BoardColumnProps {
   readonly title: string
@@ -12,7 +12,7 @@ interface BoardColumnProps {
 }
 
 /** Una columna del tablero: un estado y sus pedidos, del mas antiguo al mas nuevo. */
-export default function BoardColumn({ title, orders, now, flagFor, onCharge, onCancel }: BoardColumnProps) {
+export function BoardColumn({ title, orders, now, flagFor, onCharge, onCancel }: BoardColumnProps) {
   return (
     <section aria-label={`${title}: ${String(orders.length)}`} className="flex min-w-0 flex-col gap-3 rounded-2xl bg-muted/60 p-3">
       <h2 className="m-0 flex items-center justify-between px-1 text-base font-semibold">

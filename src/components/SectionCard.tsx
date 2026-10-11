@@ -1,8 +1,8 @@
 import { cn } from 'cn'
 import { type ReactNode, useId, useState } from 'react'
 
-import CollapsibleHeading from './CollapsibleHeading'
-import SectionHeading from './SectionHeading'
+import { CollapsibleHeading } from './CollapsibleHeading'
+import { SectionHeading } from './SectionHeading'
 import { Card, CardContent, CardHeader } from './ui/card'
 
 interface SectionCardProps {
@@ -39,7 +39,7 @@ function propsDeDesplazamiento(scrollable: boolean, title: string) {
 }
 
 /** Un bloque de una pantalla: titulo, descripcion y contenido en una tarjeta. */
-export default function SectionCard({
+export function SectionCard({
   title,
   description,
   actions,

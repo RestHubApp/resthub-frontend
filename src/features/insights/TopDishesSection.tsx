@@ -1,10 +1,10 @@
 import { fetchTopDishes, insightsReportQuery } from '@/api/insights'
 import type { InsightsRangeParams, TopDish } from '@/api/types'
-import EmptyState from '@/components/EmptyState'
-import BarList from '@/components/charts/BarList'
-import ChartCard from '@/components/charts/ChartCard'
-import DataGrid from '@/components/charts/DataGrid'
-import ReportState from './ReportState'
+import { EmptyState } from '@/components/EmptyState'
+import { BarList } from '@/components/charts/BarList'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid } from '@/components/charts/DataGrid'
+import { ReportState } from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
 import { formatInteger, formatMoney } from '@/services/format'
 
@@ -19,7 +19,7 @@ const COLUMNS = [
 ]
 
 /** Los diez platos que más salieron, por porciones vendidas. */
-export default function TopDishesSection({ range }: TopDishesSectionProps) {
+export function TopDishesSection({ range }: TopDishesSectionProps) {
   const report = useInsightsReport(insightsReportQuery('dishes-top', range, fetchTopDishes))
 
   return (

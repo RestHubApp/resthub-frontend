@@ -2,16 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { CASH_PAGE_SIZE, cashSessionsQuery } from '@/api/cash'
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import ListSkeleton from '@/components/ListSkeleton'
-import TablePagination from '@/components/TablePagination'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { TablePagination } from '@/components/TablePagination'
 import { errorMessage } from '@/services/api'
-import CashSessionDialog from './CashSessionDialog'
-import CashSessionRow from './CashSessionRow'
+import { CashSessionDialog } from './CashSessionDialog'
+import { CashSessionRow } from './CashSessionRow'
 
 /** Los turnos cerrados, del más reciente al más antiguo; tocando uno se ve su arqueo. */
-export default function CashHistory() {
+export function CashHistory() {
   const [pagina, setPagina] = useState(0)
   const [abierto, setAbierto] = useState<number | null>(null)
   const turnos = useQuery(cashSessionsQuery(pagina * CASH_PAGE_SIZE))

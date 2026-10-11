@@ -20,7 +20,7 @@ const TONE_CLASSES = {
  * Aparece despues de que la persona actuo, lejos de donde mira, asi que se
  * anuncia: un error interrumpe al lector de pantalla y un exito espera turno.
  */
-export default function FormMessage({ tone, children, fallback = false }: FormMessageProps) {
+export function FormMessage({ tone, children, fallback = false }: FormMessageProps) {
   // Una falla se avisa una sola vez: los avisos de respaldo buscan esta marca
   // para no repetir lo que la pantalla ya dice.
   const falla = tone === 'error' ? { 'data-falla': fallback ? 'respaldo' : 'propia' } : {}

@@ -1,6 +1,6 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import TextField from '@/components/TextField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { formatCents } from '@/services/format'
 
@@ -19,7 +19,7 @@ const CENTS = 100
  * Importa en especial con Yape o tarjeta: entra a la cuenta del local y el
  * cierre de caja dice cuánto hay que darle a cada mesero.
  */
-export default function TipField({ field, error, onQuick }: TipFieldProps) {
+export function TipField({ field, error, onQuick }: TipFieldProps) {
   return (
     <div className="flex flex-col gap-2">
       <TextField

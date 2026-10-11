@@ -1,6 +1,6 @@
-import FilterActions from './FilterActions'
-import FilterSelect from './FilterSelect'
-import FilterTextField from './FilterTextField'
+import { FilterActions } from './FilterActions'
+import { FilterSelect } from './FilterSelect'
+import { FilterTextField } from './FilterTextField'
 import { MAX_REQUEST_ID, MAX_ROUTE, type ObsFilters, STATUS_MIN_OPTIONS } from './obsFilters'
 import { useDraft } from './useDraft'
 
@@ -23,7 +23,7 @@ function estados(statusMin: number | null) {
 }
 
 /** Desde qué estado, qué ruta (su plantilla exacta) y qué `request_id`. */
-export default function RequestFilters({ filters, onChange }: RequestFiltersProps) {
+export function RequestFilters({ filters, onChange }: RequestFiltersProps) {
   const [ruta, setRuta] = useDraft(filters.route)
   const [peticion, setPeticion] = useDraft(filters.requestId)
   const activos = filters.statusMin !== null || filters.route !== '' || filters.requestId !== ''

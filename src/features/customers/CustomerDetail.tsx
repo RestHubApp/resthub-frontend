@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 
 import type { Customer } from '@/api/types'
-import StatusBadge from '@/components/StatusBadge'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { formatDateTime, formatMoney } from '@/services/format'
 
@@ -21,7 +21,7 @@ const TIPOS: Partial<Record<string, string>> = {
   delivery: 'Delivery',
 }
 
-export default function CustomerDetail({ customer, timeZone, canEdit, onEdit }: CustomerDetailProps) {
+export function CustomerDetail({ customer, timeZone, canEdit, onEdit }: CustomerDetailProps) {
   const cifras = [
     { label: 'Visitas', value: String(customer.visits) },
     { label: 'Gastado', value: formatMoney(customer.spent) },

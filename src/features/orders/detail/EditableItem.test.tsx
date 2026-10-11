@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { pedido, plato } from '#jest/fixtures/cobro'
 import { entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
-import OrderItems from './OrderItems'
+import { OrderItems } from './OrderItems'
 
 const PLATO = '/orders/12/items/1'
 const NOTA = 'Sin cebolla'

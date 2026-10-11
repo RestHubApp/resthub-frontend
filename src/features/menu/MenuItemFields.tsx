@@ -1,9 +1,9 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 
 import type { MenuSection } from '@/api/types'
-import SelectField from '@/components/SelectField'
-import TextareaField from '@/components/TextareaField'
-import TextField from '@/components/TextField'
+import { SelectField } from '@/components/SelectField'
+import { TextareaField } from '@/components/TextareaField'
+import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import type { MenuItemValues } from './menuSchema'
 
@@ -14,7 +14,7 @@ interface MenuItemFieldsProps {
 }
 
 /** Nombre, precio, categoría y descripción de un plato. */
-export default function MenuItemFields({ register, errors, categories }: MenuItemFieldsProps) {
+export function MenuItemFields({ register, errors, categories }: MenuItemFieldsProps) {
   return (
     <div className="grid items-start gap-5 sm:grid-cols-2">
       <div className="sm:col-span-2">

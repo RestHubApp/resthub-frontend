@@ -1,11 +1,11 @@
 import type { LowStockItem } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import { formatQuantity, toNumber } from '@/services/format'
 
 const PERCENT = 100
 
 /** Un insumo bajo su mínimo: el estado escrito con ícono y cuánto falta. */
-export default function LowStockRow({ item }: { readonly item: LowStockItem }) {
+export function LowStockRow({ item }: { readonly item: LowStockItem }) {
   const nivel = Math.min(PERCENT, (toNumber(item.stock) / Math.max(toNumber(item.min_stock), 1)) * PERCENT)
   return (
     <li className="flex flex-col gap-1.5 py-3 first:pt-0 last:pb-0">

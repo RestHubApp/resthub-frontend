@@ -13,7 +13,7 @@ interface FilterSelectProps<T extends string> {
 }
 
 /** Un filtro de lista: cambia al elegir, sin botón de aplicar. */
-export default function FilterSelect<T extends string>({ label, value, options, allLabel, onChange }: FilterSelectProps<T>) {
+export function FilterSelect<T extends string>({ label, value, options, allLabel, onChange }: FilterSelectProps<T>) {
   const id = useId()
   return (
     <div className="flex flex-col gap-1">

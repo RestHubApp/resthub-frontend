@@ -3,10 +3,10 @@ import { Link } from 'react-router'
 
 import { dishCostsQuery } from '@/api/inventory'
 import type { DishCost } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import StatusBadge from '@/components/StatusBadge'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { StatusBadge } from '@/components/StatusBadge'
 import { buttonVariants } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { formatMoney, formatPercent } from '@/services/format'
@@ -76,7 +76,7 @@ function avisoSinReceta(cantidad: number): string {
 }
 
 /** Cuánto cuesta preparar cada plato y cuánto deja, según su receta. */
-export default function RecipesPanel({ canManage }: RecipesPanelProps) {
+export function RecipesPanel({ canManage }: RecipesPanelProps) {
   const costos = useQuery(dishCostsQuery)
 
   if (costos.isError) {

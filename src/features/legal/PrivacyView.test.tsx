@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
 import { montar, servidor } from '#jest/harness'
-import PrivacyView, { PRIVACY_VERSION } from './PrivacyView'
+import { PrivacyView, PRIVACY_VERSION } from './PrivacyView'
 
 describe('PrivacyView', () => {
   it('se lee sin sesión y cubre lo que pide la Ley N.º 29733', () => {

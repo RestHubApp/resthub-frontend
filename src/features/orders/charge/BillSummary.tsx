@@ -33,7 +33,7 @@ function adjustmentRows(order: OrderResponse): Row[] {
  *
  * Lo que falta va grande: es lo que quien cobra le dice al cliente.
  */
-export default function BillSummary({ order }: BillSummaryProps) {
+export function BillSummary({ order }: BillSummaryProps) {
   const ajustes = adjustmentRows(order)
 
   return (

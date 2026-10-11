@@ -1,9 +1,9 @@
 import type { HTMLInputTypeAttribute } from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from './FieldError'
-import FieldHint from './FieldHint'
-import FieldIcon from './FieldIcon'
+import { FieldError } from './FieldError'
+import { FieldHint } from './FieldHint'
+import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
 import type { IconName } from './icons'
 import { Input } from './ui/input'
@@ -52,7 +52,7 @@ interface TextFieldProps {
  * Reunirlo aca es lo que los mantiene por debajo del limite de tamano, y hace
  * que cambiar como se ve un error sea editar un archivo.
  */
-export default function TextField({
+export function TextField({
   id,
   label,
   field,

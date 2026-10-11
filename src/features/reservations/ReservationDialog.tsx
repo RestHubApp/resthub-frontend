@@ -4,14 +4,14 @@ import { useForm } from 'react-hook-form'
 
 import { tablesQuery } from '@/api/tables'
 import type { Reservation } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
-import FormMessage from '@/components/FormMessage'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { useTimeZone } from '@/store/session'
-import ReservationFields from './ReservationFields'
+import { ReservationFields } from './ReservationFields'
 import { reservationDefaults, reservationRequest, reservationSchema, type ReservationValues } from './reservationSchema'
 import { useSaveReservation } from './useReservationMutations'
 
@@ -29,7 +29,7 @@ interface ReservationDialogProps {
  * La mesa es opcional: si se elige, el servidor revisa que no choque con otra
  * reserva de esa mesa en el mismo horario.
  */
-export default function ReservationDialog({ open, reservation, day, onClose: alCerrar }: ReservationDialogProps) {
+export function ReservationDialog({ open, reservation, day, onClose: alCerrar }: ReservationDialogProps) {
   const timeZone = useTimeZone()
   const mesas = useQuery({ ...tablesQuery(false), enabled: open })
   const form = useForm<ReservationValues>({

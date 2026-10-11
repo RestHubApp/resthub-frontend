@@ -2,16 +2,16 @@ import { cn } from 'cn'
 import { useState } from 'react'
 
 import type { DishCost, MenuItem, MenuSection } from '@/api/types'
-import FormDialog from '@/components/FormDialog'
-import Icon from '@/components/Icon'
-import StatusBadge from '@/components/StatusBadge'
+import { FormDialog } from '@/components/FormDialog'
+import { Icon } from '@/components/Icon'
+import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
-import AvailabilityToggle from './AvailabilityToggle'
-import DishMargin from './DishMargin'
+import { AvailabilityToggle } from './AvailabilityToggle'
+import { DishMargin } from './DishMargin'
 import type { Direction } from './menuOrder'
-import MenuItemForm from './MenuItemForm'
-import MenuItemStatusButton from './MenuItemStatusButton'
-import MoveButtons from './MoveButtons'
+import { MenuItemForm } from './MenuItemForm'
+import { MenuItemStatusButton } from './MenuItemStatusButton'
+import { MoveButtons } from './MoveButtons'
 import { formatMoney } from '@/services/format'
 
 interface MenuItemRowProps {
@@ -24,7 +24,7 @@ interface MenuItemRowProps {
 }
 
 /** Un plato de la carta: lo que se ve de él y lo que se hace con él. */
-export default function MenuItemRow({
+export function MenuItemRow({
   item,
   cost,
   categories,

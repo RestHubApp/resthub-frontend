@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router'
 
-import AccessibilityWidget from '@/components/AccessibilityWidget'
-import ApiFailureNotice from '@/components/ApiFailureNotice'
+import { AccessibilityWidget } from '@/components/AccessibilityWidget'
+import { ApiFailureNotice } from '@/components/ApiFailureNotice'
 import { useFailedQueries } from '@/hooks/useFailedQueries'
-import PlatformHeader from './PlatformHeader'
+import { PlatformHeader } from './PlatformHeader'
 import { usePlatformSessionUpkeep } from './usePlatformSessionUpkeep'
 
 const SKIP_LINK = (
@@ -22,7 +22,7 @@ const SKIP_LINK = (
  * sus avisos. Sin sesión de plataforma solo se ve el acceso, con la misma
  * franja arriba para que se sepa dónde se está entrando.
  */
-export default function PlatformShell() {
+export function PlatformShell() {
   usePlatformSessionUpkeep()
   const failed = useFailedQueries('platform')
 

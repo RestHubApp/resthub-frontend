@@ -11,7 +11,7 @@ import { createElement, type ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider, useLocation, type RouteObject } from 'react-router'
 
 import type { CurrentUserResponse, PermissionCode } from '../src/api/types'
-import ToastStack from '../src/features/shell/ToastStack'
+import { ToastStack } from '../src/features/shell/ToastStack'
 import { api, setAuthToken } from '../src/services/api'
 import { queryClient } from '../src/services/queryClient'
 import { useNotifications } from '../src/store/notifications'

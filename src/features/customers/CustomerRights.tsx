@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { anonymizeCustomer, customersQueryKey, exportCustomer } from '@/api/customers'
 import type { Customer, CustomerExport } from '@/api/types'
-import ConfirmDialog from '@/components/ConfirmDialog'
-import FormMessage from '@/components/FormMessage'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { useNotifications } from '@/store/notifications'
@@ -31,7 +31,7 @@ interface CustomerRightsProps {
  * de la ficha, sus pedidos y sus reservas; no se deshace y los comprobantes se
  * conservan. La rectificación es «Editar datos».
  */
-export default function CustomerRights({ customer, onErased }: CustomerRightsProps) {
+export function CustomerRights({ customer, onErased }: CustomerRightsProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   const exportar = useMutation({

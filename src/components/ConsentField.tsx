@@ -1,4 +1,4 @@
-import FieldError from './FieldError'
+import { FieldError } from './FieldError'
 import { fieldIds } from './fieldIds'
 import { Checkbox } from './ui/checkbox'
 
@@ -28,7 +28,7 @@ interface ConsentFieldProps {
  * nombra con `aria-labelledby`. Tocar el texto también la marca: en el celular
  * no hace falta atinarle al cuadrito.
  */
-export default function ConsentField({ id, checked, onChange, error }: ConsentFieldProps) {
+export function ConsentField({ id, checked, onChange, error }: ConsentFieldProps) {
   const { errorId, describedBy } = fieldIds(id, undefined, error)
   const textoId = `${id}-texto`
   return (

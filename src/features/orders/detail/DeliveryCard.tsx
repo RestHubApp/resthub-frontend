@@ -1,12 +1,12 @@
 import type { OrderResponse } from '@/api/types'
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 
 interface DeliveryCardProps {
   readonly order: OrderResponse
 }
 
 /** A dónde va un delivery y a qué número llamar. Nada si no es delivery. */
-export default function DeliveryCard({ order }: DeliveryCardProps) {
+export function DeliveryCard({ order }: DeliveryCardProps) {
   if (order.type !== 'delivery') {
     return null
   }

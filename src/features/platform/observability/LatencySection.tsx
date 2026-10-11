@@ -1,11 +1,11 @@
 import type { ObsTimePoint, ObsWindowParams } from '@/api/types'
-import AreaChart from '@/components/charts/AreaChart'
-import ChartCard from '@/components/charts/ChartCard'
-import DataGrid, { type GridColumn } from '@/components/charts/DataGrid'
+import { AreaChart } from '@/components/charts/AreaChart'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid, type GridColumn } from '@/components/charts/DataGrid'
 import { formatInteger, formatMilliseconds } from '@/services/format'
 import { PLATFORM_TIME_ZONE } from '@/features/platform/platformTime'
 import { bucketTitle, formatBucket, toSeries } from './obsLabels'
-import ObsQueryState from './ObsQueryState'
+import { ObsQueryState } from './ObsQueryState'
 import type { LiveOptions } from './useObsRefresh'
 import { useTimeseries } from './useTimeseries'
 
@@ -26,7 +26,7 @@ function columns(bucketSeconds: number): GridColumn<ObsTimePoint>[] {
  * El p95 de cada cubo, en su propio gráfico: son milisegundos y no
  * peticiones, y compartir eje con el tráfico aplastaría una de las dos.
  */
-export default function LatencySection({ params, live }: LatencySectionProps) {
+export function LatencySection({ params, live }: LatencySectionProps) {
   const serie = useTimeseries(params, live)
 
   return (

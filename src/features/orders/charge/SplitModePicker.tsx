@@ -17,7 +17,7 @@ const MODOS: readonly { value: SplitMode; label: string }[] = [
  * Radios nativos con el aspecto de fichas: se recorren con las flechas y el
  * lector de pantalla dice cuál está elegida.
  */
-export default function SplitModePicker({ value, onChange }: SplitModePickerProps) {
+export function SplitModePicker({ value, onChange }: SplitModePickerProps) {
   return (
     <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
       <legend className="mb-2 text-sm font-medium">Cómo pagan</legend>

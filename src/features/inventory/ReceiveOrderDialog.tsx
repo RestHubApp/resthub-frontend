@@ -2,8 +2,8 @@ import { useState } from 'react'
 
 import { receivePurchaseOrder } from '@/api/purchasing'
 import type { PurchaseOrder } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatMoney, formatQuantity } from '@/services/format'
@@ -32,7 +32,7 @@ function inicial(order: PurchaseOrder): Recibido {
  * Arranca con lo pedido; se corrige lo que llegó distinto. Lo recibido entra
  * al stock como compras y pondera el costo de cada insumo.
  */
-export default function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) {
+export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) {
   const [recibido, setRecibido] = useState<Recibido | null>(null)
   const recibir = usePurchasingMutation({
     mutationFn: (payload: { orderId: number; lines: { line_id: number; quantity: string; unit_cost: string }[] }) =>

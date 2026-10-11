@@ -4,9 +4,9 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
 import { changeOwnPassword, sessionOf } from '@/api/auth'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PasswordField from '@/components/PasswordField'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PasswordField } from '@/components/PasswordField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
@@ -55,7 +55,7 @@ function seguirConElTokenNuevo(respuesta: Cambio, origen: string | null): 'renov
  * Pide la actual aunque la sesion este abierta: un celular prestado o una
  * laptop sin bloquear no deberian alcanzar para quedarse con la cuenta.
  */
-export default function ChangePasswordForm() {
+export function ChangePasswordForm() {
   const navigate = useNavigate()
   const { register, handleSubmit, formState, reset } = useForm<Formulario>({
     resolver: zodResolver(changePasswordSchema),

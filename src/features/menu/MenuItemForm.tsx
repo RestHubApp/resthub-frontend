@@ -6,15 +6,15 @@ import { useForm } from 'react-hook-form'
 import { dishCostsQueryKey } from '@/api/inventory'
 import { createMenuItem, menuQueryKey, updateMenuItem } from '@/api/menu'
 import type { MenuItem, MenuSection } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { withItem } from './menuCache'
-import MenuItemFields from './MenuItemFields'
-import ModifierGroupsEditor from './ModifierGroupsEditor'
+import { MenuItemFields } from './MenuItemFields'
+import { ModifierGroupsEditor } from './ModifierGroupsEditor'
 import { draftsOf, type GroupDraft, type ParsedGroup, parseGroups } from './modifierDrafts'
 import {
   emptyMenuItem,
@@ -34,7 +34,7 @@ interface MenuItemFormProps {
   readonly onDone: () => void
 }
 
-export default function MenuItemForm({
+export function MenuItemForm({
   item,
   categories,
   defaultCategoryId,

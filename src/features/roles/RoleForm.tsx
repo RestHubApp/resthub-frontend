@@ -3,17 +3,17 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { createRole, updateRole } from '@/api/roles'
 import type { Role } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { usePermissions } from '@/store/session'
 import type { PermissionGroup } from './permissionGroups'
-import PermissionPicker from './PermissionPicker'
+import { PermissionPicker } from './PermissionPicker'
 import { withRole } from './roleCache'
-import RoleNameField from './RoleNameField'
+import { RoleNameField } from './RoleNameField'
 import { rolePayload, roleSchema, type RoleValues, valuesOf } from './roleSchema'
 import { useRoleMutation } from './useRoleMutation'
 
@@ -29,7 +29,7 @@ interface RoleFormProps {
 
 const FALLO = 'No se pudo guardar el rol.'
 
-export default function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
+export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
   const granted = usePermissions()
   const { register, handleSubmit, formState, control } = useForm<RoleValues>({
     resolver: zodResolver(roleSchema),

@@ -2,14 +2,14 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation, useParams } from 'react-router'
 
 import { recipeQuery } from '@/api/inventory'
-import EmptyState from '@/components/EmptyState'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/EmptyState'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { useCan } from '@/store/session'
-import RecipeEditor from './RecipeEditor'
+import { RecipeEditor } from './RecipeEditor'
 import { useIngredients } from './useIngredients'
 
 const RECETAS = '/inventario?vista=recetas'
@@ -21,7 +21,7 @@ function regreso(estado: unknown): { readonly to: string; readonly label: string
 }
 
 /** La receta de un plato, en su propia dirección para poder enlazarla desde el menú. */
-export default function RecipeEditorView() {
+export function RecipeEditorView() {
   const menuItemId = Number(useParams()['menuItemId'])
   const volver = regreso(useLocation().state)
   const canManage = useCan('inventory.manage')

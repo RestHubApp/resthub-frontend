@@ -10,7 +10,7 @@ interface LoadMoreButtonProps {
 }
 
 /** Cuántas se ven y «Cargar más», que pide las anteriores a la última de la lista. */
-export default function LoadMoreButton({ shown, hasMore, loading, onLoad, noun }: LoadMoreButtonProps) {
+export function LoadMoreButton({ shown, hasMore, loading, onLoad, noun }: LoadMoreButtonProps) {
   return (
     <div className="flex flex-wrap items-center gap-3">
       <p className="m-0 text-sm text-muted-foreground" aria-live="polite">

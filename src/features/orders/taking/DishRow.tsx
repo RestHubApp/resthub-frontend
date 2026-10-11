@@ -1,6 +1,6 @@
 import type { OrderMenuItem } from '@/api/types'
-import Icon from '@/components/Icon'
-import QuantityStepper from '@/features/orders/QuantityStepper'
+import { Icon } from '@/components/Icon'
+import { QuantityStepper } from '@/features/orders/QuantityStepper'
 import { MAX_QUANTITY } from './useOrderDraft'
 import { formatMoney } from '@/services/format'
 
@@ -34,7 +34,7 @@ function unavailableLabel(item: OrderMenuItem): string | null {
   return item.out_of_stock ? 'Sin insumos' : null
 }
 
-export default function DishRow({ item, quantity, onAdd, onChange }: DishRowProps) {
+export function DishRow({ item, quantity, onAdd, onChange }: DishRowProps) {
   const motivo = unavailableLabel(item)
   const agotado = motivo !== null
   const elegido = quantity > 0

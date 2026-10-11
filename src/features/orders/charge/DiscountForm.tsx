@@ -6,7 +6,7 @@ import { applyDiscount } from '@/api/orders'
 import { restaurantQuery } from '@/api/restaurant'
 import type { DiscountRequest, OrderResponse } from '@/api/types'
 import { decimalParaApi } from '@/components/formRules'
-import TextField from '@/components/TextField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { formatPercent } from '@/services/format'
@@ -35,7 +35,7 @@ function limitHint(sinTope: boolean, tope: string | undefined): string {
  * El tope del mesero lo decide el servidor; acá se muestra para que nadie
  * escriba un 20 % que va a volver rechazado.
  */
-export default function DiscountForm({ order, onDone }: DiscountFormProps) {
+export function DiscountForm({ order, onDone }: DiscountFormProps) {
   const sinTope = useCan('orders.discount_any')
   const restaurante = useQuery({ ...restaurantQuery, enabled: !sinTope })
   const { register, handleSubmit, formState } = useForm<DiscountValues>({

@@ -4,16 +4,16 @@ import { useForm } from 'react-hook-form'
 
 import { customersQueryKey, saveCustomer } from '@/api/customers'
 import type { Customer } from '@/api/types'
-import DialogFormActions from '@/components/DialogFormActions'
-import FormDialog from '@/components/FormDialog'
-import FormMessage from '@/components/FormMessage'
-import TextareaField from '@/components/TextareaField'
-import TextField from '@/components/TextField'
+import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { TextareaField } from '@/components/TextareaField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { useNotifications } from '@/store/notifications'
-import CustomerConsent from './CustomerConsent'
+import { CustomerConsent } from './CustomerConsent'
 import { customerDefaults, customerRequest, customerSchema, type CustomerValues, LIMITES } from './customerSchema'
 
 interface CustomerDialogProps {
@@ -24,7 +24,7 @@ interface CustomerDialogProps {
 }
 
 /** Alta o edición de un cliente de la libreta. */
-export default function CustomerDialog({ open, customer, onClose: alCerrar }: CustomerDialogProps) {
+export function CustomerDialog({ open, customer, onClose: alCerrar }: CustomerDialogProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   // El alta exige el consentimiento; un cliente guardado antes de pedirlo

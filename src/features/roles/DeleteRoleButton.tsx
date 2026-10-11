@@ -1,7 +1,7 @@
 import { deleteRole } from '@/api/roles'
 import type { Role } from '@/api/types'
-import ConfirmDialog from '@/components/ConfirmDialog'
-import Icon from '@/components/Icon'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { removeFromList } from '@/services/cacheList'
 import { useRoleMutation } from './useRoleMutation'
@@ -16,7 +16,7 @@ interface DeleteRoleButtonProps {
  * Solo se ofrece sin personas: si alguien lo recibió mientras tanto, el
  * servidor responde 409 y el aviso lo explica.
  */
-export default function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
+export function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
   const borrar = useRoleMutation({
     mutationFn: () => deleteRole(role.id),
     failure: `No se pudo eliminar el rol ${role.name}.`,

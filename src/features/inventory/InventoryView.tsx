@@ -1,21 +1,21 @@
 import { useCallback, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
-import Icon from '@/components/Icon'
-import PageHeader from '@/components/PageHeader'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
-import AlertsPanel from './AlertsPanel'
-import IngredientsPanel from './IngredientsPanel'
+import { AlertsPanel } from './AlertsPanel'
+import { IngredientsPanel } from './IngredientsPanel'
 import { type InventorySection, SECTIONS } from './inventorySections'
-import InventoryTabs from './InventoryTabs'
-import LowStockSummary from './LowStockSummary'
-import MovementsPanel from './MovementsPanel'
-import PurchaseOrdersPanel from './PurchaseOrdersPanel'
-import RecipesPanel from './RecipesPanel'
-import StockRulesCard from './StockRulesCard'
-import SuppliersPanel from './SuppliersPanel'
-import StockActionDialog, { type StockAction } from './StockActionDialog'
+import { InventoryTabs } from './InventoryTabs'
+import { LowStockSummary } from './LowStockSummary'
+import { MovementsPanel } from './MovementsPanel'
+import { PurchaseOrdersPanel } from './PurchaseOrdersPanel'
+import { RecipesPanel } from './RecipesPanel'
+import { StockRulesCard } from './StockRulesCard'
+import { SuppliersPanel } from './SuppliersPanel'
+import { StockActionDialog, type StockAction } from './StockActionDialog'
 import { useLowStock } from './useLowStock'
 
 function seccionDe(valor: string | null): InventorySection {
@@ -29,7 +29,7 @@ function seccionDe(valor: string | null): InventorySection {
  * editor de una receta deja a la persona donde estaba, y un enlace puede
  * llevar directo a las alertas.
  */
-export default function InventoryView() {
+export function InventoryView() {
   const canManage = useCan('inventory.manage')
   const [params, setParams] = useSearchParams()
   const seccion = seccionDe(params.get('vista'))

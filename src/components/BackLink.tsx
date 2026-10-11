@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import Icon from './Icon'
+import { Icon } from './Icon'
 
 interface BackLinkProps {
   readonly to: string
@@ -8,7 +8,7 @@ interface BackLinkProps {
 }
 
 /** Volver a la pantalla anterior, con un blanco comodo para el pulgar. */
-export default function BackLink({ to, label = 'Volver' }: BackLinkProps) {
+export function BackLink({ to, label = 'Volver' }: BackLinkProps) {
   return (
     <Link
       to={to}

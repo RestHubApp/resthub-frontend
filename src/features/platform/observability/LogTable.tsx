@@ -1,10 +1,10 @@
 import type { ObsLogEntry } from '@/api/types'
-import DataTable, { type DataColumn } from '@/components/DataTable'
+import { DataTable, type DataColumn } from '@/components/DataTable'
 import { formatTimestamp } from '@/services/format'
 import { PLATFORM_TIME_ZONE } from '@/features/platform/platformTime'
-import ExpandButton from './ExpandButton'
-import LevelBadge from './LevelBadge'
-import LogDetail from './LogDetail'
+import { ExpandButton } from './ExpandButton'
+import { LevelBadge } from './LevelBadge'
+import { LogDetail } from './LogDetail'
 import type { ObsFilters } from './obsFilters'
 
 interface LogTableProps {
@@ -40,7 +40,7 @@ const COLUMNAS: DataColumn<ObsLogEntry>[] = [
 ]
 
 /** Los logs, de los más nuevos a los más viejos; cada uno abre su detalle debajo. */
-export default function LogTable({ entries, isLoading, filters }: LogTableProps) {
+export function LogTable({ entries, isLoading, filters }: LogTableProps) {
   return (
     <DataTable
       columns={COLUMNAS}

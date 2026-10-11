@@ -16,7 +16,7 @@ function differenceTone(cents: number): string {
 }
 
 /** Un turno en el historial: cuándo, quién, y si cuadró. */
-export default function CashSessionRow({ session, onOpen }: CashSessionRowProps) {
+export function CashSessionRow({ session, onOpen }: CashSessionRowProps) {
   const timeZone = useTimeZone()
   const diferencia = session.difference === null ? null : toCents(session.difference)
 

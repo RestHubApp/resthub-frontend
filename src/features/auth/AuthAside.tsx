@@ -1,4 +1,4 @@
-import Icon from '@/components/Icon'
+import { Icon } from '@/components/Icon'
 import type { IconName } from '@/components/icons'
 
 interface AuthAsideItem {
@@ -20,7 +20,7 @@ interface AuthAsideProps {
  * Es el unico bloque de color intenso de la pantalla, asi el formulario queda
  * tranquilo al lado.
  */
-export default function AuthAside({ title, items, note }: AuthAsideProps) {
+export function AuthAside({ title, items, note }: AuthAsideProps) {
   return (
     <aside className="flex flex-col gap-8 rounded-xl bg-primary p-6 text-primary-foreground sm:p-8">
       <div className="flex flex-col gap-6">

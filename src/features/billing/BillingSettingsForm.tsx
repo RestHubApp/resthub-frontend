@@ -5,8 +5,8 @@ import { z } from 'zod'
 
 import { billingQueryKey, billingSettingsQueryKey, updateBillingSettings } from '@/api/billing'
 import type { BillingSettings } from '@/api/types'
-import FormMessage from '@/components/FormMessage'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
@@ -50,7 +50,7 @@ function valuesOf(settings: BillingSettings): Values {
  * estaba. Sin RUC, razón social, ruta y token los comprobantes quedan «sin
  * enviar» y se reenvían después.
  */
-export default function BillingSettingsForm({ settings }: BillingSettingsFormProps) {
+export function BillingSettingsForm({ settings }: BillingSettingsFormProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   const { register, handleSubmit, formState } = useForm<Values>({

@@ -26,7 +26,7 @@ const OFFSET = 12
  * tiene los mismos valores. El valor va primero y fuerte; la etiqueta,
  * después y apagada, porque quien mira ya sabe qué serie es.
  */
-export default function ChartTooltip({ x, y, containerWidth, title, rows }: ChartTooltipProps) {
+export function ChartTooltip({ x, y, containerWidth, title, rows }: ChartTooltipProps) {
   // Se abre hacia el lado con espacio para no salirse de la tarjeta.
   const haciaIzquierda = x + OFFSET + TOOLTIP_WIDTH > containerWidth
   const left = haciaIzquierda ? Math.max(0, x - OFFSET - TOOLTIP_WIDTH) : x + OFFSET

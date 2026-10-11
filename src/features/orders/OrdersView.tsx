@@ -1,13 +1,13 @@
 import { useSearchParams } from 'react-router'
 
-import PageHeader from '@/components/PageHeader'
+import { PageHeader } from '@/components/PageHeader'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import MyOrdersPanel from './floor/MyOrdersPanel'
-import TableGrid from './floor/TableGrid'
-import TakeawayDialog from './floor/TakeawayDialog'
-import TakeawayPanel from './floor/TakeawayPanel'
-import LiveIndicator from './LiveIndicator'
-import OfflineOrdersBanner from './offline/OfflineOrdersBanner'
+import { MyOrdersPanel } from './floor/MyOrdersPanel'
+import { TableGrid } from './floor/TableGrid'
+import { TakeawayDialog } from './floor/TakeawayDialog'
+import { TakeawayPanel } from './floor/TakeawayPanel'
+import { LiveIndicator } from './LiveIndicator'
+import { OfflineOrdersBanner } from './offline/OfflineOrdersBanner'
 import { useLiveUpdates } from './useLiveUpdates'
 
 const VISTAS = ['mesas', 'llevar', 'mios'] as const
@@ -25,7 +25,7 @@ const TRIGGER = 'min-h-10 text-sm data-active:font-semibold'
  * La pestana va en la URL para que volver atras desde un pedido deje al
  * mesero donde estaba. La pantalla se actualiza sola con los avisos del servidor.
  */
-export default function OrdersView() {
+export function OrdersView() {
   const live = useLiveUpdates()
   const [params, setParams] = useSearchParams()
   const vista = vistaDe(params.get('vista'))

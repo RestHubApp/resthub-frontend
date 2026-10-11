@@ -1,5 +1,5 @@
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 
@@ -10,7 +10,7 @@ interface PlatformQueryErrorProps {
 }
 
 /** Una lectura que falló, con lo que dijo el servidor y cómo volver a intentarlo. */
-export default function PlatformQueryError({ error, fallback, onRetry }: PlatformQueryErrorProps) {
+export function PlatformQueryError({ error, fallback, onRetry }: PlatformQueryErrorProps) {
   return (
     // `data-reintento`: esta falla ya ofrece reintentar (ver `ApiFailureNotice`).
     <div className="flex flex-col items-start gap-3" data-reintento="">

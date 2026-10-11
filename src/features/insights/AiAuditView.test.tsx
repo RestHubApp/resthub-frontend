@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { decision } from '#jest/fixtures/indicadores'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
 import type { AiDecision } from '@/api/types'
-import AiAuditView from './AiAuditView'
+import { AiAuditView } from './AiAuditView'
 
 const RUTA = '/insights/ai-decisions'
 

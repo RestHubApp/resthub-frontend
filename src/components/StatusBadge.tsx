@@ -17,7 +17,7 @@ interface StatusBadgeProps {
   readonly tone?: StatusTone
 }
 
-export default function StatusBadge({ label, tone }: StatusBadgeProps) {
+export function StatusBadge({ label, tone }: StatusBadgeProps) {
   if (tone === undefined) {
     return <Badge variant="outline">{label}</Badge>
   }

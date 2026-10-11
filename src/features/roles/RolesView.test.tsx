@@ -4,7 +4,7 @@ import { screen, within } from '@testing-library/react'
 import { CATALOGO, rol, ROL_ENCARGADO, ROL_MESERO } from '#jest/fixtures/plataforma'
 import { entrarComo, montar, PERMISOS_ENCARGADO, RespuestaDeError, servidor, type Peticion } from '#jest/harness'
 import type { PermissionCode, Role } from '@/api/types'
-import RolesView from './RolesView'
+import { RolesView } from './RolesView'
 
 const ORDERS_TAKE = 'orders.take'
 const TOMAR_PEDIDOS = 'Tomar pedidos'

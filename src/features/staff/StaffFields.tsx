@@ -1,9 +1,9 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import type { Role } from '@/api/types'
-import ReadOnlyField from '@/components/ReadOnlyField'
-import SelectField from '@/components/SelectField'
-import TextField from '@/components/TextField'
+import { ReadOnlyField } from '@/components/ReadOnlyField'
+import { SelectField } from '@/components/SelectField'
+import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { soloLetras } from '@/services/fieldRules'
 
@@ -39,7 +39,7 @@ interface StaffFieldsProps {
  * alta, que ademas pide la contraseña, y la edicion, que no, comparten los
  * campos sin compartir el tipo de su formulario.
  */
-export default function StaffFields({
+export function StaffFields({
   fields,
   errors,
   roles,

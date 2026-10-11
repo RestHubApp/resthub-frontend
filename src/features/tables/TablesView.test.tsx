@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { mesa, pedidoEnMesa } from '#jest/fixtures/inventario'
 import { entrarComo, montar, primero, RespuestaDeError, servidor } from '#jest/harness'
-import TablesView from './TablesView'
+import { TablesView } from './TablesView'
 
 const MESAS = '/tables'
 const NOMBRE = 'Nombre'

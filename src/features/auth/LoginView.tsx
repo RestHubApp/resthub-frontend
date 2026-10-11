@@ -5,19 +5,19 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 
 import { login, sessionOf } from '@/api/auth'
-import FormMessage from '@/components/FormMessage'
-import Icon from '@/components/Icon'
-import PasswordField from '@/components/PasswordField'
-import TextField from '@/components/TextField'
+import { FormMessage } from '@/components/FormMessage'
+import { Icon } from '@/components/Icon'
+import { PasswordField } from '@/components/PasswordField'
+import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { correoRule, MAX_PASSWORD } from '@/services/fieldRules'
 import { isPreviewTab } from '@/services/tabStorage'
 import { useSession } from '@/store/session'
-import AuthAside from './AuthAside'
-import AuthCard from './AuthCard'
-import SessionExpiredNotice from './SessionExpiredNotice'
+import { AuthAside } from './AuthAside'
+import { AuthCard } from './AuthCard'
+import { SessionExpiredNotice } from './SessionExpiredNotice'
 
 const esquema = z.object({
   email: correoRule,
@@ -71,7 +71,7 @@ function destinoDe(estado: unknown): string {
   return typeof desde === 'string' && desde.startsWith('/') && desde !== '/acceso' ? desde : '/'
 }
 
-export default function LoginView() {
+export function LoginView() {
   const signIn = useSession((state) => state.signIn)
   const navigate = useNavigate()
   const destino = destinoDe(useLocation().state)

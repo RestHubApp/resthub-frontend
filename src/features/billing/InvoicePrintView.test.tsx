@@ -4,7 +4,7 @@ import { screen } from '@testing-library/react'
 import { ajustesFiscales, comprobante } from '#jest/fixtures/panel'
 import { entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
 import type { Invoice } from '@/api/types'
-import InvoicePrintView from './InvoicePrintView'
+import { InvoicePrintView } from './InvoicePrintView'
 
 const RUTA = '/comprobantes/:invoiceId/imprimir'
 

@@ -3,7 +3,7 @@ import { fireEvent, screen, within } from '@testing-library/react'
 
 import { mesa, reserva } from '#jest/fixtures/panel'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
-import ReservationsView from './ReservationsView'
+import { ReservationsView } from './ReservationsView'
 
 const EDITAR_URL = '/reservations/21'
 const LISTA = '/reservations'

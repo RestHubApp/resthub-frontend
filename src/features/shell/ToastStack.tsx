@@ -1,9 +1,9 @@
 import { createPortal } from 'react-dom'
 
 import { useNotifications } from '@/store/notifications'
-import ToastItem from './ToastItem'
+import { ToastItem } from './ToastItem'
 
-export default function ToastStack() {
+export function ToastStack() {
   const toasts = useNotifications((state) => state.toasts)
 
   if (toasts.length === 0) {
