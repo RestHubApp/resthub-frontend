@@ -6,7 +6,7 @@
 // - Se bloquea cdn.jsdelivr.net. El widget de accesibilidad (Sienna) baja de
 //   ahí su idioma y su fuente de lectura; sin el CDN cae al inglés, que no se
 //   ve en ninguna captura. Así la prueba no depende de internet.
-// - Se ocultan con la hoja `captura.css` el botón flotante del widget (aparece
+// - Se ocultan con la hoja `capture.css` el botón flotante del widget (aparece
 //   cuando termina de bajar su archivo, a veces antes y a veces después de la
 //   captura) y los avisos emergentes (se van solos a los pocos segundos).
 // - Se normalizan las respuestas del API: los correos y los identificadores
@@ -26,7 +26,7 @@ import { expect as expectBase, test as base } from '../support/fixtures'
 import { LOG, SAMPLE_RESTAURANT, OBSERVABILITY, RESTAURANTS } from './data'
 
 
-const STYLE = join(import.meta.dirname, 'captura.css')
+const STYLE = join(import.meta.dirname, 'capture.css')
 // Tomar una captura en WebKit bajo WSL (sin GPU, con el envoltorio de
 // librerías) tarda varios segundos, más con otras pruebas corriendo: con los
 // 8 s de `expect` la primera ni siquiera termina. Es el tiempo de sacar la
