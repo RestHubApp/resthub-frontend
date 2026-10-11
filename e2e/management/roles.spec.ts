@@ -1,6 +1,7 @@
 // HU39, HU03: los roles del restaurante. El encargado es fijo, el mesero
 // cambia sus permisos pero no su nombre, un rol propio se crea, se edita y se
 // borra si nadie lo tiene, y nadie da permisos que no tiene.
+import type { Role } from '../../src/api/types'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, failureServer, newAccount } from '../support/management'
@@ -54,7 +55,7 @@ test('GES-17 el encargado crea un rol con permisos, edita el del mesero, ve que 
   await expect(viewAll).toBeChecked()
   await waiter.getByRole('button', { name: 'Guardar' }).click()
   await expect(notice(page, 'Rol Mesero guardado.')).toBeVisible()
-  const roles = async () => api(local).list('/roles')
+  const roles = async () => api(local).list<Role>('/roles')
   expect((await roles()).find((r) => r.kind === 'waiter')?.permissions).toContain('orders.read_all')
 
   // Un rol propio: Caja.
@@ -92,11 +93,11 @@ test('GES-17 el encargado crea un rol con permisos, edita el del mesero, ve que 
 
 test('GES-18 quien administra personal y roles sin todos los permisos no da lo que no tiene', async ({ page, local }) => {
   covers('funcion:roles.permisos-que-no-tiene', 'funcion:personal.roles-que-puede-dar', 'estado:roles.error')
-  const administration = await api(local).post('/roles', {
+  const administration = await api(local).post<Role>('/roles', {
     name: 'Administración',
     permissions: ['menu.read', 'staff.manage', 'roles.manage'],
   })
-  const admin = await newAccount(local, 'Admin Parcial', Number(administration.id))
+  const admin = await newAccount(local, 'Admin Parcial', administration.id)
   await openAs(page, admin, '/roles')
 
   // El encargado y el cocinero tienen permisos que esta cuenta no tiene: solo se miran.

@@ -2,6 +2,8 @@
 // confirmación que se abre desde ellos.
 import type { Locator, Page } from '@playwright/test'
 
+import type { PurchaseOrder, Supplier } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { api, id } from '../support/management'
 import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
@@ -66,17 +68,17 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
     'dialogo:inventory/ReceiveOrderDialog',
     'ruta:/inventario/recetas/:menuItemId',
   )
-  const supplier = await api(local).post('/inventory/suppliers', {
+  const supplier = await api(local).post<Supplier>('/inventory/suppliers', {
     name: 'Mercado Mayorista',
     contact: 'Don Julio',
     phone: '987654321',
     notes: 'Entrega martes y viernes',
     is_active: true,
   })
-  const order = await api(local).post('/inventory/purchase-orders', {
+  const order = await api(local).post<PurchaseOrder>('/inventory/purchase-orders', {
     supplier_id: id(supplier),
     notes: '',
-    lines: [{ ingredient_id: local.ingredients[2].id, quantity: '300', unit_cost: '0.012' }],
+    lines: [{ ingredient_id: defined(local.ingredients[2]).id, quantity: '300', unit_cost: '0.012' }],
   })
   await api(local).post(`/inventory/purchase-orders/${String(id(order))}/send`)
 

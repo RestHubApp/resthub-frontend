@@ -3,12 +3,13 @@
 // conexión y nunca se duplica.
 import type { Page } from '@playwright/test'
 
+import type { OrderResponse } from '../../src/api/types'
 import { Customer, type Local } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 
 async function tableOrders(local: Local, tableId: number) {
-  const active = await new Customer(local.http, local.owner.token).list('/orders/active')
+  const active = await new Customer(local.http, local.owner.token).list<OrderResponse>('/orders/active')
   return active.filter((order) => order.table_id === tableId)
 }
 

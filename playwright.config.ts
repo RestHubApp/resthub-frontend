@@ -9,7 +9,7 @@ const BACKEND_PORT = 8201
 const FRONT_PORT = 5201
 const FRONT = `http://localhost:${String(FRONT_PORT)}`
 const API = `http://localhost:${String(BACKEND_PORT)}`
-const enCI = process.env.CI !== undefined
+const enCI = process.env['CI'] !== undefined
 const WORKERS = enCI ? 2 : 4
 
 // El celular del mesero: 390 px de ancho, táctil.
@@ -18,15 +18,15 @@ const DESKTOP = { ...devices['Desktop Chrome'], viewport: { width: 1366, height:
 
 // En WSL sin root, WebKit se lanza con un envoltorio que agrega las librerías
 // del sistema que faltan (ver e2e/README.md). En el CI no hace falta.
-const webkitLauncher = process.env.E2E_WEBKIT_EXECUTABLE
+const webkitLauncher = process.env['E2E_WEBKIT_EXECUTABLE']
 const WEBKIT = webkitLauncher === undefined ? {} : { launchOptions: { executablePath: webkitLauncher } }
 
 const VISUAL = /visual\/.*\.spec\.ts/u
 
 // Cada corrida limpia su carpeta de resultados: dos corridas a la vez (por
 // ejemplo, la E2E y la visual) necesitan carpetas distintas.
-const OUTPUT = process.env.E2E_OUTPUT ?? './e2e/.results'
-const REPORT = process.env.E2E_REPORT ?? './e2e/.report'
+const OUTPUT = process.env['E2E_OUTPUT'] ?? './e2e/.results'
+const REPORT = process.env['E2E_REPORT'] ?? './e2e/.report'
 
 export default defineConfig({
   testDir: './e2e',
@@ -35,7 +35,7 @@ export default defineConfig({
   forbidOnly: enCI,
   // Una prueba intermitente se arregla, no se reintenta.
   retries: 0,
-  workers: process.env.E2E_WORKERS === undefined ? WORKERS : Number(process.env.E2E_WORKERS),
+  workers: process.env['E2E_WORKERS'] === undefined ? WORKERS : Number(process.env['E2E_WORKERS']),
   timeout: 45_000,
   expect: {
     timeout: 8_000,
@@ -50,7 +50,7 @@ export default defineConfig({
   ],
   use: {
     // E2E_BASE_URL sirve otra compilación sin tocar la de 5201 (la demostración del diff visual).
-    baseURL: process.env.E2E_BASE_URL ?? FRONT,
+    baseURL: process.env['E2E_BASE_URL'] ?? FRONT,
     locale: 'es-PE',
     timezoneId: 'America/Lima',
     // El service worker de la PWA guarda el armazón; en una prueba solo agrega

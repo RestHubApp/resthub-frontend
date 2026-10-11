@@ -5,6 +5,7 @@ import { join, relative } from 'node:path'
 
 import { expect, test } from '@playwright/test'
 
+import { defined } from './support/defined'
 import { FILE_INVENTORY, type Element, inventory } from './inventory/inventory'
 
 const E2E = import.meta.dirname
@@ -28,8 +29,8 @@ function marked(files: readonly string[]): Map<string, string[]> {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     const source = readFileSync(file, 'utf8')
     for (const call of source.matchAll(/covers\(([^)]*)\)/gu)) {
-      for (const literal of call[1].matchAll(/'([^']+)'/gu)) {
-        const id = literal[1]
+      for (const literal of defined(call[1]).matchAll(/'([^']+)'/gu)) {
+        const id = defined(literal[1])
         map.set(id, [...(map.get(id) ?? []), relative(E2E, file)])
       }
     }

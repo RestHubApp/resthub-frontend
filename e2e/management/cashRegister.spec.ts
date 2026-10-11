@@ -1,5 +1,6 @@
 // HU27: el encargado abre la caja con el efectivo inicial, ve el arqueo en
 // curso, la cierra contando el cajón y revisa los turnos anteriores.
+import type { CurrentCash, OwnRestaurant } from '../../src/api/types'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, failureServer, soles, sell } from '../support/management'
@@ -40,8 +41,8 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
   // Dos cobros del salón: uno en efectivo con propina y otro con Yape.
   await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado') }], tip: '3.00' })
   await sell(local, { table: local.table('2'), items: [{ dish: local.dish('Ají de gallina') }], method: 'yape' })
-  const actual = (await api(local).get('/cash/current')).session as { summary: { expected_cash: string } }
-  expect(actual.summary.expected_cash).toBe('185.00')
+  const actual = (await api(local).get<CurrentCash>('/cash/current')).session
+  expect(actual?.summary?.expected_cash).toBe('185.00')
 
   // El arqueo se actualiza solo con los cobros (canal de pedidos).
   const tile = (name: string) => inProgress.getByRole('term').filter({ hasText: name }).locator('xpath=..')
@@ -138,7 +139,7 @@ test('GES-02 el encargado valida el monto inicial, cambia el tope de descuento d
   await cap.fill('15')
   await save.click()
   await expect(notice(page, /El mesero descuenta hasta 15\.0 %/u)).toBeVisible()
-  await expect.poll(async () => (await api(local).get('/restaurant')).max_waiter_discount_percent).toBe('15.00')
+  await expect.poll(async () => (await api(local).get<OwnRestaurant>('/restaurant')).max_waiter_discount_percent).toBe('15.00')
   await evidence(page, 'ges-02-2-tope')
   await collapsible.click()
   await expect(cap).toBeHidden()

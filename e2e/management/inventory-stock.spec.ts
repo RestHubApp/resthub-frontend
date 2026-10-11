@@ -1,6 +1,8 @@
 // HU15, HU16, HU19, HU34: los insumos y su stock. Compra, merma y ajuste
 // desde la tabla, el libro de movimientos (kardex) con sus filtros y la
 // alerta de stock bajo que desaparece sola al reponer.
+import type { Ingredient, MenuResponse } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api } from '../support/management'
@@ -122,7 +124,7 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
   await expect(book.getByRole('row', { name: /Bolsa sin registrar/u })).toContainText('+150 g')
   await evidence(page, 'ges-04-7-kardex')
 
-  const stock = new Map((await api(local).list('/inventory/ingredients')).map((i) => [i.name, i.stock]))
+  const stock = new Map((await api(local).list<Ingredient>('/inventory/ingredients')).map((i) => [i.name, i.stock]))
   expect(Object.fromEntries(stock)).toMatchObject({ 'Lomo de res': '4950.000', 'Cebolla roja': '2750.000', Culantro: '600.000' })
 })
 
@@ -182,9 +184,9 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
   await expect(ingredients.getByText('4 insumos', { exact: true })).toBeVisible()
 
   // Sin lomo en stock, el Lomo saltado se agota solo; con la regla apagada, no.
-  await api(local).post('/inventory/waste', { ingredient_id: local.ingredients[0].id, quantity: '5000', reason: 'Se venció' })
+  await api(local).post('/inventory/waste', { ingredient_id: defined(local.ingredients[0]).id, quantity: '5000', reason: 'Se venció' })
   const lomoOutOfStock = async () => {
-    const menu = (await api(local, local.waiter).get('/menu')).categories as { items: { name: string; out_of_stock: boolean }[] }[]
+    const menu = (await api(local, local.waiter).get<MenuResponse>('/menu')).categories
     return menu.flatMap((c) => c.items).find((p) => p.name === 'Lomo saltado')?.out_of_stock
   }
   expect(await lomoOutOfStock()).toBe(true)

@@ -4,9 +4,8 @@
 import type { Page } from '@playwright/test'
 
 import { unique, type Local, type Table, type Dish, type Session } from '../support/api'
+import type { OrderResponse } from '../../src/api/types'
 import { api, id } from '../support/management'
-
-type Json = Record<string, unknown>
 
 export interface Line {
   readonly dish: Dish
@@ -19,8 +18,8 @@ function items(lines: readonly Line[]) {
 }
 
 /** Un pedido en mesa abierto, todavía sin enviar a cocina. */
-export async function open(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
-  return api(local, local.waiter).post('/orders', {
+export async function open(local: Local, table: Table, lines: readonly Line[]): Promise<OrderResponse> {
+  return api(local, local.waiter).post<OrderResponse>('/orders', {
     type: 'dine_in',
     table_id: table.id,
     client_request_id: `e2e-${unique()}`,
@@ -29,34 +28,34 @@ export async function open(local: Local, table: Table, lines: readonly Line[]): 
 }
 
 /** Un pedido en mesa enviado a cocina. */
-export async function inKitchen(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
+export async function inKitchen(local: Local, table: Table, lines: readonly Line[]): Promise<OrderResponse> {
   const order = await open(local, table, lines)
-  return api(local, local.waiter).post(`/orders/${String(id(order))}/send`)
+  return api(local, local.waiter).post<OrderResponse>(`/orders/${String(id(order))}/send`)
 }
 
 /** Un pedido en mesa servido, por cobrar. */
-export async function served(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
+export async function served(local: Local, table: Table, lines: readonly Line[]): Promise<OrderResponse> {
   const order = await inKitchen(local, table, lines)
   await api(local, local.kitchen).post(`/orders/${String(id(order))}/ready`)
-  return api(local, local.waiter).post(`/orders/${String(id(order))}/served`)
+  return api(local, local.waiter).post<OrderResponse>(`/orders/${String(id(order))}/served`)
 }
 
 /** Un pedido para llevar enviado a cocina. */
-export async function takeaway(local: Local, customer: string, lines: readonly Line[]): Promise<Json> {
+export async function takeaway(local: Local, customer: string, lines: readonly Line[]): Promise<OrderResponse> {
   const waiter = api(local, local.waiter)
-  const order = await waiter.post('/orders', {
+  const order = await waiter.post<OrderResponse>('/orders', {
     type: 'takeaway',
     customer_name: customer,
     client_request_id: `e2e-${unique()}`,
     items: items(lines),
   })
-  return waiter.post(`/orders/${String(id(order))}/send`)
+  return waiter.post<OrderResponse>(`/orders/${String(id(order))}/send`)
 }
 
 /** Un delivery enviado a cocina. */
-export async function delivery(local: Local, customer: string, lines: readonly Line[]): Promise<Json> {
+export async function delivery(local: Local, customer: string, lines: readonly Line[]): Promise<OrderResponse> {
   const waiter = api(local, local.waiter)
-  const order = await waiter.post('/orders', {
+  const order = await waiter.post<OrderResponse>('/orders', {
     type: 'delivery',
     customer_name: customer,
     customer_phone: '987654321',
@@ -65,7 +64,7 @@ export async function delivery(local: Local, customer: string, lines: readonly L
     client_request_id: `e2e-${unique()}`,
     items: items(lines),
   })
-  return waiter.post(`/orders/${String(id(order))}/send`)
+  return waiter.post<OrderResponse>(`/orders/${String(id(order))}/send`)
 }
 
 /** Un plato con un grupo obligatorio (término) y extras opcionales con precio. */
@@ -137,6 +136,6 @@ export async function orderInQueue(page: Page, { owner, table, dish, storage = '
 
 /** La persona y el local de una sesión, como los guarda la cola. */
 export function ownerOf(session: Session): { userId: number; restaurantId: number } {
-  const account = session.account as { user: { id: number }; restaurant: { id: number } }
-  return { userId: account.user.id, restaurantId: account.restaurant.id }
+  const { user, restaurant } = session.account
+  return { userId: user.id, restaurantId: restaurant.id }
 }

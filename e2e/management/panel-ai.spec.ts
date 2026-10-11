@@ -1,6 +1,8 @@
 // HU21, HU24, HU23: la reposición sugerida y la auditoría de la IA. Sin clave
 // de IA decide el motor por reglas, y cada decisión queda guardada con su
 // entrada, su salida, su confianza y el motor que la tomó.
+import type { AiDecisionPage } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 import { api, failureServer } from '../support/management'
@@ -57,7 +59,7 @@ test('GES-29 el encargado revisa la reposición sugerida, filtra por acción, ve
   await expect(page.getByText('Es una vista previa calculada con las reglas fijas.')).toBeHidden()
   await expect(culantro).toContainText('Respaldo: sin configurar')
   await evidence(page, 'ges-29-2-actualizada')
-  const decisions = await api(local).get('/insights/ai-decisions?kind=restock')
+  const decisions = await api(local).get<AiDecisionPage>('/insights/ai-decisions?kind=restock')
   expect(decisions.total).toBe(3)
 
   await failureServer(page, '/insights/restock')
@@ -82,7 +84,7 @@ test('GES-30 el encargado audita las decisiones de la IA: filtra por tipo y moto
     await owner.post('/inventory/ingredients', { name: `Insumo ${String(n).padStart(2, '0')}`, unit: 'unit', min_stock: '0', unit_cost: '1' })
   }
   await owner.post('/insights/restock/refresh')
-  await owner.post('/inventory/waste', { ingredient_id: local.ingredients[1].id, quantity: '100', reason: 'Se venció' })
+  await owner.post('/inventory/waste', { ingredient_id: defined(local.ingredients[1]).id, quantity: '100', reason: 'Se venció' })
   await owner.post('/insights/waste/classify')
 
   await openAs(page, local.owner, '/panel/ia')

@@ -1,17 +1,14 @@
 // HU06, HU07, HU33: la carta del encargado. Categorías y platos con su
 // precio y su orden, las opciones y extras de un plato, lo agotado hoy y lo
 // que sale de la carta.
+import type { MenuResponse, MenuSection } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, soles } from '../support/management'
 
-interface Section {
-  readonly name: string
-  readonly items: { readonly name: string; readonly is_available: boolean; readonly is_active: boolean }[]
-}
-
-async function menu(local: Parameters<typeof api>[0]): Promise<Section[]> {
-  return (await api(local).get('/menu?include_inactive=true')).categories as Section[]
+async function menu(local: Parameters<typeof api>[0]): Promise<MenuSection[]> {
+  return (await api(local).get<MenuResponse>('/menu?include_inactive=true')).categories
 }
 
 // Cada prueba es un recorrido largo de la pantalla con datos preparados por el
@@ -63,9 +60,9 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
   await expect(drinks.getByRole('heading', { name: 'Limonada frozen' })).toBeVisible()
   await expect(drinks.getByText('Con hierbabuena.')).toBeVisible()
   await expect(summary).toContainText('Hoy: 6 de 6 platos disponibles')
-  const created = (await menu(local)).flatMap((c) => c.items).find((p) => p.name === 'Limonada frozen') as unknown as Record<string, unknown>
+  const created = (await menu(local)).flatMap((c) => c.items).find((p) => p.name === 'Limonada frozen')
   expect(created).toMatchObject({ price: '9.50', is_available: true })
-  expect(created.modifier_groups).toMatchObject([{ name: 'Tamaño', min_choices: 1, options: [{ name: 'Vaso' }, { name: 'Jarra', price: '15.50' }] }])
+  expect(defined(created).modifier_groups).toMatchObject([{ name: 'Tamaño', min_choices: 1, options: [{ name: 'Vaso' }, { name: 'Jarra', price: '15.50' }] }])
 
   // Editar: el precio y las opciones que ya tenía.
   await page.getByRole('button', { name: 'Editar Limonada frozen' }).click()

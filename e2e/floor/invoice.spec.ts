@@ -4,6 +4,7 @@
 // guardado como «Sin enviar (sin proveedor)», que es hasta donde llega aquí.
 import type { Locator, Page } from '@playwright/test'
 
+import type { Invoice } from '../../src/api/types'
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 import { api, orderPaid } from '../support/floor'
@@ -15,8 +16,8 @@ async function openInvoice(page: Page, number: number): Promise<Locator> {
   return dialog
 }
 
-function invoiceOf(local: Parameters<typeof api>[0], orderId: unknown) {
-  return api(local).get(`/billing/orders/${String(orderId)}/invoice`)
+function invoiceOf(local: Parameters<typeof api>[0], orderId: number) {
+  return api(local).get<Invoice>(`/billing/orders/${String(orderId)}/invoice`)
 }
 
 test('SAL-25 el mesero emite una boleta a «clientes varios» y queda sin enviar por falta de proveedor @mobile', async ({
