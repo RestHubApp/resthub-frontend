@@ -4,32 +4,32 @@
 //   node captura-contraste.mjs antes|despues
 import { join } from 'node:path'
 
-import { abrirEstado, asegurarDir, contextoDe, lanzar, REPORTES } from './comun.mjs'
-import { ESTADOS } from './inventario.mjs'
+import { openStatus, ensureDir, contextOf, launch, REPORTS } from './comun.mjs'
+import { STATUSES } from './inventario.mjs'
 
-const etapa = process.argv[2] ?? 'despues'
-const dir = await asegurarDir(join(REPORTES, 'contraste'))
-const navegador = await lanzar()
-const casos = [
+const stage = process.argv[2] ?? 'despues'
+const dir = await ensureDir(join(REPORTS, 'contraste'))
+const browser = await launch()
+const cases = [
   { id: 'inventario', selector: '[role="tablist"]', nombre: 'pestanas' },
   { id: 'pedido-cobrado', selector: 'main .bg-success\\/10, main [class*="text-success"]', nombre: 'exito' },
   { id: 'pedidos-encargado', selector: 'main [class*="text-warning"]', nombre: 'aviso' },
 ]
-for (const caso of casos) {
-  const contexto = await navegador.newContext({ ...contextoDe('escritorio'), deviceScaleFactor: 2 })
-  const pagina = await abrirEstado(navegador, contexto, ESTADOS.find((e) => e.id === caso.id))
-  const elemento = pagina.locator(caso.selector).first()
-  const colores = await elemento.evaluate((e) => {
+for (const caseValue of cases) {
+  const context = await browser.newContext({ ...contextOf('escritorio'), deviceScaleFactor: 2 })
+  const page = await openStatus(browser, context, STATUSES.find((e) => e.id === caseValue.id))
+  const element = page.locator(caseValue.selector).first()
+  const colors = await element.evaluate((e) => {
     const s = getComputedStyle(e)
     return { color: s.color, fondo: s.backgroundColor }
   })
-  const caja = await elemento.boundingBox()
-  const margen = 24
-  await pagina.screenshot({
-    path: join(dir, `${caso.nombre}-${etapa}.png`),
-    clip: { x: Math.max(0, caja.x - margen), y: Math.max(0, caja.y - margen), width: Math.min(900, caja.width + 2 * margen), height: caja.height + 2 * margen },
+  const cashRegister = await element.boundingBox()
+  const margin = 24
+  await page.screenshot({
+    path: join(dir, `${caseValue.nombre}-${stage}.png`),
+    clip: { x: Math.max(0, cashRegister.x - margin), y: Math.max(0, cashRegister.y - margin), width: Math.min(900, cashRegister.width + 2 * margin), height: cashRegister.height + 2 * margin },
   })
-  console.log(caso.nombre, etapa, colores)
-  await contexto.close()
+  console.log(caseValue.nombre, stage, colors)
+  await context.close()
 }
-await navegador.close()
+await browser.close()

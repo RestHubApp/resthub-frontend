@@ -20,12 +20,12 @@
 // `vistas` limita el estado a escritorio o móvil (por defecto, los dos).
 // `patron` es la ruta del router que cubre el estado; con él se arma la matriz.
 
-const DIALOGO = '[role="dialog"], [role="alertdialog"]'
-const PESTANA = '[role="tabpanel"][data-state="active"]'
-const IMPRESO = '#hoja-impresa, article'
+const DIALOG = '[role="dialog"], [role="alertdialog"]'
+const TAB = '[role="tabpanel"][data-state="active"]'
+const PRINTED = '#hoja-impresa, article'
 
 /** Las 36 rutas del router, más las variantes por rol. */
-export const RUTAS = [
+export const ROUTES = [
   // Sin sesión.
   { id: 'acceso', nombre: 'Acceso', ruta: '/acceso', patron: '/acceso', cuenta: null },
   { id: 'raiz', nombre: 'Raíz (redirige al acceso sin sesión)', ruta: '/', patron: '/', cuenta: null, redireccion: true },
@@ -41,8 +41,8 @@ export const RUTAS = [
   { id: 'pedido-agregar', nombre: 'Agregar platos a un pedido', ruta: '/pedidos/:pedidoEnCocina/agregar', patron: '/pedidos/:orderId/agregar', cuenta: 'mesero' },
   { id: 'cocina', nombre: 'Cocina', ruta: '/cocina', patron: '/cocina', cuenta: 'mesero' },
   { id: 'perfil', nombre: 'Mi perfil', ruta: '/perfil', patron: '/perfil', cuenta: 'mesero' },
-  { id: 'imprimir-comanda', nombre: 'Imprimir comanda', ruta: '/imprimir/:pedidoEnCocina/comanda', patron: '/imprimir/:orderId/:kind', cuenta: 'mesero', espera: IMPRESO },
-  { id: 'imprimir-cuenta', nombre: 'Imprimir precuenta', ruta: '/imprimir/:pedidoPorCobrar/cuenta', patron: '/imprimir/:orderId/:kind', cuenta: 'mesero', espera: IMPRESO },
+  { id: 'imprimir-comanda', nombre: 'Imprimir comanda', ruta: '/imprimir/:pedidoEnCocina/comanda', patron: '/imprimir/:orderId/:kind', cuenta: 'mesero', espera: PRINTED },
+  { id: 'imprimir-cuenta', nombre: 'Imprimir precuenta', ruta: '/imprimir/:pedidoPorCobrar/cuenta', patron: '/imprimir/:orderId/:kind', cuenta: 'mesero', espera: PRINTED },
 
   // Cocina (su inicio es el tablero).
   { id: 'tablero-cocina', nombre: 'Tablero (cuenta de cocina)', ruta: '/tablero', patron: '/tablero', cuenta: 'cocina' },
@@ -54,7 +54,7 @@ export const RUTAS = [
   { id: 'tablero', nombre: 'Tablero', ruta: '/tablero', patron: '/tablero', cuenta: 'encargado' },
   { id: 'historial', nombre: 'Historial de pedidos', ruta: '/tablero/historial', patron: '/tablero/historial', cuenta: 'encargado' },
   { id: 'comprobantes', nombre: 'Comprobantes', ruta: '/comprobantes', patron: '/comprobantes', cuenta: 'encargado' },
-  { id: 'comprobante-imprimir', nombre: 'Imprimir comprobante', ruta: '/comprobantes/:comprobante/imprimir', patron: '/comprobantes/:invoiceId/imprimir', cuenta: 'encargado', espera: IMPRESO },
+  { id: 'comprobante-imprimir', nombre: 'Imprimir comprobante', ruta: '/comprobantes/:comprobante/imprimir', patron: '/comprobantes/:invoiceId/imprimir', cuenta: 'encargado', espera: PRINTED },
   { id: 'reservas', nombre: 'Reservas', ruta: '/reservas', patron: '/reservas', cuenta: 'encargado' },
   { id: 'clientes', nombre: 'Clientes', ruta: '/clientes', patron: '/clientes', cuenta: 'encargado' },
   { id: 'caja', nombre: 'Caja', ruta: '/caja', patron: '/caja', cuenta: 'encargado' },
@@ -97,8 +97,8 @@ export const OVERLAYS = [
 
   // Pedidos del mesero.
   { id: 'o-llevar', nombre: 'Diálogo «Pedido para llevar o delivery»', tipo: 'Dialog', ruta: '/pedidos', cuenta: 'mesero', pasos: [{ boton: 'Para llevar / Delivery' }] },
-  { id: 't-llevar', nombre: 'Pestaña «Llevar y delivery»', tipo: 'Tabs', ruta: '/pedidos', cuenta: 'mesero', pasos: [{ pestana: 'Llevar y delivery' }], espera: PESTANA },
-  { id: 't-mis-pedidos', nombre: 'Pestaña «Mis pedidos»', tipo: 'Tabs', ruta: '/pedidos', cuenta: 'mesero', pasos: [{ pestana: 'Mis pedidos' }], espera: PESTANA },
+  { id: 't-llevar', nombre: 'Pestaña «Llevar y delivery»', tipo: 'Tabs', ruta: '/pedidos', cuenta: 'mesero', pasos: [{ pestana: 'Llevar y delivery' }], espera: TAB },
+  { id: 't-mis-pedidos', nombre: 'Pestaña «Mis pedidos»', tipo: 'Tabs', ruta: '/pedidos', cuenta: 'mesero', pasos: [{ pestana: 'Mis pedidos' }], espera: TAB },
   { id: 'o-opciones', nombre: 'Diálogo de opciones del plato', tipo: 'Dialog', ruta: '/pedidos/nuevo?mesa=:mesaLibre', cuenta: 'mesero', pasos: [{ boton: /^Lomo saltado/ }] },
   { id: 'o-resumen', nombre: 'Sheet «Resumen» del pedido', tipo: 'Sheet', ruta: '/pedidos/nuevo?mesa=:mesaLibre', cuenta: 'mesero', pasos: [{ boton: /^Menú del día.*S\// }, { clic: 'button:has(span[aria-live])' }] },
   { id: 'o-nota', nombre: 'Diálogo de nota del plato', tipo: 'Dialog', ruta: '/pedidos/:pedidoAbierto', cuenta: 'mesero', pasos: [{ boton: /Agregar nota|Cambiar nota/ }] },
@@ -135,11 +135,11 @@ export const OVERLAYS = [
   { id: 'o-renombrar-mesa', nombre: 'Diálogo «Renombrar mesa»', tipo: 'Dialog', ruta: '/mesas', cuenta: 'encargado', pasos: [{ boton: 'Renombrar' }] },
 
   // Inventario.
-  { id: 't-movimientos', nombre: 'Inventario: pestaña Movimientos', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: 'Movimientos' }], espera: PESTANA },
-  { id: 't-alertas', nombre: 'Inventario: pestaña Alertas', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: /^Alertas/ }], espera: PESTANA },
-  { id: 't-recetas', nombre: 'Inventario: pestaña Recetas', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: 'Recetas' }], espera: PESTANA },
-  { id: 't-compras', nombre: 'Inventario: pestaña Compras', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: 'Compras' }], espera: PESTANA },
-  { id: 't-proveedores', nombre: 'Inventario: pestaña Proveedores', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: 'Proveedores' }], espera: PESTANA },
+  { id: 't-movimientos', nombre: 'Inventario: pestaña Movimientos', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: 'Movimientos' }], espera: TAB },
+  { id: 't-alertas', nombre: 'Inventario: pestaña Alertas', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: /^Alertas/ }], espera: TAB },
+  { id: 't-recetas', nombre: 'Inventario: pestaña Recetas', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: 'Recetas' }], espera: TAB },
+  { id: 't-compras', nombre: 'Inventario: pestaña Compras', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: 'Compras' }], espera: TAB },
+  { id: 't-proveedores', nombre: 'Inventario: pestaña Proveedores', tipo: 'Tabs', ruta: '/inventario', cuenta: 'encargado', pasos: [{ pestana: 'Proveedores' }], espera: TAB },
   { id: 'o-nuevo-insumo', nombre: 'Diálogo «Nuevo insumo»', tipo: 'Dialog', ruta: '/inventario', cuenta: 'encargado', pasos: [{ boton: 'Nuevo insumo' }] },
   { id: 'o-compra', nombre: 'Diálogo «Compra» de un insumo', tipo: 'Dialog', ruta: '/inventario', cuenta: 'encargado', pasos: [{ boton: 'Compra de Aceite vegetal' }] },
   { id: 'o-merma', nombre: 'Diálogo «Merma» de un insumo', tipo: 'Dialog', ruta: '/inventario', cuenta: 'encargado', pasos: [{ boton: 'Merma de Aceite vegetal' }] },
@@ -165,8 +165,8 @@ export const OVERLAYS = [
   { id: 'o-editar-reserva', nombre: 'Diálogo «Editar reserva»', tipo: 'Dialog', ruta: '/reservas', cuenta: 'encargado', pasos: [{ boton: /^Editar/ }] },
   { id: 'o-nuevo-cliente', nombre: 'Diálogo «Nuevo cliente»', tipo: 'Dialog', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: 'Nuevo cliente' }] },
   { id: 'o-ficha-cliente', nombre: 'Sheet con la ficha del cliente', tipo: 'Sheet', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: /Lucía Quispe/ }] },
-  { id: 'o-editar-cliente', nombre: 'Diálogo «Editar cliente» desde la ficha', tipo: 'Dialog', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: /Lucía Quispe/ }, { esperar: DIALOGO }, { boton: 'Editar datos' }], espera: '[role="dialog"] form' },
-  { id: 'o-borrar-cliente', nombre: 'Confirmación «Borrar sus datos» del cliente', tipo: 'AlertDialog', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: /Lucía Quispe/ }, { esperar: DIALOGO }, { boton: 'Borrar sus datos' }], espera: '[role="alertdialog"]' },
+  { id: 'o-editar-cliente', nombre: 'Diálogo «Editar cliente» desde la ficha', tipo: 'Dialog', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: /Lucía Quispe/ }, { esperar: DIALOG }, { boton: 'Editar datos' }], espera: '[role="dialog"] form' },
+  { id: 'o-borrar-cliente', nombre: 'Confirmación «Borrar sus datos» del cliente', tipo: 'AlertDialog', ruta: '/clientes', cuenta: 'encargado', pasos: [{ boton: /Lucía Quispe/ }, { esperar: DIALOG }, { boton: 'Borrar sus datos' }], espera: '[role="alertdialog"]' },
 
   // Panel BI.
   { id: 'e-panel-personalizado', nombre: 'Panel: rango personalizado', tipo: 'Estado', ruta: '/panel', cuenta: 'encargado', pasos: [{ boton: 'Personalizado' }], espera: 'main input[type="date"]' },
@@ -182,13 +182,13 @@ export const OVERLAYS = [
 ]
 
 /** Todos los estados, como una sola lista con su clase. */
-export const ESTADOS = [
-  ...RUTAS.map((r) => ({ ...r, clase: 'ruta', tipo: r.redireccion ? 'Redirección' : 'Ruta' })),
-  ...OVERLAYS.map((o) => ({ ...o, clase: 'overlay', espera: o.espera ?? DIALOGO })),
+export const STATUSES = [
+  ...ROUTES.map((r) => ({ ...r, clase: 'ruta', tipo: r.redireccion ? 'Redirección' : 'Ruta' })),
+  ...OVERLAYS.map((o) => ({ ...o, clase: 'overlay', espera: o.espera ?? DIALOG })),
 ]
 
 /** Las rutas que declara `src/router/index.tsx`, para comprobar que ninguna quedó fuera. */
-export const RUTAS_DEL_ROUTER = [
+export const ROUTER_ROUTES = [
   '/', '/acceso', '/pedidos', '/pedidos/nuevo', '/pedidos/:orderId', '/pedidos/:orderId/agregar',
   '/perfil', '/tablero', '/tablero/historial', '/cocina', '/imprimir/:orderId/:kind', '/comprobantes',
   '/comprobantes/:invoiceId/imprimir', '/reservas', '/clientes', '/caja', '/menu', '/mesas', '/inventario',

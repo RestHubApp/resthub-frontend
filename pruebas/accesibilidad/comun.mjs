@@ -10,16 +10,16 @@ import { fileURLToPath } from 'node:url'
 
 import { chromium } from 'playwright'
 
-import { ESTADOS } from './inventario.mjs'
+import { STATUSES } from './inventario.mjs'
 
-export const RAIZ = dirname(fileURLToPath(import.meta.url))
-export const REPORTES = process.env.A11Y_REPORTES ?? join(RAIZ, 'reportes')
+export const ROOT = dirname(fileURLToPath(import.meta.url))
+export const REPORTS = process.env.A11Y_REPORTES ?? join(ROOT, 'reportes')
 export const BASE_URL = process.env.A11Y_BASE_URL ?? 'http://localhost:5202'
 export const API_URL = process.env.A11Y_API_URL ?? 'http://localhost:8202'
-export const CLAVE = 'resthub123'
+export const PASSWORD = 'resthub123'
 
 /** Cuentas de la semilla (`scripts/seed_dev.py`) y las dos de vista previa. */
-export const CUENTAS = {
+export const ACCOUNTS = {
   encargado: { correo: 'admin@resthub.dev', acceso: '/acceso' },
   mesero: { correo: 'mesero@resthub.dev', acceso: '/acceso' },
   cocina: { correo: 'cocina@resthub.dev', acceso: '/acceso' },
@@ -32,78 +32,78 @@ export const CUENTAS = {
 }
 
 /** Tamaños de pantalla. El móvil es el celular del mesero (390 × 844). */
-export const VISTAS = {
+export const VIEWS = {
   escritorio: { width: 1366, height: 900, isMobile: false, hasTouch: false, deviceScaleFactor: 1 },
   movil: { width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
 }
 
-export function contextoDe(vista) {
-  const { width, height, ...resto } = VISTAS[vista]
-  return { viewport: { width, height }, ...resto, locale: 'es-PE', timezoneId: 'America/Lima' }
+export function contextOf(vista) {
+  const { width, height, ...rest } = VIEWS[vista]
+  return { viewport: { width, height }, ...rest, locale: 'es-PE', timezoneId: 'America/Lima' }
 }
 
-export function lanzar(opciones = {}) {
-  return chromium.launch({ headless: true, ...opciones })
+export function launch(options = {}) {
+  return chromium.launch({ headless: true, ...options })
 }
 
-export async function asegurarDir(ruta) {
-  await mkdir(ruta, { recursive: true })
-  return ruta
+export async function ensureDir(route) {
+  await mkdir(route, { recursive: true })
+  return route
 }
 
-export async function escribirJson(ruta, datos) {
-  await asegurarDir(dirname(ruta))
-  await writeFile(ruta, `${JSON.stringify(datos, null, 2)}\n`)
+export async function writeJson(route, data) {
+  await ensureDir(dirname(route))
+  await writeFile(route, `${JSON.stringify(data, null, 2)}\n`)
 }
 
-export async function leerJson(ruta) {
-  return JSON.parse(await readFile(ruta, 'utf8'))
+export async function readJson(route) {
+  return JSON.parse(await readFile(route, 'utf8'))
 }
 
 /** Los estados a medir, filtrables con A11Y_SOLO=id1,id2 y A11Y_CLASE=ruta|overlay. */
-export function filtrarEstados(lista = ESTADOS) {
-  const solo = process.env.A11Y_SOLO?.split(',').filter(Boolean)
-  const clase = process.env.A11Y_CLASE
-  return lista.filter((e) => (!solo || solo.includes(e.id)) && (!clase || e.clase === clase))
+export function filterStatuses(list = STATUSES) {
+  const only = process.env.A11Y_SOLO?.split(',').filter(Boolean)
+  const kind = process.env.A11Y_CLASE
+  return list.filter((e) => (!only || only.includes(e.id)) && (!kind || e.clase === kind))
 }
 
-export function filtrarVistas(estado) {
-  const solo = process.env.A11Y_VISTAS?.split(',').filter(Boolean)
-  return Object.keys(VISTAS).filter((v) => (!solo || solo.includes(v)) && (!estado?.vistas || estado.vistas.includes(v)))
+export function filterViews(status) {
+  const only = process.env.A11Y_VISTAS?.split(',').filter(Boolean)
+  return Object.keys(VIEWS).filter((v) => (!only || only.includes(v)) && (!status?.vistas || status.vistas.includes(v)))
 }
 
-let datosCache = null
-export async function datos() {
+let dataCache = null
+export async function handleData() {
   // Sin datos.json (en el CI, que mide solo las pantallas sin sesión) no hay marcadores que resolver.
-  const ruta = join(REPORTES, 'datos.json')
-  datosCache ??= existsSync(ruta) ? await leerJson(ruta) : {}
-  return datosCache
+  const route = join(REPORTS, 'datos.json')
+  dataCache ??= existsSync(route) ? await readJson(route) : {}
+  return dataCache
 }
 
 /** Reemplaza `:marcador` por su valor de `datos.json`. */
-export async function resolverRuta(ruta) {
-  const d = await datos()
-  return ruta.replace(/:([a-zA-Z]+)/gu, (_, clave) => {
-    if (d[clave] === undefined || d[clave] === null) throw new Error(`Falta «${clave}» en datos.json`)
-    return String(d[clave])
+export async function resolverRoute(route) {
+  const d = await handleData()
+  return route.replace(/:([a-zA-Z]+)/gu, (_, password) => {
+    if (d[password] === undefined || d[password] === null) throw new Error(`Falta «${password}» en datos.json`)
+    return String(d[password])
   })
 }
 
-const rutaSesion = (cuenta) => join(REPORTES, '.sesiones', `${cuenta}.json`)
+const routeSession = (account) => join(REPORTS, '.sesiones', `${account}.json`)
 
-async function llamarApi(metodo, ruta, cuerpo, token) {
-  const r = await fetch(`${API_URL}/api/v1${ruta}`, {
-    method: metodo,
+async function callApi(method, route, body, token) {
+  const r = await fetch(`${API_URL}/api/v1${route}`, {
+    method: method,
     headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
-    body: cuerpo ? JSON.stringify(cuerpo) : undefined,
+    body: body ? JSON.stringify(body) : undefined,
   })
-  if (!r.ok) throw new Error(`${metodo} ${ruta} → ${r.status}`)
+  if (!r.ok) throw new Error(`${method} ${route} → ${r.status}`)
   return r.json()
 }
 
 /** Lee el almacenamiento del origen de la aplicación en una página abierta. */
-async function leerAlmacen(pagina) {
-  return pagina.evaluate(() => ({
+async function readStorage(page) {
+  return page.evaluate(() => ({
     local: Object.entries(localStorage).map(([name, value]) => ({ name, value })),
     sesion: Object.entries(sessionStorage).map(([name, value]) => ({ name, value })),
   }))
@@ -118,38 +118,38 @@ async function leerAlmacen(pagina) {
  *   (`POST /platform/preview`, lo mismo que hace «Ver como…») y la pestaña lo
  *   canjea en `/vista-previa#codigo=…`; su sesión queda en el sessionStorage.
  */
-export async function iniciarSesion(navegador, cuenta) {
-  const datosCuenta = CUENTAS[cuenta]
-  const contexto = await navegador.newContext(contextoDe('escritorio'))
-  const pagina = await contexto.newPage()
-  if (datosCuenta.vistaPrevia) {
-    const { access_token: token } = await llamarApi('POST', '/platform/auth/login', { email: CUENTAS.plataforma.correo, password: CLAVE })
-    const { code } = await llamarApi('POST', '/platform/preview', { as: datosCuenta.vistaPrevia }, token)
-    await pagina.goto(`${BASE_URL}/vista-previa#codigo=${encodeURIComponent(code)}`)
-    await pagina.waitForURL((url) => !url.pathname.startsWith('/vista-previa'), { timeout: 20_000 })
+export async function signIn(browser, account) {
+  const dataAccount = ACCOUNTS[account]
+  const context = await browser.newContext(contextOf('escritorio'))
+  const page = await context.newPage()
+  if (dataAccount.vistaPrevia) {
+    const { access_token: token } = await callApi('POST', '/platform/auth/login', { email: ACCOUNTS.plataforma.correo, password: PASSWORD })
+    const { code } = await callApi('POST', '/platform/preview', { as: dataAccount.vistaPrevia }, token)
+    await page.goto(`${BASE_URL}/vista-previa#codigo=${encodeURIComponent(code)}`)
+    await page.waitForURL((url) => !url.pathname.startsWith('/vista-previa'), { timeout: 20_000 })
   } else {
-    await pagina.goto(`${BASE_URL}${datosCuenta.acceso}`)
-    await pagina.getByLabel('Correo').fill(datosCuenta.correo)
-    await pagina.getByLabel('Contraseña', { exact: true }).fill(CLAVE)
-    await pagina.getByRole('button', { name: 'Entrar' }).click()
-    await pagina.waitForURL((url) => !url.pathname.endsWith('/acceso'), { timeout: 20_000 })
+    await page.goto(`${BASE_URL}${dataAccount.acceso}`)
+    await page.getByLabel('Correo').fill(dataAccount.correo)
+    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Entrar' }).click()
+    await page.waitForURL((url) => !url.pathname.endsWith('/acceso'), { timeout: 20_000 })
   }
-  await esperarListo(pagina, 'main h1')
-  const almacen = await leerAlmacen(pagina)
-  await escribirJson(rutaSesion(cuenta), almacen)
-  await contexto.close()
-  return almacen
+  await waitReady(page, 'main h1')
+  const storage = await readStorage(page)
+  await writeJson(routeSession(account), storage)
+  await context.close()
+  return storage
 }
 
-const sesiones = new Map()
+const sessions = new Map()
 /** El almacenamiento de la sesión de una cuenta; inicia sesión una vez por proceso. */
-export async function sesion(navegador, cuenta) {
-  if (!cuenta) return null
-  if (!sesiones.has(cuenta)) {
-    const reutilizar = process.env.A11Y_REUTILIZAR && existsSync(rutaSesion(cuenta))
-    sesiones.set(cuenta, reutilizar ? await leerJson(rutaSesion(cuenta)) : await iniciarSesion(navegador, cuenta))
+export async function session(browser, account) {
+  if (!account) return null
+  if (!sessions.has(account)) {
+    const reuse = process.env.A11Y_REUTILIZAR && existsSync(routeSession(account))
+    sessions.set(account, reuse ? await readJson(routeSession(account)) : await signIn(browser, account))
   }
-  return sesiones.get(cuenta)
+  return sessions.get(account)
 }
 
 /**
@@ -157,17 +157,17 @@ export async function sesion(navegador, cuenta) {
  * aplicación. Se usa igual en Playwright (`addInitScript`) y en Lighthouse
  * (`evaluateOnNewDocument` de Puppeteer).
  */
-export function guionDeSesion(almacen) {
-  const datosJson = JSON.stringify(almacen ?? { local: [], sesion: [] })
+export function sessionScript(storage) {
+  const dataJson = JSON.stringify(storage ?? { local: [], sesion: [] })
   return `(() => { try {
-    const a = ${datosJson};
+    const a = ${dataJson};
     for (const { name, value } of a.local) localStorage.setItem(name, value);
     for (const { name, value } of a.sesion) sessionStorage.setItem(name, value);
   } catch (e) {} })();`
 }
 
 // Un pedido en la cola sin señal (store/offlineQueue.ts), de la cuenta con sesión.
-const GUION_COLA = `(() => { try {
+const SCRIPT_QUEUE = `(() => { try {
   const COLA = 'resthub.pedidos-sin-enviar.v2';
   const vp = sessionStorage.getItem('resthub.vista-previa.sesion.v1');
   const almacen = vp ? sessionStorage : localStorage;
@@ -183,72 +183,72 @@ const GUION_COLA = `(() => { try {
  * de avisos en vivo (`/events`) y la precarga en ratos libres mantienen la red
  * ocupada. Se espera el selector y que no quede ninguna silueta de carga.
  */
-export async function esperarListo(pagina, selector) {
-  await pagina.waitForSelector(selector, { timeout: 20_000 })
-  await pagina
+export async function waitReady(page, selector) {
+  await page.waitForSelector(selector, { timeout: 20_000 })
+  await page
     .waitForFunction(() => !document.querySelector('[aria-busy="true"], [data-slot="skeleton"]'), null, { timeout: 15_000 })
     .catch(() => undefined)
-  await pagina.waitForTimeout(400)
+  await page.waitForTimeout(400)
 }
 
-async function ejecutarPaso(pagina, paso) {
-  const primero = (loc) => loc.filter({ visible: true }).first()
-  if (paso.boton) return primero(pagina.getByRole('button', { name: paso.boton, exact: typeof paso.boton === 'string' })).click()
-  if (paso.pestana) return primero(pagina.getByRole('tab', { name: paso.pestana, exact: typeof paso.pestana === 'string' })).click()
-  if (paso.opcion) return pagina.getByRole('radio', { name: paso.opcion }).first().check({ force: true })
-  if (paso.fecha) {
+async function runStep(page, step) {
+  const first = (loc) => loc.filter({ visible: true }).first()
+  if (step.boton) return first(page.getByRole('button', { name: step.boton, exact: typeof step.boton === 'string' })).click()
+  if (step.pestana) return first(page.getByRole('tab', { name: step.pestana, exact: typeof step.pestana === 'string' })).click()
+  if (step.opcion) return page.getByRole('radio', { name: step.opcion }).first().check({ force: true })
+  if (step.fecha) {
     // Una fecha relativa a hoy, en días (-7: hace una semana), en el campo con esa etiqueta.
-    const dia = new Date(Date.now() - 5 * 3600_000 + paso.dias * 86_400_000).toISOString().slice(0, 10)
-    return pagina.getByLabel(paso.fecha, { exact: true }).fill(dia)
+    const day = new Date(Date.now() - 5 * 3600_000 + step.dias * 86_400_000).toISOString().slice(0, 10)
+    return page.getByLabel(step.fecha, { exact: true }).fill(day)
   }
-  if (paso.enlace) return primero(pagina.getByRole('link', { name: paso.enlace })).click()
-  if (paso.resumen) return primero(pagina.locator('summary', { hasText: paso.resumen })).click()
-  if (paso.clic) return primero(pagina.locator(paso.clic)).click()
-  if (paso.sinConexion) return pagina.context().setOffline(true)
-  if (paso.esperar) return pagina.waitForSelector(paso.esperar, { timeout: 15_000 })
-  throw new Error(`Paso desconocido: ${JSON.stringify(paso)}`)
+  if (step.enlace) return first(page.getByRole('link', { name: step.enlace })).click()
+  if (step.resumen) return first(page.locator('summary', { hasText: step.resumen })).click()
+  if (step.clic) return first(page.locator(step.clic)).click()
+  if (step.sinConexion) return page.context().setOffline(true)
+  if (step.esperar) return page.waitForSelector(step.esperar, { timeout: 15_000 })
+  throw new Error(`Paso desconocido: ${JSON.stringify(step)}`)
 }
 
 /**
  * Abre un estado del inventario (ruta u overlay) en una página nueva del
  * contexto, con la sesión de su cuenta, y lo deja listo para medir.
  */
-export async function abrirEstado(navegador, contexto, estado, limiteMs = 90_000) {
-  let temporizador
-  const limite = new Promise((_, rechazar) => {
-    temporizador = setTimeout(() => rechazar(new Error(`El estado ${estado.id} no se abrió en ${limiteMs / 1000} s`)), limiteMs)
+export async function openStatus(browser, context, status, limitMs = 90_000) {
+  let timer
+  const limit = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`El estado ${status.id} no se abrió en ${limitMs / 1000} s`)), limitMs)
   })
   try {
-    return await Promise.race([abrirEstadoSinLimite(navegador, contexto, estado), limite])
+    return await Promise.race([openStatusWithoutLimit(browser, context, status), limit])
   } finally {
-    clearTimeout(temporizador)
+    clearTimeout(timer)
   }
 }
 
-async function abrirEstadoSinLimite(navegador, contexto, estado) {
-  const almacen = await sesion(navegador, estado.cuenta)
-  const pagina = await contexto.newPage()
-  if (almacen) await pagina.addInitScript(guionDeSesion(almacen))
-  if (estado.cola) {
-    await pagina.route('**/api/v1/orders', (ruta) => (ruta.request().method() === 'POST' ? ruta.abort('internetdisconnected') : ruta.continue()))
-    await pagina.addInitScript(GUION_COLA)
+async function openStatusWithoutLimit(browser, context, status) {
+  const storage = await session(browser, status.cuenta)
+  const page = await context.newPage()
+  if (storage) await page.addInitScript(sessionScript(storage))
+  if (status.cola) {
+    await page.route('**/api/v1/orders', (route) => (route.request().method() === 'POST' ? route.abort('internetdisconnected') : route.continue()))
+    await page.addInitScript(SCRIPT_QUEUE)
   }
-  await pagina.goto(`${BASE_URL}${await resolverRuta(estado.ruta)}`)
-  const esperaRuta = estado.clase === 'ruta' && estado.espera ? estado.espera : 'main h1, body h1'
-  await esperarListo(pagina, esperaRuta)
-  for (const paso of estado.pasos ?? []) {
-    await ejecutarPaso(pagina, paso)
-    await pagina.waitForTimeout(250)
+  await page.goto(`${BASE_URL}${await resolverRoute(status.ruta)}`)
+  const waitRoute = status.clase === 'ruta' && status.espera ? status.espera : 'main h1, body h1'
+  await waitReady(page, waitRoute)
+  for (const step of status.pasos ?? []) {
+    await runStep(page, step)
+    await page.waitForTimeout(250)
   }
-  if (estado.clase === 'overlay') {
-    await pagina.waitForSelector(estado.espera, { state: 'visible', timeout: 15_000 })
-    await esperarListo(pagina, estado.espera)
+  if (status.clase === 'overlay') {
+    await page.waitForSelector(status.espera, { state: 'visible', timeout: 15_000 })
+    await waitReady(page, status.espera)
   }
   // Las animaciones de entrada (tw-animate-css) duran ~150 ms: se espera a que
   // terminen para que el contraste no se mida a media opacidad.
-  await pagina.waitForTimeout(600)
-  return pagina
+  await page.waitForTimeout(600)
+  return page
 }
 
 /** Nombre de archivo de un estado en una vista. */
-export const clave = (estado, vista) => `${estado.id}--${vista}`
+export const handlePassword = (status, vista) => `${status.id}--${vista}`

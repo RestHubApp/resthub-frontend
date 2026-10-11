@@ -13,8 +13,8 @@ const enCI = process.env.CI !== undefined
 const TRABAJADORES = enCI ? 2 : 4
 
 // El celular del mesero: 390 px de ancho, táctil.
-const CELULAR = { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } }
-const ESCRITORIO = { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 900 } }
+const MOBILE = { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } }
+const DESKTOP = { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 900 } }
 
 // En WSL sin root, WebKit se lanza con un envoltorio que agrega las librerías
 // del sistema que faltan (ver e2e/README.md). En el CI no hace falta.
@@ -25,12 +25,12 @@ const VISUAL = /visual\/.*\.spec\.ts/u
 
 // Cada corrida limpia su carpeta de resultados: dos corridas a la vez (por
 // ejemplo, la E2E y la visual) necesitan carpetas distintas.
-const SALIDA = process.env.E2E_SALIDA ?? './e2e/.resultados'
-const REPORTE = process.env.E2E_REPORTE ?? './e2e/.reporte'
+const OUTPUT = process.env.E2E_SALIDA ?? './e2e/.resultados'
+const REPORT = process.env.E2E_REPORTE ?? './e2e/.reporte'
 
 export default defineConfig({
   testDir: './e2e',
-  outputDir: SALIDA,
+  outputDir: OUTPUT,
   fullyParallel: true,
   forbidOnly: enCI,
   // Una prueba intermitente se arregla, no se reintenta.
@@ -44,8 +44,8 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/visual/lineas-base/{projectName}/{arg}{ext}',
   reporter: [
     ['list'],
-    ['html', { outputFolder: REPORTE, open: 'never' }],
-    ['json', { outputFile: `${REPORTE}-json/resultados.json` }],
+    ['html', { outputFolder: REPORT, open: 'never' }],
+    ['json', { outputFile: `${REPORT}-json/resultados.json` }],
     ['./e2e/soporte/reporteCobertura.ts'],
   ],
   use: {
@@ -66,38 +66,38 @@ export default defineConfig({
       name: 'escritorio',
       testIgnore: [VISUAL, /cobertura\.spec\.ts/u],
       grepInvert: /@solo-movil/u,
-      use: ESCRITORIO,
+      use: DESKTOP,
     },
     {
       name: 'movil',
       testIgnore: [VISUAL, /cobertura\.spec\.ts/u],
       grep: /@movil|@solo-movil/u,
-      use: CELULAR,
+      use: MOBILE,
     },
     // Regresión visual: las líneas base dependen del sistema operativo y de
     // sus fuentes, así que corre en local con `pnpm test:visual`, no en el CI.
-    { name: 'visual-chromium-escritorio', testMatch: VISUAL, use: ESCRITORIO },
-    { name: 'visual-chromium-movil', testMatch: VISUAL, use: CELULAR },
+    { name: 'visual-chromium-escritorio', testMatch: VISUAL, use: DESKTOP },
+    { name: 'visual-chromium-movil', testMatch: VISUAL, use: MOBILE },
     {
       name: 'visual-firefox-escritorio',
       testMatch: VISUAL,
-      use: { ...devices['Desktop Firefox'], viewport: ESCRITORIO.viewport },
+      use: { ...devices['Desktop Firefox'], viewport: DESKTOP.viewport },
     },
     {
       name: 'visual-firefox-movil',
       testMatch: VISUAL,
       // Firefox no emula `isMobile`: se prueba el ancho y el toque.
-      use: { ...devices['Desktop Firefox'], viewport: CELULAR.viewport, hasTouch: true },
+      use: { ...devices['Desktop Firefox'], viewport: MOBILE.viewport, hasTouch: true },
     },
     {
       name: 'visual-webkit-escritorio',
       testMatch: VISUAL,
-      use: { ...devices['Desktop Safari'], viewport: ESCRITORIO.viewport, ...WEBKIT },
+      use: { ...devices['Desktop Safari'], viewport: DESKTOP.viewport, ...WEBKIT },
     },
     {
       name: 'visual-webkit-movil',
       testMatch: VISUAL,
-      use: { ...devices['iPhone 13'], viewport: CELULAR.viewport, ...WEBKIT },
+      use: { ...devices['iPhone 13'], viewport: MOBILE.viewport, ...WEBKIT },
     },
   ],
   webServer: [

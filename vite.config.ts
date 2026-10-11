@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-import { acotarConexiones, precargarFuente, siennaAutoalojado } from './vite.plugins'
+import { acotarConnections, precargarSource, siennaAutoalojado } from './vite.plugins'
 
 // El color de la marca. Tiene que coincidir con el `theme-color` de index.html
 // y con `--primary` de index.css, o la barra del sistema cambia de tono al
@@ -27,7 +27,7 @@ const vercel = JSON.parse(readFileSync(new URL('vercel.json', import.meta.url), 
 // En local el API va por http (localhost:8000, o 8201 en las E2E), que la CSP
 // de producción no deja conectar: solo aquí se le suma.
 const SECURITY_HEADERS = Object.fromEntries(
-  vercel.headers.flatMap((regla) => regla.headers.map(({ key, value }) => [
+  vercel.headers.flatMap((rule) => rule.headers.map(({ key, value }) => [
     key,
     key === 'Content-Security-Policy' ? value.replace("connect-src 'self' https:", "connect-src 'self' https: http://localhost:* http://127.0.0.1:*") : value,
   ])),
@@ -37,9 +37,9 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    precargarFuente(),
+    precargarSource(),
     siennaAutoalojado(),
-    acotarConexiones(),
+    acotarConnections(),
     // Instalable: el service worker solo guarda el armazon de la aplicacion
     // (HTML, JS, CSS e iconos). Ninguna respuesta del API se guarda en cache.
     // Sin senal, lo unico que espera es un pedido nuevo del mesero, en una cola
@@ -87,7 +87,7 @@ export default defineConfig({
             'PlatformShell', 'PlatformLoginView', 'RestaurantsView', 'NewRestaurantView',
             'RestaurantDetailView', 'ActivityView', 'PreviewView', 'ObservabilityView',
             'DataTable', 'AreaChart', 'RoutesSection', 'LogsSection', 'RequestsSection',
-          ].map((nombre) => `**/assets/${nombre}-*.js`),
+          ].map((name) => `**/assets/${name}-*.js`),
         ],
         runtimeCaching: [{
           urlPattern: /^https?:\/\/[^/]+\/assets\/[^/]+\.js$/u,

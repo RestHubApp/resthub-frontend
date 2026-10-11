@@ -2,27 +2,27 @@
 // captura de cada uno en reportes/estados/. No mide nada: sirve para revisar el
 // inventario antes de las mediciones.
 import { join } from 'node:path'
-import { abrirEstado, asegurarDir, clave, contextoDe, escribirJson, filtrarEstados, filtrarVistas, lanzar, REPORTES } from './comun.mjs'
+import { openStatus, ensureDir, handlePassword, contextOf, writeJson, filterStatuses, filterViews, launch, REPORTS } from './comun.mjs'
 
-const dir = await asegurarDir(join(REPORTES, 'estados'))
-const navegador = await lanzar()
-const resultado = []
-for (const estado of filtrarEstados()) {
-  for (const vista of filtrarVistas(estado)) {
-    const contexto = await navegador.newContext(contextoDe(vista))
-    const inicio = Date.now()
+const dir = await ensureDir(join(REPORTS, 'estados'))
+const browser = await launch()
+const result = []
+for (const status of filterStatuses()) {
+  for (const vista of filterViews(status)) {
+    const context = await browser.newContext(contextOf(vista))
+    const start = Date.now()
     try {
-      const pagina = await abrirEstado(navegador, contexto, estado)
-      await pagina.screenshot({ path: join(dir, `${clave(estado, vista)}.png`) })
-      resultado.push({ id: estado.id, vista, ok: true, url: pagina.url(), ms: Date.now() - inicio })
-      console.log('ok ', clave(estado, vista), new URL(pagina.url()).pathname)
+      const page = await openStatus(browser, context, status)
+      await page.screenshot({ path: join(dir, `${handlePassword(status, vista)}.png`) })
+      result.push({ id: status.id, vista, ok: true, url: page.url(), ms: Date.now() - start })
+      console.log('ok ', handlePassword(status, vista), new URL(page.url()).pathname)
     } catch (error) {
-      resultado.push({ id: estado.id, vista, ok: false, error: error.message.split('\n')[0] })
-      console.log('ERR', clave(estado, vista), error.message.split('\n')[0])
+      result.push({ id: status.id, vista, ok: false, error: error.message.split('\n')[0] })
+      console.log('ERR', handlePassword(status, vista), error.message.split('\n')[0])
     }
-    await contexto.close()
+    await context.close()
   }
 }
-await navegador.close()
-await escribirJson(join(dir, 'estados.json'), resultado)
-console.log(`${resultado.filter((r) => r.ok).length}/${resultado.length} estados alcanzados`)
+await browser.close()
+await writeJson(join(dir, 'estados.json'), result)
+console.log(`${result.filter((r) => r.ok).length}/${result.length} estados alcanzados`)

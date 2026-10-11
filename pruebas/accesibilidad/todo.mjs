@@ -7,9 +7,9 @@
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 
-import { RAIZ } from './comun.mjs'
+import { ROOT } from './comun.mjs'
 
-const PASOS = {
+const STEPS = {
   datos: ['datos.mjs'],
   axe: ['axe.mjs'],
   'axe-sin-widget': ['axe.mjs', { A11Y_SIN_WIDGET: '1', A11Y_CLASE: 'ruta' }],
@@ -18,14 +18,14 @@ const PASOS = {
   teclado: ['teclado.mjs'],
   resumen: ['resumen.mjs'],
 }
-const pedidos = process.argv.slice(2)
-const orden = pedidos.length > 0 ? ['datos', ...pedidos.filter((p) => p !== 'datos'), 'resumen'] : Object.keys(PASOS)
-let fallos = 0
-for (const paso of [...new Set(orden)]) {
-  const [archivo, entorno = {}] = PASOS[paso] ?? []
-  if (!archivo) throw new Error(`Paso desconocido: ${paso}. Opciones: ${Object.keys(PASOS).join(', ')}`)
-  console.log(`\n=== ${paso} ===`)
-  const r = spawnSync(process.execPath, [join(RAIZ, archivo)], { stdio: 'inherit', env: { ...process.env, ...entorno } })
-  if (r.status !== 0) fallos += 1
+const orders = process.argv.slice(2)
+const order = orders.length > 0 ? ['datos', ...orders.filter((p) => p !== 'datos'), 'resumen'] : Object.keys(STEPS)
+let failures = 0
+for (const step of [...new Set(order)]) {
+  const [file, environment = {}] = STEPS[step] ?? []
+  if (!file) throw new Error(`Paso desconocido: ${step}. Opciones: ${Object.keys(STEPS).join(', ')}`)
+  console.log(`\n=== ${step} ===`)
+  const r = spawnSync(process.execPath, [join(ROOT, file)], { stdio: 'inherit', env: { ...process.env, ...environment } })
+  if (r.status !== 0) failures += 1
 }
-process.exit(fallos > 0 ? 1 : 0)
+process.exit(failures > 0 ? 1 : 0)

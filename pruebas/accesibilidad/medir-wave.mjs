@@ -6,64 +6,64 @@ import { writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { abrirEstado, asegurarDir, clave, escribirJson, filtrarEstados, filtrarVistas, lanzar, leerJson, REPORTES, VISTAS } from './comun.mjs'
-import { abrirNavegadorWave, analizarConWave, capturarWave, prepararWave } from './wave.mjs'
+import { openStatus, ensureDir, handlePassword, writeJson, filterStatuses, filterViews, launch, readJson, REPORTS, VIEWS } from './comun.mjs'
+import { openBrowserWave, analyzeWithWave, captureWave, prepareWave } from './wave.mjs'
 
-const dir = await asegurarDir(join(REPORTES, 'wave'))
-const capturas = await asegurarDir(join(dir, 'capturas'))
-const { version } = await prepararWave()
-const navegadorSesiones = await lanzar()
-const filas = []
-const estados = filtrarEstados()
+const dir = await ensureDir(join(REPORTS, 'wave'))
+const captures = await ensureDir(join(dir, 'capturas'))
+const { version } = await prepareWave()
+const browserSessions = await launch()
+const rows = []
+const statuses = filterStatuses()
 
-for (const vista of Object.keys(VISTAS)) {
-  const deLaVista = estados.filter((e) => filtrarVistas(e).includes(vista))
+for (const vista of Object.keys(VIEWS)) {
+  const deLaVista = statuses.filter((e) => filterViews(e).includes(vista))
   if (deLaVista.length === 0) continue
-  const { width, height, ...resto } = VISTAS[vista]
-  const { contexto, cerrar } = await abrirNavegadorWave({ viewport: { width, height }, ...resto })
-  for (const estado of deLaVista) {
-    let pagina
-    let paso = 'abrir'
+  const { width, height, ...rest } = VIEWS[vista]
+  const { contexto: context, cerrar: close } = await openBrowserWave({ viewport: { width, height }, ...rest })
+  for (const status of deLaVista) {
+    let page
+    let step = 'abrir'
     try {
       // Un estado que se traba (la extensión no responde) no detiene a los demás.
-      const medir = async () => {
-        pagina = await abrirEstado(navegadorSesiones, contexto, estado)
-        paso = 'analizar'
-        const resultado = await analizarConWave(pagina)
-        paso = 'capturar'
-        await capturarWave(pagina, join(capturas, `${clave(estado, vista)}.png`))
-        return resultado
+      const measure = async () => {
+        page = await openStatus(browserSessions, context, status)
+        step = 'analizar'
+        const result = await analyzeWithWave(page)
+        step = 'capturar'
+        await captureWave(page, join(captures, `${handlePassword(status, vista)}.png`))
+        return result
       }
-      let limite
-      const { conteos, items } = await Promise.race([
-        medir(),
-        new Promise((_, rechazar) => {
-          limite = setTimeout(() => rechazar(new Error(`sin respuesta en 120 s (paso: ${paso})`)), 120_000)
+      let limit
+      const { conteos: counts, items } = await Promise.race([
+        measure(),
+        new Promise((_, reject) => {
+          limit = setTimeout(() => reject(new Error(`sin respuesta en 120 s (paso: ${step})`)), 120_000)
         }),
-      ]).finally(() => clearTimeout(limite))
-      const fila = { id: estado.id, nombre: estado.nombre, clase: estado.clase, tipo: estado.tipo, vista, url: pagina.url(), conteos, items: items.map(({ xpaths, ...i }) => ({ ...i, xpaths: xpaths.slice(0, 5) })) }
-      await escribirJson(join(dir, `${clave(estado, vista)}.json`), fila)
-      filas.push(fila)
-      const c = conteos
-      console.log(`${clave(estado, vista).padEnd(40)} err ${c.errors} contr ${c.contrast} alert ${c.alerts} feat ${c.features} str ${c.structure} aria ${c.aria}  ${items.filter((i) => ['error', 'contrast', 'alert'].includes(i.tipo)).map((i) => `${i.id}(${i.cantidad})`).join(' ')}`)
+      ]).finally(() => clearTimeout(limit))
+      const row = { id: status.id, nombre: status.nombre, clase: status.clase, tipo: status.tipo, vista, url: page.url(), conteos: counts, items: items.map(({ xpaths, ...i }) => ({ ...i, xpaths: xpaths.slice(0, 5) })) }
+      await writeJson(join(dir, `${handlePassword(status, vista)}.json`), row)
+      rows.push(row)
+      const c = counts
+      console.log(`${handlePassword(status, vista).padEnd(40)} err ${c.errors} contr ${c.contrast} alert ${c.alerts} feat ${c.features} str ${c.structure} aria ${c.aria}  ${items.filter((i) => ['error', 'contrast', 'alert'].includes(i.tipo)).map((i) => `${i.id}(${i.cantidad})`).join(' ')}`)
     } catch (error) {
-      filas.push({ id: estado.id, nombre: estado.nombre, clase: estado.clase, tipo: estado.tipo, vista, error: error.message.split('\n')[0] })
-      console.log(`${clave(estado, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
+      rows.push({ id: status.id, nombre: status.nombre, clase: status.clase, tipo: status.tipo, vista, error: error.message.split('\n')[0] })
+      console.log(`${handlePassword(status, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
     }
-    await Promise.race([pagina?.close().catch(() => undefined), new Promise((r) => setTimeout(r, 10_000))])
+    await Promise.race([page?.close().catch(() => undefined), new Promise((r) => setTimeout(r, 10_000))])
     // El paso «sin conexión» corta la red de todo el contexto persistente.
-    await contexto.setOffline(false)
+    await context.setOffline(false)
   }
-  await cerrar()
+  await close()
 }
-await navegadorSesiones.close()
+await browserSessions.close()
 
-const rutaResumen = join(dir, 'resumen.json')
-const parcial = process.env.A11Y_SOLO || process.env.A11Y_CLASE || process.env.A11Y_VISTAS
-const previo = existsSync(rutaResumen) && parcial ? await leerJson(rutaResumen) : { filas: [] }
-const nuevas = new Set(filas.map((f) => `${f.id}--${f.vista}`))
-const todas = [...previo.filas.filter((f) => !nuevas.has(`${f.id}--${f.vista}`)), ...filas]
-await escribirJson(rutaResumen, { fecha: new Date().toISOString(), version, filas: todas })
-const suma = (k) => todas.reduce((s, f) => s + (f.conteos?.[k] ?? 0), 0)
-await writeFile(join(dir, 'resumen.txt'), `WAVE ${version}: ${todas.length} mediciones; errors ${suma('errors')}, contrast ${suma('contrast')}, alerts ${suma('alerts')}\n`)
-console.log(`\nWAVE ${version}: ${todas.length} mediciones, ${todas.filter((f) => f.error).length} sin abrir; errors ${suma('errors')}, contrast ${suma('contrast')}, alerts ${suma('alerts')}`)
+const routeSummary = join(dir, 'resumen.json')
+const partial = process.env.A11Y_SOLO || process.env.A11Y_CLASE || process.env.A11Y_VISTAS
+const previous = existsSync(routeSummary) && partial ? await readJson(routeSummary) : { filas: [] }
+const fresh = new Set(rows.map((f) => `${f.id}--${f.vista}`))
+const all = [...previous.filas.filter((f) => !fresh.has(`${f.id}--${f.vista}`)), ...rows]
+await writeJson(routeSummary, { fecha: new Date().toISOString(), version, filas: all })
+const sum = (k) => all.reduce((s, f) => s + (f.conteos?.[k] ?? 0), 0)
+await writeFile(join(dir, 'resumen.txt'), `WAVE ${version}: ${all.length} mediciones; errors ${sum('errors')}, contrast ${sum('contrast')}, alerts ${sum('alerts')}\n`)
+console.log(`\nWAVE ${version}: ${all.length} mediciones, ${all.filter((f) => f.error).length} sin abrir; errors ${sum('errors')}, contrast ${sum('contrast')}, alerts ${sum('alerts')}`)

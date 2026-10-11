@@ -4,30 +4,30 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { gzipSync } from 'node:zlib'
 import { join } from 'node:path'
 
-const raiz = process.cwd()
-const manifiesto = JSON.parse(await readFile(join(raiz, 'dist/.vite/manifest.json'), 'utf8'))
-const archivos = new Map(Object.values(manifiesto).map((entrada) => [entrada.file, entrada]))
-const entry = Object.values(manifiesto).find((item) => item.isEntry)
+const root = process.cwd()
+const manifest = JSON.parse(await readFile(join(root, 'dist/.vite/manifest.json'), 'utf8'))
+const files = new Map(Object.values(manifest).map((entryValue) => [entryValue.file, entryValue]))
+const entry = Object.values(manifest).find((item) => item.isEntry)
 if (!entry) throw new Error('El manifiesto no contiene el archivo inicial')
-const carga = new Set()
-function incluir(item) {
-  if (!item || carga.has(item.file)) return
-  carga.add(item.file)
-  for (const dependency of item.imports ?? []) incluir(manifiesto[dependency])
+const load = new Set()
+function include(item) {
+  if (!item || load.has(item.file)) return
+  load.add(item.file)
+  for (const dependency of item.imports ?? []) include(manifest[dependency])
 }
-incluir(entry)
-const resumen = []
-for (const [file, item] of archivos) {
+include(entry)
+const summary = []
+for (const [file, item] of files) {
   if (!file.endsWith('.js')) continue
-  const bytes = await readFile(join(raiz, 'dist', file))
-  resumen.push({ file, kb: +(bytes.length / 1024).toFixed(1), gzipKb: +(gzipSync(bytes).length / 1024).toFixed(1), inicial: carga.has(file), origen: item.src ?? '' })
+  const bytes = await readFile(join(root, 'dist', file))
+  summary.push({ file, kb: +(bytes.length / 1024).toFixed(1), gzipKb: +(gzipSync(bytes).length / 1024).toFixed(1), inicial: load.has(file), origen: item.src ?? '' })
 }
-resumen.sort((a, b) => b.gzipKb - a.gzipKb)
+summary.sort((a, b) => b.gzipKb - a.gzipKb)
 const lighthouse = {}
-for (const ruta of ['acceso', 'pedidos', 'pedidos-nuevo', 'roles', 'caja', 'panel']) {
-  const lhr = JSON.parse(await readFile(join(raiz, `pruebas/accesibilidad/reportes/lighthouse/${ruta}--movil.report.json`), 'utf8'))
+for (const route of ['acceso', 'pedidos', 'pedidos-nuevo', 'roles', 'caja', 'panel']) {
+  const lhr = JSON.parse(await readFile(join(root, `pruebas/accesibilidad/reportes/lighthouse/${route}--movil.report.json`), 'utf8'))
   const audit = lhr.audits
-  lighthouse[ruta] = {
+  lighthouse[route] = {
     performance: Math.round(lhr.categories.performance.score * 100),
     benchmarkIndex: lhr.environment.benchmarkIndex,
     lcpMs: audit['largest-contentful-paint']?.numericValue,
@@ -38,8 +38,8 @@ for (const ruta of ['acceso', 'pedidos', 'pedidos-nuevo', 'roles', 'caja', 'pane
     fontDisplay: audit['font-display-insight']?.details?.items?.map((i) => ({ url: i.url, wastedMs: i.wastedMs })) ?? [],
   }
 }
-const salida = process.env.A11Y_DIAGNOSTICO ?? join(raiz, 'pruebas/accesibilidad/reportes/perf-movil-inicial.json')
-const informe = { creado: new Date().toISOString(), inicial: [...carga], totalInicialGzipKb: +resumen.filter((i) => i.inicial).reduce((sum, i) => sum + i.gzipKb, 0).toFixed(1), archivos: resumen, lighthouse }
-await writeFile(salida, `${JSON.stringify(informe, null, 2)}\n`)
-console.log(`Entrada: ${informe.totalInicialGzipKb} KiB gzip en ${carga.size} chunks; reporte ${salida}`)
-for (const item of resumen.filter((i) => i.inicial)) console.log(`${item.file}: ${item.gzipKb} KiB gzip`)
+const output = process.env.A11Y_DIAGNOSTICO ?? join(root, 'pruebas/accesibilidad/reportes/perf-movil-inicial.json')
+const report = { creado: new Date().toISOString(), inicial: [...load], totalInicialGzipKb: +summary.filter((i) => i.inicial).reduce((sum, i) => sum + i.gzipKb, 0).toFixed(1), archivos: summary, lighthouse }
+await writeFile(output, `${JSON.stringify(report, null, 2)}\n`)
+console.log(`Entrada: ${report.totalInicialGzipKb} KiB gzip en ${load.size} chunks; reporte ${output}`)
+for (const item of summary.filter((i) => i.inicial)) console.log(`${item.file}: ${item.gzipKb} KiB gzip`)

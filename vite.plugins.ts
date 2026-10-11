@@ -13,28 +13,28 @@ import { loadEnv, type Plugin } from 'vite'
 // que trae dentro si un idioma falta).
 const SIENNA_CDN = 'https://cdn.jsdelivr.net/npm/sienna-accessibility/dist/'
 const SIENNA_BASE = '/sienna/'
-const SIENNA_ARCHIVOS = ['fonts/OpenDyslexic3-Regular.woff', 'fonts/OpenDyslexic3-Regular.ttf', 'locales/es.json'] as const
+const SIENNA_FILES = ['fonts/OpenDyslexic3-Regular.woff', 'fonts/OpenDyslexic3-Regular.ttf', 'locales/es.json'] as const
 export function siennaAutoalojado(): Plugin {
   const dist = fileURLToPath(new URL('node_modules/sienna-accessibility/dist', import.meta.url))
-  const leer = (archivo: string) => readFileSync(join(dist, archivo)) // eslint-disable-line security/detect-non-literal-fs-filename -- lista fija de arriba
+  const read = (file: string) => readFileSync(join(dist, file)) // eslint-disable-line security/detect-non-literal-fs-filename -- lista fija de arriba
   return {
     name: 'resthub:sienna-autoalojado',
-    transform(codigo, id) {
-      return id.includes('sienna-accessibility') && codigo.includes(SIENNA_CDN) ? codigo.replaceAll(SIENNA_CDN, SIENNA_BASE) : null
+    transform(code, id) {
+      return id.includes('sienna-accessibility') && code.includes(SIENNA_CDN) ? code.replaceAll(SIENNA_CDN, SIENNA_BASE) : null
     },
-    configureServer(servidor) {
-      servidor.middlewares.use(SIENNA_BASE, (peticion, respuesta, siguiente) => {
-        const archivo = SIENNA_ARCHIVOS.find((a) => `/${a}` === peticion.url)
-        if (archivo === undefined) {
-          siguiente()
+    configureServer(server) {
+      server.middlewares.use(SIENNA_BASE, (request, response, next) => {
+        const file = SIENNA_FILES.find((a) => `/${a}` === request.url)
+        if (file === undefined) {
+          next()
           return
         }
-        respuesta.end(leer(archivo))
+        response.end(read(file))
       })
     },
     generateBundle() {
-      for (const archivo of SIENNA_ARCHIVOS) {
-        this.emitFile({ type: 'asset', fileName: `sienna/${archivo}`, source: leer(archivo) })
+      for (const file of SIENNA_FILES) {
+        this.emitFile({ type: 'asset', fileName: `sienna/${file}`, source: read(file) })
       }
     },
   }
@@ -45,7 +45,7 @@ export function siennaAutoalojado(): Plugin {
 // Al compilar con VITE_API_URL se suma una CSP en <meta> que lo acota al propio
 // origen y al del API: el navegador aplica las dos y gana la más estricta, de
 // modo que una inyección no puede sacar datos a un dominio ajeno.
-export function acotarConexiones(): Plugin {
+export function acotarConnections(): Plugin {
   // Solo corre al compilar (`apply: 'build'`), por eso el modo es producción.
   const api = (loadEnv('production', process.cwd(), 'VITE_').VITE_API_URL as string | undefined) ?? ''
   return {
@@ -55,8 +55,8 @@ export function acotarConexiones(): Plugin {
       if (api.trim() === '') {
         return []
       }
-      const origen = new URL(api).origin
-      return [{ tag: 'meta', injectTo: 'head-prepend', attrs: { 'http-equiv': 'Content-Security-Policy', content: `connect-src 'self' ${origen}` } }]
+      const origin = new URL(api).origin
+      return [{ tag: 'meta', injectTo: 'head-prepend', attrs: { 'http-equiv': 'Content-Security-Policy', content: `connect-src 'self' ${origin}` } }]
     },
   }
 }
@@ -64,18 +64,18 @@ export function acotarConexiones(): Plugin {
 // La fuente de la interfaz la pide el CSS, así que el navegador la descubre
 // recién al bajarlo (HTML → CSS → fuente) y el texto sale con la de respaldo
 // hasta entonces. Precargarla la baja en paralelo con el CSS.
-export function precargarFuente(): Plugin {
+export function precargarSource(): Plugin {
   return {
     name: 'resthub:precargar-fuente',
     apply: 'build',
     transformIndexHtml: {
       order: 'post',
-      handler(_html, contexto) {
-        const fuente = Object.keys(contexto.bundle ?? {}).find((archivo) => /geist-latin-wght-normal-.*\.woff2$/u.test(archivo))
-        if (fuente === undefined) {
+      handler(_html, context) {
+        const source = Object.keys(context.bundle ?? {}).find((file) => /geist-latin-wght-normal-.*\.woff2$/u.test(file))
+        if (source === undefined) {
           return []
         }
-        return [{ tag: 'link', injectTo: 'head-prepend', attrs: { rel: 'preload', as: 'font', type: 'font/woff2', crossorigin: '', href: `/${fuente}` } }]
+        return [{ tag: 'link', injectTo: 'head-prepend', attrs: { rel: 'preload', as: 'font', type: 'font/woff2', crossorigin: '', href: `/${source}` } }]
       },
     },
   }

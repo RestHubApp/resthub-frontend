@@ -20,15 +20,15 @@ import { fileURLToPath } from 'node:url'
 
 import { chromium } from 'playwright'
 
-const RAIZ = dirname(fileURLToPath(import.meta.url))
-const EXTENSION = join(RAIZ, '.wave-ext')
-const ID_TIENDA = 'jbbplnpkjmmeebjpijfedlgcdilocofh'
+const ROOT = dirname(fileURLToPath(import.meta.url))
+const EXTENSION = join(ROOT, '.wave-ext')
+const ID_SHOP = 'jbbplnpkjmmeebjpijfedlgcdilocofh'
 const URL_CRX =
   'https://clients2.google.com/service/update2/crx?response=redirect&prodversion=140.0' +
-  `&acceptformat=crx2,crx3&x=id%3D${ID_TIENDA}%26uc`
+  `&acceptformat=crx2,crx3&x=id%3D${ID_SHOP}%26uc`
 
 /** Las seis categorías del panel de WAVE, con el nombre que usa `wave.results`. */
-const CATEGORIAS = {
+const CATEGORIES = {
   errors: 'error',
   contrast: 'contrast',
   alerts: 'alert',
@@ -38,24 +38,24 @@ const CATEGORIAS = {
 }
 
 /** Descarga y desempaqueta la extensión si falta. Devuelve su ruta y su versión. */
-export async function prepararWave() {
-  const manifiesto = join(EXTENSION, 'manifest.json')
-  if (!existsSync(manifiesto)) {
-    const respuesta = await fetch(URL_CRX, { redirect: 'follow' })
-    if (!respuesta.ok) {
-      throw new Error(`No se pudo descargar WAVE de la Chrome Web Store: HTTP ${respuesta.status}`)
+export async function prepareWave() {
+  const manifest = join(EXTENSION, 'manifest.json')
+  if (!existsSync(manifest)) {
+    const response = await fetch(URL_CRX, { redirect: 'follow' })
+    if (!response.ok) {
+      throw new Error(`No se pudo descargar WAVE de la Chrome Web Store: HTTP ${response.status}`)
     }
-    const crx = Buffer.from(await respuesta.arrayBuffer())
+    const crx = Buffer.from(await response.arrayBuffer())
     // Un CRX3 es un ZIP con una cabecera firmada delante: se recorta hasta la
     // primera firma local de ZIP (PK\x03\x04) y se descomprime.
-    const inicio = crx.indexOf(Buffer.from([0x50, 0x4b, 0x03, 0x04]))
-    if (inicio < 0) throw new Error('El CRX descargado no contiene un ZIP')
+    const start = crx.indexOf(Buffer.from([0x50, 0x4b, 0x03, 0x04]))
+    if (start < 0) throw new Error('El CRX descargado no contiene un ZIP')
     const zip = join(mkdtempSync(join(tmpdir(), 'wave-crx-')), 'wave.zip')
-    writeFileSync(zip, crx.subarray(inicio))
+    writeFileSync(zip, crx.subarray(start))
     execFileSync('unzip', ['-oq', zip, '-d', EXTENSION])
     rmSync(dirname(zip), { recursive: true, force: true })
   }
-  const { version } = JSON.parse(readFileSync(manifiesto, 'utf8'))
+  const { version } = JSON.parse(readFileSync(manifest, 'utf8'))
   return { ruta: EXTENSION, version }
 }
 
@@ -63,14 +63,14 @@ export async function prepararWave() {
  * Abre un Chromium con WAVE cargada. El contexto es persistente (las
  * extensiones no se cargan en contextos incógnito) y se borra al cerrar.
  */
-export async function abrirNavegadorWave({ viewport, isMobile = false, hasTouch = false, deviceScaleFactor = 1 } = {}) {
-  const { ruta } = await prepararWave()
-  const perfil = mkdtempSync(join(tmpdir(), 'wave-perfil-'))
-  const contexto = await chromium.launchPersistentContext(perfil, {
+export async function openBrowserWave({ viewport, isMobile = false, hasTouch = false, deviceScaleFactor = 1 } = {}) {
+  const { ruta: route } = await prepareWave()
+  const profile = mkdtempSync(join(tmpdir(), 'wave-perfil-'))
+  const context = await chromium.launchPersistentContext(profile, {
     headless: true,
     // 'chromium' es el headless nuevo (el navegador completo), que sí carga extensiones.
     channel: 'chromium',
-    args: [`--disable-extensions-except=${ruta}`, `--load-extension=${ruta}`],
+    args: [`--disable-extensions-except=${route}`, `--load-extension=${route}`],
     viewport: viewport ?? { width: 1366, height: 900 },
     isMobile,
     hasTouch,
@@ -78,16 +78,16 @@ export async function abrirNavegadorWave({ viewport, isMobile = false, hasTouch 
     locale: 'es-PE',
     timezoneId: 'America/Lima',
   })
-  const cerrar = async () => {
-    await contexto.close()
-    rmSync(perfil, { recursive: true, force: true })
+  const close = async () => {
+    await context.close()
+    rmSync(profile, { recursive: true, force: true })
   }
-  return { contexto, cerrar }
+  return { contexto: context, cerrar: close }
 }
 
-async function serviceWorkerDe(contexto) {
-  const existente = contexto.serviceWorkers().find((sw) => sw.url().endsWith('/service_worker.js'))
-  return existente ?? contexto.waitForEvent('serviceworker', { timeout: 15_000 })
+async function serviceWorkerDe(context) {
+  const existing = context.serviceWorkers().find((sw) => sw.url().endsWith('/service_worker.js'))
+  return existing ?? context.waitForEvent('serviceworker', { timeout: 15_000 })
 }
 
 /**
@@ -95,58 +95,58 @@ async function serviceWorkerDe(contexto) {
  * interruptor: si WAVE ya estaba activo en la pestaña, lo apaga.
  * Devuelve si WAVE quedó activo.
  */
-async function alternarWave(pagina) {
-  const sw = await serviceWorkerDe(pagina.context())
-  await pagina.bringToFront()
+async function toggleWave(page) {
+  const sw = await serviceWorkerDe(page.context())
+  await page.bringToFront()
   return sw.evaluate(async (url) => {
     /* global chrome, serviceworker */
     // La extensión ve la URL de las pestañas http(s) por sus host_permissions.
-    const pestanas = await chrome.tabs.query({})
-    const candidatas = pestanas.filter((t) => t.url === url)
-    const pestana = candidatas.find((t) => t.active) ?? candidatas[0]
-    if (!pestana) throw new Error(`WAVE no encuentra la pestaña ${url}`)
-    await serviceworker.func.runWave(pestana.id, pestana.url ?? '')
-    return Boolean(serviceworker.func.isTabActive(pestana.id))
-  }, pagina.url())
+    const tabs = await chrome.tabs.query({})
+    const candidates = tabs.filter((t) => t.url === url)
+    const tab = candidates.find((t) => t.active) ?? candidates[0]
+    if (!tab) throw new Error(`WAVE no encuentra la pestaña ${url}`)
+    await serviceworker.func.runWave(tab.id, tab.url ?? '')
+    return Boolean(serviceworker.func.isTabActive(tab.id))
+  }, page.url())
 }
 
 /**
  * Ejecuta WAVE sobre la página tal como está (con un modal abierto, si lo hay)
  * y devuelve los conteos del panel y el detalle por regla.
  */
-export async function analizarConWave(pagina, { timeout = 60_000 } = {}) {
+export async function analyzeWithWave(page, { timeout = 60_000 } = {}) {
   // Si quedó un análisis anterior (misma pestaña, sin recarga), se apaga
   // primero: así el panel y los resultados son de este estado.
-  await pagina.evaluate(() => {
+  await page.evaluate(() => {
     if (window.wave) window.wave.results = undefined
   })
-  let activo = await alternarWave(pagina)
-  if (!activo) {
-    await pagina.waitForTimeout(500)
-    activo = await alternarWave(pagina)
+  let active = await toggleWave(page)
+  if (!active) {
+    await page.waitForTimeout(500)
+    active = await toggleWave(page)
   }
-  if (!activo) throw new Error('WAVE no quedó activo en la pestaña')
+  if (!active) throw new Error('WAVE no quedó activo en la pestaña')
 
   // El análisis termina cuando `wave.min.js` publica sus resultados.
-  await pagina.waitForFunction(() => window.wave?.results?.categories, null, { timeout })
+  await page.waitForFunction(() => window.wave?.results?.categories, null, { timeout })
   // Y el panel lateral cuando muestra los números.
-  await pagina
+  await page
     .frameLocator('#wave_sidebar_container iframe, iframe[src*="sidebar.html"]')
     .locator('text=Contrast Errors')
     .first()
     .waitFor({ timeout: 15_000 })
     .catch(() => undefined)
-  await pagina.waitForTimeout(500)
+  await page.waitForTimeout(500)
 
-  const categorias = await pagina.evaluate(() => JSON.parse(JSON.stringify(window.wave.results.categories)))
-  const conteos = {}
+  const categories = await page.evaluate(() => JSON.parse(JSON.stringify(window.wave.results.categories)))
+  const counts = {}
   const items = []
-  for (const [clave, tipo] of Object.entries(CATEGORIAS)) {
-    const categoria = categorias[tipo] ?? { count: 0, items: {} }
-    conteos[clave] = categoria.count ?? 0
-    for (const item of Object.values(categoria.items ?? {})) {
+  for (const [password, type] of Object.entries(CATEGORIES)) {
+    const category = categories[type] ?? { count: 0, items: {} }
+    counts[password] = category.count ?? 0
+    for (const item of Object.values(category.items ?? {})) {
       items.push({
-        tipo,
+        tipo: type,
         id: item.id,
         descripcion: item.description,
         cantidad: item.count,
@@ -154,17 +154,17 @@ export async function analizarConWave(pagina, { timeout = 60_000 } = {}) {
       })
     }
   }
-  return { conteos, items }
+  return { conteos: counts, items }
 }
 
 /** Captura la página con el panel de WAVE a la vista. */
-export async function capturarWave(pagina, rutaPng) {
-  await pagina.screenshot({ path: rutaPng })
-  return rutaPng
+export async function captureWave(page, routePng) {
+  await page.screenshot({ path: routePng })
+  return routePng
 }
 
 /** Apaga WAVE en la pestaña (quita el panel y los íconos) sin recargar. */
-export async function apagarWave(pagina) {
-  const activo = await pagina.evaluate(() => Boolean(document.getElementById('wave_sidebar_container')))
-  if (activo) await alternarWave(pagina)
+export async function turnOffWave(page) {
+  const active = await page.evaluate(() => Boolean(document.getElementById('wave_sidebar_container')))
+  if (active) await toggleWave(page)
 }

@@ -10,18 +10,18 @@ import { join } from 'node:path'
 
 import AxeBuilder from '@axe-core/playwright'
 
-import { abrirEstado, asegurarDir, clave, contextoDe, escribirJson, filtrarEstados, filtrarVistas, lanzar, REPORTES } from './comun.mjs'
+import { openStatus, ensureDir, handlePassword, contextOf, writeJson, filterStatuses, filterViews, launch, REPORTS } from './comun.mjs'
 
-export const ETIQUETAS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']
-export const IMPACTOS = ['critical', 'serious', 'moderate', 'minor']
+export const LABELS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']
+export const IMPACTS = ['critical', 'serious', 'moderate', 'minor']
 
-const sinWidget = Boolean(process.env.A11Y_SIN_WIDGET)
-const dir = await asegurarDir(join(REPORTES, sinWidget ? 'axe-sin-widget' : 'axe'))
+const withoutWidget = Boolean(process.env.A11Y_SIN_WIDGET)
+const dir = await ensureDir(join(REPORTS, withoutWidget ? 'axe-sin-widget' : 'axe'))
 
-function resumir(resultado) {
-  const porImpacto = Object.fromEntries(IMPACTOS.map((i) => [i, 0]))
-  const violaciones = resultado.violations.map((v) => {
-    porImpacto[v.impact] += 1
+function summarize(result) {
+  const byImpact = Object.fromEntries(IMPACTS.map((i) => [i, 0]))
+  const violations = result.violations.map((v) => {
+    byImpact[v.impact] += 1
     return {
       regla: v.id,
       impacto: v.impact,
@@ -33,65 +33,65 @@ function resumir(resultado) {
     }
   })
   return {
-    porImpacto,
-    violaciones,
-    reglasAprobadas: resultado.passes.length,
-    porRevisar: resultado.incomplete.map((i) => ({ regla: i.id, nodos: i.nodes.length })),
-    version: resultado.testEngine.version,
+    porImpacto: byImpact,
+    violaciones: violations,
+    reglasAprobadas: result.passes.length,
+    porRevisar: result.incomplete.map((i) => ({ regla: i.id, nodos: i.nodes.length })),
+    version: result.testEngine.version,
   }
 }
 
-const filas = []
-const navegador = await lanzar()
-for (const estado of filtrarEstados()) {
-  for (const vista of filtrarVistas(estado)) {
-    const contexto = await navegador.newContext(contextoDe(vista))
-    if (sinWidget) await contexto.route(/sienna-accessibility/u, (ruta) => ruta.abort())
+const rows = []
+const browser = await launch()
+for (const status of filterStatuses()) {
+  for (const vista of filterViews(status)) {
+    const context = await browser.newContext(contextOf(vista))
+    if (withoutWidget) await context.route(/sienna-accessibility/u, (route) => route.abort())
     try {
-      const pagina = await abrirEstado(navegador, contexto, estado)
-      const resultado = await new AxeBuilder({ page: pagina }).withTags(ETIQUETAS).analyze()
-      const fila = { id: estado.id, nombre: estado.nombre, clase: estado.clase, tipo: estado.tipo, vista, url: pagina.url(), ...resumir(resultado) }
-      await escribirJson(join(dir, `${clave(estado, vista)}.json`), fila)
-      filas.push(fila)
-      const { critical, serious, moderate, minor } = fila.porImpacto
-      console.log(`${clave(estado, vista).padEnd(40)} crit ${critical} ser ${serious} mod ${moderate} min ${minor}  ${fila.violaciones.map((v) => `${v.regla}(${v.nodos})`).join(' ')}`)
+      const page = await openStatus(browser, context, status)
+      const result = await new AxeBuilder({ page: page }).withTags(LABELS).analyze()
+      const row = { id: status.id, nombre: status.nombre, clase: status.clase, tipo: status.tipo, vista, url: page.url(), ...summarize(result) }
+      await writeJson(join(dir, `${handlePassword(status, vista)}.json`), row)
+      rows.push(row)
+      const { critical, serious, moderate, minor } = row.porImpacto
+      console.log(`${handlePassword(status, vista).padEnd(40)} crit ${critical} ser ${serious} mod ${moderate} min ${minor}  ${row.violaciones.map((v) => `${v.regla}(${v.nodos})`).join(' ')}`)
     } catch (error) {
-      filas.push({ id: estado.id, nombre: estado.nombre, clase: estado.clase, tipo: estado.tipo, vista, error: error.message.split('\n')[0] })
-      console.log(`${clave(estado, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
+      rows.push({ id: status.id, nombre: status.nombre, clase: status.clase, tipo: status.tipo, vista, error: error.message.split('\n')[0] })
+      console.log(`${handlePassword(status, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
     }
-    await contexto.close()
+    await context.close()
   }
 }
-await navegador.close()
+await browser.close()
 
 // Resumen: si se midió solo una parte, se combina con lo que ya había.
 const { existsSync } = await import('node:fs')
-const { leerJson } = await import('./comun.mjs')
-const rutaResumen = join(dir, 'resumen.json')
-const previo = existsSync(rutaResumen) && (process.env.A11Y_SOLO || process.env.A11Y_CLASE || process.env.A11Y_VISTAS) ? await leerJson(rutaResumen) : { filas: [] }
-const nuevas = new Set(filas.map((f) => `${f.id}--${f.vista}`))
-const todas = [...previo.filas.filter((f) => !nuevas.has(`${f.id}--${f.vista}`)), ...filas]
-await escribirJson(rutaResumen, { fecha: new Date().toISOString(), etiquetas: ETIQUETAS, sinWidget, filas: todas })
+const { readJson } = await import('./comun.mjs')
+const routeSummary = join(dir, 'resumen.json')
+const previous = existsSync(routeSummary) && (process.env.A11Y_SOLO || process.env.A11Y_CLASE || process.env.A11Y_VISTAS) ? await readJson(routeSummary) : { filas: [] }
+const fresh = new Set(rows.map((f) => `${f.id}--${f.vista}`))
+const all = [...previous.filas.filter((f) => !fresh.has(`${f.id}--${f.vista}`)), ...rows]
+await writeJson(routeSummary, { fecha: new Date().toISOString(), etiquetas: LABELS, sinWidget: withoutWidget, filas: all })
 
 // Reporte HTML legible (se abre y se captura como evidencia).
-const escapar = (t) => String(t).replace(/[&<>"]/gu, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
-const totales = Object.fromEntries(IMPACTOS.map((i) => [i, todas.reduce((s, f) => s + (f.porImpacto?.[i] ?? 0), 0)]))
+const escape = (t) => String(t).replace(/[&<>"]/gu, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+const totals = Object.fromEntries(IMPACTS.map((i) => [i, all.reduce((s, f) => s + (f.porImpacto?.[i] ?? 0), 0)]))
 const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>axe-core — RestHub</title>
 <style>body{font:14px system-ui,sans-serif;margin:24px;color:#111;background:#fff}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:4px 6px;text-align:left;vertical-align:top}th{background:#eee}.c{color:#b00020;font-weight:700}.s{color:#c2410c;font-weight:700}.ok{color:#166534}</style></head><body>
-<h1>axe-core ${escapar(todas.find((f) => f.version)?.version ?? '')} — ${todas.length} estados × vista${sinWidget ? ' (sin widget Sienna)' : ''}</h1>
-<p>Etiquetas: ${ETIQUETAS.join(', ')}. Totales de reglas violadas: critical ${totales.critical}, serious ${totales.serious}, moderate ${totales.moderate}, minor ${totales.minor}. Fecha: ${new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' })}.</p>
+<h1>axe-core ${escape(all.find((f) => f.version)?.version ?? '')} — ${all.length} estados × vista${withoutWidget ? ' (sin widget Sienna)' : ''}</h1>
+<p>Etiquetas: ${LABELS.join(', ')}. Totales de reglas violadas: critical ${totals.critical}, serious ${totals.serious}, moderate ${totals.moderate}, minor ${totals.minor}. Fecha: ${new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' })}.</p>
 <table><thead><tr><th>Estado</th><th>Tipo</th><th>Vista</th><th>Critical</th><th>Serious</th><th>Moderate</th><th>Minor</th><th>Reglas (nodos)</th></tr></thead><tbody>
-${todas
-  .map((f) => `<tr><td>${escapar(f.nombre)}<br><small>${escapar(f.id)}</small></td><td>${escapar(f.tipo)}</td><td>${f.vista}</td>${
+${all
+  .map((f) => `<tr><td>${escape(f.nombre)}<br><small>${escape(f.id)}</small></td><td>${escape(f.tipo)}</td><td>${f.vista}</td>${
     f.error
-      ? `<td colspan="5" class="c">No se pudo abrir: ${escapar(f.error)}</td>`
-      : `${IMPACTOS.map((i) => `<td class="${f.porImpacto[i] ? (i === 'critical' ? 'c' : 's') : 'ok'}">${f.porImpacto[i]}</td>`).join('')}<td>${f.violaciones.map((v) => `${escapar(v.regla)} (${v.nodos})`).join(', ') || '—'}</td>`
+      ? `<td colspan="5" class="c">No se pudo abrir: ${escape(f.error)}</td>`
+      : `${IMPACTS.map((i) => `<td class="${f.porImpacto[i] ? (i === 'critical' ? 'c' : 's') : 'ok'}">${f.porImpacto[i]}</td>`).join('')}<td>${f.violaciones.map((v) => `${escape(v.regla)} (${v.nodos})`).join(', ') || '—'}</td>`
   }</tr>`)
   .join('\n')}
 </tbody></table></body></html>`
 await writeFile(join(dir, 'reporte.html'), html)
-const errores = todas.filter((f) => f.error).length
+const errors = all.filter((f) => f.error).length
 // En el CI (A11Y_ESTRICTO=1) una violación critical o serious, o un estado que
 // no se pudo abrir, hace fallar el paso.
-if (process.env.A11Y_ESTRICTO && (totales.critical > 0 || totales.serious > 0 || errores > 0)) process.exitCode = 1
-console.log(`\naxe: ${todas.length} mediciones, ${errores} sin abrir. critical ${totales.critical}, serious ${totales.serious}, moderate ${totales.moderate}, minor ${totales.minor}`)
+if (process.env.A11Y_ESTRICTO && (totals.critical > 0 || totals.serious > 0 || errors > 0)) process.exitCode = 1
+console.log(`\naxe: ${all.length} mediciones, ${errors} sin abrir. critical ${totals.critical}, serious ${totals.serious}, moderate ${totals.moderate}, minor ${totals.minor}`)
