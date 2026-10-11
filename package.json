@@ -27,7 +27,8 @@
     "test:visual": "playwright test --project=visual-chromium-desktop --project=visual-chromium-mobile --project=visual-firefox-desktop --project=visual-firefox-mobile --project=visual-webkit-desktop --project=visual-webkit-mobile",
     "e2e:inventory": "node e2e/inventory/generate.ts",
     "type-coverage": "type-coverage",
-    "size": "size-limit"
+    "size": "size-limit",
+    "doctor": "react-doctor . --verbose --no-score --no-supply-chain --blocking warning"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
@@ -111,6 +112,7 @@
     "openapi-typescript": "^7.13.0",
     "playwright": "1.63.0",
     "puppeteer-core": "25.12.0",
+    "react-doctor": "0.9.17",
     "shadcn": "^4.21.0",
     "size-limit": "^14.2.0",
     "tailwindcss": "^4.3.3",

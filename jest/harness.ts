@@ -11,6 +11,7 @@ import { createElement, type ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider, useLocation, type RouteObject } from 'react-router'
 
 import type { CurrentUserResponse, PermissionCode } from '../src/api/types'
+import { RouteError } from '../src/router/RouteError'
 import { SCREENS } from '../src/router/screens'
 import { ToastStack } from '../src/features/shell/ToastStack'
 import { api, setAuthToken } from '../src/services/api'
@@ -251,9 +252,12 @@ function copy(routes: readonly RouteObject[]): RouteObject[] {
 
 /** Monta un router en memoria con estas rutas (p. ej. las de `src/router`). */
 export function mountRoutes(routes: RouteObject[], en = '/'): Mount {
-  const router = createMemoryRouter([...copy(routes), { path: '*', element: createElement(WhereAmI) }], {
-    initialEntries: [en],
-  })
+  const router = createMemoryRouter(
+    [...copy(routes).map((route) => ({ ErrorBoundary: RouteError, ...route })), { path: '*', element: createElement(WhereAmI), ErrorBoundary: RouteError }],
+    {
+      initialEntries: [en],
+    },
+  )
   const user = userEvent.setup()
   // Los avisos (`useNotifications`) se ven como en el armazón de la aplicación.
   const result = render(

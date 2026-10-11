@@ -1,0 +1,49 @@
+{
+  // React Doctor (`pnpm doctor`). Cada exclusión dice por qué; lo que no está
+  // aquí se arregla en el código y el CI falla ante cualquier hallazgo nuevo.
+  "ignore": {
+    "overrides": [
+      {
+        // Herramientas de línea de comandos, no código de la aplicación. Esperar
+        // dentro de un bucle es a propósito: una sola página de Chromium, un
+        // puerto o un archivo a la vez, en orden, y el orden es parte del
+        // resultado. Las listas son de unos pocos elementos.
+        "files": ["checks/**", "eslint.config.js", "e2e/**", "scripts/**"],
+        "rules": [
+          "react-doctor/async-await-in-loop",
+          "react-doctor/js-set-map-lookups",
+          "react-doctor/server-sequential-independent-await",
+          "react-doctor/no-fetch-response-used-without-status-check",
+          "react-doctor/no-unsafe-json-parse",
+          "react-doctor/no-json-parse-stringify-clone",
+          "react-doctor/import-metadata-execution-risk"
+        ]
+      },
+      {
+        // Los genera y mantiene el CLI de shadcn: exportan junto al componente
+        // su variante (`buttonVariants`) y no se editan a mano.
+        "files": ["src/components/ui/**"],
+        "rules": ["react-doctor/only-export-components"]
+      },
+      {
+        // Estas mutaciones no tocan el caché de consultas: abren o actualizan
+        // la sesión en el almacén de zustand (`useSession`) o devuelven un
+        // resultado que nadie más lee. Al cerrar la sesión se vacía el caché
+        // entero, así que no queda nada que invalidar.
+        "files": [
+          "src/features/auth/useLogin.ts",
+          "src/features/auth/useChangePassword.ts",
+          "src/features/platform/usePlatformLogin.ts",
+          "src/features/shell/useAcceptTerms.ts"
+        ],
+        "rules": ["react-doctor/query-mutation-missing-invalidation"]
+      },
+      {
+        // El nombre accesible del botón de la cabecera lo da el texto de la
+        // columna, que llega por `table.FlexRender`; la regla no ve dentro.
+        "files": ["src/features/insights/MarginsTable.tsx"],
+        "rules": ["react-doctor/control-has-associated-label"]
+      }
+    ]
+  }
+}

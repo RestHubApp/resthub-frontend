@@ -8,6 +8,7 @@ import { paths, routePatterns } from '@/services/paths'
 import { lazyRoute } from './lazyRoute'
 import { PLATFORM } from './platformRoute'
 import { PREVIEW } from './previewRoute'
+import { RouteError } from './RouteError'
 import { SCREENS } from './screens'
 import type { Screen } from './screens/screenTypes'
 
@@ -27,11 +28,12 @@ function screenRoute({ path, load, permission, public: isPublic }: Screen): Rout
 export const router = createBrowserRouter(
   [
     // En una pestaña de vista previa, la puerta muestra un aviso en vez del área.
-    { element: <PreviewPlatformGate />, children: [PLATFORM] },
-    PREVIEW,
+    { element: <PreviewPlatformGate />, ErrorBoundary: RouteError, children: [PLATFORM] },
+    { ...PREVIEW, ErrorBoundary: RouteError },
     {
       path: routePatterns.home,
       element: <AppShell screens={SCREENS} />,
+      ErrorBoundary: RouteError,
       children: [
         { index: true, Component: HomeRedirect },
         ...SCREENS.map(screenRoute),

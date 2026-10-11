@@ -29,8 +29,8 @@ export function ModifierGroupsEditor({ groups, error, onChange }: ModifierGroups
       <legend className="mb-1 text-sm font-medium">Opciones del plato (opcional)</legend>
       {groups.map((group, index) => (
         <ModifierGroupFields
-          key={`grupo-${String(index)}`}
-          id={`grupo-${String(index)}`}
+          key={group.key}
+          id={group.key}
           group={group}
           onChange={(partial) => {
             change(index, partial)

@@ -58,5 +58,6 @@ export function canAssignRole(
   role: Pick<Role, 'permissions'>,
   granted: readonly PermissionCode[],
 ): boolean {
-  return role.permissions.every((permission) => granted.includes(permission))
+  const owned = new Set(granted)
+  return role.permissions.every((permission) => owned.has(permission))
 }

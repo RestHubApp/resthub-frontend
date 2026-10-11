@@ -16,14 +16,14 @@ export function LowStockRow({ item }: { readonly item: LowStockItem }) {
           Bajo mínimo
         </span>
       </div>
-      <div
-        role="meter"
+      <meter
         aria-label={`Stock de ${item.name} respecto del mínimo`}
-        aria-valuemin={0}
-        aria-valuemax={toNumber(item.min_stock)}
-        aria-valuenow={toNumber(item.stock)}
-        className="h-2 overflow-hidden rounded-full bg-destructive/15"
-      >
+        min={0}
+        max={toNumber(item.min_stock)}
+        value={toNumber(item.stock)}
+        className="sr-only"
+      />
+      <div aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-destructive/15">
         <div className="h-full rounded-full bg-destructive" style={{ width: `${String(level)}%` }} />
       </div>
       <p className="m-0 text-xs text-muted-foreground">

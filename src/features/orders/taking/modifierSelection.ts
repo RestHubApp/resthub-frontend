@@ -39,11 +39,12 @@ export interface SelectionSummary {
 export function summarize(item: OrderMenuItem, selected: Selected): SelectionSummary {
   const groups = item.modifier_groups
   const missing = groups.filter((group) => (selected[group.name] ?? []).length < group.min_choices)
-  const modifiers: DraftModifier[] = groups.flatMap((group) =>
-    group.options
-      .filter((option) => (selected[group.name] ?? []).includes(option.name))
-      .map((option) => ({ group: group.name, option: option.name, price: option.price })),
-  )
+  const modifiers: DraftModifier[] = groups.flatMap((group) => {
+    const chosen = new Set(selected[group.name])
+    return group.options
+      .filter((option) => chosen.has(option.name))
+      .map((option) => ({ group: group.name, option: option.name, price: option.price }))
+  })
   const totalCents = toCents(item.price) + modifiers.reduce((sum, m) => sum + toCents(m.price), 0)
   return { missing, modifiers, totalCents }
 }

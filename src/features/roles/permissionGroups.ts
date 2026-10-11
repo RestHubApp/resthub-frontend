@@ -67,8 +67,9 @@ export function permissionSummary(
     return 'Sin permisos'
   }
   const count = quantity === 1 ? '1 permiso' : `${String(quantity)} permisos`
+  const owned = new Set(role.permissions)
   const names = groups
-    .filter((group) => group.permissions.some((permission) => role.permissions.includes(permission.code)))
+    .filter((group) => group.permissions.some((permission) => owned.has(permission.code)))
     .map((group) => group.name)
   return names.length === 0 ? count : `${count} · ${enumerate(names)}`
 }

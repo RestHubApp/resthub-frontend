@@ -41,6 +41,13 @@ jobs:
       - name: Código sin uso (knip)
         run: pnpm knip
 
+      # React Doctor: corrección, rendimiento, seguridad y accesibilidad de React.
+      # `--no-score` no llama a su API de puntuación ni envía fallos; falla ante
+      # cualquier hallazgo (advertencias incluidas). Las exclusiones y su motivo
+      # están en doctor.config.jsonc.
+      - name: React Doctor
+        run: pnpm run doctor
+
       # Código repetido: falla si pasa del 0,5 % de las líneas.
       - name: Duplicación (jscpd)
         run: pnpm dup
