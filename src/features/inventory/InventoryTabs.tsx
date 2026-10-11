@@ -22,18 +22,18 @@ export function InventoryTabs({ value, onChange, panels, alertCount }: Inventory
   return (
     <Tabs
       value={value}
-      onValueChange={(nuevo) => {
-        onChange(nuevo as InventorySection)
+      onValueChange={(fresh) => {
+        onChange(fresh as InventorySection)
       }}
       className="gap-4"
     >
       <div className="-mx-4 overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_85%,transparent)] sm:mx-0 sm:px-0 sm:[mask-image:none]">
         <TabsList className="group-data-horizontal/tabs:h-auto">
-          {SECTIONS.map((seccion) => (
-            <TabsTrigger key={seccion.value} value={seccion.value} className="h-11 flex-none px-3.5">
-              <Icon name={seccion.icon} size={16} />
-              <span>{seccion.label}</span>
-              {seccion.value === 'alertas' && alertCount !== undefined && alertCount > 0 ? (
+          {SECTIONS.map((section) => (
+            <TabsTrigger key={section.value} value={section.value} className="h-11 flex-none px-3.5">
+              <Icon name={section.icon} size={16} />
+              <span>{section.label}</span>
+              {section.value === 'alertas' && alertCount !== undefined && alertCount > 0 ? (
                 <span className="rounded-full bg-warning px-1.5 text-xs font-semibold text-white">
                   {alertCount}
                 </span>
@@ -42,9 +42,9 @@ export function InventoryTabs({ value, onChange, panels, alertCount }: Inventory
           ))}
         </TabsList>
       </div>
-      {SECTIONS.map((seccion) => (
-        <TabsContent key={seccion.value} value={seccion.value}>
-          {panels[seccion.value]}
+      {SECTIONS.map((section) => (
+        <TabsContent key={section.value} value={section.value}>
+          {panels[section.value]}
         </TabsContent>
       ))}
     </Tabs>

@@ -20,31 +20,31 @@ export function recipeCatalog(
   ingredients: readonly Ingredient[],
   recipe: Recipe,
 ): ReadonlyMap<number, RecipeIngredient> {
-  const catalogo = new Map<number, RecipeIngredient>()
-  for (const linea of recipe.lines) {
-    catalogo.set(linea.ingredient_id, {
-      id: linea.ingredient_id,
-      name: linea.ingredient_name,
-      unit: linea.unit,
-      unitCost: Number(linea.unit_cost),
+  const catalog = new Map<number, RecipeIngredient>()
+  for (const line of recipe.lines) {
+    catalog.set(line.ingredient_id, {
+      id: line.ingredient_id,
+      name: line.ingredient_name,
+      unit: line.unit,
+      unitCost: Number(line.unit_cost),
     })
   }
-  for (const insumo of ingredients) {
-    catalogo.set(insumo.id, {
-      id: insumo.id,
-      name: insumo.name,
-      unit: insumo.unit,
-      unitCost: Number(insumo.unit_cost),
+  for (const ingredient of ingredients) {
+    catalog.set(ingredient.id, {
+      id: ingredient.id,
+      name: ingredient.name,
+      unit: ingredient.unit,
+      unitCost: Number(ingredient.unit_cost),
     })
   }
-  return catalogo
+  return catalog
 }
 
 export function recipeValuesOf(recipe: Recipe): RecipeValues {
   return {
-    lines: recipe.lines.map((linea) => ({
-      ingredient_id: linea.ingredient_id,
-      quantity: fromBase(linea.quantity, 1),
+    lines: recipe.lines.map((line) => ({
+      ingredient_id: line.ingredient_id,
+      quantity: fromBase(line.quantity, 1),
     })),
   }
 }
@@ -62,7 +62,7 @@ export function recipeCost(
   lines: RecipeValues['lines'],
   catalog: ReadonlyMap<number, RecipeIngredient>,
 ): number {
-  return lines.reduce((total, linea) => total + lineCost(linea.quantity, catalog.get(linea.ingredient_id)), 0)
+  return lines.reduce((total, line) => total + lineCost(line.quantity, catalog.get(line.ingredient_id)), 0)
 }
 
 /** Los insumos activos que todavía no están en la receta, para agregarlos. */
@@ -71,19 +71,19 @@ export function availableIngredients(
   lines: RecipeValues['lines'],
   catalog: ReadonlyMap<number, RecipeIngredient>,
 ): RecipeIngredient[] {
-  const usados = new Set(lines.map((linea) => linea.ingredient_id))
+  const used = new Set(lines.map((line) => line.ingredient_id))
   return ingredients
-    .filter((insumo) => !usados.has(insumo.id))
-    .map((insumo) => catalog.get(insumo.id))
-    .filter((insumo) => insumo !== undefined)
+    .filter((ingredient) => !used.has(ingredient.id))
+    .map((ingredient) => catalog.get(ingredient.id))
+    .filter((ingredient) => ingredient !== undefined)
 }
 
 /** El cuerpo de `PUT /inventory/recipes/{id}`, con las cantidades como texto decimal. */
 export function recipePayload(values: RecipeValues) {
   return {
-    lines: values.lines.map((linea) => ({
-      ingredient_id: linea.ingredient_id,
-      quantity: linea.quantity.trim().replace(',', '.'),
+    lines: values.lines.map((line) => ({
+      ingredient_id: line.ingredient_id,
+      quantity: line.quantity.trim().replace(',', '.'),
     })),
   }
 }

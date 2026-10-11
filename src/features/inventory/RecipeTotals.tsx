@@ -15,9 +15,9 @@ interface RecipeTotalsProps {
  * interrumpir a quien está escribiendo.
  */
 export function RecipeTotals({ price, cost, hasLines }: RecipeTotalsProps) {
-  const margen = price - cost
-  const porcentaje = price > 0 ? (margen / price) * 100 : 0
-  const perdida = margen < 0
+  const margin = price - cost
+  const percentage = price > 0 ? (margin / price) * 100 : 0
+  const lost = margin < 0
 
   return (
     <dl
@@ -34,14 +34,14 @@ export function RecipeTotals({ price, cost, hasLines }: RecipeTotalsProps) {
       </div>
       <div className="flex flex-col gap-0.5">
         <dt className="text-sm text-muted-foreground">Margen</dt>
-        <dd className={cn('m-0 text-lg font-semibold tabular-nums', perdida && 'text-destructive')}>
-          {hasLines ? formatMoney(margen) : '—'}
+        <dd className={cn('m-0 text-lg font-semibold tabular-nums', lost && 'text-destructive')}>
+          {hasLines ? formatMoney(margin) : '—'}
         </dd>
       </div>
       <div className="flex flex-col gap-0.5">
         <dt className="text-sm text-muted-foreground">% margen</dt>
-        <dd className={cn('m-0 text-lg font-semibold tabular-nums', perdida && 'text-destructive')}>
-          {hasLines ? formatPercent(porcentaje.toFixed(1)) : '—'}
+        <dd className={cn('m-0 text-lg font-semibold tabular-nums', lost && 'text-destructive')}>
+          {hasLines ? formatPercent(percentage.toFixed(1)) : '—'}
         </dd>
       </div>
     </dl>

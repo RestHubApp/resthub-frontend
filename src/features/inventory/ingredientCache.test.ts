@@ -7,7 +7,7 @@ import { saveIngredient } from './ingredientCache'
 
 const ARROZ = 'Arroz'
 
-function insumo(id: number, name: string, overrides: Partial<Ingredient> = {}): Ingredient {
+function ingredient(id: number, name: string, overrides: Partial<Ingredient> = {}): Ingredient {
   return {
     id,
     name,
@@ -27,9 +27,9 @@ function insumo(id: number, name: string, overrides: Partial<Ingredient> = {}): 
 describe('saveIngredient', () => {
   it('agrega o actualiza un insumo activo en la lista ordenado por nombre', () => {
     const qc = new QueryClient()
-    qc.setQueryData(ingredientsQuery.queryKey, [insumo(1, ARROZ), insumo(3, 'Cebolla')])
+    qc.setQueryData(ingredientsQuery.queryKey, [ingredient(1, ARROZ), ingredient(3, 'Cebolla')])
 
-    saveIngredient(qc, insumo(2, 'Azúcar'))
+    saveIngredient(qc, ingredient(2, 'Azúcar'))
 
     const actual = qc.getQueryData<Ingredient[]>(ingredientsQuery.queryKey)
     expect(actual?.map((i) => i.name)).toEqual([ARROZ, 'Azúcar', 'Cebolla'])
@@ -37,12 +37,12 @@ describe('saveIngredient', () => {
 
   it('quita un insumo desactivado de la lista principal y de las alertas', () => {
     const qc = new QueryClient()
-    const tomate = insumo(2, 'Tomate', { stock: '2', min_stock: '5', is_low: true })
-    qc.setQueryData(ingredientsQuery.queryKey, [insumo(1, ARROZ), tomate])
+    const tomate = ingredient(2, 'Tomate', { stock: '2', min_stock: '5', is_low: true })
+    qc.setQueryData(ingredientsQuery.queryKey, [ingredient(1, ARROZ), tomate])
     qc.setQueryData(lowStockQuery.queryKey, [tomate])
 
-    const desactivado = { ...tomate, is_active: false }
-    saveIngredient(qc, desactivado)
+    const disabled = { ...tomate, is_active: false }
+    saveIngredient(qc, disabled)
 
     expect(qc.getQueryData<Ingredient[]>(ingredientsQuery.queryKey)?.map((i) => i.id)).toEqual([1])
     expect(qc.getQueryData<Ingredient[]>(lowStockQuery.queryKey)?.map((i) => i.id)).toEqual([])
@@ -50,9 +50,9 @@ describe('saveIngredient', () => {
 
   it('actualiza las alertas ordenando negativos primero y luego por distancia al mínimo', () => {
     const qc = new QueryClient()
-    qc.setQueryData(lowStockQuery.queryKey, [insumo(1, 'Papas', { stock: '4', min_stock: '10', is_low: true })])
+    qc.setQueryData(lowStockQuery.queryKey, [ingredient(1, 'Papas', { stock: '4', min_stock: '10', is_low: true })])
 
-    const carne = insumo(2, 'Carne', { stock: '-1', min_stock: '10', is_low: true, is_negative: true })
+    const carne = ingredient(2, 'Carne', { stock: '-1', min_stock: '10', is_low: true, is_negative: true })
     saveIngredient(qc, carne)
 
     const actual = qc.getQueryData<Ingredient[]>(lowStockQuery.queryKey)
@@ -61,7 +61,7 @@ describe('saveIngredient', () => {
 
   it('acepta un resultado de tipo StockChange y extrae el insumo', () => {
     const qc = new QueryClient()
-    qc.setQueryData(ingredientsQuery.queryKey, [insumo(1, ARROZ, { stock: '10' })])
+    qc.setQueryData(ingredientsQuery.queryKey, [ingredient(1, ARROZ, { stock: '10' })])
 
     const stockChange: StockChange = {
       movement: {
@@ -80,7 +80,7 @@ describe('saveIngredient', () => {
         unit: 'g',
         unit_cost: '15',
       },
-      ingredient: insumo(1, ARROZ, { stock: '15' }),
+      ingredient: ingredient(1, ARROZ, { stock: '15' }),
     }
 
     saveIngredient(qc, stockChange)
@@ -93,7 +93,7 @@ describe('saveIngredient', () => {
     const qc = new QueryClient()
     const spy = jest.spyOn(qc, 'invalidateQueries')
 
-    saveIngredient(qc, insumo(1, ARROZ))
+    saveIngredient(qc, ingredient(1, ARROZ))
 
     expect(spy).toHaveBeenCalledWith({ queryKey: inventoryQueryKey })
   })

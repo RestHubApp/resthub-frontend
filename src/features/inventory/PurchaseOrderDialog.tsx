@@ -27,62 +27,62 @@ interface PurchaseOrderDialogProps {
  * alcanza para una semana; después se ajusta a mano lo que haga falta.
  */
 export function PurchaseOrderDialog({ open, onClose }: PurchaseOrderDialogProps) {
-  const proveedores = useQuery({ ...suppliersQuery, enabled: open })
-  const insumos = useQuery({ ...ingredientsQuery, enabled: open })
-  const sugerencias = useQuery({ ...purchaseSuggestionsQuery, enabled: open })
-  const [proveedor, setProveedor] = useState('')
-  const [lineas, setLineas] = useState<LineDraft[]>([emptyLine()])
-  const cerrar = () => {
-    setProveedor('')
-    setLineas([emptyLine()])
+  const suppliers = useQuery({ ...suppliersQuery, enabled: open })
+  const ingredients = useQuery({ ...ingredientsQuery, enabled: open })
+  const suggestions = useQuery({ ...purchaseSuggestionsQuery, enabled: open })
+  const [supplier, setSupplier] = useState('')
+  const [lines, setLines] = useState<LineDraft[]>([emptyLine()])
+  const close = () => {
+    setSupplier('')
+    setLines([emptyLine()])
     onClose()
   }
-  const crear = usePurchasingMutation({
+  const create = usePurchasingMutation({
     mutationFn: (payload: CreatePurchaseOrderRequest) => createPurchaseOrder(payload),
-    success: (orden) => `Orden de compra ${String(orden.number)} creada (${formatMoney(orden.estimated_total)}).`,
+    success: (order) => `Orden de compra ${String(order.number)} creada (${formatMoney(order.estimated_total)}).`,
     failure: 'No se pudo crear la orden.',
-    onSuccess: cerrar,
+    onSuccess: close,
   })
-  const listas = linesForApi(lineas)
-  const activos = (proveedores.data ?? []).filter((p) => p.is_active)
+  const lists = linesForApi(lines)
+  const active = (suppliers.data ?? []).filter((p) => p.is_active)
 
   return (
     <FormDialog open={open} size="lg" title="Nueva orden de compra" onOpenChange={(abierto) => {
       if (!abierto) {
-        cerrar()
+        close()
       }
     }}>
       <div className="flex flex-col gap-2">
         <Label htmlFor="orden-proveedor">Proveedor</Label>
-        <NativeSelect id="orden-proveedor" className="w-full" value={proveedor} onChange={(evento) => {
-          setProveedor(evento.target.value)
+        <NativeSelect id="orden-proveedor" className="w-full" value={supplier} onChange={(event) => {
+          setSupplier(event.target.value)
         }}>
-          <NativeSelectOption value="">{activos.length === 0 ? 'Da de alta un proveedor primero' : 'Elige el proveedor'}</NativeSelectOption>
-          {activos.map((p) => (
+          <NativeSelectOption value="">{active.length === 0 ? 'Da de alta un proveedor primero' : 'Elige el proveedor'}</NativeSelectOption>
+          {active.map((p) => (
             <NativeSelectOption key={p.id} value={String(p.id)}>{p.name}</NativeSelectOption>
           ))}
         </NativeSelect>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-medium">Insumos</span>
-        <Button type="button" variant="outline" size="sm" disabled={(sugerencias.data ?? []).length === 0} onClick={() => {
-          setLineas(linesFromSuggestions(sugerencias.data ?? []))
+        <Button type="button" variant="outline" size="sm" disabled={(suggestions.data ?? []).length === 0} onClick={() => {
+          setLines(linesFromSuggestions(suggestions.data ?? []))
         }}>
           <Icon name="comprar" size={14} />
-          <span>Cargar sugerencias ({(sugerencias.data ?? []).length})</span>
+          <span>Cargar sugerencias ({(suggestions.data ?? []).length})</span>
         </Button>
       </div>
-      <PurchaseLinesList lines={lineas} ingredients={insumos.data ?? []} onChange={setLineas} />
+      <PurchaseLinesList lines={lines} ingredients={ingredients.data ?? []} onChange={setLines} />
       <DialogFormActions>
-        <Button type="button" variant="outline" onClick={cerrar}>
+        <Button type="button" variant="outline" onClick={close}>
           Cancelar
         </Button>
-        <Button type="button" disabled={proveedor === '' || listas === null || crear.isPending} onClick={() => {
-          if (listas !== null) {
-            crear.mutate({ supplier_id: Number(proveedor), lines: listas, notes: '' })
+        <Button type="button" disabled={supplier === '' || lists === null || create.isPending} onClick={() => {
+          if (lists !== null) {
+            create.mutate({ supplier_id: Number(supplier), lines: lists, notes: '' })
           }
         }}>
-          {crear.isPending ? 'Creando…' : 'Crear orden'}
+          {create.isPending ? 'Creando…' : 'Crear orden'}
         </Button>
       </DialogFormActions>
     </FormDialog>

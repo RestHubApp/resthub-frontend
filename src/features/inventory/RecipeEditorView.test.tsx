@@ -7,52 +7,52 @@ import type { PermissionCode, Recipe } from '@/api/types'
 import { InventoryView } from './InventoryView'
 import { RecipeEditorView } from './RecipeEditorView'
 
-const RECETA = '/inventory/recipes/10'
+const RECIPE = '/inventory/recipes/10'
 const CEBOLLA = insumo({ id: 2, name: 'Cebolla', unit_cost: '0.002' })
-const SOLO_LECTURA: PermissionCode[] = ['inventory.read']
-const GUARDAR = { name: 'Guardar receta' }
-const INSUMOS = '/inventory/ingredients'
+const ONLY_READ: PermissionCode[] = ['inventory.read']
+const SAVE = { name: 'Guardar receta' }
+const INGREDIENTS = '/inventory/ingredients'
 const EN = '/inventario/recetas/10'
-const RUTA = { path: '/inventario/recetas/:menuItemId', en: EN }
+const ROUTE = { path: '/inventario/recetas/:menuItemId', en: EN }
 
-function abrirReceta(inicial: Recipe = receta(), permisos: readonly PermissionCode[] = PERMISOS_ENCARGADO) {
-  const api = servidor().on('get', RECETA, inicial).on('get', INSUMOS, [insumo(), CEBOLLA])
-  entrarComo(permisos)
-  return { api, ...montar(<RecipeEditorView />, RUTA) }
+function openRecipe(initial: Recipe = receta(), permissions: readonly PermissionCode[] = PERMISOS_ENCARGADO) {
+  const api = servidor().on('get', RECIPE, initial).on('get', INGREDIENTS, [insumo(), CEBOLLA])
+  entrarComo(permissions)
+  return { api, ...montar(<RecipeEditorView />, ROUTE) }
 }
 
-function valor(termino: string) {
-  return screen.getByText(termino).nextElementSibling
+function value(term: string) {
+  return screen.getByText(term).nextElementSibling
 }
 
 describe('RecipeEditorView', () => {
   it('muestra precio, costo y margen de la porción y cada línea con su costo', async () => {
-    abrirReceta()
+    openRecipe()
 
     expect(await screen.findByRole('heading', { name: 'Receta: Ceviche', level: 1 })).toBeInTheDocument()
-    expect(valor('Costo por porción')).toHaveTextContent('S/ 1.00')
-    expect(valor('Margen')).toHaveTextContent('S/ 29.00')
+    expect(value('Costo por porción')).toHaveTextContent('S/ 1.00')
+    expect(value('Margen')).toHaveTextContent('S/ 29.00')
     expect(screen.getByLabelText('Limón')).toHaveValue('250')
     expect(screen.getByRole('link', { name: 'Volver a recetas' })).toHaveAttribute('href', '/inventario?vista=recetas')
   })
 
   it('agregar un insumo y escribir su cantidad recalcula el costo al instante y se guarda completo', async () => {
-    const { api, user } = abrirReceta()
-    api.on('put', RECETA, receta({ cost: '1.20' }))
+    const { api, user } = openRecipe()
+    api.on('put', RECIPE, receta({ cost: '1.20' }))
 
-    const guardar = await screen.findByRole('button', GUARDAR)
-    expect(guardar).toBeDisabled()
+    const save = await screen.findByRole('button', SAVE)
+    expect(save).toBeDisabled()
     await user.selectOptions(screen.getByLabelText('Agregar insumo'), 'Cebolla (g)')
     expect(screen.queryByRole('option', { name: 'Limón (g)' })).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Agregar' }))
     await user.type(screen.getByLabelText('Cebolla'), '100')
 
-    expect(valor('Costo por porción')).toHaveTextContent('S/ 1.20')
+    expect(value('Costo por porción')).toHaveTextContent('S/ 1.20')
     expect(screen.getByText('Hay cambios sin guardar.')).toBeInTheDocument()
-    await user.click(guardar)
+    await user.click(save)
 
     expect(await screen.findByText('Receta de Ceviche guardada.')).toBeInTheDocument()
-    expect(api.llamadas('put', RECETA)[0]?.body).toEqual({
+    expect(api.llamadas('put', RECIPE)[0]?.body).toEqual({
       lines: [
         { ingredient_id: 1, quantity: '250' },
         { ingredient_id: 2, quantity: '100' },
@@ -61,50 +61,50 @@ describe('RecipeEditorView', () => {
   })
 
   it('quitar el último insumo avisa que guardar borra la receta', async () => {
-    const { api, user } = abrirReceta()
-    api.on('put', RECETA, receta({ has_recipe: false, lines: [], cost: null, margin: null, margin_percent: null }))
+    const { api, user } = openRecipe()
+    api.on('put', RECIPE, receta({ has_recipe: false, lines: [], cost: null, margin: null, margin_percent: null }))
 
     await user.click(await screen.findByRole('button', { name: 'Quitar Limón' }))
     expect(screen.getByText('Sin insumos: al guardar, el plato queda sin receta y sin costo.')).toBeInTheDocument()
-    expect(valor('Margen')).toHaveTextContent('—')
+    expect(value('Margen')).toHaveTextContent('—')
     await user.click(screen.getByRole('button', { name: 'Borrar receta' }))
 
     expect(await screen.findByText('Receta de Ceviche borrada.')).toBeInTheDocument()
-    expect(api.llamadas('put', RECETA)[0]?.body).toEqual({ lines: [] })
+    expect(api.llamadas('put', RECIPE)[0]?.body).toEqual({ lines: [] })
   })
 
   it('una cantidad en cero no se guarda y un margen negativo se marca', async () => {
-    const { api, user } = abrirReceta(receta({ price: '0.50' }))
-    const campo = await screen.findByLabelText('Limón')
-    expect(valor('Margen')).toHaveTextContent('-S/ 0.50')
-    await user.clear(campo)
-    await user.type(campo, '0')
-    await user.click(screen.getByRole('button', GUARDAR))
+    const { api, user } = openRecipe(receta({ price: '0.50' }))
+    const field = await screen.findByLabelText('Limón')
+    expect(value('Margen')).toHaveTextContent('-S/ 0.50')
+    await user.clear(field)
+    await user.type(field, '0')
+    await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('Tiene que ser mayor que cero')).toBeInTheDocument()
-    expect(api.llamadas('put', RECETA)).toHaveLength(0)
+    expect(api.llamadas('put', RECIPE)).toHaveLength(0)
   })
 
   it('quien solo consulta ve la receta sin poder cambiarla', async () => {
-    abrirReceta(receta(), SOLO_LECTURA)
+    openRecipe(receta(), ONLY_READ)
     expect(await screen.findByLabelText('Limón')).toHaveAttribute('readonly')
     expect(screen.queryByRole('button', { name: 'Quitar Limón' })).not.toBeInTheDocument()
     expect(screen.queryByLabelText('Agregar insumo')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', GUARDAR)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', SAVE)).not.toBeInTheDocument()
   })
 
   it('si el servidor rechaza el guardado, el error queda junto a la receta', async () => {
-    const { api, user } = abrirReceta()
-    api.on('put', RECETA, new RespuestaDeError(422, 'Un insumo ya no existe.'))
+    const { api, user } = openRecipe()
+    api.on('put', RECIPE, new RespuestaDeError(422, 'Un insumo ya no existe.'))
     await user.type(await screen.findByLabelText('Limón'), '0')
-    await user.click(screen.getByRole('button', GUARDAR))
+    await user.click(screen.getByRole('button', SAVE))
     expect(await screen.findByText('Un insumo ya no existe.')).toBeInTheDocument()
   })
 
   it('llegando desde el menú, vuelve al menú', async () => {
-    servidor().on('get', RECETA, new RespuestaDeError(404, 'Ese plato no existe.')).on('get', INSUMOS, [])
+    servidor().on('get', RECIPE, new RespuestaDeError(404, 'Ese plato no existe.')).on('get', INGREDIENTS, [])
     entrarComo()
-    const { router } = montar(<RecipeEditorView />, RUTA)
+    const { router } = montar(<RecipeEditorView />, ROUTE)
     await act(() => router.navigate(EN, { state: { from: '/menu' } }))
 
     expect(await screen.findByText('Ese plato no existe.')).toBeInTheDocument()
@@ -119,14 +119,14 @@ describe('RecipesPanel', () => {
         costoDePlato(),
         costoDePlato({ menu_item_id: 11, menu_item_name: 'Causa', has_recipe: false, cost: null, margin: null, margin_percent: null, is_active: false }),
       ])
-      .on('get', INSUMOS, [])
+      .on('get', INGREDIENTS, [])
       .on('get', '/inventory/alerts/low-stock', [])
-    entrarComo(SOLO_LECTURA)
+    entrarComo(ONLY_READ)
     montar(<InventoryView />, { path: '/inventario', en: '/inventario?vista=recetas' })
 
-    const fila = (await screen.findByText('Ceviche')).closest('tr') as HTMLElement
-    expect(within(fila).getByText('S/ 18.00')).toBeInTheDocument()
-    expect(within(fila).getByRole('link', { name: 'Ver receta de Ceviche' })).toHaveAttribute('href', EN)
+    const row = (await screen.findByText('Ceviche')).closest('tr') as HTMLElement
+    expect(within(row).getByText('S/ 18.00')).toBeInTheDocument()
+    expect(within(row).getByRole('link', { name: 'Ver receta de Ceviche' })).toHaveAttribute('href', EN)
     expect(screen.getByText('Sin receta')).toBeInTheDocument()
     expect(screen.getByText('Fuera de la carta')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Crear receta de Causa' })).toBeInTheDocument()

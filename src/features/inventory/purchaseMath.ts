@@ -3,8 +3,8 @@ import type { PurchaseValues } from './inventorySchema'
 import { findInputUnit, fromBase, inputUnits, parseDecimal, priceUnit, toBaseCost, toBaseQuantity } from './units'
 import { formatMoney } from '@/services/format'
 
-function positivo(numero: number): boolean {
-  return Number.isFinite(numero) && numero > 0
+function positive(number: number): boolean {
+  return Number.isFinite(number) && number > 0
 }
 
 export interface PurchaseMath {
@@ -23,38 +23,38 @@ export interface PurchaseMath {
  */
 export function purchaseMath(values: PurchaseValues, unit: IngredientUnit): PurchaseMath | null {
   const factor = findInputUnit(unit, values.quantity_unit).factor
-  const cantidad = parseDecimal(values.quantity) * factor
-  const costo = parseDecimal(values.cost)
-  if (!positivo(cantidad) || !positivo(costo)) {
+  const quantity = parseDecimal(values.quantity) * factor
+  const cost = parseDecimal(values.cost)
+  if (!positive(quantity) || !positive(cost)) {
     return null
   }
-  const precio = priceUnit(unit).factor
+  const price = priceUnit(unit).factor
   if (values.cost_mode === 'unit') {
-    return { baseQuantity: cantidad, pricePerUnit: costo, total: (costo * cantidad) / precio }
+    return { baseQuantity: quantity, pricePerUnit: cost, total: (cost * quantity) / price }
   }
-  return { baseQuantity: cantidad, pricePerUnit: (costo / cantidad) * precio, total: costo }
+  return { baseQuantity: quantity, pricePerUnit: (cost / quantity) * price, total: cost }
 }
 
 /** El cuerpo de `POST /inventory/purchases`, en la unidad base. */
 export function purchasePayload(ingredientId: number, values: PurchaseValues, unit: IngredientUnit) {
   const factor = findInputUnit(unit, values.quantity_unit).factor
-  const cantidad = toBaseQuantity(values.quantity, factor)
-  const costo = parseDecimal(values.cost)
+  const quantity = toBaseQuantity(values.quantity, factor)
+  const cost = parseDecimal(values.cost)
   const unitCost =
     values.cost_mode === 'unit'
-      ? toBaseCost(costo, priceUnit(unit).factor)
-      : toBaseCost(costo, Number(cantidad))
-  return { ingredient_id: ingredientId, quantity: cantidad, unit_cost: unitCost, reason: values.reason }
+      ? toBaseCost(cost, priceUnit(unit).factor)
+      : toBaseCost(cost, Number(quantity))
+  return { ingredient_id: ingredientId, quantity: quantity, unit_cost: unitCost, reason: values.reason }
 }
 
 /** Se propone el costo que ya tiene el insumo: casi siempre se repite. */
 export function purchaseDefaults(ingredient: Ingredient): PurchaseValues {
-  const costo = Number(ingredient.unit_cost) * priceUnit(ingredient.unit).factor
+  const cost = Number(ingredient.unit_cost) * priceUnit(ingredient.unit).factor
   return {
     quantity: '',
     quantity_unit: inputUnits(ingredient.unit)[0]?.value ?? ingredient.unit,
     cost_mode: 'unit',
-    cost: costo > 0 ? fromBase(costo, 1) : '',
+    cost: cost > 0 ? fromBase(cost, 1) : '',
     reason: '',
   }
 }
@@ -64,9 +64,9 @@ export function costLabel(mode: PurchaseValues['cost_mode'], unitLabel: string):
 }
 
 /** "Total S/ 21.00 · sale a S/ 4.20 por kg", o nada mientras falte un dato. */
-export function costHint(cuentas: PurchaseMath | null, unitLabel: string): string | undefined {
-  if (cuentas === null) {
+export function costHint(accounts: PurchaseMath | null, unitLabel: string): string | undefined {
+  if (accounts === null) {
     return undefined
   }
-  return `Total ${formatMoney(cuentas.total)} · sale a ${formatMoney(cuentas.pricePerUnit)} por ${unitLabel}`
+  return `Total ${formatMoney(accounts.total)} · sale a ${formatMoney(accounts.pricePerUnit)} por ${unitLabel}`
 }

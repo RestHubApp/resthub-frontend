@@ -9,20 +9,20 @@ interface LowStockSummaryProps {
   readonly onShowAlerts: () => void
 }
 
-const MAX_NOMBRES = 4
+const MAX_NAMES = 4
 
-function lista(nombres: readonly string[]): string {
-  const primeros = nombres.slice(0, MAX_NOMBRES).join(', ')
-  const resto = nombres.length - MAX_NOMBRES
-  return resto > 0 ? `${primeros} y ${String(resto)} más` : primeros
+function list(names: readonly string[]): string {
+  const first = names.slice(0, MAX_NAMES).join(', ')
+  const rest = names.length - MAX_NAMES
+  return rest > 0 ? `${first} y ${String(rest)} más` : first
 }
 
-function titular(bajos: number, negativos: number): string {
-  if (bajos === 0) {
+function holder(low: number, negative: number): string {
+  if (low === 0) {
     return 'Stock en orden: nada por debajo del mínimo.'
   }
-  const cuantos = bajos === 1 ? '1 insumo por reponer' : `${String(bajos)} insumos por reponer`
-  return negativos > 0 ? `${cuantos}, ${String(negativos)} en negativo` : cuantos
+  const howMany = low === 1 ? '1 insumo por reponer' : `${String(low)} insumos por reponer`
+  return negative > 0 ? `${howMany}, ${String(negative)} en negativo` : howMany
 }
 
 /**
@@ -32,40 +32,40 @@ function titular(bajos: number, negativos: number): string {
  * lista se oye también con lector de pantalla.
  */
 export function LowStockSummary({ onShowAlerts }: LowStockSummaryProps) {
-  const alertas = useLowStock()
-  if (alertas.isPending) {
+  const alerts = useLowStock()
+  if (alerts.isPending) {
     return <ListSkeleton label="Revisando el stock…" count={1} itemClassName="h-19 rounded-xl" />
   }
-  if (alertas.data === undefined) {
+  if (alerts.data === undefined) {
     return null
   }
-  const bajos = alertas.data
-  const negativos = bajos.filter((insumo) => insumo.is_negative).length
+  const low = alerts.data
+  const negative = low.filter((ingredient) => ingredient.is_negative).length
 
   return (
     <div
       role="status"
       className={cn(
         'flex flex-col gap-3 rounded-xl px-5 py-4 ring-1 sm:flex-row sm:items-center sm:justify-between',
-        bajos.length === 0 ? 'bg-success/10 ring-success/20' : 'bg-warning/10 ring-warning/25',
+        low.length === 0 ? 'bg-success/10 ring-success/20' : 'bg-warning/10 ring-warning/25',
       )}
     >
       <div className="flex items-start gap-3">
         <Icon
-          name={bajos.length === 0 ? 'confirmar' : 'aviso'}
+          name={low.length === 0 ? 'confirmar' : 'aviso'}
           size={22}
-          className={cn('mt-0.5 shrink-0', bajos.length === 0 ? 'text-success' : 'text-warning')}
+          className={cn('mt-0.5 shrink-0', low.length === 0 ? 'text-success' : 'text-warning')}
         />
         <div className="flex flex-col gap-0.5">
           <p className="m-0 font-semibold">
-            {titular(bajos.length, negativos)}
+            {holder(low.length, negative)}
           </p>
-          {bajos.length === 0 ? null : (
-            <p className="m-0 text-sm text-muted-foreground">{lista(bajos.map((insumo) => insumo.name))}</p>
+          {low.length === 0 ? null : (
+            <p className="m-0 text-sm text-muted-foreground">{list(low.map((ingredient) => ingredient.name))}</p>
           )}
         </div>
       </div>
-      {bajos.length === 0 ? null : (
+      {low.length === 0 ? null : (
         <Button type="button" variant="outline" className="h-11 px-4" onClick={onShowAlerts}>
           <Icon name="aviso" size={16} />
           <span>Ver alertas</span>

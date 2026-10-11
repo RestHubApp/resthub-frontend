@@ -15,17 +15,17 @@ export function PurchaseLinesList({ lines, ingredients, onChange }: PurchaseLine
   return (
     <>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {lines.map((linea, indice) => (
+        {lines.map((line, index) => (
           <PurchaseLineEditor
-            key={linea.key}
-            index={indice}
-            line={linea}
+            key={line.key}
+            index={index}
+            line={line}
             ingredients={ingredients}
-            onChange={(nueva) => {
-              onChange(lines.map((l, i) => (i === indice ? nueva : l)))
+            onChange={(fresh) => {
+              onChange(lines.map((l, i) => (i === index ? fresh : l)))
             }}
             onRemove={() => {
-              onChange(lines.filter((_, i) => i !== indice))
+              onChange(lines.filter((_, i) => i !== index))
             }}
           />
         ))}

@@ -19,8 +19,8 @@ import { SuppliersPanel } from './SuppliersPanel'
 import { StockActionDialog, type StockAction } from './StockActionDialog'
 import { useLowStock } from './useLowStock'
 
-function seccionDe(valor: string | null): InventorySection {
-  return SECTIONS.find((seccion) => seccion.value === valor)?.value ?? 'insumos'
+function sectionOf(value: string | null): InventorySection {
+  return SECTIONS.find((section) => section.value === value)?.value ?? 'insumos'
 }
 
 /**
@@ -33,14 +33,14 @@ function seccionDe(valor: string | null): InventorySection {
 export function InventoryView() {
   const canManage = useCan(PERMISSION.inventoryManage)
   const [params, setParams] = useSearchParams()
-  const seccion = seccionDe(params.get('vista'))
-  const alertas = useLowStock()
-  const [accion, setAccion] = useState<StockAction | null>(null)
-  const abrir = useCallback((nueva: StockAction) => {
-    setAccion(nueva)
+  const section = sectionOf(params.get('vista'))
+  const alerts = useLowStock()
+  const [action, setAction] = useState<StockAction | null>(null)
+  const open = useCallback((fresh: StockAction) => {
+    setAction(fresh)
   }, [])
-  const irA = (nueva: InventorySection) => {
-    setParams(nueva === 'insumos' ? {} : { vista: nueva }, { replace: true })
+  const irA = (fresh: InventorySection) => {
+    setParams(fresh === 'insumos' ? {} : { vista: fresh }, { replace: true })
   }
 
   return (
@@ -55,7 +55,7 @@ export function InventoryView() {
               size="lg"
               className="h-11 px-4"
               onClick={() => {
-                abrir({ kind: 'create' })
+                open({ kind: 'create' })
               }}
             >
               <Icon name="agregar" size={16} />
@@ -71,22 +71,22 @@ export function InventoryView() {
         }}
       />
       <InventoryTabs
-        value={seccion}
+        value={section}
         onChange={irA}
-        alertCount={alertas.data?.length}
+        alertCount={alerts.data?.length}
         panels={{
-          insumos: <IngredientsPanel canManage={canManage} onAction={abrir} />,
+          insumos: <IngredientsPanel canManage={canManage} onAction={open} />,
           movimientos: <MovementsPanel />,
-          alertas: <AlertsPanel canManage={canManage} onAction={abrir} />,
+          alertas: <AlertsPanel canManage={canManage} onAction={open} />,
           recetas: <RecipesPanel canManage={canManage} />,
           compras: <PurchaseOrdersPanel canManage={canManage} />,
           proveedores: <SuppliersPanel canManage={canManage} />,
         }}
       />
       <StockActionDialog
-        action={accion}
+        action={action}
         onClose={() => {
-          setAccion(null)
+          setAction(null)
         }}
       />
     </div>

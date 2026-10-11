@@ -43,15 +43,15 @@ export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps)
     resolver: zodResolver(schema),
     values: valuesOf(supplier),
   })
-  const cerrar = () => {
+  const close = () => {
     reset()
     onClose()
   }
-  const guardar = usePurchasingMutation({
+  const save = usePurchasingMutation({
     mutationFn: (payload: SupplierRequest) => saveSupplier(payload, supplier?.id),
-    success: (guardado) => `Proveedor «${guardado.name}» guardado.`,
+    success: (saved) => `Proveedor «${saved.name}» guardado.`,
     failure: 'No se pudo guardar el proveedor.',
-    onSuccess: cerrar,
+    onSuccess: close,
   })
 
   return (
@@ -60,7 +60,7 @@ export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps)
       title={supplier === null ? 'Nuevo proveedor' : `Editar ${supplier.name}`}
       onOpenChange={(abierto) => {
         if (!abierto) {
-          cerrar()
+          close()
         }
       }}
     >
@@ -68,8 +68,8 @@ export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps)
         noValidate
         className="flex flex-col gap-4"
         onSubmit={onSubmit(
-          handleSubmit((valores) => {
-            guardar.mutate({ ...valores, is_active: supplier === null || supplier.is_active })
+          handleSubmit((values) => {
+            save.mutate({ ...values, is_active: supplier === null || supplier.is_active })
           }),
         )}
       >
@@ -80,11 +80,11 @@ export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps)
         </div>
         <TextField id="proveedor-nota" label="Nota (opcional)" placeholder="Entrega martes y viernes…" field={register('notes')} error={formState.errors.notes?.message} />
         <DialogFormActions>
-          <Button type="button" variant="outline" onClick={cerrar}>
+          <Button type="button" variant="outline" onClick={close}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={guardar.isPending}>
-            {guardar.isPending ? 'Guardando…' : 'Guardar'}
+          <Button type="submit" disabled={save.isPending}>
+            {save.isPending ? 'Guardando…' : 'Guardar'}
           </Button>
         </DialogFormActions>
       </form>

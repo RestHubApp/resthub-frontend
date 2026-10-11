@@ -16,51 +16,51 @@ interface RecipesPanelProps {
   readonly canManage: boolean
 }
 
-const NUMERO = 'tabular-nums'
+const NUMBER = 'tabular-nums'
 
-function margen(costo: DishCost) {
-  if (costo.margin === null) {
+function margin(cost: DishCost) {
+  if (cost.margin === null) {
     return <StatusBadge label="Sin receta" tone="pending" />
   }
-  const perdida = Number(costo.margin) < 0
-  return <span className={perdida ? 'font-semibold text-destructive' : 'font-semibold'}>{formatMoney(costo.margin)}</span>
+  const lost = Number(cost.margin) < 0
+  return <span className={lost ? 'font-semibold text-destructive' : 'font-semibold'}>{formatMoney(cost.margin)}</span>
 }
 
-function columnas(canManage: boolean): DataColumn<DishCost>[] {
+function columns(canManage: boolean): DataColumn<DishCost>[] {
   return [
     {
       id: 'plato',
       header: 'Plato',
-      cell: (costo) => (
+      cell: (cost) => (
         <span className="flex flex-wrap items-center gap-2 font-medium">
-          {costo.menu_item_name}
-          {costo.is_active ? null : <StatusBadge label="Fuera de la carta" />}
+          {cost.menu_item_name}
+          {cost.is_active ? null : <StatusBadge label="Fuera de la carta" />}
         </span>
       ),
     },
-    { id: 'precio', header: 'Precio', className: NUMERO, cell: (costo) => formatMoney(costo.price) },
-    { id: 'costo', header: 'Costo', className: NUMERO, cell: (costo) => (costo.cost === null ? '—' : formatMoney(costo.cost)) },
-    { id: 'margen', header: 'Margen', className: NUMERO, cell: margen },
+    { id: 'precio', header: 'Precio', className: NUMBER, cell: (cost) => formatMoney(cost.price) },
+    { id: 'costo', header: 'Costo', className: NUMBER, cell: (cost) => (cost.cost === null ? '—' : formatMoney(cost.cost)) },
+    { id: 'margen', header: 'Margen', className: NUMBER, cell: margin },
     {
       id: 'porcentaje',
       header: '% margen',
-      className: NUMERO,
-      cell: (costo) => (costo.margin_percent === null ? '—' : formatPercent(costo.margin_percent)),
+      className: NUMBER,
+      cell: (cost) => (cost.margin_percent === null ? '—' : formatPercent(cost.margin_percent)),
     },
     {
       id: 'receta',
       header: 'Receta',
-      cell: (costo) => {
-        const verbo = canManage ? 'Editar' : 'Ver'
-        const texto = costo.has_recipe ? `${verbo} receta` : 'Crear receta'
+      cell: (cost) => {
+        const verb = canManage ? 'Editar' : 'Ver'
+        const text = cost.has_recipe ? `${verb} receta` : 'Crear receta'
         return (
           <Link
-            to={paths.inventory.recipe(costo.menu_item_id)}
-            className={buttonVariants({ variant: costo.has_recipe ? 'outline' : 'secondary', className: 'h-11 px-3' })}
-            aria-label={`${texto} de ${costo.menu_item_name}`}
+            to={paths.inventory.recipe(cost.menu_item_id)}
+            className={buttonVariants({ variant: cost.has_recipe ? 'outline' : 'secondary', className: 'h-11 px-3' })}
+            aria-label={`${text} de ${cost.menu_item_name}`}
           >
             <Icon name="receta" size={16} />
-            <span>{texto}</span>
+            <span>{text}</span>
           </Link>
         )
       },
@@ -68,39 +68,39 @@ function columnas(canManage: boolean): DataColumn<DishCost>[] {
   ]
 }
 
-function avisoSinReceta(cantidad: number): string {
-  if (cantidad === 0) {
+function noticeWithoutRecipe(quantity: number): string {
+  if (quantity === 0) {
     return ''
   }
-  const sujeto = cantidad === 1 ? '1 plato no tiene' : `${String(cantidad)} platos no tienen`
-  return ` ${sujeto} receta: al venderse no descuentan stock.`
+  const subject = quantity === 1 ? '1 plato no tiene' : `${String(quantity)} platos no tienen`
+  return ` ${subject} receta: al venderse no descuentan stock.`
 }
 
 /** Cuánto cuesta preparar cada plato y cuánto deja, según su receta. */
 export function RecipesPanel({ canManage }: RecipesPanelProps) {
-  const costos = useQuery(dishCostsQuery)
+  const costs = useQuery(dishCostsQuery)
 
-  if (costos.isError) {
+  if (costs.isError) {
     return (
       <FormMessage tone="error">
-        {errorMessage(costos.error, 'No se pudieron cargar las recetas.')}
+        {errorMessage(costs.error, 'No se pudieron cargar las recetas.')}
       </FormMessage>
     )
   }
-  const sinReceta = (costos.data ?? []).filter((costo) => !costo.has_recipe).length
+  const withoutRecipe = (costs.data ?? []).filter((cost) => !cost.has_recipe).length
 
   return (
     <div className="flex flex-col gap-4">
       <p className="m-0 text-sm text-muted-foreground">
         El costo suma los insumos de una porción a su costo actual. Margen = precio − costo.
-        {avisoSinReceta(sinReceta)}
+        {noticeWithoutRecipe(withoutRecipe)}
       </p>
       <DataTable
-        columns={columnas(canManage)}
-        data={costos.data ?? []}
-        isLoading={costos.isPending}
+        columns={columns(canManage)}
+        data={costs.data ?? []}
+        isLoading={costs.isPending}
         emptyMessage="Todavía no hay platos en la carta."
-        getRowId={(costo) => String(costo.menu_item_id)}
+        getRowId={(cost) => String(cost.menu_item_id)}
       />
     </div>
   )

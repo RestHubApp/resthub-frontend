@@ -11,24 +11,24 @@ interface RecipeFooterProps {
 
 /** El botón de guardar, que dice qué va a pasar: guardar o borrar la receta. */
 export function RecipeFooter({ empty, hadRecipe, dirty, pending }: RecipeFooterProps) {
-  const borra = empty && hadRecipe
-  const etiqueta = borra ? 'Borrar receta' : 'Guardar receta'
+  const deletes = empty && hadRecipe
+  const label = deletes ? 'Borrar receta' : 'Guardar receta'
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
       <p className="m-0 text-sm text-muted-foreground" aria-live="polite">
-        {borra ? 'Sin insumos: al guardar, el plato queda sin receta y sin costo.' : ''}
-        {!borra && dirty ? 'Hay cambios sin guardar.' : ''}
+        {deletes ? 'Sin insumos: al guardar, el plato queda sin receta y sin costo.' : ''}
+        {!deletes && dirty ? 'Hay cambios sin guardar.' : ''}
       </p>
       <Button
         type="submit"
         size="lg"
-        variant={borra ? 'danger' : 'default'}
+        variant={deletes ? 'danger' : 'default'}
         className="h-11 px-5"
         disabled={pending || !dirty}
       >
-        <Icon name={borra ? 'eliminar' : 'confirmar'} size={16} />
-        <span>{pending ? 'Guardando…' : etiqueta}</span>
+        <Icon name={deletes ? 'eliminar' : 'confirmar'} size={16} />
+        <span>{pending ? 'Guardando…' : label}</span>
       </Button>
     </div>
   )

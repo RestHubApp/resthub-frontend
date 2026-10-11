@@ -35,9 +35,9 @@ export function IngredientUnitField({ ingredient, field, error }: IngredientUnit
       field={field}
       error={error}
     >
-      {UNIT_OPTIONS.map((opcion) => (
-        <NativeSelectOption key={opcion.value} value={opcion.value}>
-          {opcion.label}
+      {UNIT_OPTIONS.map((option) => (
+        <NativeSelectOption key={option.value} value={option.value}>
+          {option.label}
         </NativeSelectOption>
       ))}
     </SelectField>

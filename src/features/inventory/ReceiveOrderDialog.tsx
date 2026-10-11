@@ -15,12 +15,12 @@ interface ReceiveOrderDialogProps {
   readonly onClose: () => void
 }
 
-type Recibido = Readonly<Partial<Record<number, { quantity: string; unitCost: string }>>>
+type Received = Readonly<Partial<Record<number, { quantity: string; unitCost: string }>>>
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-const NUMERO = /^\d+(?:[.,]\d+)?$/u
+const NUMBER = /^\d+(?:[.,]\d+)?$/u
 
-function inicial(order: PurchaseOrder): Recibido {
+function initial(order: PurchaseOrder): Received {
   return Object.fromEntries(
     order.lines.map((line) => [line.id, { quantity: line.quantity, unitCost: line.unit_cost }]),
   )
@@ -33,32 +33,32 @@ function inicial(order: PurchaseOrder): Recibido {
  * al stock como compras y pondera el costo de cada insumo.
  */
 export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) {
-  const [recibido, setRecibido] = useState<Recibido | null>(null)
-  const recibir = usePurchasingMutation({
+  const [received, setReceived] = useState<Received | null>(null)
+  const receive = usePurchasingMutation({
     mutationFn: (payload: { orderId: number; lines: { line_id: number; quantity: string; unit_cost: string }[] }) =>
       receivePurchaseOrder(payload.orderId, { lines: payload.lines }),
     success: (orden) => `Orden ${String(orden.number)} recibida: ${formatMoney(orden.received_total)} entraron al stock.`,
     failure: 'No se pudo recibir la orden.',
     onSuccess: () => {
-      setRecibido(null)
+      setReceived(null)
       onClose()
     },
   })
   if (order === null) {
     return null
   }
-  const valores = recibido ?? inicial(order)
-  const lineas = order.lines.map((line) => ({
+  const values = received ?? initial(order)
+  const lines = order.lines.map((line) => ({
     line_id: line.id,
-    quantity: (valores[line.id]?.quantity ?? '0').replace(',', '.'),
-    unit_cost: (valores[line.id]?.unitCost ?? '0').replace(',', '.'),
+    quantity: (values[line.id]?.quantity ?? '0').replace(',', '.'),
+    unit_cost: (values[line.id]?.unitCost ?? '0').replace(',', '.'),
   }))
-  const validas = lineas.every((line) => NUMERO.test(line.quantity) && NUMERO.test(line.unit_cost))
+  const valid = lines.every((line) => NUMBER.test(line.quantity) && NUMBER.test(line.unit_cost))
 
   return (
-    <FormDialog open title={`Recibir la orden ${String(order.number)}`} description={order.supplier_name} onOpenChange={(abierto) => {
-      if (!abierto) {
-        setRecibido(null)
+    <FormDialog open title={`Recibir la orden ${String(order.number)}`} description={order.supplier_name} onOpenChange={(open) => {
+      if (!open) {
+        setReceived(null)
         onClose()
       }
     }}>
@@ -69,11 +69,11 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
               {line.ingredient_name}
               <span className="block text-xs text-muted-foreground">Pedido: {formatQuantity(line.quantity, line.unit ?? '')}</span>
             </span>
-            <Input aria-label={`Cantidad recibida de ${line.ingredient_name}`} inputMode="decimal" value={valores[line.id]?.quantity ?? ''} onChange={(evento) => {
-              setRecibido({ ...valores, [line.id]: { quantity: evento.target.value, unitCost: valores[line.id]?.unitCost ?? '0' } })
+            <Input aria-label={`Cantidad recibida de ${line.ingredient_name}`} inputMode="decimal" value={values[line.id]?.quantity ?? ''} onChange={(event) => {
+              setReceived({ ...values, [line.id]: { quantity: event.target.value, unitCost: values[line.id]?.unitCost ?? '0' } })
             }} />
-            <Input aria-label={`Costo real por unidad de ${line.ingredient_name}`} inputMode="decimal" value={valores[line.id]?.unitCost ?? ''} onChange={(evento) => {
-              setRecibido({ ...valores, [line.id]: { quantity: valores[line.id]?.quantity ?? '0', unitCost: evento.target.value } })
+            <Input aria-label={`Costo real por unidad de ${line.ingredient_name}`} inputMode="decimal" value={values[line.id]?.unitCost ?? ''} onChange={(event) => {
+              setReceived({ ...values, [line.id]: { quantity: values[line.id]?.quantity ?? '0', unitCost: event.target.value } })
             }} />
           </li>
         ))}
@@ -82,10 +82,10 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
         <Button type="button" variant="outline" onClick={onClose}>
           Cancelar
         </Button>
-        <Button type="button" variant="success" disabled={!validas || recibir.isPending} onClick={() => {
-          recibir.mutate({ orderId: order.id, lines: lineas })
+        <Button type="button" variant="success" disabled={!valid || receive.isPending} onClick={() => {
+          receive.mutate({ orderId: order.id, lines: lines })
         }}>
-          {recibir.isPending ? 'Recibiendo…' : 'Recibir y cargar al stock'}
+          {receive.isPending ? 'Recibiendo…' : 'Recibir y cargar al stock'}
         </Button>
       </DialogFormActions>
     </FormDialog>

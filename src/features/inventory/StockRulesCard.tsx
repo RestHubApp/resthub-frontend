@@ -17,22 +17,22 @@ import { useNotifications } from '@/store/notifications'
 // algunos validadores (WAVE) no toman el texto del <label> que la envuelve, y
 // la etiqueta apunta a la casilla con `htmlFor` en vez de envolverla (un
 // <label> que envuelve un <button> queda «huérfano» para WAVE).
-const CASILLA_ID = 'regla-agotado'
-const TITULO_ID = 'regla-agotado-titulo'
-const DETALLE_ID = 'regla-agotado-detalle'
+const CHECKBOX_ID = 'regla-agotado'
+const TITLE_ID = 'regla-agotado-titulo'
+const DETAIL_ID = 'regla-agotado-detalle'
 
 export function StockRulesCard() {
-  const restaurante = useQuery(restaurantQuery)
+  const restaurant = useQuery(restaurantQuery)
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const cambiar = useMutation({
-    mutationFn: (activo: boolean) => updateRestaurant({ auto_out_of_stock: activo }),
-    onSuccess: (actualizado) => {
-      queryClient.setQueryData(restaurantQueryKey, actualizado)
+  const change = useMutation({
+    mutationFn: (active: boolean) => updateRestaurant({ auto_out_of_stock: active }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(restaurantQueryKey, updated)
       void queryClient.invalidateQueries({ queryKey: menuQueryKey })
       push({
         tone: 'info',
-        message: actualizado.auto_out_of_stock
+        message: updated.auto_out_of_stock
           ? 'Los platos sin insumos se agotan solos.'
           : 'Los platos ya no se agotan por el stock.',
       })
@@ -41,26 +41,26 @@ export function StockRulesCard() {
       push({ tone: 'warning', message: errorMessage(error, 'No se pudo cambiar la regla.') })
     },
   })
-  if (!restaurante.isSuccess) {
+  if (!restaurant.isSuccess) {
     return null
   }
 
   return (
     <div className="flex items-start gap-3 rounded-lg bg-muted px-4 py-3 text-sm">
       <Checkbox
-        id={CASILLA_ID}
-        aria-labelledby={TITULO_ID}
-        aria-describedby={DETALLE_ID}
+        id={CHECKBOX_ID}
+        aria-labelledby={TITLE_ID}
+        aria-describedby={DETAIL_ID}
         className="mt-0.5"
-        checked={restaurante.data.auto_out_of_stock}
-        disabled={cambiar.isPending}
-        onCheckedChange={(estado) => {
-          cambiar.mutate(estado === true)
+        checked={restaurant.data.auto_out_of_stock}
+        disabled={change.isPending}
+        onCheckedChange={(status) => {
+          change.mutate(status === true)
         }}
       />
-      <label htmlFor={CASILLA_ID} className="cursor-pointer">
-        <span id={TITULO_ID} className="font-medium">Agotar solos los platos sin insumos</span>
-        <span id={DETALLE_ID} className="block text-muted-foreground">
+      <label htmlFor={CHECKBOX_ID} className="cursor-pointer">
+        <span id={TITLE_ID} className="font-medium">Agotar solos los platos sin insumos</span>
+        <span id={DETAIL_ID} className="block text-muted-foreground">
           Si la receta de un plato pide más de lo que hay en stock, el mesero lo ve «Sin insumos» y no lo puede pedir.
         </span>
       </label>

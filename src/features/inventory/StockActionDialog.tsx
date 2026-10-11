@@ -15,18 +15,18 @@ interface StockActionDialogProps {
   readonly onClose: () => void
 }
 
-const TITULOS = {
+const TITLES = {
   purchase: 'Registrar compra',
   waste: 'Registrar merma',
   adjustment: 'Ajustar stock',
   edit: 'Editar',
 } as const
 
-function titulo(action: StockAction): string {
-  return action.kind === 'create' ? 'Nuevo insumo' : `${TITULOS[action.kind]}: ${action.ingredient.name}`
+function title(action: StockAction): string {
+  return action.kind === 'create' ? 'Nuevo insumo' : `${TITLES[action.kind]}: ${action.ingredient.name}`
 }
 
-function formulario(action: StockAction, onClose: () => void) {
+function form(action: StockAction, onClose: () => void) {
   switch (action.kind) {
     case 'create':
       return <IngredientForm onDone={onClose} />
@@ -51,15 +51,15 @@ export function StockActionDialog({ action, onClose }: StockActionDialogProps) {
   return (
     <FormDialog
       open={action !== null}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(open) => {
+        if (!open) {
           onClose()
         }
       }}
-      title={action === null ? '' : titulo(action)}
+      title={action === null ? '' : title(action)}
       size="lg"
     >
-      {action === null ? null : formulario(action, onClose)}
+      {action === null ? null : form(action, onClose)}
     </FormDialog>
   )
 }

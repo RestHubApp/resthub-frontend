@@ -16,16 +16,16 @@ interface StockPreviewProps {
  */
 export function StockPreview({ ingredient, delta }: StockPreviewProps) {
   const actual = Number(ingredient.stock)
-  const quedara = delta === null ? null : actual + delta
-  const minimo = Number(ingredient.min_stock)
+  const remains = delta === null ? null : actual + delta
+  const min = Number(ingredient.min_stock)
 
   return (
     <p aria-live="polite" className="m-0 rounded-lg bg-muted px-3 py-2 text-sm">
       Hoy hay <strong>{formatQuantity(actual, ingredient.unit)}</strong>
-      {quedara === null ? null : (
+      {remains === null ? null : (
         <>
-          {' '}→ quedará en <strong>{formatQuantity(quedara, ingredient.unit)}</strong>
-          {quedara < minimo ? ', todavía bajo el mínimo' : null}
+          {' '}→ quedará en <strong>{formatQuantity(remains, ingredient.unit)}</strong>
+          {remains < min ? ', todavía bajo el mínimo' : null}
         </>
       )}
     </p>
