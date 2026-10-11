@@ -137,12 +137,26 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
   Cualquier hallazgo, advertencias incluidas, falla el CI. Se arregla en el
   código; solo lo que choca con una decisión del proyecto se excluye en
   `doctor.config.jsonc`, con el motivo escrito al lado.
+- **Huella de carbono** (`pnpm carbon`, y `pnpm carbon:browser` en el CI):
+  `scripts/carbon.ts` mide la primera visita de `/acceso`, `/privacidad`,
+  `/plataforma/acceso` y de Pedidos con la sesión de un mesero, con
+  `@tgwf/co2` (Sustainable Web Design v4), y falla si una ruta baja de A+
+  (0,040 g, unos 270 kB). Las rutas están en `scripts/carbon/routes.ts`: una
+  pantalla pública nueva se agrega allí. No se baja la nota mínima para que
+  pase; se recorta lo que entró. Qué entró en una ruta lo dice
+  `pnpm carbon --verbose`. Reglas que la protegen: la pantalla de acceso no
+  importa Zod ni React Hook Form (usa `services/credentialRules.ts` y
+  `hooks/useCredentialsForm.ts`); el widget Sienna solo se importa al pedirlo
+  (`openAccessibilityMenu`); el service worker precachea solo lo que enlaza
+  `index.html` (`precacheShellOnly` en `vite.plugins.ts`) y las pantallas que el
+  mesero usa sin señal llevan `offline: true` en el registro de pantallas. La
+  fuente se regenera con `scripts/subsetFont.sh`.
 - **Cobertura de tipos** (`pnpm type-coverage`, configuración `typeCoverage` del
   `package.json`): modo estricto, mínimo 99,7 % de expresiones con tipo. Un
   `any` colado lo baja; no se baja el umbral para que pase.
 - **Tamaño del paquete** (`pnpm size`, `size-limit` en el `package.json`, gzip,
   necesita `dist/` de `pnpm build`): presupuestos del bundle principal, de los
-  chunks grandes (React, zod, Sienna y hooks compartidos) y del total, con
+  chunks grandes (React, zod y Sienna) y del total, con
   un 10 % de holgura sobre lo medido. Si crece, se investiga qué entró; el
   presupuesto se sube solo con una razón escrita en el PR.
 - **Pruebas** (`testing-library` y `jest-dom`, solo en `*.test.*`): consultas por

@@ -9,7 +9,6 @@ import { DEFAULT_TIME_ZONE } from '@/services/format'
 import {
   emailRule,
   MAX_COMPLETE_NAME,
-  MAX_PASSWORD,
   nameRule,
   passwordRule,
 } from '@/services/fieldRules'
@@ -19,18 +18,6 @@ import { isValidTimeZone } from './timeZones'
 // Los límites repiten los del backend: avisan mientras se escribe, y el
 // servidor vuelve a comprobarlos.
 const MAX_RESTAURANT_NAME = 120
-
-export const platformLoginSchema = z.object({
-  email: emailRule,
-  // Al entrar no se exige el mínimo: el servidor ya dice si no coincide. El
-  // máximo sí, porque el servidor rechaza una más larga antes de mirarla.
-  password: z
-    .string()
-    .min(1, 'Escribe tu contraseña')
-    .max(MAX_PASSWORD, `Usa como máximo ${String(MAX_PASSWORD)} caracteres`),
-})
-
-export type PlatformLoginValues = z.infer<typeof platformLoginSchema>
 
 const restaurantNameRule = z
   .string()

@@ -5,7 +5,6 @@ import {
   createRestaurantPayload,
   createRestaurantSchema,
   ownerSchema,
-  platformLoginSchema,
   restaurantSettingsSchema,
   settingsPayload,
 } from './platformSchema'
@@ -61,22 +60,6 @@ describe('ownerSchema', () => {
   it('pide nombre con letras y un correo válido', () => {
     const result = ownerSchema.safeParse({ ...OWNER, full_name: 'María 2', email: 'maria' })
     expect(messages(result)).toEqual(expect.arrayContaining(['full_name', 'email']))
-  })
-})
-
-describe('platformLoginSchema', () => {
-  const email = 'plataforma@resthub.dev'
-
-  it('no exige el mínimo de la contraseña al entrar', () => {
-    expect(platformLoginSchema.safeParse({ email: email, password: 'x' }).success).toBe(true)
-    expect(messages(platformLoginSchema.safeParse({ email: email, password: '' }))).toEqual([
-      'password',
-    ])
-  })
-
-  it('rechaza una contraseña más larga de lo que acepta el servidor', () => {
-    expect(platformLoginSchema.safeParse({ email: email, password: 'x'.repeat(128) }).success).toBe(true)
-    expect(messages(platformLoginSchema.safeParse({ email: email, password: 'x'.repeat(129) }))).toEqual(['password'])
   })
 })
 

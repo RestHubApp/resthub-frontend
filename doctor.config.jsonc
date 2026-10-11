@@ -2,6 +2,9 @@
   // React Doctor (`pnpm doctor`). Cada exclusión dice por qué; lo que no está
   // aquí se arregla en el código y el CI falla ante cualquier hallazgo nuevo.
   "ignore": {
+    // Compilaciones locales (producción, E2E y la medición de carbono): código
+    // minificado de terceros, no el del proyecto.
+    "files": ["dist/**", "dist-e2e/**", "dist-carbon/**"],
     "overrides": [
       {
         // Herramientas de línea de comandos, no código de la aplicación. Esperar

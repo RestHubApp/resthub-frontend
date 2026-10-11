@@ -51,3 +51,5 @@ reports/mutation
 
 # Contrato de Pact que generan las pruebas de consumidor (lo versiona el backend)
 pacts/
+dist-carbon
+carbon.json

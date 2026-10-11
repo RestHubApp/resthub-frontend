@@ -1,9 +1,9 @@
 {
-  "total": 426,
+  "total": 427,
   "byType": {
     "ruta": 36,
     "confirmacion": 11,
-    "desplegable": 6,
+    "desplegable": 7,
     "dialogo": 24,
     "hoja": 3,
     "pestanas": 2,
@@ -293,6 +293,12 @@
       "type": "confirmacion",
       "description": "`¿Desactivar a ${account.full_name}?`",
       "origin": "src/features/staff/StaffStatusButton.tsx"
+    },
+    {
+      "id": "desplegable:components/AccessibilityWidget",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/components/AccessibilityWidget.tsx"
     },
     {
       "id": "desplegable:components/CollapsibleHeading",

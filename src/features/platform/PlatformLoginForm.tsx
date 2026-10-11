@@ -15,7 +15,7 @@ interface PlatformLoginFormProps {
 
 /** Correo y contraseña de una cuenta de plataforma. Un 429 dice cuándo volver a intentar. */
 export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProps) {
-  const { register, errors, access, submit } = usePlatformLogin(onSignedIn)
+  const { bind, errors, access, submit } = usePlatformLogin(onSignedIn)
 
   return (
     <form noValidate className="flex flex-col gap-5" onSubmit={submit}>
@@ -30,16 +30,16 @@ export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProp
         inputMode="email"
         autoComplete="username"
         spellCheck={false}
-        field={register('email')}
-        error={errors.email?.message}
+        field={bind('email')}
+        error={errors.email}
       />
       <PasswordField
         id="platform-password"
         label="Contraseña"
         placeholder="Tu contraseña"
         autoComplete="current-password"
-        field={register('password')}
-        error={errors.password?.message}
+        field={bind('password')}
+        error={errors.password}
       />
       {access.isError ? (
         <FormMessage tone="error">

@@ -22,7 +22,8 @@
     "noFallthroughCasesInSwitch": true,
     "exactOptionalPropertyTypes": true,
     "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "noUncheckedIndexedAccess": true
   },
-  "include": ["vite.config.ts", "vite.plugins.ts"]
+  "include": ["vite.config.ts", "vite.plugins.ts", "scripts/**/*.ts"]
 }

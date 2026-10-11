@@ -137,7 +137,7 @@ const siblingFolderZones = folders(FEATURES_DIR).flatMap((feature) => {
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.results*/**', 'e2e/.report*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'checks/accessibility/.wave-ext/**', 'checks/accessibility/reports/**'],
+    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.results*/**', 'e2e/.report*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'checks/accessibility/.wave-ext/**', 'dist-carbon/**', 'checks/accessibility/reports/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -564,6 +564,7 @@ export default tseslint.config(
             'jest/**',
             'e2e/**',
             'checks/**',
+            'scripts/**',
             '*.config.{js,ts,mjs}',
             'src/api/contract/**',
             'vite.*.ts',
@@ -752,6 +753,13 @@ export default tseslint.config(
     extends: [tseslint.configs.disableTypeChecked],
   },
   // ---------------------------------------------------------------------
+  // Herramientas de línea de comandos (Node, scripts/): la huella de carbono.
+  // ---------------------------------------------------------------------
+  {
+    files: ['scripts/**/*.ts'],
+    languageOptions: { globals: globals.node },
+  },
+  // ---------------------------------------------------------------------
   // Pruebas de extremo a extremo y visuales (Playwright, e2e/).
   //
   // Corren en Node y describen recorridos largos de la interfaz. Se lintean
@@ -803,7 +811,7 @@ export default tseslint.config(
   // `() => undefined` como una función vacía, que `no-empty-function` prohíbe).
   // ---------------------------------------------------------------------
   {
-    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.ts'],
+    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.ts', 'scripts/**/*.ts'],
     plugins: { unicorn },
     rules: {
       // `node:fs` y no `fs`: el prefijo deja claro que es del núcleo de Node.
@@ -853,7 +861,7 @@ export default tseslint.config(
   // `cspell-terms.txt`.
   // ---------------------------------------------------------------------
   {
-    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.{ts,cjs}', 'checks/**/*.mjs', '*.config.{js,ts,mjs}', 'vite.plugins.ts'],
+    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.{ts,cjs}', 'checks/**/*.mjs', 'scripts/**/*.ts', '*.config.{js,ts,mjs}', 'vite.plugins.ts'],
     plugins: { '@cspell': cspell },
     rules: {
       '@cspell/spellchecker': [
@@ -893,7 +901,7 @@ export default tseslint.config(
   // (`aria-*`, `data-*`) o las de librerías.
   // ---------------------------------------------------------------------
   {
-    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.ts'],
+    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.ts', 'scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/naming-convention': [
         'error',

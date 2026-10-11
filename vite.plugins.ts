@@ -47,7 +47,7 @@ export function handleSiennaSelfHosted(): Plugin {
 // modo que una inyección no puede sacar datos a un dominio ajeno.
 export function boundConnections(): Plugin {
   // Solo corre al compilar (`apply: 'build'`), por eso el modo es producción.
-  const api = (loadEnv('production', process.cwd(), 'VITE_')['VITE_API_URL'] as string | undefined) ?? ''
+  const api = loadEnv('production', process.cwd(), 'VITE_')['VITE_API_URL'] ?? ''
   return {
     name: 'resthub:acotar-conexiones',
     apply: 'build',
@@ -71,7 +71,7 @@ export function preloadSource(): Plugin {
     transformIndexHtml: {
       order: 'post',
       handler(_html, context) {
-        const source = Object.keys(context.bundle ?? {}).find((file) => /geist-latin-wght-normal-.*\.woff2$/u.test(file))
+        const source = Object.keys(context.bundle ?? {}).find((file) => /geist-latin-wght-.*\.woff2$/u.test(file))
         if (source === undefined) {
           return []
         }
@@ -79,4 +79,43 @@ export function preloadSource(): Plugin {
       },
     },
   }
+}
+
+// Lo que el service worker precachea al instalarse es lo primero que descarga
+// una persona nueva, antes de abrir nada. Debe ser el armazón: el HTML, el
+// archivo inicial con lo que importa de forma estática, la hoja de estilos y la
+// fuente, es decir, lo que `index.html` enlaza. Las pantallas (cada una un
+// archivo perezoso) se guardan cuando se abren (`runtimeCaching`) y las del
+// mesero sin señal se adelantan al entrar (`useOfflineWarmup`).
+const LINKED = /(?:src|href)="\/([^"]+)"/gu
+
+/** La forma de `manifestTransforms` de Workbox: las entradas del precaché que quedan. */
+type ShellFilter = <TEntry extends { readonly url: string }>(entries: TEntry[]) => { manifest: TEntry[]; warnings: string[] }
+
+/** Las rutas de `assets/` que enlaza el HTML: scripts, `modulepreload`, estilos y fuentes. */
+export function linkedAssets(html: string): Set<string> {
+  return new Set([...html.matchAll(LINKED)].flatMap(([, url]) => (url?.startsWith('assets/') === true ? [url] : [])))
+}
+
+/**
+ * El filtro del manifiesto de precaché: de `assets/` solo lo que enlaza
+ * `index.html` (el armazón). Lo demás que Workbox encuentra en la carpeta (el
+ * HTML, el registro del service worker) se queda.
+ */
+export function precacheShellOnly(): { plugin: Plugin; transform: ShellFilter } {
+  const build = { directory: '' }
+  const plugin: Plugin = {
+    name: 'resthub:precache-armazon',
+    apply: 'build',
+    configResolved(config) {
+      build.directory = join(config.root, config.build.outDir)
+    },
+  }
+  const transform: ShellFilter = (entries) => {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- la carpeta de salida la fija la configuración de Vite
+    const linked = linkedAssets(readFileSync(join(build.directory, 'index.html'), 'utf8'))
+    const manifest = entries.filter(({ url }) => (url.startsWith('assets/') ? linked.has(url) : true))
+    return { manifest, warnings: [] }
+  }
+  return { plugin, transform }
 }

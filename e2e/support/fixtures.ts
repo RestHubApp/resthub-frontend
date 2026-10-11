@@ -4,12 +4,6 @@ import { test as base, expect as expectBase, type Page } from '@playwright/test'
 
 import { createRestaurant, signInPlatformByApi, newHttp, type Local, type Session, type SessionPlatform } from './api'
 
-declare global {
-  interface Window {
-    __RESTHUB_E2E?: boolean
-  }
-}
-
 const SESSION = 'resthub.session.v2'
 const SESSION_PLATFORM = 'resthub.platform-session.v1'
 
@@ -22,12 +16,6 @@ interface Accessories {
 }
 
 export const test = base.extend<Accessories>({
-  page: async ({ page }, provide) => {
-    await page.addInitScript(() => {
-      window.__RESTHUB_E2E = true
-    })
-    await provide(page)
-  },
   local: async ({}, provide) => {
     const local = await createRestaurant()
     await provide(local)

@@ -2,7 +2,6 @@ import { describe, expect, it } from '@jest/globals'
 
 import {
   emailRule,
-  MAX_PASSWORD,
   nameRule,
   passwordRule,
   onlyDigits,
@@ -10,6 +9,7 @@ import {
   onlyPhone,
   phoneRule,
 } from './fieldRules'
+import { MAX_PASSWORD } from './fieldLimits'
 
 function message(result: { success: boolean; error?: { issues: { message: string }[] } }): string | undefined {
   return result.error?.issues[0]?.message

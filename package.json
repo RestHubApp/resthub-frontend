@@ -28,10 +28,11 @@
     "e2e:inventory": "node e2e/inventory/generate.ts",
     "type-coverage": "type-coverage",
     "size": "size-limit",
+    "carbon": "node scripts/carbon.ts",
+    "carbon:browser": "node scripts/carbon.ts --mode browser",
     "doctor": "react-doctor . --verbose --no-score --no-supply-chain --blocking warning"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "^5.3.0",
     "@hookform/resolvers": "^5.9.1",
     "@tanstack/react-query": "^5.102.8",
     "@tanstack/react-table": "^9.2.4",
@@ -64,6 +65,7 @@
     "@cspell/eslint-plugin": "^10.3.6",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.0",
     "@eslint/js": "9.39.5",
+    "@fontsource-variable/geist": "^5.3.0",
     "@jest/globals": "^30.5.2",
     "@pact-foundation/pact": "^17.1.4",
     "@playwright/test": "^1.63.0",
@@ -77,6 +79,7 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
+    "@tgwf/co2": "0.19.0",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/node": "^24.13.4",
     "@types/react": "^19.3.0",
@@ -137,10 +140,10 @@
   },
   "size-limit": [
     {
-      "name": "Bundle principal",
+      "name": "Bundle principal (armazón y router)",
       "path": "dist/assets/index-*.js",
       "gzip": true,
-      "limit": "37.1 kB"
+      "limit": "107.8 kB"
     },
     {
       "name": "Chunk de React",
@@ -152,25 +155,19 @@
       "name": "Chunk de esquemas (zod)",
       "path": "dist/assets/schemas-*.js",
       "gzip": true,
-      "limit": "41 kB"
+      "limit": "40.9 kB"
     },
     {
       "name": "Chunk de accesibilidad (Sienna)",
       "path": "dist/assets/sienna-accessibility*.js",
       "gzip": true,
-      "limit": "22.7 kB"
-    },
-    {
-      "name": "Chunk compartido de hooks",
-      "path": "dist/assets/hooks-*.js",
-      "gzip": true,
-      "limit": "20.9 kB"
+      "limit": "22.6 kB"
     },
     {
       "name": "Todo el JS",
       "path": "dist/assets/*.js",
       "gzip": true,
-      "limit": "471.4 kB"
+      "limit": "458.3 kB"
     }
   ]
 }

@@ -2,7 +2,8 @@ import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import { PasswordField } from '@/components/PasswordField'
 import { TextField } from '@/components/TextField'
-import { MIN_PASSWORD, onlyLetters } from '@/services/fieldRules'
+import { MIN_PASSWORD } from '@/services/fieldLimits'
+import { onlyLetters } from '@/services/fieldRules'
 
 interface OwnerFieldsProps {
   /** Distingue los `id` cuando hay más de un formulario en la pantalla. */

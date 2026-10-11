@@ -1,7 +1,8 @@
 /* Hoja que se aplica solo al tomar las capturas de regresión visual (ver captura.ts). */
 
-/* El botón flotante del widget de accesibilidad aparece cuando termina de bajar su archivo. */
+/* El botón flotante del widget de accesibilidad y su botón de reserva se ocultan: el primero aparece cuando alguien lo pide. */
 .asw-menu-btn,
+.a11y-launcher,
 .asw-container {
   visibility: hidden !important;
 }

@@ -9,9 +9,9 @@ const STEP_MS = 50
 /**
  * Abre el menú del widget de accesibilidad como si se tocara su botón.
  *
- * El widget se carga unos segundos después de `load` (AccessibilityWidget.tsx).
- * Si la persona toca «Accesibilidad» antes, se importa en ese momento y el menú
- * se abre en cuanto aparece el botón: antes el toque no hacía nada.
+ * El widget no se descarga hasta que alguien lo pide (AccessibilityWidget.tsx):
+ * el primer toque lo importa y el menú se abre en cuanto aparece su botón.
+ * Los siguientes toques solo hacen clic en ese botón.
  */
 export function openAccessibilityMenu(): void {
   const button = document.querySelector<HTMLElement>(WIDGET_BUTTON)

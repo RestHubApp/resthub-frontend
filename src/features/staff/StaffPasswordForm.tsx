@@ -7,7 +7,7 @@ import type { StaffResponse } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
 import { onSubmit } from '@/hooks/formSubmit'
-import { MIN_PASSWORD } from '@/services/fieldRules'
+import { MIN_PASSWORD } from '@/services/fieldLimits'
 import { useNotifications } from '@/store/notifications'
 import { type ResetPasswordValues, resetPasswordSchema } from './staffSchema'
 

@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-import { boundConnections, preloadSource, handleSiennaSelfHosted } from './vite.plugins'
+import { boundConnections, preloadSource, handleSiennaSelfHosted, precacheShellOnly } from './vite.plugins'
 
 // El color de la marca. Tiene que coincidir con el `theme-color` de index.html
 // y con `--primary` de index.css, o la barra del sistema cambia de tono al
@@ -33,6 +33,8 @@ const SECURITY_HEADERS = Object.fromEntries(
   ])),
 )
 
+const shell = precacheShellOnly()
+
 export default defineConfig({
   plugins: [
     react(),
@@ -40,6 +42,7 @@ export default defineConfig({
     preloadSource(),
     handleSiennaSelfHosted(),
     boundConnections(),
+    shell.plugin,
     // Instalable: el service worker solo guarda el armazon de la aplicacion
     // (HTML, JS, CSS e iconos). Ninguna respuesta del API se guarda en cache.
     // Sin senal, lo unico que espera es un pedido nuevo del mesero, en una cola
@@ -50,7 +53,11 @@ export default defineConfig({
       // con `script` iba como <script> síncrono en el <head> (Lighthouse lo
       // marcaba como recurso que bloquea el renderizado).
       injectRegister: 'script-defer',
-      includeAssets: ['favicon.ico', 'favicon.svg', 'apple-touch-icon-180x180.png'],
+      // Ni los iconos de la aplicacion instalada ni los de la pestana van al
+      // precache: el sistema guarda los primeros al instalar y el navegador pide
+      // los segundos una vez. Sin senal no hacen falta.
+      includeAssets: [],
+      includeManifestIcons: false,
       manifest: {
         name: 'RestHub',
         short_name: 'RestHub',
@@ -75,24 +82,23 @@ export default defineConfig({
       workbox: {
         // Una navegacion a /api no es una pantalla: que llegue al servidor.
         navigateFallbackDenylist: [/^\/api\//],
-        // La cola sin señal solo toma pedidos nuevos. Se guardan el armazón,
-        // Pedidos y el formulario nuevo con sus dependencias; el resto de las
-        // pantallas no se descarga durante la instalación del service worker.
-        globIgnores: [
-          ...[
-            'BoardView', 'HistoryView', 'KitchenView', 'PrintView', 'BillingView',
-            'InvoicePrintView', 'ReservationsView', 'CustomersView', 'CashView',
-            'MenuView', 'TablesView', 'InventoryView', 'RecipeEditorView',
-            'StaffView', 'RolesView', 'InsightsView', 'RestockView', 'AiAuditView',
-            'PlatformShell', 'PlatformLoginView', 'RestaurantsView', 'NewRestaurantView',
-            'RestaurantDetailView', 'ActivityView', 'PreviewView', 'ObservabilityView',
-            'DataTable', 'AreaChart', 'RoutesSection', 'LogsSection', 'RequestsSection',
-          ].map((name) => `**/assets/${name}-*.js`),
-        ],
+        // Al instalarse solo se guarda el armazon (lo que enlaza index.html): una
+        // persona nueva no paga las pantallas que quiza nunca abra. Cada pantalla
+        // se guarda al abrirla (`runtimeCaching`) y las que el mesero necesita
+        // sin senal se adelantan al entrar (`useOfflineWarmup`).
+        // El service worker toma el control de la pestana que lo instalo: sin esto, el
+        // armazon de la primera visita no pasa por el y las pantallas que se bajan
+        // despues (`useOfflineWarmup`) no se guardarian hasta la siguiente carga.
+        clientsClaim: true,
+        // El runtime de Workbox dentro de sw.js: un archivo menos que bajar al instalarse.
+        inlineWorkboxRuntime: true,
+        globPatterns: ['**/*.{js,css,html,woff2}'],
+        manifestTransforms: [shell.transform],
         runtimeCaching: [{
           urlPattern: /^https?:\/\/[^/]+\/assets\/[^/]+\.js$/u,
           handler: 'CacheFirst',
           options: {
+            // El mismo nombre que `services/screenCache.ts`.
             cacheName: 'resthub-pantallas-visitadas',
             expiration: { maxEntries: 80, maxAgeSeconds: 30 * 24 * 60 * 60 },
           },
@@ -114,7 +120,14 @@ export default defineConfig({
         codeSplitting: {
           // React cambia menos que la aplicacion: en su propio archivo queda
           // en la cache del celular entre una version y la siguiente.
-          groups: [{ name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/u, priority: 10 }],
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/u, priority: 10 },
+            // Lo que el archivo inicial importa de forma estatica (el router, las consultas,
+            // el armazon, los componentes de Radix) va en un solo archivo: cada archivo mas es
+            // una peticion con sus cabeceras (1 kB de CSP y seguridad) y brotli comprime mejor
+            // uno grande que veinte chicos. Las pantallas siguen siendo perezosas.
+            { name: 'shell', tags: ['$initial'], priority: 5 },
+          ],
         },
       },
     },

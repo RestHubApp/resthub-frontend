@@ -195,6 +195,44 @@ jobs:
         if: success() || failure()
         run: git diff --exit-code -- src/api/schema.d.ts
 
+  # Huella de carbono de la primera visita (Sustainable Web Design v4, el modelo
+  # de websitecarbon.com): compila, sirve `dist` con `vite preview`, carga cada
+  # ruta pública y la pantalla principal del mesero en Chromium con un contexto
+  # nuevo, suma los bytes transferidos y falla si una ruta baja de la nota A+.
+  # La sesión del mesero y las respuestas del API son de prueba (scripts/carbon).
+  carbon:
+    name: Huella de carbono (A+ en la primera visita)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+
+      - name: Instalar Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Instalar Chromium de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Medir la primera visita de cada ruta
+        run: pnpm carbon:browser --verbose --json carbon.json
+
+      - name: Subir la medición
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: huella-de-carbono
+          path: carbon.json
+          retention-days: 14
+
   # Pruebas de extremo a extremo con Playwright (solo Chromium) contra el
   # backend de develop, con una base SQLite propia migrada y sembrada. La
   # regresión visual no corre aquí: sus líneas base dependen del sistema

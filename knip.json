@@ -12,7 +12,8 @@
   "project": [
     "src/**/*.{ts,tsx}",
     "jest/**",
-    "e2e/**"
+    "e2e/**",
+    "scripts/**/*.ts"
   ],
   "ignore": [
     "src/api/schema.d.ts",
