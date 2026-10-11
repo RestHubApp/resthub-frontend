@@ -85,7 +85,7 @@ describe('las otras pestañas', () => {
     expect(screen.getByRole('heading', { name: 'Cerrados hoy (1)' })).toBeInTheDocument()
     const params = api.llamadas('get', '/orders')[0]?.params ?? {}
     expect(params).toMatchObject({ waiter_id: 7, limit: 100 })
-    expect(params.date_from).toBe(params.date_to)
+    expect(params['date_from']).toBe(params['date_to'])
   })
 
   it('sin pedidos del día invita a tomar el primero', async () => {

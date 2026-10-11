@@ -87,7 +87,8 @@ export default function MarginsTable({ dishes }: MarginsTableProps) {
           {table.getHeaderGroups().map((group) => (
             <TableRow key={group.id}>
               {group.headers.map((header, index) => {
-                const orden = header.column.getIsSorted() || 'none'
+                const ordenado = header.column.getIsSorted()
+                const orden = ordenado === false ? 'none' : ordenado
                 return (
                   <TableHead key={header.id} aria-sort={ARIA_SORT[orden]} className={`px-3 ${index > 0 ? 'text-right' : ''}`}>
                     <button

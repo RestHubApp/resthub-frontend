@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
-import { cuenta, entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { cuenta, entrarComo, montar, PERMISOS_MESERO, primero, RespuestaDeError, servidor } from '#jest/harness'
 import { currentAuthToken } from '../../services/api'
 import { useSession } from '../../store/session'
 import ProfileView from './ProfileView'
@@ -122,7 +122,7 @@ describe('ProfileView', () => {
     const campo = screen.getByLabelText(ACTUAL)
     expect(campo).toHaveAttribute('type', 'password')
 
-    await user.click(screen.getAllByRole('button', { name: /mostrar/i })[0])
+    await user.click(primero(screen.getAllByRole('button', { name: /mostrar/i })))
 
     expect(campo).toHaveAttribute('type', 'text')
   })

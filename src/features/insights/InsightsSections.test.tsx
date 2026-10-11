@@ -55,7 +55,7 @@ describe('InsightsView: secciones', () => {
     const tabla = screen.getByRole('table', { name: 'Margen por plato, ordenable por columna' })
     expect(within(tabla).getByText('Sin receta')).toBeInTheDocument()
     expect(within(tabla).getByText('-16.7 % (pérdida)')).toBeInTheDocument()
-    const nombres = () => within(tabla).getAllByRole('row').slice(1).map((fila) => within(fila).getAllByRole('cell')[0]?.textContent)
+    const nombres = () => within(tabla).getAllByRole('row').slice(1).map((fila) => within(fila).getAllByRole('cell').at(0)?.textContent ?? '')
     expect(nombres()[0]).toMatch(/^Ceviche/u)
 
     await user.click(within(tabla).getByRole('button', { name: /Plato/u }))

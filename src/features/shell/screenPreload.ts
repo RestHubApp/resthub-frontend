@@ -18,11 +18,11 @@ export interface ScreenPreload {
 export const ScreenPreloadContext = createContext<readonly ScreenPreload[]>([])
 
 /** Un archivo que no se pudo bajar se vuelve a pedir al abrir la pantalla. */
-export function ignorar(): undefined {
+function ignorar(): undefined {
   return undefined
 }
 
-export function preloadScreen(screen: ScreenPreload): void {
+function preloadScreen(screen: ScreenPreload): void {
   void screen.load?.().catch(ignorar)
   screen.prefetch?.()
 }

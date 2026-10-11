@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
 
-import { fetchOrder, orderQueryKey } from '../../api/orders'
+import { orderQuery } from '../../api/orders'
 import FormMessage from '../../components/FormMessage'
 import { isActive, orderPlace } from './orderLabels'
 import TakeOrder from './taking/TakeOrder'
 
 /** Agregar platos a un pedido que ya existe. */
 export default function AddItemsView() {
-  const orderId = Number(useParams().orderId)
-  const pedido = useQuery({ queryKey: orderQueryKey(orderId), queryFn: () => fetchOrder(orderId) })
+  const orderId = Number(useParams()['orderId'])
+  const pedido = useQuery(orderQuery(orderId))
   const order = pedido.data
   const cerrado = order !== undefined && !isActive(order.status)
 

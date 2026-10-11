@@ -1,7 +1,7 @@
 import type { NewItemRequest, OpenOrderRequest } from '../../../api/types'
 
 /** A dónde y a quién se entrega un delivery. */
-export interface DeliveryInfo {
+interface DeliveryInfo {
   readonly phone: string
   readonly address: string
   readonly reference: string

@@ -7,7 +7,7 @@ import { Checkbox } from './ui/checkbox'
  * N.º 29733). Si cambia, cambia también `CONSENT_VERSION` en el backend
  * (`customers/domain/customers.py`): lo aceptado antes queda con su versión.
  */
-export const CONSENT_TEXT =
+const CONSENT_TEXT =
   'El cliente acepta que el local guarde sus datos (nombre, teléfono, correo, dirección y notas, ' +
   'incluidas alergias) para atender sus próximos pedidos. Puede pedir verlos, corregirlos o ' +
   'borrarlos cuando quiera (Ley N.º 29733).'

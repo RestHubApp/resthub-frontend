@@ -23,7 +23,7 @@ function tras(actual: OrderResponse, monto: string): OrderResponse {
 function montoDe(peticion: Peticion, actual: OrderResponse): string {
   const cuerpo = peticion.body as { amount?: string; item_ids?: number[] }
   if (cuerpo.item_ids) {
-    const elegidos = actual.items.filter((item) => cuerpo.item_ids?.includes(item.id))
+    const elegidos = actual.items.filter((item) => cuerpo.item_ids?.includes(item.id) === true)
     return elegidos.reduce((suma, item) => suma + Number(item.subtotal), 0).toFixed(2)
   }
   return cuerpo.amount ?? actual.balance

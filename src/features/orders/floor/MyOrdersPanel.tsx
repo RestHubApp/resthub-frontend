@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { fetchOrders, MAX_ORDERS_PAGE, orderListQueryKey } from '../../../api/orders'
+import { MAX_ORDERS_PAGE, ordersQuery } from '../../../api/orders'
 import EmptyState from '../../../components/EmptyState'
 import ListSkeleton from '../../../components/ListSkeleton'
 import { useSession, useTimeZone } from '../../../store/session'
@@ -15,11 +15,7 @@ export default function MyOrdersPanel() {
   const timeZone = useTimeZone()
   const hoy = todayIn(timeZone)
   const params = { waiter_id: userId, date_from: hoy, date_to: hoy, limit: MAX_ORDERS_PAGE }
-  const pedidos = useQuery({
-    queryKey: orderListQueryKey(params),
-    queryFn: () => fetchOrders(params),
-    enabled: userId !== undefined,
-  })
+  const pedidos = useQuery({ ...ordersQuery(params), enabled: userId !== undefined })
 
   if (pedidos.isPending) {
     return <ListSkeleton label="Cargando tus pedidos…" count={3} itemClassName="h-20 rounded-xl" />

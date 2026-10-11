@@ -19,6 +19,7 @@ interface ChargeReceiptProps {
 export default function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
   const ultimo = order.payments.at(-1)
   const vuelto = ultimo?.change ?? null
+  const recibido = ultimo?.amount_received ?? ''
   const propinas = toCents(order.tips) > 0
 
   return (
@@ -46,10 +47,10 @@ export default function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
             <dd className="m-0 text-right tabular-nums">{formatMoney(order.tips)}</dd>
           </>
         ) : null}
-        {ultimo?.amount_received ? (
+        {recibido !== '' ? (
           <>
             <dt className="text-muted-foreground">Recibido</dt>
-            <dd className="m-0 text-right tabular-nums">{formatMoney(ultimo.amount_received)}</dd>
+            <dd className="m-0 text-right tabular-nums">{formatMoney(recibido)}</dd>
           </>
         ) : null}
       </dl>

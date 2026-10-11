@@ -289,7 +289,7 @@ setUnauthorizedHandler(() => {
  * Una pestana de vista previa guarda su sesion en su propio `sessionStorage`
  * y no se sincroniza con nadie.
  */
-export function syncWithStoredSession(): void {
+function syncWithStoredSession(): void {
   if (isPreviewTab()) {
     return
   }

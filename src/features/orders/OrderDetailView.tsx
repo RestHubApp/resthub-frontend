@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { lazy, Suspense, useState } from 'react'
 import { useParams } from 'react-router'
 
-import { fetchOrder, orderQueryKey } from '../../api/orders'
+import { orderQuery } from '../../api/orders'
 import EmptyState from '../../components/EmptyState'
 import { useOrderNoteFlags } from '../../hooks/useOrderNoteFlags'
 import { useCan } from '../../store/session'
@@ -31,13 +31,9 @@ const ChargeDialog = lazy(() => import('./charge/ChargeDialog'))
  * aparece sin recargar.
  */
 export default function OrderDetailView() {
-  const orderId = Number(useParams().orderId)
+  const orderId = Number(useParams()['orderId'])
   const live = useLiveUpdates()
-  const pedido = useQuery({
-    queryKey: orderQueryKey(orderId),
-    queryFn: () => fetchOrder(orderId),
-    enabled: Number.isInteger(orderId),
-  })
+  const pedido = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
   // Las alergias las ve el encargado; useLiveUpdates ya refresca las notas.
   const veAlergias = useCan('insights.read')
   const notas = useOrderNoteFlags(Number.isInteger(orderId) ? [orderId] : [], { enabled: veAlergias, live: false })

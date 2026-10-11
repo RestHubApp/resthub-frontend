@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen, within } from '@testing-library/react'
 
 import { carta, mesa, pedido, ultimoCuerpo } from '#jest/fixtures/pedidos'
-import { entrarComo, montar, RespuestaDeError, servidor, sinRed } from '#jest/harness'
+import { entrarComo, montar, primero, RespuestaDeError, servidor, sinRed } from '#jest/harness'
 import type { OpenOrderRequest } from '../../../api/types'
 import { ownerOf, queuedOrders, removeQueued } from '../../../store/offlineQueue'
 import { useSession } from '../../../store/session'
@@ -32,7 +32,7 @@ async function elegir(user: ReturnType<typeof tomarPedidoEnMesa>['user'], nombre
 
 async function enviar(user: ReturnType<typeof tomarPedidoEnMesa>['user']) {
   // El botón de la barra; el del resumen solo está con el resumen abierto.
-  await user.click(screen.getAllByRole('button', ENVIAR_A_COCINA)[0])
+  await user.click(primero(screen.getAllByRole('button', ENVIAR_A_COCINA)))
 }
 
 function rutaActual() {

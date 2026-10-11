@@ -1,7 +1,7 @@
 import Icon from '../../components/Icon'
 import type { IconName } from '../../components/icons'
 
-export interface AuthAsideItem {
+interface AuthAsideItem {
   readonly icon: IconName
   readonly text: string
 }

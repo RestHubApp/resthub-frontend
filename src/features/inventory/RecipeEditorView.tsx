@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation, useParams } from 'react-router'
 
-import { fetchRecipe, recipeQueryKey } from '../../api/inventory'
+import { recipeQuery } from '../../api/inventory'
 import EmptyState from '../../components/EmptyState'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -22,12 +22,11 @@ function regreso(estado: unknown): { readonly to: string; readonly label: string
 
 /** La receta de un plato, en su propia dirección para poder enlazarla desde el menú. */
 export default function RecipeEditorView() {
-  const menuItemId = Number(useParams().menuItemId)
+  const menuItemId = Number(useParams()['menuItemId'])
   const volver = regreso(useLocation().state)
   const canManage = useCan('inventory.manage')
   const receta = useQuery({
-    queryKey: recipeQueryKey(menuItemId),
-    queryFn: () => fetchRecipe(menuItemId),
+    ...recipeQuery(menuItemId),
     enabled: Number.isInteger(menuItemId),
     // El editor parte de lo que hay en el servidor, no de una copia vieja.
     staleTime: 0,

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
-import { fetchOrderInvoice, orderInvoiceQueryKey } from '../../../api/billing'
+import { orderInvoiceQuery } from '../../../api/billing'
 import type { OrderResponse } from '../../../api/types'
 import Icon from '../../../components/Icon'
 import { Button } from '../../../components/ui/button'
@@ -38,11 +38,7 @@ function esEnlaceSeguro(url: string): boolean {
 export default function InvoicePanel({ order }: InvoicePanelProps) {
   const puede = useCan('billing.issue')
   const [emitiendo, setEmitiendo] = useState(false)
-  const comprobante = useQuery({
-    queryKey: orderInvoiceQueryKey(order.id),
-    queryFn: () => fetchOrderInvoice(order.id),
-    enabled: puede && order.status === 'paid',
-  })
+  const comprobante = useQuery({ ...orderInvoiceQuery(order.id), enabled: puede && order.status === 'paid' })
   if (!puede || order.status !== 'paid' || comprobante.isPending) {
     return null
   }

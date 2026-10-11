@@ -22,6 +22,9 @@ export default function SalesChart({ days }: { readonly days: readonly DailySale
       formatTick={formatMoneyCompact}
       describe={(index) => {
         const day = days[index]
+        if (day === undefined) {
+          return { title: '', rows: [] }
+        }
         return {
           title: formatLongDate(day.date),
           rows: [

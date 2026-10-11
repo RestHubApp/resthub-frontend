@@ -27,7 +27,7 @@ function recienCreado(estado: unknown): boolean {
 
 /** La ficha de un restaurante: sus datos, su estado y sus encargados. */
 export default function RestaurantDetailView() {
-  const restaurantId = Number(useParams().restaurantId)
+  const restaurantId = Number(useParams()['restaurantId'])
   const creado = recienCreado(useLocation().state)
   const valido = Number.isInteger(restaurantId) && restaurantId > 0
   const ficha = useQuery({ ...platformRestaurantQuery(restaurantId), enabled: valido })

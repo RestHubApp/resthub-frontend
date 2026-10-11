@@ -4,7 +4,7 @@
 // cabecera `Authorization`: la alternativa seria poner el token en la URL, y la
 // URL queda escrita en los logs del servidor y de cualquier proxy.
 
-export interface StreamEvent {
+interface StreamEvent {
   readonly type: string
   readonly data: string
 }

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { cashSessionQueryKey, fetchCashSession } from '../../api/cash'
+import { cashSessionQuery } from '../../api/cash'
 import type { CashSession } from '../../api/types'
 import EmptyState from '../../components/EmptyState'
 import FormDialog from '../../components/FormDialog'
@@ -25,11 +25,7 @@ function countedLabel(session: CashSession | undefined): string | undefined {
 
 /** El arqueo firmado de un turno ya cerrado. */
 export default function CashSessionDialog({ sessionId, onClose }: CashSessionDialogProps) {
-  const turno = useQuery({
-    queryKey: cashSessionQueryKey(sessionId ?? 0),
-    queryFn: () => fetchCashSession(sessionId ?? 0),
-    enabled: sessionId !== null,
-  })
+  const turno = useQuery({ ...cashSessionQuery(sessionId ?? 0), enabled: sessionId !== null })
   if (sessionId === null) {
     return null
   }
@@ -50,7 +46,7 @@ export default function CashSessionDialog({ sessionId, onClose }: CashSessionDia
       {turno.isPending ? <EmptyState title="Cargando el arqueo…" /> : null}
       {turno.isError ? <RetryQueryError message={errorMessage(turno.error, 'No se pudo cargar el turno.')} onRetry={() => { void turno.refetch() }} /> : null}
       {datos?.summary ? <CashSummaryView session={datos} summary={datos.summary} /> : null}
-      {datos?.closing_notes ? <p className="m-0 text-sm">Nota: {datos.closing_notes}</p> : null}
+      {datos !== undefined && datos.closing_notes !== '' ? <p className="m-0 text-sm">Nota: {datos.closing_notes}</p> : null}
     </FormDialog>
   )
 }

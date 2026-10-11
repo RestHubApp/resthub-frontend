@@ -8,7 +8,7 @@ const API_PREFIX = '/api/v1'
 // El mismo nombre que usa el backend. El identificador lo genera el navegador
 // y el servidor lo respeta, asi un error de la consola y su linea en los logs
 // del servidor se encuentran buscando el mismo valor.
-export const REQUEST_ID_HEADER = 'X-Request-ID'
+const REQUEST_ID_HEADER = 'X-Request-ID'
 
 const SERVER_ERROR = 500
 const CLIENT_ERROR = 400
@@ -52,7 +52,7 @@ const restaurante: Credential = { token: null, alVencer: null }
 const plataforma: Credential = { token: null, alVencer: null }
 
 /** El prefijo de las rutas del administrador del sistema, relativo a `/api/v1`. */
-export const PLATFORM_PREFIX = '/platform'
+const PLATFORM_PREFIX = '/platform'
 
 /** Lo que decide adónde va una petición: la ruta y, si la hay, su propia base o sus parámetros. */
 export type RequestTarget = string | undefined | AxiosRequestConfig

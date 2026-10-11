@@ -3,7 +3,7 @@
 // servidor que sirve la aplicación, así que no queda en sus registros.
 
 /** El nombre del dato en el fragmento. Lo arma el área de plataforma. */
-export const PREVIEW_CODE_PARAM = 'codigo'
+const PREVIEW_CODE_PARAM = 'codigo'
 // Un código de verdad es mucho más corto; algo más largo no se manda.
 const MAX_CODE_LENGTH = 256
 const UNAUTHORIZED = 401

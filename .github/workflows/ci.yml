@@ -37,6 +37,14 @@ jobs:
       - name: ESLint
         run: pnpm lint
 
+      # Archivos, dependencias y exports que nadie usa.
+      - name: Código sin uso (knip)
+        run: pnpm knip
+
+      # Código repetido: falla si pasa del 1 % de las líneas.
+      - name: Duplicación (jscpd)
+        run: pnpm dup
+
       - name: Pruebas unitarias
         run: pnpm test
 

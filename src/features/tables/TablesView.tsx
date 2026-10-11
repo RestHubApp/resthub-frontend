@@ -20,7 +20,13 @@ import { useTableMutation } from './useTableMutation'
 function moved(tables: readonly TableState[], index: number, direction: -1 | 1): number[] {
   const ids = tables.map((table) => table.id)
   const destino = index + direction
-  ;[ids[index], ids[destino]] = [ids[destino], ids[index]]
+  const actual = ids[index]
+  const vecino = ids[destino]
+  if (actual === undefined || vecino === undefined) {
+    return ids
+  }
+  ids[index] = vecino
+  ids[destino] = actual
   return ids
 }
 

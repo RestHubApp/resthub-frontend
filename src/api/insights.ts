@@ -22,10 +22,10 @@ import type {
 // Indicadores del negocio y decisiones de la IA. Son solo del encargado
 // (`insights.read`): un mesero recibe 403.
 
-export const insightsQueryKey = ['insights'] as const
+const insightsQueryKey = ['insights'] as const
 
 /** Las consultas de un reporte con rango de fechas. Cambiar el rango es otra consulta. */
-export function insightsReportKey(report: string, range: InsightsRangeParams) {
+function insightsReportKey(report: string, range: InsightsRangeParams) {
   return [...insightsQueryKey, report, range] as const
 }
 
@@ -38,9 +38,15 @@ export function insightsReportQuery<T>(
   return queryOptions({ queryKey: insightsReportKey(report, range), queryFn: () => fetcher(range) })
 }
 
-export const restockQueryKey = [...insightsQueryKey, 'restock'] as const
+const restockQueryKey = [...insightsQueryKey, 'restock'] as const
 export const aiDecisionsQueryKey = [...insightsQueryKey, 'ai-decisions'] as const
 export const orderNotesQueryKey = [...insightsQueryKey, 'order-notes'] as const
+const lowStockQueryKey = [...insightsQueryKey, 'low-stock'] as const
+
+/** La raiz de las claves de un reporte del panel, para invalidarlos todos a la vez. */
+export function insightsReportRootKey(report: string) {
+  return [...insightsQueryKey, report] as const
+}
 
 async function report<T>(path: string, range: InsightsRangeParams, extra = {}): Promise<T> {
   const { data } = await api.get<T>(`/insights${path}`, { params: { ...range, ...extra } })
@@ -85,7 +91,7 @@ export function fetchWasteReport(range: InsightsRangeParams): Promise<WasteRepor
 }
 
 /** Los insumos bajo su mínimo ahora mismo. No depende del rango. */
-export async function fetchLowStock(): Promise<LowStockItem[]> {
+async function fetchLowStock(): Promise<LowStockItem[]> {
   const { data } = await api.get<LowStockItem[]>('/insights/low-stock')
   return data
 }
@@ -97,7 +103,7 @@ export async function classifyWaste(): Promise<ClassifyWasteResult> {
 }
 
 /** La última recomendación guardada, o una vista previa por reglas si nunca se pidió. */
-export async function fetchRestock(): Promise<RestockReport> {
+async function fetchRestock(): Promise<RestockReport> {
   const { data } = await api.get<RestockReport>('/insights/restock')
   return data
 }
@@ -108,7 +114,7 @@ export async function refreshRestock(): Promise<RestockReport> {
   return data
 }
 
-export async function fetchAiDecisions(params: AiDecisionParams): Promise<AiDecisionPage> {
+async function fetchAiDecisions(params: AiDecisionParams): Promise<AiDecisionPage> {
   const { data } = await api.get<AiDecisionPage>('/insights/ai-decisions', { params })
   return data
 }
@@ -117,7 +123,7 @@ export async function fetchAiDecisions(params: AiDecisionParams): Promise<AiDeci
 export const MAX_ORDER_NOTES_ORDERS = 100
 
 /** Cómo leyó la IA las notas de esos pedidos: alergia, preferencia, prioridad u otro. */
-export async function fetchOrderNotes(orderIds: readonly number[]): Promise<OrderNotesReport> {
+async function fetchOrderNotes(orderIds: readonly number[]): Promise<OrderNotesReport> {
   // FastAPI espera la lista como `order_ids=1&order_ids=2`, sin corchetes.
   const { data } = await api.get<OrderNotesReport>('/insights/order-notes', {
     params: { order_ids: orderIds.slice(0, MAX_ORDER_NOTES_ORDERS) },
@@ -129,4 +135,22 @@ export async function fetchOrderNotes(orderIds: readonly number[]): Promise<Orde
 /** Clasifica las notas pendientes del restaurante (lo normal es que ocurra al enviar a cocina). */
 export async function classifyOrderNotes(): Promise<void> {
   await api.post('/insights/order-notes/classify', undefined, { timeout: SLOW_TIMEOUT_MS })
+}
+
+export const lowStockQuery = queryOptions({ queryKey: lowStockQueryKey, queryFn: fetchLowStock })
+
+export const restockQuery = queryOptions({ queryKey: restockQueryKey, queryFn: fetchRestock })
+
+export function aiDecisionsQuery(params: AiDecisionParams) {
+  return queryOptions({
+    queryKey: [...aiDecisionsQueryKey, params],
+    queryFn: () => fetchAiDecisions(params),
+  })
+}
+
+export function orderNotesQuery(orderIds: readonly number[]) {
+  return queryOptions({
+    queryKey: [...orderNotesQueryKey, orderIds],
+    queryFn: () => fetchOrderNotes(orderIds),
+  })
 }

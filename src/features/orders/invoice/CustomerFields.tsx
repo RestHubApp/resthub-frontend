@@ -3,7 +3,7 @@ import { Input } from '../../../components/ui/input'
 import { Label } from '../../../components/ui/label'
 import { customerComplete } from './invoiceDocument'
 
-export interface CustomerValues {
+interface CustomerValues {
   readonly numero: string
   readonly nombre: string
   readonly direccion: string

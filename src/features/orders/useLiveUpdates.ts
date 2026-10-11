@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { currentUserQueryKey } from '../../api/auth'
 import { cashQueryKey } from '../../api/cash'
 import { orderNotesQueryKey } from '../../api/insights'
+import { menuQueryKey } from '../../api/menu'
 import { ordersQueryKey } from '../../api/orders'
 import { tablesQueryKey } from '../../api/tables'
 import { api } from '../../services/api'
@@ -17,7 +18,6 @@ export type LiveStatus = 'connecting' | 'live' | 'offline'
 // El mismo plazo que anuncia el servidor en el aviso `ready`.
 const RETRY_MS = 3000
 const UNAUTHORIZED = 401
-const MENU_KEY = ['menu'] as const
 
 // Un aviso dice que cambio, nunca los datos: se invalidan las consultas y
 // TanStack Query vuelve a pedir solo las que estan en pantalla.
@@ -25,12 +25,12 @@ const KEYS_BY_TOPIC: Readonly<Record<string, readonly (readonly unknown[])[]>> =
   orders: [ordersQueryKey, tablesQueryKey, cashQueryKey],
   // Se abrió o se cerró la caja: el cobro sabe si puede cobrar.
   cash: [cashQueryKey],
-  menu: [MENU_KEY],
+  menu: [menuQueryKey],
   permissions: [currentUserQueryKey],
   // Solo llega al encargado: se clasificaron las notas de un pedido.
   insights: [orderNotesQueryKey],
 }
-const EVERYTHING = [ordersQueryKey, tablesQueryKey, MENU_KEY, orderNotesQueryKey, cashQueryKey] as const
+const EVERYTHING = [ordersQueryKey, tablesQueryKey, menuQueryKey, orderNotesQueryKey, cashQueryKey] as const
 
 const liveLogger = logger.child({ module: 'realtime' })
 

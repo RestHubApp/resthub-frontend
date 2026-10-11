@@ -24,7 +24,7 @@ function cerrado(id: number, cambios: Partial<CashSession> = {}): CashSession {
 
 function abrir(items: CashSession[], total = items.length) {
   const api = servidor().on('get', SESIONES, (peticion: { params: Record<string, unknown> }) => ({
-    items: peticion.params.offset === 0 ? items : [cerrado(99, { opened_by_name: 'Turno viejo' })],
+    items: peticion.params['offset'] === 0 ? items : [cerrado(99, { opened_by_name: 'Turno viejo' })],
     total,
   }))
   entrarComo()

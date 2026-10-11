@@ -1,6 +1,11 @@
 import comments from '@eslint-community/eslint-plugin-eslint-comments/configs'
 import js from '@eslint/js'
 import boundaries from 'eslint-plugin-boundaries'
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
+import importX from 'eslint-plugin-import-x'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
+import pluginQuery from '@tanstack/eslint-plugin-query'
+import reactEffect from 'eslint-plugin-react-you-might-not-need-an-effect'
 import noBarrelFiles from 'eslint-plugin-no-barrel-files'
 import checkFile from 'eslint-plugin-check-file'
 import react from 'eslint-plugin-react'
@@ -45,7 +50,7 @@ export default tseslint.config(
       ...react.configs.flat.recommended.rules,
       ...react.configs.flat['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
 
       // SOLID, responsabilidad unica: un archivo describe un componente.
       'react/no-multi-comp': ['error', { ignoreStateless: false }],
@@ -137,7 +142,7 @@ export default tseslint.config(
     rules: {
       'react/no-multi-comp': 'off',
       'react-refresh/only-export-components': [
-        'warn',
+        'error',
         { allowConstantExport: true, allowExportNames: ['buttonVariants', 'badgeVariants', 'tabsListVariants'] },
       ],
     },
@@ -345,6 +350,106 @@ export default tseslint.config(
         },
       ],
     },
+  },
+
+  // ---------------------------------------------------------------------
+  // Importaciones: ciclos, duplicados y dependencias.
+  //
+  // Sin `import-x/extensions` y `resolver-next`, no-cycle no resuelve las
+  // rutas de un proyecto TS y reporta 0 siempre (falso verde).
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { 'import-x': importX },
+    settings: {
+      'import-x/extensions': ['.ts', '.tsx', '.js'],
+      'import-x/resolver-next': [createTypeScriptImportResolver({ project: './tsconfig.json' })],
+    },
+    rules: {
+      'import-x/no-cycle': ['error', { maxDepth: Infinity }],
+      'import-x/no-duplicates': 'error',
+      'import-x/no-self-import': 'error',
+      'import-x/no-useless-path-segments': 'error',
+      'import-x/no-extraneous-dependencies': [
+        'error',
+        {
+          devDependencies: [
+            '**/*.test.{ts,tsx}',
+            'jest/**',
+            'e2e/**',
+            'pruebas/**',
+            '*.config.{js,ts,mjs}',
+            'src/api/contract/**',
+            'vite.*.ts',
+          ],
+        },
+      ],
+      'import-x/no-mutable-exports': 'error',
+      'import-x/first': 'error',
+      'import-x/newline-after-import': 'error',
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Accesibilidad en el JSX (jsx-a11y en modo estricto).
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.tsx'],
+    plugins: { 'jsx-a11y': jsxA11y },
+    rules: {
+      ...jsxA11y.flatConfigs.strict.rules,
+      // Un bloque desplazable (traceback, JSON) debe poder enfocarse para
+      // desplazarse con teclado; si es una region con nombre, es valido.
+      'jsx-a11y/no-noninteractive-tabindex': ['error', { roles: ['tabpanel', 'region'], tags: [] }],
+      // Safari/VoiceOver deja de anunciar como lista un <ul> con `list-style: none`:
+      // ahí el role="list" explícito no es redundante.
+      'jsx-a11y/no-redundant-roles': ['error', { ul: ['list'], ol: ['list'] }],
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // TanStack Query: claves exhaustivas, queryOptions como fuente unica.
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { '@tanstack/query': pluginQuery },
+    rules: {
+      ...pluginQuery.configs['flat/recommended'][0].rules,
+      '@tanstack/query/prefer-query-options': 'error',
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // TypeScript: reglas que strictTypeChecked no trae.
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/switch-exhaustiveness-check': ['error', { requireDefaultForNonUnion: true }],
+      '@typescript-eslint/strict-boolean-expressions': 'error',
+      '@typescript-eslint/no-use-before-define': ['error', {
+          functions: false,
+          classes: true,
+          // Un cierre puede nombrar una constante declarada despues (los
+          // almacenes de sesion y su temporizador de vencimiento se necesitan
+          // mutuamente); el uso en el mismo ambito antes de declarar sigue
+          // prohibido, y tsc ya marca el acceso real antes de inicializar.
+          variables: false,
+        }],
+      '@typescript-eslint/consistent-type-exports': 'error',
+      '@typescript-eslint/method-signature-style': 'error',
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Efectos innecesarios.
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.tsx', 'src/**/use*.ts'],
+    ...reactEffect.configs.recommended,
+    rules: Object.fromEntries(
+      Object.keys(reactEffect.configs.recommended.rules ?? {}).map((rule) => [rule, 'error']),
+    ),
   },
 
   // ---------------------------------------------------------------------

@@ -7,7 +7,7 @@ import type { OwnRestaurant, UpdateRestaurantRequest } from './types'
 
 export const restaurantQueryKey = ['restaurant'] as const
 
-export async function fetchRestaurant(): Promise<OwnRestaurant> {
+async function fetchRestaurant(): Promise<OwnRestaurant> {
   const { data } = await api.get<OwnRestaurant>('/restaurant')
   return data
 }

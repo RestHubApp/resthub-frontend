@@ -3,7 +3,6 @@
 // build del frontend falla en compilacion en vez de fallar en ejecucion.
 import type { components, operations } from './schema'
 
-export type HealthResponse = components['schemas']['HealthResponse']
 
 export type AccessTokenResponse = components['schemas']['AccessTokenResponse']
 export type LoginRequest = components['schemas']['LoginRequest']
@@ -11,8 +10,6 @@ export type ChangeOwnPasswordRequest = components['schemas']['ChangeOwnPasswordR
 export type CurrentUserResponse = components['schemas']['SessionResponse']
 export type AcceptTermsRequest = components['schemas']['AcceptTermsRequest']
 export type CustomerExport = components['schemas']['CustomerExportResponse']
-export type UserResponse = components['schemas']['SessionUserResponse']
-export type RestaurantResponse = components['schemas']['SessionRestaurantResponse']
 export type PermissionCode = components['schemas']['Permission']
 
 // Roles del restaurante: el encargado, el mesero y los que arma cada local.
@@ -51,19 +48,14 @@ export type PaymentMethod = components['schemas']['PaymentMethod']
 export type OpenOrderRequest = components['schemas']['OpenOrderRequest']
 export type NewItemRequest = components['schemas']['NewItemRequest']
 export type ChangeItemRequest = components['schemas']['ChangeItemRequest']
-export type UpdateOrderRequest = components['schemas']['UpdateOrderRequest']
-export type ChargeOrderRequest = components['schemas']['ChargeOrderRequest']
 export type PaymentRequest = components['schemas']['PaymentRequest']
 export type PaymentResponse = components['schemas']['PaymentResponse']
 export type DiscountRequest = components['schemas']['DiscountRequest']
-export type CourtesyRequest = components['schemas']['CourtesyRequest']
 
 // Caja: el turno abierto, su arqueo y los turnos anteriores.
 export type CurrentCash = components['schemas']['CurrentCashResponse']
 export type CashSession = components['schemas']['CashSessionResponse']
 export type CashSummary = components['schemas']['CashSummaryResponse']
-export type CashMethodTotal = components['schemas']['MethodTotalResponse']
-export type CashWaiterTips = components['schemas']['WaiterTipsResponse']
 export type CashSessionPage = components['schemas']['CashSessionPageResponse']
 export type OpenCashRequest = components['schemas']['OpenCashRequest']
 export type CloseCashRequest = components['schemas']['CloseCashRequest']
@@ -102,7 +94,6 @@ export type AdjustmentRequest = components['schemas']['AdjustmentRequest']
 export type StockChange = components['schemas']['StockChangeResponse']
 export type DishCost = components['schemas']['DishCostResponse']
 export type Recipe = components['schemas']['RecipeResponse']
-export type RecipeLine = components['schemas']['RecipeLineResponse']
 export type ReplaceRecipeRequest = components['schemas']['ReplaceRecipeRequest']
 
 // Panel BI e IA (`/insights`).
@@ -125,7 +116,6 @@ export type DishMargins = components['schemas']['DishMarginsResponse']
 export type DishMargin = components['schemas']['DishMarginResponse']
 export type LowStockItem = components['schemas']['LowStockResponse']
 export type WasteReport = components['schemas']['WasteReportResponse']
-export type WasteByCause = components['schemas']['WasteByCauseResponse']
 export type WasteByIngredient = components['schemas']['WasteByIngredientResponse']
 export type ClassifyWasteResult = components['schemas']['ClassifyWasteResponse']
 export type RestockReport = components['schemas']['RestockResponse']
@@ -145,9 +135,7 @@ export type OrderNotesReport = components['schemas']['OrderNotesResponse']
 export type Supplier = components['schemas']['SupplierResponse']
 export type SupplierRequest = components['schemas']['SupplierRequest']
 export type PurchaseOrder = components['schemas']['PurchaseOrderResponse']
-export type PurchaseOrderLine = components['schemas']['PurchaseLineResponse']
 export type PurchaseOrderPage = components['schemas']['PurchaseOrderPageResponse']
-export type PurchaseOrderStatus = components['schemas']['PurchaseOrderStatus']
 export type CreatePurchaseOrderRequest = components['schemas']['CreatePurchaseOrderRequest']
 export type ReceivePurchaseOrderRequest = components['schemas']['ReceivePurchaseOrderRequest']
 export type PurchaseSuggestion = components['schemas']['PurchaseSuggestionResponse']
@@ -159,7 +147,6 @@ export type Invoice = components['schemas']['InvoiceResponse']
 export type InvoicePage = components['schemas']['InvoicePageResponse']
 export type IssueInvoiceRequest = components['schemas']['IssueInvoiceRequest']
 export type InvoiceKind = components['schemas']['InvoiceKind']
-export type InvoiceStatus = components['schemas']['InvoiceStatus']
 export type DocumentType = components['schemas']['DocumentType']
 
 // Clientes frecuentes y reservas de mesa.
@@ -195,7 +182,6 @@ export type PlatformActivityParams = NonNullable<
 // Vista previa: el local de muestra, sus cuentas y el código de un solo uso
 // con que una pestaña nueva entra como su encargado o su mesero.
 export type PlatformSandbox = components['schemas']['SandboxResponse']
-export type PlatformSandboxAccount = components['schemas']['SandboxAccountResponse']
 export type PreviewAs = components['schemas']['PreviewAs']
 export type PreviewRequest = components['schemas']['PreviewRequest']
 export type PreviewCodeResponse = components['schemas']['PreviewCodeResponse']

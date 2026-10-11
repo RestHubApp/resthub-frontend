@@ -18,7 +18,7 @@ import { isValidTimeZone } from './timeZones'
 
 // Los límites repiten los del backend: avisan mientras se escribe, y el
 // servidor vuelve a comprobarlos.
-export const MAX_RESTAURANT_NAME = 120
+const MAX_RESTAURANT_NAME = 120
 
 export const platformLoginSchema = z.object({
   email: correoRule,
@@ -38,7 +38,7 @@ const restaurantNameRule = z
   .min(1, 'Escribe el nombre del restaurante')
   .max(MAX_RESTAURANT_NAME, `Usa como máximo ${String(MAX_RESTAURANT_NAME)} caracteres`)
 
-export const slugRule = z
+const slugRule = z
   .string()
   .trim()
   .min(1, 'Escribe el identificador')
@@ -50,7 +50,7 @@ export const slugRule = z
  * no se vuelve a validar, así una zona guardada que este navegador no conoce
  * no impide cambiarle el nombre.
  */
-export function timeZoneRule(sinCambio?: string) {
+function timeZoneRule(sinCambio?: string) {
   return z
     .string()
     .min(1, 'Elige la zona horaria')

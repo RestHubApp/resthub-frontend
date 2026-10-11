@@ -21,16 +21,16 @@ import type {
 
 export const inventoryQueryKey = ['inventory'] as const
 
-export const ingredientsQueryKey = [...inventoryQueryKey, 'ingredients'] as const
-export const lowStockQueryKey = [...inventoryQueryKey, 'low-stock'] as const
-export const movementsQueryKey = [...inventoryQueryKey, 'movements'] as const
+const ingredientsQueryKey = [...inventoryQueryKey, 'ingredients'] as const
+const lowStockQueryKey = [...inventoryQueryKey, 'low-stock'] as const
+const movementsQueryKey = [...inventoryQueryKey, 'movements'] as const
 export const dishCostsQueryKey = [...inventoryQueryKey, 'recipes'] as const
 
-export function recipeQueryKey(menuItemId: number) {
+function recipeQueryKey(menuItemId: number) {
   return [...dishCostsQueryKey, menuItemId] as const
 }
 
-export function movementListQueryKey(params: MovementListParams) {
+function movementListQueryKey(params: MovementListParams) {
   return [...movementsQueryKey, params] as const
 }
 
@@ -42,7 +42,7 @@ function recipePath(menuItemId: number): string {
   return `/inventory/recipes/${String(menuItemId)}`
 }
 
-export async function fetchIngredients(includeInactive = false): Promise<Ingredient[]> {
+async function fetchIngredients(includeInactive = false): Promise<Ingredient[]> {
   const { data } = await api.get<Ingredient[]>('/inventory/ingredients', {
     params: includeInactive ? { include_inactive: true } : undefined,
   })
@@ -70,14 +70,14 @@ export async function updateIngredient(
 }
 
 /** Insumos con stock por debajo del mínimo, incluidos los negativos. */
-export async function fetchLowStock(): Promise<Ingredient[]> {
+async function fetchLowStock(): Promise<Ingredient[]> {
   const { data } = await api.get<Ingredient[]>('/inventory/alerts/low-stock')
   return data
 }
 
 export const lowStockQuery = queryOptions({ queryKey: lowStockQueryKey, queryFn: fetchLowStock })
 
-export async function fetchMovements(params: MovementListParams): Promise<MovementPage> {
+async function fetchMovements(params: MovementListParams): Promise<MovementPage> {
   // El tipo es una lista: FastAPI la espera como `kind=a&kind=b`, sin corchetes.
   const { data } = await api.get<MovementPage>('/inventory/movements', {
     params,
@@ -103,14 +103,14 @@ export async function registerAdjustment(payload: AdjustmentRequest): Promise<St
 }
 
 /** Costo, margen y porcentaje de margen de cada plato, tenga o no receta. */
-export async function fetchDishCosts(): Promise<DishCost[]> {
+async function fetchDishCosts(): Promise<DishCost[]> {
   const { data } = await api.get<DishCost[]>('/inventory/recipes')
   return data
 }
 
 export const dishCostsQuery = queryOptions({ queryKey: dishCostsQueryKey, queryFn: fetchDishCosts })
 
-export async function fetchRecipe(menuItemId: number): Promise<Recipe> {
+async function fetchRecipe(menuItemId: number): Promise<Recipe> {
   const { data } = await api.get<Recipe>(recipePath(menuItemId))
   return data
 }
@@ -122,4 +122,12 @@ export async function replaceRecipe(
 ): Promise<Recipe> {
   const { data } = await api.put<Recipe>(recipePath(menuItemId), payload)
   return data
+}
+
+export function movementsQuery(params: MovementListParams) {
+  return queryOptions({ queryKey: movementListQueryKey(params), queryFn: () => fetchMovements(params) })
+}
+
+export function recipeQuery(menuItemId: number) {
+  return queryOptions({ queryKey: recipeQueryKey(menuItemId), queryFn: () => fetchRecipe(menuItemId) })
 }

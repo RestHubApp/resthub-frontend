@@ -1,3 +1,5 @@
+import { queryOptions } from '@tanstack/react-query'
+
 import { api } from '../services/api'
 import type {
   AcceptTermsRequest,
@@ -68,3 +70,9 @@ export async function exchangePreviewCode(payload: PreviewExchangeRequest): Prom
   const { data } = await api.post<AccessTokenResponse>('/auth/preview', payload, { withoutCredential: true })
   return data
 }
+
+/** La cuenta en curso, releida en segundo plano: un fallo no muestra aviso. */
+export const currentUserQuery = queryOptions({
+  queryKey: currentUserQueryKey,
+  queryFn: () => fetchCurrentUser({ background: true }),
+})

@@ -17,7 +17,7 @@ const PERSONAS = 'Personas'
 
 function abrir() {
   const api = servidor()
-    .on('get', LISTA, (peticion: { params: Record<string, unknown> }) => (peticion.params.day === DIA ? [reserva()] : []))
+    .on('get', LISTA, (peticion: { params: Record<string, unknown> }) => (peticion.params['day'] === DIA ? [reserva()] : []))
     .on('get', '/tables', [mesa(1, '1'), mesa(2, '2'), mesa(3, TERRAZA)])
   entrarComo()
   const montaje = montar(<ReservationsView />)

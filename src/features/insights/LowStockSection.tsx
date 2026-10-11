@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { fetchLowStock, insightsQueryKey } from '../../api/insights'
+import { lowStockQuery } from '../../api/insights'
 import EmptyState from '../../components/EmptyState'
 import Icon from '../../components/Icon'
 import SectionCard from '../../components/SectionCard'
@@ -11,7 +11,7 @@ import ReportState from './ReportState'
 
 /** Los insumos que ya están por debajo de su mínimo. No depende del rango: es el stock de hoy. */
 export default function LowStockSection() {
-  const insumos = useQuery({ queryKey: [...insightsQueryKey, 'low-stock'], queryFn: fetchLowStock })
+  const insumos = useQuery(lowStockQuery)
 
   return (
     <SectionCard

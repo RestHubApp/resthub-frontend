@@ -10,5 +10,5 @@ import type { insightsReportQuery } from '../../api/insights'
  */
 export function useInsightsReport<T>(options: ReturnType<typeof insightsReportQuery<T>>) {
   const query = useQuery({ ...options, placeholderData: keepPreviousData })
-  return { ...query, refreshing: query.isFetching && query.isPlaceholderData }
+  return { data: query.data, error: query.error, refreshing: query.isFetching && query.isPlaceholderData }
 }

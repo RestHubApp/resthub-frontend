@@ -30,7 +30,7 @@ export const platformObservabilityQueryKey = [...platformQueryKey, 'observabilit
 const BASE = '/platform/observability'
 
 /** Lo que se pide por página de logs o de peticiones. */
-export const OBS_PAGE_SIZE = 50
+const OBS_PAGE_SIZE = 50
 
 /** El `before_id` de la primera página: ninguno, empieza por lo más nuevo. */
 const FIRST_PAGE: number | null = null

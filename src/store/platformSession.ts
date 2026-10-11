@@ -205,7 +205,7 @@ setPlatformUnauthorizedHandler(() => {
  * administrador, cierra la de esta pestaña sin borrar lo guardado. Una pestaña
  * de vista previa no guarda la sesión de plataforma y no se sincroniza.
  */
-export function syncWithStoredPlatformSession(): void {
+function syncWithStoredPlatformSession(): void {
   const lectura = leer()
   if (!lectura.ok) {
     return

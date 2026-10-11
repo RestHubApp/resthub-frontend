@@ -6,7 +6,7 @@ export interface RouteSortOption {
 }
 
 /** Las columnas por las que se ordena la tabla de rutas, siempre de mayor a menor. */
-export const ROUTE_SORTS: readonly RouteSortOption[] = [
+export const ROUTE_SORTS: readonly [RouteSortOption, RouteSortOption, RouteSortOption] = [
   { value: 'requests', label: 'Peticiones' },
   { value: 'p95', label: 'p95' },
   { value: 'errors', label: 'Errores 5xx' },

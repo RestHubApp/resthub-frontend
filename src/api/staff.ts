@@ -21,11 +21,11 @@ function staffPath(userId: number, action = ''): string {
   return `/staff/${String(userId)}${action}`
 }
 
-export function staffListQueryKey(params: StaffListParams) {
+function staffListQueryKey(params: StaffListParams) {
   return [...staffQueryKey, params] as const
 }
 
-export async function fetchStaff(params: StaffListParams = {}): Promise<StaffListResponse> {
+async function fetchStaff(params: StaffListParams = {}): Promise<StaffListResponse> {
   // El filtro por rol es una lista: FastAPI la espera como `role_id=1&role_id=2`
   // y no con los corchetes que Axios agrega por defecto.
   const { data } = await api.get<StaffListResponse>('/staff', {

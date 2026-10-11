@@ -31,7 +31,7 @@ export const WINDOWS: readonly WindowOption[] = [
   { value: '7d', label: '7 d', phrase: 'en los últimos 7 días' },
 ]
 
-export const DEFAULT_WINDOW: ObsWindow = '24h'
+const DEFAULT_WINDOW: ObsWindow = '24h'
 
 /** Desde qué estado se listan las peticiones: todas, las rechazadas o las que fallaron. */
 export const STATUS_MIN_OPTIONS = [
@@ -52,7 +52,7 @@ export interface ObsFilters {
 }
 
 /** El nombre de cada filtro en la dirección. */
-export const PARAM = {
+const PARAM = {
   window: 'ventana',
   restaurantId: 'restaurante',
   logLevel: 'nivel',

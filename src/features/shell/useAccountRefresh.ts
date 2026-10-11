@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-import { currentUserQueryKey, fetchCurrentUser } from '../../api/auth'
+import { currentUserQuery } from '../../api/auth'
 import { useSession } from '../../store/session'
 
 // El nombre del restaurante o los permisos cambian muy de vez en cuando: basta
@@ -21,8 +21,7 @@ export function useAccountRefresh(): void {
   const refresh = useSession((state) => state.refresh)
 
   const cuenta = useQuery({
-    queryKey: currentUserQueryKey,
-    queryFn: () => fetchCurrentUser({ background: true }),
+    ...currentUserQuery,
     enabled: token !== null,
     staleTime: REFRESH_MS,
     refetchInterval: REFRESH_MS,

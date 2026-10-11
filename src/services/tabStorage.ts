@@ -18,7 +18,7 @@ export const PREVIEW_SESSION_KEY = 'resthub.vista-previa.sesion.v1'
  */
 export const PREVIEW_TAB_KEY = 'resthub.vista-previa.pestana.v1'
 /** La ruta que canjea el código de vista previa, sin la base de la aplicación. */
-export const PREVIEW_ENTRY_PATH = '/vista-previa'
+const PREVIEW_ENTRY_PATH = '/vista-previa'
 
 /** Lo que se usa de `Storage`: así las pruebas pasan un mapa en memoria. */
 export interface KeyValueStorage {
@@ -27,7 +27,7 @@ export interface KeyValueStorage {
   removeItem: (key: string) => void
 }
 
-export type TabKind = 'restaurant' | 'preview'
+type TabKind = 'restaurant' | 'preview'
 
 export interface TabStorage {
   readonly kind: TabKind

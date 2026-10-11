@@ -19,7 +19,7 @@ export interface NavEntry {
  * que el mesero abre cien veces por turno, y las primeras cuatro son las que
  * caben en la barra inferior del celular.
  */
-export const NAV_ENTRIES: readonly NavEntry[] = [
+const NAV_ENTRIES: readonly NavEntry[] = [
   {
     to: '/pedidos',
     label: 'Pedidos',
