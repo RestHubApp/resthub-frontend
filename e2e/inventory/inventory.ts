@@ -9,7 +9,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
-import { defined } from '../support/defined'
+import { defined } from '../support/defined.ts'
 
 export interface Element {
   readonly id: string
