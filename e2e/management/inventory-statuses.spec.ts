@@ -67,14 +67,15 @@ test('GES-11 cada pestaña del inventario avisa si el servidor falla', async ({ 
   }
   await openAs(page, local.owner, '/inventario')
   await expect(page.getByText('No se pudieron cargar los insumos.')).toBeVisible()
-  const messages = {
-    movements: 'No se pudo cargar el libro de movimientos.',
-    alerts: 'No se pudieron cargar las alertas.',
-    recipes: 'No se pudieron cargar las recetas.',
-    purchases: 'No se pudieron cargar las órdenes.',
-    suppliers: 'No se pudieron cargar los proveedores.',
-  }
-  for (const [tab, message] of Object.entries(messages)) {
+  // Pares [nombre visible de la pestaña, aviso]: el nombre es texto de la interfaz.
+  const messages: [string, string][] = [
+    ['Movimientos', 'No se pudo cargar el libro de movimientos.'],
+    ['Alertas', 'No se pudieron cargar las alertas.'],
+    ['Recetas', 'No se pudieron cargar las recetas.'],
+    ['Compras', 'No se pudieron cargar las órdenes.'],
+    ['Proveedores', 'No se pudieron cargar los proveedores.'],
+  ]
+  for (const [tab, message] of messages) {
     // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
     await page.getByRole('tab', { name: new RegExp(tab, 'iu') }).click()
     await expect(page.getByRole('tabpanel').getByRole('alert')).toHaveText(message)
