@@ -39,6 +39,17 @@ describe('sesión de restaurante', () => {
     expect(currentAuthToken()).toBe('t-1')
   })
 
+  it('cerrar por cambio de contraseña vacía la sesión y lo explica hasta la próxima entrada', () => {
+    useSession.getState().signIn('t-1', MESERO)
+
+    useSession.getState().signOutAfterPasswordChange()
+    expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false, passwordChanged: true })
+    expect(guardada()).toBeNull()
+
+    useSession.getState().signIn('t-2', MESERO)
+    expect(useSession.getState().passwordChanged).toBe(false)
+  })
+
   it('refrescar cambia la cuenta y la guardada, pero sin sesión no hace nada', () => {
     useSession.getState().refresh(MESERO)
     expect(useSession.getState().account).toBeNull()

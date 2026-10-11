@@ -43,8 +43,14 @@ export async function acceptTerms(version: AcceptTermsRequest['version']): Promi
   return data
 }
 
-export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<void> {
-  await api.post('/auth/me/password', payload)
+/**
+ * Cambia la contraseña propia. El servidor corta todos los tokens anteriores,
+ * el de esta petición incluido, y devuelve el único válido con la sesión (la
+ * misma forma que el acceso).
+ */
+export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<AccessTokenResponse> {
+  const { data } = await api.post<AccessTokenResponse>('/auth/me/password', payload)
+  return data
 }
 
 /**

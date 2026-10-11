@@ -30,6 +30,8 @@ interface SessionState {
   account: CurrentUserResponse | null
   /** La sesion se cerro sola porque el token vencio: el acceso lo explica. */
   expired: boolean
+  /** La sesion se cerro porque no se pudo seguir tras cambiar la contraseña: el acceso lo explica. */
+  passwordChanged: boolean
   signIn: (token: string, account: CurrentUserResponse) => void
   /** Aplica una lectura nueva de `GET /auth/me`: nombre, restaurante o permisos. */
   refresh: (account: CurrentUserResponse) => void
@@ -42,6 +44,12 @@ interface SessionState {
   signOut: () => void
   /** Cierra la sesion porque el servidor ya no acepta el token. */
   expire: () => void
+  /**
+   * Cierra la sesion despues de cambiar la contraseña propia cuando no se pudo
+   * seguir con el token nuevo: el servidor ya revoco el que habia y usarlo solo
+   * daria 401.
+   */
+  signOutAfterPasswordChange: () => void
   /**
    * Abre la sesion de vista previa que entrego `POST /auth/preview`.
    *
@@ -56,21 +64,10 @@ interface SessionState {
   exitPreview: () => void
 }
 
-/**
- * Lee la sesion guardada del navegador.
- *
- * El token se guarda para que recargar la pagina no eche al usuario.
- * Cualquier lectura puede fallar en una ventana privada o con el
- * almacenamiento bloqueado, asi que el fallo se trata como "no hay sesion".
- */
-function readStoredSession(): StoredSession | null {
-  const lectura = leerGuardada()
-  return lectura.ok ? lectura.session : null
-}
-
 type Lectura = { readonly ok: true; readonly session: StoredSession | null } | { readonly ok: false }
 
-// Como `readStoredSession`, pero distingue «no hay sesión guardada» de «no se
+// Lee la sesion guardada del navegador (el token se guarda para que recargar
+// la pagina no eche al usuario). Distingue «no hay sesión guardada» de «no se
 // pudo leer»: sin almacenamiento no se sabe qué hizo otra pestaña, y eso no
 // alcanza para cerrar la sesión de esta.
 function leerGuardada(): Lectura {
@@ -169,12 +166,9 @@ function vigente(session: StoredSession | null): session is StoredSession {
   return session !== null && !isTokenExpired(session.token) && (!isPreviewTab() || session.account.preview)
 }
 
-function mismaCuenta(a: CurrentUserResponse, b: CurrentUserResponse): boolean {
-  return a.user.id === b.user.id && a.restaurant.id === b.restaurant.id
-}
-
 forgetOldSessions()
-const guardada = readStoredSession()
+const lecturaInicial = leerGuardada()
+const guardada = lecturaInicial.ok ? lecturaInicial.session : null
 const restored = vigente(guardada) ? guardada : null
 if (guardada !== null && restored === null) {
   writeStoredSession(null)
@@ -190,11 +184,12 @@ export const useSession = create<SessionState>((set, get) => ({
   token: restored?.token ?? null,
   account: restored?.account ?? null,
   expired: guardada !== null && restored === null,
+  passwordChanged: false,
 
   signIn: (token, account) => {
     setAuthToken(token)
     writeStoredSession({ token, account })
-    set({ token, account, expired: false })
+    set({ token, account, expired: false, passwordChanged: false })
     programarVencimiento(token)
     logger.info(
       { userId: account.user.id, roleId: account.user.role_id, restaurantId: account.restaurant.id },
@@ -236,8 +231,13 @@ export const useSession = create<SessionState>((set, get) => ({
 
   signOut: () => {
     limpiarSesion()
-    set({ token: null, account: null, expired: false })
+    set({ token: null, account: null, expired: false, passwordChanged: false })
     logger.info('auth.signed_out')
+  },
+
+  signOutAfterPasswordChange: () => {
+    get().signOut()
+    set({ passwordChanged: true })
   },
 
   expire: () => {
@@ -245,7 +245,7 @@ export const useSession = create<SessionState>((set, get) => ({
       return
     }
     limpiarSesion()
-    set({ token: null, account: null, expired: true })
+    set({ token: null, account: null, expired: true, passwordChanged: false })
     logger.warn('auth.session_expired')
   },
 
@@ -266,7 +266,7 @@ export const useSession = create<SessionState>((set, get) => ({
     }
     limpiarSesion()
     setPreviewTabMark(false)
-    set({ token: null, account: null, expired: false })
+    set({ token: null, account: null, expired: false, passwordChanged: false })
     logger.info('auth.preview_exited')
   },
 }))
@@ -302,11 +302,11 @@ export function syncWithStoredSession(): void {
   if (actual !== null && actual.token === estado.token) {
     return
   }
-  if (vigente(actual) && (estado.account === null || mismaCuenta(actual.account, estado.account))) {
+  if (vigente(actual) && (estado.account === null || (actual.account.user.id === estado.account.user.id && actual.account.restaurant.id === estado.account.restaurant.id))) {
     setAuthToken(actual.token)
     persistencia.token = actual.token
     programarVencimiento(actual.token)
-    useSession.setState({ token: actual.token, account: actual.account, expired: false })
+    useSession.setState({ token: actual.token, account: actual.account, expired: false, passwordChanged: false })
     logger.info('auth.synced_from_other_tab')
     return
   }
@@ -314,7 +314,7 @@ export function syncWithStoredSession(): void {
     return
   }
   soltarSesion()
-  useSession.setState({ token: null, account: null, expired: false })
+  useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })
   logger.info('auth.signed_out_in_other_tab')
 }
 

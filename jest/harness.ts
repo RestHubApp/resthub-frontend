@@ -200,7 +200,7 @@ export function entrarAPlataforma(): void {
 export function entrarComo(permisos: readonly PermissionCode[] = PERMISOS_ENCARGADO, cambios: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
   const account = cuenta(permisos, cambios)
   setAuthToken('token-de-prueba')
-  useSession.setState({ token: 'token-de-prueba', account, expired: false })
+  useSession.setState({ token: 'token-de-prueba', account, expired: false, passwordChanged: false })
   return account
 }
 
@@ -272,7 +272,7 @@ afterEach(() => {
   api.defaults.adapter = adaptadorOriginal
   servidorActual = null
   setAuthToken(null)
-  useSession.setState({ token: null, account: null, expired: false })
+  useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })
   if (usePlatformSession.getState().token !== null) {
     usePlatformSession.getState().signOut()
   }

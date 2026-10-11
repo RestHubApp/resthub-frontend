@@ -132,6 +132,23 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
     expect(guardada(local)?.token).toBe(nuevo)
   })
 
+  it('tras cambiar la contraseña, la otra pestaña adopta el token nuevo y no se queda con el revocado', async () => {
+    const local = fakeStorage()
+    const viejo = tokenQueVence(3600, 'a')
+    const uno = await abrirPestana(local)
+    uno.useSession.getState().signIn(viejo, cuenta(1))
+    const dos = await abrirPestana(local)
+    const nuevo = tokenQueVence(3600, 'clave-nueva')
+
+    // La pestaña que cambia la clave renueva con el token de la respuesta.
+    uno.useSession.getState().renew(viejo, nuevo, cuenta(1))
+    expect(guardada(local)?.token).toBe(nuevo)
+    avisar(dos.ventana, local, CLAVE)
+
+    expect(dos.useSession.getState()).toMatchObject({ token: nuevo, account: cuenta(1) })
+    expect(dos.currentAuthToken()).toBe(nuevo)
+  })
+
   it('si otra pestaña ya renovó y esta no se enteró, adopta lo guardado en vez de pisarlo', async () => {
     const local = fakeStorage()
     const viejo = tokenQueVence(3600, 'a')

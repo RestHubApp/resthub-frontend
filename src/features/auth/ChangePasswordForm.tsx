@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router'
 
-import { changeOwnPassword, login, sessionOf } from '../../api/auth'
+import { changeOwnPassword, sessionOf } from '../../api/auth'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import PasswordField from '../../components/PasswordField'
@@ -24,6 +25,7 @@ import {
  * laptop sin bloquear no deberian alcanzar para quedarse con la cuenta.
  */
 export default function ChangePasswordForm() {
+  const navigate = useNavigate()
   const { register, handleSubmit, formState, reset } = useForm<Formulario>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: EMPTY_CHANGE_PASSWORD,
@@ -35,20 +37,26 @@ export default function ChangePasswordForm() {
         current_password: valores.current_password,
         new_password: valores.new_password,
       }),
-    onSuccess: async (_, valores) => {
-      reset(EMPTY_CHANGE_PASSWORD)
-      // Cambiar la contraseña corta las sesiones anteriores, también esta: se
-      // entra de nuevo con la clave nueva para no sacar a la persona de la app.
-      const { token, account, renew } = useSession.getState()
-      if (token === null || account === null) {
+    onSuccess: (respuesta) => {
+      // El servidor corta todos los tokens anteriores, este incluido, y
+      // devuelve el único válido: se cambia aquí y, al quedar guardado, las
+      // otras pestañas lo adoptan en vez de seguir con uno que da 401. Sin
+      // segundo acceso: la clave nueva no vuelve a viajar.
+      const { token, renew } = useSession.getState()
+      // Un servidor viejo respondía 204 sin cuerpo: ahí no hay token que usar.
+      const nuevo = (respuesta as Partial<typeof respuesta> | null | undefined)?.access_token ?? ''
+      if (token !== null && nuevo !== '') {
+        renew(token, nuevo, sessionOf(respuesta))
+      }
+      if (nuevo !== '' && useSession.getState().token === nuevo) {
+        reset(EMPTY_CHANGE_PASSWORD)
         return
       }
-      try {
-        const nueva = await login({ email: account.user.email, password: valores.new_password })
-        renew(token, nueva.access_token, sessionOf(nueva))
-      } catch {
-        // Sin renovar, la próxima petición da 401 y el acceso lo explica.
-      }
+      // Sin token nuevo, o la sesión ya no era esta (se cerró o cambió en otra
+      // pestaña): seguir con el token viejo solo daría 401. Se cierra y se
+      // vuelve al acceso con el aviso.
+      useSession.getState().signOutAfterPasswordChange()
+      void navigate('/acceso', { replace: true })
     },
   })
 
