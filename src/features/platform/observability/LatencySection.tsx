@@ -38,7 +38,7 @@ export function LatencySection({ params, live }: LatencySectionProps) {
           refreshing={series.isPlaceholderData}
           chart={
             <AreaChart
-              points={toSeries(points, bucket, PLATFORM_TIME_ZONE, (p) => p.p95_ms)}
+              points={toSeries(points, { bucketSeconds: bucket, timeZone: PLATFORM_TIME_ZONE, value: (p) => p.p95_ms })}
               label={`Latencia p95 por cubo de ${formatBucket(bucket)}, horas de Lima`}
               formatValue={formatMilliseconds}
               formatTick={formatMilliseconds}

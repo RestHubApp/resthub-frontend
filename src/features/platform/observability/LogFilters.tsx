@@ -28,10 +28,7 @@ export function LogFilters({ filters, onChange }: LogFiltersProps) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={(event) => {
         event.preventDefault()
-        onChange({
-          logSearch: search.trim(),
-          logRequestId: request.trim(),
-        })
+        onChange({ logSearch: search.trim(), logRequestId: request.trim() })
       }}
     >
       <FilterSelect

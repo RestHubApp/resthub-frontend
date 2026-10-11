@@ -1,8 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { createStaff } from '@/api/staff'
 import type { Role } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
@@ -10,13 +8,12 @@ import { onSubmit } from '@/hooks/formSubmit'
 import { MIN_PASSWORD } from '@/services/fieldRules'
 import { defaultRoleId } from './roleOptions'
 import { StaffFields } from './StaffFields'
-import { saveStaffMember } from './staffList'
 import {
-  createPayload,
   type CreateStaffValues,
   createStaffSchema,
   emptyCreateStaff,
 } from './staffSchema'
+import { useCreateStaff } from './useCreateStaff'
 
 interface StaffCreateFormProps {
   /** Los roles que quien mira puede dar. */
@@ -25,20 +22,14 @@ interface StaffCreateFormProps {
   readonly onDone: () => void
 }
 
+/** El formulario para dar de alta una cuenta del personal con su contraseña inicial. */
 export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
-  const queryClient = useQueryClient()
   const { register, handleSubmit, formState } = useForm<CreateStaffValues>({
     resolver: zodResolver(createStaffSchema),
     defaultValues: emptyCreateStaff(defaultRoleId(roles)),
   })
 
-  const registration = useMutation({
-    mutationFn: (values: CreateStaffValues) => createStaff(createPayload(values)),
-    onSuccess: (account) => {
-      saveStaffMember(queryClient, account)
-      onDone()
-    },
-  })
+  const registration = useCreateStaff(onDone)
 
   const errors = formState.errors
 

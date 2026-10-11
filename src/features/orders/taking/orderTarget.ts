@@ -41,6 +41,14 @@ export function backPath(target: OrderTarget): string {
   return target.kind === 'takeaway' ? paths.orders.takeaway : paths.orders.list
 }
 
+/** Los datos de entrega del cuerpo del pedido; vacios si no es delivery. */
+function deliveryFields(delivery: DeliveryInfo | undefined) {
+  if (delivery === undefined) {
+    return { customer_phone: '', delivery_address: '', delivery_reference: '' }
+  }
+  return { customer_phone: delivery.phone, delivery_address: delivery.address, delivery_reference: delivery.reference }
+}
+
 /**
  * El cuerpo para abrir el pedido.
  *
@@ -63,14 +71,11 @@ export function openRequest(
   if (target.kind === 'table') {
     return { ...base, type: 'dine_in', table_id: target.tableId, customer_name: '' }
   }
-  const delivery = target.delivery
   return {
     ...base,
-    type: delivery === undefined ? 'takeaway' : 'delivery',
+    type: target.delivery === undefined ? 'takeaway' : 'delivery',
     customer_name: target.customerName,
     customer_id: target.customerId ?? null,
-    customer_phone: delivery?.phone ?? '',
-    delivery_address: delivery?.address ?? '',
-    delivery_reference: delivery?.reference ?? '',
+    ...deliveryFields(target.delivery),
   }
 }

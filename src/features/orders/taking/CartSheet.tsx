@@ -1,7 +1,7 @@
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
-import { CartLine } from './CartLine'
+import { CartLineList } from './CartLineList'
 import { cartTotals } from './cartTotals'
 import type { DraftLine } from './useOrderDraft'
 
@@ -46,24 +46,7 @@ export function CartSheet({
         <SheetDescription className="m-0">
           Revisa las cantidades y anota lo que la cocina tiene que saber.
         </SheetDescription>
-        {lines.length === 0 ? (
-          <p className="m-0 py-6 text-center text-muted-foreground">Todavía no elegiste platos.</p>
-        ) : (
-          <ul className="m-0 flex list-none flex-col gap-4 p-0">
-            {lines.map((line) => (
-              <CartLine
-                key={line.lineKey}
-                line={line}
-                onQuantity={(quantity) => {
-                  onQuantity(line.lineKey, quantity)
-                }}
-                onNotes={(note) => {
-                  onNotes(line.lineKey, note)
-                }}
-              />
-            ))}
-          </ul>
-        )}
+        <CartLineList lines={lines} onQuantity={onQuantity} onNotes={onNotes} />
         <div className="flex items-baseline justify-between border-t pt-3">
           <span className="text-muted-foreground">{count}</span>
           <span className="text-xl font-bold tabular-nums">{total}</span>

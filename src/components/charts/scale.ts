@@ -33,8 +33,19 @@ export function spreadIndexes(length: number, maxLabels: number): number[] {
   return Array.from({ length: maxLabels }, (_, index) => Math.round(index * step))
 }
 
+interface NearestIndexOptions {
+  /** Posición horizontal del puntero dentro del gráfico. */
+  readonly x: number
+  /** Donde empieza el área de trazado. */
+  readonly left: number
+  /** Distancia horizontal entre dos puntos. */
+  readonly step: number
+  /** Cantidad de puntos de la serie. */
+  readonly length: number
+}
+
 /** El índice del punto más cercano a una posición horizontal. */
-export function nearestIndex(x: number, left: number, step: number, length: number): number {
+export function nearestIndex({ x, left, step, length }: NearestIndexOptions): number {
   if (length <= 1 || step <= 0) {
     return 0
   }

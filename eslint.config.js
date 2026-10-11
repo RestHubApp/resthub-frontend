@@ -185,14 +185,14 @@ export default tseslint.config(
 
       // KISS
       'sonarjs/cognitive-complexity': ['error', 15],
-      complexity: ['error', 10],
+      complexity: ['error', 8],
       'max-depth': ['error', 3],
       'max-lines': ['error', { max: 250, skipBlankLines: true, skipComments: true }],
       'max-lines-per-function': [
         'error',
-        { max: 80, skipBlankLines: true, skipComments: true },
+        { max: 50, skipBlankLines: true, skipComments: true },
       ],
-      'max-params': ['error', 4],
+      'max-params': ['error', 3],
       'max-nested-callbacks': ['error', 3],
 
       // SOLID, inversion de dependencias: preferir contratos explicitos.
@@ -204,6 +204,19 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': ['error', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
+    },
+  },
+
+  // Las pruebas, sus ayudantes (jest/, e2e/) y los pactos conservan el límite
+  // anterior: un `describe` agrupa casos, un pacto se arma en una función y los
+  // ayudantes de Playwright reciben posicionales. Todo el código de producción
+  // cumple 50 líneas, complejidad 8 y 3 parámetros.
+  {
+    files: ['**/*.test.{ts,tsx}', 'src/api/contract/**/*.ts', 'jest/**/*.ts', 'e2e/**/*.ts'],
+    rules: {
+      complexity: ['error', 10],
+      'max-lines-per-function': ['error', { max: 80, skipBlankLines: true, skipComments: true }],
+      'max-params': ['error', 4],
     },
   },
 
@@ -556,6 +569,15 @@ export default tseslint.config(
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',
     },
+  },
+
+  // Un archivo de producción que importa de más de 12 módulos hace demasiado:
+  // se parte en piezas. Las pruebas importan lo que prueban y sus ayudantes.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', 'src/api/contract/**'],
+    plugins: { 'import-x': importX },
+    rules: { 'import-x/max-dependencies': ['error', { max: 12 }] },
   },
 
   // ---------------------------------------------------------------------

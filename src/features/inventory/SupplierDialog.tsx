@@ -1,25 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 
 import { saveSupplier } from '@/api/purchasing'
 import type { Supplier, SupplierRequest } from '@/api/types'
 import { DialogFormActions } from '@/components/DialogFormActions'
 import { FormDialog } from '@/components/FormDialog'
-import { textOptional } from '@/components/formRules'
-import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
+import { SupplierFields } from './SupplierFields'
+import { supplierSchema, supplierValuesOf, type SupplierValues } from './supplierSchema'
 import { usePurchasingMutation } from './usePurchasingMutation'
-
-// Los topes del servidor.
-const schema = z.object({
-  name: z.string().trim().min(1, 'Escribe el nombre del proveedor').max(80, 'Usa como máximo 80 caracteres'),
-  contact: textOptional(80),
-  phone: textOptional(20),
-  notes: textOptional(300),
-})
-type Values = z.infer<typeof schema>
 
 interface SupplierDialogProps {
   readonly open: boolean
@@ -28,20 +18,11 @@ interface SupplierDialogProps {
   readonly onClose: () => void
 }
 
-function valuesOf(supplier: Supplier | null): Values {
-  return {
-    name: supplier?.name ?? '',
-    contact: supplier?.contact ?? '',
-    phone: supplier?.phone ?? '',
-    notes: supplier?.notes ?? '',
-  }
-}
-
 /** Alta o edición de un proveedor: nombre, contacto, teléfono y una nota. */
 export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps) {
-  const { register, handleSubmit, formState, reset } = useForm<Values>({
-    resolver: zodResolver(schema),
-    values: valuesOf(supplier),
+  const { register, handleSubmit, formState, reset } = useForm<SupplierValues>({
+    resolver: zodResolver(supplierSchema),
+    values: supplierValuesOf(supplier),
   })
   const close = () => {
     reset()
@@ -73,12 +54,7 @@ export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps)
           }),
         )}
       >
-        <TextField id="proveedor-nombre" label="Nombre" field={register('name')} error={formState.errors.name?.message} />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TextField id="proveedor-contacto" label="Contacto (opcional)" field={register('contact')} error={formState.errors.contact?.message} />
-          <TextField id="proveedor-telefono" label="Teléfono (opcional)" type="tel" inputMode="tel" field={register('phone')} error={formState.errors.phone?.message} />
-        </div>
-        <TextField id="proveedor-nota" label="Nota (opcional)" placeholder="Entrega martes y viernes…" field={register('notes')} error={formState.errors.notes?.message} />
+        <SupplierFields register={register} errors={formState.errors} />
         <DialogFormActions>
           <Button type="button" variant="outline" onClick={close}>
             Cancelar

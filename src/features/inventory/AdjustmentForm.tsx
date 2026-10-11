@@ -1,23 +1,14 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
-
-import { registerAdjustment } from '@/api/inventory'
 import type { Ingredient } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
 import { SelectField } from '@/components/SelectField'
 import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
-import { adjustmentDelta, adjustmentPayload } from './adjustmentMath'
 import { ChoiceField } from './ChoiceField'
 import { FormButtons } from './FormButtons'
-import { adjustmentSchema, type AdjustmentValues } from './inventorySchema'
+import { MutationError } from './MutationError'
 import { QuantityField } from './QuantityField'
 import { StockPreview } from './StockPreview'
-import { inputUnits } from './units'
-import { useInventoryChange } from './useInventoryChange'
-import { formatQuantity, formatSignedQuantity } from '@/services/format'
+import { useAdjustmentForm } from './useAdjustmentForm'
 
 interface AdjustmentFormProps {
   readonly ingredient: Ingredient
@@ -36,40 +27,13 @@ const MODES = [
  * calcula la diferencia. Si ya se sabe la diferencia, se escribe directo.
  */
 export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
-  const units = inputUnits(ingredient.unit)
-  const { register, handleSubmit, formState, control } = useForm<AdjustmentValues>({
-    resolver: zodResolver(adjustmentSchema),
-    defaultValues: {
-      mode: 'count',
-      quantity: '',
-      quantity_unit: units[0]?.value ?? ingredient.unit,
-      sign: 'subtract',
-      reason: 'Conteo físico',
-    },
-  })
-  const [mode, quantity, quantityUnit, sign] = useWatch({
-    control,
-    name: ['mode', 'quantity', 'quantity_unit', 'sign'],
-  })
-  const delta = adjustmentDelta({ mode, quantity, quantity_unit: quantityUnit, sign }, ingredient)
-
-  const adjustment = useInventoryChange({
-    send: (data: AdjustmentValues) => registerAdjustment(adjustmentPayload(data, ingredient)),
-    success: (result) =>
-      `Ajuste de ${formatSignedQuantity(result.movement.quantity, ingredient.unit)}: ${ingredient.name} queda en ${formatQuantity(result.ingredient.stock, ingredient.unit)}`,
-    onDone,
-  })
-  const errors = formState.errors
+  const { register, submit, errors, mode, delta, units, adjustment } = useAdjustmentForm(ingredient, onDone)
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
-      onSubmit={onSubmit(
-        handleSubmit((data) => {
-          adjustment.mutate(data)
-        }),
-      )}
+      onSubmit={onSubmit(submit)}
     >
       <ChoiceField legend="¿Qué sabes?" field={register('mode')} options={MODES} />
       {mode === 'difference' ? (
@@ -95,11 +59,11 @@ export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
       />
       <StockPreview ingredient={ingredient} delta={delta} />
 
-      {adjustment.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(adjustment.error, 'No se pudo registrar el ajuste.')}
-        </FormMessage>
-      ) : null}
+      <MutationError
+        isError={adjustment.isError}
+        error={adjustment.error}
+        fallback="No se pudo registrar el ajuste."
+      />
       <FormButtons label="Guardar ajuste" icon="count" pending={adjustment.isPending} onCancel={onDone} />
     </form>
   )

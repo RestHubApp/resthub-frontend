@@ -1,18 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-import { createTable, tableName, updateTable } from '@/api/tables'
+import { tableName } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
 import { FormDialog } from '@/components/FormDialog'
-import { FormMessage } from '@/components/FormMessage'
+import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
-import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/api'
 import { onSubmit } from '@/hooks/formSubmit'
-import { withTable } from './tableCache'
 import { MAX_LABEL, tableSchema, type TableValues } from './tableSchema'
-import { useTableMutation } from './useTableMutation'
+import { TABLE_SAVE_FAILURE, useTableSave } from './useTableSave'
 
 interface TableFormDialogProps {
   /** `null` crea una mesa; una mesa, la renombra. */
@@ -27,17 +23,9 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
     resolver: zodResolver(tableSchema),
     values: { label: table?.label ?? '' },
   })
-  const save = useTableMutation({
-    mutationFn: (values: TableValues) =>
-      table === null ? createTable(values) : updateTable(table.id, values),
-    failure: 'No se pudo guardar la mesa.',
-    success: table === null ? 'Mesa creada.' : 'Mesa renombrada.',
-    updateCache: withTable,
-    onSuccess: () => {
-      reset()
-      onOpenChange(false)
-    },
-    inlineError: true,
+  const save = useTableSave(table, () => {
+    reset()
+    onOpenChange(false)
   })
 
   return (
@@ -65,19 +53,15 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
           field={register('label')}
           error={formState.errors.label?.message}
         />
-        {save.isError ? (
-          <FormMessage tone="error">{errorMessage(save.error, 'No se pudo guardar la mesa.')}</FormMessage>
-        ) : null}
-        <DialogFormActions>
-          <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={() => {
+        <FormFooter
+          mutation={save}
+          failureText={TABLE_SAVE_FAILURE}
+          onCancel={() => {
             onOpenChange(false)
-          }}>
-            Cancelar
-          </Button>
-          <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
-            {save.isPending ? 'Guardando…' : 'Guardar'}
-          </Button>
-        </DialogFormActions>
+          }}
+          submit={{ label: 'Guardar', pendingLabel: 'Guardando…' }}
+          size="lg"
+        />
       </form>
     </FormDialog>
   )

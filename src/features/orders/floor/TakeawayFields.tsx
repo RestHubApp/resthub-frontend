@@ -1,7 +1,8 @@
 import type { UseFormReturn } from 'react-hook-form'
 
 import { TextField } from '@/components/TextField'
-import { MAX_CUSTOMER, MAX_ADDRESS, MAX_REFERENCE, MAX_PHONE, type TakeawayValues } from './takeawaySchema'
+import { DeliveryFields } from './DeliveryFields'
+import { MAX_CUSTOMER, type TakeawayValues } from './takeawaySchema'
 
 interface TakeawayFieldsProps {
   readonly form: UseFormReturn<TakeawayValues>
@@ -26,41 +27,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
         field={register('customer_name')}
         error={errors.customer_name?.message}
       />
-      {delivery ? (
-        <>
-          <TextField
-            id="takeaway-phone"
-            type="tel"
-            inputMode="tel"
-            label="Teléfono"
-            placeholder="Por ejemplo, 987654321"
-            autoComplete="off"
-            maxLength={MAX_PHONE}
-            field={register('phone')}
-            error={errors.phone?.message}
-          />
-          <TextField
-            id="takeaway-address"
-            label="Dirección de entrega"
-            placeholder="Calle, número, distrito"
-            icon="location"
-            autoComplete="off"
-            maxLength={MAX_ADDRESS}
-            field={register('address')}
-            error={errors.address?.message}
-          />
-          <TextField
-            id="takeaway-reference"
-            label="Referencia (opcional)"
-            placeholder="Por ejemplo, frente al parque"
-            icon="note"
-            autoComplete="off"
-            maxLength={MAX_REFERENCE}
-            field={register('reference')}
-            error={errors.reference?.message}
-          />
-        </>
-      ) : null}
+      {delivery ? <DeliveryFields form={form} /> : null}
     </>
   )
 }

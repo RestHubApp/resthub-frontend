@@ -61,6 +61,6 @@ describe('formatBucket y toSeries', () => {
 
   it('un punto por cubo con la medida elegida', () => {
     const points = [{ t: START, requests: 8, errors_5xx: 1, p95_ms: 120 }]
-    expect(toSeries(points, 60, LIMA, (p) => p.p95_ms)).toEqual([{ key: START, axisLabel: '14:00', value: 120 }])
+    expect(toSeries(points, { bucketSeconds: 60, timeZone: LIMA, value: (p) => p.p95_ms })).toEqual([{ key: START, axisLabel: '14:00', value: 120 }])
   })
 })

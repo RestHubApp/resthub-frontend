@@ -1,19 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
-
-import { createIngredient, updateIngredient } from '@/api/inventory'
 import type { Ingredient, IngredientUnit } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
 import { FormButtons } from './FormButtons'
+import { IngredientStockFields } from './IngredientStockFields'
 import { IngredientUnitField } from './IngredientUnitField'
-import { EMPTY_INGREDIENT, ingredientNumbers, ingredientValuesOf } from './ingredientValues'
-import { ingredientSchema, type IngredientValues } from './inventorySchema'
-import { QuantityField } from './QuantityField'
-import { inputUnits, priceUnit } from './units'
-import { useInventoryChange } from './useInventoryChange'
+import { MutationError } from './MutationError'
+import { inputUnits } from './units'
+import { useIngredientForm } from './useIngredientForm'
 
 interface IngredientFormProps {
   /** El insumo que se edita. Sin él, se crea uno nuevo. */
@@ -21,38 +14,13 @@ interface IngredientFormProps {
   readonly onDone: () => void
 }
 
-function save(ingredient: Ingredient | undefined, values: IngredientValues) {
-  const numbers = ingredientNumbers(values, values.unit)
-  if (ingredient === undefined) {
-    return createIngredient({ name: values.name, unit: values.unit, ...numbers })
-  }
-  return updateIngredient(ingredient.id, { name: values.name, ...numbers })
-}
-
 /** Alta y edición de un insumo. */
 export function IngredientForm({ ingredient, onDone }: IngredientFormProps) {
-  const { register, handleSubmit, formState, control, setValue } = useForm<IngredientValues>({
-    resolver: zodResolver(ingredientSchema),
-    defaultValues: ingredient === undefined ? EMPTY_INGREDIENT : ingredientValuesOf(ingredient),
-  })
-  const unit = useWatch({ control, name: 'unit' })
-  const change = useInventoryChange({
-    send: (values: IngredientValues) => save(ingredient, values),
-    success: (result) => (ingredient === undefined ? `Insumo ${result.name} creado.` : 'Cambios guardados.'),
-    onDone,
-  })
-  const errors = formState.errors
+  const { register, setValue, submit, errors, unit, change } = useIngredientForm(ingredient, onDone)
+  const isNew = ingredient === undefined
 
   return (
-    <form
-      noValidate
-      className="flex flex-col gap-5"
-      onSubmit={onSubmit(
-        handleSubmit((values) => {
-          change.mutate(values)
-        }),
-      )}
-    >
+    <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(submit)}>
       <TextField
         id="ingredient-name"
         label="Nombre"
@@ -70,36 +38,12 @@ export function IngredientForm({ ingredient, onDone }: IngredientFormProps) {
         })}
         error={errors.unit?.message}
       />
-      <div className="grid items-start gap-5 sm:grid-cols-2">
-        <QuantityField
-          id="ingredient-min"
-          label="Stock mínimo"
-          hint="Por debajo, aparece en alertas."
-          amount={register('min_stock')}
-          unit={register('min_stock_unit')}
-          units={inputUnits(unit)}
-          error={errors.min_stock?.message}
-        />
-        <TextField
-          id="ingredient-cost"
-          label={`Costo por ${priceUnit(unit).label} (S/)`}
-          icon="cost"
-          inputMode="decimal"
-          autoComplete="off"
-          hint="Cada compra lo recalcula con el promedio ponderado."
-          field={register('unit_cost')}
-          error={errors.unit_cost?.message}
-        />
-      </div>
+      <IngredientStockFields register={register} errors={errors} unit={unit} />
 
-      {change.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(change.error, 'No se pudo guardar el insumo.')}
-        </FormMessage>
-      ) : null}
+      <MutationError isError={change.isError} error={change.error} fallback="No se pudo guardar el insumo." />
       <FormButtons
-        label={ingredient === undefined ? 'Crear insumo' : 'Guardar'}
-        icon={ingredient === undefined ? 'add' : 'confirm'}
+        label={isNew ? 'Crear insumo' : 'Guardar'}
+        icon={isNew ? 'add' : 'confirm'}
         pending={change.isPending}
         onCancel={onDone}
       />

@@ -1,16 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
-import { closeCash } from '@/api/cash'
-import type { CashSession, CloseCashRequest } from '@/api/types'
-import { TextField } from '@/components/TextField'
+import type { CashSession } from '@/api/types'
 import { onSubmit } from '@/hooks/formSubmit'
-import { centsToApi, formatCents, toCents } from '@/services/format'
-import { cashAmountForApi, closeCashSchema, type CloseCashValues, MAX_CASH_NOTES } from './cashSchema'
-import { differenceLabel } from './cashDifference'
+import { toCents } from '@/services/format'
+import { cashAmountForApi, closeCashSchema, type CloseCashValues } from './cashSchema'
+import { CashDifferenceBar } from './CashDifferenceBar'
 import { CloseCashButton } from './CloseCashButton'
-import { useCashMutation } from './useCashMutation'
+import { CloseCashFields } from './CloseCashFields'
+import { OpenOrdersWarning } from './OpenOrdersWarning'
+import { useCloseCash } from './useCloseCash'
 
 interface CloseCashFormProps {
   readonly session: CashSession
@@ -35,16 +34,7 @@ export function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
   })
   const cash = useWatch({ control, name: 'counted_cash' }).trim()
   const difference = AMOUNT.test(cash) ? toCents(cashAmountForApi(cash)) - expected : null
-  const close = useCashMutation({
-    mutationFn: (payload: CloseCashRequest) => closeCash(payload),
-    success: (closed) => `Caja cerrada. ${differenceLabel(toCents(closed.difference ?? '0'))}.`,
-    failure: 'No se pudo cerrar la caja.',
-    onSuccess: onClosed,
-  })
-
-  // Cerrar mueve dinero y no se deshace: un monto válido abre la confirmación
-  // y solo al confirmarla sale el cierre. Enter en el monto hace lo mismo.
-  const [toConfirm, setToConfirm] = useState<CloseCashRequest | null>(null)
+  const close = useCloseCash(onClosed)
 
   return (
     <form
@@ -52,58 +42,21 @@ export function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
       className="flex flex-col gap-4"
       onSubmit={onSubmit(
         handleSubmit((values) => {
-          setToConfirm({ counted_cash: cashAmountForApi(values.counted_cash), notes: values.notes })
+          close.ask({ counted_cash: cashAmountForApi(values.counted_cash), notes: values.notes })
         }),
       )}
     >
-      {session.open_orders > 0 ? (
-        <p role="status" className="m-0 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
-          {session.open_orders === 1 ? 'Hay 1 pedido sin cobrar' : `Hay ${String(session.open_orders)} pedidos sin cobrar`}.
-          Puedes cerrar igual: se cobra en el turno siguiente.
-        </p>
-      ) : null}
-      <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
-        <TextField
-          id="caja-contado"
-          label="Efectivo contado"
-          icon="payment"
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder={centsToApi(expected)}
-          hint={`Esperado: ${formatCents(expected)}`}
-          field={register('counted_cash')}
-          error={formState.errors.counted_cash?.message}
-        />
-        <TextField
-          id="caja-nota-cierre"
-          label="Nota (opcional)"
-          maxLength={MAX_CASH_NOTES}
-          placeholder="Faltó sencillo, billete falso…"
-          field={register('notes')}
-          error={formState.errors.notes?.message}
-        />
-      </div>
-      <p aria-live="polite" className="m-0 flex items-baseline justify-between rounded-lg bg-muted px-4 py-3">
-        <span className="font-medium">Diferencia</span>
-        <span className="text-xl font-bold tabular-nums">
-          {difference === null ? '—' : differenceLabel(difference)}
-        </span>
-      </p>
+      <OpenOrdersWarning count={session.open_orders} />
+      <CloseCashFields register={register} errors={formState.errors} expected={expected} />
+      <CashDifferenceBar difference={difference} />
       <div className="flex justify-end">
         <CloseCashButton
           pending={close.isPending}
           expected={expected}
           difference={difference}
-          open={toConfirm !== null}
-          onCancel={() => {
-            setToConfirm(null)
-          }}
-          onConfirm={() => {
-            if (toConfirm !== null) {
-              close.mutate(toConfirm)
-            }
-            setToConfirm(null)
-          }}
+          open={close.isConfirming}
+          onCancel={close.cancel}
+          onConfirm={close.confirm}
         />
       </div>
     </form>

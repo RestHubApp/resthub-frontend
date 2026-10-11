@@ -1,18 +1,14 @@
-import { useQuery } from '@tanstack/react-query'
-import { Link, useLocation, useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 
-import { recipeQuery } from '@/api/inventory'
 import { PERMISSION } from '@/api/permissions'
 import { EmptyState } from '@/components/EmptyState'
-import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
-import { buttonVariants } from '@/components/ui/button'
-import { errorMessage } from '@/services/api'
 import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
+import { BackToLink } from './BackToLink'
+import { MutationError } from './MutationError'
 import { RecipeEditor } from './RecipeEditor'
-import { useIngredients } from './useIngredients'
+import { useRecipeEditorData } from './useRecipeEditorData'
 
 /** A dónde vuelve "Volver": al menú si se llegó desde un plato, si no a las recetas. */
 function returnFocus(status: unknown): { readonly to: string; readonly label: string } {
@@ -25,39 +21,19 @@ export function RecipeEditorView() {
   const menuItemId = Number(useParams()['menuItemId'])
   const back = returnFocus(useLocation().state)
   const canManage = useCan(PERMISSION.inventoryManage)
-  const recipe = useQuery({
-    ...recipeQuery(menuItemId),
-    enabled: Number.isInteger(menuItemId),
-    // El editor parte de lo que hay en el servidor, no de una copia vieja.
-    staleTime: 0,
-  })
-  const ingredients = useIngredients()
-  const error = recipe.error ?? ingredients.error
-  const isLoading = error === null && (recipe.data === undefined || ingredients.data === undefined)
+  const { recipe, ingredients, error, isLoading } = useRecipeEditorData(menuItemId)
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={recipe.data === undefined ? 'Receta' : `Receta: ${recipe.data.menu_item_name}`}
+        title={recipe === undefined ? 'Receta' : `Receta: ${recipe.menu_item_name}`}
         description="Lo que lleva una porción, en la unidad de cada insumo. El costo usa el costo actual de cada insumo."
-        actions={
-          <Link to={back.to} className={buttonVariants({ variant: 'outline', className: 'h-11 px-4' })}>
-            <Icon name="previous" size={16} />
-            <span>{back.label}</span>
-          </Link>
-        }
+        actions={<BackToLink to={back.to} label={back.label} />}
       />
-      {error === null ? null : (
-        <FormMessage tone="error">{errorMessage(error, 'No se pudo cargar la receta.')}</FormMessage>
-      )}
+      <MutationError isError={error !== null} error={error} fallback="No se pudo cargar la receta." />
       {isLoading ? <EmptyState title="Cargando la receta…" /> : null}
-      {recipe.data !== undefined && ingredients.data !== undefined ? (
-        <RecipeEditor
-          key={menuItemId}
-          recipe={recipe.data}
-          ingredients={ingredients.data}
-          canManage={canManage}
-        />
+      {recipe !== undefined && ingredients !== undefined ? (
+        <RecipeEditor key={menuItemId} recipe={recipe} ingredients={ingredients} canManage={canManage} />
       ) : null}
     </div>
   )

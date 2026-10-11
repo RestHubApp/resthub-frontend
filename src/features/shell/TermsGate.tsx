@@ -1,34 +1,21 @@
-import { useMutation } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { acceptTerms, fetchCurrentUser } from '@/api/auth'
 import type { CurrentUserResponse } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { errorMessage, errorStatus } from '@/services/api'
+import { errorMessage } from '@/services/api'
 import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
-
-// La versión cambió mientras se leía: se relee la sesión y se pide la nueva.
-const VERSION_CHANGED = 409
+import { useAcceptTerms } from './useAcceptTerms'
 
 /**
  * Ley N.º 29733: antes de trabajar, cada cuenta acepta los términos de uso y
  * la política de privacidad vigentes. Si cambian, se vuelven a pedir.
  */
 export function TermsGate({ account }: { readonly account: CurrentUserResponse }) {
-  const refresh = useSession((state) => state.refresh)
   const signOut = useSession((state) => state.signOut)
-  const accept = useMutation({
-    mutationFn: () => acceptTerms(account.terms_version),
-    onSuccess: refresh,
-    onError: async (error) => {
-      if (errorStatus(error) === VERSION_CHANGED) {
-        refresh(await fetchCurrentUser())
-      }
-    },
-  })
+  const accept = useAcceptTerms(account.terms_version)
 
   return (
     // Dentro del armazón, que ya tiene su <main>: una sección y no otro.

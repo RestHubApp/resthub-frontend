@@ -29,12 +29,17 @@ export function formatBucket(seconds: number): string {
     : `${String(Math.max(1, Math.round(seconds / SECONDS_PER_MINUTE)))} min`
 }
 
+/** Cómo se arma una serie: el ancho del cubo, la zona horaria y qué valor toma cada punto. */
+export interface SeriesOptions {
+  readonly bucketSeconds: number
+  readonly timeZone: string
+  readonly value: (point: ObsTimePoint) => number
+}
+
 /** Una serie del gráfico de área, un punto por cubo, con su rótulo del eje. */
 export function toSeries(
   points: readonly ObsTimePoint[],
-  bucketSeconds: number,
-  timeZone: string,
-  value: (point: ObsTimePoint) => number,
+  { bucketSeconds, timeZone, value }: SeriesOptions,
 ): SeriesPoint[] {
   return points.map((point) => ({
     key: point.t,

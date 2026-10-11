@@ -1,19 +1,15 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
-import { cashQueryKey, currentCashQuery } from '@/api/cash'
+import { currentCashQuery } from '@/api/cash'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { PageHeader } from '@/components/PageHeader'
 import { RetryQueryError } from '@/components/RetryQueryError'
 import { SectionCard } from '@/components/SectionCard'
-import { useServerEvent } from '@/hooks/useServerEvent'
 import { errorMessage } from '@/services/api'
-import { formatDateTime, formatMoney } from '@/services/format'
-import { useTimeZone } from '@/store/session'
+import { CashCurrentSections } from './CashCurrentSections'
 import { CashHistory } from './CashHistory'
-import { CashSummaryView } from './CashSummaryView'
-import { CloseCashForm } from './CloseCashForm'
 import { DiscountLimitForm } from './DiscountLimitForm'
-import { OpenCashForm } from './OpenCashForm'
+import { useCashRefresh } from './useCashRefresh'
 
 /**
  * La caja del local: abrir el turno, ver cómo va y cerrarlo con el arqueo.
@@ -22,15 +18,8 @@ import { OpenCashForm } from './OpenCashForm'
  * canal de pedidos, y abrir o cerrar la caja, por el de caja.
  */
 export function CashView() {
-  const timeZone = useTimeZone()
-  const queryClient = useQueryClient()
   const cashRegister = useQuery(currentCashQuery)
-  const refresh = () => {
-    void queryClient.invalidateQueries({ queryKey: cashQueryKey })
-  }
-  useServerEvent('orders', refresh)
-  useServerEvent('cash', refresh)
-  const shift = cashRegister.data?.session ?? null
+  const refresh = useCashRefresh()
 
   return (
     <div className="flex flex-col gap-6">
@@ -40,24 +29,7 @@ export function CashView() {
       />
       {cashRegister.isPending ? <ListSkeleton label="Cargando la caja…" count={3} itemClassName="h-16 rounded-lg" /> : null}
       {cashRegister.isError ? <RetryQueryError message={errorMessage(cashRegister.error, 'No se pudo cargar la caja.')} onRetry={() => { void cashRegister.refetch() }} /> : null}
-      {cashRegister.data?.is_open === false ? (
-        <SectionCard title="Abrir caja" description="Sin caja abierta, nadie puede cobrar.">
-          <OpenCashForm />
-        </SectionCard>
-      ) : null}
-      {shift?.summary ? (
-        <>
-          <SectionCard
-            title="Turno en curso"
-            description={`Abrió ${shift.opened_by_name} el ${formatDateTime(shift.opened_at, timeZone)} con ${formatMoney(shift.opening_amount)}`}
-          >
-            <CashSummaryView session={shift} summary={shift.summary} />
-          </SectionCard>
-          <SectionCard title="Cerrar caja" description="Cuenta el efectivo del cajón, propinas en efectivo incluidas.">
-            <CloseCashForm session={shift} onClosed={refresh} />
-          </SectionCard>
-        </>
-      ) : null}
+      <CashCurrentSections current={cashRegister.data} onClosed={refresh} />
       {/* Lo de abajo aparece recién con la caja cargada: si no, el turno en
           curso lo empujaba hacia abajo al llegar (Lighthouse medía un CLS de 0,24
           en escritorio y 0,46 en el celular). */}

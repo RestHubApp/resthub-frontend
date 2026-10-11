@@ -198,6 +198,17 @@ setPlatformUnauthorizedHandler(() => {
   usePlatformSession.getState().expire()
 })
 
+/** Si lo guardado sigue vigente y es del mismo administrador (o esta pestaña no tenía ninguno). */
+function canAdoptStoredPlatformSession(
+  stored: StoredPlatformSession | null,
+  admin: PlatformAdmin | null,
+): stored is StoredPlatformSession {
+  if (stored === null || isTokenExpired(stored.token)) {
+    return false
+  }
+  return admin === null || admin.id === stored.admin.id
+}
+
 /**
  * Pone esta pestaña al día con la sesión de plataforma guardada, que otra
  * pestaña acaba de cambiar: adopta la del mismo administrador (renovada) o una
@@ -215,7 +226,7 @@ function syncWithStoredPlatformSession(): void {
   if (actual !== null && actual.token === status.token) {
     return
   }
-  if (actual !== null && !isTokenExpired(actual.token) && (status.admin === null || status.admin.id === actual.admin.id)) {
+  if (canAdoptStoredPlatformSession(actual, status.admin)) {
     setPlatformAuthToken(actual.token)
     persistence.token = actual.token
     scheduleExpiry(actual.token)

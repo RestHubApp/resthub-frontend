@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { suppliersQuery } from '@/api/purchasing'
 import type { Supplier } from '@/api/types'
 import { EmptyState } from '@/components/EmptyState'
-import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/api'
+import { MutationError } from './MutationError'
 import { SupplierDialog } from './SupplierDialog'
+import { SupplierRow } from './SupplierRow'
 
 interface SuppliersPanelProps {
   readonly canManage: boolean
@@ -38,30 +38,20 @@ export function SuppliersPanel({ canManage }: SuppliersPanelProps) {
       }
     >
       {suppliers.isPending ? <ListSkeleton label="Cargando proveedores…" count={3} itemClassName="h-14 rounded-lg" /> : null}
-      {suppliers.isError ? (
-        <FormMessage tone="error">{errorMessage(suppliers.error, 'No se pudieron cargar los proveedores.')}</FormMessage>
-      ) : null}
+      <MutationError isError={suppliers.isError} error={suppliers.error} fallback="No se pudieron cargar los proveedores." />
       {suppliers.isSuccess && list.length === 0 ? (
         <EmptyState title="Todavía no hay proveedores" description="Da de alta al mercado o distribuidor al que le compras." />
       ) : null}
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {list.map((supplier) => (
-          <li key={supplier.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 ring-1 ring-input">
-            <span className="flex flex-col">
-              <span className="font-medium">{supplier.name}</span>
-              <span className="text-sm text-muted-foreground">
-                {[supplier.contact, supplier.phone, supplier.notes].filter(Boolean).join(' · ') || 'Sin datos de contacto'}
-              </span>
-            </span>
-            {canManage ? (
-              <Button type="button" variant="ghost" size="sm" onClick={() => {
-                setEditing(supplier)
-              }}>
-                <Icon name="edit" size={14} />
-                <span>Editar</span>
-              </Button>
-            ) : null}
-          </li>
+          <SupplierRow
+            key={supplier.id}
+            supplier={supplier}
+            canManage={canManage}
+            onEdit={() => {
+              setEditing(supplier)
+            }}
+          />
         ))}
       </ul>
       <SupplierDialog

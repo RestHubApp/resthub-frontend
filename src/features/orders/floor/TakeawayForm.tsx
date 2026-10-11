@@ -1,25 +1,14 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
-import { useNavigate } from 'react-router'
-
 import { DialogFormActions } from '@/components/DialogFormActions'
 import { FormDialog } from '@/components/FormDialog'
 import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
 import { CustomerLookup } from './CustomerLookup'
 import { TakeawayConsent } from './TakeawayConsent'
 import { TakeawayFields } from './TakeawayFields'
-import { withCustomer } from './takeawayCustomer'
-import { EMPTY_TAKEAWAY, fromCustomer, newOrderPath, takeawaySchema, type TakeawayValues } from './takeawaySchema'
-
-const MODES: readonly { value: TakeawayValues['mode']; label: string }[] = [
-  { value: 'takeaway', label: 'Recoge en local' },
-  { value: 'delivery', label: 'Delivery' },
-]
+import { TakeawayModePicker } from './TakeawayModePicker'
+import { fromCustomer } from './takeawaySchema'
+import { useTakeawayForm } from './useTakeawayForm'
 
 interface TakeawayFormProps {
   readonly onClose: () => void
@@ -35,58 +24,35 @@ interface TakeawayFormProps {
  * obligatorios. El pedido no se crea aca, sino al enviarlo a cocina.
  */
 export function TakeawayForm({ onClose }: TakeawayFormProps) {
-  const [failure, setFailure] = useState<string | null>(null)
-  const navigate = useNavigate()
-  const form = useForm<TakeawayValues>({ resolver: zodResolver(takeawaySchema), defaultValues: EMPTY_TAKEAWAY })
-  const mode = useWatch({ control: form.control, name: 'mode' })
+  const { form, mode, failure, submit } = useTakeawayForm()
 
   return (
-    <FormDialog open onOpenChange={(open) => {
-      if (!open) {
-        onClose()
-      }
-    }} title="Pedido para llevar o delivery">
-      <form
-        noValidate
-        className="flex flex-col gap-5"
-        onSubmit={onSubmit(form.handleSubmit(async (values) => {
-          setFailure(null)
-          try {
-            void navigate(newOrderPath(await withCustomer(values)))
-          } catch (error) {
-            setFailure(errorMessage(error, 'No se pudo guardar. Los datos siguen aquí; vuelve a intentarlo.'))
-          }
-        }))}
-      >
-        <div role="radiogroup" aria-label="Cómo se entrega" className="grid grid-cols-2 gap-2">
-          {MODES.map((modeOption) => (
-            <Button
-              key={modeOption.value}
-              type="button"
-              role="radio"
-              aria-checked={mode === modeOption.value}
-              variant={mode === modeOption.value ? 'default' : 'outline'}
-              size="lg"
-              className="h-11"
-              onClick={() => {
-                form.setValue('mode', modeOption.value)
-              }}
-            >
-              <Icon name={modeOption.value === 'delivery' ? 'delivery' : 'takeaway'} size={16} />
-              <span>{modeOption.label}</span>
-            </Button>
-          ))}
-        </div>
-        <CustomerLookup onPick={(customer) => {
-          form.reset(fromCustomer(customer, form.getValues('mode')))
-        }} />
+    <FormDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose()
+        }
+      }}
+      title="Pedido para llevar o delivery"
+    >
+      <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(submit)}>
+        <TakeawayModePicker
+          value={mode}
+          onChange={(next) => {
+            form.setValue('mode', next)
+          }}
+        />
+        <CustomerLookup
+          onPick={(customer) => {
+            form.reset(fromCustomer(customer, form.getValues('mode')))
+          }}
+        />
         <TakeawayFields form={form} delivery={mode === 'delivery'} />
         <TakeawayConsent form={form} />
         {failure === null ? null : <FormMessage tone="error">{failure}</FormMessage>}
         <DialogFormActions>
-          <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={() => {
-            onClose()
-          }}>
+          <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onClose}>
             Cancelar
           </Button>
           <Button type="submit" size="lg" className="h-11 px-4" disabled={form.formState.isSubmitting}>

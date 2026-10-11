@@ -55,8 +55,8 @@ function nameControls(menu: HTMLElement): void {
   }
 }
 
-/** Los textos que el widget deja en inglés. */
-function translateRemaining(menu: HTMLElement): void {
+/** Traduce las etiquetas que tienen traducción conocida. */
+function translateLabels(menu: HTMLElement): void {
   for (const control of menu.querySelectorAll(`[${LABEL}]`)) {
     const translated = TRANSLATIONS.get(control.getAttribute(LABEL) ?? '')
     if (translated !== undefined) {
@@ -64,11 +64,21 @@ function translateRemaining(menu: HTMLElement): void {
       pin(control, 'title', translated)
     }
   }
+}
+
+/** Los enlaces «Learn more about» pasan a un nombre en español. */
+function translateLearnMore(menu: HTMLElement): void {
   for (const link of menu.querySelectorAll('a[aria-label^="Learn more about"]')) {
     const card = link.closest('.asw-card')?.querySelector('.asw-card-title')?.textContent.trim() ?? ''
     pin(link, LABEL, card === '' ? 'Más información' : `Más información sobre ${card}`)
     pin(link, 'title', 'Más información')
   }
+}
+
+/** Los textos que el widget deja en inglés. */
+function translateRemaining(menu: HTMLElement): void {
+  translateLabels(menu)
+  translateLearnMore(menu)
 }
 
 /**

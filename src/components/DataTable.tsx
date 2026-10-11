@@ -1,20 +1,14 @@
-import {
-  type ColumnDef,
-  createExpandedRowModel,
-  flexRender,
-  type Row,
-  type RowData,
-  rowExpandingFeature,
-  tableFeatures,
-  useTable,
-} from '@tanstack/react-table'
-import { Fragment, type ReactNode, useMemo } from 'react'
+import { type ColumnDef, type Row, type RowData, useTable } from '@tanstack/react-table'
+import { type ReactNode, useMemo } from 'react'
 
 import { usePagination } from '@/hooks/usePagination'
+import { features } from './dataTableModel'
+import { DataTableHeader } from './DataTableHeader'
+import { DataTableRow } from './DataTableRow'
 import { DataTableSkeleton } from './DataTableSkeleton'
 import { EmptyState } from './EmptyState'
 import { TablePagination } from './TablePagination'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { Table, TableBody } from './ui/table'
 
 /** Lo que una celda sabe de su fila, ademas del dato. */
 export interface DataRowContext {
@@ -37,14 +31,7 @@ export interface DataColumn<TData extends RowData> {
   readonly className?: string
 }
 
-// Filas de la silueta: las que caben a la vista, no una página entera.
-const ROWS_LOADING = 6
-
-const features = tableFeatures({
-  rowExpandingFeature,
-  expandedRowModel: createExpandedRowModel(),
-})
-
+/** Lo que una celda sabe de su fila. */
 function rowContext<TData extends RowData>(row: Row<typeof features, TData>): DataRowContext {
   return {
     isExpanded: row.getIsExpanded(),
@@ -54,6 +41,7 @@ function rowContext<TData extends RowData>(row: Row<typeof features, TData>): Da
   }
 }
 
+/** Traduce una columna propia a la de TanStack. */
 function toColumnDef<TData extends RowData>(
   column: DataColumn<TData>,
 ): ColumnDef<typeof features, TData> {
@@ -63,6 +51,10 @@ function toColumnDef<TData extends RowData>(
     cell: ({ row }) => column.cell(row.original, rowContext(row)),
   }
 }
+
+
+// Filas de la silueta: las que caben a la vista, no una página entera.
+const ROWS_LOADING = 6
 
 interface DataTableProps<TData extends RowData> {
   readonly columns: readonly DataColumn<TData>[]
@@ -121,41 +113,10 @@ export function DataTable<TData extends RowData>({
     <div className="flex flex-col gap-3">
     <div className="rounded-xl bg-card ring-1 ring-foreground/10">
       <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className={`px-3 ${cellClasses.get(header.column.id) ?? ''}`}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+        <DataTableHeader table={table} cellClasses={cellClasses} />
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <Fragment key={row.id}>
-              <TableRow data-state={row.getIsExpanded() ? 'open' : undefined}>
-                {row.getAllCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className={`px-3 py-2.5 ${cellClasses.get(cell.column.id) ?? ''}`}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-              {row.getIsExpanded() && renderExpanded !== undefined ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell
-                    colSpan={row.getAllCells().length}
-                    className="bg-muted/40 p-4 whitespace-normal"
-                  >
-                    {renderExpanded(row.original)}
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </Fragment>
+            <DataTableRow key={row.id} row={row} cellClasses={cellClasses} renderExpanded={renderExpanded} />
           ))}
         </TableBody>
       </Table>

@@ -1,8 +1,10 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef } from 'react'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 
-import { classifyOrderNotes, MAX_ORDER_NOTES_ORDERS, orderNotesQuery, orderNotesQueryKey } from '@/api/insights'
+import { MAX_ORDER_NOTES_ORDERS, orderNotesQuery, orderNotesQueryKey } from '@/api/insights'
 import type { OrderNoteClassification } from '@/api/types'
+import { noteKeyOf } from './orderNoteKey'
+import { useClassifyPendingNotes } from './useClassifyPendingNotes'
 import { useServerEvent } from './useServerEvent'
 
 /** Cómo leyó la IA una nota: de un plato (`order_item_id`) o del pedido entero (`null`). */
@@ -31,10 +33,6 @@ export interface OrderNoteFlags {
   readonly error: unknown
 }
 
-function keyOf(orderId: number, orderItemId: number | null): string {
-  return `${String(orderId)}:${orderItemId === null ? 'pedido' : String(orderItemId)}`
-}
-
 /**
  * Las alergias y restricciones que la IA encontró en las notas de unos
  * pedidos (`GET /insights/order-notes`), al día con el evento SSE `insights`.
@@ -61,42 +59,20 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
     void queryClient.invalidateQueries({ queryKey: orderNotesQueryKey })
   }, isActive && isLive)
 
-  const { mutate: classify, isPending: isClassifying } = useMutation({
-    mutationFn: classifyOrderNotes,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: orderNotesQueryKey }),
-  })
-  const ordered = useRef(new Set<string>())
-  const data = notes.data
   // Lo que se conserva de la consulta anterior puede traer pedidos que ya no están.
+  const data = notes.data
   const items = useMemo(() => {
     const current = new Set(ids)
     return data?.items.filter((item) => current.has(item.order_id))
   }, [data, ids])
-  // Lo pendiente de clasificar; vacio si la pantalla no lo pidio.
-  const pending = useMemo(
-    () =>
-      isClassifyPending
-        ? (items ?? []).filter((item) => item.status === 'pending').map((item) => keyOf(item.order_id, item.order_item_id))
-        : [],
-    [items, isClassifyPending],
-  )
-  useEffect(() => {
-    const fresh = pending.filter((key) => !ordered.current.has(key))
-    if (fresh.length === 0 || isClassifying) {
-      return
-    }
-    for (const key of fresh) {
-      ordered.current.add(key)
-    }
-    classify()
-  }, [pending, classify, isClassifying])
+  useClassifyPendingNotes(items, isClassifyPending)
 
   return useMemo(() => {
     const list = items ?? []
-    const byKey = new Map(list.map((item) => [keyOf(item.order_id, item.order_item_id), item]))
+    const byKey = new Map(list.map((item) => [noteKeyOf(item.order_id, item.order_item_id), item]))
     return {
       flags: list,
-      flagFor: (orderId, orderItemId) => byKey.get(keyOf(orderId, orderItemId)),
+      flagFor: (orderId, orderItemId) => byKey.get(noteKeyOf(orderId, orderItemId)),
       allergyCount: list.filter((item) => item.mentions_allergy === true).length,
       isLoading: notes.isPending && isActive,
       error: notes.error,

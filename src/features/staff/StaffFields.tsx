@@ -1,11 +1,10 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import type { Role } from '@/api/types'
-import { ReadOnlyField } from '@/components/ReadOnlyField'
-import { SelectField } from '@/components/SelectField'
 import { TextField } from '@/components/TextField'
-import { NativeSelectOption } from '@/components/ui/native-select'
 import { onlyLetters } from '@/services/fieldRules'
+import { StaffEmailField } from './StaffEmailField'
+import { StaffRoleField } from './StaffRoleField'
 
 interface StaffFieldsProps {
   /** Lo que devuelve `register(...)` para cada campo. */
@@ -23,7 +22,7 @@ interface StaffFieldsProps {
   /** Los roles que quien mira puede dar. */
   readonly roles: readonly Role[]
   /** El correo de una cuenta que ya existe. */
-  readonly fixedEmail?: string
+  readonly fixedEmail?: string | undefined
   /**
    * El rol de la cuenta propia, que no se puede cambiar: quien se quita el
    * permiso de administrar el personal se queda sin esta pantalla. Con valor,
@@ -60,48 +59,8 @@ export function StaffFields({
           error={errors.full_name}
         />
       </div>
-      {fields.email === undefined ? (
-        <ReadOnlyField
-          label="Correo"
-          value={fixedEmail ?? ''}
-          hint="Es con lo que entra a RestHub: no se cambia."
-        />
-      ) : (
-        <TextField
-          id="email"
-          label="Correo"
-          placeholder="nombre@correo.com"
-          type="email"
-          inputMode="email"
-          autoComplete="off"
-          spellCheck={false}
-          hint="Con este correo entra a RestHub."
-          field={fields.email}
-          error={errors.email}
-        />
-      )}
-      {lockedRoleLabel !== undefined ? (
-        <ReadOnlyField
-          label="Rol"
-          value={lockedRoleLabel}
-          hint="No puedes cambiar el rol de tu propia cuenta."
-        />
-      ) : (
-        <SelectField
-          id="role_id"
-          label="Rol"
-          icon="accountType"
-          hint="Solo aparecen los roles con permisos que tu cuenta también tiene."
-          field={fields.role_id}
-          error={errors.role_id}
-        >
-          {roles.map((role) => (
-            <NativeSelectOption key={role.id} value={String(role.id)}>
-              {role.name}
-            </NativeSelectOption>
-          ))}
-        </SelectField>
-      )}
+      <StaffEmailField field={fields.email} error={errors.email} fixedEmail={fixedEmail} />
+      <StaffRoleField field={fields.role_id} error={errors.role_id} roles={roles} lockedRoleLabel={lockedRoleLabel} />
     </div>
   )
 }

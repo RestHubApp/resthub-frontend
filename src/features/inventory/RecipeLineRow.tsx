@@ -1,11 +1,10 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import { FieldError } from '@/components/FieldError'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import type { RecipeIngredient } from './recipeMath'
-import { baseUnitLabel, formatUnitCost } from './units'
+import { RecipeQuantityInput } from './RecipeQuantityInput'
+import { formatUnitCost } from './units'
 import { formatMoney } from '@/services/format'
 
 interface RecipeLineRowProps {
@@ -29,7 +28,6 @@ export function RecipeLineRow({
   onRemove,
 }: RecipeLineRowProps) {
   const id = `recipe-line-${String(index)}`
-  const errorId = `${id}-error`
 
   return (
     <li className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 py-3 sm:grid-cols-[minmax(0,1fr)_11rem_7rem_auto]">
@@ -39,22 +37,7 @@ export function RecipeLineRow({
         </label>
         <span className="text-sm text-muted-foreground">{formatUnitCost(ingredient.unitCost, ingredient.unit)}</span>
       </div>
-      <div className="col-start-1 flex flex-col gap-1 sm:col-start-auto">
-        <div className="flex items-center gap-2">
-          <Input
-            id={id}
-            className="h-11 w-28 text-right tabular-nums"
-            inputMode="decimal"
-            autoComplete="off"
-            readOnly={readOnly}
-            aria-invalid={error !== undefined}
-            aria-describedby={error === undefined ? undefined : errorId}
-            {...field}
-          />
-          <span className="text-sm text-muted-foreground">{baseUnitLabel(ingredient.unit)}</span>
-        </div>
-        <FieldError id={errorId} message={error} />
-      </div>
+      <RecipeQuantityInput id={id} field={field} unit={ingredient.unit} error={error} readOnly={readOnly} />
       <p className="col-start-2 row-start-2 m-0 text-right font-semibold tabular-nums sm:col-start-auto sm:row-start-auto">
         <span className="sr-only">Costo de la línea: </span>
         {formatMoney(cost)}

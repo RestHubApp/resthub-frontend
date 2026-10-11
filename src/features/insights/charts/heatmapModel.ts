@@ -2,6 +2,9 @@ import type { HourlyCell } from '@/api/types'
 
 export const HEAT_STEPS = 5
 
+/** Alto de cada celda de la grilla, en píxeles. */
+export const CELL_HEIGHT = 28
+
 export interface HeatmapModel {
   /** De la primera a la última hora con algún pedido en el rango. */
   readonly hours: readonly number[]

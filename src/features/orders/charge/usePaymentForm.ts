@@ -56,7 +56,7 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
   const [mode, setMode] = useState<SplitMode>('all')
   const [personas, setPersonas] = useState(INITIAL_PERSONAS)
   const [dishes, setDishes] = useState<number[]>([])
-  const part = chargeCents(order, mode, personas, dishes)
+  const part = chargeCents({ order, mode, remaining: personas, itemIds: dishes })
   const form = useForm<ChargeValues>({
     resolver: zodResolver(chargeSchema(part)),
     defaultValues: { payment_method: 'cash', amount_received: '', tip: '' },
@@ -93,3 +93,6 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
     }),
   }
 }
+
+/** Lo que devuelve `usePaymentForm`: el borrador del pago en curso. */
+export type PaymentDraft = ReturnType<typeof usePaymentForm>

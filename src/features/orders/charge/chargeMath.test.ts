@@ -68,8 +68,8 @@ describe('chargeCents', () => {
   const sampleOrder = order([item(1, '30.00'), item(2, '12.00')], '42.00')
 
   it('según el modo: todo, partes iguales o por platos', () => {
-    expect(chargeCents(sampleOrder, 'all', 1, [])).toBe(4200)
-    expect(chargeCents(sampleOrder, 'equal', 2, [])).toBe(2100)
-    expect(chargeCents(sampleOrder, 'items', 1, [2])).toBe(1200)
+    expect(chargeCents({ order: sampleOrder, mode: 'all', remaining: 1, itemIds: [] })).toBe(4200)
+    expect(chargeCents({ order: sampleOrder, mode: 'equal', remaining: 2, itemIds: [] })).toBe(2100)
+    expect(chargeCents({ order: sampleOrder, mode: 'items', remaining: 1, itemIds: [2] })).toBe(1200)
   })
 })

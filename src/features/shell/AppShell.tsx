@@ -1,32 +1,11 @@
-import { Outlet } from 'react-router'
-
-import { AccessibilityWidget } from '@/components/AccessibilityWidget'
-import { ApiFailureNotice } from '@/components/ApiFailureNotice'
-import { useFailedQueries } from '@/hooks/useFailedQueries'
-import { paths } from '@/services/paths'
 import { isPreviewTab } from '@/services/tabStorage'
-import { usePreview, useSession } from '@/store/session'
-import { BottomNav } from './BottomNav'
-import { Brand } from './Brand'
-import { entriesFor } from './navigation'
-import { PreviewBanner } from './PreviewBanner'
+import { useSession } from '@/store/session'
 import { PreviewEndedView } from './PreviewEndedView'
-import { RestaurantName } from './RestaurantName'
-import { type ShellScreen, ShellScreensContext } from './shellScreens'
-import { SideNav } from './SideNav'
-import { ToastStack } from './ToastStack'
+import type { ShellScreen } from './shellScreens'
+import { SignedInShell } from './SignedInShell'
+import { SignedOutShell } from './SignedOutShell'
 import { useAccountRefresh } from './useAccountRefresh'
 import { useSessionRenewal } from './useSessionRenewal'
-
-// Es estatico: se crea una vez y no depende de props ni del estado.
-const SKIP_LINK = (
-  <a
-    href="#contenido"
-    className="sr-only rounded-lg bg-primary px-3 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50"
-  >
-    Saltar al contenido
-  </a>
-)
 
 const WITHOUT_SCREENS: readonly ShellScreen[] = []
 
@@ -46,8 +25,6 @@ interface AppShellProps {
  */
 export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
   const account = useSession((state) => state.account)
-  const isPreview = usePreview()
-  const failed = useFailedQueries('restaurant')
   useAccountRefresh()
   useSessionRenewal()
 
@@ -56,48 +33,7 @@ export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
     return <PreviewEndedView />
   }
   if (account === null) {
-    return (
-      <div className="flex min-h-dvh flex-col bg-background">
-        {SKIP_LINK}
-        <AccessibilityWidget />
-        <header className="mx-auto flex w-full max-w-5xl px-4 pt-5 sm:px-6">
-          <Brand to={paths.login} />
-        </header>
-        <main id="contenido" tabIndex={-1} className="flex flex-1 flex-col px-4 py-6 outline-none sm:px-6">
-          <Outlet />
-        </main>
-      </div>
-    )
+    return <SignedOutShell />
   }
-
-  const entries = entriesFor(screens, account.permissions)
-
-  return (
-    <ShellScreensContext value={screens}>
-      {isPreview ? <PreviewBanner account={account} /> : null}
-      <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
-        {SKIP_LINK}
-        <AccessibilityWidget />
-        <ToastStack />
-        <SideNav entries={entries} account={account} />
-
-        <div className="flex min-h-dvh min-w-0 flex-col">
-          <header className="sticky top-[var(--preview-banner-h,0px)] z-30 flex items-center gap-3 border-b bg-card px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 lg:hidden">
-            <Brand to={paths.home} compact />
-            <RestaurantName name={account.restaurant.name} variant="header" />
-          </header>
-          <ApiFailureNotice message={failed.message} onRetry={failed.retry} />
-          <main
-            id="contenido"
-            tabIndex={-1}
-            className="mx-auto w-full max-w-[1100px] flex-1 px-4 pt-6 pb-28 outline-none sm:px-6 lg:pb-8"
-          >
-            <Outlet />
-          </main>
-        </div>
-
-        <BottomNav entries={entries} account={account} />
-      </div>
-    </ShellScreensContext>
-  )
+  return <SignedInShell account={account} screens={screens} />
 }

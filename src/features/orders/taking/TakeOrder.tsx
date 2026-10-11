@@ -1,12 +1,11 @@
-import { type ReactNode, useState } from 'react'
+import type { ReactNode } from 'react'
 
 import { useLiveUpdates } from '@/features/orders/useLiveUpdates'
 import { BackLink } from '@/components/BackLink'
-import { CartBar } from './CartBar'
-import { CartSheet } from './CartSheet'
 import { MenuPicker } from './MenuPicker'
 import { backPath, draftKey, type OrderTarget } from './orderTarget'
 import { useDraftActions, useDraftLines } from './useOrderDraft'
+import { TakeOrderCart } from './TakeOrderCart'
 import { useSubmitDraft } from './useSubmitDraft'
 
 interface TakeOrderProps {
@@ -30,12 +29,7 @@ export function TakeOrder({ target, title, description, notice }: TakeOrderProps
   const lines = useDraftLines(key)
   const { add, setQuantity, setNotes } = useDraftActions()
   const send = useSubmitDraft(target, title)
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false)
   const submitLabel = target.kind === 'add' ? 'Agregar al pedido' : 'Enviar a cocina'
-  const submit = () => {
-    setIsSummaryOpen(false)
-    send.mutate(lines)
-  }
 
   return (
     <div className="flex flex-col gap-5 pb-20 lg:pb-24">
@@ -56,29 +50,20 @@ export function TakeOrder({ target, title, description, notice }: TakeOrderProps
           setQuantity(key, lineKey, quantity)
         }}
       />
-      <CartBar
+      <TakeOrderCart
+        title={title}
         lines={lines}
         submitLabel={submitLabel}
         pending={send.isPending}
-        onOpen={() => {
-          setIsSummaryOpen(true)
-        }}
-        onSubmit={submit}
-      />
-      <CartSheet
-        open={isSummaryOpen}
-        onOpenChange={setIsSummaryOpen}
-        title={`Resumen · ${title}`}
-        lines={lines}
         onQuantity={(lineKey, quantity) => {
           setQuantity(key, lineKey, quantity)
         }}
         onNotes={(lineKey, notes) => {
           setNotes(key, lineKey, notes)
         }}
-        submitLabel={submitLabel}
-        pending={send.isPending}
-        onSubmit={submit}
+        onSend={() => {
+          send.mutate(lines)
+        }}
       />
     </div>
   )

@@ -57,13 +57,16 @@ export function itemsCents(order: OrderResponse, itemIds: readonly number[]): nu
   return due - discountOf(due, Number(order.discount_percent))
 }
 
+/** Lo que define este pago: el pedido, el modo, entre cuántos y qué platos. */
+export interface ChargeRequest {
+  readonly order: OrderResponse
+  readonly mode: SplitMode
+  readonly remaining: number
+  readonly itemIds: readonly number[]
+}
+
 /** Lo que se cobra en este pago según el modo elegido, sin la propina. */
-export function chargeCents(
-  order: OrderResponse,
-  mode: SplitMode,
-  remaining: number,
-  itemIds: readonly number[],
-): number {
+export function chargeCents({ order, mode, remaining, itemIds }: ChargeRequest): number {
   if (mode === 'equal') {
     return equalPartCents(balanceCents(order), remaining)
   }

@@ -1,17 +1,11 @@
-import { advanceOrder } from '@/api/orders'
-import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
-import { Icon } from '@/components/Icon'
-import { Button } from '@/components/ui/button'
-import { useCan } from '@/store/session'
 import { AllergyAlert } from '@/features/orders/AllergyAlert'
 import { ElapsedTime } from '@/features/orders/ElapsedTime'
 import { ItemNote } from '@/features/orders/ItemNote'
 import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
 import { OrderItemLine } from '@/features/orders/OrderItemLine'
 import { orderPlace } from '@/features/orders/orderLabels'
-import { stepDoneMessage } from '@/features/orders/nextStep'
-import { useOrderAction } from '@/features/orders/useOrderAction'
+import { KitchenReadyButton } from './KitchenReadyButton'
 
 interface KitchenCardProps {
   readonly order: OrderResponse
@@ -26,12 +20,6 @@ interface KitchenCardProps {
  * Marcar listo lo hace quien tiene `orders.manage`; el resto solo mira.
  */
 export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
-  const canMark = useCan(PERMISSION.ordersManage) && order.status === 'in_kitchen'
-  const ready = useOrderAction({
-    mutationFn: () => advanceOrder(order.id, 'ready'),
-    success: stepDoneMessage,
-    failure: 'No se pudo marcar como listo.',
-  })
   const hasAllergy = allergyIn(order, flagFor) !== undefined
 
   return (
@@ -55,14 +43,7 @@ export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
         ))}
       </ul>
       <ItemNote note={order.notes} flag={flagFor(order.id, null)} label="Nota del pedido" />
-      {canMark ? (
-        <Button type="button" size="lg" className="h-12 text-base" disabled={ready.isPending} onClick={() => {
-          ready.mutate()
-        }}>
-          <Icon name="ready" size={18} />
-          <span>{ready.isPending ? 'Guardando…' : 'Listo'}</span>
-        </Button>
-      ) : null}
+      <KitchenReadyButton order={order} />
     </article>
   )
 }

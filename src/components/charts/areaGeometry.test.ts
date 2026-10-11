@@ -9,12 +9,12 @@ const POINTS = [
 
 describe('areaGeometry', () => {
   it('sin serie superpuesta no dibuja su línea', () => {
-    expect(areaGeometry(POINTS, 400, 260).overlayPath).toBe('')
+    expect(areaGeometry(POINTS, { width: 400, height: 260 }).overlayPath).toBe('')
   })
 
   it('el tope del eje cubre también a la serie superpuesta', () => {
-    expect(areaGeometry(POINTS, 400, 260).ticks.at(-1)).toBe(40)
-    const geometry = areaGeometry(POINTS, 400, 260, [5, 90])
+    expect(areaGeometry(POINTS, { width: 400, height: 260 }).ticks.at(-1)).toBe(40)
+    const geometry = areaGeometry(POINTS, { width: 400, height: 260 }, [5, 90])
     expect(geometry.ticks.at(-1)).toBe(100)
     expect(geometry.overlayPath.startsWith('M')).toBe(true)
   })

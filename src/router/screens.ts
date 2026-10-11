@@ -1,25 +1,10 @@
-import type { ComponentType } from 'react'
-
-import { PERMISSION } from '@/api/permissions'
-import { asDefault } from '@/components/lazyNamed'
-import type { ShellScreen } from '@/features/shell/shellScreens'
-import { routePatterns } from '@/services/paths'
-
-/** Una pantalla del restaurante: lo que el router, el menú y las guardas saben de ella. */
-export interface Screen extends ShellScreen {
-  /** Se descarga recién al abrirla (o antes, si el armazón la adelanta). */
-  readonly load: () => Promise<{ default: ComponentType }>
-  /** Abierta a todos, también sin sesión. Sin esto, la ruta exige sesión (y el permiso, si lo declara). */
-  readonly public?: true
-}
-
-// Los datos de una pantalla se precargan con el mismo módulo que la pantalla
-// necesita al abrirse; el nombre es el de la función que exporta.
-const prefetchOf = (load: () => Promise<Record<string, (() => void) | undefined>>, name: string) => () => {
-  void load().then((module) => {
-    module[name]?.()
-  })
-}
+import { ACCESS_SCREENS } from './screens/accessScreens'
+import { ADMIN_SCREENS } from './screens/adminScreens'
+import { BOARD_SCREENS } from './screens/boardScreens'
+import { CATALOG_SCREENS } from './screens/catalogScreens'
+import { ORDERS_SCREENS } from './screens/ordersScreens'
+import { SALES_SCREENS } from './screens/salesScreens'
+import type { Screen } from './screens/screenTypes'
 
 /**
  * Las pantallas del restaurante, en un solo lugar.
@@ -36,129 +21,10 @@ const prefetchOf = (load: () => Promise<Record<string, (() => void) | undefined>
  * abrirla.
  */
 export const SCREENS: readonly Screen[] = [
-  { path: routePatterns.login, public: true, load: asDefault(() => import('@/features/auth/LoginView'), 'LoginView') },
-  // Pública: se lee antes de entrar o desde la pantalla que pide aceptarla.
-  { path: routePatterns.privacy, public: true, load: asDefault(() => import('@/features/legal/PrivacyView'), 'PrivacyView') },
-  { path: routePatterns.profile, load: asDefault(() => import('@/features/auth/ProfileView'), 'ProfileView') },
-  {
-    path: routePatterns.orders,
-    permission: PERMISSION.ordersTake,
-    nav: {
-      label: 'Pedidos',
-      icon: 'order',
-      description: 'Tomar pedidos por mesa o para llevar, enviarlos a cocina y marcarlos servidos.',
-    },
-    load: asDefault(() => import('@/features/orders/OrdersView'), 'OrdersView'),
-    prefetch: prefetchOf(() => import('@/features/orders/prefetchOrders'), 'prefetchFloor'),
-  },
-  { path: routePatterns.newOrder, permission: PERMISSION.ordersTake, load: asDefault(() => import('@/features/orders/NewOrderView'), 'NewOrderView') },
-  { path: routePatterns.orderDetail, permission: PERMISSION.ordersTake, load: asDefault(() => import('@/features/orders/OrderDetailView'), 'OrderDetailView') },
-  { path: routePatterns.addItems, permission: PERMISSION.ordersTake, load: asDefault(() => import('@/features/orders/AddItemsView'), 'AddItemsView') },
-  {
-    path: routePatterns.board,
-    permission: PERMISSION.ordersReadAll,
-    nav: { label: 'Tablero', icon: 'board', description: 'Los pedidos del día en vivo, de la cocina al cobro.' },
-    load: asDefault(() => import('@/features/orders/BoardView'), 'BoardView'),
-    prefetch: prefetchOf(() => import('@/features/orders/prefetchOrders'), 'prefetchBoard'),
-  },
-  { path: routePatterns.history, permission: PERMISSION.ordersReadAll, load: asDefault(() => import('@/features/orders/HistoryView'), 'HistoryView') },
-  {
-    path: routePatterns.kitchen,
-    permission: PERMISSION.ordersTake,
-    nav: {
-      label: 'Cocina',
-      icon: 'kitchen',
-      description: 'Lo que falta preparar, en tarjetas grandes para la pantalla de la cocina.',
-    },
-    load: asDefault(() => import('@/features/orders/KitchenView'), 'KitchenView'),
-    prefetch: prefetchOf(() => import('@/features/orders/prefetchOrders'), 'prefetchKitchen'),
-  },
-  { path: routePatterns.print, permission: PERMISSION.ordersTake, load: asDefault(() => import('@/features/orders/PrintView'), 'PrintView') },
-  {
-    path: routePatterns.reservations,
-    permission: PERMISSION.reservationsRead,
-    nav: { label: 'Reservas', icon: 'reservations', description: 'Las reservas de cada día: a qué hora, cuántos y en qué mesa.' },
-    load: asDefault(() => import('@/features/reservations/ReservationsView'), 'ReservationsView'),
-  },
-  {
-    path: routePatterns.customers,
-    permission: PERMISSION.customersRead,
-    nav: { label: 'Clientes', icon: 'customers', description: 'Los clientes frecuentes, sus datos de delivery y lo que gastan.' },
-    load: asDefault(() => import('@/features/customers/CustomersView'), 'CustomersView'),
-  },
-  {
-    path: routePatterns.cash,
-    permission: PERMISSION.cashManage,
-    nav: {
-      label: 'Caja',
-      icon: 'cashRegister',
-      description: 'Abrir y cerrar la caja del turno, con su arqueo y las propinas de cada mesero.',
-    },
-    load: asDefault(() => import('@/features/cash/CashView'), 'CashView'),
-    prefetch: prefetchOf(() => import('@/features/cash/prefetchCash'), 'prefetchCash'),
-  },
-  {
-    path: routePatterns.billing,
-    permission: PERMISSION.billingManage,
-    nav: {
-      label: 'Comprobantes',
-      icon: 'recipe',
-      description: 'Boletas y facturas electrónicas, los datos fiscales y lo que falta enviar a SUNAT.',
-    },
-    load: asDefault(() => import('@/features/billing/BillingView'), 'BillingView'),
-  },
-  { path: routePatterns.invoicePrint, permission: PERMISSION.billingIssue, load: asDefault(() => import('@/features/billing/InvoicePrintView'), 'InvoicePrintView') },
-  {
-    path: routePatterns.menu,
-    permission: PERMISSION.menuManage,
-    nav: { label: 'Menú', icon: 'menu', description: 'Categorías, platos, precios y lo que hay disponible hoy.' },
-    load: asDefault(() => import('@/features/menu/MenuView'), 'MenuView'),
-    prefetch: prefetchOf(() => import('@/features/menu/prefetchMenu'), 'prefetchMenu'),
-  },
-  {
-    path: routePatterns.tables,
-    permission: PERMISSION.tablesManage,
-    nav: { label: 'Mesas', icon: 'table', description: 'Las mesas del salón y cuáles están en uso.' },
-    load: asDefault(() => import('@/features/tables/TablesView'), 'TablesView'),
-    prefetch: prefetchOf(() => import('@/features/tables/prefetchTables'), 'prefetchTables'),
-  },
-  {
-    path: routePatterns.inventory,
-    permission: PERMISSION.inventoryRead,
-    nav: { label: 'Inventario', icon: 'inventory', description: 'Insumos, compras, mermas, recetas y alertas de stock bajo.' },
-    load: asDefault(() => import('@/features/inventory/InventoryView'), 'InventoryView'),
-    prefetch: prefetchOf(() => import('@/features/inventory/prefetchInventory'), 'prefetchInventory'),
-  },
-  { path: routePatterns.recipeEditor, permission: PERMISSION.inventoryRead, load: asDefault(() => import('@/features/inventory/RecipeEditorView'), 'RecipeEditorView') },
-  {
-    path: routePatterns.staff,
-    permission: PERMISSION.staffManage,
-    nav: { label: 'Personal', icon: 'staff', description: 'Las cuentas del restaurante y el rol de cada una.' },
-    load: asDefault(() => import('@/features/staff/StaffView'), 'StaffView'),
-    prefetch: prefetchOf(() => import('@/features/staff/prefetchStaff'), 'prefetchStaff'),
-  },
-  {
-    path: routePatterns.roles,
-    permission: PERMISSION.rolesManage,
-    nav: {
-      label: 'Roles',
-      icon: 'roles',
-      description: 'Qué puede hacer cada rol del restaurante: encargado, mesero y los que armes.',
-    },
-    load: asDefault(() => import('@/features/roles/RolesView'), 'RolesView'),
-    prefetch: prefetchOf(() => import('@/features/roles/prefetchRoles'), 'prefetchRoles'),
-  },
-  {
-    path: routePatterns.insights,
-    permission: PERMISSION.insightsRead,
-    nav: {
-      label: 'Panel BI',
-      icon: 'indicators',
-      description: 'Ventas, platos más vendidos, márgenes y la predicción de demanda.',
-    },
-    load: asDefault(() => import('@/features/insights/InsightsView'), 'InsightsView'),
-    prefetch: prefetchOf(() => import('@/features/insights/prefetchInsights'), 'prefetchInsights'),
-  },
-  { path: routePatterns.restock, permission: PERMISSION.insightsRead, load: asDefault(() => import('@/features/insights/RestockView'), 'RestockView') },
-  { path: routePatterns.aiAudit, permission: PERMISSION.insightsRead, load: asDefault(() => import('@/features/insights/AiAuditView'), 'AiAuditView') },
+  ...ACCESS_SCREENS,
+  ...ORDERS_SCREENS,
+  ...BOARD_SCREENS,
+  ...SALES_SCREENS,
+  ...CATALOG_SCREENS,
+  ...ADMIN_SCREENS,
 ]
