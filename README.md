@@ -49,6 +49,11 @@ contraseña `resthub123`; al área de administración del sistema
 | `pnpm run doctor` | React Doctor (corrección, rendimiento, seguridad y accesibilidad de React) con `--no-score`; falla ante cualquier hallazgo. Se escribe `pnpm run doctor` porque `pnpm doctor` es un comando de pnpm. Exclusiones y motivos en `doctor.config.jsonc` |
 | `pnpm carbon` | Huella de carbono de la primera visita de cada ruta, en modo estático (tamaño comprimido según el manifest de Vite); falla si una ruta baja de A+ |
 | `pnpm carbon:browser` | Lo mismo midiendo con Chromium los bytes que viajan (el del CI) |
+| `pnpm test:e2e` | Pruebas E2E con Playwright contra el backend de develop (job `e2e` del CI). Ver `e2e/README.md` |
+| `pnpm test:visual:ci` | Regresión visual de Chromium (escritorio y celular); el CI la corre en la imagen de Playwright (job `visual`) |
+| `pnpm test:visual` | Regresión visual en los tres navegadores; Firefox y WebKit solo en local |
+| `pnpm test:visual:update` | Regenera las líneas base de Chromium dentro de la imagen de Playwright (docker o podman). Ver `e2e/README.md` |
+| `pnpm a11y [axe] [keyboard] …` | Revisión de accesibilidad de cada ruta y modal con la sesión de cada rol (`checks/accessibility/`). Con `A11Y_STRICT=1` falla ante violaciones serious o critical de axe; el job `con-sesion` del CI corre `pnpm a11y axe keyboard` así |
 
 ### Pruebas
 

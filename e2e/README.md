@@ -3,13 +3,20 @@
 | Comando | Qué hace |
 |---|---|
 | `pnpm test:e2e` | Inventario de interfaz (`coverage`) y E2E en Chromium: escritorio 1366 × 900 y celular 390 × 844 (pruebas `@mobile`). Corre en el CI (job `e2e`). |
-| `pnpm test:visual` | Regresión visual en Chromium, Firefox y WebKit, escritorio y celular. Solo en local. |
-| `pnpm test:visual --update-snapshots` | Regenera las líneas base (`e2e/visual/baselines/<proyecto>/`) después de un cambio visual aprobado. |
+| `pnpm test:visual:ci` | Regresión visual de Chromium, escritorio y celular (`visual-chromium-desktop` y `visual-chromium-mobile`). Corre en el CI (job `visual`), dentro de la imagen oficial de Playwright. |
+| `pnpm test:visual:update` | Regenera esas líneas base en un contenedor con la misma imagen del CI (docker o podman). |
+| `pnpm test:visual` | Regresión visual en los tres navegadores. Firefox y WebKit solo en local. |
 | `pnpm e2e:inventory` | Reescribe `e2e/coverage-ui.json` desde el código. |
 
 - `webServer` levanta el backend con `e2e/server/backend.sh` (base SQLite propia, migrada, sembrada con `seed_dev` y en modo WAL, puerto 8201) y la compilación de producción del frontend (puerto 5201). `E2E_BACKEND_DIR` apunta al repositorio del backend (por omisión `../resthub-backend`).
 - Cada prueba da de alta su propio restaurante por el API de plataforma (`support/api.ts`): las pruebas corren en paralelo y repetidas sin compartir datos.
 - **Inventario de interfaz.** `coverage-ui.json` lista cada ruta del router, cada overlay del código (FormDialog, ConfirmDialog, Sheet, Tabs, desplegables) y las funciones, estados y vistas por rol de `inventory/functions/*.json`. Cada prueba marca lo que recorre con `covers('…')`; `coverage.spec.ts` falla si algo queda sin prueba E2E o sin captura visual.
-- **Las líneas base visuales dependen del sistema operativo** (fuentes y rasterizador): se generaron en WSL2 con Ubuntu 26.04. En otra máquina se regeneran y se revisan antes de versionarlas; por eso la regresión visual no está en el CI.
+- **Las líneas base visuales dependen del sistema operativo** (fuentes y rasterizador). Las de Chromium (`visual-chromium-desktop` y `visual-chromium-mobile`) se generan en la imagen `mcr.microsoft.com/playwright:v<versión exacta de playwright>-noble` (Ubuntu 24.04 con las fuentes de la imagen), la misma del job `visual` del CI; por eso el CI las compara sin diferencias de render. Los umbrales son los de `playwright.config.ts` (`maxDiffPixelRatio: 0.002`) y no se suben para que pase. Las de Firefox y WebKit no tienen imagen oficial equivalente en el CI: se generaron en WSL2 con Ubuntu 26.04 y se corren en local con `pnpm test:visual`.
+- **Regenerar las líneas base de Chromium** después de un cambio visual aprobado:
+  1. Con docker o podman en marcha: `pnpm test:visual:update` (necesita `../resthub-backend` en `develop`, o `E2E_BACKEND_DIR`; `CONTAINER_ENGINE=podman` fuerza el motor). Corre `playwright test --update-snapshots` en la imagen y deja las imágenes en `e2e/visual/baselines/`.
+  2. Sin docker: en GitHub, Actions > «Líneas base visuales» > Run workflow sobre la rama del cambio. Deja las imágenes como artefacto `lineas-base-visuales`; con la opción «commit» activa las sube como un commit a esa rama. Si se baja el artefacto, se copian las carpetas sobre `e2e/visual/baselines/`.
+  3. Revisar con `git diff --stat e2e/visual/baselines` y abrir las imágenes cambiadas: solo deben cambiar las pantallas que se tocaron a propósito.
+  Si el job `visual` falla, el artefacto `regresion-visual` trae el reporte de Playwright con la imagen esperada, la real y la diferencia.
+- **Accesibilidad con sesión.** `pnpm a11y axe keyboard` (`checks/accessibility/`) abre cada ruta y modal con la cuenta de su rol; el job `con-sesion` de `accessibility.yml` lo corre en cada PR con el mismo backend sembrado (`E2E_SEED_HISTORY=1` agrega la historia sintética para que el panel tenga gráficos). Su configuración común está en la acción `.github/actions/entorno-e2e`, que usan también los jobs `e2e` y `visual`.
 - **WSL sin root.** Firefox y WebKit necesitan librerías del sistema que se pueden extraer sin `sudo` (`apt-get download <paquete>` y `dpkg-deb -x <deb> <carpeta>`) y exportar en `LD_LIBRARY_PATH`. El lanzador de WebKit de Playwright pisa esa variable: se usa `E2E_WEBKIT_EXECUTABLE=e2e/browsers/webkit-wsl.sh` con `E2E_EXTRA_LIBS=<carpeta>/usr/lib/x86_64-linux-gnu`.
 - Otras variables: `E2E_WORKERS`, `E2E_OUTPUT` y `E2E_REPORT` (carpetas propias para correr dos suites a la vez), `E2E_EVIDENCE` (capturas por paso), `E2E_BASE_URL` (probar otra compilación).
