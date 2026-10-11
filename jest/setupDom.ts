@@ -3,14 +3,27 @@
 import '@testing-library/jest-dom/jest-globals'
 
 import { cleanup, configure } from '@testing-library/react'
-import { afterEach } from '@jest/globals'
+import { afterAll, afterEach, beforeAll } from '@jest/globals'
+
+import { mswServer } from './mswServer'
 
 // La primera pantalla perezosa se compila con Babel y puede tardar varios
 // segundos. findBy* espera 1 s por defecto, menos que el testTimeout.
 configure({ asyncUtilTimeout: 15_000 })
 
+// MSW responde el API entero: una petición sin manejador falla la prueba en vez
+// de salir a la red, y los manejadores de una prueba no pasan a la siguiente.
+beforeAll(() => {
+  mswServer.listen({ onUnhandledRequest: 'error' })
+})
+
 afterEach(() => {
   cleanup()
+  mswServer.resetHandlers()
+})
+
+afterAll(() => {
+  mswServer.close()
 })
 
 if (typeof window !== 'undefined') {
@@ -67,13 +80,4 @@ if (typeof window !== 'undefined') {
   // jsdom avisa «Not implemented» y no hace nada: en las pruebas basta con eso, sin el aviso.
   window.scrollTo = () => undefined
   window.print = () => undefined
-  // Nada sale a la red: una petición con `fetch` (el canal de avisos) queda
-  // abierta hasta que se aborta, como una conexión que todavía no responde.
-  // Las del API pasan por el `fetch` falso de cada prueba (`server()` del arnés).
-  window.fetch = (_entry: RequestInfo | URL, options?: RequestInit) =>
-    new Promise<Response>((_resolver, reject) => {
-      options?.signal?.addEventListener('abort', () => {
-        reject(new DOMException('Abortado', 'AbortError'))
-      })
-    })
 }

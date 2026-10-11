@@ -3,8 +3,8 @@
 // jsdom no trae Request, Response, Headers ni los flujos, y React Router los
 // usa en cada navegación de un router de datos. Se toman de Node junto con su
 // AbortController: un Request de Node rechaza la señal de un AbortController
-// de jsdom. `fetch` no se copia: en las pruebas nada sale a la red (ver
-// jest/setupDom.ts).
+// de jsdom. También `fetch`: MSW (jest/mswServer.ts) lo intercepta y ninguna
+// petición sale a la red.
 const { TestEnvironment } = require('jest-environment-jsdom')
 
 const DE_NODE = [
@@ -22,6 +22,8 @@ const DE_NODE = [
   'TextDecoder',
   'structuredClone',
   'BroadcastChannel',
+  // MSW intercepta este `fetch` (ver jest/mswServer.ts): sin él no hay nada que interceptar.
+  'fetch',
 ]
 
 class EnvironmentJsdom extends TestEnvironment {

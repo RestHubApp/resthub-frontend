@@ -4,7 +4,10 @@
 // Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
 // como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { HttpResponse, http } from 'msw'
+
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
+import { mswServer } from '#jest/mswServer'
 
 const PLATFORM_STORAGE_KEY = 'resthub.platform-session.v1'
 const RESTAURANT_STORAGE_KEY = 'resthub.session.v2'
@@ -121,11 +124,12 @@ describe('sesión de plataforma', () => {
     setAuthToken('restaurante')
     const headers: Record<string, unknown> = {}
     // Sin red: anota la cabecera con la que salió cada petición.
-    stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
-      const request = new Request(input, init)
-      headers[new URL(request.url).pathname] = request.headers.get('Authorization')
-      return Promise.resolve(new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } }))
-    })
+    mswServer.use(
+      http.all('*/api/v1/*', ({ request }) => {
+        headers[new URL(request.url).pathname] = request.headers.get('Authorization')
+        return HttpResponse.json([])
+      }),
+    )
 
     await Promise.all([renewPlatformSession(), fetchTables()])
 
@@ -208,7 +212,7 @@ describe('en una pestaña de vista previa', () => {
     const { storage, usePlatformSession, renewPlatformSession } = await loadInPreview(tokenThatExpires(3600))
     const saved = storage.data.get(PLATFORM_STORAGE_KEY)
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
-    stubGlobal('fetch', () => Promise.resolve(new Response('{}', { status: 401, headers: { 'Content-Type': 'application/json' } })))
+    mswServer.use(http.all('*/api/v1/*', () => HttpResponse.json({ detail: 'vencida', code: 'unauthenticated' }, { status: 401 })))
 
     await expect(renewPlatformSession()).rejects.toThrow()
 

@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import { SLOW_TIMEOUT_MS } from '@/services/api'
-import { errorStatus } from '@/services/apiError'
+import { hasCode } from '@/services/apiError'
 import { send } from './client'
 import type {
   BillingSettings,
@@ -59,7 +59,7 @@ export async function fetchOrderInvoice(orderId: number): Promise<Invoice | null
       client.GET('/api/v1/billing/orders/{order_id}/invoice', { params: { path: { order_id: orderId } } }),
     )
   } catch (error: unknown) {
-    if (errorStatus(error) === 404) {
+    if (hasCode(error, 'invoice_not_found')) {
       return null
     }
     throw error

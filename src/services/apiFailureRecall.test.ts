@@ -1,26 +1,22 @@
-import { afterEach, describe, expect, it, jest } from '@jest/globals'
+import { afterEach, describe, expect, it } from '@jest/globals'
 
+import { answerAll } from '#jest/answerAll'
 import { readPlatform, readRestaurant, writeRestaurant } from '#jest/apiCalls'
 import { apiFailureMessage, clearApiFailure } from './apiFailure'
 
 const CUTOFF = 'Servicio no disponible.'
 
-const originalFetch = globalThis.fetch
-
 function respondWith(status: number, body: unknown): void {
-  globalThis.fetch = jest.fn(() =>
-    Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })),
-  )
+  answerAll(status, body)
 }
 
 afterEach(() => {
-  globalThis.fetch = originalFetch
   clearApiFailure()
 })
 
 describe('el corte que recuerda el armazón', () => {
   it('una lectura caída se recuerda y se olvida cuando otra lectura responde', async () => {
-    respondWith(503, { detail: CUTOFF })
+    respondWith(503, { detail: CUTOFF, code: 'database_unavailable' })
     await expect(readRestaurant()).rejects.toThrow()
     expect(apiFailureMessage('restaurant')).toBe(CUTOFF)
 
@@ -30,13 +26,13 @@ describe('el corte que recuerda el armazón', () => {
   })
 
   it('una escritura caída no queda en el armazón: la avisa su formulario', async () => {
-    respondWith(503, { detail: CUTOFF })
+    respondWith(503, { detail: CUTOFF, code: 'database_unavailable' })
     await expect(writeRestaurant()).rejects.toThrow()
     expect(apiFailureMessage('restaurant')).toBeNull()
   })
 
   it('una lectura de plataforma que responde no borra el corte del restaurante', async () => {
-    respondWith(503, { detail: CUTOFF })
+    respondWith(503, { detail: CUTOFF, code: 'database_unavailable' })
     await expect(readRestaurant()).rejects.toThrow()
     respondWith(200, { restaurant: null })
     await readPlatform()

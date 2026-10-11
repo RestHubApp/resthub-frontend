@@ -1,13 +1,10 @@
-import { errorStatus } from '@/services/apiError'
-
-// El servidor no llegó a atender: el proxy delante responde por él.
-const SERVER_UNREACHABLE = new Set([502, 503, 504])
+import { isUnreachable } from '@/services/apiError'
 
 /**
- * Sin respuesta del servidor: no hay señal, se cortó o el servidor no está.
+ * Sin respuesta del servidor: no hay señal, se cortó o el servidor no está
+ * (un servicio caído, o el proxy delante respondiendo por él).
  * Vale reintentar, porque el pedido lleva su id y no se duplica.
  */
 export function isOffline(error: unknown): boolean {
-  const status = errorStatus(error)
-  return status === undefined || SERVER_UNREACHABLE.has(status)
+  return isUnreachable(error)
 }

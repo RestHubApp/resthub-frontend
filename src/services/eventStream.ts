@@ -4,6 +4,9 @@
 // cabecera `Authorization`: la alternativa seria poner el token en la URL, y la
 // URL queda escrita en los logs del servidor y de cualquier proxy.
 
+import type { ErrorCode } from '@/api/types'
+
+import { codeOfBody } from './apiError'
 import { anyOf } from './signals'
 
 interface StreamEvent {
@@ -13,11 +16,23 @@ interface StreamEvent {
 
 export class EventStreamError extends Error {
   readonly status: number
+  /** El código estable del error del servidor (`{ detail, code }`), si el cuerpo lo traía. */
+  readonly code: ErrorCode | undefined
 
-  constructor(status: number) {
+  constructor(status: number, code?: ErrorCode) {
     super(`El canal de avisos respondio ${String(status)}.`)
     this.name = 'EventStreamError'
     this.status = status
+    this.code = code
+  }
+}
+
+// El cuerpo de un error del canal es el mismo `{ detail, code }` del resto del API.
+async function codeOfResponse(response: Response): Promise<ErrorCode | undefined> {
+  try {
+    return codeOfBody(await response.json())
+  } catch {
+    return undefined
   }
 }
 
@@ -74,7 +89,7 @@ export async function readEventStream({
       signal: anyOf(signal, idle.signal),
     })
     if (!response.ok || response.body === null) {
-      throw new EventStreamError(response.status)
+      throw new EventStreamError(response.status, await codeOfResponse(response))
     }
 
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()

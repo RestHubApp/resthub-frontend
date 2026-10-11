@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
+import { answerAll, answerNever, answerWithNetworkError, type Sent } from '#jest/answerAll'
 import { readRestaurant, writePlatform, writeWithoutCredential } from '#jest/apiCalls'
 import { SLOW_TIMEOUT_MS } from './api'
 import { setAuthToken, setPlatformAuthToken, setPlatformUnauthorizedHandler, setUnauthorizedHandler } from './apiCredentials'
-import { ApiError } from './apiError'
+import { ApiError, errorMessage } from './apiError'
 import { isPlatformPath, tokenFor } from './apiRouting'
 
 const T_RESTAURANT = 'tok-restaurante'
@@ -15,35 +16,15 @@ const WITHOUT_BAR = 'platform/restaurants'
 const LEAVES_PLATFORM = '/platform/../orders'
 const OTHER_ORIGIN = '//evil.com/platform'
 
-const originalFetch = globalThis.fetch
-
 /** Lo que llegó al servidor falso: la ruta y la cabecera `Authorization` de cada petición. */
-const received: { path: string; authorization: string | null; requestId: string | null }[] = []
+const received: Sent[] = []
 
 // Sin red: responde con ese código y anota con qué cabeceras salió la petición.
 function respondWith(status: number, body: unknown = []): void {
-  globalThis.fetch = jest.fn((input: RequestInfo | URL, init?: RequestInit) => {
-    const request = new Request(input, init)
-    received.push({
-      path: new URL(request.url).pathname,
-      authorization: request.headers.get('Authorization'),
-      requestId: request.headers.get('X-Request-ID'),
-    })
-    return Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }))
-  })
-}
-
-// Una conexión que no responde: solo termina cuando se aborta su señal.
-function hangingFetch(_input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  return new Promise<Response>((_resolve, reject) => {
-    init?.signal?.addEventListener('abort', () => {
-      reject(new DOMException('Abortado', 'AbortError'))
-    })
-  })
+  answerAll(status, body, received)
 }
 
 afterEach(() => {
-  globalThis.fetch = originalFetch
   received.length = 0
   setAuthToken(null)
   setPlatformAuthToken(null)
@@ -134,18 +115,32 @@ describe('cabecera Authorization de cada petición', () => {
     expect(first?.requestId).not.toBe(second?.requestId)
   })
 
-  it('un 401 cierra solo la sesión dueña de la ruta', async () => {
+  it('un error de sesión (`unauthenticated`) cierra solo la sesión dueña de la ruta', async () => {
     const onExpireRestaurant = jest.fn()
     const onExpirePlatform = jest.fn()
     setUnauthorizedHandler(onExpireRestaurant)
     setPlatformUnauthorizedHandler(onExpirePlatform)
     setAuthToken('r1')
     setPlatformAuthToken('p1')
-    respondWith(401, { detail: 'vencida' })
+    respondWith(401, { detail: 'vencida', code: 'unauthenticated' })
 
     await expect(writePlatform()).rejects.toThrow()
     expect(onExpirePlatform).toHaveBeenCalledTimes(1)
     expect(onExpireRestaurant).not.toHaveBeenCalled()
+  })
+
+  it('el cierre de sesión lo decide el código, no el 401: `invalid_credentials` con credencial no cierra', async () => {
+    const onExpireRestaurant = jest.fn()
+    setUnauthorizedHandler(onExpireRestaurant)
+    setAuthToken('r1')
+    respondWith(401, { detail: 'Correo o contraseña incorrectos.', code: 'invalid_credentials' })
+
+    await expect(readRestaurant()).rejects.toThrow()
+    expect(onExpireRestaurant).not.toHaveBeenCalled()
+
+    respondWith(401, { detail: 'La credencial no vale.', code: 'invalid_token' })
+    await expect(readRestaurant()).rejects.toThrow()
+    expect(onExpireRestaurant).toHaveBeenCalledTimes(1)
   })
 
   it('`withoutCredential` no manda ningún token aunque haya sesiones abiertas', async () => {
@@ -157,20 +152,20 @@ describe('cabecera Authorization de cada petición', () => {
     expect(received.map((r) => r.authorization)).toEqual([null, 'Bearer r1'])
   })
 
-  it('un 401 de una petición `withoutCredential` no cierra la sesión abierta', async () => {
+  it('un `unauthenticated` de una petición `withoutCredential` no cierra la sesión abierta', async () => {
     const onExpireRestaurant = jest.fn()
     setUnauthorizedHandler(onExpireRestaurant)
     setAuthToken('r1')
-    respondWith(401)
+    respondWith(401, { detail: 'vencida', code: 'unauthenticated' })
 
     await expect(writeWithoutCredential()).rejects.toThrow()
     expect(onExpireRestaurant).not.toHaveBeenCalled()
   })
 
-  it('un 401 sin credencial (contraseña equivocada) no cierra nada', async () => {
+  it('un `unauthenticated` sin credencial (contraseña equivocada) no cierra nada', async () => {
     const onExpirePlatform = jest.fn()
     setPlatformUnauthorizedHandler(onExpirePlatform)
-    respondWith(401)
+    respondWith(401, { detail: 'Correo o contraseña incorrectos.', code: 'invalid_credentials' })
 
     await expect(writePlatform()).rejects.toThrow()
     expect(onExpirePlatform).not.toHaveBeenCalled()
@@ -179,24 +174,33 @@ describe('cabecera Authorization de cada petición', () => {
 
 describe('errores de la petición', () => {
   it('un error del servidor rechaza con ApiError, su código y su cuerpo', async () => {
-    respondWith(409, { detail: 'El pedido cambió' })
+    respondWith(409, { detail: 'El pedido cambió', code: 'conflict' })
     const error: unknown = await readRestaurant().catch((cause: unknown) => cause)
     expect(error).toBeInstanceOf(ApiError)
-    expect(error).toMatchObject({ status: 409, body: { detail: 'El pedido cambió' }, method: 'get', path: '/api/v1/tables' })
+    expect(error).toMatchObject({ status: 409, code: 'conflict', body: { detail: 'El pedido cambió' }, method: 'get', path: '/api/v1/tables' })
+  })
+
+  it('un 422 de validación trae `detail` como lista, `errors` y `code: validation_error`', async () => {
+    const problems = [{ loc: ['body', 'name'], msg: 'El nombre es obligatorio', type: 'missing' }]
+    respondWith(422, { detail: problems, errors: problems, code: 'validation_error' })
+    const error: unknown = await readRestaurant().catch((cause: unknown) => cause)
+    expect(error).toMatchObject({ status: 422, code: 'validation_error' })
+    expect(errorMessage(error, 'x')).toBe('El nombre es obligatorio')
   })
 
   it('un corte de red rechaza sin código HTTP', async () => {
-    globalThis.fetch = jest.fn(() => Promise.reject(new TypeError('Failed to fetch')))
+    answerWithNetworkError()
     const error: unknown = await readRestaurant().catch((cause: unknown) => cause)
-    expect(error).toMatchObject({ status: undefined, code: 'network' })
+    expect(error).toMatchObject({ status: undefined, reason: 'network' })
   })
 
   it('una petición que no responde a tiempo rechaza con `timeout`', async () => {
-    jest.useFakeTimers()
-    globalThis.fetch = hangingFetch
+    // MSW espera con setImmediate y microtareas: si se falsean, responde 500 en vez de quedarse colgado.
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
+    answerNever()
     const pending = readRestaurant().catch((cause: unknown) => cause)
     await jest.advanceTimersByTimeAsync(15_001)
-    expect(await pending).toMatchObject({ code: 'timeout' })
+    expect(await pending).toMatchObject({ reason: 'timeout' })
     jest.useRealTimers()
   })
 

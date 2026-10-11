@@ -63,9 +63,29 @@ está en `jest/`.
 - Las pruebas de pantallas usan el arnés `#jest/harness`: `montar(<Vista />)`
   la abre con un router en memoria y el caché de la aplicación, `entrarComo()`
   abre una sesión con los permisos dados y `servidor().on('get', '/ruta', datos)`
-  responde el API desde un `fetch` falso (`llamadas()` dice qué se envió; los parámetros de la consulta llegan como texto).
+  responde el API (`llamadas()` dice qué se envió; los parámetros de la consulta llegan como texto).
   El canal de avisos (SSE) falso está en `#jest/channel` y los datos de prueba
   en `jest/fixtures/`.
+- La red de las pruebas es MSW (`jest/mswServer.ts`, `setupServer` de `msw/node`,
+  encendido en `jest/setupDom.ts` con `onUnhandledRequest: 'error'` y reseteado
+  tras cada prueba): se ejercita el cliente real (`openapi-fetch`,
+  `src/services/api.ts`) y solo la red es falsa. El arnés, `answerAll` y el
+  canal de avisos son manejadores de MSW. Para una respuesta tipada con el
+  contrato, `apiHttp` de `#jest/apiHttp` (`openapi-msw`): la ruta y el cuerpo
+  deben existir en `schema.d.ts`. ESLint prohíbe `jest.mock` de `@/api/*` y de
+  `@/services/api` en las pruebas (`MOCKS_OF_API_ALLOWED` en `eslint.config.js`
+  guarda las excepciones por archivo, con su motivo; hoy no hay).
+  Detalles de entorno: `jest.config.js` usa `customExportConditions: ['']` para
+  que `msw/node` resuelva su versión de Node; `jest/jsdomEnvironment.cjs` copia
+  `fetch` y las clases de la API fetch de Node; las dependencias ESM de MSW
+  se transforman con Babel (`onlyEsm`). Con temporizadores falsos de Jest, no se
+  falsean `setImmediate`, `nextTick` ni `queueMicrotask`
+  (`jest.useFakeTimers({ doNotFake: [...] })`) o MSW responde 500.
+- Los errores del servidor son `{ detail, code }`. `ApiError.code` es el
+  `ErrorCode` del esquema y toda decisión (reintentar, cerrar sesión, «mesa
+  ocupada», conflicto de nombre…) usa `hasCode`, `isSessionEnded` o
+  `isUnreachable` de `services/apiError`; el `detail` solo se muestra
+  (`errorMessage`). ESLint prohíbe comparar el texto del error.
 - Las pruebas que simulan una pestaña sin DOM (reemplazan `window`, `location`
   o el almacenamiento) declaran `@jest-environment ./jest/nodeEnvironment.cjs`
   y usan `stubGlobal` y `unstubAllGlobals` de `#jest/globals`.

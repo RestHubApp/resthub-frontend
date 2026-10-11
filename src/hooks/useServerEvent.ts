@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react'
 
 import { currentAuthToken } from '@/services/apiCredentials'
+import { isDenied } from '@/services/apiError'
 import { apiUrl } from '@/services/apiRouting'
 import { EventStreamError, readEventStream } from '@/services/eventStream'
 import { logger } from '@/services/logger'
 
 const RETRY_MS = 3000
-const UNAUTHORIZED = 401
-const FORBIDDEN = 403
 
 const eventLogger = logger.child({ module: 'realtime' })
 
@@ -39,7 +38,7 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
       if (controller.signal.aborted) {
         return
       }
-      if (error instanceof EventStreamError && (error.status === UNAUTHORIZED || error.status === FORBIDDEN)) {
+      if (error instanceof EventStreamError && isDenied(error.code)) {
         return
       }
       eventLogger.warn({ err: error, topic }, 'realtime.disconnected')
