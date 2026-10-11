@@ -10,11 +10,11 @@ import { LiveIndicator } from './LiveIndicator'
 import { OfflineOrdersBanner } from './offline/OfflineOrdersBanner'
 import { useLiveUpdates } from './useLiveUpdates'
 
-const VISTAS = ['mesas', 'llevar', 'mios'] as const
-type Vista = (typeof VISTAS)[number]
+const VIEWS = ['mesas', 'llevar', 'mios'] as const
+type Vista = (typeof VIEWS)[number]
 
-function vistaDe(valor: string | null): Vista {
-  return VISTAS.find((vista) => vista === valor) ?? 'mesas'
+function vistaDe(value: string | null): Vista {
+  return VIEWS.find((vista) => vista === value) ?? 'mesas'
 }
 
 const TRIGGER = 'min-h-10 text-sm data-active:font-semibold'
@@ -45,8 +45,8 @@ export function OrdersView() {
       <OfflineOrdersBanner />
       <Tabs
         value={vista}
-        onValueChange={(valor) => {
-          setParams({ vista: valor }, { replace: true })
+        onValueChange={(value) => {
+          setParams({ vista: value }, { replace: true })
         }}
         className="gap-4"
       >

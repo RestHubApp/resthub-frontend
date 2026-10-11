@@ -78,7 +78,7 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
   const owner = ownerOf(useSession((state) => state.account))
   const key = draftKey(target)
 
-  const refrescar = () =>
+  const refresh = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: ordersQueryKey }),
       queryClient.invalidateQueries({ queryKey: tablesQueryKey }),
@@ -103,7 +103,7 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
         await navigate(paths.orders.list)
         return
       }
-      await refrescar()
+      await refresh()
       push({ tone: 'info', message: successMessage(target, order) })
       await navigate(target.kind === 'add' ? paths.orders.detail(order.id) : paths.orders.list)
     },
@@ -113,7 +113,7 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
         return
       }
       clear(key)
-      await refrescar()
+      await refresh()
       push({
         tone: 'warning',
         message: `El pedido #${String(error.order.number)} quedó abierto sin enviar: ${errorMessage(error.cause, 'reintenta desde su detalle.')}`,

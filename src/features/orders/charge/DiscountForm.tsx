@@ -21,13 +21,13 @@ interface DiscountFormProps {
 }
 
 /** "Hasta 10 %": lo que el mesero puede descontar sin el encargado. */
-function limitHint(sinTope: boolean, tope: string | undefined): string {
-  if (sinTope) {
+function limitHint(withoutCap: boolean, cap: string | undefined): string {
+  if (withoutCap) {
     return 'Sin tope: lo aplicas como encargado.'
   }
-  return tope === undefined
+  return cap === undefined
     ? 'Hasta el tope que fija el encargado.'
-    : `Hasta ${formatPercent(tope)}; más, lo aplica el encargado.`
+    : `Hasta ${formatPercent(cap)}; más, lo aplica el encargado.`
 }
 
 /**
@@ -37,13 +37,13 @@ function limitHint(sinTope: boolean, tope: string | undefined): string {
  * escriba un 20 % que va a volver rechazado.
  */
 export function DiscountForm({ order, onDone }: DiscountFormProps) {
-  const sinTope = useCan(PERMISSION.ordersDiscountAny)
-  const restaurante = useQuery({ ...restaurantQuery, enabled: !sinTope })
+  const withoutCap = useCan(PERMISSION.ordersDiscountAny)
+  const restaurant = useQuery({ ...restaurantQuery, enabled: !withoutCap })
   const { register, handleSubmit, formState } = useForm<DiscountValues>({
     resolver: zodResolver(discountSchema),
     defaultValues: { percent: '', reason: '' },
   })
-  const descontar = useOrderAction({
+  const discount = useOrderAction({
     mutationFn: (payload: DiscountRequest) => applyDiscount(order.id, payload),
     success: (pedido) => `Descuento de ${formatPercent(pedido.discount_percent)} aplicado.`,
     failure: 'No se pudo aplicar el descuento.',
@@ -55,8 +55,8 @@ export function DiscountForm({ order, onDone }: DiscountFormProps) {
       noValidate
       className="flex flex-col gap-3 rounded-lg bg-muted p-3"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          descontar.mutate({ percent: decimalParaApi(valores.percent) ?? '0', reason: valores.reason })
+        handleSubmit((values) => {
+          discount.mutate({ percent: decimalParaApi(values.percent) ?? '0', reason: values.reason })
         }),
       )}
     >
@@ -76,7 +76,7 @@ export function DiscountForm({ order, onDone }: DiscountFormProps) {
           label="Motivo"
           placeholder="Cliente frecuente, demora en cocina…"
           maxLength={MAX_ADJUSTMENT_REASON}
-          hint={limitHint(sinTope, restaurante.data?.max_waiter_discount_percent)}
+          hint={limitHint(withoutCap, restaurant.data?.max_waiter_discount_percent)}
           field={register('reason')}
           error={formState.errors.reason?.message}
         />
@@ -85,8 +85,8 @@ export function DiscountForm({ order, onDone }: DiscountFormProps) {
         <Button type="button" variant="ghost" onClick={onDone}>
           Volver
         </Button>
-        <Button type="submit" disabled={descontar.isPending}>
-          {descontar.isPending ? 'Aplicando…' : 'Aplicar descuento'}
+        <Button type="submit" disabled={discount.isPending}>
+          {discount.isPending ? 'Aplicando…' : 'Aplicar descuento'}
         </Button>
       </div>
     </form>

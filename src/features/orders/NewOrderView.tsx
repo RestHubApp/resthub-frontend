@@ -8,11 +8,11 @@ type AwayTarget = Extract<OrderTarget, { kind: 'takeaway' }>
 
 /** Lee de la URL a quién va un pedido para llevar o delivery. */
 function awayTarget(params: URLSearchParams): AwayTarget {
-  const texto = (clave: string) => (params.get(clave) ?? '').trim()
+  const text = (password: string) => (params.get(password) ?? '').trim()
   const customerId = Number(params.get('clienteId'))
   const base = {
     kind: 'takeaway' as const,
-    customerName: texto('cliente'),
+    customerName: text('cliente'),
     ...(Number.isInteger(customerId) && customerId > 0 ? { customerId } : {}),
   }
   if (params.get('tipo') !== 'delivery') {
@@ -20,13 +20,13 @@ function awayTarget(params: URLSearchParams): AwayTarget {
   }
   return {
     ...base,
-    delivery: { phone: texto('telefono'), address: texto('direccion'), reference: texto('referencia') },
+    delivery: { phone: text('telefono'), address: text('direccion'), reference: text('referencia') },
   }
 }
 
 function awayTitle(target: AwayTarget): string {
-  const tipo = target.delivery === undefined ? 'Para llevar' : 'Delivery'
-  return target.customerName === '' ? tipo : `${tipo} · ${target.customerName}`
+  const type = target.delivery === undefined ? 'Para llevar' : 'Delivery'
+  return target.customerName === '' ? type : `${type} · ${target.customerName}`
 }
 
 /**

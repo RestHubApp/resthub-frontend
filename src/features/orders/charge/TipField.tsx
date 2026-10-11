@@ -10,7 +10,7 @@ interface TipFieldProps {
   readonly onQuick: (amount: string) => void
 }
 
-const ATAJOS = [2, 5, 10] as const
+const SHORTCUTS = [2, 5, 10] as const
 const CENTS = 100
 
 /**
@@ -39,11 +39,11 @@ export function TipField({ field, error, onQuick }: TipFieldProps) {
         }}>
           Sin propina
         </Button>
-        {ATAJOS.map((monto) => (
-          <Button key={monto} type="button" variant="outline" className="h-10" onClick={() => {
-            onQuick(String(monto))
+        {SHORTCUTS.map((amount) => (
+          <Button key={amount} type="button" variant="outline" className="h-10" onClick={() => {
+            onQuick(String(amount))
           }}>
-            {formatCents(monto * CENTS)}
+            {formatCents(amount * CENTS)}
           </Button>
         ))}
       </div>

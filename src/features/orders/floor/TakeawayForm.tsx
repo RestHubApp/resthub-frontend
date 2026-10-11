@@ -16,7 +16,7 @@ import { TakeawayFields } from './TakeawayFields'
 import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, fromCustomer, newOrderPath, takeawaySchema, type TakeawayValues } from './takeawaySchema'
 
-const MODOS: readonly { value: TakeawayValues['mode']; label: string }[] = [
+const MODES: readonly { value: TakeawayValues['mode']; label: string }[] = [
   { value: 'takeaway', label: 'Recoge en local' },
   { value: 'delivery', label: 'Delivery' },
 ]
@@ -35,31 +35,31 @@ interface TakeawayFormProps {
  * obligatorios. El pedido no se crea aca, sino al enviarlo a cocina.
  */
 export function TakeawayForm({ onClose }: TakeawayFormProps) {
-  const [fallo, setFallo] = useState<string | null>(null)
+  const [failure, setFailure] = useState<string | null>(null)
   const navigate = useNavigate()
   const form = useForm<TakeawayValues>({ resolver: zodResolver(takeawaySchema), defaultValues: EMPTY_TAKEAWAY })
   const mode = useWatch({ control: form.control, name: 'mode' })
 
   return (
-    <FormDialog open onOpenChange={(abierto) => {
-      if (!abierto) {
+    <FormDialog open onOpenChange={(open) => {
+      if (!open) {
         onClose()
       }
     }} title="Pedido para llevar o delivery">
       <form
         noValidate
         className="flex flex-col gap-5"
-        onSubmit={onSubmit(form.handleSubmit(async (valores) => {
-          setFallo(null)
+        onSubmit={onSubmit(form.handleSubmit(async (values) => {
+          setFailure(null)
           try {
-            void navigate(newOrderPath(await withCustomer(valores)))
+            void navigate(newOrderPath(await withCustomer(values)))
           } catch (error) {
-            setFallo(errorMessage(error, 'No se pudo guardar. Los datos siguen aquí; vuelve a intentarlo.'))
+            setFailure(errorMessage(error, 'No se pudo guardar. Los datos siguen aquí; vuelve a intentarlo.'))
           }
         }))}
       >
         <div role="radiogroup" aria-label="Cómo se entrega" className="grid grid-cols-2 gap-2">
-          {MODOS.map((modo) => (
+          {MODES.map((modo) => (
             <Button
               key={modo.value}
               type="button"
@@ -77,12 +77,12 @@ export function TakeawayForm({ onClose }: TakeawayFormProps) {
             </Button>
           ))}
         </div>
-        <CustomerLookup onPick={(cliente) => {
-          form.reset(fromCustomer(cliente, form.getValues('mode')))
+        <CustomerLookup onPick={(customer) => {
+          form.reset(fromCustomer(customer, form.getValues('mode')))
         }} />
         <TakeawayFields form={form} delivery={mode === 'delivery'} />
         <TakeawayConsent form={form} />
-        {fallo === null ? null : <FormMessage tone="error">{fallo}</FormMessage>}
+        {failure === null ? null : <FormMessage tone="error">{failure}</FormMessage>}
         <DialogFormActions>
           <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={() => {
             onClose()

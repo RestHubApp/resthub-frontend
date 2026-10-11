@@ -6,74 +6,74 @@ import { entrarComo, montar, servidor, type Peticion } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { ChargeDialog } from './ChargeDialog'
 
-const PAGOS = '/orders/12/payments'
-const CONFIRMAR = { name: 'Confirmar pago' }
-const IGUALES = { name: 'Partes iguales' }
+const PAYMENTS = '/orders/12/payments'
+const CONFIRM = { name: 'Confirmar pago' }
+const EQUAL = { name: 'Partes iguales' }
 
 // Tras un pago parcial, el pedido baja su saldo; con el último, queda pagado.
-function tras(actual: OrderResponse, monto: string): OrderResponse {
-  const nuevo = pago({ id: 50 + actual.payments.length, amount: monto })
-  const saldo = (Number(actual.balance) - Number(monto)).toFixed(2)
-  if (saldo === '0.00') {
-    return pagado(actual, nuevo)
+function tras(actual: OrderResponse, amount: string): OrderResponse {
+  const fresh = pago({ id: 50 + actual.payments.length, amount: amount })
+  const balance = (Number(actual.balance) - Number(amount)).toFixed(2)
+  if (balance === '0.00') {
+    return pagado(actual, fresh)
   }
-  return { ...actual, payments: [...actual.payments, nuevo], paid_amount: monto, balance: saldo }
+  return { ...actual, payments: [...actual.payments, fresh], paid_amount: amount, balance: balance }
 }
 
-function montoDe(peticion: Peticion, actual: OrderResponse): string {
-  const cuerpo = peticion.body as { amount?: string; item_ids?: number[] }
-  if (cuerpo.item_ids) {
-    const elegidos = actual.items.filter((item) => cuerpo.item_ids?.includes(item.id) === true)
-    return elegidos.reduce((suma, item) => suma + Number(item.subtotal), 0).toFixed(2)
+function amountOf(request: Peticion, actual: OrderResponse): string {
+  const body = request.body as { amount?: string; item_ids?: number[] }
+  if (body.item_ids) {
+    const selected = actual.items.filter((item) => body.item_ids?.includes(item.id) === true)
+    return selected.reduce((sum, item) => sum + Number(item.subtotal), 0).toFixed(2)
   }
-  return cuerpo.amount ?? actual.balance
+  return body.amount ?? actual.balance
 }
 
-function cobrarDividido(inicial: OrderResponse = pedido()) {
-  let actual = inicial
+function chargeSplit(initial: OrderResponse = pedido()) {
+  let actual = initial
   const api = servidor()
     .on('get', '/cash/current', { is_open: true, session: null })
     .on('get', '/orders/12', () => actual)
-    .on('post', PAGOS, (peticion: Peticion) => {
-      actual = tras(actual, montoDe(peticion, actual))
+    .on('post', PAYMENTS, (request: Peticion) => {
+      actual = tras(actual, amountOf(request, actual))
       return actual
     })
   entrarComo()
-  return { api, ...montar(<ChargeDialog order={inicial} onClose={jest.fn()} />) }
+  return { api, ...montar(<ChargeDialog order={initial} onClose={jest.fn()} />) }
 }
 
 describe('cobro en partes iguales', () => {
   it('divide lo que falta entre dos y cobra la parte de cada uno', async () => {
-    const { api, user } = cobrarDividido()
+    const { api, user } = chargeSplit()
 
-    await user.click(await screen.findByRole('radio', IGUALES))
+    await user.click(await screen.findByRole('radio', EQUAL))
     expect(screen.getByText('Paga cada una').nextSibling).toHaveTextContent('S/ 25.00')
     await user.click(screen.getByRole('radio', { name: 'Tarjeta' }))
-    await user.click(screen.getByRole('button', CONFIRMAR))
+    await user.click(screen.getByRole('button', CONFIRM))
 
     expect(await screen.findByText('Pago registrado. Faltan S/ 25.00.')).toBeInTheDocument()
-    expect(api.llamadas('post', PAGOS)[0]?.body).toMatchObject({ amount: '25.00', payment_method: 'card', expected_balance: '50.00' })
+    expect(api.llamadas('post', PAYMENTS)[0]?.body).toMatchObject({ amount: '25.00', payment_method: 'card', expected_balance: '50.00' })
     expect(await screen.findByText('Paga lo que falta')).toBeInTheDocument()
     expect(within(screen.getByRole('region', { name: 'Pagos registrados' })).getByText('S/ 25.00', { exact: false })).toBeInTheDocument()
   })
 
   it('la última persona paga lo que queda, sin monto parcial', async () => {
-    const { api, user } = cobrarDividido()
+    const { api, user } = chargeSplit()
 
-    await user.click(await screen.findByRole('radio', IGUALES))
+    await user.click(await screen.findByRole('radio', EQUAL))
     await user.click(screen.getByRole('button', { name: 'Uno menos de personas' }))
     expect(screen.getByText('Paga lo que falta')).toBeInTheDocument()
     await user.click(screen.getByRole('radio', { name: 'Plin' }))
-    await user.click(screen.getByRole('button', CONFIRMAR))
+    await user.click(screen.getByRole('button', CONFIRM))
 
     await screen.findByRole('dialog', { name: 'Cobro registrado' })
-    expect(api.llamadas('post', PAGOS)[0]?.body).not.toHaveProperty('amount')
+    expect(api.llamadas('post', PAYMENTS)[0]?.body).not.toHaveProperty('amount')
   })
 
   it('entre tres, el redondeo queda para el último', async () => {
-    const { user } = cobrarDividido(pedido({ balance: '100.00', total: '100.00' }))
+    const { user } = chargeSplit(pedido({ balance: '100.00', total: '100.00' }))
 
-    await user.click(await screen.findByRole('radio', IGUALES))
+    await user.click(await screen.findByRole('radio', EQUAL))
     await user.click(screen.getByRole('button', { name: 'Uno más de personas' }))
 
     expect(screen.getByText('Paga cada una').nextSibling).toHaveTextContent('S/ 33.33')
@@ -82,22 +82,22 @@ describe('cobro en partes iguales', () => {
 
 describe('cobro por platos', () => {
   it('pide al menos un plato y cobra solo los elegidos', async () => {
-    const { api, user } = cobrarDividido()
+    const { api, user } = chargeSplit()
 
     await user.click(await screen.findByRole('radio', { name: 'Por platos' }))
     expect(screen.getByText('Elige al menos un plato')).toBeInTheDocument()
-    expect(screen.getByRole('button', CONFIRMAR)).toBeDisabled()
+    expect(screen.getByRole('button', CONFIRM)).toBeDisabled()
     await user.click(screen.getByRole('checkbox', { name: /Chicha morada/u }))
     expect(screen.getByText('Paga, con el descuento del pedido').nextSibling).toHaveTextContent('S/ 20.00')
     await user.click(screen.getByRole('radio', { name: 'Yape' }))
-    await user.click(screen.getByRole('button', CONFIRMAR))
+    await user.click(screen.getByRole('button', CONFIRM))
 
     expect(await screen.findByText('Pago registrado. Faltan S/ 30.00.')).toBeInTheDocument()
-    expect(api.llamadas('post', PAGOS)[0]?.body).toMatchObject({ item_ids: [2], payment_method: 'yape' })
+    expect(api.llamadas('post', PAYMENTS)[0]?.body).toMatchObject({ item_ids: [2], payment_method: 'yape' })
   })
 
   it('los platos ya pagados no se ofrecen y una cortesía no cuesta', async () => {
-    const orden = pedido({
+    const order = pedido({
       items: [
         plato({ is_paid: true }),
         plato({ id: 2, name: 'Chicha morada', subtotal: '20.00' }),
@@ -107,7 +107,7 @@ describe('cobro por platos', () => {
       balance: '20.00',
       payments: [pago()],
     })
-    const { user } = cobrarDividido(orden)
+    const { user } = chargeSplit(order)
 
     await user.click(await screen.findByRole('radio', { name: 'Por platos' }))
 
@@ -119,7 +119,7 @@ describe('cobro por platos', () => {
 
 describe('la cuenta', () => {
   it('muestra cortesías, descuento y lo ya pagado antes de lo que falta', async () => {
-    cobrarDividido(
+    chargeSplit(
       pedido({
         subtotal: '58.00',
         courtesy_amount: '8.00',

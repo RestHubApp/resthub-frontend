@@ -13,10 +13,10 @@ import { TableCard } from './TableCard'
 
 /** Las mesas activas del salon, en el orden en que las acomodo el encargado. */
 export function TableGrid() {
-  const mesas = useQuery(tablesQuery(false))
+  const tables = useQuery(tablesQuery(false))
   const canManage = useCan(PERMISSION.tablesManage)
 
-  if (mesas.isPending) {
+  if (tables.isPending) {
     return (
       <ListSkeleton
         label="Cargando mesas…"
@@ -26,16 +26,16 @@ export function TableGrid() {
       />
     )
   }
-  if (mesas.isError) {
+  if (tables.isError) {
     return (
       <QueryError
-        error={mesas.error}
+        error={tables.error}
         fallback="No se pudieron cargar las mesas."
-        onRetry={() => void mesas.refetch()}
+        onRetry={() => void tables.refetch()}
       />
     )
   }
-  if (mesas.data.length === 0) {
+  if (tables.data.length === 0) {
     return (
       <EmptyState
         title="No hay mesas activas"
@@ -50,17 +50,17 @@ export function TableGrid() {
     )
   }
 
-  const libres = mesas.data.filter((mesa) => mesa.active_order === null).length
+  const free = tables.data.filter((table) => table.active_order === null).length
 
   return (
     <section aria-labelledby="mesas-titulo" className="flex flex-col gap-3">
       <h2 id="mesas-titulo" className="m-0 text-sm font-medium text-muted-foreground">
-        {libres} de {mesas.data.length} mesas libres
+        {free} de {tables.data.length} mesas libres
       </h2>
       <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 xl:grid-cols-4">
-        {mesas.data.map((mesa) => (
-          <li key={mesa.id} className="flex flex-col">
-            <TableCard table={mesa} />
+        {tables.data.map((table) => (
+          <li key={table.id} className="flex flex-col">
+            <TableCard table={table} />
           </li>
         ))}
       </ul>

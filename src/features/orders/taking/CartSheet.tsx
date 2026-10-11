@@ -54,11 +54,11 @@ export function CartSheet({
               <CartLine
                 key={line.lineKey}
                 line={line}
-                onQuantity={(cantidad) => {
-                  onQuantity(line.lineKey, cantidad)
+                onQuantity={(quantity) => {
+                  onQuantity(line.lineKey, quantity)
                 }}
-                onNotes={(nota) => {
-                  onNotes(line.lineKey, nota)
+                onNotes={(note) => {
+                  onNotes(line.lineKey, note)
                 }}
               />
             ))}

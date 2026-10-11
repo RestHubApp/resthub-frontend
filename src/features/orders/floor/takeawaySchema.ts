@@ -5,18 +5,18 @@ import type { Customer } from '@/api/types'
 import { paths } from '@/services/paths'
 
 // Los topes repiten los del backend (`orders/domain/orders.py`).
-export const MAX_CLIENTE = 80
-export const MAX_TELEFONO = 20
-export const MAX_DIRECCION = 200
-export const MAX_REFERENCIA = 150
+export const MAX_CUSTOMER = 80
+export const MAX_PHONE = 20
+export const MAX_ADDRESS = 200
+export const MAX_REFERENCE = 150
 
 export const takeawaySchema = z
   .object({
     mode: z.enum(['takeaway', 'delivery']),
-    customer_name: textoOpcional(MAX_CLIENTE),
-    phone: textoOpcional(MAX_TELEFONO),
-    address: textoOpcional(MAX_DIRECCION),
-    reference: textoOpcional(MAX_REFERENCIA),
+    customer_name: textoOpcional(MAX_CUSTOMER),
+    phone: textoOpcional(MAX_PHONE),
+    address: textoOpcional(MAX_ADDRESS),
+    reference: textoOpcional(MAX_REFERENCE),
     customer_id: z.number().int().positive().nullable(),
     // El cliente nuevo de un delivery aceptó quedar en la libreta (Ley N.º 29733).
     consent: z.boolean(),
@@ -26,14 +26,14 @@ export const takeawaySchema = z
       return
     }
     // Sin nombre, teléfono y dirección el repartidor no sabe a quién ni a dónde.
-    const faltan: readonly [keyof typeof values, string][] = [
+    const missing: readonly [keyof typeof values, string][] = [
       ['customer_name', 'Escribe el nombre de quien recibe'],
       ['phone', 'Escribe un teléfono para coordinar la entrega'],
       ['address', 'Escribe la dirección de entrega'],
     ]
-    for (const [campo, mensaje] of faltan) {
-      if (values[campo] === '') {
-        ctx.addIssue({ code: 'custom', path: [campo], message: mensaje })
+    for (const [field, message] of missing) {
+      if (values[field] === '') {
+        ctx.addIssue({ code: 'custom', path: [field], message: message })
       }
     }
   })

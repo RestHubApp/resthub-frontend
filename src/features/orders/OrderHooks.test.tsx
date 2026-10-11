@@ -10,35 +10,35 @@ import { QuantityStepper } from './QuantityStepper'
 import { useCanTakeStep } from './useCanTakeStep'
 import { useNow } from './useNow'
 
-const SERVIDO = pedido({ status: 'served', waiter_id: 7 })
-const DE_OTRO = pedido({ status: 'served', waiter_id: 8 })
-const ACTIVOS = '/orders/active'
+const SERVED = pedido({ status: 'served', waiter_id: 7 })
+const OF_OTHER = pedido({ status: 'served', waiter_id: 8 })
+const ACTIVE = '/orders/active'
 
 afterEach(() => {
   jest.useRealTimers()
 })
 
 describe('useCanTakeStep', () => {
-  function puede(order = SERVIDO, estado = order.status) {
-    return renderHook(() => useCanTakeStep(order, nextStepFor(estado))).result.current
+  function can(order = SERVED, status = order.status) {
+    return renderHook(() => useCanTakeStep(order, nextStepFor(status))).result.current
   }
 
   it('el mesero cobra lo que atendió, pero no la mesa de otro', () => {
     entrarComo(PERMISOS_MESERO)
-    expect(puede()).toBe(true)
-    expect(puede(DE_OTRO)).toBe(false)
+    expect(can()).toBe(true)
+    expect(can(OF_OTHER)).toBe(false)
   })
 
   it('quien ve todos los pedidos cobra cualquiera', () => {
     entrarComo(PERMISOS_ENCARGADO)
-    expect(puede(DE_OTRO)).toBe(true)
+    expect(can(OF_OTHER)).toBe(true)
   })
 
   it('sin el permiso del paso, o sin paso, no hay botón; servir una mesa ajena sí vale', () => {
     entrarComo(PERMISOS_MESERO)
-    expect(puede(pedido({ status: 'in_kitchen' }))).toBe(false)
-    expect(puede(pedido({ status: 'paid' }))).toBe(false)
-    expect(puede(pedido({ status: 'ready', waiter_id: 8 }))).toBe(true)
+    expect(can(pedido({ status: 'in_kitchen' }))).toBe(false)
+    expect(can(pedido({ status: 'paid' }))).toBe(false)
+    expect(can(pedido({ status: 'ready', waiter_id: 8 }))).toBe(true)
   })
 })
 
@@ -54,16 +54,16 @@ describe('precargas de pedidos', () => {
   })
 
   it('cocina y tablero adelantan los pedidos en curso solo con su permiso', async () => {
-    const api = servidor().on('get', ACTIVOS, [])
+    const api = servidor().on('get', ACTIVE, [])
     entrarComo(['menu.read'])
     prefetchKitchen()
     prefetchBoard()
-    expect(api.llamadas('get', ACTIVOS)).toHaveLength(0)
+    expect(api.llamadas('get', ACTIVE)).toHaveLength(0)
 
     entrarComo(PERMISOS_MESERO)
     prefetchKitchen()
     await waitFor(() => {
-      expect(api.llamadas('get', ACTIVOS)).toHaveLength(1)
+      expect(api.llamadas('get', ACTIVE)).toHaveLength(1)
     })
   })
 })
@@ -72,11 +72,11 @@ describe('useNow', () => {
   it('refresca la hora con el intervalo pedido', () => {
     jest.useFakeTimers({ now: new Date('2026-09-26T12:00:00Z') })
     const { result } = renderHook(() => useNow(15_000))
-    const inicio = result.current
+    const start = result.current
     act(() => {
       jest.advanceTimersByTime(15_000)
     })
-    expect(result.current - inicio).toBe(15_000)
+    expect(result.current - start).toBe(15_000)
   })
 })
 

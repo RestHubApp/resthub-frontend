@@ -38,11 +38,11 @@ export function OrderDetailView() {
   const live = useLiveUpdates()
   const pedido = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
   // Las alergias las ve el encargado; useLiveUpdates ya refresca las notas.
-  const veAlergias = useCan(PERMISSION.insightsRead)
-  const notas = useOrderNoteFlags(Number.isInteger(orderId) ? [orderId] : [], { enabled: veAlergias, live: false })
-  const [dialogo, setDialogo] = useState<'charge' | 'cancel' | null>(null)
-  const cerrar = () => {
-    setDialogo(null)
+  const canViewAllergies = useCan(PERMISSION.insightsRead)
+  const notes = useOrderNoteFlags(Number.isInteger(orderId) ? [orderId] : [], { enabled: canViewAllergies, live: false })
+  const [dialog, setDialog] = useState<'charge' | 'cancel' | null>(null)
+  const close = () => {
+    setDialog(null)
   }
 
   if (pedido.isPending) {
@@ -64,24 +64,24 @@ export function OrderDetailView() {
         <BackLink to={paths.orders.list} label="Pedidos" />
         <LiveIndicator status={live} />
       </div>
-      <OrderHeader order={order} flagFor={notas.flagFor} />
+      <OrderHeader order={order} flagFor={notes.flagFor} />
       <DeliveryCard order={order} />
       <OrderActions
         order={order}
         onCharge={() => {
-          setDialogo('charge')
+          setDialog('charge')
         }}
         onCancel={() => {
-          setDialogo('cancel')
+          setDialog('cancel')
         }}
       />
       {order.type === 'dine_in' && isActive(order.status) ? <TableMoves order={order} /> : null}
       <PrintLinks order={order} />
       <OrderClosedInfo order={order} />
-      <OrderItems order={order} flagFor={notas.flagFor} />
+      <OrderItems order={order} flagFor={notes.flagFor} />
       <Suspense fallback={null}>
-        {dialogo === 'charge' ? <ChargeDialog order={order} onClose={cerrar} /> : null}
-        {dialogo === 'cancel' ? <CancelOrderDialog order={order} onClose={cerrar} /> : null}
+        {dialog === 'charge' ? <ChargeDialog order={order} onClose={close} /> : null}
+        {dialog === 'cancel' ? <CancelOrderDialog order={order} onClose={close} /> : null}
       </Suspense>
     </div>
   )

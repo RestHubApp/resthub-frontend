@@ -14,8 +14,8 @@ import { orderPlace } from './orderLabels'
 import { useOrderAction } from './useOrderAction'
 
 // El mismo tope que el servidor.
-const MAX_MOTIVO = 300
-const schema = z.object({ reason: textoObligatorio(MAX_MOTIVO, 'Escribe el motivo') })
+const MAX_REASON = 300
+const schema = z.object({ reason: textoObligatorio(MAX_REASON, 'Escribe el motivo') })
 type Values = z.infer<typeof schema>
 
 interface CancelOrderDialogProps {
@@ -35,9 +35,9 @@ export function CancelOrderDialog({ order, onClose }: CancelOrderDialogProps) {
     resolver: zodResolver(schema),
     defaultValues: { reason: '' },
   })
-  const cancelar = useOrderAction({
+  const cancel = useOrderAction({
     mutationFn: (reason: string) => cancelOrder(order?.id ?? 0, reason),
-    success: (cancelado) => `Pedido #${String(cancelado.number)} cancelado.`,
+    success: (cancelled) => `Pedido #${String(cancelled.number)} cancelado.`,
     failure: 'No se pudo cancelar el pedido.',
     onSuccess: () => {
       reset()
@@ -52,8 +52,8 @@ export function CancelOrderDialog({ order, onClose }: CancelOrderDialogProps) {
   return (
     <FormDialog
       open
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(open) => {
+        if (!open) {
           reset()
           onClose()
         }
@@ -65,8 +65,8 @@ export function CancelOrderDialog({ order, onClose }: CancelOrderDialogProps) {
         noValidate
         className="flex flex-col gap-5"
         onSubmit={onSubmit(
-          handleSubmit((valores) => {
-            cancelar.mutate(valores.reason)
+          handleSubmit((values) => {
+            cancel.mutate(values.reason)
           }),
         )}
       >
@@ -74,7 +74,7 @@ export function CancelOrderDialog({ order, onClose }: CancelOrderDialogProps) {
           id="motivo-cancelacion"
           label="Motivo"
           placeholder="El cliente se fue, pedido duplicado…"
-          maxLength={MAX_MOTIVO}
+          maxLength={MAX_REASON}
           field={register('reason')}
           error={formState.errors.reason?.message}
         />
@@ -82,8 +82,8 @@ export function CancelOrderDialog({ order, onClose }: CancelOrderDialogProps) {
           <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onClose}>
             Volver
           </Button>
-          <Button type="submit" size="lg" variant="danger" className="h-11 px-4" disabled={cancelar.isPending}>
-            {cancelar.isPending ? 'Cancelando…' : 'Cancelar pedido'}
+          <Button type="submit" size="lg" variant="danger" className="h-11 px-4" disabled={cancel.isPending}>
+            {cancel.isPending ? 'Cancelando…' : 'Cancelar pedido'}
           </Button>
         </DialogFormActions>
       </form>

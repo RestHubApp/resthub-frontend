@@ -11,11 +11,11 @@ interface CartLineProps {
 }
 
 // El mismo tope que el servidor.
-const MAX_NOTA = 200
+const MAX_NOTE = 200
 
 /** Un plato del borrador: cantidad, subtotal y la nota para la cocina. */
 export function CartLine({ line, onQuantity, onNotes }: CartLineProps) {
-  const notaId = `nota-${line.lineKey.replaceAll(/[^\w-]/gu, '-')}`
+  const noteId = `nota-${line.lineKey.replaceAll(/[^\w-]/gu, '-')}`
 
   return (
     <li className="flex flex-col gap-2 border-b pb-4 last:border-b-0">
@@ -34,14 +34,14 @@ export function CartLine({ line, onQuantity, onNotes }: CartLineProps) {
         <QuantityStepper name={line.name} quantity={line.quantity} max={MAX_QUANTITY} onChange={onQuantity} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={notaId} className="text-sm text-muted-foreground">
+        <Label htmlFor={noteId} className="text-sm text-muted-foreground">
           Nota para cocina
         </Label>
         <Input
-          id={notaId}
+          id={noteId}
           className="h-11 text-base"
           placeholder="Sin cebolla, alergia al maní…"
-          maxLength={MAX_NOTA}
+          maxLength={MAX_NOTE}
           autoComplete="off"
           value={line.notes}
           onChange={(event) => {

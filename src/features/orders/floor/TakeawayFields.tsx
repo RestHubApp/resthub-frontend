@@ -1,7 +1,7 @@
 import type { UseFormReturn } from 'react-hook-form'
 
 import { TextField } from '@/components/TextField'
-import { MAX_CLIENTE, MAX_DIRECCION, MAX_REFERENCIA, MAX_TELEFONO, type TakeawayValues } from './takeawaySchema'
+import { MAX_CUSTOMER, MAX_ADDRESS, MAX_REFERENCE, MAX_PHONE, type TakeawayValues } from './takeawaySchema'
 
 interface TakeawayFieldsProps {
   readonly form: UseFormReturn<TakeawayValues>
@@ -21,7 +21,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
         placeholder="Por ejemplo, Ana"
         icon="perfil"
         autoComplete="off"
-        maxLength={MAX_CLIENTE}
+        maxLength={MAX_CUSTOMER}
         hint="Se muestra en el tablero para entregar el pedido correcto."
         field={register('customer_name')}
         error={errors.customer_name?.message}
@@ -35,7 +35,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
             label="Teléfono"
             placeholder="Por ejemplo, 987654321"
             autoComplete="off"
-            maxLength={MAX_TELEFONO}
+            maxLength={MAX_PHONE}
             field={register('phone')}
             error={errors.phone?.message}
           />
@@ -45,7 +45,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
             placeholder="Calle, número, distrito"
             icon="ubicacion"
             autoComplete="off"
-            maxLength={MAX_DIRECCION}
+            maxLength={MAX_ADDRESS}
             field={register('address')}
             error={errors.address?.message}
           />
@@ -55,7 +55,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
             placeholder="Por ejemplo, frente al parque"
             icon="nota"
             autoComplete="off"
-            maxLength={MAX_REFERENCIA}
+            maxLength={MAX_REFERENCE}
             field={register('reference')}
             error={errors.reference?.message}
           />

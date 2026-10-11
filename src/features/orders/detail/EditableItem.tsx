@@ -28,15 +28,15 @@ interface EditableItemProps {
  * que se habla con la cocina y el servidor lo rechaza.
  */
 export function EditableItem({ orderId, item, flag }: EditableItemProps) {
-  const [editando, setEditando] = useState(false)
-  const cambio = useOrderAction({
+  const [editing, setEditing] = useState(false)
+  const change = useOrderAction({
     mutationFn: (payload: ChangeItemRequest) => changeOrderItem(orderId, item.id, payload),
     failure: 'No se pudo cambiar el plato.',
     onSuccess: () => {
-      setEditando(false)
+      setEditing(false)
     },
   })
-  const quitar = useOrderAction({
+  const remove = useOrderAction({
     mutationFn: () => removeOrderItem(orderId, item.id),
     success: () => `${item.name} quitado del pedido.`,
     failure: 'No se pudo quitar el plato.',
@@ -53,33 +53,33 @@ export function EditableItem({ orderId, item, flag }: EditableItemProps) {
           name={item.name}
           quantity={item.quantity}
           max={MAX_QUANTITY}
-          disabled={cambio.isPending || quitar.isPending}
-          onChange={(cantidad) => {
-            if (cantidad <= 0) {
-              quitar.mutate()
+          disabled={change.isPending || remove.isPending}
+          onChange={(quantity) => {
+            if (quantity <= 0) {
+              remove.mutate()
               return
             }
-            cambio.mutate({ quantity: cantidad })
+            change.mutate({ quantity: quantity })
           }}
         />
       </div>
       <ItemNote note={item.notes} flag={flag} />
       <Button type="button" variant="ghost" className="h-11 w-fit px-3" onClick={() => {
-        setEditando(true)
+        setEditing(true)
       }}>
         <Icon name="nota" size={16} />
         <span>{item.notes === '' ? 'Agregar nota' : 'Cambiar nota'}</span>
       </Button>
-      {editando ? (
+      {editing ? (
         <Suspense fallback={null}>
           <ItemNoteDialog
-            open={editando}
-            onOpenChange={setEditando}
+            open={editing}
+            onOpenChange={setEditing}
             dish={item.name}
             notes={item.notes}
-            pending={cambio.isPending}
+            pending={change.isPending}
             onSave={(notes) => {
-              cambio.mutate({ notes })
+              change.mutate({ notes })
             }}
           />
         </Suspense>

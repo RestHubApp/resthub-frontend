@@ -16,7 +16,7 @@ import { useLiveUpdates } from './useLiveUpdates'
 import { useNow } from './useNow'
 
 // En cocina el tiempo corre rápido: se refresca cada quince segundos.
-const REFRESCO_MS = 15_000
+const REFRESH_MS = 15_000
 
 /**
  * La pantalla de cocina: solo lo que falta preparar y lo que espera a salir.
@@ -26,15 +26,15 @@ const REFRESCO_MS = 15_000
  */
 export function KitchenView() {
   const live = useLiveUpdates()
-  const now = useNow(REFRESCO_MS)
-  const activos = useQuery(activeOrdersQuery)
-  const pedidos = useMemo(() => activos.data ?? [], [activos.data])
-  const enCocina = pedidos.filter((order) => order.status === 'in_kitchen')
-  const listos = pedidos.filter((order) => order.status === 'ready')
-  const ids = useMemo(() => pedidos.map((order) => order.id), [pedidos])
+  const now = useNow(REFRESH_MS)
+  const active = useQuery(activeOrdersQuery)
+  const orders = useMemo(() => active.data ?? [], [active.data])
+  const inKitchen = orders.filter((order) => order.status === 'in_kitchen')
+  const ready = orders.filter((order) => order.status === 'ready')
+  const ids = useMemo(() => orders.map((order) => order.id), [orders])
   // Las alergias las ve quien tiene el panel; el resto ve las notas tal cual.
-  const veAlergias = useCan(PERMISSION.insightsRead)
-  const notas = useOrderNoteFlags(ids, { enabled: veAlergias, live: false })
+  const canViewAllergies = useCan(PERMISSION.insightsRead)
+  const notes = useOrderNoteFlags(ids, { enabled: canViewAllergies, live: false })
 
   return (
     <div className="flex flex-col gap-5">
@@ -43,28 +43,28 @@ export function KitchenView() {
         description="Lo que falta preparar, del pedido más antiguo al más nuevo."
         actions={<LiveIndicator status={live} />}
       />
-      {activos.isPending ? <BoardSkeleton titles={['Por preparar', 'Listos para servir']} /> : null}
-      {activos.isError ? (
-        <QueryError error={activos.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void activos.refetch()} />
+      {active.isPending ? <BoardSkeleton titles={['Por preparar', 'Listos para servir']} /> : null}
+      {active.isError ? (
+        <QueryError error={active.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void active.refetch()} />
       ) : null}
       {/* Mientras carga, la silueta ocupa el lugar de las dos secciones; antes se
           veían las dos a la vez y, al irse la silueta, las secciones saltaban
           (CLS de 0,58 en el celular). */}
-      {activos.isPending ? null : (
+      {active.isPending ? null : (
         <>
-          <SectionCard title={`Por preparar (${String(enCocina.length)})`}>
-            {activos.isSuccess && enCocina.length === 0 ? <EmptyState title="Nada pendiente en cocina" /> : null}
+          <SectionCard title={`Por preparar (${String(inKitchen.length)})`}>
+            {active.isSuccess && inKitchen.length === 0 ? <EmptyState title="Nada pendiente en cocina" /> : null}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {enCocina.map((order) => (
-                <KitchenCard key={order.id} order={order} now={now} flagFor={notas.flagFor} />
+              {inKitchen.map((order) => (
+                <KitchenCard key={order.id} order={order} now={now} flagFor={notes.flagFor} />
               ))}
             </div>
           </SectionCard>
-          <SectionCard title={`Listos para servir (${String(listos.length)})`} collapsible>
-            {activos.isSuccess && listos.length === 0 ? <EmptyState title="Nada esperando a salir" /> : null}
+          <SectionCard title={`Listos para servir (${String(ready.length)})`} collapsible>
+            {active.isSuccess && ready.length === 0 ? <EmptyState title="Nada esperando a salir" /> : null}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {listos.map((order) => (
-                <KitchenCard key={order.id} order={order} now={now} flagFor={notas.flagFor} />
+              {ready.map((order) => (
+                <KitchenCard key={order.id} order={order} now={now} flagFor={notes.flagFor} />
               ))}
             </div>
           </SectionCard>

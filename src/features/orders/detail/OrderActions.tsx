@@ -27,10 +27,10 @@ const WIDE = 'h-12 w-full px-5 text-base sm:w-auto'
  * cuando esta listo, el encargado ademas "Marcar listo" y "Cobrar".
  */
 export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
-  const paso = nextStepFor(order.status)
-  const puede = useCanTakeStep(order, paso)
-  const puedeCancelar = useCan(PERMISSION.ordersManage)
-  const avanzar = useOrderAction({
+  const step = nextStepFor(order.status)
+  const can = useCanTakeStep(order, step)
+  const canCancel = useCan(PERMISSION.ordersManage)
+  const advance = useOrderAction({
     mutationFn: (step: OrderStep) => advanceOrder(order.id, step),
     success: stepDoneMessage,
     failure: 'No se pudo actualizar el pedido.',
@@ -42,26 +42,26 @@ export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-      {paso !== undefined && puede ? (
+      {step !== undefined && can ? (
         <Button
           type="button"
           size="lg"
-          variant={paso.action === 'charge' ? 'success' : 'default'}
+          variant={step.action === 'charge' ? 'success' : 'default'}
           className={WIDE}
-          disabled={avanzar.isPending}
+          disabled={advance.isPending}
           onClick={() => {
-            if (paso.action === 'charge') {
+            if (step.action === 'charge') {
               onCharge()
               return
             }
-            avanzar.mutate(paso.action)
+            advance.mutate(step.action)
           }}
         >
-          <Icon name={paso.icon} size={18} />
-          <span>{avanzar.isPending ? 'Guardando…' : paso.label}</span>
+          <Icon name={step.icon} size={18} />
+          <span>{advance.isPending ? 'Guardando…' : step.label}</span>
         </Button>
       ) : (
-        <p className="m-0 rounded-lg bg-muted px-4 py-3 text-sm font-medium">{paso?.waiting}</p>
+        <p className="m-0 rounded-lg bg-muted px-4 py-3 text-sm font-medium">{step?.waiting}</p>
       )}
       <Button asChild variant="outline" size="lg" className={WIDE}>
         <Link to={paths.orders.addItems(order.id)}>
@@ -69,7 +69,7 @@ export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
           <span>Agregar platos</span>
         </Link>
       </Button>
-      {puedeCancelar ? (
+      {canCancel ? (
         <Button type="button" variant="destructive" size="lg" className={WIDE} onClick={onCancel}>
           <Icon name="cancelar" size={18} />
           <span>Cancelar pedido</span>

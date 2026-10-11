@@ -14,9 +14,9 @@ interface TableMovesProps {
   readonly order: OrderResponse
 }
 
-type Dialogo = 'mover' | 'unir' | null
+type Dialog = 'mover' | 'unir' | null
 
-const BOTON = 'h-11 px-4'
+const BUTTON = 'h-11 px-4'
 
 /**
  * Cambiar de mesa y unir mesas, para un pedido en mesa que sigue en curso.
@@ -26,67 +26,67 @@ const BOTON = 'h-11 px-4'
  * pasan a cobrarse con este pedido. El servidor exige las dos cosas igual.
  */
 export function TableMoves({ order }: TableMovesProps) {
-  const [dialogo, setDialogo] = useState<Dialogo>(null)
-  const veTodos = useCan(PERMISSION.ordersReadAll)
-  const yo = useSession((state) => state.account?.user.id)
-  const esMia = (waiterId: number) => veTodos || waiterId === yo
-  const cerrar = () => {
-    setDialogo(null)
+  const [dialog, setDialog] = useState<Dialog>(null)
+  const canViewAll = useCan(PERMISSION.ordersReadAll)
+  const me = useSession((state) => state.account?.user.id)
+  const esMia = (waiterId: number) => canViewAll || waiterId === me
+  const close = () => {
+    setDialog(null)
   }
-  const mover = useOrderAction({
+  const move = useOrderAction({
     mutationFn: (table: TableState) => moveOrder(order.id, table.id),
-    success: (movido) => `Pedido #${String(movido.number)} ahora en ${tableName(movido.table_label ?? '')}.`,
+    success: (moved) => `Pedido #${String(moved.number)} ahora en ${tableName(moved.table_label ?? '')}.`,
     failure: 'No se pudo cambiar de mesa.',
-    onSuccess: cerrar,
+    onSuccess: close,
   })
-  const unir = useOrderAction({
+  const join = useOrderAction({
     mutationFn: (table: TableState) => mergeOrders(order.id, table.active_order?.id ?? 0),
-    success: (unido) => `Mesas unidas en el pedido #${String(unido.number)}.`,
+    success: (joined) => `Mesas unidas en el pedido #${String(joined.number)}.`,
     failure: 'No se pudieron unir las mesas.',
-    onSuccess: cerrar,
+    onSuccess: close,
   })
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Button type="button" variant="outline" className={BOTON} onClick={() => {
-        setDialogo('mover')
+      <Button type="button" variant="outline" className={BUTTON} onClick={() => {
+        setDialog('mover')
       }}>
         <Icon name="movimientos" size={16} />
         <span>Cambiar de mesa</span>
       </Button>
       {order.payments.length === 0 && esMia(order.waiter_id) ? (
-        <Button type="button" variant="outline" className={BOTON} onClick={() => {
-          setDialogo('unir')
+        <Button type="button" variant="outline" className={BUTTON} onClick={() => {
+          setDialog('unir')
         }}>
           <Icon name="mesa" size={16} />
           <span>Unir otra mesa</span>
         </Button>
       ) : null}
       <TablePickerDialog
-        open={dialogo === 'mover'}
+        open={dialog === 'mover'}
         title="Cambiar de mesa"
         description="Los platos, las notas y la cuenta pasan a la mesa que elijas."
-        filter={(mesa) => mesa.status === 'free'}
+        filter={(table) => table.status === 'free'}
         empty="No hay mesas libres"
-        pending={mover.isPending}
-        onPick={(mesa) => {
-          mover.mutate(mesa)
+        pending={move.isPending}
+        onPick={(table) => {
+          move.mutate(table)
         }}
-        onClose={cerrar}
+        onClose={close}
       />
       <TablePickerDialog
-        open={dialogo === 'unir'}
+        open={dialog === 'unir'}
         title="Unir otra mesa a esta"
         description="Sus platos pasan a este pedido y esa mesa queda libre."
-        filter={(mesa) =>
-          mesa.active_order !== null && mesa.active_order.id !== order.id && esMia(mesa.active_order.waiter_id)
+        filter={(table) =>
+          table.active_order !== null && table.active_order.id !== order.id && esMia(table.active_order.waiter_id)
         }
-        empty={veTodos ? 'No hay otras mesas con pedido' : 'No tienes otras mesas con pedido'}
-        pending={unir.isPending}
-        onPick={(mesa) => {
-          unir.mutate(mesa)
+        empty={canViewAll ? 'No hay otras mesas con pedido' : 'No tienes otras mesas con pedido'}
+        pending={join.isPending}
+        onPick={(table) => {
+          join.mutate(table)
         }}
-        onClose={cerrar}
+        onClose={close}
       />
     </div>
   )

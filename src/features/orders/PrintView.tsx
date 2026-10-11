@@ -24,30 +24,30 @@ import { QueryError } from './QueryError'
 export function PrintView() {
   const params = useParams()
   const orderId = Number(params['orderId'])
-  const comanda = params['kind'] === 'comanda'
+  const ticket = params['kind'] === 'comanda'
   const timeZone = useTimeZone()
-  const restaurante = useSession((state) => state.account?.restaurant.name ?? '')
-  const pedido = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
-  const listo = pedido.isSuccess
+  const restaurant = useSession((state) => state.account?.restaurant.name ?? '')
+  const order = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
+  const ready = order.isSuccess
 
   useEffect(() => {
-    if (listo) {
+    if (ready) {
       window.print()
     }
-  }, [listo])
+  }, [ready])
 
-  if (pedido.isPending) {
+  if (order.isPending) {
     return <EmptyState title="Preparando la hoja…" />
   }
-  if (pedido.isError) {
-    return <QueryError error={pedido.error} fallback="No se pudo cargar el pedido." onRetry={() => void pedido.refetch()} />
+  if (order.isError) {
+    return <QueryError error={order.error} fallback="No se pudo cargar el pedido." onRetry={() => void order.refetch()} />
   }
 
   return (
     <div className="flex flex-col items-center gap-4">
       <style>{PRINT_CSS}</style>
       {/* La hoja no lleva título visible; el lector de pantalla sí lo necesita. */}
-      <h1 className="sr-only">{`${comanda ? 'Comanda' : 'Precuenta'} del pedido #${String(pedido.data.number)}`}</h1>
+      <h1 className="sr-only">{`${ticket ? 'Comanda' : 'Precuenta'} del pedido #${String(order.data.number)}`}</h1>
       <div className="flex w-full max-w-sm items-center justify-between gap-2 print:hidden">
         <BackLink to={paths.orders.detail(orderId)} label="Pedido" />
         <Button type="button" onClick={() => {
@@ -58,10 +58,10 @@ export function PrintView() {
         </Button>
       </div>
       <article id="hoja-impresa" className="w-[74mm] bg-white p-3 font-mono text-black shadow-md">
-        {comanda ? (
-          <KitchenTicket order={pedido.data} timeZone={timeZone} />
+        {ticket ? (
+          <KitchenTicket order={order.data} timeZone={timeZone} />
         ) : (
-          <BillTicket order={pedido.data} restaurant={restaurante} timeZone={timeZone} />
+          <BillTicket order={order.data} restaurant={restaurant} timeZone={timeZone} />
         )}
       </article>
     </div>

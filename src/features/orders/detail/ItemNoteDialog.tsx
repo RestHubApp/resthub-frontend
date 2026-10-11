@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 
 // El mismo tope que el servidor.
-const MAX_NOTA = 200
-const schema = z.object({ notes: textoOpcional(MAX_NOTA) })
+const MAX_NOTE = 200
+const schema = z.object({ notes: textoOpcional(MAX_NOTE) })
 type Values = z.infer<typeof schema>
 
 interface ItemNoteDialogProps {
@@ -43,8 +43,8 @@ export function ItemNoteDialog({
         noValidate
         className="flex flex-col gap-5"
         onSubmit={onSubmit(
-          handleSubmit((valores) => {
-            onSave(valores.notes)
+          handleSubmit((values) => {
+            onSave(values.notes)
           }),
         )}
       >
@@ -53,7 +53,7 @@ export function ItemNoteDialog({
           label="Nota para cocina"
           icon="nota"
           placeholder="Sin cebolla, alergia al maní…"
-          maxLength={MAX_NOTA}
+          maxLength={MAX_NOTE}
           autoComplete="off"
           hint="Déjala vacía para quitarla."
           field={register('notes')}

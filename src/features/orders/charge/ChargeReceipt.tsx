@@ -17,10 +17,10 @@ interface ChargeReceiptProps {
  * que importa en la caja, así que va grande y se anuncia.
  */
 export function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
-  const ultimo = order.payments.at(-1)
-  const vuelto = ultimo?.change ?? null
-  const recibido = ultimo?.amount_received ?? ''
-  const propinas = toCents(order.tips) > 0
+  const last = order.payments.at(-1)
+  const change = last?.change ?? null
+  const received = last?.amount_received ?? ''
+  const tips = toCents(order.tips) > 0
 
   return (
     <div className="flex flex-col gap-4">
@@ -29,28 +29,28 @@ export function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
         <p className="m-0 font-semibold">
           Pedido #{order.number} pagado · {order.payment_method_label ?? 'el medio elegido'}
         </p>
-        {vuelto === null ? (
+        {change === null ? (
           <p className="m-0 text-2xl font-bold tabular-nums">{formatMoney(order.total)}</p>
         ) : (
           <p className="m-0 flex flex-col">
             <span className="text-sm font-medium">Vuelto</span>
-            <span className="text-4xl font-bold tabular-nums">{formatMoney(vuelto)}</span>
+            <span className="text-4xl font-bold tabular-nums">{formatMoney(change)}</span>
           </p>
         )}
       </div>
       <dl className="m-0 grid grid-cols-2 gap-y-1 text-sm">
         <dt className="text-muted-foreground">Total cobrado</dt>
         <dd className="m-0 text-right tabular-nums">{formatMoney(order.total)}</dd>
-        {propinas ? (
+        {tips ? (
           <>
             <dt className="text-muted-foreground">Propinas</dt>
             <dd className="m-0 text-right tabular-nums">{formatMoney(order.tips)}</dd>
           </>
         ) : null}
-        {recibido !== '' ? (
+        {received !== '' ? (
           <>
             <dt className="text-muted-foreground">Recibido</dt>
-            <dd className="m-0 text-right tabular-nums">{formatMoney(recibido)}</dd>
+            <dd className="m-0 text-right tabular-nums">{formatMoney(received)}</dd>
           </>
         ) : null}
       </dl>

@@ -26,18 +26,18 @@ interface KitchenCardProps {
  * Marcar listo lo hace quien tiene `orders.manage`; el resto solo mira.
  */
 export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
-  const puedeMarcar = useCan(PERMISSION.ordersManage) && order.status === 'in_kitchen'
-  const listo = useOrderAction({
+  const canMark = useCan(PERMISSION.ordersManage) && order.status === 'in_kitchen'
+  const ready = useOrderAction({
     mutationFn: () => advanceOrder(order.id, 'ready'),
     success: stepDoneMessage,
     failure: 'No se pudo marcar como listo.',
   })
-  const alergia = allergyIn(order, flagFor) !== undefined
+  const allergy = allergyIn(order, flagFor) !== undefined
 
   return (
     <article
       aria-label={`Pedido ${String(order.number)}`}
-      className={`flex flex-col gap-3 rounded-xl bg-card p-4 shadow-xs ${alergia ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
+      className={`flex flex-col gap-3 rounded-xl bg-card p-4 shadow-xs ${allergy ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
     >
       <header className="flex items-start justify-between gap-2">
         <div>
@@ -46,7 +46,7 @@ export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
         </div>
         <div className="flex flex-col items-end gap-1">
           <ElapsedTime order={order} now={now} />
-          {alergia ? <AllergyAlert /> : null}
+          {allergy ? <AllergyAlert /> : null}
         </div>
       </header>
       <ul className="m-0 flex list-none flex-col gap-2 border-t px-0 pt-3 pb-0 text-base">
@@ -55,12 +55,12 @@ export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
         ))}
       </ul>
       <ItemNote note={order.notes} flag={flagFor(order.id, null)} label="Nota del pedido" />
-      {puedeMarcar ? (
-        <Button type="button" size="lg" className="h-12 text-base" disabled={listo.isPending} onClick={() => {
-          listo.mutate()
+      {canMark ? (
+        <Button type="button" size="lg" className="h-12 text-base" disabled={ready.isPending} onClick={() => {
+          ready.mutate()
         }}>
           <Icon name="listo" size={18} />
-          <span>{listo.isPending ? 'Guardando…' : 'Listo'}</span>
+          <span>{ready.isPending ? 'Guardando…' : 'Listo'}</span>
         </Button>
       ) : null}
     </article>

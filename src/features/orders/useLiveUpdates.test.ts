@@ -9,58 +9,58 @@ import { useLiveUpdates } from './useLiveUpdates'
 
 // Un canal de avisos controlado por la prueba: cada conexión es un flujo al
 // que se le escriben eventos, o una respuesta de error.
-interface Conexion {
+interface Connection {
   readonly url: string
   readonly headers: Headers
-  escribir: (texto: string) => void
+  escribir: (text: string) => void
   cerrar: () => void
 }
 
-const conexiones: Conexion[] = []
-let estadoDeRespuesta = 200
+const connections: Connection[] = []
+let responseStatus = 200
 const fetchOriginal = window.fetch.bind(window)
 
-function canalFalso(entrada: RequestInfo | URL, opciones?: RequestInit): Promise<Response> {
-  let controlador: ReadableStreamDefaultController<Uint8Array> | null = null
-  const flujo = new ReadableStream<Uint8Array>({
+function fakeChannel(entry: RequestInfo | URL, options?: RequestInit): Promise<Response> {
+  let handler: ReadableStreamDefaultController<Uint8Array> | null = null
+  const flow = new ReadableStream<Uint8Array>({
     start(c) {
-      controlador = c
+      handler = c
     },
   })
-  const codificador = new TextEncoder()
-  conexiones.push({
-    url: entrada instanceof Request ? entrada.url : entrada.toString(),
-    headers: new Headers(opciones?.headers),
-    escribir: (texto) => controlador?.enqueue(codificador.encode(texto)),
-    cerrar: () => controlador?.close(),
+  const encoder = new TextEncoder()
+  connections.push({
+    url: entry instanceof Request ? entry.url : entry.toString(),
+    headers: new Headers(options?.headers),
+    escribir: (text) => handler?.enqueue(encoder.encode(text)),
+    cerrar: () => handler?.close(),
   })
-  const cuerpo = estadoDeRespuesta === 200 ? flujo : null
-  return Promise.resolve(new Response(cuerpo, { status: estadoDeRespuesta }))
+  const body = responseStatus === 200 ? flow : null
+  return Promise.resolve(new Response(body, { status: responseStatus }))
 }
 
-function envoltorio({ children }: { readonly children: ReactNode }) {
+function wrapper({ children }: { readonly children: ReactNode }) {
   return createElement(QueryClientProvider, { client: queryClient }, children)
 }
 
-function escuchar() {
+function listen() {
   entrarComo()
-  return renderHook(() => useLiveUpdates(), { wrapper: envoltorio })
+  return renderHook(() => useLiveUpdates(), { wrapper: wrapper })
 }
 
-function aviso(tipo: string) {
+function notice(type: string) {
   act(() => {
-    conexiones.at(-1)?.escribir(`event: ${tipo}\ndata: {}\n\n`)
+    connections.at(-1)?.escribir(`event: ${type}\ndata: {}\n\n`)
   })
 }
 
-function invalidada(clave: readonly unknown[]): boolean | undefined {
-  return queryClient.getQueryState(clave)?.isInvalidated
+function invalidated(password: readonly unknown[]): boolean | undefined {
+  return queryClient.getQueryState(password)?.isInvalidated
 }
 
 beforeEach(() => {
-  conexiones.length = 0
-  estadoDeRespuesta = 200
-  window.fetch = canalFalso
+  connections.length = 0
+  responseStatus = 200
+  window.fetch = fakeChannel
   queryClient.setQueryData(['orders', 'active'], [])
   queryClient.setQueryData(['tables', { includeInactive: false }], [])
   queryClient.setQueryData(['menu', 'pedidos'], { categories: [] })
@@ -73,43 +73,43 @@ afterEach(() => {
 
 describe('useLiveUpdates', () => {
   it('abre el canal con el token en la cabecera y pasa a «en vivo» con el aviso ready', async () => {
-    const { result } = escuchar()
+    const { result } = listen()
     expect(result.current).toBe('connecting')
     await waitFor(() => {
-      expect(conexiones).toHaveLength(1)
+      expect(connections).toHaveLength(1)
     })
-    expect(conexiones[0]?.url).toBe('/api/v1/events')
-    expect(conexiones[0]?.headers.get('Authorization')).toBe('Bearer token-de-prueba')
+    expect(connections[0]?.url).toBe('/api/v1/events')
+    expect(connections[0]?.headers.get('Authorization')).toBe('Bearer token-de-prueba')
 
-    aviso('ready')
+    notice('ready')
     await waitFor(() => {
       expect(result.current).toBe('live')
     })
   })
 
   it('un aviso de pedidos invalida pedidos y mesas, pero no la carta', async () => {
-    escuchar()
+    listen()
     await waitFor(() => {
-      expect(conexiones).toHaveLength(1)
+      expect(connections).toHaveLength(1)
     })
-    aviso('ready')
-    aviso('orders')
+    notice('ready')
+    notice('orders')
     await waitFor(() => {
-      expect(invalidada(['orders', 'active'])).toBe(true)
+      expect(invalidated(['orders', 'active'])).toBe(true)
     })
-    expect(invalidada(['tables', { includeInactive: false }])).toBe(true)
-    expect(invalidada(['menu', 'pedidos'])).toBe(false)
+    expect(invalidated(['tables', { includeInactive: false }])).toBe(true)
+    expect(invalidated(['menu', 'pedidos'])).toBe(false)
   })
 
   it('si el canal se corta, reintenta y al reconectar vuelve a pedir todo', async () => {
     jest.useFakeTimers()
-    const { result } = escuchar()
+    const { result } = listen()
     await waitFor(() => {
-      expect(conexiones).toHaveLength(1)
+      expect(connections).toHaveLength(1)
     })
-    aviso('ready')
+    notice('ready')
     act(() => {
-      conexiones[0]?.cerrar()
+      connections[0]?.cerrar()
     })
     await waitFor(() => {
       expect(result.current).toBe('offline')
@@ -117,30 +117,30 @@ describe('useLiveUpdates', () => {
     await act(async () => {
       await jest.advanceTimersByTimeAsync(3000)
     })
-    expect(conexiones).toHaveLength(2)
-    aviso('ready')
+    expect(connections).toHaveLength(2)
+    notice('ready')
     await waitFor(() => {
-      expect(invalidada(['menu', 'pedidos'])).toBe(true)
+      expect(invalidated(['menu', 'pedidos'])).toBe(true)
     })
     expect(result.current).toBe('live')
   })
 
   it('un 401 no se reintenta: la credencial ya no vale', async () => {
     jest.useFakeTimers()
-    estadoDeRespuesta = 401
-    const { result } = escuchar()
+    responseStatus = 401
+    const { result } = listen()
     await waitFor(() => {
       expect(result.current).toBe('offline')
     })
     await act(async () => {
       await jest.advanceTimersByTimeAsync(10_000)
     })
-    expect(conexiones).toHaveLength(1)
+    expect(connections).toHaveLength(1)
   })
 
   it('sin sesión no abre ningún canal', () => {
-    const { result } = renderHook(() => useLiveUpdates(), { wrapper: envoltorio })
+    const { result } = renderHook(() => useLiveUpdates(), { wrapper: wrapper })
     expect(result.current).toBe('connecting')
-    expect(conexiones).toHaveLength(0)
+    expect(connections).toHaveLength(0)
   })
 })

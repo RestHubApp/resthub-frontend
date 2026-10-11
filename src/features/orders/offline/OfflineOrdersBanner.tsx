@@ -9,8 +9,8 @@ import { useOfflineOrders } from './useOfflineOrders'
  * las pantallas donde el mesero pasa el turno.
  */
 export function OfflineOrdersBanner() {
-  const { pendientes, enviar } = useOfflineOrders()
-  if (pendientes.length === 0) {
+  const { pendientes: pending, enviar: send } = useOfflineOrders()
+  if (pending.length === 0) {
     return null
   }
 
@@ -19,12 +19,12 @@ export function OfflineOrdersBanner() {
       <span className="flex items-center gap-2">
         <Icon name="sinConexion" size={18} />
         <span>
-          {pendientes.length === 1 ? '1 pedido espera señal' : `${String(pendientes.length)} pedidos esperan señal`}:{' '}
-          {pendientes.map((pedido) => pedido.label).join(', ')}. Se envían solos al volver la conexión.
+          {pending.length === 1 ? '1 pedido espera señal' : `${String(pending.length)} pedidos esperan señal`}:{' '}
+          {pending.map((order) => order.label).join(', ')}. Se envían solos al volver la conexión.
         </span>
       </span>
       <Button type="button" size="sm" variant="outline" onClick={() => {
-        void enviar()
+        void send()
       }}>
         <Icon name="reintentar" size={14} />
         <span>Reintentar</span>

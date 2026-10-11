@@ -5,11 +5,11 @@ import { itemDePedido, pedido } from '#jest/fixtures/pedidos'
 import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
 import { PrintView } from './PrintView'
 
-const RUTA = '/imprimir/:orderId/:kind'
-const imprimir = jest.fn()
+const ROUTE = '/imprimir/:orderId/:kind'
+const print = jest.fn()
 const originalPrint = window.print.bind(window)
 
-const DELIVERY_PAGADO = pedido({
+const DELIVERY_PAID = pedido({
   type: 'delivery',
   table_label: null,
   customer_name: 'Ana',
@@ -32,14 +32,14 @@ const DELIVERY_PAGADO = pedido({
   paid_at: '2026-09-26T18:00:00Z',
 })
 
-function abrir(kind: string, respuesta: unknown = DELIVERY_PAGADO) {
-  servidor().on('get', '/orders/5', respuesta)
+function open(kind: string, response: unknown = DELIVERY_PAID) {
+  servidor().on('get', '/orders/5', response)
   entrarComo()
-  return montar(<PrintView />, { path: RUTA, en: `/imprimir/5/${kind}` })
+  return montar(<PrintView />, { path: ROUTE, en: `/imprimir/5/${kind}` })
 }
 
 beforeEach(() => {
-  window.print = imprimir
+  window.print = print
 })
 
 afterEach(() => {
@@ -48,7 +48,7 @@ afterEach(() => {
 
 describe('PrintView', () => {
   it('la comanda lleva platos, opciones y notas en mayúsculas, sin precios, y se imprime sola', async () => {
-    abrir('comanda')
+    open('comanda')
     expect(await screen.findByText('Comanda')).toBeInTheDocument()
     expect(screen.getByText('2 × Lomo saltado')).toBeInTheDocument()
     expect(screen.getByText('Tres cuartos')).toBeInTheDocument()
@@ -56,11 +56,11 @@ describe('PrintView', () => {
     expect(screen.getByText('Nota: tocar el timbre')).toBeInTheDocument()
     expect(screen.getByText('Tel.: 987654321')).toBeInTheDocument()
     expect(screen.queryByText(/S\//u)).not.toBeInTheDocument()
-    expect(imprimir).toHaveBeenCalledTimes(1)
+    expect(print).toHaveBeenCalledTimes(1)
   })
 
   it('la cuenta pagada es el ticket con cortesías, descuento, pagos y vuelto', async () => {
-    abrir('cuenta')
+    open('cuenta')
     expect(await screen.findByText('Ticket de venta')).toBeInTheDocument()
     expect(screen.getByText('La Picantería')).toBeInTheDocument()
     expect(screen.getByText(/Chicha morada\s*\(cortesía\)/u)).toBeInTheDocument()
@@ -71,17 +71,17 @@ describe('PrintView', () => {
   })
 
   it('antes de pagar es la precuenta, y el botón vuelve a imprimir', async () => {
-    const { user } = abrir('cuenta', pedido({ status: 'served' }))
+    const { user } = open('cuenta', pedido({ status: 'served' }))
     expect(await screen.findByText('Precuenta')).toBeInTheDocument()
     expect(screen.queryByText('Vuelto')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Imprimir' }))
-    expect(imprimir).toHaveBeenCalledTimes(2)
+    expect(print).toHaveBeenCalledTimes(2)
     expect(screen.getByRole('link', { name: 'Pedido' })).toHaveAttribute('href', '/pedidos/5')
   })
 
   it('si el pedido no carga, no imprime una hoja vacía', async () => {
-    abrir('cuenta', new RespuestaDeError(404, 'Ese pedido no existe.'))
+    open('cuenta', new RespuestaDeError(404, 'Ese pedido no existe.'))
     expect(await screen.findByText('Ese pedido no existe.')).toBeInTheDocument()
-    expect(imprimir).not.toHaveBeenCalled()
+    expect(print).not.toHaveBeenCalled()
   })
 })

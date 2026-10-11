@@ -10,12 +10,12 @@ import type { NextStep } from './nextStep'
  * un mesero que cubre una mesa ajena la sirve, pero no la cobra. El servidor
  * lo exige igual; acá solo se evita mostrar un botón que va a responder 403.
  */
-export function useCanTakeStep(order: OrderResponse, paso: NextStep | undefined): boolean {
-  const conPermiso = useCan(paso?.permission ?? PERMISSION.ordersTake)
-  const veTodos = useCan(PERMISSION.ordersReadAll)
-  const propio = useSession((state) => state.account?.user.id === order.waiter_id)
-  if (paso === undefined || !conPermiso) {
+export function useCanTakeStep(order: OrderResponse, step: NextStep | undefined): boolean {
+  const withPermission = useCan(step?.permission ?? PERMISSION.ordersTake)
+  const canViewAll = useCan(PERMISSION.ordersReadAll)
+  const own = useSession((state) => state.account?.user.id === order.waiter_id)
+  if (step === undefined || !withPermission) {
     return false
   }
-  return paso.action !== 'charge' || propio || veTodos
+  return step.action !== 'charge' || own || canViewAll
 }

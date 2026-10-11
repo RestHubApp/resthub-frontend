@@ -18,26 +18,26 @@ interface ChargeContentProps {
  * cuenta dividida cada pago cambia el saldo, y un descuento cambia el total.
  */
 export function ChargeContent({ order, onClose }: ChargeContentProps) {
-  const [cobrado, setCobrado] = useState<OrderResponse | null>(null)
-  const vivo = useQuery({ ...orderQuery(order.id), initialData: order })
-  const actual = vivo.data
+  const [charged, setCharged] = useState<OrderResponse | null>(null)
+  const live = useQuery({ ...orderQuery(order.id), initialData: order })
+  const actual = live.data
 
   return (
     <FormDialog
       open
       size="lg"
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(open) => {
+        if (!open) {
           onClose()
         }
       }}
-      title={cobrado === null ? `Cobrar pedido #${String(actual.number)}` : 'Cobro registrado'}
-      description={cobrado === null ? `${orderPlace(actual)} · ${actual.waiter_name}` : undefined}
+      title={charged === null ? `Cobrar pedido #${String(actual.number)}` : 'Cobro registrado'}
+      description={charged === null ? `${orderPlace(actual)} · ${actual.waiter_name}` : undefined}
     >
-      {cobrado === null ? (
-        <ChargeForm order={actual} onPaid={setCobrado} onCancel={onClose} />
+      {charged === null ? (
+        <ChargeForm order={actual} onPaid={setCharged} onCancel={onClose} />
       ) : (
-        <ChargeReceipt order={cobrado} onClose={onClose} />
+        <ChargeReceipt order={charged} onClose={onClose} />
       )}
     </FormDialog>
   )

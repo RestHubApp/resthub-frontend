@@ -24,7 +24,7 @@ export function QuantityStepper({
   canRemove = true,
 }: QuantityStepperProps) {
   // Con la cantidad en 1, "−" quita el plato, si se puede quitar.
-  const quitaPlato = quantity <= 1 && canRemove
+  const removesDish = quantity <= 1 && canRemove
 
   return (
     <div className="flex items-center gap-1">
@@ -32,13 +32,13 @@ export function QuantityStepper({
         type="button"
         variant="outline"
         className={BUTTON}
-        aria-label={quitaPlato ? `Quitar ${name}` : `Uno menos de ${name}`}
+        aria-label={removesDish ? `Quitar ${name}` : `Uno menos de ${name}`}
         disabled={disabled || quantity <= 1 && !canRemove}
         onClick={() => {
           onChange(quantity - 1)
         }}
       >
-        <Icon name={quitaPlato ? 'eliminar' : 'quitar'} size={18} />
+        <Icon name={removesDish ? 'eliminar' : 'quitar'} size={18} />
       </Button>
       <span className="min-w-8 text-center text-lg font-bold tabular-nums">
         <span className="sr-only">Cantidad: </span>

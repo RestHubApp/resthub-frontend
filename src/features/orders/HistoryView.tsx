@@ -58,14 +58,14 @@ function columnas(timeZone: string): DataColumn<OrderResponse>[] {
  */
 export function HistoryView() {
   const timeZone = useTimeZone()
-  const hoy = todayIn(timeZone)
+  const today = todayIn(timeZone)
   const columns = useMemo(() => columnas(timeZone), [timeZone])
-  const [filtros, setFiltros] = useState<HistoryFilters>({ from: hoy, to: hoy, status: '', type: '', waiterId: '' })
-  const [pagina, setPagina] = useState(0)
-  const params = toParams(filtros, pagina)
-  const historial = useQuery({ ...ordersQuery(params), placeholderData: keepPreviousData })
-  const total = historial.data?.total ?? 0
-  const paginas = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const [filters, setFilters] = useState<HistoryFilters>({ from: today, to: today, status: '', type: '', waiterId: '' })
+  const [page, setPage] = useState(0)
+  const params = toParams(filters, page)
+  const history = useQuery({ ...ordersQuery(params), placeholderData: keepPreviousData })
+  const total = history.data?.total ?? 0
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
     <div className="flex flex-col gap-5">
@@ -73,27 +73,27 @@ export function HistoryView() {
       <PageHeader title="Historial de pedidos" description="Todos los pedidos: pagados, cancelados o en curso." />
       <SectionCard title="Filtros" as="h2">
         <HistoryFiltersBar
-          value={filtros}
-          onChange={(nuevos) => {
-            setFiltros(nuevos)
-            setPagina(0)
+          value={filters}
+          onChange={(fresh) => {
+            setFilters(fresh)
+            setPage(0)
           }}
         />
       </SectionCard>
-      <SectionCard title="Pedidos" description={historial.isSuccess ? `${String(total)} en total` : undefined}>
-        {historial.isError ? (
-          <QueryError error={historial.error} fallback="No se pudo cargar el historial." onRetry={() => void historial.refetch()} />
+      <SectionCard title="Pedidos" description={history.isSuccess ? `${String(total)} en total` : undefined}>
+        {history.isError ? (
+          <QueryError error={history.error} fallback="No se pudo cargar el historial." onRetry={() => void history.refetch()} />
         ) : (
           <DataTable
             columns={columns}
-            data={historial.data?.items ?? []}
-            isLoading={historial.isPending}
+            data={history.data?.items ?? []}
+            isLoading={history.isPending}
             emptyMessage="Ningún pedido coincide con los filtros."
             getRowId={(order) => String(order.id)}
             renderExpanded={(order) => <OrderSummary order={order} />}
           />
         )}
-        {paginas > 1 ? <TablePagination actual={pagina} total={paginas} onChange={setPagina} /> : null}
+        {pages > 1 ? <TablePagination actual={page} total={pages} onChange={setPage} /> : null}
       </SectionCard>
     </div>
   )

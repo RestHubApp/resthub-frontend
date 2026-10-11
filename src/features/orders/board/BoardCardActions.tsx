@@ -15,10 +15,10 @@ interface BoardCardActionsProps {
 
 /** El paso siguiente del pedido y, aparte, cancelar. */
 export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActionsProps) {
-  const paso = nextStepFor(order.status)
-  const puede = useCan(paso?.permission ?? PERMISSION.ordersTake)
-  const puedeCancelar = useCan(PERMISSION.ordersManage)
-  const avanzar = useOrderAction({
+  const step = nextStepFor(order.status)
+  const can = useCan(step?.permission ?? PERMISSION.ordersTake)
+  const canCancel = useCan(PERMISSION.ordersManage)
+  const advance = useOrderAction({
     mutationFn: (step: OrderStep) => advanceOrder(order.id, step),
     success: stepDoneMessage,
     failure: 'No se pudo actualizar el pedido.',
@@ -26,26 +26,26 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
 
   return (
     <div className="flex flex-wrap gap-2">
-      {paso !== undefined && puede ? (
+      {step !== undefined && can ? (
         <Button
           type="button"
           size="lg"
-          variant={paso.action === 'charge' ? 'success' : 'default'}
+          variant={step.action === 'charge' ? 'success' : 'default'}
           className="h-11 flex-1 px-3"
-          disabled={avanzar.isPending}
+          disabled={advance.isPending}
           onClick={() => {
-            if (paso.action === 'charge') {
+            if (step.action === 'charge') {
               onCharge(order)
               return
             }
-            avanzar.mutate(paso.action)
+            advance.mutate(step.action)
           }}
         >
-          <Icon name={paso.icon} size={16} />
-          <span>{paso.label}</span>
+          <Icon name={step.icon} size={16} />
+          <span>{step.label}</span>
         </Button>
       ) : null}
-      {puedeCancelar ? (
+      {canCancel ? (
         <Button
           type="button"
           size="lg"

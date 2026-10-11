@@ -8,7 +8,7 @@ interface SplitDraft {
   readonly personas: number
   readonly setPersonas: (personas: number) => void
   readonly platos: readonly number[]
-  readonly setPlatos: (platos: number[]) => void
+  readonly setPlatos: (dishes: number[]) => void
   readonly parte: number
 }
 
