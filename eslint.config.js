@@ -1,3 +1,4 @@
+import cspell from '@cspell/eslint-plugin'
 import comments from '@eslint-community/eslint-plugin-eslint-comments/configs'
 import js from '@eslint/js'
 import boundaries from 'eslint-plugin-boundaries'
@@ -16,6 +17,7 @@ import security from 'eslint-plugin-security'
 import sonarjs from 'eslint-plugin-sonarjs'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import { fileURLToPath } from 'node:url'
 
 // ---------------------------------------------------------------------
 // Fuentes unicas por sintaxis (no-restricted-syntax).
@@ -719,4 +721,83 @@ export default tseslint.config(
     files: ['jest/**/*.cjs'],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
+
+  // ---------------------------------------------------------------------
+  // Identificadores en inglés (comentarios, textos de interfaz, descripciones
+  // de pruebas y mensajes de commit siguen en español).
+  //
+  // `@cspell/eslint-plugin` revisa solo identificadores: ni cadenas, ni
+  // plantillas, ni comentarios, ni texto JSX. Diccionario inglés + términos de
+  // software; lo que no es inglés pero se queda (siglas legales, nombres de
+  // platos, marcas, nombres propios de los datos de prueba) vive en
+  // `cspell-terms.txt`.
+  // ---------------------------------------------------------------------
+  {
+    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.{ts,cjs}', 'checks/**/*.mjs', '*.config.{js,ts,mjs}', 'vite.plugins.ts'],
+    plugins: { '@cspell': cspell },
+    rules: {
+      '@cspell/spellchecker': [
+        'error',
+        {
+          checkIdentifiers: true,
+          checkStrings: false,
+          checkStringTemplates: false,
+          checkComments: false,
+          checkJSXText: false,
+          autoFix: false,
+          numSuggestions: 0,
+          cspell: {
+            language: 'en',
+            import: [
+              '@cspell/dict-software-terms/cspell-ext.json',
+              '@cspell/dict-typescript/cspell-ext.json',
+              '@cspell/dict-node/cspell-ext.json',
+              '@cspell/dict-html/cspell-ext.json',
+              '@cspell/dict-css/cspell-ext.json',
+            ],
+            dictionaryDefinitions: [{ name: 'resthub-terms', path: fileURLToPath(new URL('./cspell-terms.txt', import.meta.url)) }],
+            dictionaries: ['resthub-terms'],
+          },
+        },
+      ],
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Convenciones de nombres (@typescript-eslint/naming-convention).
+  //
+  // camelCase para variables, funciones y parámetros; PascalCase para tipos y
+  // componentes; UPPER_CASE para las constantes de módulo; los booleanos
+  // llevan prefijo de pregunta y los hooks empiezan con `use`. Las claves de
+  // objetos y de tipos no se revisan: son las del API (snake_case), las del DOM
+  // (`aria-*`, `data-*`) o las de librerías.
+  // ---------------------------------------------------------------------
+  {
+    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.ts'],
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'error',
+        { selector: 'default', format: ['camelCase'], leadingUnderscore: 'allow', trailingUnderscore: 'allow' },
+        { selector: 'import', format: null },
+        // PascalCase en variables: los componentes de React (`const Icon = icons[name]`).
+        { selector: 'variable', format: ['camelCase', 'UPPER_CASE', 'PascalCase'], leadingUnderscore: 'allow' },
+        // Los booleanos son preguntas: isOpen, hasItems, canCharge, shouldRetry, wasPaid, willExpire.
+        { selector: 'variable', types: ['boolean'], format: ['PascalCase'], prefix: ['is', 'has', 'can', 'should', 'was', 'will'] },
+        { selector: 'variable', types: ['boolean'], modifiers: ['global', 'const'], format: ['PascalCase', 'UPPER_CASE'], prefix: ['is', 'has', 'can', 'should', 'was', 'will', 'IS_', 'HAS_', 'CAN_', 'SHOULD_', 'WAS_', 'WILL_'] },
+        // Lo que se desestructura trae el nombre de quien lo declaró (props de React, respuestas de librerías).
+        { selector: ['variable', 'parameter'], modifiers: ['destructured'], format: null },
+        { selector: ['variable', 'parameter'], types: ['boolean'], modifiers: ['destructured'], format: null },
+        { selector: 'function', format: ['camelCase', 'PascalCase'] },
+        // Un hook es `useAlgo`.
+        { selector: 'function', filter: { regex: '^use', match: true }, format: null, custom: { regex: '^use[A-Z0-9]', match: true } },
+        { selector: 'parameter', format: ['camelCase', 'PascalCase'], leadingUnderscore: 'allow' },
+        { selector: 'typeLike', format: ['PascalCase'] },
+        { selector: 'interface', format: ['PascalCase'], custom: { regex: '^I[A-Z]|Dto$', match: false } },
+        { selector: 'enumMember', format: ['PascalCase', 'UPPER_CASE'] },
+        // Claves del API (snake_case), del DOM y de librerías: no son nuestras.
+        { selector: ['objectLiteralProperty', 'typeProperty', 'objectLiteralMethod', 'classProperty', 'classMethod', 'accessor'], format: null },
+      ],
+    },
+  },
+
 )

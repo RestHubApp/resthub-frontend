@@ -20,7 +20,13 @@
   ],
   "ignoreDependencies": [
     "@stryker-mutator/api",
-    "@fontsource-variable/geist"
+    "@fontsource-variable/geist",
+    "@cspell/dict-css",
+    "@cspell/dict-en_us",
+    "@cspell/dict-html",
+    "@cspell/dict-node",
+    "@cspell/dict-software-terms",
+    "@cspell/dict-typescript"
   ],
   "ignoreUnresolved": [
     "\\./jest/nodeEnvironment\\.cjs"
