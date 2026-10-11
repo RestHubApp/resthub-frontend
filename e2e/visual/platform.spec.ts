@@ -70,10 +70,10 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
   // Con el armazón único la pantalla ancha monta algunas secciones sola: se baja
   // por la página hasta que el observador las haya cargado todas.
   await page.mouse.move(700, 500)
-  for (const step of [1, 2, 3, 4, 5, 6]) {
-    await page.mouse.wheel(0, 500 * step)
-    await page.waitForTimeout(300)
-  }
+  await expect(async () => {
+    await page.mouse.wheel(0, 700)
+    await expect(page.getByText('5 peticiones', { exact: true })).toBeVisible({ timeout: 1_000 })
+  }).toPass()
   await expect(page.getByRole('heading', { name: 'Rutas' })).toBeVisible()
   await expect(page.getByText('orders.open_failed')).toBeVisible()
   await expect(page.getByText('5 peticiones', { exact: true })).toBeVisible()
