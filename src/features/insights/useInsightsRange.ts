@@ -21,22 +21,22 @@ export interface InsightsRange {
 export function useInsightsRange(timeZone: string): InsightsRange {
   const [search, setSearch] = useSearchParams()
   const today = todayIn(timeZone)
-  const pedido = search.get('rango')
-  const desde = search.get('desde') ?? ''
-  const hasta = search.get('hasta') ?? ''
+  const order = search.get('rango')
+  const from = search.get('desde') ?? ''
+  const until = search.get('hasta') ?? ''
 
-  let preset: RangePreset = isRangePreset(pedido) ? pedido : DEFAULT_PRESET
-  if (preset === 'personalizado' && customRangeProblem(desde, hasta) !== null) {
+  let preset: RangePreset = isRangePreset(order) ? order : DEFAULT_PRESET
+  if (preset === 'personalizado' && customRangeProblem(from, until) !== null) {
     preset = DEFAULT_PRESET
   }
   const params =
-    preset === 'personalizado' ? { date_from: desde, date_to: hasta } : presetRange(preset, today)
+    preset === 'personalizado' ? { date_from: from, date_to: until } : presetRange(preset, today)
 
   return {
     preset,
     params,
-    choosePreset: (valor) => {
-      setSearch({ rango: valor }, { replace: true })
+    choosePreset: (value) => {
+      setSearch({ rango: value }, { replace: true })
     },
     chooseCustom: (from, to) => {
       setSearch({ rango: 'personalizado', desde: from, hasta: to }, { replace: true })

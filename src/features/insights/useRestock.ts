@@ -5,13 +5,13 @@ import { aiDecisionsQueryKey, refreshRestock, restockQuery } from '@/api/insight
 /** La recomendación de reposición y la acción de pedirla de nuevo. */
 export function useRestock() {
   const queryClient = useQueryClient()
-  const recomendacion = useQuery(restockQuery)
-  const actualizar = useMutation({
+  const recommendation = useQuery(restockQuery)
+  const update = useMutation({
     mutationFn: refreshRestock,
     onSuccess: async (data) => {
       queryClient.setQueryData(restockQuery.queryKey, data)
       await queryClient.invalidateQueries({ queryKey: aiDecisionsQueryKey })
     },
   })
-  return { recomendacion, actualizar }
+  return { recomendacion: recommendation, actualizar: update }
 }

@@ -12,21 +12,21 @@ export interface HeatmapModel {
 
 /** Recorta las horas en que el local no vendió nada y ordena las celdas en filas. */
 export function heatmapModel(cells: readonly HourlyCell[]): HeatmapModel {
-  const conVentas = cells.filter((cell) => cell.paid_orders > 0)
-  if (conVentas.length === 0) {
+  const withSales = cells.filter((cell) => cell.paid_orders > 0)
+  if (withSales.length === 0) {
     return { hours: [], rows: [], max: 0 }
   }
-  const primera = Math.min(...conVentas.map((cell) => cell.hour))
-  const ultima = Math.max(...conVentas.map((cell) => cell.hour))
-  const hours = Array.from({ length: ultima - primera + 1 }, (_, indice) => primera + indice)
-  const porClave = new Map(cells.map((cell) => [`${String(cell.weekday)}-${String(cell.hour)}`, cell]))
-  const dias = [...new Set(cells.map((cell) => cell.weekday))].sort((a, b) => a - b)
+  const first = Math.min(...withSales.map((cell) => cell.hour))
+  const last = Math.max(...withSales.map((cell) => cell.hour))
+  const hours = Array.from({ length: last - first + 1 }, (_, index) => first + index)
+  const byPassword = new Map(cells.map((cell) => [`${String(cell.weekday)}-${String(cell.hour)}`, cell]))
+  const days = [...new Set(cells.map((cell) => cell.weekday))].sort((a, b) => a - b)
 
-  const rows = dias.map((weekday) => {
-    const celdas = hours.flatMap((hour) => porClave.get(`${String(weekday)}-${String(hour)}`) ?? [])
+  const rows = days.map((weekday) => {
+    const celdas = hours.flatMap((hour) => byPassword.get(`${String(weekday)}-${String(hour)}`) ?? [])
     return { weekday, label: celdas[0]?.weekday_label ?? '', cells: celdas }
   })
-  return { hours, rows, max: Math.max(...conVentas.map((cell) => cell.paid_orders)) }
+  return { hours, rows, max: Math.max(...withSales.map((cell) => cell.paid_orders)) }
 }
 
 /** El escalón de color de un valor: 0 es "sin pedidos", 1 a 5 la rampa de un tono. */

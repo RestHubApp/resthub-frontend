@@ -87,17 +87,17 @@ export function MarginsTable({ dishes }: MarginsTableProps) {
           {table.getHeaderGroups().map((group) => (
             <TableRow key={group.id}>
               {group.headers.map((header, index) => {
-                const ordenado = header.column.getIsSorted()
-                const orden = ordenado === false ? 'none' : ordenado
+                const sorted = header.column.getIsSorted()
+                const order = sorted === false ? 'none' : sorted
                 return (
-                  <TableHead key={header.id} aria-sort={ARIA_SORT[orden]} className={`px-3 ${index > 0 ? 'text-right' : ''}`}>
+                  <TableHead key={header.id} aria-sort={ARIA_SORT[order]} className={`px-3 ${index > 0 ? 'text-right' : ''}`}>
                     <button
                       type="button"
                       onClick={header.column.getToggleSortingHandler()}
                       className="inline-flex items-center gap-1 rounded-sm font-medium outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
                       <table.FlexRender header={header} />
-                      <Icon name={SORT_ICON[orden]} size={14} className={orden === 'none' ? 'opacity-50' : undefined} />
+                      <Icon name={SORT_ICON[order]} size={14} className={order === 'none' ? 'opacity-50' : undefined} />
                     </button>
                   </TableHead>
                 )

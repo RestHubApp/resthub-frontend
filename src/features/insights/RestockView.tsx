@@ -19,46 +19,46 @@ function byUrgency(a: RestockItem, b: RestockItem): number {
 }
 
 // Sin filtro, lo que puede esperar queda plegado: la lista empieza por lo que pide atención.
-function visible(item: RestockItem, filtro: RestockAction | null, verEspera: boolean): boolean {
-  if (filtro !== null) {
-    return item.action === filtro
+function visible(item: RestockItem, filter: RestockAction | null, viewWait: boolean): boolean {
+  if (filter !== null) {
+    return item.action === filter
   }
-  return verEspera || item.action !== 'wait'
+  return viewWait || item.action !== 'wait'
 }
 
 /** Reposición inteligente: qué comprar y cuándo, según el consumo y las mermas. */
 export function RestockView() {
-  const { recomendacion, actualizar } = useRestock()
-  const [filtro, setFiltro] = useState<RestockAction | null>(null)
-  const [verEspera, setVerEspera] = useState(false)
+  const { recomendacion: recommendation, actualizar: update } = useRestock()
+  const [filter, setFilter] = useState<RestockAction | null>(null)
+  const [viewWait, setViewWait] = useState(false)
 
   return (
     <div className="flex flex-col gap-6">
       <PanelHeader
         description="Qué insumos comprar y cuándo, según el stock, el consumo de las últimas semanas y las mermas."
         actions={
-          <Button type="button" size="lg" className="h-10 px-4" disabled={actualizar.isPending} onClick={() => { actualizar.mutate() }}>
-            <Icon name="actualizar" size={16} className={actualizar.isPending ? 'animate-spin' : undefined} />
-            <span>{actualizar.isPending ? 'Actualizando…' : 'Actualizar recomendaciones'}</span>
+          <Button type="button" size="lg" className="h-10 px-4" disabled={update.isPending} onClick={() => { update.mutate() }}>
+            <Icon name="actualizar" size={16} className={update.isPending ? 'animate-spin' : undefined} />
+            <span>{update.isPending ? 'Actualizando…' : 'Actualizar recomendaciones'}</span>
           </Button>
         }
       />
-      {actualizar.isPending ? (
+      {update.isPending ? (
         <p role="status" className="m-0 text-sm text-muted-foreground">
           Decidiendo insumo por insumo. Con la IA puede tardar varios segundos.
         </p>
       ) : null}
-      {actualizar.isError ? (
-        <FormMessage tone="error">{errorMessage(actualizar.error, 'No se pudieron actualizar las recomendaciones.')}</FormMessage>
+      {update.isError ? (
+        <FormMessage tone="error">{errorMessage(update.error, 'No se pudieron actualizar las recomendaciones.')}</FormMessage>
       ) : null}
-      <ReportState data={recomendacion.data} error={recomendacion.error} errorText="No se pudo cargar la reposición.">
+      <ReportState data={recommendation.data} error={recommendation.error} errorText="No se pudo cargar la reposición.">
         {(report) => {
-          const visibles = report.items.filter((item) => visible(item, filtro, verEspera)).sort(byUrgency)
-          const enEspera = filtro === null && !verEspera ? report.items.filter((item) => item.action === 'wait').length : 0
+          const visibles = report.items.filter((item) => visible(item, filter, viewWait)).sort(byUrgency)
+          const inWait = filter === null && !viewWait ? report.items.filter((item) => item.action === 'wait').length : 0
           return (
-            <div className={`flex flex-col gap-6 transition-opacity ${actualizar.isPending ? 'opacity-50' : ''}`}>
+            <div className={`flex flex-col gap-6 transition-opacity ${update.isPending ? 'opacity-50' : ''}`}>
               <RestockNotice report={report} />
-              <RestockSummary counts={report.counts} selected={filtro} onSelect={setFiltro} />
+              <RestockSummary counts={report.counts} selected={filter} onSelect={setFilter} />
               {visibles.length === 0 ? (
                 <EmptyState title="No hay insumos con esa acción." />
               ) : (
@@ -68,10 +68,10 @@ export function RestockView() {
                   ))}
                 </ul>
               )}
-              {enEspera > 0 ? (
-                <Button type="button" variant="outline" className="self-start" onClick={() => { setVerEspera(true) }}>
+              {inWait > 0 ? (
+                <Button type="button" variant="outline" className="self-start" onClick={() => { setViewWait(true) }}>
                   <Icon name="expandir" size={16} />
-                  <span>{`Ver también los ${String(enEspera)} insumos que pueden esperar`}</span>
+                  <span>{`Ver también los ${String(inWait)} insumos que pueden esperar`}</span>
                 </Button>
               ) : null}
             </div>

@@ -12,7 +12,7 @@ import { ReportState } from './ReportState'
 
 /** Los insumos que ya están por debajo de su mínimo. No depende del rango: es el stock de hoy. */
 export function LowStockSection() {
-  const insumos = useQuery(lowStockQuery)
+  const ingredients = useQuery(lowStockQuery)
 
   return (
     <SectionCard
@@ -27,7 +27,7 @@ export function LowStockSection() {
         </Button>
       }
     >
-      <ReportState data={insumos.data} error={insumos.error} errorText="No se pudo cargar el stock.">
+      <ReportState data={ingredients.data} error={ingredients.error} errorText="No se pudo cargar el stock.">
         {(items) =>
           items.length === 0 ? (
             <EmptyState title="Ningún insumo está bajo su mínimo." />

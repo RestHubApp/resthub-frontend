@@ -6,7 +6,7 @@ const PERCENT = 100
 
 /** Un insumo bajo su mínimo: el estado escrito con ícono y cuánto falta. */
 export function LowStockRow({ item }: { readonly item: LowStockItem }) {
-  const nivel = Math.min(PERCENT, (toNumber(item.stock) / Math.max(toNumber(item.min_stock), 1)) * PERCENT)
+  const level = Math.min(PERCENT, (toNumber(item.stock) / Math.max(toNumber(item.min_stock), 1)) * PERCENT)
   return (
     <li className="flex flex-col gap-1.5 py-3 first:pt-0 last:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -24,7 +24,7 @@ export function LowStockRow({ item }: { readonly item: LowStockItem }) {
         aria-valuenow={toNumber(item.stock)}
         className="h-2 overflow-hidden rounded-full bg-destructive/15"
       >
-        <div className="h-full rounded-full bg-destructive" style={{ width: `${String(nivel)}%` }} />
+        <div className="h-full rounded-full bg-destructive" style={{ width: `${String(level)}%` }} />
       </div>
       <p className="m-0 text-xs text-muted-foreground">
         Quedan {formatQuantity(item.stock, item.unit)} de un mínimo de {formatQuantity(item.min_stock, item.unit)}; faltan{' '}

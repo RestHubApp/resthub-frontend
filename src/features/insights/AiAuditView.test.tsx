@@ -6,9 +6,9 @@ import { entrarComo, montar, RespuestaDeError, servidor } from '#jest/harness'
 import type { AiDecision } from '@/api/types'
 import { AiAuditView } from './AiAuditView'
 
-const RUTA = '/insights/ai-decisions'
+const ROUTE = '/insights/ai-decisions'
 
-const NOTA = decision({
+const NOTE = decision({
   id: 2,
   kind: 'order_note',
   kind_label: 'Nota de pedido',
@@ -17,7 +17,7 @@ const NOTA = decision({
   order_number: 17,
   output: { note_type: 'allergy' },
 })
-const MERMA = decision({
+const WASTE = decision({
   id: 3,
   kind: 'waste_cause',
   kind_label: 'Causa de merma',
@@ -32,34 +32,34 @@ const MERMA = decision({
   model: null,
   output: { cause: 'desconocida' },
 })
-const SIN_SALIDA = decision({ id: 4, subject_label: 'Arroz', output: {} })
+const WITHOUT_OUTPUT = decision({ id: 4, subject_label: 'Arroz', output: {} })
 
-function abrir(items: AiDecision[] = [decision(), NOTA, MERMA, SIN_SALIDA], total = items.length) {
-  const api = servidor().on('get', RUTA, { items, total })
+function open(items: AiDecision[] = [decision(), NOTE, WASTE, WITHOUT_OUTPUT], total = items.length) {
+  const api = servidor().on('get', ROUTE, { items, total })
   entrarComo()
   return { api, ...montar(<AiAuditView />, { path: '/panel/ia' }) }
 }
 
-function fila(texto: string): HTMLElement {
-  return screen.getByText(texto).closest('tr') as HTMLElement
+function row(text: string): HTMLElement {
+  return screen.getByText(text).closest('tr') as HTMLElement
 }
 
 describe('AiAuditView', () => {
   it('cada decisión dice sobre qué fue, qué decidió, con qué motor y confianza', async () => {
-    abrir()
+    open()
     expect(await screen.findByText('4 en total con estos filtros.')).toBeInTheDocument()
-    expect(within(fila('Insumo: Limón')).getByText('Comprar hoy')).toBeInTheDocument()
-    expect(within(fila('Insumo: Limón')).getByText('87 %')).toBeInTheDocument()
-    expect(within(fila('Ceviche · Pedido #17')).getByText('Alergia o restricción')).toBeInTheDocument()
-    const merma = fila('Merma (id 99)')
-    expect(within(merma).getByText('desconocida')).toBeInTheDocument()
-    expect(within(merma).getByText('Regla fija')).toBeInTheDocument()
-    expect(within(merma).getByText('Respaldo: sin configurar')).toBeInTheDocument()
-    expect(within(fila('Insumo: Arroz')).getByText('—')).toBeInTheDocument()
+    expect(within(row('Insumo: Limón')).getByText('Comprar hoy')).toBeInTheDocument()
+    expect(within(row('Insumo: Limón')).getByText('87 %')).toBeInTheDocument()
+    expect(within(row('Ceviche · Pedido #17')).getByText('Alergia o restricción')).toBeInTheDocument()
+    const waste = row('Merma (id 99)')
+    expect(within(waste).getByText('desconocida')).toBeInTheDocument()
+    expect(within(waste).getByText('Regla fija')).toBeInTheDocument()
+    expect(within(waste).getByText('Respaldo: sin configurar')).toBeInTheDocument()
+    expect(within(row('Insumo: Arroz')).getByText('—')).toBeInTheDocument()
   })
 
   it('«Ver JSON» muestra lo que vio el motor y lo que respondió', async () => {
-    const { user } = abrir([decision()])
+    const { user } = open([decision()])
     await user.click(await screen.findByRole('button', { name: 'Ver JSON' }))
 
     expect(screen.getByText('Estado de entrada')).toBeInTheDocument()
@@ -70,38 +70,38 @@ describe('AiAuditView', () => {
   })
 
   it('los filtros viajan al servidor y un filtro vacío no se manda', async () => {
-    const { api, user } = abrir()
+    const { api, user } = open()
     await screen.findByText('4 en total con estos filtros.')
 
     await user.selectOptions(screen.getByLabelText('Tipo'), 'Nota de pedido')
     await user.selectOptions(screen.getByLabelText('Motor'), 'Reglas fijas')
     await user.selectOptions(screen.getByLabelText('Tipo'), 'Todos los tipos')
 
-    const pedidos = api.llamadas('get', RUTA).map((p) => p.params)
-    expect(pedidos[0]).toEqual({ limit: 20, offset: 0 })
-    expect(pedidos).toContainEqual({ kind: 'order_note', limit: 20, offset: 0 })
-    expect(pedidos.at(-1)).toEqual({ engine: 'rules', limit: 20, offset: 0 })
+    const orders = api.llamadas('get', ROUTE).map((p) => p.params)
+    expect(orders[0]).toEqual({ limit: 20, offset: 0 })
+    expect(orders).toContainEqual({ kind: 'order_note', limit: 20, offset: 0 })
+    expect(orders.at(-1)).toEqual({ engine: 'rules', limit: 20, offset: 0 })
   })
 
   it('pagina de a 20 y volver a filtrar regresa a la primera página', async () => {
-    const { api, user } = abrir([decision()], 45)
+    const { api, user } = open([decision()], 45)
     await user.click(await screen.findByRole('button', { name: 'Siguiente' }))
     expect(await screen.findByText('Página 2 de 3')).toBeInTheDocument()
-    expect(api.llamadas('get', RUTA).at(-1)?.params).toEqual({ limit: 20, offset: 20 })
+    expect(api.llamadas('get', ROUTE).at(-1)?.params).toEqual({ limit: 20, offset: 20 })
 
     await user.selectOptions(screen.getByLabelText('Motor'), 'Jev (IA)')
 
     expect(await screen.findByText('Página 1 de 3')).toBeInTheDocument()
-    expect(api.llamadas('get', RUTA).at(-1)?.params).toEqual({ engine: 'jev', limit: 20, offset: 0 })
+    expect(api.llamadas('get', ROUTE).at(-1)?.params).toEqual({ engine: 'jev', limit: 20, offset: 0 })
   })
 
   it('sin decisiones lo dice', async () => {
-    abrir([])
+    open([])
     expect(await screen.findByText('No hay decisiones con esos filtros.')).toBeInTheDocument()
   })
 
   it('si la auditoría falla lo dice', async () => {
-    servidor().on('get', RUTA, new RespuestaDeError(403, 'Solo el encargado ve la auditoría'))
+    servidor().on('get', ROUTE, new RespuestaDeError(403, 'Solo el encargado ve la auditoría'))
     entrarComo()
     montar(<AiAuditView />)
     expect(await screen.findByText('Solo el encargado ve la auditoría')).toBeInTheDocument()
@@ -109,8 +109,8 @@ describe('AiAuditView', () => {
 })
 
 describe('AiAuditView: IA externa', () => {
-  const RESTAURANTE = '/restaurant'
-  const local = (activa: boolean) => ({
+  const RESTAURANT = '/restaurant'
+  const local = (active: boolean) => ({
     id: 1,
     name: 'La Picantería',
     slug: 'la-picanteria',
@@ -118,31 +118,31 @@ describe('AiAuditView: IA externa', () => {
     is_active: true,
     auto_out_of_stock: true,
     max_waiter_discount_percent: '10.00',
-    external_ai_enabled: activa,
+    external_ai_enabled: active,
     created_at: '2026-09-26T13:00:00Z',
   })
 
   it('el encargado la apaga y nada sale del sistema', async () => {
-    const api = servidor().on('get', RUTA, { items: [], total: 0 }).on('get', RESTAURANTE, local(true))
-    api.on('patch', RESTAURANTE, local(false))
+    const api = servidor().on('get', ROUTE, { items: [], total: 0 }).on('get', RESTAURANT, local(true))
+    api.on('patch', RESTAURANT, local(false))
     entrarComo()
     const { user } = montar(<AiAuditView />, { path: '/panel/ia' })
 
-    const casilla = await screen.findByRole('checkbox', { name: 'Usar la IA externa' })
-    expect(casilla).toBeChecked()
-    await user.click(casilla)
+    const checkbox = await screen.findByRole('checkbox', { name: 'Usar la IA externa' })
+    expect(checkbox).toBeChecked()
+    await user.click(checkbox)
 
     expect(await screen.findByText('La IA externa quedó apagada: deciden las reglas y nada sale del sistema.')).toBeInTheDocument()
-    expect(api.llamadas('patch', RESTAURANTE)[0]?.body).toEqual({ external_ai_enabled: false })
+    expect(api.llamadas('patch', RESTAURANT)[0]?.body).toEqual({ external_ai_enabled: false })
   })
 
   it('quien solo ve el panel no la puede cambiar', async () => {
-    const api = servidor().on('get', RUTA, { items: [], total: 0 })
+    const api = servidor().on('get', ROUTE, { items: [], total: 0 })
     entrarComo(['insights.read'])
     montar(<AiAuditView />, { path: '/panel/ia' })
 
     expect(await screen.findByText('0 en total con estos filtros.')).toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Usar la IA externa' })).not.toBeInTheDocument()
-    expect(api.llamadas('get', RESTAURANTE)).toHaveLength(0)
+    expect(api.llamadas('get', RESTAURANT)).toHaveLength(0)
   })
 })

@@ -13,7 +13,7 @@ interface ReportStateProps<T> {
   readonly skeleton?: ReactElement
 }
 
-const BLOQUE = <ListSkeleton label="Cargando…" count={1} itemClassName="h-48 rounded-xl" />
+const BLOCK = <ListSkeleton label="Cargando…" count={1} itemClassName="h-48 rounded-xl" />
 
 /** Carga, error o el contenido de un reporte, igual en cada sección. */
 export function ReportState<T>({
@@ -21,7 +21,7 @@ export function ReportState<T>({
   error,
   errorText,
   children,
-  skeleton = BLOQUE,
+  skeleton = BLOCK,
 }: ReportStateProps<T>): ReactElement {
   if (data !== undefined) {
     return children(data)

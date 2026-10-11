@@ -16,7 +16,7 @@ import { WaitersSection } from './WaitersSection'
 import { WasteSection } from './WasteSection'
 import { useTimeZone } from '@/store/session'
 
-const KPI_CARGANDO = (
+const KPI_LOADING = (
   <ListSkeleton
     label="Cargando el resumen…"
     count={4}
@@ -32,17 +32,17 @@ const KPI_CARGANDO = (
  * los números de todas las tarjetas coinciden entre sí.
  */
 export function InsightsView() {
-  const zona = useTimeZone()
-  const range = useInsightsRange(zona)
+  const zone = useTimeZone()
+  const range = useInsightsRange(zone)
   const summary = useInsightsReport(salesSummaryQuery(range.params))
-  const periodo = summary.data?.period
+  const period = summary.data?.period
 
   return (
     <div className="flex flex-col gap-6">
       <PanelHeader description="Ventas, platos, márgenes y mermas del período. Los montos son de pedidos cobrados." />
-      <RangeFilter range={range} period={periodo} timeZone={zona} />
+      <RangeFilter range={range} period={period} timeZone={zone} />
       <div className={`transition-opacity ${summary.refreshing ? 'opacity-50' : ''}`}>
-        <ReportState data={summary.data} error={summary.error} errorText="No se pudo cargar el resumen del período." skeleton={KPI_CARGANDO}>
+        <ReportState data={summary.data} error={summary.error} errorText="No se pudo cargar el resumen del período." skeleton={KPI_LOADING}>
           {(data) => <KpiRow summary={data} />}
         </ReportState>
       </div>
