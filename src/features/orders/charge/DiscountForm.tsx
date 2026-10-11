@@ -45,7 +45,7 @@ export function DiscountForm({ order, onDone }: DiscountFormProps) {
   })
   const discount = useOrderAction({
     mutationFn: (payload: DiscountRequest) => applyDiscount(order.id, payload),
-    success: (pedido) => `Descuento de ${formatPercent(pedido.discount_percent)} aplicado.`,
+    success: (updatedOrder) => `Descuento de ${formatPercent(updatedOrder.discount_percent)} aplicado.`,
     failure: 'No se pudo aplicar el descuento.',
     onSuccess: onDone,
   })

@@ -18,7 +18,7 @@ import { formatUnitCost } from './units'
 import { useIngredients } from './useIngredients'
 
 const BY_PAGE = 20
-function columnas(timeZone: string): DataColumn<Movement>[] {
+function buildColumns(timeZone: string): DataColumn<Movement>[] {
   return [
   { id: 'fecha', header: 'Fecha', className: 'tabular-nums', cell: (mov) => formatDateTime(mov.created_at, timeZone) },
   { id: 'insumo', header: 'Insumo', cell: (mov) => mov.ingredient_name },
@@ -60,7 +60,7 @@ function columnas(timeZone: string): DataColumn<Movement>[] {
 export function MovementsPanel() {
   const ingredients = useIngredients()
   const timeZone = useTimeZone()
-  const columns = useMemo(() => columnas(timeZone), [timeZone])
+  const columns = useMemo(() => buildColumns(timeZone), [timeZone])
   const [ingredient, setIngredient] = useState('')
   const [type, setType] = useState('')
   const [page, setPage] = useState(0)

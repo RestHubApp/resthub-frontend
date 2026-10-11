@@ -39,8 +39,8 @@ jobs:
 
       - name: axe-core sobre las pantallas sin sesión
         env:
-          A11Y_SOLO: acceso,raiz,plataforma-acceso,vista-previa-sin-codigo
-          A11Y_ESTRICTO: '1'
+          A11Y_ONLY: acceso,raiz,plataforma-acceso,vista-previa-sin-codigo
+          A11Y_STRICT: '1'
         run: |
           pnpm preview --port 5202 --strictPort &
           until curl -sf http://localhost:5202/acceso > /dev/null; do sleep 1; done

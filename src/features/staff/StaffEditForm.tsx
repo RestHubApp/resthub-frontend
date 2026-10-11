@@ -39,8 +39,8 @@ export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormP
     // La cuenta propia no manda el rol: el servidor responde 409 si lo intenta.
     mutationFn: (values: StaffIdentityValues) =>
       updateStaff(account.id, isSelf ? { full_name: values.full_name } : identityPayload(values)),
-    onSuccess: (cuenta) => {
-      saveStaffMember(queryClient, cuenta)
+    onSuccess: (updatedAccount) => {
+      saveStaffMember(queryClient, updatedAccount)
       onDone()
     },
   })

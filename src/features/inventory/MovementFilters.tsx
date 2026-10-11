@@ -21,15 +21,15 @@ export function MovementFilters({
   kind,
   onKind,
 }: MovementFiltersProps) {
-  const insumoId = useId()
+  const ingredientFieldId = useId()
   const typeId = useId()
 
   return (
     <div className="grid gap-3 sm:grid-cols-[minmax(0,18rem)_minmax(0,12rem)]">
       <div className="flex flex-col gap-2">
-        <Label htmlFor={insumoId}>Insumo</Label>
+        <Label htmlFor={ingredientFieldId}>Insumo</Label>
         <NativeSelect
-          id={insumoId}
+          id={ingredientFieldId}
           className="w-full [&_select]:h-11"
           value={ingredientId}
           onChange={(event) => {

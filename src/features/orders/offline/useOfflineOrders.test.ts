@@ -3,7 +3,7 @@ import { describe, expect, it } from '@jest/globals'
 
 import { isOffline } from './useOfflineOrders'
 
-function respuesta(status: number): AxiosError {
+function errorResponse(status: number): AxiosError {
   const config = { headers: new AxiosHeaders() }
   const response = { status, data: {}, statusText: '', headers: {}, config } as AxiosResponse
   return new AxiosError('rechazado', AxiosError.ERR_BAD_REQUEST, config, null, response)
@@ -17,11 +17,11 @@ describe('isOffline', () => {
 
   it('un corte de red o el proxy sin servidor también', () => {
     expect(isOffline(new AxiosError('Network Error', AxiosError.ERR_NETWORK))).toBe(true)
-    expect(isOffline(respuesta(503))).toBe(true)
+    expect(isOffline(errorResponse(503))).toBe(true)
   })
 
   it('un rechazo del servidor no se reintenta desde la cola', () => {
-    expect(isOffline(respuesta(409))).toBe(false)
-    expect(isOffline(respuesta(422))).toBe(false)
+    expect(isOffline(errorResponse(409))).toBe(false)
+    expect(isOffline(errorResponse(422))).toBe(false)
   })
 })

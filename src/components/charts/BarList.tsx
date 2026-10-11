@@ -47,7 +47,7 @@ export function BarList({ data, label }: BarListProps) {
   const reservation = Math.max(0, ...data.map((datum) => datum.valueLabel.length)) * REM_PER_CHAR + REM_GAP
   const [width, setWidth] = useState(0)
 
-  const señalar = (index: number) => (event: PointerEvent<HTMLLIElement> | FocusEvent<HTMLLIElement>) => {
+  const point = (index: number) => (event: PointerEvent<HTMLLIElement> | FocusEvent<HTMLLIElement>) => {
     const cashRegister = listRef.current?.getBoundingClientRect()
     const row = event.currentTarget.getBoundingClientRect()
     if (cashRegister === undefined) {
@@ -71,9 +71,9 @@ export function BarList({ data, label }: BarListProps) {
             // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- El foco muestra el tooltip del dato (ver arriba).
             tabIndex={0}
             aria-label={`${datum.label}: ${datum.valueLabel}`}
-            onPointerEnter={señalar(index)}
+            onPointerEnter={point(index)}
             onPointerLeave={drop}
-            onFocus={señalar(index)}
+            onFocus={point(index)}
             onBlur={drop}
             className="grid grid-cols-[minmax(7rem,38%)_1fr] items-center gap-3 rounded-md px-1 py-1.5 outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50"
           >

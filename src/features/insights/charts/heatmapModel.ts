@@ -23,8 +23,8 @@ export function heatmapModel(cells: readonly HourlyCell[]): HeatmapModel {
   const days = [...new Set(cells.map((cell) => cell.weekday))].sort((a, b) => a - b)
 
   const rows = days.map((weekday) => {
-    const celdas = hours.flatMap((hour) => byPassword.get(`${String(weekday)}-${String(hour)}`) ?? [])
-    return { weekday, label: celdas[0]?.weekday_label ?? '', cells: celdas }
+    const dayCells = hours.flatMap((hour) => byPassword.get(`${String(weekday)}-${String(hour)}`) ?? [])
+    return { weekday, label: dayCells[0]?.weekday_label ?? '', cells: dayCells }
   })
   return { hours, rows, max: Math.max(...withSales.map((cell) => cell.paid_orders)) }
 }

@@ -35,9 +35,9 @@ export function addDays(isoDate: string, days: number): string {
 
 /** Dias entre dos fechas, contando ambas. */
 export function daysBetween(from: string, to: string): number {
-  const desde = new Date(`${from}T00:00:00Z`).getTime()
+  const fromTime = new Date(`${from}T00:00:00Z`).getTime()
   const until = new Date(`${to}T00:00:00Z`).getTime()
-  return Math.round((until - desde) / DAY_MS) + 1
+  return Math.round((until - fromTime) / DAY_MS) + 1
 }
 
 /** Las fechas de un rango predefinido, terminando hoy. */

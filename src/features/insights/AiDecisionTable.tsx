@@ -98,10 +98,10 @@ interface AiDecisionTableProps {
 /** Cada decisión guardada, con su entrada y salida a un clic. */
 export function AiDecisionTable({ decisions, isLoading }: AiDecisionTableProps) {
   const timeZone = useTimeZone()
-  const columnas = useMemo(() => columns(timeZone), [timeZone])
+  const tableColumns = useMemo(() => columns(timeZone), [timeZone])
   return (
     <DataTable
-      columns={columnas}
+      columns={tableColumns}
       data={decisions}
       isLoading={isLoading}
       emptyMessage="No hay decisiones con esos filtros."

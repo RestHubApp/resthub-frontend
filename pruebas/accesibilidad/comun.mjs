@@ -13,7 +13,7 @@ import { chromium } from 'playwright'
 import { STATUSES } from './inventario.mjs'
 
 export const ROOT = dirname(fileURLToPath(import.meta.url))
-export const REPORTS = process.env.A11Y_REPORTES ?? join(ROOT, 'reportes')
+export const REPORTS = process.env.A11Y_REPORTS ?? join(ROOT, 'reportes')
 export const BASE_URL = process.env.A11Y_BASE_URL ?? 'http://localhost:5202'
 export const API_URL = process.env.A11Y_API_URL ?? 'http://localhost:8202'
 export const PASSWORD = 'resthub123'
@@ -60,16 +60,16 @@ export async function readJson(route) {
   return JSON.parse(await readFile(route, 'utf8'))
 }
 
-/** Los estados a medir, filtrables con A11Y_SOLO=id1,id2 y A11Y_CLASE=ruta|overlay. */
+/** Los estados a medir, filtrables con A11Y_ONLY=id1,id2 y A11Y_CLASS=ruta|overlay. */
 export function filterStatuses(list = STATUSES) {
-  const only = process.env.A11Y_SOLO?.split(',').filter(Boolean)
-  const kind = process.env.A11Y_CLASE
+  const only = process.env.A11Y_ONLY?.split(',').filter(Boolean)
+  const kind = process.env.A11Y_CLASS
   return list.filter((e) => (!only || only.includes(e.id)) && (!kind || e.class === kind))
 }
 
 export function filterViews(status) {
-  const only = process.env.A11Y_VISTAS?.split(',').filter(Boolean)
-  return Object.keys(VIEWS).filter((v) => (!only || only.includes(v)) && (!status?.vistas || status.vistas.includes(v)))
+  const only = process.env.A11Y_VIEWS?.split(',').filter(Boolean)
+  return Object.keys(VIEWS).filter((v) => (!only || only.includes(v)) && (!status?.views || status.views.includes(v)))
 }
 
 let dataCache = null
@@ -122,14 +122,14 @@ export async function signIn(browser, account) {
   const dataAccount = ACCOUNTS[account]
   const context = await browser.newContext(contextOf('escritorio'))
   const page = await context.newPage()
-  if (dataAccount.vistaPrevia) {
+  if (dataAccount.preview) {
     const { access_token: token } = await callApi('POST', '/platform/auth/login', { email: ACCOUNTS.platform.email, password: PASSWORD })
-    const { code } = await callApi('POST', '/platform/preview', { as: dataAccount.vistaPrevia }, token)
+    const { code } = await callApi('POST', '/platform/preview', { as: dataAccount.preview }, token)
     await page.goto(`${BASE_URL}/vista-previa#codigo=${encodeURIComponent(code)}`)
     await page.waitForURL((url) => !url.pathname.startsWith('/vista-previa'), { timeout: 20_000 })
   } else {
-    await page.goto(`${BASE_URL}${dataAccount.acceso}`)
-    await page.getByLabel('Correo').fill(dataAccount.correo)
+    await page.goto(`${BASE_URL}${dataAccount.access}`)
+    await page.getByLabel('Correo').fill(dataAccount.email)
     await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await page.waitForURL((url) => !url.pathname.endsWith('/acceso'), { timeout: 20_000 })
@@ -146,7 +146,7 @@ const sessions = new Map()
 export async function session(browser, account) {
   if (!account) return null
   if (!sessions.has(account)) {
-    const reuse = process.env.A11Y_REUTILIZAR && existsSync(routeSession(account))
+    const reuse = process.env.A11Y_REUSE && existsSync(routeSession(account))
     sessions.set(account, reuse ? await readJson(routeSession(account)) : await signIn(browser, account))
   }
   return sessions.get(account)
@@ -193,19 +193,19 @@ export async function waitReady(page, selector) {
 
 async function runStep(page, step) {
   const first = (loc) => loc.filter({ visible: true }).first()
-  if (step.boton) return first(page.getByRole('button', { name: step.boton, exact: typeof step.boton === 'string' })).click()
-  if (step.pestana) return first(page.getByRole('tab', { name: step.pestana, exact: typeof step.pestana === 'string' })).click()
-  if (step.opcion) return page.getByRole('radio', { name: step.opcion }).first().check({ force: true })
-  if (step.fecha) {
+  if (step.button) return first(page.getByRole('button', { name: step.button, exact: typeof step.button === 'string' })).click()
+  if (step.tab) return first(page.getByRole('tab', { name: step.tab, exact: typeof step.tab === 'string' })).click()
+  if (step.option) return page.getByRole('radio', { name: step.option }).first().check({ force: true })
+  if (step.date) {
     // Una fecha relativa a hoy, en días (-7: hace una semana), en el campo con esa etiqueta.
-    const day = new Date(Date.now() - 5 * 3600_000 + step.dias * 86_400_000).toISOString().slice(0, 10)
-    return page.getByLabel(step.fecha, { exact: true }).fill(day)
+    const day = new Date(Date.now() - 5 * 3600_000 + step.days * 86_400_000).toISOString().slice(0, 10)
+    return page.getByLabel(step.date, { exact: true }).fill(day)
   }
-  if (step.enlace) return first(page.getByRole('link', { name: step.enlace })).click()
-  if (step.resumen) return first(page.locator('summary', { hasText: step.resumen })).click()
-  if (step.clic) return first(page.locator(step.clic)).click()
-  if (step.sinConexion) return page.context().setOffline(true)
-  if (step.esperar) return page.waitForSelector(step.esperar, { timeout: 15_000 })
+  if (step.link) return first(page.getByRole('link', { name: step.link })).click()
+  if (step.summary) return first(page.locator('summary', { hasText: step.summary })).click()
+  if (step.click) return first(page.locator(step.click)).click()
+  if (step.offline) return page.context().setOffline(true)
+  if (step.wait) return page.waitForSelector(step.wait, { timeout: 15_000 })
   throw new Error(`Paso desconocido: ${JSON.stringify(step)}`)
 }
 
@@ -226,23 +226,23 @@ export async function openStatus(browser, context, status, limitMs = 90_000) {
 }
 
 async function openStatusWithoutLimit(browser, context, status) {
-  const storage = await session(browser, status.cuenta)
+  const storage = await session(browser, status.account)
   const page = await context.newPage()
   if (storage) await page.addInitScript(sessionScript(storage))
-  if (status.cola) {
+  if (status.queue) {
     await page.route('**/api/v1/orders', (route) => (route.request().method() === 'POST' ? route.abort('internetdisconnected') : route.continue()))
     await page.addInitScript(SCRIPT_QUEUE)
   }
-  await page.goto(`${BASE_URL}${await resolverRoute(status.ruta)}`)
-  const waitRoute = status.clase === 'ruta' && status.espera ? status.espera : 'main h1, body h1'
+  await page.goto(`${BASE_URL}${await resolverRoute(status.route)}`)
+  const waitRoute = status.class === 'ruta' && status.wait ? status.wait : 'main h1, body h1'
   await waitReady(page, waitRoute)
-  for (const step of status.pasos ?? []) {
+  for (const step of status.steps ?? []) {
     await runStep(page, step)
     await page.waitForTimeout(250)
   }
-  if (status.clase === 'overlay') {
-    await page.waitForSelector(status.espera, { state: 'visible', timeout: 15_000 })
-    await waitReady(page, status.espera)
+  if (status.class === 'overlay') {
+    await page.waitForSelector(status.wait, { state: 'visible', timeout: 15_000 })
+    await waitReady(page, status.wait)
   }
   // Las animaciones de entrada (tw-animate-css) duran ~150 ms: se espera a que
   // terminen para que el contraste no se mida a media opacidad.

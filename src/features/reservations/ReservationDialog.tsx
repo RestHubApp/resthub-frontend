@@ -29,7 +29,7 @@ interface ReservationDialogProps {
  * La mesa es opcional: si se elige, el servidor revisa que no choque con otra
  * reserva de esa mesa en el mismo horario.
  */
-export function ReservationDialog({ open, reservation, day, onClose: alCerrar }: ReservationDialogProps) {
+export function ReservationDialog({ open, reservation, day, onClose: handleClose }: ReservationDialogProps) {
   const timeZone = useTimeZone()
   const tables = useQuery({ ...tablesQuery(false), enabled: open })
   const form = useForm<ReservationValues>({
@@ -43,15 +43,15 @@ export function ReservationDialog({ open, reservation, day, onClose: alCerrar }:
   const { reset } = form
   const onClose = () => {
     reset(reservationDefaults(reservation, day, timeZone))
-    alCerrar()
+    handleClose()
   }
   const save = useSaveReservation(reservation?.id, onClose)
 
   return (
     <FormDialog
       open={open}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
           save.reset()
           onClose()
         }

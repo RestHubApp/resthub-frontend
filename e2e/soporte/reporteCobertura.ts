@@ -11,7 +11,7 @@ interface Element {
 }
 
 const ROOT = join(import.meta.dirname, '..')
-const OUTPUT = `${process.env.E2E_REPORTE ?? join(ROOT, '.reporte')}-cobertura-ui.json`
+const OUTPUT = `${process.env.E2E_REPORT ?? join(ROOT, '.reporte')}-cobertura-ui.json`
 
 export default class ReportCoverage implements Reporter {
   private readonly seen = new Map<string, Set<string>>()

@@ -209,7 +209,7 @@ export function signInAs(permissions: readonly PermissionCode[] = PERMISSIONS_OW
 }
 
 // Muestra la ruta actual para comprobar adónde llevó una navegación.
-function WhereEstoy() {
+function WhereAmI() {
   const { pathname, search } = useLocation()
   return createElement('output', { 'aria-label': 'Ruta actual' }, `${pathname}${search}`)
 }
@@ -251,7 +251,7 @@ function copy(routes: readonly RouteObject[]): RouteObject[] {
 
 /** Monta un router en memoria con estas rutas (p. ej. las de `src/router`). */
 export function mountRoutes(routes: RouteObject[], en = '/'): Mount {
-  const router = createMemoryRouter([...copy(routes), { path: '*', element: createElement(WhereEstoy) }], {
+  const router = createMemoryRouter([...copy(routes), { path: '*', element: createElement(WhereAmI) }], {
     initialEntries: [en],
   })
   const user = userEvent.setup()

@@ -49,8 +49,8 @@ export function InvoiceDialog({ order, open, onClose }: InvoiceDialogProps) {
       open={open}
       title={`Comprobante del pedido #${String(order.number)}`}
       description={`Total ${formatMoney(order.total)} (IGV incluido)`}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
           onClose()
         }
       }}

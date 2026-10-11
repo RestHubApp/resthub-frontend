@@ -11,7 +11,7 @@ interface ItemOrder {
 
 /** Subir y bajar categorías y platos, con el cambio a la vista al instante. */
 export function useMenuOrder(categories: readonly MenuSection[]) {
-  const categorias = useMenuChange<readonly number[]>({
+  const categoriesMutation = useMenuChange<readonly number[]>({
     send: (ids) => reorderCategories(ids),
     preview: (menu, ids) => withCategoryOrder(menu, ids),
     failure: 'No se pudo cambiar el orden de las categorías.',
@@ -24,7 +24,7 @@ export function useMenuOrder(categories: readonly MenuSection[]) {
 
   return {
     moveCategory: (categoryId: number, direction: Direction) => {
-      categorias.mutate(moveId(categories.map((category) => category.id), categoryId, direction))
+      categoriesMutation.mutate(moveId(categories.map((category) => category.id), categoryId, direction))
     },
     moveItem: (section: MenuSection, itemId: number, direction: Direction) => {
       dishes.mutate({

@@ -14,7 +14,7 @@ import { MIN_PASSWORD } from '@/services/fieldRules'
 import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 import {
-  type ChangePasswordForm as Formulario,
+  type ChangePasswordForm as Form,
   changePasswordSchema,
   EMPTY_CHANGE_PASSWORD,
 } from './passwordSchema'
@@ -58,7 +58,7 @@ function followWithNewToken(response: Change, origin: string | null): 'renovada'
  */
 export function ChangePasswordForm() {
   const navigate = useNavigate()
-  const { register, handleSubmit, formState, reset } = useForm<Formulario>({
+  const { register, handleSubmit, formState, reset } = useForm<Form>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: EMPTY_CHANGE_PASSWORD,
   })
@@ -66,7 +66,7 @@ export function ChangePasswordForm() {
   const change = useMutation({
     // El token se toma al enviar: si otra pestaña entra con otra cuenta
     // mientras tanto, compararlo al terminar pisaría esa sesión ajena.
-    mutationFn: async (values: Formulario) => {
+    mutationFn: async (values: Form) => {
       const origin = useSession.getState().token
       const response = await changeOwnPassword({
         current_password: values.current_password,

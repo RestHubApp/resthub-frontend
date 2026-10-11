@@ -37,7 +37,7 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
   const receive = usePurchasingMutation({
     mutationFn: (payload: { orderId: number; lines: { line_id: number; quantity: string; unit_cost: string }[] }) =>
       receivePurchaseOrder(payload.orderId, { lines: payload.lines }),
-    success: (orden) => `Orden ${String(orden.number)} recibida: ${formatMoney(orden.received_total)} entraron al stock.`,
+    success: (receivedOrder) => `Orden ${String(receivedOrder.number)} recibida: ${formatMoney(receivedOrder.received_total)} entraron al stock.`,
     failure: 'No se pudo recibir la orden.',
     onSuccess: () => {
       setReceived(null)
@@ -83,7 +83,7 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
           Cancelar
         </Button>
         <Button type="button" variant="success" disabled={!valid || receive.isPending} onClick={() => {
-          receive.mutate({ orderId: order.id, lines: lines })
+          receive.mutate({ orderId: order.id, lines })
         }}>
           {receive.isPending ? 'Recibiendo…' : 'Recibir y cargar al stock'}
         </Button>

@@ -59,21 +59,21 @@ export function TakeawayForm({ onClose }: TakeawayFormProps) {
         }))}
       >
         <div role="radiogroup" aria-label="Cómo se entrega" className="grid grid-cols-2 gap-2">
-          {MODES.map((modo) => (
+          {MODES.map((modeOption) => (
             <Button
-              key={modo.value}
+              key={modeOption.value}
               type="button"
               role="radio"
-              aria-checked={mode === modo.value}
-              variant={mode === modo.value ? 'default' : 'outline'}
+              aria-checked={mode === modeOption.value}
+              variant={mode === modeOption.value ? 'default' : 'outline'}
               size="lg"
               className="h-11"
               onClick={() => {
-                form.setValue('mode', modo.value)
+                form.setValue('mode', modeOption.value)
               }}
             >
-              <Icon name={modo.value === 'delivery' ? 'delivery' : 'takeaway'} size={16} />
-              <span>{modo.label}</span>
+              <Icon name={modeOption.value === 'delivery' ? 'delivery' : 'takeaway'} size={16} />
+              <span>{modeOption.label}</span>
             </Button>
           ))}
         </div>

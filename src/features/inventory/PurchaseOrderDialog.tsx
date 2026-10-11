@@ -47,8 +47,8 @@ export function PurchaseOrderDialog({ open, onClose }: PurchaseOrderDialogProps)
   const active = (suppliers.data ?? []).filter((p) => p.is_active)
 
   return (
-    <FormDialog open={open} size="lg" title="Nueva orden de compra" onOpenChange={(abierto) => {
-      if (!abierto) {
+    <FormDialog open={open} size="lg" title="Nueva orden de compra" onOpenChange={(nextOpen) => {
+      if (!nextOpen) {
         close()
       }
     }}>

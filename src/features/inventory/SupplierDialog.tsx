@@ -58,8 +58,8 @@ export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps)
     <FormDialog
       open={open}
       title={supplier === null ? 'Nuevo proveedor' : `Editar ${supplier.name}`}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
           close()
         }
       }}

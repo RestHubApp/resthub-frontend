@@ -38,7 +38,7 @@ for (const route of ['acceso', 'pedidos', 'pedidos-nuevo', 'roles', 'caja', 'pan
     fontDisplay: audit['font-display-insight']?.details?.items?.map((i) => ({ url: i.url, wastedMs: i.wastedMs })) ?? [],
   }
 }
-const output = process.env.A11Y_DIAGNOSTICO ?? join(root, 'pruebas/accesibilidad/reportes/perf-movil-inicial.json')
+const output = process.env.A11Y_DIAGNOSIS ?? join(root, 'pruebas/accesibilidad/reportes/perf-movil-inicial.json')
 const report = { created: new Date().toISOString(), initial: [...load], totalInitialGzipKb: +summary.filter((i) => i.initial).reduce((sum, i) => sum + i.gzipKb, 0).toFixed(1), files: summary, lighthouse }
 await writeFile(output, `${JSON.stringify(report, null, 2)}\n`)
 console.log(`Entrada: ${report.totalInitialGzipKb} KiB gzip en ${load.size} chunks; reporte ${output}`)

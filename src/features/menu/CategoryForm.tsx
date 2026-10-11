@@ -31,8 +31,8 @@ export function CategoryForm({ category, onDone }: CategoryFormProps) {
   const save = useMutation({
     mutationFn: (values: CategoryValues) =>
       category === undefined ? createCategory(values) : updateCategory(category.id, values),
-    onSuccess: (categoria) => {
-      queryClient.setQueryData(MENU_KEY, (menu) => menu && withCategory(menu, categoria))
+    onSuccess: (createdCategory) => {
+      queryClient.setQueryData(MENU_KEY, (menu) => menu && withCategory(menu, createdCategory))
       void queryClient.invalidateQueries({ queryKey: menuQueryKey })
       onDone()
     },

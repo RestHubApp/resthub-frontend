@@ -24,7 +24,7 @@ interface CustomerDialogProps {
 }
 
 /** Alta o edición de un cliente de la libreta. */
-export function CustomerDialog({ open, customer, onClose: alCerrar }: CustomerDialogProps) {
+export function CustomerDialog({ open, customer, onClose: handleClose }: CustomerDialogProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   // El alta exige el consentimiento; un cliente guardado antes de pedirlo
@@ -38,7 +38,7 @@ export function CustomerDialog({ open, customer, onClose: alCerrar }: CustomerDi
   // datos del anterior. Al cerrarse, el formulario vuelve a sus valores.
   const onClose = () => {
     reset(customerDefaults(customer))
-    alCerrar()
+    handleClose()
   }
   const save = useMutation({
     mutationFn: (values: CustomerValues) => saveCustomer(customerRequest(values), customer?.id),
@@ -53,8 +53,8 @@ export function CustomerDialog({ open, customer, onClose: alCerrar }: CustomerDi
   return (
     <FormDialog
       open={open}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
           save.reset()
           onClose()
         }

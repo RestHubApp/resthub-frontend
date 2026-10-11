@@ -51,11 +51,11 @@ export function recipeValuesOf(recipe: Recipe): RecipeValues {
 
 /** El costo de una línea mientras se escribe; cero si la cantidad todavía no es un número. */
 export function lineCost(quantity: string, ingredient: RecipeIngredient | undefined): number {
-  const cantidad = parseDecimal(quantity)
-  if (ingredient === undefined || !Number.isFinite(cantidad)) {
+  const parsedQuantity = parseDecimal(quantity)
+  if (ingredient === undefined || !Number.isFinite(parsedQuantity)) {
     return 0
   }
-  return cantidad * ingredient.unitCost
+  return parsedQuantity * ingredient.unitCost
 }
 
 export function recipeCost(

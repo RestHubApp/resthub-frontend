@@ -10,8 +10,8 @@
 // a poner la sesión en el documento nuevo.
 //
 // Se corre de a una página: en esta máquina corren otros agentes y el
-// rendimiento se mediría con ruido. Variables: A11Y_SOLO, A11Y_PRESETS=escritorio,movil,
-// A11Y_REPETIR=n (corridas por página; se informa la mediana de rendimiento).
+// rendimiento se mediría con ruido. Variables: A11Y_ONLY, A11Y_PRESETS=escritorio,movil,
+// A11Y_REPEAT=n (corridas por página; se informa la mediana de rendimiento).
 import { spawn } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
@@ -29,7 +29,7 @@ import { ensureDir, BASE_URL, writeJson, filterStatuses, sessionScript, launch, 
 const CATEGORIES = ['accessibility', 'performance', 'best-practices', 'seo']
 const PRESETS = { desktop: desktopConfig, movil: undefined }
 const presets = (process.env.A11Y_PRESETS ?? 'escritorio,movil').split(',')
-const repeat = Number(process.env.A11Y_REPETIR ?? 1)
+const repeat = Number(process.env.A11Y_REPEAT ?? 1)
 const dir = await ensureDir(join(REPORTS, 'lighthouse'))
 
 // Las sesiones se abren por la interfaz con Playwright, una vez.
@@ -44,7 +44,7 @@ await browserSessions.close()
 // (%LOCALAPPDATA%, \\wsl.localhost\...) y el Chromium de Linux las crea como
 // carpetas relativas dentro del repositorio.
 const profile = mkdtempSync(join(process.env.A11Y_TMP ?? tmpdir(), 'resthub-lighthouse-'))
-const PORT = Number(process.env.A11Y_PUERTO_CDP ?? 9302)
+const PORT = Number(process.env.A11Y_PORT_CDP ?? 9302)
 const processValue = spawn(process.env.CHROME_PATH ?? chromium.executablePath(), [
   '--headless=new', '--no-first-run', '--no-default-browser-check', '--disable-gpu',
   `--remote-debugging-port=${String(PORT)}`, `--user-data-dir=${profile}`, 'about:blank',
@@ -63,9 +63,9 @@ for (const status of statuses) {
   for (const preset of presets) {
     const url = `${BASE_URL}${await resolverRoute(status.route)}`
     const runs = []
-    // A11Y_REANUDAR=1: si la corrida se cortó, lo que ya tiene reporte no se vuelve a medir.
+    // A11Y_RESUME=1: si la corrida se cortó, lo que ya tiene reporte no se vuelve a medir.
     const previous = join(dir, `${status.id}--${preset}.report.json`)
-    if (process.env.A11Y_REANUDAR && existsSync(previous)) {
+    if (process.env.A11Y_RESUME && existsSync(previous)) {
       const lhr = JSON.parse(readFileSync(previous, 'utf8'))
       runs.push({ lhr, report: null, load: Number.NaN })
     }
@@ -75,7 +75,7 @@ for (const status of statuses) {
       try {
         const load = loadavg()[0]
         const result = await lighthouse(url, { port: chrome.port, output: ['html', 'json'], logLevel: 'error', onlyCategories: CATEGORIES }, PRESETS[preset], page)
-        result.carga = load
+        result.load = load
         runs.push(result)
       } catch (error) {
         console.log(`${status.id} ${preset} ERROR ${error.message}`)
@@ -114,7 +114,7 @@ for (const status of statuses) {
       // Carga de la máquina (promedio de 1 min) al empezar cada corrida y el
       // índice de CPU que midió Lighthouse: con otros agentes corriendo, el
       // rendimiento simulado baja aunque la aplicación no cambie.
-      loadMachine: runs.map((c) => (Number.isNaN(c.carga) ? null : Number(c.carga.toFixed(1)))),
+      loadMachine: runs.map((c) => (Number.isNaN(c.load) ? null : Number(c.load.toFixed(1)))),
       benchmarkIndex: lhr.environment.benchmarkIndex,
     }
     rows.push(row)
@@ -140,8 +140,8 @@ try {
 
 // Resumen combinado con lo que ya había si se midió una parte.
 const routeSummary = join(dir, 'resumen.json')
-const previousValue = existsSync(routeSummary) && (process.env.A11Y_SOLO || process.env.A11Y_PRESETS) ? await readJson(routeSummary) : { rows: [] }
+const previousValue = existsSync(routeSummary) && (process.env.A11Y_ONLY || process.env.A11Y_PRESETS) ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.preset}`))
-const all = [...previousValue.filas.filter((f) => !fresh.has(`${f.id}--${f.preset}`)), ...rows]
+const all = [...previousValue.rows.filter((f) => !fresh.has(`${f.id}--${f.preset}`)), ...rows]
 await writeJson(routeSummary, { date: new Date().toISOString(), categories: CATEGORIES, repeat, rows: all })
 console.log(`\nLighthouse: ${rows.length} mediciones`)

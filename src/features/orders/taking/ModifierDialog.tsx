@@ -51,7 +51,7 @@ export function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps
     selectedSet({})
     onClose()
   }
-  const alternar = (group: string, option: string, max: number) => {
+  const toggleChoice = (group: string, option: string, max: number) => {
     selectedSet((antes) => toggle(antes, group, option, max))
   }
 
@@ -83,7 +83,7 @@ export function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps
                 price={option.price}
                 selected={(selected[group.name] ?? []).includes(option.name)}
                 onToggle={() => {
-                  alternar(group.name, option.name, group.max_choices)
+                  toggleChoice(group.name, option.name, group.max_choices)
                 }}
               />
             ))}

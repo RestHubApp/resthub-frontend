@@ -4,7 +4,7 @@ import { Icon } from './Icon'
 
 type Level = 'h2' | 'h3' | 'h4'
 
-const TAMAÑOS: Record<Level, string> = {
+const SIZES: Record<Level, string> = {
   h2: 'text-lg',
   h3: 'text-lg',
   h4: 'text-base',
@@ -39,7 +39,7 @@ export function CollapsibleHeading({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <Heading className={`m-0 font-heading leading-snug font-semibold text-foreground ${TAMAÑOS[as]}`}>
+      <Heading className={`m-0 font-heading leading-snug font-semibold text-foreground ${SIZES[as]}`}>
         <button
           type="button"
           aria-expanded={open}

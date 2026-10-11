@@ -40,8 +40,8 @@ export function CloseCashButton({ pending, expected, difference, open, onCancel,
       </Button>
       <AlertDialog
         open={open}
-        onOpenChange={(abierta) => {
-          if (!abierta) {
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
             onCancel()
           }
         }}

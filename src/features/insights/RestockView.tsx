@@ -53,17 +53,17 @@ export function RestockView() {
       ) : null}
       <ReportState data={recommendation.data} error={recommendation.error} errorText="No se pudo cargar la reposición.">
         {(report) => {
-          const visibles = report.items.filter((item) => visible(item, filter, viewWait)).sort(byUrgency)
+          const visibleItems = report.items.filter((item) => visible(item, filter, viewWait)).sort(byUrgency)
           const inWait = filter === null && !viewWait ? report.items.filter((item) => item.action === 'wait').length : 0
           return (
             <div className={`flex flex-col gap-6 transition-opacity ${update.isPending ? 'opacity-50' : ''}`}>
               <RestockNotice report={report} />
               <RestockSummary counts={report.counts} selected={filter} onSelect={setFilter} />
-              {visibles.length === 0 ? (
+              {visibleItems.length === 0 ? (
                 <EmptyState title="No hay insumos con esa acción." />
               ) : (
                 <ul aria-label="Recomendaciones por insumo" className="m-0 flex list-none flex-col gap-3 p-0">
-                  {visibles.map((item) => (
+                  {visibleItems.map((item) => (
                     <RestockItemCard key={item.ingredient_id} item={item} />
                   ))}
                 </ul>

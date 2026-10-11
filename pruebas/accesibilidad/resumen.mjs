@@ -15,9 +15,9 @@ const lh = await read('lighthouse/resumen.json')
 const wave = await read('wave/resumen.json')
 
 const index = (rows, k2) => new Map(rows.map((f) => [`${f.id}--${f[k2]}`, f]))
-const iAxe = index(axe.filas, 'vista')
-const iWave = index(wave.filas, 'vista')
-const iLh = index(lh.filas, 'preset')
+const iAxe = index(axe.rows, 'vista')
+const iWave = index(wave.rows, 'vista')
+const iLh = index(lh.rows, 'preset')
 
 const META = { lhA11y: 95, lhBp: 95, lhSeoAccess: 90, lhPerfDesktop: 90, lhPerfMovil: 80, lhPerfMovilManagement: 70 }
 // El celular es del mesero y de cocina, y de quien aún no entró: 80. El
@@ -41,10 +41,10 @@ for (const e of STATUSES) {
       if (l && !l.error) coverage.lighthouse[0] += 1
     }
     rowsStatus.push({ id: e.id, name: e.name, type: e.type, vista, axe: a, wave: w, lighthouse: l })
-    if (a?.porImpacto && (a.porImpacto.critical > 0 || a.porImpacto.serious > 0)) violations.push(`axe ${e.id} ${vista}: ${a.violaciones.filter((v) => ['critical', 'serious'].includes(v.impacto)).map((v) => v.regla).join(', ')}`)
-    if (w?.conteos && (w.conteos.errors > 0 || w.conteos.contrast > 0)) violations.push(`WAVE ${e.id} ${vista}: ${w.conteos.errors} errors, ${w.conteos.contrast} contrast`)
-    if (l?.puntajes) {
-      const p = l.puntajes
+    if (a?.byImpact && (a.byImpact.critical > 0 || a.byImpact.serious > 0)) violations.push(`axe ${e.id} ${vista}: ${a.violations.filter((v) => ['critical', 'serious'].includes(v.impact)).map((v) => v.rule).join(', ')}`)
+    if (w?.counts && (w.counts.errors > 0 || w.counts.contrast > 0)) violations.push(`WAVE ${e.id} ${vista}: ${w.counts.errors} errors, ${w.counts.contrast} contrast`)
+    if (l?.scores) {
+      const p = l.scores
       const perfMeta = vista === 'escritorio' ? META.lhPerfDesktop : MOBILE_ACCOUNTS.has(e.account) ? META.lhPerfMovil : META.lhPerfMovilManagement
       if (p.accessibility < META.lhA11y) violations.push(`Lighthouse ${e.id} ${vista}: accessibility ${p.accessibility}`)
       if (p['best-practices'] < META.lhBp) violations.push(`Lighthouse ${e.id} ${vista}: best-practices ${p['best-practices']}`)
@@ -63,9 +63,9 @@ const routesRouter = ROUTER_ROUTES.map((patron) => {
 
 const pct = ([h, t]) => (t === 0 ? '—' : `${((100 * h) / t).toFixed(1)} %`)
 const n = (x) => x ?? '—'
-const axeCell = (a) => (!a ? 'sin medir' : a.error ? 'error' : `${a.porImpacto.critical}/${a.porImpacto.serious}/${a.porImpacto.moderate}/${a.porImpacto.minor}`)
-const waveCell = (w) => (!w ? 'sin medir' : w.error ? 'error' : `${w.conteos.errors}/${w.conteos.contrast}/${w.conteos.alerts}`)
-const lhCell = (l) => (l === null ? 'no aplica' : !l ? 'sin medir' : l.error ? 'error' : `${l.puntajes.accessibility}/${l.puntajes.performance}/${l.puntajes['best-practices']}/${l.puntajes.seo}`)
+const axeCell = (a) => (!a ? 'sin medir' : a.error ? 'error' : `${a.byImpact.critical}/${a.byImpact.serious}/${a.byImpact.moderate}/${a.byImpact.minor}`)
+const waveCell = (w) => (!w ? 'sin medir' : w.error ? 'error' : `${w.counts.errors}/${w.counts.contrast}/${w.counts.alerts}`)
+const lhCell = (l) => (l === null ? 'no aplica' : !l ? 'sin medir' : l.error ? 'error' : `${l.scores.accessibility}/${l.scores.performance}/${l.scores['best-practices']}/${l.scores.seo}`)
 
 const md = `# Resumen de accesibilidad — RestHub
 
@@ -76,9 +76,9 @@ Build de producción (\`vite preview\`) y backend local con \`seed_dev\` + \`see
 
 | Herramienta | Estados medidos | Porcentaje |
 |---|---|---|
-| axe-core ${axe.filas.find((f) => f.version)?.version ?? ''} (rutas y overlays × escritorio/móvil) | ${coverage.axe[0]} / ${coverage.axe[1]} | ${pct(coverage.axe)} |
+| axe-core ${axe.rows.find((f) => f.version)?.version ?? ''} (rutas y overlays × escritorio/móvil) | ${coverage.axe[0]} / ${coverage.axe[1]} | ${pct(coverage.axe)} |
 | WAVE ${wave.version ?? ''} (rutas y overlays × escritorio/móvil) | ${coverage.wave[0]} / ${coverage.wave[1]} | ${pct(coverage.wave)} |
-| Lighthouse ${lh.filas.find((f) => f.version)?.version ?? ''} (rutas × preset escritorio/móvil; no mide modales) | ${coverage.lighthouse[0]} / ${coverage.lighthouse[1]} | ${pct(coverage.lighthouse)} |
+| Lighthouse ${lh.rows.find((f) => f.version)?.version ?? ''} (rutas × preset escritorio/móvil; no mide modales) | ${coverage.lighthouse[0]} / ${coverage.lighthouse[1]} | ${pct(coverage.lighthouse)} |
 
 Rutas del router cubiertas: axe ${routesRouter.filter((r) => r.axe).length}/${routesRouter.length}, WAVE ${routesRouter.filter((r) => r.wave).length}/${routesRouter.length}, Lighthouse ${routesRouter.filter((r) => r.lighthouse).length}/${routesRouter.length}.
 
@@ -104,11 +104,11 @@ ${routesRouter.map((r) => `| \`${r.patron}\` | ${r.statuses.join(', ')} | ${r.ax
 
 | Medición | critical | serious | moderate | minor |
 |---|---|---|---|---|
-${[['Con el widget', axe.filas.filter((f) => f.clase === 'ruta')], ['Sin el widget', axeWithoutWidget.filas]]
-  .map(([t, fs]) => `| ${t} (${fs.length} mediciones) | ${['critical', 'serious', 'moderate', 'minor'].map((i) => fs.reduce((s, f) => s + n(f.porImpacto?.[i] ?? 0), 0)).join(' | ')} |`)
+${[['Con el widget', axe.rows.filter((f) => f.class === 'ruta')], ['Sin el widget', axeWithoutWidget.rows]]
+  .map(([t, fs]) => `| ${t} (${fs.length} mediciones) | ${['critical', 'serious', 'moderate', 'minor'].map((i) => fs.reduce((s, f) => s + n(f.byImpact?.[i] ?? 0), 0)).join(' | ')} |`)
   .join('\n')}
 `
 await writeFile(join(REPORTS, 'resumen.md'), md)
-await writeJson(join(REPORTS, 'resumen.json'), { coverage, routesRouter, violations, rows: rowsStatus.map((f) => ({ id: f.id, vista: f.vista, axe: f.axe?.porImpacto ?? f.axe?.error, wave: f.wave?.conteos ?? f.wave?.error, lighthouse: f.lighthouse?.puntajes ?? f.lighthouse?.error ?? null })) })
+await writeJson(join(REPORTS, 'resumen.json'), { coverage, routesRouter, violations, rows: rowsStatus.map((f) => ({ id: f.id, vista: f.vista, axe: f.axe?.byImpact ?? f.axe?.error, wave: f.wave?.counts ?? f.wave?.error, lighthouse: f.lighthouse?.scores ?? f.lighthouse?.error ?? null })) })
 console.log(`Cobertura: axe ${pct(coverage.axe)}, WAVE ${pct(coverage.wave)}, Lighthouse ${pct(coverage.lighthouse)}. Incumplimientos: ${violations.length}`)
 for (const i of violations) console.log(`  - ${i}`)

@@ -25,8 +25,8 @@ const VISUAL = /visual\/.*\.spec\.ts/u
 
 // Cada corrida limpia su carpeta de resultados: dos corridas a la vez (por
 // ejemplo, la E2E y la visual) necesitan carpetas distintas.
-const OUTPUT = process.env.E2E_SALIDA ?? './e2e/.resultados'
-const REPORT = process.env.E2E_REPORTE ?? './e2e/.reporte'
+const OUTPUT = process.env.E2E_OUTPUT ?? './e2e/.resultados'
+const REPORT = process.env.E2E_REPORT ?? './e2e/.reporte'
 
 export default defineConfig({
   testDir: './e2e',

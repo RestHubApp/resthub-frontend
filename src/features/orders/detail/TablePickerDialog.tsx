@@ -45,8 +45,8 @@ export function TablePickerDialog({
       open={open}
       title={title}
       description={description}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
           onClose()
         }
       }}

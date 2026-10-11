@@ -35,7 +35,7 @@ export function ReservationsView() {
   const [day, setDay] = useState(() => todayIn(timeZone))
   const reservations = useQuery(reservationsOfDayQuery(day))
   const tables = useQuery(tablesQuery(true))
-  const estado = useReservationStatus()
+  const statusMutation = useReservationStatus()
   const [editing, setEditing] = useState<Editing>(null)
   const list = reservations.data ?? []
   const tableOf = (id: number | null) => {
@@ -78,12 +78,12 @@ export function ReservationsView() {
               tableLabel={tableOf(reservation.table_id)}
               timeZone={timeZone}
               canManage={canManage}
-              busy={estado.isPending}
+              busy={statusMutation.isPending}
               onEdit={() => {
                 setEditing({ reservation })
               }}
               onStatus={(status) => {
-                estado.mutate({ id: reservation.id, status })
+                statusMutation.mutate({ id: reservation.id, status })
               }}
             />
           ))}

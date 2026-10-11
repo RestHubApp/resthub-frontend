@@ -68,10 +68,10 @@ async function dialog(browser, id, trigger, vista) {
   await context.close()
   return {
     id, vista, trigger, onOpen,
-    focusTrapped: path.every((p) => p.dentroDeDialogo),
-    ringVisible: path.filter((p) => !p.visible).map((p) => p.nombre),
+    focusTrapped: path.every((p) => p.dialogInside),
+    ringVisible: path.filter((p) => !p.visible).map((p) => p.name),
     closedWithEscape: closed,
-    focusReturned: onClose.nombre.includes(trigger),
+    focusReturned: onClose.name.includes(trigger),
     onClose,
   }
 }
@@ -94,8 +94,8 @@ const result = {
 await browserValue.close()
 await writeJson(join(dir, 'teclado.json'), result)
 for (const r of result.routes) {
-  console.log(`\n${r.id} (${r.vista}): ${r.steps.map((p, i) => `${String(i + 1)}. ${p.nombre}${p.visible ? '' : ' [sin anillo]'}`).join(' → ')}`)
+  console.log(`\n${r.id} (${r.vista}): ${r.steps.map((p, i) => `${String(i + 1)}. ${p.name}${p.visible ? '' : ' [sin anillo]'}`).join(' → ')}`)
 }
 for (const d of result.dialogs) {
-  console.log(`\nDiálogo «${d.trigger}» en ${d.id} (${d.vista}): foco inicial en «${d.onOpen.nombre}», atrapado ${d.focusTrapped ? 'sí' : 'NO'}, anillo ausente en [${d.ringVisible.join(', ')}], Escape cierra ${d.closedWithEscape ? 'sí' : 'NO'}, foco devuelto ${d.focusReturned ? 'sí' : 'NO'} («${d.onClose.nombre}»)`)
+  console.log(`\nDiálogo «${d.trigger}» en ${d.id} (${d.vista}): foco inicial en «${d.onOpen.name}», atrapado ${d.focusTrapped ? 'sí' : 'NO'}, anillo ausente en [${d.ringVisible.join(', ')}], Escape cierra ${d.closedWithEscape ? 'sí' : 'NO'}, foco devuelto ${d.focusReturned ? 'sí' : 'NO'} («${d.onClose.name}»)`)
 }

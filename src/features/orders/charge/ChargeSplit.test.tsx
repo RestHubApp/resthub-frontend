@@ -11,7 +11,7 @@ const CONFIRM = { name: 'Confirmar pago' }
 const EQUAL = { name: 'Partes iguales' }
 
 // Tras un pago parcial, el pedido baja su saldo; con el último, queda pagado.
-function tras(actual: OrderResponse, amount: string): OrderResponse {
+function after(actual: OrderResponse, amount: string): OrderResponse {
   const fresh = payment({ id: 50 + actual.payments.length, amount })
   const balance = (Number(actual.balance) - Number(amount)).toFixed(2)
   if (balance === '0.00') {
@@ -35,7 +35,7 @@ function chargeSplit(initial: OrderResponse = handleOrder()) {
     .on('get', '/cash/current', { is_open: true, session: null })
     .on('get', '/orders/12', () => actual)
     .on('post', PAYMENTS, (request: Request) => {
-      actual = tras(actual, amountOf(request, actual))
+      actual = after(actual, amountOf(request, actual))
       return actual
     })
   signInAs()

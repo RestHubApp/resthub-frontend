@@ -25,8 +25,8 @@ export function StaffStatusButton({ account, disabled }: StaffStatusButtonProps)
   const queryClient = useQueryClient()
   const status = useMutation({
     mutationFn: () => changeStaffStatus(account.id, !account.is_active),
-    onSuccess: (cuenta) => {
-      saveStaffMember(queryClient, cuenta)
+    onSuccess: (updatedAccount) => {
+      saveStaffMember(queryClient, updatedAccount)
     },
   })
   const change = () => {

@@ -35,7 +35,7 @@ for (const vista of Object.keys(VIEWS)) {
         return result
       }
       let limit
-      const { conteos: counts, items } = await Promise.race([
+      const { counts, items } = await Promise.race([
         measure(),
         new Promise((_, reject) => {
           limit = setTimeout(() => reject(new Error(`sin respuesta en 120 s (paso: ${step})`)), 120_000)
@@ -45,7 +45,7 @@ for (const vista of Object.keys(VIEWS)) {
       await writeJson(join(dir, `${handlePassword(status, vista)}.json`), row)
       rows.push(row)
       const c = counts
-      console.log(`${handlePassword(status, vista).padEnd(40)} err ${c.errors} contr ${c.contrast} alert ${c.alerts} feat ${c.features} str ${c.structure} aria ${c.aria}  ${items.filter((i) => ['error', 'contrast', 'alert'].includes(i.tipo)).map((i) => `${i.id}(${i.cantidad})`).join(' ')}`)
+      console.log(`${handlePassword(status, vista).padEnd(40)} err ${c.errors} contr ${c.contrast} alert ${c.alerts} feat ${c.features} str ${c.structure} aria ${c.aria}  ${items.filter((i) => ['error', 'contrast', 'alert'].includes(i.type)).map((i) => `${i.id}(${i.quantity})`).join(' ')}`)
     } catch (error) {
       rows.push({ id: status.id, name: status.name, class: status.class, type: status.type, vista, error: error.message.split('\n')[0] })
       console.log(`${handlePassword(status, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
@@ -59,11 +59,11 @@ for (const vista of Object.keys(VIEWS)) {
 await browserSessions.close()
 
 const routeSummary = join(dir, 'resumen.json')
-const partial = process.env.A11Y_SOLO || process.env.A11Y_CLASE || process.env.A11Y_VISTAS
+const partial = process.env.A11Y_ONLY || process.env.A11Y_CLASS || process.env.A11Y_VIEWS
 const previous = existsSync(routeSummary) && partial ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.vista}`))
-const all = [...previous.filas.filter((f) => !fresh.has(`${f.id}--${f.vista}`)), ...rows]
+const all = [...previous.rows.filter((f) => !fresh.has(`${f.id}--${f.vista}`)), ...rows]
 await writeJson(routeSummary, { date: new Date().toISOString(), version, rows: all })
-const sum = (k) => all.reduce((s, f) => s + (f.conteos?.[k] ?? 0), 0)
+const sum = (k) => all.reduce((s, f) => s + (f.counts?.[k] ?? 0), 0)
 await writeFile(join(dir, 'resumen.txt'), `WAVE ${version}: ${all.length} mediciones; errors ${sum('errors')}, contrast ${sum('contrast')}, alerts ${sum('alerts')}\n`)
 console.log(`\nWAVE ${version}: ${all.length} mediciones, ${all.filter((f) => f.error).length} sin abrir; errors ${sum('errors')}, contrast ${sum('contrast')}, alerts ${sum('alerts')}`)

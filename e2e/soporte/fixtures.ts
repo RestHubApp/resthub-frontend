@@ -80,11 +80,11 @@ export function notice(page: Page, text: string | RegExp) {
   return page.getByRole('status').filter({ hasText: text }).or(page.getByRole('alert').filter({ hasText: text }))
 }
 
-const EVIDENCES = process.env.E2E_EVIDENCIAS
+const EVIDENCES = process.env.E2E_EVIDENCE
 
 /**
  * Guarda una captura de un paso para la documentación, solo si se pidió con
- * `E2E_EVIDENCIAS=<carpeta>` y en la primera repetición del proyecto de escritorio
+ * `E2E_EVIDENCE=<carpeta>` y en la primera repetición del proyecto de escritorio
  * (o del móvil, si la prueba es solo del celular).
  */
 export async function evidence(page: Page, name: string): Promise<void> {

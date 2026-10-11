@@ -20,7 +20,7 @@ async function call(token, method, route, body) {
 
 async function token(account, platform = false) {
   const route = platform ? '/platform/auth/login' : '/auth/login'
-  const r = await call(null, 'POST', route, { email: ACCOUNTS[account].correo, password: PASSWORD })
+  const r = await call(null, 'POST', route, { email: ACCOUNTS[account].email, password: PASSWORD })
   return r.access_token
 }
 
@@ -31,7 +31,7 @@ const todayLima = () => new Date(Date.now() - 5 * 3600_000).toISOString().slice(
 // `sin-terminos` se crea aparte y nunca los acepta, para medir esa puerta.
 async function acceptTerms() {
   for (const account of ['encargado', 'mesero', 'cocina']) {
-    const r = await call(null, 'POST', '/auth/login', { email: ACCOUNTS[account].correo, password: PASSWORD })
+    const r = await call(null, 'POST', '/auth/login', { email: ACCOUNTS[account].email, password: PASSWORD })
     if (!r.terms_accepted) await call(r.access_token, 'POST', '/auth/me/terms', { version: r.terms_version })
   }
 }
@@ -59,7 +59,7 @@ export async function prepareData() {
     address: 'Av. Arequipa 123', reference: 'Frente al parque', notes: 'Cliente de las pruebas de accesibilidad',
     consent: true,
   })
-  ids.cliente = customer.id
+  ids.customer = customer.id
   const day = todayLima()
   const reservations = await call(t, 'GET', `/reservations?day=${day}`)
   const list = Array.isArray(reservations) ? reservations : reservations.items
@@ -76,7 +76,7 @@ export async function prepareData() {
   supplier ??= await call(t, 'POST', '/inventory/suppliers', {
     name: 'Mercado Central (pruebas a11y)', contact: 'Rosa', phone: '912345678', notes: '', is_active: true,
   })
-  ids.proveedor = supplier.id
+  ids.supplier = supplier.id
   const orders = await call(t, 'GET', '/inventory/purchase-orders')
   if (orders.items.length === 0) {
     const ingredients = await call(t, 'GET', '/inventory/ingredients')
@@ -95,7 +95,7 @@ export async function prepareData() {
   // Datos fiscales, un pedido cobrado con comprobante y uno servido por cobrar.
   await call(t, 'PUT', '/billing/settings', {
     ruc: '20123456789', legal_name: 'Restaurante Demo S.A.C.', address: 'Jr. Lima 456, Lima',
-    igv_rate: '18.00', boleta_series: 'B001', factura_series: 'F001', provider_url: '', provider_token: null,
+    igv_rate: '18.00', sales_receipt_series: 'B001', tax_invoice_series: 'F001', provider_url: '', provider_token: null,
   })
   const menu = await call(t, 'GET', '/menu')
   const dishes = menu.categories.flatMap((c) => c.items ?? [])
@@ -121,8 +121,8 @@ export async function prepareData() {
       .catch((e) => console.warn('comprobante:', e.message))
   }
   const taxInvoices2 = await call(t, 'GET', '/billing/invoices')
-  ids.comprobante = taxInvoices2.items[0]?.id ?? null
-  ids.pedidoCobrado = taxInvoices2.items[0]?.order_id ?? null
+  ids.invoice = taxInvoices2.items[0]?.id ?? null
+  ids.orderCharged = taxInvoices2.items[0]?.order_id ?? null
 
   // Un pedido en mesa servido, del mesero, listo para cobrar (cobro y comprobante).
   const tm = await token('mesero')
@@ -140,17 +140,17 @@ export async function prepareData() {
   if (toCharge.status === 'open') await call(tm, 'POST', `/orders/${toCharge.id}/send`)
   if (['open', 'in_kitchen'].includes(toCharge.status)) await call(t, 'POST', `/orders/${toCharge.id}/ready`)
   if (toCharge.status !== 'served') await call(t, 'POST', `/orders/${toCharge.id}/served`)
-  ids.pedidoPorCobrar = toCharge.id
+  ids.orderToCharge = toCharge.id
   // Un pedido para llevar todavía sin enviar a cocina: sus platos se editan (notas).
   let open = active.find((o) => o.customer_name === 'Sin enviar (pruebas a11y)' && o.status === 'open')
   open ??= await call(tm, 'POST', '/orders', {
     type: 'takeaway', customer_name: 'Sin enviar (pruebas a11y)',
     items: dishes.filter((p) => p.id !== lomo.id).slice(0, 2).map((p) => ({ menu_item_id: p.id, quantity: 1, notes: '' })),
   })
-  ids.pedidoAbierto = open.id
-  ids.pedidoEnCocina = active.find((o) => o.status === 'in_kitchen')?.id ?? toCharge.id
-  ids.plato = dish.id
-  ids.platoConOpciones = dishes.find((p) => (p.modifier_groups ?? []).length > 0)?.id ?? null
+  ids.openOrder = open.id
+  ids.orderInKitchen = active.find((o) => o.status === 'in_kitchen')?.id ?? toCharge.id
+  ids.dish = dish.id
+  ids.dishWithOptions = dishes.find((p) => (p.modifier_groups ?? []).length > 0)?.id ?? null
 
   // Un pedido cobrado sin comprobante (para «Emitir boleta o factura»).
   const charged = await call(t, 'GET', '/orders?status=paid').catch(() => ({ items: [] }))
@@ -162,7 +162,7 @@ export async function prepareData() {
     await call(t, 'POST', `/orders/${order.id}/charge`, { payment_method: 'yape', tip: '0', expected_balance: read.balance })
     withoutInvoice = order
   }
-  ids.pedidoSinComprobante = withoutInvoice.id
+  ids.orderWithoutInvoice = withoutInvoice.id
 
   // Un rol sin personas y una categoría vacía: solo esos se pueden eliminar.
   const roles = await call(t, 'GET', '/roles')
@@ -181,12 +181,12 @@ export async function prepareData() {
     await call(null, 'POST', '/platform/auth/login', { email: ACCOUNTS.platform.email, password: 'clave-equivocada-a11y' }).catch(() => undefined)
   }
   const restaurants = await call(tp, 'GET', '/platform/restaurants')
-  ids.restaurante = (restaurants.items ?? restaurants)[0].id
+  ids.restaurant = (restaurants.items ?? restaurants)[0].id
   const sessions = await call(t, 'GET', '/cash/sessions')
-  ids.turnoCaja = (sessions.items ?? sessions).find((s) => !s.is_open)?.id ?? null
+  ids.shiftCashRegister = (sessions.items ?? sessions).find((s) => !s.is_open)?.id ?? null
 
   const tablesValue = await call(t, 'GET', '/tables')
-  ids.mesaLibre = tablesValue.filter((m) => !m.active_order).at(-1)?.id ?? null
+  ids.freeTable = tablesValue.filter((m) => !m.active_order).at(-1)?.id ?? null
 
   await writeJson(join(REPORTS, 'datos.json'), ids)
   return ids

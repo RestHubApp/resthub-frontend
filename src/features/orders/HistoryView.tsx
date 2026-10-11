@@ -20,7 +20,7 @@ import { paths } from '@/services/paths'
 import { useTimeZone } from '@/store/session'
 import { formatDateTime, formatMoney, todayIn } from '@/services/format'
 
-function columnas(timeZone: string): DataColumn<OrderResponse>[] {
+function buildColumns(timeZone: string): DataColumn<OrderResponse>[] {
   return [
 
   { id: 'numero', header: 'N.º', cell: (order) => <span className="font-semibold tabular-nums">#{order.number}</span> },
@@ -59,7 +59,7 @@ function columnas(timeZone: string): DataColumn<OrderResponse>[] {
 export function HistoryView() {
   const timeZone = useTimeZone()
   const today = todayIn(timeZone)
-  const columns = useMemo(() => columnas(timeZone), [timeZone])
+  const columns = useMemo(() => buildColumns(timeZone), [timeZone])
   const [filters, setFilters] = useState<HistoryFilters>({ from: today, to: today, status: '', type: '', waiterId: '' })
   const [page, setPage] = useState(0)
   const params = toParams(filters, page)
