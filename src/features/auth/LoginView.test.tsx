@@ -11,10 +11,12 @@ const SIGN_IN = { name: 'Entrar' }
 const LOGIN = '/auth/login'
 // La contraseña de las cuentas de la semilla de desarrollo, no una credencial real.
 const TEST_SECRET = 'resthub123'
+const WHERE = { name: 'Ruta actual' }
+const PLATFORM_EMAIL = 'plataforma@resthub.dev'
 
 function accessResponse() {
-  const { user, restaurant, permissions, preview: isPreview } = buildAccount(PERMISSIONS_WAITER)
-  return { access_token: 'token-nuevo', token_type: 'bearer', expires_in: 3600, user, restaurant, permissions, preview: isPreview }
+  const { kind, user, restaurant, permissions, preview: isPreview } = buildAccount(PERMISSIONS_WAITER)
+  return { access_token: 'token-nuevo', token_type: 'bearer', expires_in: 3600, kind, user, restaurant, permissions, preview: isPreview }
 }
 
 function openAccess(status?: { from: string }) {
@@ -35,7 +37,7 @@ describe('LoginView', () => {
     await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
     await user.click(screen.getByRole('button', SIGN_IN))
 
-    expect(await screen.findByRole('status', { name: 'Ruta actual' })).toHaveTextContent(/^\/$/u)
+    expect(await screen.findByRole('status', WHERE)).toHaveTextContent(/^\/$/u)
     expect(api.calls('post', LOGIN)[0]?.body).toEqual({ email: 'mesero@resthub.dev', password: TEST_SECRET })
     expect(useSession.getState().token).toBe('token-nuevo')
     expect(useSession.getState().account?.permissions).toEqual([...PERMISSIONS_WAITER])
@@ -49,7 +51,7 @@ describe('LoginView', () => {
     await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
     await user.click(screen.getByRole('button', SIGN_IN))
 
-    expect(await screen.findByRole('status', { name: 'Ruta actual' })).toHaveTextContent('/caja')
+    expect(await screen.findByRole('status', WHERE)).toHaveTextContent('/caja')
   })
 
   it('con una contraseña equivocada muestra el mensaje del servidor y no abre sesión', async () => {
@@ -82,9 +84,30 @@ describe('LoginView', () => {
     expect(screen.getByText('Tu sesión venció. Vuelve a entrar para seguir donde estabas.')).toBeVisible()
   })
 
-  it('ofrece la entrada a la administración del sistema', () => {
+  it('no ofrece otra puerta para la administración del sistema: el acceso es uno solo', () => {
     openAccess()
 
-    expect(screen.getByRole('link', { name: 'Administración del sistema' })).toHaveAttribute('href', '/plataforma/acceso')
+    expect(screen.queryByRole('link', { name: 'Administración del sistema' })).not.toBeInTheDocument()
+  })
+
+  it('una cuenta de plataforma entra por el mismo formulario y abre su sesión', async () => {
+    const { api, user } = openAccess()
+    api.on('post', LOGIN, {
+      access_token: 'token-plataforma',
+      token_type: 'bearer',
+      expires_in: 3600,
+      kind: 'platform',
+      admin: { id: 1, email: PLATFORM_EMAIL, full_name: 'Equipo RestHub' },
+      permissions: ['platform.restaurants.read'],
+      preview: false,
+    })
+
+    await user.type(screen.getByLabelText(EMAIL), PLATFORM_EMAIL)
+    await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
+    await user.click(screen.getByRole('button', SIGN_IN))
+
+    expect(await screen.findByRole('status', WHERE)).toHaveTextContent(/^\/$/u)
+    expect(useSession.getState().token).toBe('token-plataforma')
+    expect(useSession.getState().account).toMatchObject({ kind: 'platform', permissions: ['platform.restaurants.read'] })
   })
 })

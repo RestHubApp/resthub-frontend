@@ -3,9 +3,8 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { createElement, type ReactNode } from 'react'
 
-import { buildAccount, ErrorResponse, PERMISSIONS_OWNER, server, signInAs } from '#jest/harness'
+import { buildAccount, currentStaff, ErrorResponse, PERMISSIONS_OWNER, server, signInAs } from '#jest/harness'
 import { queryClient } from '@/services/queryClient'
-import { useSession } from '@/store/session'
 import { useAcceptTerms } from './useAcceptTerms'
 
 const TERMS = '/auth/me/terms'
@@ -26,7 +25,7 @@ describe('useAcceptTerms', () => {
     })
 
     await waitFor(() => {
-      expect(useSession.getState().account?.terms_accepted).toBe(true)
+      expect(currentStaff()?.terms_accepted).toBe(true)
     })
   })
 
@@ -41,7 +40,7 @@ describe('useAcceptTerms', () => {
     })
 
     await waitFor(() => {
-      expect(useSession.getState().account?.terms_version).toBe('2027-01')
+      expect(currentStaff()?.terms_version).toBe('2027-01')
     })
   })
 })

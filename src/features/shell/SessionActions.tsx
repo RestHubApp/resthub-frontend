@@ -1,15 +1,16 @@
 import { Link, useNavigate } from 'react-router'
 
+import type { Session } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { accountLabels } from './accountLabels'
 import { ShellIcon } from './ShellIcon'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
 import { useQueuedOrders } from '@/store/offlineQueue'
-import { usePreview, useSession } from '@/store/session'
+import { usePreview, useSession, useStaffAccount } from '@/store/session'
 
 interface SessionActionsProps {
-  readonly fullName: string
-  readonly roleLabel: string
+  readonly account: Session
   readonly onNavigate?: () => void
 }
 
@@ -19,10 +20,11 @@ interface SessionActionsProps {
  * En una vista previa no hay «Cerrar sesión»: se sale desde la franja de
  * arriba, que ademas descarta la sesion de la pestana.
  */
-export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActionsProps) {
+export function SessionActions({ account, onNavigate }: SessionActionsProps) {
+  const { fullName, roleLabel } = accountLabels(account)
   const signOut = useSession((state) => state.signOut)
   const isPreview = usePreview()
-  const pending = useQueuedOrders(useSession((state) => state.account))
+  const pending = useQueuedOrders(useStaffAccount())
   const navigate = useNavigate()
 
   const handleSignOut = () => {

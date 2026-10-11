@@ -5,7 +5,7 @@ import { ordersQueryKey } from '@/api/orders'
 import { tablesQueryKey } from '@/api/tables'
 import { useNotifications } from '@/store/notifications'
 import { belongsTo, ownerOf, queuedOrders, useQueuedOrders } from '@/store/offlineQueue'
-import { useSession } from '@/store/session'
+import { staffOf, useSession, useStaffAccount } from '@/store/session'
 import { deliverQueued } from './deliverQueued'
 
 // Mientras haya pedidos esperando, se reintenta cada medio minuto por si el
@@ -20,13 +20,13 @@ const RETRY_MS = 30_000
  * rechazo de verdad (plato agotado, mesa ocupada) se avisa y sale de la cola.
  */
 export function useOfflineOrders() {
-  const pending = useQueuedOrders(useSession((state) => state.account))
+  const pending = useQueuedOrders(useStaffAccount())
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   const sending = useRef(false)
 
   const send = useCallback(async () => {
-    const owner = ownerOf(useSession.getState().account)
+    const owner = ownerOf(staffOf(useSession.getState().account))
     if (sending.current || queuedOrders(owner).length === 0) {
       return
     }
@@ -35,7 +35,7 @@ export function useOfflineOrders() {
       for (const order of queuedOrders(owner)) {
         // Si la sesión se cerró o cambió de cuenta a mitad de la cola, el
         // token ya no es el de quien tomó el pedido.
-        if (!belongsTo(order, ownerOf(useSession.getState().account))) {
+        if (!belongsTo(order, ownerOf(staffOf(useSession.getState().account)))) {
           break
         }
         const wasFollowed = await deliverQueued(order, push)

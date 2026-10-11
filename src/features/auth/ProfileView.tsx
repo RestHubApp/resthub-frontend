@@ -1,5 +1,6 @@
 import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
+import { SYSTEM_ADMINISTRATION } from '@/services/systemAdministration'
 import { usePreview, useSession } from '@/store/session'
 import { ChangePasswordForm } from './ChangePasswordForm'
 
@@ -21,16 +22,26 @@ export function ProfileView() {
     return null
   }
 
-  const data = [
-    { term: 'Nombre', data: account.user.full_name },
-    { term: 'Correo', data: account.user.email },
-    { term: 'Rol', data: account.user.role_label },
-    { term: 'Restaurante', data: account.restaurant.name },
-  ]
+  const isPlatform = account.kind === 'platform'
+  const data = isPlatform
+    ? [
+        { term: 'Nombre', data: account.admin.full_name },
+        { term: 'Correo', data: account.admin.email },
+        { term: 'Cuenta', data: SYSTEM_ADMINISTRATION },
+      ]
+    : [
+        { term: 'Nombre', data: account.user.full_name },
+        { term: 'Correo', data: account.user.email },
+        { term: 'Rol', data: account.user.role_label },
+        { term: 'Restaurante', data: account.restaurant.name },
+      ]
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Mi perfil" description="Tus datos los mantiene el encargado del restaurante." />
+      <PageHeader
+        title="Mi perfil"
+        description={isPlatform ? 'Tus datos los mantiene el equipo de RestHub.' : 'Tus datos los mantiene el encargado del restaurante.'}
+      />
 
       <SectionCard title="Tus datos">
         <dl className="m-0 grid gap-4 sm:grid-cols-2">
@@ -43,8 +54,8 @@ export function ProfileView() {
         </dl>
       </SectionCard>
 
-      {/* La cuenta de muestra no tiene contraseña y el servidor rechaza cambiarla. */}
-      {isPreview ? null : (
+      {/* La cuenta de muestra no tiene contraseña y el servidor rechaza cambiarla; la de plataforma no la cambia desde aquí. */}
+      {isPreview || isPlatform ? null : (
         <SectionCard title="Cambiar contraseña">
           <ChangePasswordForm />
         </SectionCard>

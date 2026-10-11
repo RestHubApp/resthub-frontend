@@ -6,11 +6,13 @@ afterEach(() => {
   clearApiFailure()
 })
 
+const CUTOFF = 'No se pudieron cargar los datos.'
+
 describe('apiFailure', () => {
-  it('guarda el aviso del ámbito que falló y no el del otro', () => {
-    noteApiFailure('restaurant', 'No se pudieron cargar los datos.')
-    expect(apiFailureMessage('restaurant')).toBe('No se pudieron cargar los datos.')
-    expect(apiFailureMessage('platform')).toBeNull()
+  it('guarda el último aviso del corte', () => {
+    noteApiFailure(CUTOFF)
+    expect(apiFailureMessage()).toBe(CUTOFF)
+    expect(apiFailureMessage()).toBe(CUTOFF)
   })
 
   it('avisa a quien escucha y se olvida al reintentar', () => {
@@ -18,10 +20,10 @@ describe('apiFailure', () => {
     const leave = subscribeApiFailure(() => {
       notices += 1
     })
-    noteApiFailure('platform', 'Servicio no disponible.')
+    noteApiFailure('Servicio no disponible.')
     clearApiFailure()
     expect(notices).toBe(2)
-    expect(apiFailureMessage('platform')).toBeNull()
+    expect(apiFailureMessage()).toBeNull()
     leave()
   })
 })

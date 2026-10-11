@@ -12,15 +12,14 @@ import { createElement, type ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider, useLocation, type RouteObject } from 'react-router'
 
 import { mswServer } from './mswServer'
-import type { CurrentUserResponse, ErrorCode, PermissionCode } from '../src/api/types'
+import type { ErrorCode, PermissionCode, StaffSession } from '../src/api/types'
 import { RouteError } from '../src/router/RouteError'
 import { SCREENS } from '../src/router/screens'
 import { ToastStack } from '../src/features/shell/ToastStack'
 import { setAuthToken } from '../src/services/apiCredentials'
 import { queryClient } from '../src/services/queryClient'
 import { useNotifications } from '../src/store/notifications'
-import { usePlatformSession } from '../src/store/platformSession'
-import { useSession } from '../src/store/session'
+import { staffOf, useSession } from '../src/store/session'
 
 /** Las pantallas del restaurante tal como las registra el router: de ellas salen el menú y la precarga del armazón. */
 export const TEST_SCREENS = SCREENS
@@ -217,8 +216,9 @@ export const PERMISSIONS_WAITER: readonly PermissionCode[] = [
 ]
 
 /** Una cuenta de restaurante con los permisos dados. */
-export function buildAccount(permissions: readonly PermissionCode[], changes: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
+export function buildAccount(permissions: readonly PermissionCode[], changes: Partial<StaffSession> = {}): StaffSession {
   return {
+    kind: 'staff',
     permissions: [...permissions],
     preview: false,
     terms_version: '2026-10',
@@ -229,17 +229,17 @@ export function buildAccount(permissions: readonly PermissionCode[], changes: Pa
   }
 }
 
-/** Abre la sesión del administrador del sistema sin pasar por su acceso. */
-export function signInToPlatform(): void {
-  usePlatformSession.getState().signIn('token-de-plataforma', { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' })
-}
-
 /** Abre una sesión de restaurante sin pasar por el acceso. */
-export function signInAs(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, changes: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
+export function signInAs(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, changes: Partial<StaffSession> = {}): StaffSession {
   const account = buildAccount(permissions, changes)
   setAuthToken('token-de-prueba')
   useSession.setState({ token: 'token-de-prueba', account, expired: false, passwordChanged: false })
   return account
+}
+
+/** La sesión del personal abierta ahora, o `null` (sin sesión o de plataforma). */
+export function currentStaff(): StaffSession | null {
+  return staffOf(useSession.getState().account)
 }
 
 // Muestra la ruta actual para comprobar adónde llevó una navegación.
@@ -312,9 +312,6 @@ afterEach(() => {
   queryClient.clear()
   setAuthToken(null)
   useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })
-  if (usePlatformSession.getState().token !== null) {
-    usePlatformSession.getState().signOut()
-  }
   useNotifications.setState({ toasts: [] })
 })
 

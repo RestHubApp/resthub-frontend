@@ -30,7 +30,16 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Obtener un token de acceso */
+        /**
+         * Obtener un token de acceso (personal o administración del sistema)
+         * @description Un solo acceso para las dos clases de cuenta.
+         *
+         *     Prueba primero al personal de los restaurantes; si no hay una credencial
+         *     válida del personal, a la administración del sistema. La respuesta trae
+         *     `kind` (`staff` o `platform`) y la sesión que corresponde. Una credencial
+         *     que no sirve en ninguna responde el mismo 401 y gasta el mismo contador de
+         *     intentos, así que no revela de qué clase es el correo.
+         */
         post: operations["login_api_v1_auth_login_post"];
         delete?: never;
         options?: never;
@@ -140,7 +149,8 @@ export interface paths {
          *
          *     El celular del mesero lo pide antes de que venza el actual, así el turno
          *     no se corta cada hora. Una cuenta desactivada no llega acá: el principal
-         *     ya se validó contra la base.
+         *     ya se validó contra la base. Sirve a las dos clases de cuenta y responde la
+         *     variante que corresponda al token que llegó.
          *
          *     Una vista previa no se renueva: vence a los 30 minutos y se vuelve a abrir
          *     desde la plataforma, que la deja otra vez en su bitácora.
@@ -1424,7 +1434,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Obtener un token de la administración del sistema */
+        /**
+         * Obtener un token de la administración del sistema
+         * @deprecated
+         */
         post: operations["login_api_v1_platform_auth_login_post"];
         delete?: never;
         options?: never;
@@ -1439,7 +1452,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuenta de plataforma que pregunta */
+        /**
+         * Cuenta de plataforma que pregunta
+         * @deprecated
+         */
         get: operations["read_current_admin_api_v1_platform_auth_me_get"];
         put?: never;
         post?: never;
@@ -1458,7 +1474,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Renovar el token de la administración del sistema */
+        /**
+         * Renovar el token de la administración del sistema
+         * @deprecated
+         */
         post: operations["refresh_token_api_v1_platform_auth_refresh_post"];
         delete?: never;
         options?: never;
@@ -1931,34 +1950,6 @@ export interface components {
         AcceptTermsRequest: {
             /** Version */
             version: string;
-        };
-        /**
-         * AccessTokenResponse
-         * @description El token y, en la misma respuesta, la sesión que abre.
-         *
-         *     Así la interfaz no necesita una segunda petición a `/auth/me` para
-         *     dibujarse después de entrar.
-         */
-        AccessTokenResponse: {
-            /** Access Token */
-            access_token: string;
-            /** Expires In */
-            expires_in: number;
-            /** Permissions */
-            permissions: components["schemas"]["Permission"][];
-            /** Preview */
-            preview: boolean;
-            restaurant: components["schemas"]["SessionRestaurantResponse"];
-            /** Terms Accepted */
-            terms_accepted: boolean;
-            /** Terms Version */
-            terms_version: string;
-            /**
-             * Token Type
-             * @default bearer
-             */
-            token_type: string;
-            user: components["schemas"]["SessionUserResponse"];
         };
         /**
          * ActiveOrderSummaryResponse
@@ -3610,6 +3601,31 @@ export interface components {
             /** Kind Label */
             kind_label: string;
         };
+        /** PlatformAdminAccessTokenResponse */
+        PlatformAdminAccessTokenResponse: {
+            /** Access Token */
+            access_token: string;
+            admin: components["schemas"]["SessionAdminResponse"];
+            /** Expires In */
+            expires_in: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "platform";
+            /** Permissions */
+            permissions: components["schemas"]["PlatformPermission"][];
+            /**
+             * Preview
+             * @default false
+             */
+            preview: boolean;
+            /**
+             * Token Type
+             * @default bearer
+             */
+            token_type: string;
+        };
         /** PlatformAdminResponse */
         PlatformAdminResponse: {
             /** Email */
@@ -3618,6 +3634,28 @@ export interface components {
             full_name: string;
             /** Id */
             id: number;
+        };
+        /**
+         * PlatformAdminSessionResponse
+         * @description La cuenta de la administración del sistema y lo que puede hacer.
+         *
+         *     No pertenece a ningún restaurante: no trae `restaurant` ni términos. La
+         *     interfaz arma la navegación con `permissions`, como con el personal.
+         */
+        PlatformAdminSessionResponse: {
+            admin: components["schemas"]["SessionAdminResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "platform";
+            /** Permissions */
+            permissions: components["schemas"]["PlatformPermission"][];
+            /**
+             * Preview
+             * @default false
+             */
+            preview: boolean;
         };
         /** PlatformLoginRequest */
         PlatformLoginRequest: {
@@ -3629,6 +3667,17 @@ export interface components {
             /** Password */
             password: string;
         };
+        /**
+         * PlatformPermission
+         * @description Permisos de la administración del sistema.
+         *
+         *     Catálogo aparte de `Permission` a propósito: el encargado de un restaurante
+         *     tiene `frozenset(Permission)` y nunca debe recibir estos, y el editor de
+         *     roles del restaurante tampoco los ofrece. Una credencial de restaurante no
+         *     los tiene ni los puede pedir.
+         * @enum {string}
+         */
+        PlatformPermission: "platform.restaurants.read" | "platform.restaurants.manage" | "platform.activity.read" | "platform.preview.open" | "platform.observability.read";
         /** PlatformSessionResponse */
         PlatformSessionResponse: {
             admin: components["schemas"]["PlatformAdminResponse"];
@@ -4250,24 +4299,14 @@ export interface components {
             accounts: components["schemas"]["SandboxAccountResponse"][];
             restaurant: components["schemas"]["RestaurantSummaryResponse"] | null;
         };
-        /**
-         * SessionResponse
-         * @description La cuenta propia, su restaurante y lo que su rol le deja hacer.
-         *
-         *     La interfaz arma la navegación con `permissions`; la API igual rechaza lo
-         *     no permitido, así que ocultar es comodidad y no seguridad.
-         */
-        SessionResponse: {
-            /** Permissions */
-            permissions: components["schemas"]["Permission"][];
-            /** Preview */
-            preview: boolean;
-            restaurant: components["schemas"]["SessionRestaurantResponse"];
-            /** Terms Accepted */
-            terms_accepted: boolean;
-            /** Terms Version */
-            terms_version: string;
-            user: components["schemas"]["SessionUserResponse"];
+        /** SessionAdminResponse */
+        SessionAdminResponse: {
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name: string;
+            /** Id */
+            id: number;
         };
         /** SessionRestaurantResponse */
         SessionRestaurantResponse: {
@@ -4298,6 +4337,39 @@ export interface components {
             /** Is Available */
             is_available: boolean;
         };
+        /**
+         * StaffAccessTokenResponse
+         * @description El token y, en la misma respuesta, la sesión que abre.
+         *
+         *     Así la interfaz no necesita una segunda petición a `/auth/me` para
+         *     dibujarse después de entrar.
+         */
+        StaffAccessTokenResponse: {
+            /** Access Token */
+            access_token: string;
+            /** Expires In */
+            expires_in: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "staff";
+            /** Permissions */
+            permissions: components["schemas"]["Permission"][];
+            /** Preview */
+            preview: boolean;
+            restaurant: components["schemas"]["SessionRestaurantResponse"];
+            /** Terms Accepted */
+            terms_accepted: boolean;
+            /** Terms Version */
+            terms_version: string;
+            /**
+             * Token Type
+             * @default bearer
+             */
+            token_type: string;
+            user: components["schemas"]["SessionUserResponse"];
+        };
         /** StaffMemberResponse */
         StaffMemberResponse: {
             /**
@@ -4324,6 +4396,30 @@ export interface components {
             items: components["schemas"]["StaffMemberResponse"][];
             /** Total */
             total: number;
+        };
+        /**
+         * StaffSessionResponse
+         * @description La cuenta del personal, su restaurante y lo que su rol le deja hacer.
+         *
+         *     La interfaz arma la navegación con `permissions`; la API igual rechaza lo
+         *     no permitido, así que ocultar es comodidad y no seguridad.
+         */
+        StaffSessionResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "staff";
+            /** Permissions */
+            permissions: components["schemas"]["Permission"][];
+            /** Preview */
+            preview: boolean;
+            restaurant: components["schemas"]["SessionRestaurantResponse"];
+            /** Terms Accepted */
+            terms_accepted: boolean;
+            /** Terms Version */
+            terms_version: string;
+            user: components["schemas"]["SessionUserResponse"];
         };
         /** StatusCountResponse */
         StatusCountResponse: {
@@ -4779,7 +4875,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AccessTokenResponse"];
+                    "application/json": components["schemas"]["StaffAccessTokenResponse"] | components["schemas"]["PlatformAdminAccessTokenResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */
@@ -4862,7 +4958,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SessionResponse"];
+                    "application/json": components["schemas"]["StaffSessionResponse"] | components["schemas"]["PlatformAdminSessionResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */
@@ -4940,7 +5036,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AccessTokenResponse"];
+                    "application/json": components["schemas"]["StaffAccessTokenResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */
@@ -5027,7 +5123,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SessionResponse"];
+                    "application/json": components["schemas"]["StaffSessionResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */
@@ -5114,7 +5210,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AccessTokenResponse"];
+                    "application/json": components["schemas"]["StaffAccessTokenResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */
@@ -5197,7 +5293,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AccessTokenResponse"];
+                    "application/json": components["schemas"]["StaffAccessTokenResponse"] | components["schemas"]["PlatformAdminAccessTokenResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */

@@ -68,8 +68,10 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
   precarga y su entrada de menú (`nav`). De ahí salen las rutas, las guardas de
   permiso (`RequireSession`), el menú lateral e inferior y la precarga del
   armazón, que recibe el registro por prop. Una pantalla nueva es una entrada
-  allí; no se toca otra lista. Las pantallas de plataforma y la vista previa se
-  declaran en `src/router/routes.tsx`.
+  allí; no se toca otra lista. Las pantallas de plataforma (`/plataforma/...`, con permisos
+  `platform.*`) están en el mismo registro: un solo armazón, una sola guarda y un
+  solo acceso (`/acceso`) para el personal y para la administración del sistema.
+  Solo la vista previa se declara aparte, en `src/router/routes.tsx`.
 - **Rutas** (`src/services/paths.ts`): `routePatterns` guarda cada ruta una vez
   (`/pedidos/:orderId`) y `paths` da constructores tipados
   (`paths.orders.detail(id)`). Prohibido un literal de ruta (`'/…'`) en `to=`,
@@ -138,8 +140,8 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
   código; solo lo que choca con una decisión del proyecto se excluye en
   `doctor.config.jsonc`, con el motivo escrito al lado.
 - **Huella de carbono** (`pnpm carbon`, y `pnpm carbon:browser` en el CI):
-  `scripts/carbon.ts` mide la primera visita de `/acceso`, `/privacidad`,
-  `/plataforma/acceso` y de Pedidos con la sesión de un mesero, con
+  `scripts/carbon.ts` mide la primera visita de `/acceso`, `/privacidad`
+  y de Pedidos con la sesión de un mesero, con
   `@tgwf/co2` (Sustainable Web Design v4), y falla si una ruta baja de A+
   (0,040 g, unos 270 kB). Las rutas están en `scripts/carbon/routes.ts`: una
   pantalla pública nueva se agrega allí. No se baja la nota mínima para que
@@ -210,14 +212,14 @@ El aislamiento lo garantiza el backend; el frontend no debe abrirle huecos.
 - El cliente nunca envía `restaurant_id` (ni en el cuerpo, la URL o un
   parámetro): el servidor lo toma del token. Marca cualquier petición que lo
   mande.
-- Al cerrar o vencer la sesión se vacía el caché de consultas
-  (`clearQueriesExcept`, que solo deja las de la sesión de plataforma) y lo
-  guardado de la cuenta; nada de una cuenta queda visible para la siguiente en
+- Al cerrar o vencer la sesión se vacía el caché de consultas y de mutaciones
+  (`clearQueries`) y lo guardado de la cuenta; nada de una cuenta queda visible para la siguiente en
   el mismo celular.
-- La sesión del administrador del sistema es otra sesión: su token viaja solo
-  a `/platform/*` y el de restaurante nunca va ahí. Marca cualquier petición
-  que mezcle credenciales o una pantalla de `/plataforma` que lea la sesión
-  del restaurante.
+- La sesión es una sola y lleva `kind` (`staff` o `platform`): lo propio del
+  restaurante (restaurante, términos, cola sin señal, canal de avisos) se lee
+  solo con `kind === 'staff'` (`useStaffAccount`), y las pantallas de
+  `/plataforma` no leen nada del restaurante. Marca cualquier pantalla que lea
+  `account.restaurant` o `account.user` sin comprobar la clase de cuenta.
 - Un 404 se muestra como «no existe» sin sugerir que el recurso es de otro
   local.
 

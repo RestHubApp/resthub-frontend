@@ -1,7 +1,7 @@
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { useQueuedOrders } from '@/store/offlineQueue'
-import { useSession } from '@/store/session'
+import { useStaffAccount } from '@/store/session'
 import { leavePreview } from './leavePreview'
 import { ShellIcon } from './ShellIcon'
 
@@ -23,7 +23,7 @@ interface PreviewExitButtonProps {
  * descartarlos: nada se pierde en silencio, ni siquiera en una prueba.
  */
 export function PreviewExitButton({ tone = 'banner' }: PreviewExitButtonProps) {
-  const pending = useQueuedOrders(useSession((state) => state.account))
+  const pending = useQueuedOrders(useStaffAccount())
 
   const button = (onClick?: () => void) => (
     <Button type="button" size={tone === 'page' ? 'lg' : 'default'} className={STYLES[tone]} onClick={onClick}>

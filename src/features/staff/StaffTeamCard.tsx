@@ -6,7 +6,7 @@ import { DataTable } from '@/components/DataTable'
 import { FormMessage } from '@/components/FormMessage'
 import { SectionCard } from '@/components/SectionCard'
 import { errorMessage } from '@/services/apiError'
-import { usePermissions, useSession } from '@/store/session'
+import { staffOf, usePermissions, useSession } from '@/store/session'
 import { canManageAccount } from './roleOptions'
 import { staffColumns } from './StaffColumns'
 import { STAFF_LIST_QUERY } from './staffList'
@@ -16,7 +16,7 @@ export function StaffTeamCard() {
   const staff = useQuery(STAFF_LIST_QUERY)
   const roles = useQuery(rolesQuery())
   const granted = usePermissions()
-  const ownId = useSession((state) => state.account?.user.id)
+  const ownId = useSession((state) => staffOf(state.account)?.user.id)
   const canManage = (account: StaffResponse) => canManageAccount(account, roles.data, granted)
 
   return (

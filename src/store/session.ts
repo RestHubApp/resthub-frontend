@@ -4,7 +4,7 @@ import { setAuthToken, setUnauthorizedHandler } from '@/services/apiCredentials'
 import { DEFAULT_TIME_ZONE } from '@/services/format'
 import { logger } from '@/services/logger'
 import { expiryTimer, isTokenExpired } from '@/services/tokenExpiry'
-import { clearQueriesExcept, PLATFORM_QUERY_ROOT } from '@/services/queryClient'
+import { clearQueries } from '@/services/queryClient'
 import { isPreviewTab, setPreviewTabMark } from '@/services/tabStorage'
 import { discardPreviewQueue } from './offlineQueue'
 import {
@@ -16,25 +16,28 @@ import {
   type StoredSession,
   writeStoredSession,
 } from './sessionStorageAccess'
-import type { CurrentUserResponse, PermissionCode } from '@/api/types'
+import type { AnyPermissionCode, PermissionCode, Session, StaffSession } from '@/api/types'
 
 interface SessionState {
   token: string | null
-  /** La cuenta, su restaurante y sus permisos, tal como los da `GET /auth/me`. */
-  account: CurrentUserResponse | null
+  /**
+   * La sesión tal como la da `GET /auth/me`: la del personal de un restaurante
+   * o la de la administración del sistema, según `kind`.
+   */
+  account: Session | null
   /** La sesion se cerro sola porque el token vencio: el acceso lo explica. */
   expired: boolean
   /** La sesion se cerro porque no se pudo seguir tras cambiar la contraseña: el acceso lo explica. */
   passwordChanged: boolean
-  signIn: (token: string, account: CurrentUserResponse) => void
+  signIn: (token: string, account: Session) => void
   /** Aplica una lectura nueva de `GET /auth/me`: nombre, restaurante o permisos. */
-  refresh: (account: CurrentUserResponse) => void
+  refresh: (account: Session) => void
   /**
    * Cambia el token `origin` por uno renovado sin cerrar la sesion. Si la
    * sesion ya no es la de `origin` (se cerro o entro otra cuenta mientras
    * viajaba la renovacion), la respuesta se descarta.
    */
-  renew: (origin: string, token: string, account: CurrentUserResponse) => void
+  renew: (origin: string, token: string, account: Session) => void
   signOut: () => void
   /** Cierra la sesion porque el servidor ya no acepta el token. */
   expire: () => void
@@ -50,7 +53,7 @@ interface SessionState {
    * Solo en una pestana de vista previa y solo con una sesion que el servidor
    * marco `preview: true`: asi nunca termina en `localStorage`.
    */
-  startPreview: (token: string, account: CurrentUserResponse) => void
+  startPreview: (token: string, account: StaffSession) => void
   /**
    * Sale de la vista previa: borra su sesion y deja de tratar la pestana como
    * de vista previa. En una pestana normal no hace nada.
@@ -83,9 +86,8 @@ function cleanSession(): void {
   setAuthToken(null)
   writeStoredSession(null)
   scheduleExpiry(null)
-  // Nada de la cuenta anterior queda en el cache para la siguiente. Lo del
-  // administrador del sistema es de otra sesion y se queda.
-  clearQueriesExcept(PLATFORM_QUERY_ROOT)
+  // Nada de la cuenta anterior queda en el cache para la siguiente.
+  clearQueries()
   // En una vista previa, al salir o vencer, su cola (solo de esta pestana y
   // del local de muestra) ya no tiene con que enviarse. En una normal no hace nada.
   discardPreviewQueue()
@@ -99,7 +101,7 @@ function dropSession(): void {
   setAuthToken(null)
   persistence.token = null
   scheduleExpiry(null)
-  clearQueriesExcept(PLATFORM_QUERY_ROOT)
+  clearQueries()
 }
 
 /** Si lo guardado se puede seguir usando: vigente y, en una vista previa, marcado como tal. */
@@ -122,7 +124,7 @@ if (restored === null) {
 setAuthToken(restored?.token ?? null)
 
 /** Aplica una lectura nueva de `GET /auth/me` sin tocar el token. */
-function refreshSession(account: CurrentUserResponse): void {
+function refreshSession(account: Session): void {
   const { token } = useSession.getState()
   // eslint-disable-next-line security/detect-possible-timing-attacks -- compara con null, no con un secreto: el cliente no verifica credenciales
   if (token === null) {
@@ -137,7 +139,7 @@ function refreshSession(account: CurrentUserResponse): void {
 }
 
 /** Cambia el token `origin` por el renovado, salvo que la sesión ya no sea la de `origin`. */
-function renewSession(origin: string, token: string, account: CurrentUserResponse): void {
+function renewSession(origin: string, token: string, account: Session): void {
   if (useSession.getState().token !== origin) {
     return
   }
@@ -156,12 +158,12 @@ function renewSession(origin: string, token: string, account: CurrentUserRespons
 }
 
 /** Abre la sesión de vista previa, solo en su propia pestaña y con una cuenta `preview`. */
-function startPreviewSession(token: string, account: CurrentUserResponse): void {
+function startPreviewSession(token: string, account: StaffSession): void {
   if (!isPreviewTab() || !account.preview) {
     throw new Error('Una sesion de vista previa solo se abre en su propia pestana.')
   }
   // Lo que esta pestana haya cargado antes no se mezcla con el local de muestra.
-  clearQueriesExcept(PLATFORM_QUERY_ROOT)
+  clearQueries()
   setPreviewTabMark(true)
   useSession.getState().signIn(token, account)
   logger.info({ restaurantId: account.restaurant.id }, 'auth.preview_started')
@@ -178,6 +180,14 @@ function exitPreviewSession(): void {
   logger.info('auth.preview_exited')
 }
 
+function logSignedIn(account: Session): void {
+  if (account.kind === 'platform') {
+    logger.info({ adminId: account.admin.id }, 'auth.signed_in')
+    return
+  }
+  logger.info({ userId: account.user.id, roleId: account.user.role_id, restaurantId: account.restaurant.id }, 'auth.signed_in')
+}
+
 export const useSession = create<SessionState>((set, get) => ({
   token: restored?.token ?? null,
   account: restored?.account ?? null,
@@ -189,10 +199,7 @@ export const useSession = create<SessionState>((set, get) => ({
     writeStoredSession({ token, account })
     set({ token, account, expired: false, passwordChanged: false })
     scheduleExpiry(token)
-    logger.info(
-      { userId: account.user.id, roleId: account.user.role_id, restaurantId: account.restaurant.id },
-      'auth.signed_in',
-    )
+    logSignedIn(account)
   },
 
   signOut: () => {
@@ -227,13 +234,20 @@ setUnauthorizedHandler(() => {
   useSession.getState().expire()
 })
 
-/** Si la sesión guardada es de la misma cuenta y local que esta pestaña. */
-function isSameAccount(stored: StoredSession, account: CurrentUserResponse): boolean {
-  return stored.account.user.id === account.user.id && stored.account.restaurant.id === account.restaurant.id
+function accountId(account: Session): number {
+  return account.kind === 'platform' ? account.admin.id : account.user.id
+}
+
+/** Si la sesión guardada es de la misma cuenta (y, en el personal, del mismo local) que esta pestaña. */
+function isSameAccount(stored: StoredSession, account: Session): boolean {
+  if (stored.account.kind === 'platform' || account.kind === 'platform') {
+    return stored.account.kind === account.kind && accountId(stored.account) === accountId(account)
+  }
+  return accountId(stored.account) === accountId(account) && stored.account.restaurant.id === account.restaurant.id
 }
 
 /** Si lo guardado se puede adoptar: sigue vigente y es de la misma cuenta (o esta pestaña no tenía ninguna). */
-function canAdoptStoredSession(stored: StoredSession | null, account: CurrentUserResponse | null): stored is StoredSession {
+function canAdoptStoredSession(stored: StoredSession | null, account: Session | null): stored is StoredSession {
   return current(stored) && (account === null || isSameAccount(stored, account))
 }
 
@@ -298,34 +312,44 @@ export function usePreview(): boolean {
   return useSession((state) => state.account?.preview === true)
 }
 
-export function hasPermission(
-  account: CurrentUserResponse | null,
-  permission: PermissionCode,
-): boolean {
-  return account?.permissions.includes(permission) ?? false
+const WITHOUT_PERMISSIONS: readonly PermissionCode[] = []
+
+export function hasPermission(account: Session | null, permission: AnyPermissionCode): boolean {
+  const granted: readonly AnyPermissionCode[] = account?.permissions ?? WITHOUT_PERMISSIONS
+  return granted.includes(permission)
 }
 
 /**
- * Si la cuenta puede hacer algo, segun los permisos de su rol.
+ * Si la cuenta puede hacer algo, segun sus permisos (los de su rol, o los
+ * `platform.*` de la administración del sistema).
  *
  * Ocultar un boton es comodidad, no seguridad: el servidor vuelve a comprobar
  * el permiso en cada peticion. La interfaz pregunta por permisos y no por
  * roles para que cambiar el mapa de permisos de un rol en el backend se
  * refleje sin tocar ninguna pantalla.
  */
-export function useCan(permission: PermissionCode): boolean {
+export function useCan(permission: AnyPermissionCode): boolean {
   return useSession((state) => hasPermission(state.account, permission))
 }
 
-const WITHOUT_PERMISSIONS: readonly PermissionCode[] = []
+/** La sesión del personal, o `null` si no hay sesión o es de la administración del sistema. */
+export function staffOf(account: Session | null): StaffSession | null {
+  return account?.kind === 'staff' ? account : null
+}
+
+/** La sesión del personal de este momento; lo propio de un restaurante (pedidos, cola, términos) corre solo con ella. */
+export function useStaffAccount(): StaffSession | null {
+  return useSession((state) => staffOf(state.account))
+}
 
 /**
- * Todos los permisos de la cuenta.
+ * Todos los permisos del restaurante de la cuenta.
  *
- * Para comparar con los de un rol: nadie da un permiso que no tiene.
+ * Para comparar con los de un rol: nadie da un permiso que no tiene. Una
+ * cuenta de plataforma no tiene ninguno.
  */
 export function usePermissions(): readonly PermissionCode[] {
-  return useSession((state) => state.account?.permissions ?? WITHOUT_PERMISSIONS)
+  return useSession((state) => staffOf(state.account)?.permissions ?? WITHOUT_PERMISSIONS)
 }
 
 /**
@@ -334,13 +358,13 @@ export function usePermissions(): readonly PermissionCode[] {
  * Lo usan las precargas: pedir por adelantado algo que el servidor va a
  * rechazar con 403 solo gasta un viaje de red.
  */
-export function can(permission: PermissionCode): boolean {
+export function can(permission: AnyPermissionCode): boolean {
   return hasPermission(useSession.getState().account, permission)
 }
 
 /** La zona horaria del restaurante fuera de un componente. */
 export function currentTimeZone(): string {
-  return useSession.getState().account?.restaurant.timezone ?? DEFAULT_TIME_ZONE
+  return staffOf(useSession.getState().account)?.restaurant.timezone ?? DEFAULT_TIME_ZONE
 }
 
 /**
@@ -348,5 +372,5 @@ export function currentTimeZone(): string {
  * pedidos son las del local, no las del navegador de quien mira.
  */
 export function useTimeZone(): string {
-  return useSession((state) => state.account?.restaurant.timezone ?? DEFAULT_TIME_ZONE)
+  return useSession((state) => staffOf(state.account)?.restaurant.timezone ?? DEFAULT_TIME_ZONE)
 }

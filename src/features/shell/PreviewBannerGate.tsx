@@ -1,9 +1,7 @@
-import type { CurrentUserResponse } from '@/api/types'
-import { usePreview } from '@/store/session'
+import type { Session } from '@/api/types'
 import { PreviewBanner } from './PreviewBanner'
 
-/** Muestra el aviso de la vista previa solo cuando la sesión es de vista previa. */
-export function PreviewBannerGate({ account }: { readonly account: CurrentUserResponse }) {
-  const isPreview = usePreview()
-  return isPreview ? <PreviewBanner account={account} /> : null
+/** Muestra el aviso de la vista previa solo cuando la sesión es de vista previa (siempre del personal del local de muestra). */
+export function PreviewBannerGate({ account }: { readonly account: Session }) {
+  return account.kind === 'staff' && account.preview ? <PreviewBanner account={account} /> : null
 }

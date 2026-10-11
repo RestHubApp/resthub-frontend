@@ -6,7 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
-import type { CurrentUserResponse } from '@/api/types'
+import type { StaffSession } from '@/api/types'
 
 const STORAGE_KEY = 'resthub.session.v2'
 
@@ -16,12 +16,12 @@ function tokenThatExpires(secondsFromNow: number): string {
 }
 
 // Solo lo que el almacén lee de la cuenta.
-function account(userId: number): CurrentUserResponse {
+function account(userId: number): StaffSession {
   return {
     user: { id: userId, role_id: 1 },
     restaurant: { id: 1, timezone: 'America/Lima' },
     permissions: [],
-  } as unknown as CurrentUserResponse
+  } as unknown as StaffSession
 }
 
 function fakeStorage() {
@@ -115,7 +115,7 @@ describe('sesión normal y ciclo de vida', () => {
     const token = tokenThatExpires(3600)
     useSession.getState().signIn(token, account(1))
 
-    const updated = { ...account(1), permissions: ['orders.take'] } as unknown as CurrentUserResponse
+    const updated = { ...account(1), permissions: ['orders.take'] } as unknown as StaffSession
     useSession.getState().refresh(updated)
 
     expect(useSession.getState().account).toEqual(updated)
@@ -174,7 +174,7 @@ const MARK = 'resthub.vista-previa.pestana.v1'
 const PREVIEW = 'resthub.vista-previa.sesion.v1'
 const QUEUE = 'resthub.pedidos-sin-enviar.v2'
 
-function sampleAccount(): CurrentUserResponse {
+function sampleAccount(): StaffSession {
   return { ...account(9), preview: true }
 }
 

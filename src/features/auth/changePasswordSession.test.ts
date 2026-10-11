@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from '@jest/globals'
 
-import { buildAccount, PERMISSIONS_WAITER, signInAs } from '#jest/harness'
-import { sessionOf } from '@/api/auth'
-import type { AccessTokenResponse } from '@/api/types'
+import { buildAccount, currentStaff, PERMISSIONS_WAITER, signInAs } from '#jest/harness'
+import { staffSessionOf } from '@/api/auth'
+import type { StaffAccessTokenResponse } from '@/api/types'
 import { useSession } from '@/store/session'
 import { followWithNewToken } from './changePasswordSession'
 
-function responseWith(token: string): AccessTokenResponse {
+function responseWith(token: string): StaffAccessTokenResponse {
   return { access_token: token, token_type: 'bearer', expires_in: 3600, ...buildAccount(PERMISSIONS_WAITER) }
 }
 
@@ -21,7 +21,7 @@ describe('followWithNewToken', () => {
 
     expect(followWithNewToken(response, origin)).toBe('renovada')
     expect(useSession.getState().token).toBe('token-renovado')
-    expect(sessionOf(response).user.id).toBe(useSession.getState().account?.user.id)
+    expect(staffSessionOf(response).user.id).toBe(currentStaff()?.user.id)
   })
 
   it('cierra la sesión si el servidor no devolvió token', () => {

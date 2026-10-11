@@ -1,4 +1,4 @@
-import type { CurrentUserResponse } from '@/api/types'
+import type { Session, StaffSession } from '@/api/types'
 import { isPreviewTab, tabStorage } from '@/services/tabStorage'
 
 // Donde se guarda la sesion lo decide la pestana al cargarse (`tabStorage`):
@@ -9,11 +9,21 @@ import { isPreviewTab, tabStorage } from '@/services/tabStorage'
 export const STORAGE = tabStorage.storage
 export const STORAGE_KEY = tabStorage.sessionKey
 // Las versiones anteriores ya no se leen; tampoco se dejan con un token adentro.
-const OLD_STORAGE_KEYS = ['resthub.session.v1'] as const
+// La sesión de plataforma ya no es otra: es la misma que la del personal.
+const OLD_STORAGE_KEYS = ['resthub.session.v1', 'resthub.platform-session.v1'] as const
 
 export interface StoredSession {
   token: string
-  account: CurrentUserResponse
+  account: Session
+}
+
+/**
+ * Una sesión guardada antes de que la respuesta llevara `kind` es del personal,
+ * como se leía entonces: así nadie vuelve a entrar solo por haber actualizado.
+ */
+function withKind(stored: StoredSession): StoredSession {
+  const account: object = stored.account
+  return 'kind' in account ? stored : { ...stored, account: { ...account, kind: 'staff' } as StaffSession }
 }
 
 /** Lectura de la sesión guardada: con el valor, o sin poder leer. */
@@ -29,7 +39,7 @@ export function readSaved(): Read {
   }
   try {
     const raw = STORAGE.getItem(STORAGE_KEY)
-    return { ok: true, session: raw === null ? null : (JSON.parse(raw) as StoredSession) }
+    return { ok: true, session: raw === null ? null : withKind(JSON.parse(raw) as StoredSession) }
   } catch {
     return { ok: false }
   }

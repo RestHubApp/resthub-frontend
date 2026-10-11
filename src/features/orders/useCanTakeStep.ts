@@ -1,6 +1,6 @@
 import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
-import { useCan, useSession } from '@/store/session'
+import { staffOf, useCan, useSession } from '@/store/session'
 import type { NextStep } from './nextStep'
 
 /**
@@ -13,7 +13,7 @@ import type { NextStep } from './nextStep'
 export function useCanTakeStep(order: OrderResponse, step: NextStep | undefined): boolean {
   const hasPermission = useCan(step?.permission ?? PERMISSION.ordersTake)
   const canViewAll = useCan(PERMISSION.ordersReadAll)
-  const isOwn = useSession((state) => state.account?.user.id === order.waiter_id)
+  const isOwn = useSession((state) => staffOf(state.account)?.user.id === order.waiter_id)
   if (step === undefined || !hasPermission) {
     return false
   }

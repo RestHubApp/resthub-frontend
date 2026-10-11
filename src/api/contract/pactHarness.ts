@@ -2,7 +2,7 @@ import path from 'node:path'
 
 import { MatchersV3, PactV4, type V3MockServer } from '@pact-foundation/pact'
 
-import { setAuthToken, setPlatformAuthToken } from '@/services/apiCredentials'
+import { setAuthToken } from '@/services/apiCredentials'
 import { setApiOrigin } from '@/services/apiRouting'
 
 // Lo que comparten las pruebas de contrato del consumidor.
@@ -111,17 +111,15 @@ export function newPact(): PactV4 {
  * Apunta el cliente real al servidor simulado y abre las sesiones de ejemplo.
  *
  * Solo cambia el origen del cliente: lo demás (identificador de petición,
- * token por ruta, cierre de sesión en un 401) son los de la aplicación.
+ * credencial de la sesión, cierre de sesión en un 401) son los de la aplicación.
  */
 export function connectTo(mockServer: V3MockServer): void {
   setApiOrigin(mockServer.url)
   setAuthToken(EXAMPLE_TOKEN)
-  setPlatformAuthToken(EXAMPLE_TOKEN)
 }
 
 /** Sin sesión abierta: el acceso sale sin credencial. */
 export function connectWithoutSession(mockServer: V3MockServer): void {
   setApiOrigin(mockServer.url)
   setAuthToken(null)
-  setPlatformAuthToken(null)
 }

@@ -36,7 +36,6 @@
         "files": [
           "src/features/auth/useLogin.ts",
           "src/features/auth/useChangePassword.ts",
-          "src/features/platform/usePlatformLogin.ts",
           "src/features/shell/useAcceptTerms.ts"
         ],
         "rules": ["react-doctor/query-mutation-missing-invalidation"]

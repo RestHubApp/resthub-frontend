@@ -16,7 +16,7 @@ import { PreviewEntryPending } from './PreviewEntryPending'
  *
  * Si sirvió, el `loader` ya llevó a la aplicación y esta pantalla no se ve.
  * El enlace de vuelta recarga la página: la pestaña deja de ser de vista
- * previa y vuelve a leer la sesión de plataforma del navegador.
+ * previa y vuelve a leer la sesión del navegador.
  */
 export function PreviewEntryView() {
   const result = useLoaderData<PreviewEntryResult>()

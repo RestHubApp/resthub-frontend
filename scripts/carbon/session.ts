@@ -11,6 +11,7 @@ const A_YEAR_S = 365 * 24 * 60 * 60
 const WAITER_PERMISSIONS = ['menu.read', 'tables.read', 'orders.take', 'orders.charge', 'customers.read', 'reservations.read']
 
 const WAITER_ACCOUNT = {
+  kind: 'staff',
   permissions: WAITER_PERMISSIONS,
   preview: false,
   terms_version: '2026-10',

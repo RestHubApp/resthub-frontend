@@ -2,10 +2,9 @@ import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen, within } from '@testing-library/react'
 
 import { buildMenu, table, order, lastBody } from '#jest/fixtures/orders'
-import { signInAs, mountScreen, firstOf, ErrorResponse, server, withoutNetwork } from '#jest/harness'
+import { currentStaff, signInAs, mountScreen, firstOf, ErrorResponse, server, withoutNetwork } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { ownerOf, queuedOrders, removeQueued } from '@/store/offlineQueue'
-import { useSession } from '@/store/session'
 import { NewOrderView } from '@/features/orders/NewOrderView'
 import { useDraftActions } from './useOrderDraft'
 
@@ -102,7 +101,7 @@ describe('tomar un pedido en una mesa', () => {
     await send(user)
 
     expect(await screen.findByText('Sin señal: el pedido de Mesa 3 quedó guardado y se enviará solo.')).toBeInTheDocument()
-    const inQueue = queuedOrders(ownerOf(useSession.getState().account))
+    const inQueue = queuedOrders(ownerOf(currentStaff()))
     expect(inQueue.map((item) => [item.label, item.request.table_id])).toEqual([['Mesa 3', 3]])
     expect(api.calls('post', SEND)).toHaveLength(0)
   })
@@ -115,7 +114,7 @@ describe('tomar un pedido en una mesa', () => {
 
     expect(await screen.findByText('La mesa ya tiene un pedido abierto.')).toBeInTheDocument()
     expect(screen.getByText('1 plato · Ver y anotar')).toBeInTheDocument()
-    expect(queuedOrders(ownerOf(useSession.getState().account))).toHaveLength(0)
+    expect(queuedOrders(ownerOf(currentStaff()))).toHaveLength(0)
   })
 
   it('sin platos no se puede enviar', async () => {

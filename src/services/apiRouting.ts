@@ -1,12 +1,9 @@
-// A qué sesión pertenece una petición y dónde está el API.
+// Dónde está el API y a quién se le manda la credencial.
 //
-// Cada sesión viaja solo a sus rutas, y esto se decide mirando la dirección
-// final y no el texto de la ruta.
+// La sesión viaja solo al API, y esto se decide mirando la dirección final y
+// no el texto de la ruta.
 
 const API_PREFIX = '/api/v1'
-
-/** El prefijo de las rutas del administrador del sistema, relativo a `/api/v1`. */
-const PLATFORM_PREFIX = '/platform'
 
 // Una dirección con esquema (`https:`) o con `//` delante ya trae su propio origen.
 const SCHEME = /^[a-z][a-z\d+.-]*:/iu
@@ -43,8 +40,6 @@ export function apiUrl(path: string): string {
 /** Lo que decide adónde va una petición: su ruta relativa a `/api/v1` o una dirección completa. */
 type RequestTarget = string | undefined
 
-type Destination = 'restaurant' | 'platform' | 'foreign'
-
 function urlOf(target: RequestTarget): URL | null {
   const path = target ?? ''
   const joined = hasOrigin(path) ? path : `${apiUrl('')}/${path.replace(/^\/+/u, '')}`
@@ -57,55 +52,21 @@ function urlOf(target: RequestTarget): URL | null {
 }
 
 /**
- * A quién pertenece la petición, mirando la dirección final y no el texto de
- * la ruta: `platform/x` sin barra es de plataforma, `/platform/../orders` no,
- * y una dirección de otro origen (`https://otro.com/…`, `//otro.com/…`) no
- * es de ninguna sesión.
+ * Si la petición va al API de la aplicación, mirando la dirección final y no
+ * el texto de la ruta: una dirección de otro origen (`https://otro.com/…`,
+ * `//otro.com/…`) no es del API.
  */
-function destinationOf(target: RequestTarget): Destination {
+function isApiTarget(target: RequestTarget): boolean {
   const base = urlOf('')
   const url = base === null ? null : urlOf(target)
-  if (base === null || url?.origin !== base.origin) {
-    return 'foreign'
-  }
-  const platformPath = `${base.pathname.replace(/\/$/u, '')}${PLATFORM_PREFIX}`
-  return url.pathname === platformPath || url.pathname.startsWith(`${platformPath}/`) ? 'platform' : 'restaurant'
+  return base !== null && url?.origin === base.origin
 }
 
 /**
- * Si una petición es del administrador del sistema.
- *
- * Solo cuenta el prefijo completo: `/platformas` o `/restaurant/platform` no
- * lo son. La consulta (`?search=`) no cambia a quien pertenece la ruta.
+ * El token que acompaña a una petición: el de la sesión abierta si va al API,
+ * y ninguno si va a otro origen. Cuál ruta acepta qué cuenta lo decide el
+ * servidor con sus permisos; el cliente solo no reparte la credencial fuera.
  */
-export function isPlatformPath(target: RequestTarget): boolean {
-  return destinationOf(target) === 'platform'
-}
-
-/** Los tokens abiertos en este momento, por sesión. */
-export interface SessionTokens {
-  readonly restaurant: string | null
-  readonly platform: string | null
-}
-
-/**
- * El token que acompaña a una petición.
- *
- * Cada sesión viaja solo a sus rutas: el token de plataforma nunca sale hacia
- * un endpoint de restaurante ni el de restaurante hacia `/platform/*`. El
- * servidor rechazaría la mezcla con 401, pero además no tiene por qué verla.
- * Una petición a otro origen que el del API no lleva ninguno.
- */
-export function tokenFor(target: RequestTarget, tokens: SessionTokens): string | null {
-  switch (destinationOf(target)) {
-    case 'platform': {
-      return tokens.platform
-    }
-    case 'restaurant': {
-      return tokens.restaurant
-    }
-    case 'foreign': {
-      return null
-    }
-  }
+export function tokenFor(target: RequestTarget, token: string | null): string | null {
+  return isApiTarget(target) ? token : null
 }

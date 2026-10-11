@@ -1,4 +1,4 @@
-import type { PermissionCode } from '@/api/types'
+import type { PermissionCode, PlatformPermissionCode } from '@/api/types'
 
 /**
  * Los permisos que la interfaz pregunta, con nombre.
@@ -33,3 +33,17 @@ export const PERMISSION = {
   tablesManage: 'tables.manage',
   tablesRead: 'tables.read',
 } as const satisfies Record<string, PermissionCode>
+
+/**
+ * Los permisos de la administración del sistema (`platform.*`), con nombre.
+ *
+ * Son un catálogo aparte del de un restaurante: un encargado nunca los recibe.
+ * Las pantallas de plataforma los piden igual que las demás piden los suyos.
+ */
+export const PLATFORM_PERMISSION = {
+  restaurantsRead: 'platform.restaurants.read',
+  restaurantsManage: 'platform.restaurants.manage',
+  activityRead: 'platform.activity.read',
+  previewOpen: 'platform.preview.open',
+  observabilityRead: 'platform.observability.read',
+} as const satisfies Record<string, PlatformPermissionCode>

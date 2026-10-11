@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import type { CurrentUserResponse } from '@/api/types'
+import type { StaffSession } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
@@ -13,7 +13,7 @@ import { useAcceptTerms } from './useAcceptTerms'
  * Ley N.º 29733: antes de trabajar, cada cuenta acepta los términos de uso y
  * la política de privacidad vigentes. Si cambian, se vuelven a pedir.
  */
-export function TermsGate({ account }: { readonly account: CurrentUserResponse }) {
+export function TermsGate({ account }: { readonly account: StaffSession }) {
   const signOut = useSession((state) => state.signOut)
   const accept = useAcceptTerms(account.terms_version)
 

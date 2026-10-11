@@ -1,19 +1,14 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 
 import { answerAll, answerNever, answerWithNetworkError, type Sent } from '#jest/answerAll'
-import { readRestaurant, writePlatform, writeWithoutCredential } from '#jest/apiCalls'
+import { readPlatform, readRestaurant, writeSession, writeWithoutCredential } from '#jest/apiCalls'
 import { SLOW_TIMEOUT_MS } from './api'
-import { setAuthToken, setPlatformAuthToken, setPlatformUnauthorizedHandler, setUnauthorizedHandler } from './apiCredentials'
+import { setAuthToken, setUnauthorizedHandler } from './apiCredentials'
 import { ApiError, errorMessage } from './apiError'
-import { isPlatformPath, tokenFor } from './apiRouting'
+import { tokenFor } from './apiRouting'
 
-const T_RESTAURANT = 'tok-restaurante'
-const T_PLATFORM = 'tok-plataforma'
-const TOKENS = { restaurant: T_RESTAURANT, platform: T_PLATFORM }
+const TOKEN = 'tok-sesion'
 const RESTAURANTS = '/platform/restaurants'
-// Direcciones que engañan a quien mira solo el texto de la ruta.
-const WITHOUT_BAR = 'platform/restaurants'
-const LEAVES_PLATFORM = '/platform/../orders'
 const OTHER_ORIGIN = '//evil.com/platform'
 
 /** Lo que llegó al servidor falso: la ruta y la cabecera `Authorization` de cada petición. */
@@ -27,83 +22,47 @@ function respondWith(status: number, body: unknown = []): void {
 afterEach(() => {
   received.length = 0
   setAuthToken(null)
-  setPlatformAuthToken(null)
   setUnauthorizedHandler(null)
-  setPlatformUnauthorizedHandler(null)
-})
-
-describe('isPlatformPath', () => {
-  it('reconoce el prefijo completo, con o sin consulta', () => {
-    expect(isPlatformPath('/platform')).toBe(true)
-    expect(isPlatformPath('/platform/auth/login')).toBe(true)
-    expect(isPlatformPath('/platform/restaurants?search=sol')).toBe(true)
-  })
-
-  it('no confunde rutas parecidas ni vacías', () => {
-    expect(isPlatformPath('/platformas')).toBe(false)
-    expect(isPlatformPath('/restaurant/platform')).toBe(false)
-    expect(isPlatformPath('/auth/me')).toBe(false)
-    expect(isPlatformPath(undefined)).toBe(false)
-  })
-
-  it('mira la dirección final y no el texto de la ruta', () => {
-    expect(isPlatformPath(WITHOUT_BAR)).toBe(true)
-    expect(isPlatformPath(LEAVES_PLATFORM)).toBe(false)
-    expect(isPlatformPath('/orders/../platform/restaurants')).toBe(true)
-  })
-
-  it('una dirección de otro origen no es de plataforma', () => {
-    expect(isPlatformPath(`https://evil.com/api/v1${RESTAURANTS}`)).toBe(false)
-    expect(isPlatformPath(OTHER_ORIGIN)).toBe(false)
-  })
 })
 
 describe('tokenFor', () => {
-  it('manda el token de plataforma solo a /platform/*', () => {
-    expect(tokenFor('/platform/restaurants', TOKENS)).toBe(T_PLATFORM)
-    expect(tokenFor('/orders', TOKENS)).toBe(T_RESTAURANT)
+  it('manda el token de la sesión a cualquier ruta del API, sea del restaurante o de plataforma', () => {
+    expect(tokenFor('/platform/restaurants', TOKEN)).toBe(TOKEN)
+    expect(tokenFor('/orders', TOKEN)).toBe(TOKEN)
+    expect(tokenFor('platform/restaurants', TOKEN)).toBe(TOKEN)
   })
 
   it('a otro origen no manda ninguno', () => {
     for (const foreign of [`https://evil.com/api/v1${RESTAURANTS}`, 'https://evil.com/orders', OTHER_ORIGIN]) {
-      expect(tokenFor(foreign, TOKENS)).toBeNull()
+      expect(tokenFor(foreign, TOKEN)).toBeNull()
     }
   })
 
-  it('una ruta sin barra o con `..` lleva el token de su destino real', () => {
-    expect(tokenFor(WITHOUT_BAR, TOKENS)).toBe(T_PLATFORM)
-    expect(tokenFor(LEAVES_PLATFORM, TOKENS)).toBe(T_RESTAURANT)
-  })
-
-  it('sin la sesión de la ruta no manda ninguno, aunque la otra esté abierta', () => {
-    expect(tokenFor('/platform/auth/me', { restaurant: T_RESTAURANT, platform: null })).toBeNull()
-    expect(tokenFor('/auth/me', { restaurant: null, platform: T_PLATFORM })).toBeNull()
+  it('sin sesión no manda ninguno', () => {
+    expect(tokenFor('/auth/me', null)).toBeNull()
   })
 })
 
 describe('cabecera Authorization de cada petición', () => {
-  it('lleva la credencial de la sesión dueña de la ruta', async () => {
-    setAuthToken('r1')
-    setPlatformAuthToken('p1')
+  it('lleva la credencial de la sesión, a las rutas del restaurante y a las de plataforma', async () => {
+    setAuthToken('s1')
     respondWith(200)
     await readRestaurant()
+    respondWith(200, { restaurant: null })
+    await readPlatform()
     respondWith(200, { access_token: 'x' })
-    await writePlatform()
+    await writeSession()
     expect(received.map((r) => [r.path, r.authorization])).toEqual([
-      ['/api/v1/tables', 'Bearer r1'],
-      ['/api/v1/platform/auth/refresh', 'Bearer p1'],
+      ['/api/v1/tables', 'Bearer s1'],
+      ['/api/v1/platform/sandbox', 'Bearer s1'],
+      ['/api/v1/auth/refresh', 'Bearer s1'],
     ])
   })
 
-  it('cerrar una sesión no toca la otra', async () => {
-    setAuthToken('r1')
-    setPlatformAuthToken('p1')
-    setPlatformAuthToken(null)
-    respondWith(200, { access_token: 'x' })
-    await writePlatform()
+  it('sin sesión abierta no lleva ninguna', async () => {
     respondWith(200)
     await readRestaurant()
-    expect(received.map((r) => r.authorization)).toEqual([null, 'Bearer r1'])
+    expect(received.map((r) => r.authorization)).toEqual([null])
   })
 
   it('cada petición lleva un identificador propio', async () => {
@@ -115,18 +74,14 @@ describe('cabecera Authorization de cada petición', () => {
     expect(first?.requestId).not.toBe(second?.requestId)
   })
 
-  it('un error de sesión (`unauthenticated`) cierra solo la sesión dueña de la ruta', async () => {
-    const onExpireRestaurant = jest.fn()
-    const onExpirePlatform = jest.fn()
-    setUnauthorizedHandler(onExpireRestaurant)
-    setPlatformUnauthorizedHandler(onExpirePlatform)
-    setAuthToken('r1')
-    setPlatformAuthToken('p1')
+  it('un error de sesión (`unauthenticated`) de una petición con credencial cierra la sesión', async () => {
+    const onExpire = jest.fn()
+    setUnauthorizedHandler(onExpire)
+    setAuthToken('s1')
     respondWith(401, { detail: 'vencida', code: 'unauthenticated' })
 
-    await expect(writePlatform()).rejects.toThrow()
-    expect(onExpirePlatform).toHaveBeenCalledTimes(1)
-    expect(onExpireRestaurant).not.toHaveBeenCalled()
+    await expect(writeSession()).rejects.toThrow()
+    expect(onExpire).toHaveBeenCalledTimes(1)
   })
 
   it('el cierre de sesión lo decide el código, no el 401: `invalid_credentials` con credencial no cierra', async () => {
@@ -145,7 +100,6 @@ describe('cabecera Authorization de cada petición', () => {
 
   it('`withoutCredential` no manda ningún token aunque haya sesiones abiertas', async () => {
     setAuthToken('r1')
-    setPlatformAuthToken('p1')
     respondWith(200, { access_token: 'x' })
     await writeWithoutCredential()
     await readRestaurant()
@@ -163,12 +117,12 @@ describe('cabecera Authorization de cada petición', () => {
   })
 
   it('un `unauthenticated` sin credencial (contraseña equivocada) no cierra nada', async () => {
-    const onExpirePlatform = jest.fn()
-    setPlatformUnauthorizedHandler(onExpirePlatform)
+    const onExpire = jest.fn()
+    setUnauthorizedHandler(onExpire)
     respondWith(401, { detail: 'Correo o contraseña incorrectos.', code: 'invalid_credentials' })
 
-    await expect(writePlatform()).rejects.toThrow()
-    expect(onExpirePlatform).not.toHaveBeenCalled()
+    await expect(writeSession()).rejects.toThrow()
+    expect(onExpire).not.toHaveBeenCalled()
   })
 })
 

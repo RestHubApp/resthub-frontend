@@ -3,11 +3,13 @@ import { ADMIN_SCREENS } from './screens/adminScreens'
 import { BOARD_SCREENS } from './screens/boardScreens'
 import { CATALOG_SCREENS } from './screens/catalogScreens'
 import { ORDERS_SCREENS } from './screens/ordersScreens'
+import { PLATFORM_SCREENS } from './screens/platformScreens'
 import { SALES_SCREENS } from './screens/salesScreens'
 import type { Screen } from './screens/screenTypes'
 
 /**
- * Las pantallas del restaurante, en un solo lugar.
+ * Las pantallas de la aplicación, en un solo lugar: las del restaurante y las de
+ * la administración del sistema (`/plataforma/...`, con permisos `platform.*`).
  *
  * Es la única fuente de la ruta, el permiso, la carga y la entrada del menú de
  * cada una: de acá salen las rutas del router, las guardas de permiso, el menú
@@ -27,4 +29,5 @@ export const SCREENS: readonly Screen[] = [
   ...SALES_SCREENS,
   ...CATALOG_SCREENS,
   ...ADMIN_SCREENS,
+  ...PLATFORM_SCREENS,
 ]

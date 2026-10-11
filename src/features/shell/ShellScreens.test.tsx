@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
+import { signInToPlatform } from '#jest/fixtures/platform'
 import { buildAccount, signInAs, mountScreen, mountRoutes, TEST_SCREENS, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import { useSession } from '@/store/session'
 import { AppShell } from './AppShell'
@@ -11,6 +12,8 @@ import { RequireSession } from './RequireSession'
 import { ShellScreensContext } from './shellScreens'
 
 const ROUTE = { name: 'Ruta actual' }
+const LOG = '/plataforma/bitacora'
+const BEFORE_STARTING = 'Antes de empezar'
 
 // Un token con `exp` legible: la franja de vista previa cuenta el tiempo que le queda.
 function tokenThatExpiresIn(seconds: number): string {
@@ -64,6 +67,26 @@ describe('RequireSession', () => {
 
     expect(await screen.findByRole('status', ROUTE)).toHaveTextContent(/^\/$/u)
     expect(screen.queryByText('Caja privada')).not.toBeInTheDocument()
+  })
+
+  it('una cuenta de plataforma no pasa por los términos del restaurante y abre lo suyo por su permiso', () => {
+    server()
+    signInToPlatform()
+    mountRoutes(
+      [{ element: <RequireSession permission="platform.activity.read" />, children: [{ path: LOG, element: <p>Bitácora privada</p> }] }],
+      LOG,
+    )
+
+    expect(screen.getByText('Bitácora privada')).toBeInTheDocument()
+    expect(screen.queryByText(BEFORE_STARTING)).not.toBeInTheDocument()
+  })
+
+  it('una cuenta del personal con los términos sin aceptar sigue viendo la puerta de los términos', () => {
+    server()
+    signInAs(['cash.manage'], { terms_accepted: false })
+    openProtected()
+
+    expect(screen.getByText(BEFORE_STARTING)).toBeInTheDocument()
   })
 
   it('sin sesión va al acceso recordando adónde se quería ir', async () => {
@@ -146,7 +169,7 @@ describe('RequireSession: términos y privacidad', () => {
     signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
     const { user } = openProtected()
 
-    expect(screen.getByRole('heading', { name: 'Antes de empezar' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: BEFORE_STARTING })).toBeInTheDocument()
     expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /términos de uso y la política de privacidad/u })).toHaveAttribute('href', '/privacidad')
     await user.click(screen.getByRole('button', { name: 'Acepto los términos' }))

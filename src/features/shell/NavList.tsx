@@ -1,6 +1,6 @@
 import { ShellIcon } from './ShellIcon'
 import type { NavEntry } from './navigation'
-import { PreloadLink } from './PreloadLink'
+import { EntryLink } from './EntryLink'
 
 interface NavListProps {
   readonly entries: readonly NavEntry[]
@@ -11,8 +11,8 @@ interface NavListProps {
 const BASE =
   'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50'
 
-function linkClass({ isActive }: { isActive: boolean }): string {
-  return isActive
+function linkClass(isCurrent: boolean): string {
+  return isCurrent
     ? `${BASE} bg-primary text-primary-foreground`
     : `${BASE} text-foreground hover:bg-muted`
 }
@@ -21,7 +21,7 @@ function linkClass({ isActive }: { isActive: boolean }): string {
  * Las entradas del menu, en columna.
  *
  * La misma lista sirve a la barra lateral y al panel "Más" del celular.
- * NavLink marca la pantalla actual con `aria-current`, asi que el lector de
+ * El enlace marca la pantalla actual con `aria-current`, asi que el lector de
  * pantalla la anuncia sin depender del color.
  */
 export function NavList({ entries, onNavigate }: NavListProps) {
@@ -29,10 +29,10 @@ export function NavList({ entries, onNavigate }: NavListProps) {
     <ul className="m-0 flex list-none flex-col gap-1 p-0">
       {entries.map((entry) => (
         <li key={entry.to}>
-          <PreloadLink to={entry.to} className={linkClass} onClick={onNavigate}>
+          <EntryLink entry={entry} className={linkClass} onClick={onNavigate}>
             <ShellIcon name={entry.icon} size={18} />
             <span>{entry.label}</span>
-          </PreloadLink>
+          </EntryLink>
         </li>
       ))}
     </ul>

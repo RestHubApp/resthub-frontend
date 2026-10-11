@@ -1,6 +1,6 @@
 import { type RefObject, useEffect, useRef } from 'react'
 
-import type { CurrentUserResponse } from '@/api/types'
+import type { StaffSession } from '@/api/types'
 import { tokenExpiresAt } from '@/services/tokenExpiry'
 import { useSession } from '@/store/session'
 import { previewTimeLeft } from './previewCountdown'
@@ -33,7 +33,7 @@ function usePublishedHeight(): RefObject<HTMLElement | null> {
 }
 
 interface PreviewBannerProps {
-  readonly account: CurrentUserResponse
+  readonly account: StaffSession
 }
 
 /**
