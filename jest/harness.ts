@@ -273,7 +273,11 @@ beforeEach(() => {
 
 afterEach(() => {
   queryClient.clear()
-  api.defaults.adapter = adapterOriginal
+  if (adapterOriginal === undefined) {
+    delete api.defaults.adapter
+  } else {
+    api.defaults.adapter = adapterOriginal
+  }
   currentServer = null
   setAuthToken(null)
   useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })

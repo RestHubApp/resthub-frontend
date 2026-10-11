@@ -26,8 +26,8 @@ interface TextFieldProps {
   readonly type?: HTMLInputTypeAttribute
   /** Icono a la izquierda. Sin él, se usa el del tipo de dato, si lo hay. */
   readonly icon?: IconName
-  readonly error?: string
-  readonly hint?: string
+  readonly error?: string | undefined
+  readonly hint?: string | undefined
   readonly placeholder?: string
   readonly autoComplete?: string
   readonly inputMode?: 'tel' | 'text' | 'email' | 'numeric' | 'decimal'

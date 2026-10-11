@@ -15,7 +15,7 @@ interface QuantityFieldProps {
   /** La lista de unidades. Con una sola unidad, se muestra como texto. */
   readonly unit: UseFormRegisterReturn
   readonly units: readonly InputUnit[]
-  readonly error?: string
+  readonly error?: string | undefined
   readonly hint?: string
 }
 

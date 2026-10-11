@@ -6,7 +6,7 @@ import { centsToApi, formatCents } from '@/services/format'
 
 interface CashAmountFieldProps {
   readonly field: UseFormRegisterReturn
-  readonly error?: string
+  readonly error?: string | undefined
   readonly totalCents: number
   /** El vuelto calculado con lo escrito, o `null` si todavia no se puede calcular. */
   readonly changeCents: number | null

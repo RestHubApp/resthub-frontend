@@ -1,7 +1,7 @@
 interface FieldErrorProps {
   /** Para que el campo lo anuncie con `aria-describedby`. */
   readonly id?: string
-  readonly message?: string
+  readonly message?: string | undefined
 }
 
 /**

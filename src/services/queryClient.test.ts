@@ -12,7 +12,7 @@ const PASSWORD = 'x'.repeat(12)
 async function mutation(mutationKey: readonly unknown[] | undefined, variables: unknown): Promise<void> {
   const fresh = queryClient
     .getMutationCache()
-    .build(queryClient, { mutationKey, mutationFn: () => Promise.resolve(null) })
+    .build(queryClient, { ...(mutationKey === undefined ? {} : { mutationKey }), mutationFn: () => Promise.resolve(null) })
   await fresh.execute(variables)
 }
 

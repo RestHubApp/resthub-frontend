@@ -10,5 +10,5 @@ for (const [key, value] of Object.entries(process.env)) {
 }
 // Los eventos del logger no llenan la salida de las pruebas, salvo que se pida
 // un nivel con VITE_LOG_LEVEL.
-vite.VITE_LOG_LEVEL ??= 'fatal'
+vite['VITE_LOG_LEVEL'] ??= 'fatal'
 Object.defineProperty(globalThis, '__VITE_ENV__', { value: vite, writable: true, configurable: true })

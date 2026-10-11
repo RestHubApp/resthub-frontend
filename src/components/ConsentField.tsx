@@ -16,7 +16,7 @@ interface ConsentFieldProps {
   readonly id: string
   readonly checked: boolean
   readonly onChange: (checked: boolean) => void
-  readonly error?: string
+  readonly error?: string | undefined
 }
 
 /**

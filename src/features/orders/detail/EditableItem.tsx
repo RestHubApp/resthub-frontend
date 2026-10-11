@@ -18,7 +18,7 @@ const ItemNoteDialog = lazyNamed(() => import('./ItemNoteDialog'), 'ItemNoteDial
 interface EditableItemProps {
   readonly orderId: number
   readonly item: OrderItemResponse
-  readonly flag?: OrderNoteFlag
+  readonly flag?: OrderNoteFlag | undefined
 }
 
 /**

@@ -7,7 +7,7 @@ import { TermsGate } from './TermsGate'
 
 interface RequireSessionProps {
   /** Permiso que exige la ruta. Sin el, basta con estar autenticado. */
-  readonly permission?: PermissionCode
+  readonly permission?: PermissionCode | undefined
 }
 
 /**

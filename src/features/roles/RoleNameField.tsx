@@ -10,7 +10,7 @@ interface RoleNameFieldProps {
   readonly role: Role | null
   readonly readOnly: boolean
   readonly field: UseFormRegisterReturn
-  readonly error?: string
+  readonly error?: string | undefined
 }
 
 /** El nombre del rol; el del mesero y el de un rol que solo se mira no se escriben. */

@@ -30,7 +30,7 @@ interface MenuItemFormProps {
   readonly item?: MenuItem
   readonly categories: readonly MenuSection[]
   /** La categoría elegida al crear desde una categoría. */
-  readonly defaultCategoryId?: number
+  readonly defaultCategoryId?: number | undefined
   readonly onDone: () => void
 }
 

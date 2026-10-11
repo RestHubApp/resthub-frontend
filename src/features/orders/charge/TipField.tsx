@@ -6,7 +6,7 @@ import { formatCents } from '@/services/format'
 
 interface TipFieldProps {
   readonly field: UseFormRegisterReturn
-  readonly error?: string
+  readonly error?: string | undefined
   readonly onQuick: (amount: string) => void
 }
 

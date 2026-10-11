@@ -13,7 +13,7 @@ interface RecipeLineRowProps {
   readonly ingredient: RecipeIngredient
   readonly field: UseFormRegisterReturn
   readonly cost: number
-  readonly error?: string
+  readonly error?: string | undefined
   readonly readOnly: boolean
   readonly onRemove: () => void
 }

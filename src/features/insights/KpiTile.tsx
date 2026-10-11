@@ -9,7 +9,7 @@ interface KpiTileProps {
   /** Si subir es bueno (ventas) o malo (cancelados). */
   readonly higherIsBetter: boolean
   readonly comparedTo: string
-  readonly detail?: string
+  readonly detail?: string | undefined
 }
 
 type Tone = 'good' | 'bad' | 'flat'

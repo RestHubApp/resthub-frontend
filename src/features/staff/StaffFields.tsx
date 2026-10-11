@@ -16,9 +16,9 @@ interface StaffFieldsProps {
     readonly email?: UseFormRegisterReturn
   }
   readonly errors: {
-    readonly full_name?: string
-    readonly email?: string
-    readonly role_id?: string
+    readonly full_name?: string | undefined
+    readonly email?: string | undefined
+    readonly role_id?: string | undefined
   }
   /** Los roles que quien mira puede dar. */
   readonly roles: readonly Role[]
@@ -29,7 +29,7 @@ interface StaffFieldsProps {
    * permiso de administrar el personal se queda sin esta pantalla. Con valor,
    * se muestra en vez de la lista.
    */
-  readonly lockedRoleLabel?: string
+  readonly lockedRoleLabel?: string | undefined
 }
 
 /**
