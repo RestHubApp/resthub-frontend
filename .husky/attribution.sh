@@ -1,6 +1,6 @@
 #!/bin/sh
 # Rechaza la atribución a una herramienta de IA en el texto que llega por la
-# entrada estándar. La usan el hook commit-msg y el job `atribucion` del CI (misma regla que el backend),
+# entrada estándar. La usan el hook commit-msg y el job `no-attribution` del CI (misma regla que el backend),
 # para que los dos apliquen exactamente la misma regla.
 #
 # Salida 0 si el texto está limpio; 1 si encuentra atribución (y la imprime).

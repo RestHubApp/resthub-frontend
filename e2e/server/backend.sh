@@ -5,7 +5,7 @@
 # E2E_BACKEND_DIR  carpeta del repositorio resthub-backend (por omisión, ../resthub-backend)
 # E2E_DB           archivo SQLite que se borra y se vuelve a crear en cada arranque
 #
-# `backend.sh --preparar` solo migra y siembra; con E2E_DB_PREPARADA=1 el
+# `backend.sh --prepare` solo migra y siembra; con E2E_DB_PREPARED=1 el
 # arranque usa esa base tal cual (así lo hace el CI, en pasos separados).
 set -euo pipefail
 
@@ -25,7 +25,7 @@ export CORS_ALLOWED_ORIGINS="[\"$FRONT\"]"
 export FRONTEND_BASE_URL="$FRONT"
 
 cd "$BACKEND_DIR"
-if [[ "${E2E_DB_PREPARADA:-0}" != "1" ]]; then
+if [[ "${E2E_DB_PREPARED:-0}" != "1" ]]; then
   mkdir -p "$(dirname "$DB")"
   rm -f "$DB" "$DB-journal" "$DB-wal" "$DB-shm"
   uv run --frozen alembic upgrade head
@@ -35,7 +35,7 @@ if [[ "${E2E_DB_PREPARADA:-0}" != "1" ]]; then
   # terminaban en «database is locked». El modo queda guardado en el archivo.
   uv run --frozen python -c "import sqlite3, sys; sqlite3.connect(sys.argv[1]).execute('PRAGMA journal_mode=WAL')" "$DB"
 fi
-if [[ "${1:-}" == "--preparar" ]]; then
+if [[ "${1:-}" == "--prepare" ]]; then
   exit 0
 fi
 exec uv run --frozen uvicorn resthub.main:app --host 127.0.0.1 --port "$PORT"
