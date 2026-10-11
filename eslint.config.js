@@ -17,6 +17,7 @@ import security from 'eslint-plugin-security'
 import sonarjs from 'eslint-plugin-sonarjs'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import { readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 // ---------------------------------------------------------------------
@@ -101,6 +102,29 @@ const restrictSyntaxExcept = (...owned) => [
     .filter(([name]) => !owned.includes(name))
     .flatMap(([, { selectors, message }]) => selectors.map((selector) => ({ selector, message }))),
 ]
+
+// ---------------------------------------------------------------------
+// Subcarpetas de una característica.
+//
+// Una subcarpeta (`orders/board`, `orders/charge`...) solo importa de sí misma
+// y de la raíz de su característica. Si dos hermanas necesitan lo mismo, eso
+// sube a la raíz. Las zonas se arman leyendo el disco, así una subcarpeta
+// nueva queda cubierta sin tocar esta configuración.
+// ---------------------------------------------------------------------
+const FEATURES_DIR = fileURLToPath(new URL('./src/features/', import.meta.url))
+const folders = (directory) => readdirSync(directory, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+const siblingFolderZones = folders(FEATURES_DIR).flatMap((feature) => {
+  const subfolders = folders(`${FEATURES_DIR}${feature}`)
+  return subfolders.flatMap((target) =>
+    subfolders
+      .filter((from) => from !== target)
+      .map((from) => ({
+        target: `./src/features/${feature}/${target}`,
+        from: `./src/features/${feature}/${from}`,
+        message: `Una subcarpeta no importa de su hermana (${feature}/${target} -> ${feature}/${from}): sube lo compartido a la raíz de ${feature}.`,
+      })),
+  )
+})
 
 export default tseslint.config(
   {
@@ -524,6 +548,7 @@ export default tseslint.config(
           ],
         },
       ],
+      'import-x/no-restricted-paths': ['error', { basePath: import.meta.dirname, zones: siblingFolderZones }],
       'import-x/no-mutable-exports': 'error',
       // Un solo nombre por simbolo: renombrar y buscar usos es seguro. Los
       // archivos que una herramienta carga por default estan mas abajo.

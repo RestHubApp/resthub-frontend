@@ -7,24 +7,13 @@ import { errorMessage, errorStatus } from '@/services/api'
 import { useNotifications } from '@/store/notifications'
 import { belongsTo, ownerOf, type QueuedOrder, queuedOrders, removeQueued, useQueuedOrders } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
+import { isOffline } from '@/features/orders/isOffline'
 
 const CONFLICT = 409
 const UNAUTHORIZED = 401
 // Mientras haya pedidos esperando, se reintenta cada medio minuto por si el
 // navegador no avisa que volvió la señal (pasa en algunos celulares).
 const RETRY_MS = 30_000
-
-// El servidor no llegó a atender: el proxy delante responde por él.
-const SERVER_UNREACHABLE = new Set([502, 503, 504])
-
-/**
- * Sin respuesta del servidor: no hay señal, se cortó o el servidor no está.
- * Vale reintentar, porque el pedido lleva su id y no se duplica.
- */
-export function isOffline(error: unknown): boolean {
-  const status = errorStatus(error)
-  return status === undefined || SERVER_UNREACHABLE.has(status)
-}
 
 /** Abre el pedido y lo manda a cocina; si ya estaba en cocina, el 409 vale como hecho. */
 async function sendQueued(order: QueuedOrder): Promise<number> {

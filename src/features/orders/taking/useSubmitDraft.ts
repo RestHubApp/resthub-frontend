@@ -10,7 +10,7 @@ import { useNotifications } from '@/store/notifications'
 import { enqueueOrder, ownerOf, type QueueOwner } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
 import { stepDoneMessage } from '@/features/orders/nextStep'
-import { isOffline } from '@/features/orders/offline/useOfflineOrders'
+import { isOffline } from '@/features/orders/isOffline'
 import { draftKey, openRequest, type OrderTarget } from './orderTarget'
 import { type DraftLine, toNewItems, useDraftActions } from './useOrderDraft'
 

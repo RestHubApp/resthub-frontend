@@ -1,7 +1,7 @@
 import type { OrderMenuItem } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { QuantityStepper } from '@/features/orders/QuantityStepper'
-import { MAX_QUANTITY } from './useOrderDraft'
+import { MAX_QUANTITY } from '@/features/orders/quantityLimit'
 import { formatMoney } from '@/services/format'
 
 function rowTone(selected: boolean, outOfStock: boolean): string {

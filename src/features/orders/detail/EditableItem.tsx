@@ -8,7 +8,7 @@ import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 import { Button } from '@/components/ui/button'
 import { ItemNote } from '@/features/orders/ItemNote'
 import { QuantityStepper } from '@/features/orders/QuantityStepper'
-import { MAX_QUANTITY } from '@/features/orders/taking/useOrderDraft'
+import { MAX_QUANTITY } from '@/features/orders/quantityLimit'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { formatMoney } from '@/services/format'
 

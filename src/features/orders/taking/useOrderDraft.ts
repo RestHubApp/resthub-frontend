@@ -2,6 +2,7 @@ import { create } from 'zustand'
 
 import type { NewItemRequest, OrderMenuItem } from '@/api/types'
 import { centsToApi, toCents } from '@/services/format'
+import { MAX_QUANTITY } from '@/features/orders/quantityLimit'
 
 /** Una opción elegida de un grupo del plato, con lo que suma al precio. */
 export interface DraftModifier {
@@ -30,8 +31,6 @@ interface DraftState {
   clear: (key: string) => void
 }
 
-// El mismo tope que el servidor.
-export const MAX_QUANTITY = 99
 const EMPTY: readonly DraftLine[] = []
 
 /** La clave de una línea: el plato y sus opciones, en un orden fijo. */

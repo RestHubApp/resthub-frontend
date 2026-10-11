@@ -37,4 +37,20 @@ describe('newOrderPath', () => {
       'referencia': 'Frente al parque',
     })
   })
+
+  it('lleva los datos del delivery en la URL', () => {
+    const route = newOrderPath({
+      mode: 'delivery',
+      customer_name: 'Ana',
+      phone: '987',
+      address: 'Calle 1',
+      reference: '',
+      customer_id: 3,
+      consent: false,
+    })
+    const params = new URLSearchParams(route.split('?')[1])
+    expect(params.get('tipo')).toBe('delivery')
+    expect(params.get('clienteId')).toBe('3')
+    expect(params.get('direccion')).toBe('Calle 1')
+  })
 })

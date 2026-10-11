@@ -1,5 +1,5 @@
 import type { OrderResponse } from '@/api/types'
-import { OrderClosedInfo } from '@/features/orders/detail/OrderClosedInfo'
+import { OrderClosedInfo } from '@/features/orders/OrderClosedInfo'
 import { OrderItemLine } from '@/features/orders/OrderItemLine'
 
 interface OrderSummaryProps {

@@ -9,7 +9,7 @@ import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
-import { InvoiceDialog } from './InvoiceDialog'
+import { InvoiceDialog } from '@/features/orders/invoice/InvoiceDialog'
 
 interface InvoicePanelProps {
   readonly order: OrderResponse

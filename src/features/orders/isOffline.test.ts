@@ -1,7 +1,7 @@
 import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios'
 import { describe, expect, it } from '@jest/globals'
 
-import { isOffline } from './useOfflineOrders'
+import { isOffline } from './isOffline'
 
 function errorResponse(status: number): AxiosError {
   const config = { headers: new AxiosHeaders() }
