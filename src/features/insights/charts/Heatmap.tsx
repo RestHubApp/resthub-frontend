@@ -51,10 +51,12 @@ export default function Heatmap({ cells, peak, label, describe }: HeatmapProps) 
 
   return (
     <div className="flex flex-col gap-3">
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Grafico navegable con flechas: ningun rol ARIA de widget describe un mapa de calor con cursor, y el foco es lo que da acceso por teclado al tooltip. */}
       <div
         ref={ref}
         role="img"
         aria-label={label}
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- El foco da acceso por teclado al cursor del grafico (ver arriba).
         tabIndex={0}
         onKeyDown={cursor.onKeyDown}
         onFocus={cursor.onFocus}

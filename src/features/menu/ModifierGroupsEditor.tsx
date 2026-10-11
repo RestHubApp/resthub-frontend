@@ -47,12 +47,12 @@ export default function ModifierGroupsEditor({ groups, error, onChange }: Modifi
                   cambiar(indice, { max: e.target.value })
                 }} />
               </div>
-              <label className="flex h-9 items-center gap-2 text-sm">
-                <Checkbox aria-labelledby={`${id}-obligatorio`} checked={grupo.required} onCheckedChange={(estado) => {
+              <div className="flex h-9 items-center gap-2 text-sm">
+                <Checkbox id={`${id}-obligatorio`} checked={grupo.required} onCheckedChange={(estado) => {
                   cambiar(indice, { required: estado === true })
                 }} />
-                <span id={`${id}-obligatorio`}>Obligatorio</span>
-              </label>
+                <Label htmlFor={`${id}-obligatorio`} className="font-normal">Obligatorio</Label>
+              </div>
               <Button type="button" variant="ghost" size="sm" aria-label={`Quitar el grupo ${grupo.name}`} onClick={() => {
                 onChange(groups.filter((_, i) => i !== indice))
               }}>

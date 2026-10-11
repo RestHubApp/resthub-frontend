@@ -49,6 +49,7 @@ function InputGroupAddon({
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>) {
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- Comodidad de raton: el clic en el adorno enfoca el campo; el teclado ya llega al campo con Tab.
     <div
       role="group"
       data-slot="input-group-addon"

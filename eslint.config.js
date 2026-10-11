@@ -3,6 +3,7 @@ import js from '@eslint/js'
 import boundaries from 'eslint-plugin-boundaries'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import importX from 'eslint-plugin-import-x'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import noBarrelFiles from 'eslint-plugin-no-barrel-files'
 import checkFile from 'eslint-plugin-check-file'
 import react from 'eslint-plugin-react'
@@ -384,6 +385,20 @@ export default tseslint.config(
       'import-x/no-mutable-exports': 'error',
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Accesibilidad en el JSX (jsx-a11y en modo estricto).
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.tsx'],
+    plugins: { 'jsx-a11y': jsxA11y },
+    rules: {
+      ...jsxA11y.flatConfigs.strict.rules,
+      // Un bloque desplazable (traceback, JSON) debe poder enfocarse para
+      // desplazarse con teclado; si es una region con nombre, es valido.
+      'jsx-a11y/no-noninteractive-tabindex': ['error', { roles: ['tabpanel', 'region'], tags: [] }],
     },
   },
 

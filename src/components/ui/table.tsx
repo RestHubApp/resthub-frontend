@@ -9,6 +9,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     // foco quien usa teclado no podría hacerlo.
     <div
       data-slot="table-container"
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Region desplazable: el foco permite el desplazamiento por teclado (WCAG 2.1.1).
       tabIndex={0}
       className="relative w-full overflow-x-auto rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >

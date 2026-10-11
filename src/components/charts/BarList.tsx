@@ -65,8 +65,10 @@ export default function BarList({ data, label }: BarListProps) {
     <div ref={listRef} className="relative">
       <ul aria-label={label} className="m-0 flex list-none flex-col gap-1 p-0">
         {data.map((datum, index) => (
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Fila de grafico enfocable: el foco muestra el tooltip con el valor para quien usa teclado; no hay accion que justifique un boton.
           <li
             key={datum.key}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- El foco muestra el tooltip del dato (ver arriba).
             tabIndex={0}
             aria-label={`${datum.label}: ${datum.valueLabel}`}
             onPointerEnter={señalar(index)}
