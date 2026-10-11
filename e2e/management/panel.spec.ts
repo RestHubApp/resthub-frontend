@@ -2,6 +2,8 @@
 // ticket promedio y cancelados del período, platos, medios de pago, margen,
 // meseros, insumos bajo el mínimo y mermas por causa; el rango de fechas acota
 // cada sección. Las ventas se preparan por el API: pedidos servidos y cobrados.
+import type { OrderResponse } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 import { api, dayFromToday, failureServer, id, soles, sell } from '../support/management'
@@ -24,13 +26,13 @@ test('GES-26 el encargado revisa los indicadores del período, mira las tablas, 
   )
   await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado'), quantity: 2 }] })
   await sell(local, { table: local.table('2'), items: [{ dish: local.dish('Ceviche clásico') }, { dish: local.dish('Chicha morada') }], method: 'yape' })
-  const cancelled = await api(local, local.waiter).post('/orders', {
+  const cancelled = await api(local, local.waiter).post<OrderResponse>('/orders', {
     type: 'dine_in',
     table_id: local.table('3').id,
     items: [{ menu_item_id: local.dish('Ají de gallina').id, quantity: 1, notes: '' }],
   })
   await api(local).post(`/orders/${String(id(cancelled))}/cancel`, { reason: 'El cliente se fue' })
-  await api(local).post('/inventory/waste', { ingredient_id: local.ingredients[1].id, quantity: '100', reason: 'Se venció en la cámara' })
+  await api(local).post('/inventory/waste', { ingredient_id: defined(local.ingredients[1]).id, quantity: '100', reason: 'Se venció en la cámara' })
 
   await openAs(page, local.owner, '/panel')
   await expect(page.getByRole('heading', { level: 1, name: 'Panel BI' })).toBeVisible()

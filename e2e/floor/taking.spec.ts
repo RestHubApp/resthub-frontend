@@ -1,6 +1,8 @@
 // HU09, HU07, HU33: el mesero toma el pedido de una mesa desde el celular.
 // Mesa, platos y «Enviar a cocina»; los platos agotados se ven pero no se
 // eligen, y un plato con opciones pide el término antes de sumarse.
+import type { OrderResponse } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import {
@@ -103,9 +105,8 @@ test('SAL-02 el mesero busca, filtra por categoría y anota en el resumen antes 
   await sheet.getByRole('button', { name: 'Enviar a cocina' }).click()
   await expect(notice(page, /enviado a cocina/u)).toBeVisible()
 
-  const [order] = await api(local, local.waiter).list('/orders/active')
-  const lines = order.items as { name: string; quantity: number; notes: string }[]
-  expect(lines).toEqual([
+  const order = defined((await api(local, local.waiter).list<OrderResponse>('/orders/active'))[0])
+  expect(order.items).toEqual([
     expect.objectContaining({ name: 'Ceviche clásico', quantity: 1, notes: 'Sin cebolla, poco ají' }),
     expect.objectContaining({ name: 'Inca Kola 500 ml', quantity: 2, notes: '' }),
   ])
@@ -115,7 +116,7 @@ test('SAL-03 un plato agotado o sin insumos se ve pero no se puede elegir @mobil
   covers('funcion:pedido-nuevo.plato-agotado', 'funcion:pedido-nuevo.plato-sin-insumos')
   await api(local).patch(`/menu/items/${String(local.dish('Ají de gallina').id)}/availability`, { is_available: false })
   // Sin lomo de res en el almacén, la receta del Lomo saltado no alcanza.
-  const [lomoRes] = local.ingredients
+  const lomoRes = defined(local.ingredients[0])
   await api(local).post('/inventory/waste', { ingredient_id: lomoRes.id, quantity: '5000', reason: 'Se malogró' })
   await openAs(page, local.waiter, `/pedidos/nuevo?mesa=${String(local.table('1').id)}`)
 
@@ -163,9 +164,9 @@ test('SAL-04 un plato con opciones pide el término y suma los extras al precio 
 
   await page.getByRole('button', { name: 'Enviar a cocina' }).click()
   await expect(notice(page, /enviado a cocina/u)).toBeVisible()
-  const [order] = await api(local, local.waiter).list('/orders/active')
+  const order = defined((await api(local, local.waiter).list<OrderResponse>('/orders/active'))[0])
   expect(order.total).toBe('35.50')
-  const [line] = order.items as { menu_item_id: number; modifiers: { option: string; price: string }[] }[]
+  const line = defined(order.items[0])
   expect(line.menu_item_id).toBe(bistec.id)
   expect(line.modifiers.map((m) => m.option)).toEqual(['A punto', 'Huevo frito', 'Plátano'])
 })

@@ -21,6 +21,7 @@ import {
   type Session,
   unique,
 } from './api'
+import type { PlatformActivityPage, PlatformRestaurantDetail, PlatformRestaurantPage } from '../../src/api/types'
 import { expect } from './fixtures'
 
 // Lo que muestra cada página de las listas de plataforma (`PLATFORM_PAGE_SIZE`).
@@ -118,7 +119,7 @@ export async function enqueueOrders(
 
 /** La dueña de los pedidos en cola de una sesión del API. */
 export function ownerOf(session: Session): { userId: number; restaurantId: number } {
-  const { user, restaurant } = session.account as { user: { id: number }; restaurant: { id: number } }
+  const { user, restaurant } = session.account
   return { userId: user.id, restaurantId: restaurant.id }
 }
 
@@ -164,7 +165,7 @@ export async function previewWarnings(howMany: number): Promise<void> {
 
 function restaurantRegistration(platform: Customer, name: string) {
   const suffix = unique()
-  return platform.post('/platform/restaurants', {
+  return platform.post<PlatformRestaurantDetail>('/platform/restaurants', {
     name,
     slug: `e2e-pag-${suffix}`,
     timezone: 'America/Lima',
@@ -184,7 +185,7 @@ export async function restaurantsWithPrefix(platform: Customer, prefix: string, 
 
 /** Que la lista de restaurantes tenga más de una página. Solo da de alta los que falten. */
 export async function restaurantsWithPages(platform: Customer): Promise<void> {
-  let total = Number((await platform.get('/platform/restaurants?limit=1&offset=0')).total)
+  let total = (await platform.get<PlatformRestaurantPage>('/platform/restaurants?limit=1&offset=0')).total
   while (total <= PAGE_PLATFORM) {
     await restaurantRegistration(platform, `Relleno ${unique()}`)
     total += 1
@@ -193,10 +194,10 @@ export async function restaurantsWithPages(platform: Customer): Promise<void> {
 
 /** Que la bitácora de plataforma tenga más de una página: cada acceso deja una entrada. */
 export async function logWithPages(http: APIRequestContext, platform: Customer): Promise<number> {
-  let total = Number((await platform.get('/platform/activity?limit=1&offset=0')).total)
+  let total = (await platform.get<PlatformActivityPage>('/platform/activity?limit=1&offset=0')).total
   while (total <= PAGE_PLATFORM) {
     await signInPlatformByApi(http)
-    total = Number((await platform.get('/platform/activity?limit=1&offset=0')).total)
+    total = (await platform.get<PlatformActivityPage>('/platform/activity?limit=1&offset=0')).total
   }
   return total
 }

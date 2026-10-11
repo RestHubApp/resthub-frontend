@@ -1,6 +1,8 @@
 // HU03, HU04: las cuentas del personal. Alta con rol y contraseña inicial,
 // edición, contraseña restablecida, desactivar (ya no entra) y activar; la
 // cuenta propia no cambia su rol ni se desactiva.
+import type { Role } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { NEW_SECRET } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
@@ -100,8 +102,8 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
 
 test('GES-16 la tabla del personal se pagina y avisa si el servidor falla', async ({ page, local }) => {
   covers('funcion:personal.paginar', 'estado:personal.error')
-  const roles = await api(local).list('/roles')
-  const waiter = Number(roles.find((role) => role.kind === 'waiter')?.id)
+  const roles = await api(local).list<Role>('/roles')
+  const waiter = defined(roles.find((role) => role.kind === 'waiter')).id
   for (let n = 1; n <= 13; n += 1) {
     await newAccount(local, `Ayudante ${String.fromCodePoint(64 + n)}`, waiter)
   }

@@ -16,18 +16,17 @@ import {
   type Dish,
   type Session,
 } from './api'
+import type { Invoice, OrderResponse } from '../../src/api/types'
 import { test as base } from './fixtures'
-
-type Json = Record<string, unknown>
 
 const API = `${API_ORIGIN}/api/v1`
 
-async function body(response: APIResponse, that: string): Promise<Json> {
+async function body<T>(response: APIResponse, that: string): Promise<T> {
   if (!response.ok()) {
     throw new Error(`${that}: ${String(response.status())} ${await response.text()}`)
   }
   const text = await response.text()
-  return text === '' ? {} : (JSON.parse(text) as Json)
+  return JSON.parse(text === '' ? '{}' : text) as T
 }
 
 type Http = Local['http']
@@ -50,25 +49,25 @@ export class ApiManagement {
     return { headers: { Authorization: `Bearer ${this.token}`, Connection: 'close' }, data }
   }
 
-  async get(route: string): Promise<Json> {
-    return body(await this.http.get(`${API}${route}`, this.options()), `GET ${route}`)
+  async get<T>(route: string): Promise<T> {
+    return body<T>(await this.http.get(`${API}${route}`, this.options()), `GET ${route}`)
   }
 
-  async list(route: string): Promise<Json[]> {
-    const data = (await this.get(route)) as unknown
-    return Array.isArray(data) ? (data as Json[]) : (((data as Json).items ?? []) as Json[])
+  async list<T>(route: string): Promise<T[]> {
+    const data = await this.get<T[] | { items?: T[] }>(route)
+    return Array.isArray(data) ? data : (data.items ?? [])
   }
 
-  async post(route: string, data: unknown = {}): Promise<Json> {
-    return body(await this.http.post(`${API}${route}`, this.options(data)), `POST ${route}`)
+  async post<T>(route: string, data: unknown = {}): Promise<T> {
+    return body<T>(await this.http.post(`${API}${route}`, this.options(data)), `POST ${route}`)
   }
 
-  async put(route: string, data: unknown): Promise<Json> {
-    return body(await this.http.put(`${API}${route}`, this.options(data)), `PUT ${route}`)
+  async put<T>(route: string, data: unknown): Promise<T> {
+    return body<T>(await this.http.put(`${API}${route}`, this.options(data)), `PUT ${route}`)
   }
 
-  async patch(route: string, data: unknown): Promise<Json> {
-    return body(await this.http.patch(`${API}${route}`, this.options(data)), `PATCH ${route}`)
+  async patch<T>(route: string, data: unknown): Promise<T> {
+    return body<T>(await this.http.patch(`${API}${route}`, this.options(data)), `PATCH ${route}`)
   }
 }
 
@@ -89,8 +88,8 @@ export function today(): string {
 }
 
 /** El id numérico de una respuesta del API. */
-export function id(data: Json): number {
-  return Number(data.id)
+export function id(data: { readonly id: number }): number {
+  return data.id
 }
 
 export interface Sale {
@@ -105,9 +104,9 @@ export interface Sale {
  * la cocina lo marca listo, el mesero lo sirve y lo cobra. Hace falta la caja
  * abierta. Devuelve el pedido pagado.
  */
-export async function sell(local: Local, sale: Sale): Promise<Json> {
+export async function sell(local: Local, sale: Sale): Promise<OrderResponse> {
   const waiter = api(local, local.waiter)
-  const order = await waiter.post('/orders', {
+  const order = await waiter.post<OrderResponse>('/orders', {
     type: 'dine_in',
     table_id: sale.table.id,
     client_request_id: `e2e-${unique()}`,
@@ -117,12 +116,12 @@ export async function sell(local: Local, sale: Sale): Promise<Json> {
   await waiter.post(`${route}/send`)
   await api(local, local.kitchen).post(`${route}/ready`)
   await waiter.post(`${route}/served`)
-  return waiter.post(`${route}/charge`, { payment_method: sale.method ?? 'cash', tip: sale.tip ?? '0' })
+  return waiter.post<OrderResponse>(`${route}/charge`, { payment_method: sale.method ?? 'cash', tip: sale.tip ?? '0' })
 }
 
 /** La boleta simple de un pedido pagado, sin datos del cliente. */
-export async function issueSalesReceipt(local: Local, orderId: number): Promise<Json> {
-  return api(local).post('/billing/invoices', {
+export async function issueSalesReceipt(local: Local, orderId: number): Promise<Invoice> {
+  return api(local).post<Invoice>('/billing/invoices', {
     order_id: orderId,
     kind: 'boleta',
     customer_name: '',
@@ -182,16 +181,16 @@ export const test = base.extend<{ empty: RestaurantEmpty }>({
 /** Cuenta las veces que la página pide imprimir, sin abrir el diálogo del sistema. */
 export async function countPrints(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const dialog = window as unknown as { prints: number }
-    dialog.prints = 0
+    let count = 0
+    Object.defineProperty(window, 'prints', { get: () => count })
     window.print = () => {
-      dialog.prints += 1
+      count += 1
     }
   })
 }
 
 export async function prints(page: Page): Promise<number> {
-  return page.evaluate(() => (window as unknown as { prints: number }).prints)
+  return page.evaluate(() => Number(Reflect.get(window, 'prints')))
 }
 
 /** El día que cae `dias` después de hoy en Lima (`2026-09-28`). */

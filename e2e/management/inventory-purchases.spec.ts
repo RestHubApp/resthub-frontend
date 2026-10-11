@@ -1,6 +1,8 @@
 // HU34: proveedores y órdenes de compra. La orden se arma desde las
 // sugerencias de reposición o a mano, se envía y al recibirla entra al stock
 // con su costo real.
+import type { Ingredient } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, soles } from '../support/management'
@@ -59,7 +61,7 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
   await expect(create).toBeDisabled()
   await order.getByLabel('Proveedor').selectOption({ label: 'Mercado Mayorista' })
   await order.getByRole('button', { name: 'Cargar sugerencias (1)' }).click()
-  await expect(order.getByLabel('Insumo de la línea 1')).toHaveValue(String(local.ingredients[2].id))
+  await expect(order.getByLabel('Insumo de la línea 1')).toHaveValue(String(defined(local.ingredients[2]).id))
   await expect(order.getByLabel('Cantidad en g')).toHaveValue('300.000')
   await evidence(page, 'ges-08-2-orden-sugerida')
   await create.click()
@@ -92,7 +94,7 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
   await expect(page.getByText('Stock en orden: nada por debajo del mínimo.')).toBeVisible()
   await page.getByRole('tab', { name: /Movimientos/u }).click()
   await expect(page.getByRole('tabpanel', { name: /Movimientos/u }).getByRole('row', { name: /Culantro/u }).first()).toContainText('+250 g')
-  const culantro = (await api(local).list('/inventory/ingredients')).find((i) => i.name === 'Culantro')
+  const culantro = (await api(local).list<Ingredient>('/inventory/ingredients')).find((i) => i.name === 'Culantro')
   expect(culantro?.stock).toBe('350.000')
 })
 

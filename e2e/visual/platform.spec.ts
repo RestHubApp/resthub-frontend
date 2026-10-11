@@ -6,6 +6,7 @@
 // el de esta prueba.
 import type { APIRequestContext, Page } from '@playwright/test'
 
+import type { PlatformSandbox, PreviewCodeResponse } from '../../src/api/types'
 import { Customer } from '../support/api'
 import { withSampleRestaurant } from '../support/platform'
 import { covers } from '../support/coverage'
@@ -88,11 +89,11 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
 /** Un código de vista previa recién pedido, con el local de muestra creado si no existía. */
 async function previewCode(http: APIRequestContext, token: string): Promise<string> {
   const admin = new Customer(http, token)
-  const sample = await admin.get('/platform/sandbox').catch(() => null)
+  const sample = await admin.get<PlatformSandbox>('/platform/sandbox').catch(() => null)
   if (sample?.restaurant === null || sample?.restaurant === undefined) {
     await admin.post('/platform/sandbox/reset')
   }
-  return String((await admin.post('/platform/preview', { as: 'waiter' })).code)
+  return (await admin.post<PreviewCodeResponse>('/platform/preview', { as: 'waiter' })).code
 }
 
 async function previewSession(page: Page): Promise<{ userId: number; restaurantId: number }> {

@@ -3,6 +3,8 @@
 // o teléfono, y uno nuevo queda en la libreta.
 import type { Locator, Page } from '@playwright/test'
 
+import type { Customer as CustomerData, OrderResponse } from '../../src/api/types'
+import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, id, readOrder } from '../support/floor'
@@ -63,7 +65,7 @@ test('SAL-22 el mesero toma un pedido para llevar y lo encuentra en sus pestaña
   await tabs.getByRole('tab', { name: 'Mesas' }).click()
   await expect(page.getByRole('heading', { name: '4 de 4 mesas libres' })).toBeVisible()
 
-  const [order] = await api(local, local.waiter).list('/orders/active')
+  const order = defined((await api(local, local.waiter).list<OrderResponse>('/orders/active'))[0])
   expect(order).toMatchObject({ type: 'takeaway', customer_name: 'Ana', status: 'in_kitchen' })
 })
 
@@ -92,10 +94,10 @@ test('SAL-23 un delivery exige nombre, teléfono y dirección, y el cliente nuev
   await expect(page.getByText('Nuevo delivery a Jr. Huallaga 450, Cercado.')).toBeVisible()
   await sendUnDish(page, /^Ají de gallina/u)
 
-  const customers = await api(local).list('/customers?q=912345678')
+  const customers = await api(local).list<CustomerData>('/customers?q=912345678')
   expect(customers).toEqual([expect.objectContaining({ name: 'Luis Quispe', address: 'Jr. Huallaga 450, Cercado' })])
-  const [order] = await api(local, local.waiter).list('/orders/active')
-  expect(order).toMatchObject({ type: 'delivery', customer_phone: '912345678', customer_id: customers[0].id })
+  const order = defined((await api(local, local.waiter).list<OrderResponse>('/orders/active'))[0])
+  expect(order).toMatchObject({ type: 'delivery', customer_phone: '912345678', customer_id: defined(customers[0]).id })
 
   await page.goto(`/pedidos/${String(id(order))}`)
   const delivery = page.getByRole('region', { name: 'Entrega' })
@@ -122,7 +124,7 @@ test('SAL-23B sin el consentimiento del cliente, el delivery sale igual y no que
   await sendUnDish(page, /^Ají de gallina/u)
 
   expect(await api(local).list('/customers?q=934567812')).toEqual([])
-  const [order] = await api(local, local.waiter).list('/orders/active')
+  const order = defined((await api(local, local.waiter).list<OrderResponse>('/orders/active'))[0])
   expect(order).toMatchObject({ type: 'delivery', customer_phone: '934567812', customer_id: null })
 })
 
@@ -131,7 +133,7 @@ test('SAL-24 el mesero encuentra al cliente frecuente por nombre y no le vuelve 
   local,
 }) => {
   covers('funcion:pedidos.buscar-cliente-frecuente', 'estado:pedidos.cliente-no-encontrado')
-  const rosa = await api(local).post('/customers', {
+  const rosa = await api(local).post<CustomerData>('/customers', {
     name: 'Rosa Pérez',
     phone: '999888777',
     email: '',
@@ -160,7 +162,7 @@ test('SAL-24 el mesero encuentra al cliente frecuente por nombre y no le vuelve 
   await dialog.getByRole('button', { name: 'Elegir platos' }).click()
   await sendUnDish(page, /^Lomo saltado/u)
 
-  const [order] = await api(local, local.waiter).list('/orders/active')
+  const order = defined((await api(local, local.waiter).list<OrderResponse>('/orders/active'))[0])
   expect(order).toMatchObject({ type: 'delivery', customer_id: rosa.id, delivery_address: 'Av. Brasil 1200, Magdalena' })
   expect((await readOrder(local, id(order))).customer_name).toBe('Rosa Pérez')
   const notebook = await api(local).list('/customers?q=Rosa')

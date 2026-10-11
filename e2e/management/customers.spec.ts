@@ -3,6 +3,8 @@
 // la edición desde la ficha.
 import { readFile } from 'node:fs/promises'
 
+import type { Customer as CustomerData, OrderResponse } from '../../src/api/types'
+import { defined } from '../support/defined'
 import type { Local } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
@@ -14,7 +16,7 @@ async function orderOf(local: Local, customerId: number, type: 'delivery' | 'din
   const data = type === 'delivery'
     ? { type: 'delivery', customer_id: customerId, customer_name: 'Rosa Díaz', customer_phone: '987654321', delivery_address: 'Av. Sol 123' }
     : { type: 'dine_in', table_id: local.table('1').id, customer_id: customerId }
-  const order = await waiter.post('/orders', { ...data, items: [{ menu_item_id: local.dish('Chicha morada').id, quantity: 1, notes: '' }] })
+  const order = await waiter.post<OrderResponse>('/orders', { ...data, items: [{ menu_item_id: local.dish('Chicha morada').id, quantity: 1, notes: '' }] })
   const route = `/orders/${String(id(order))}`
   await waiter.post(`${route}/send`)
   await api(local, local.kitchen).post(`${route}/ready`)
@@ -82,7 +84,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
   await expect(registration).toBeHidden()
 
   // Tres pedidos de delivery lo vuelven frecuente.
-  const customerId = id((await api(local).list('/customers'))[0])
+  const customerId = id(defined((await api(local).list<CustomerData>('/customers'))[0]))
   for (let n = 0; n < 3; n += 1) {
     await orderOf(local, customerId, 'delivery')
   }
@@ -117,7 +119,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
   await edit.getByLabel('Notas (opcional)').fill('Alérgica al maní')
   await edit.getByRole('button', { name: 'Guardar' }).click()
   await expect(notice(page, 'Rosa Díaz: datos guardados.')).toBeVisible()
-  expect((await api(local).get(`/customers/${String(customerId)}`)).notes).toBe('Alérgica al maní')
+  expect((await api(local).get<CustomerData>(`/customers/${String(customerId)}`)).notes).toBe('Alérgica al maní')
 
   await failureServer(page, '/customers')
   await page.reload()
@@ -125,7 +127,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
 })
 
 test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', async ({ page, restaurantWithCashRegister: local }) => {
-  const customer = await api(local).post('/customers', { name: 'Julio Paz', phone: '912345678', email: '', address: '', reference: '', notes: '', consent: true })
+  const customer = await api(local).post<CustomerData>('/customers', { name: 'Julio Paz', phone: '912345678', email: '', address: '', reference: '', notes: '', consent: true })
   await orderOf(local, id(customer), 'dine_in')
   await openAs(page, local.owner, '/clientes')
   await page.getByRole('button', { name: /Julio Paz/u }).click()
@@ -155,7 +157,7 @@ test('GES-25 la ventana de un cliente nuevo abre vacía después de guardar otro
 
 test('GES-34 el encargado descarga los datos de un cliente y, a su pedido, los borra', async ({ page, restaurantWithCashRegister: local }) => {
   covers('confirmacion:customers/CustomerRights', 'funcion:clientes.exportar-datos', 'funcion:clientes.borrar-datos')
-  const customer = await api(local).post('/customers', {
+  const customer = await api(local).post<CustomerData>('/customers', {
     name: 'Rosa Díaz', phone: '987654321', email: '', address: 'Av. Sol 123', reference: '', notes: 'Alérgica al maní', consent: true,
   })
   const orderId = await orderOf(local, id(customer), 'delivery')

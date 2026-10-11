@@ -3,6 +3,8 @@
 // con alergia se resaltan para quien ve el panel (regla por palabras clave).
 import type { Browser, Page } from '@playwright/test'
 
+import type { OrderResponse } from '../../src/api/types'
+import { defined } from '../support/defined'
 import type { Session } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
@@ -10,8 +12,9 @@ import { api, orderInTable } from '../support/floor'
 
 /** Otro navegador (otra tablet, otra laptop) con su propia sesión. */
 async function otherBrowser(browser: Browser, session: Session, destination: string): Promise<Page> {
+  const { baseURL } = test.info().project.use
   const context = await browser.newContext({
-    baseURL: test.info().project.use.baseURL,
+    ...(baseURL === undefined ? {} : { baseURL }),
     locale: 'es-PE',
     timezoneId: 'America/Lima',
     serviceWorkers: 'block',
@@ -25,12 +28,12 @@ async function otherBrowser(browser: Browser, session: Session, destination: str
 /** Deja una marca en la ventana: si la página se recarga, la marca se pierde. */
 async function markWithoutReload(page: Page): Promise<void> {
   await page.evaluate(() => {
-    ;(window as unknown as { withoutReload: boolean }).withoutReload = true
+    Reflect.set(window, 'withoutReload', true)
   })
 }
 
 async function noSeSurcharge(page: Page): Promise<boolean> {
-  return page.evaluate(() => (window as unknown as { withoutReload?: boolean }).withoutReload === true)
+  return page.evaluate(() => Reflect.get(window, 'withoutReload') === true)
 }
 
 // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
@@ -121,7 +124,7 @@ test('SAL-07 la pantalla de cocina muestra lo que falta preparar sin precios y e
   await expect(page.getByText('Por preparar (1)')).toBeVisible()
   await expect(page.getByText('Listos para servir (1)')).toBeVisible()
   await expect(page.getByRole('article', { name: 'Pedido 1' }).getByRole('button', { name: 'Listo' })).toHaveCount(0)
-  const active = await api(local).list('/orders/active')
+  const active = await api(local).list<OrderResponse>('/orders/active')
   expect(active.map((p) => [p.number, p.status])).toEqual([
     [1, 'ready'],
     [2, 'in_kitchen'],
@@ -168,6 +171,6 @@ test('SAL-09 una nota con alergia se resalta en el tablero, la cocina y el detal
   await evidence(page, 'sal-09-2-detalle-alergia')
 
   // La nota original no se modifica.
-  const order = await api(local).get(`/orders/${String(withAllergy.id)}`)
-  expect((order.items as { notes: string }[])[0].notes).toBe('Es alérgica al maní')
+  const order = await api(local).get<OrderResponse>(`/orders/${String(withAllergy.id)}`)
+  expect(defined(order.items[0]).notes).toBe('Es alérgica al maní')
 })

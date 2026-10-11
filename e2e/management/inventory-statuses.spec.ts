@@ -1,5 +1,6 @@
 // HU15, HU16: paginación de los insumos y del libro de movimientos, y lo que
 // muestra cada pestaña del inventario cuando el servidor falla.
+import type { Ingredient, MovementPage } from '../../src/api/types'
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 import { api, failureServer } from '../support/management'
@@ -14,7 +15,7 @@ test('GES-10 los insumos y el libro de movimientos se paginan', async ({ page, l
   covers('funcion:inventario.paginar', 'funcion:movimientos.paginar', 'funcion:inventario.cancelar-accion')
   const owner = api(local)
   for (let n = 1; n <= 28; n += 1) {
-    const ingredient = await owner.post('/inventory/ingredients', { name: `Insumo ${String(n).padStart(2, '0')}`, unit: 'unit', min_stock: '0', unit_cost: '1' })
+    const ingredient = await owner.post<Ingredient>('/inventory/ingredients', { name: `Insumo ${String(n).padStart(2, '0')}`, unit: 'unit', min_stock: '0', unit_cost: '1' })
     if (n <= 18) {
       await owner.post('/inventory/purchases', { ingredient_id: ingredient.id, quantity: '5', unit_cost: '1', reason: `Compra ${String(n)}` })
     }
@@ -50,7 +51,7 @@ test('GES-10 los insumos y el libro de movimientos se paginan', async ({ page, l
   // Filtrar vuelve a la primera página.
   await book.getByLabel('Tipo').selectOption({ label: 'Compra' })
   await expect(pagesBook).toContainText('Página 1 de 2')
-  expect((await owner.get('/inventory/movements?limit=1')).total).toBe(21)
+  expect((await owner.get<MovementPage>('/inventory/movements?limit=1')).total).toBe(21)
 })
 
 test('GES-11 cada pestaña del inventario avisa si el servidor falla', async ({ page, local }) => {

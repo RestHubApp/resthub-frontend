@@ -80,7 +80,7 @@ export function notice(page: Page, text: string | RegExp) {
   return page.getByRole('status').filter({ hasText: text }).or(page.getByRole('alert').filter({ hasText: text }))
 }
 
-const EVIDENCES = process.env.E2E_EVIDENCE
+const EVIDENCES = process.env['E2E_EVIDENCE']
 
 /**
  * Guarda una captura de un paso para la documentación, solo si se pidió con

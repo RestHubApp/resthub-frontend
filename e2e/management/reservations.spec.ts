@@ -1,6 +1,7 @@
 // HU38: las reservas por día. Nombre, teléfono, personas, día, hora,
 // duración y mesa opcional; dos reservas vigentes de la misma mesa no se
 // cruzan; estados reservada, llegaron, no vinieron y cancelada.
+import type { Reservation } from '../../src/api/types'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, dayFromToday, failureServer } from '../support/management'
@@ -99,7 +100,7 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
   await group.getByRole('button', { name: 'Cancelar' }).click()
   await expect(group).toContainText('Cancelada')
   await evidence(page, 'ges-23-3-estados')
-  const statuses = (await api(local).list(`/reservations?day=${manana}`)).map((r) => [r.customer_name, r.status])
+  const statuses = (await api(local).list<Reservation>(`/reservations?day=${manana}`)).map((r) => [r.customer_name, r.status])
   expect(Object.fromEntries(statuses)).toEqual({ 'Grupo Vargas': 'cancelled', 'Familia Quispe': 'seated', 'Señor Torres': 'no_show' })
 
   // Otro día, sin reservas.

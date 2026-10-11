@@ -1,6 +1,7 @@
 // HU10, HU13, HU31, HU32: lo que el mesero y el encargado hacen con un pedido
 // ya tomado: agregar platos, corregir uno abierto, cancelarlo con motivo,
 // cambiarlo de mesa, unir otra mesa e imprimir la comanda y la precuenta.
+import type { TableState } from '../../src/api/types'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, countPrints, id, prints, readOrder, openOrder, orderInTable, orderPaid } from '../support/floor'
@@ -143,7 +144,7 @@ test('SAL-15 el mesero cambia el pedido de mesa y une otra mesa suya @mobile', a
 
   const actual = await readOrder(local, id(first))
   expect(actual).toMatchObject({ table_id: local.table('3').id, total: '48.00' })
-  const tables = await api(local).list('/tables')
+  const tables = await api(local).list<TableState>('/tables')
   const free = tables.filter((m) => m.active_order === null).map((m) => m.label)
   expect(free).toEqual(['1', '2', '4'])
 })

@@ -9,6 +9,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
+import { defined } from '../support/defined'
+
 export interface Element {
   readonly id: string
   readonly type: 'ruta' | 'dialogo' | 'confirmacion' | 'hoja' | 'pestanas' | 'desplegable' | 'funcion' | 'rol' | 'estado'
@@ -36,7 +38,7 @@ function routerRoutes(): Element[] {
   const origin = 'src/services/paths.ts'
   const routes = new Map<string, string>()
   for (const match of patterns.matchAll(/: '(\/[^']*)'/gu)) {
-    routes.set(match[1], origin)
+    routes.set(defined(match[1]), origin)
   }
   routes.set('/*', 'src/router/routes.tsx')
   routes.set('/plataforma/*', 'src/router/routes.tsx')
@@ -62,14 +64,14 @@ const OVERLAYS = [
 function title(fragment: string): string {
   const literal = /title="([^"]+)"/u.exec(fragment)
   if (literal !== null) {
-    return literal[1]
+    return defined(literal[1])
   }
   const expression = /title=\{([^\n]+?)\}\s*(?:\n|>|size|description|open|onOpenChange)/u.exec(fragment)
   if (expression !== null) {
-    return expression[1].trim()
+    return defined(expression[1]).trim()
   }
   const sheet = /<SheetTitle[^>]*>([^<]+)<\/SheetTitle>/u.exec(fragment)
-  return sheet === null ? '' : sheet[1].trim()
+  return sheet === null ? '' : defined(sheet[1]).trim()
 }
 
 function codeOverlays(): Element[] {

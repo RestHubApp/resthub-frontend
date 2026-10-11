@@ -62,11 +62,11 @@ test('VIS-06 el tablero, el historial, la cancelación, el comprobante y la caja
 
   await page.goto('/comprobantes')
   await expect(page.getByRole('heading', { name: 'Emitidos' })).toBeVisible()
-  await expect(page.getByText(String(salesReceipt.code))).toBeVisible()
+  await expect(page.getByText(salesReceipt.code)).toBeVisible()
   await capture(page, 'comprobantes')
 
   await page.goto(`/comprobantes/${String(id(salesReceipt))}/imprimir`)
-  await expect(page.getByText(String(salesReceipt.code)).first()).toBeVisible()
+  await expect(page.getByText(salesReceipt.code).first()).toBeVisible()
   await capture(page, 'comprobante-imprimir')
 
   await page.goto('/caja')

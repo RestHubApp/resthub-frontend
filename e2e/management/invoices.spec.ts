@@ -1,6 +1,7 @@
 // HU35: los comprobantes electrónicos. Datos fiscales del local, la lista de
 // lo emitido y su estado ante SUNAT, el reenvío y la hoja impresa. Sin token
 // del proveedor el comprobante queda «Sin enviar (sin proveedor)», simulado.
+import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, countPrints, issueSalesReceipt, failureServer, id, prints, soles, sell } from '../support/management'
@@ -25,7 +26,7 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
   const order = await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado') }, { dish: local.dish('Chicha morada') }] })
   const salesReceipt = await issueSalesReceipt(local, id(order))
   expect(salesReceipt).toMatchObject({ status: 'simulated', total: '40.00' })
-  const code = String(salesReceipt.code)
+  const code = salesReceipt.code
   await countPrints(page)
   await openAs(page, local.owner, '/comprobantes')
   await expect(page.getByRole('heading', { level: 1, name: 'Comprobantes' })).toBeVisible()
@@ -68,8 +69,8 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
   await expect(sheet).toContainText('Boleta de venta electrónica')
   await expect(sheet).toContainText(code)
   await expect(sheet).toContainText('1 × Lomo saltado')
-  await expect(sheet).toContainText(soles(String(salesReceipt.taxable)))
-  await expect(sheet).toContainText(soles(String(salesReceipt.igv)))
+  await expect(sheet).toContainText(soles(salesReceipt.taxable))
+  await expect(sheet).toContainText(soles(salesReceipt.igv))
   await expect(sheet).toContainText('IGV 18.0 %')
   await expect(sheet).toContainText('Estado: Sin enviar (sin proveedor).')
   await expect.poll(() => prints(page)).toBe(1)
@@ -88,18 +89,18 @@ test('GES-20 los comprobantes se paginan de a 25 y la lista avisa si el servidor
   const codes: string[] = []
   for (let n = 0; n < 26; n += 1) {
     const order = await sell(local, { table: local.table('2'), items: [{ dish: local.dish('Inca Kola 500 ml') }] })
-    codes.push(String((await issueSalesReceipt(local, id(order))).code))
+    codes.push((await issueSalesReceipt(local, id(order))).code)
   }
   await openAs(page, local.owner, '/comprobantes')
   const issued = page.getByRole('heading', { name: 'Emitidos' }).locator('xpath=../../..')
   const pages = issued.getByRole('navigation', { name: 'Paginación' })
   await expect(pages).toContainText('Página 1 de 2')
   await expect(issued.getByRole('listitem')).toHaveCount(25)
-  await expect(issued.getByRole('listitem').first()).toContainText(codes[25])
+  await expect(issued.getByRole('listitem').first()).toContainText(defined(codes[25]))
   await pages.getByRole('button', { name: 'Siguiente' }).click()
   await expect(pages).toContainText('Página 2 de 2')
   await expect(issued.getByRole('listitem')).toHaveCount(1)
-  await expect(issued.getByRole('listitem')).toContainText(codes[0])
+  await expect(issued.getByRole('listitem')).toContainText(defined(codes[0]))
   await evidence(page, 'ges-20-1-pagina-2')
 
   await failureServer(page, '/billing/invoices')

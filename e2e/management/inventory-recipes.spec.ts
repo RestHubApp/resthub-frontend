@@ -1,5 +1,6 @@
 // HU17: la receta de cada plato, con su costo por porción y su margen en vivo.
 // Se llega desde la pestaña Recetas del inventario o desde el plato en el menú.
+import type { Recipe } from '../../src/api/types'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
 import { api, soles } from '../support/management'
@@ -65,7 +66,7 @@ test('GES-06 el encargado arma la receta de un plato con su costo y su margen, y
   await expect(notice(page, 'Receta de Ají de gallina guardada.')).toBeVisible()
   await expect(save).toBeDisabled()
 
-  const recipe = await api(local).get(`/inventory/recipes/${String(local.dish('Ají de gallina').id)}`)
+  const recipe = await api(local).get<Recipe>(`/inventory/recipes/${String(local.dish('Ají de gallina').id)}`)
   expect(recipe).toMatchObject({ has_recipe: true, cost: '0.42' })
   expect(recipe.lines).toHaveLength(2)
 

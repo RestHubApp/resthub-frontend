@@ -1,5 +1,6 @@
 // HU08: las mesas del salón. Crear, renombrar, ordenar como el recorrido del
 // salón y desactivar las que no se usan; una mesa ocupada no se desactiva.
+import type { TableState } from '../../src/api/types'
 import { orderInTable } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
@@ -56,7 +57,7 @@ test('GES-14 el encargado crea, renombra, ordena, desactiva y activa mesas, y un
   // La terraza va antes que la mesa 4 en el recorrido.
   await expect(page.getByRole('button', { name: 'Bajar Terraza 2' })).toBeDisabled()
   await page.getByRole('button', { name: 'Subir Terraza 2' }).click()
-  await expect.poll(async () => (await api(local).list('/tables?include_inactive=true')).map((m) => m.label)).toEqual([
+  await expect.poll(async () => (await api(local).list<TableState>('/tables?include_inactive=true')).map((m) => m.label)).toEqual([
     '1',
     '2',
     '3',
@@ -71,7 +72,7 @@ test('GES-14 el encargado crea, renombra, ordena, desactiva y activa mesas, y un
   await expect(page.getByText('4 activas de 5')).toBeVisible()
   await evidence(page, 'ges-14-2-mesas')
   // El mesero ya no la ve al elegir mesa.
-  expect((await api(local, local.waiter).list('/tables')).map((m) => m.label)).not.toContain('4')
+  expect((await api(local, local.waiter).list<TableState>('/tables')).map((m) => m.label)).not.toContain('4')
   await table('Mesa 4').getByRole('button', { name: 'Activar' }).click()
   await expect(notice(page, 'Mesa 4 activada.')).toBeVisible()
   await expect(page.getByText('5 activas de 5')).toBeVisible()
