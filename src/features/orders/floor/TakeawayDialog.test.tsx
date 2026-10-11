@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { customer, lastBody } from '#jest/fixtures/pedidos'
+import { customer, lastBody } from '#jest/fixtures/orders'
 import { signInAs, handleMount, server, withoutResponse } from '#jest/harness'
 import { TakeawayDialog } from './TakeawayDialog'
 

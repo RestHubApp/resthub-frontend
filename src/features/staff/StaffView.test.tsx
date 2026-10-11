@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { TEAM, member, role, ROLE_OWNER, ROLE_WAITER } from '#jest/fixtures/plataforma'
+import { TEAM, member, role, ROLE_OWNER, ROLE_WAITER } from '#jest/fixtures/platform'
 import { signInAs, handleMount, PERMISSIONS_OWNER, handleFirst, ErrorResponse, server, type Request } from '#jest/harness'
 import type { PermissionCode } from '@/api/types'
 import { StaffView } from './StaffView'

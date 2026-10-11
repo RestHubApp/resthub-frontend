@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { signInToPlatform, restaurantCard, mountPlatform, restaurantSummary } from '#jest/fixtures/plataforma'
+import { signInToPlatform, restaurantCard, mountPlatform, restaurantSummary } from '#jest/fixtures/platform'
 import { ErrorResponse, server } from '#jest/harness'
 
 // Contraseña de prueba, no una credencial real.

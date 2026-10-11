@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { stockChange, ingredient } from '#jest/fixtures/inventario'
+import { stockChange, ingredient } from '#jest/fixtures/inventory'
 import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import { InventoryView } from './InventoryView'
 

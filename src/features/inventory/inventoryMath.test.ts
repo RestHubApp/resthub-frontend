@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { ingredient, recipe } from '#jest/fixtures/inventario'
+import { ingredient, recipe } from '#jest/fixtures/inventory'
 import { adjustmentDelta, adjustmentPayload } from './adjustmentMath'
 import { EMPTY_INGREDIENT, ingredientNumbers, ingredientValuesOf } from './ingredientValues'
 import { adjustmentSchema, ingredientSchema, purchaseSchema, recipeSchema, wasteSchema } from './inventorySchema'

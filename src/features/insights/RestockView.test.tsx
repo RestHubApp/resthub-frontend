@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { ingredientToReview, restock } from '#jest/fixtures/indicadores'
+import { ingredientToReview, restock } from '#jest/fixtures/indicators'
 import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import type { RestockReport } from '@/api/types'
 import { RestockView } from './RestockView'

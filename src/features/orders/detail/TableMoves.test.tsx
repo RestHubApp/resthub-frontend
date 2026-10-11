@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { table, payment, handleOrder } from '#jest/fixtures/cobro'
+import { table, payment, handleOrder } from '#jest/fixtures/charge'
 import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
 import type { ActiveOrderSummary, OrderResponse, PermissionCode } from '@/api/types'
 import { TableMoves } from './TableMoves'
@@ -27,7 +27,7 @@ function summary(id: number, waiterId: number): ActiveOrderSummary {
   }
 }
 
-const SALON = [
+const FLOOR = [
   table({ id: 3, label: '3', status: 'occupied', active_order: summary(12, 7) }),
   table({ id: 4, label: '4' }),
   table({ id: 5, label: 'Terraza', status: 'occupied', active_order: summary(20, 7) }),
@@ -35,7 +35,7 @@ const SALON = [
 ]
 
 function move(permissions: readonly PermissionCode[] = PERMISSIONS_WAITER, order: OrderResponse = handleOrder()) {
-  const api = server().on('get', '/tables', SALON)
+  const api = server().on('get', '/tables', FLOOR)
   signInAs(permissions)
   return { api, ...handleMount(<TableMoves order={order} />) }
 }
@@ -80,7 +80,7 @@ describe('TableMoves', () => {
 
   it('sin otras mesas propias lo dice', async () => {
     const { api, user } = move()
-    api.on('get', '/tables', [SALON[0]])
+    api.on('get', '/tables', [FLOOR[0]])
 
     await user.click(screen.getByRole('button', JOIN))
 

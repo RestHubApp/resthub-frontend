@@ -1,9 +1,9 @@
 // Regresión visual del panel BI: indicadores con ventas del día, reposición
 // sugerida y la auditoría de la IA.
-import { sell } from '../soporte/gestion'
-import { covers } from '../soporte/cobertura'
-import { openAs } from '../soporte/fixtures'
-import { capture, expect, deadline, test } from './captura'
+import { sell } from '../support/management'
+import { covers } from '../support/coverage'
+import { openAs } from '../support/fixtures'
+import { capture, expect, deadline, test } from './capture'
 
 test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', async ({ page, restaurantWithCashRegister }) => {
   deadline(120_000)

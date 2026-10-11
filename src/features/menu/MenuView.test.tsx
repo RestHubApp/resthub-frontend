@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { handleMenu, dishCost, dish } from '#jest/fixtures/inventario'
+import { handleMenu, dishCost, dish } from '#jest/fixtures/inventory'
 import { signInAs, handleMount, PERMISSIONS_OWNER, handleFirst, ErrorResponse, server } from '#jest/harness'
 import type { MenuResponse } from '@/api/types'
 import { MenuView } from './MenuView'

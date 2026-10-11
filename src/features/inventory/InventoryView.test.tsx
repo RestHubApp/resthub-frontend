@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { ingredient } from '#jest/fixtures/inventario'
+import { ingredient } from '#jest/fixtures/inventory'
 import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import type { Ingredient, PermissionCode } from '@/api/types'
 import { InventoryView } from './InventoryView'

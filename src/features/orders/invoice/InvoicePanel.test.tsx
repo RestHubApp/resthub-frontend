@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { invoice, paid, payment, handleOrder } from '#jest/fixtures/cobro'
+import { invoice, paid, payment, handleOrder } from '#jest/fixtures/charge'
 import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { InvoicePanel } from './InvoicePanel'

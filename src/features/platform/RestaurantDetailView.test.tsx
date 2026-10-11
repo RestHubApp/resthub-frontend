@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { signInToPlatform, restaurantCard, mountPlatform } from '#jest/fixtures/plataforma'
+import { signInToPlatform, restaurantCard, mountPlatform } from '#jest/fixtures/platform'
 import { ErrorResponse, server } from '#jest/harness'
 import type { PlatformRestaurantDetail } from '@/api/types'
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { act, screen, within } from '@testing-library/react'
 
-import { dishCost, ingredient, recipe } from '#jest/fixtures/inventario'
+import { dishCost, ingredient, recipe } from '#jest/fixtures/inventory'
 import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import type { PermissionCode, Recipe } from '@/api/types'
 import { InventoryView } from './InventoryView'

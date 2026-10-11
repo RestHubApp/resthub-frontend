@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { handleOrder } from '#jest/fixtures/cobro'
+import { handleOrder } from '#jest/fixtures/charge'
 import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse, PermissionCode } from '@/api/types'
 import { todayIn } from '@/services/format'

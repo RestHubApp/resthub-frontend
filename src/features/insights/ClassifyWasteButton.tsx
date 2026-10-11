@@ -28,7 +28,7 @@ export function ClassifyWasteButton({ pending }: ClassifyWasteButtonProps) {
           classify.mutate()
         }}
       >
-        <Icon name="ia" size={14} className={classify.isPending ? 'animate-pulse' : undefined} />
+        <Icon name="ai" size={14} className={classify.isPending ? 'animate-pulse' : undefined} />
         <span>{classify.isPending ? 'Clasificando…' : `Clasificar mermas pendientes (${String(pending)})`}</span>
       </Button>
       {classify.isError ? (

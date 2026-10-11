@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { waitFor } from '@testing-library/react'
 
-import { table, orderInTable } from '#jest/fixtures/inventario'
+import { table, orderInTable } from '#jest/fixtures/inventory'
 import { signInAs, PERMISSIONS_WAITER, server } from '#jest/harness'
 import type { TableResponse } from '@/api/types'
 import { prefetchTables } from './prefetchTables'

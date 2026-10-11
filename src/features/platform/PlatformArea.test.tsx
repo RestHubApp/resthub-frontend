@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { ADMIN, signInToPlatform, mountPlatform } from '#jest/fixtures/plataforma'
+import { ADMIN, signInToPlatform, mountPlatform } from '#jest/fixtures/platform'
 import { signInAs, ErrorResponse, server } from '#jest/harness'
 import { usePlatformSession } from '@/store/platformSession'
 import { useSession } from '@/store/session'

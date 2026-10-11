@@ -1,7 +1,7 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { handleOrder } from '#jest/fixtures/cobro'
+import { handleOrder } from '#jest/fixtures/charge'
 import { signInAs, handleMount, server } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { CancelOrderDialog } from './CancelOrderDialog'

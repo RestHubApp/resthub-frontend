@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { payment, handleOrder, dish } from '#jest/fixtures/cobro'
+import { payment, handleOrder, dish } from '#jest/fixtures/charge'
 import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, handleFirst, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { AdjustmentsPanel } from './AdjustmentsPanel'

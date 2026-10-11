@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { orderItem, order } from '#jest/fixtures/pedidos'
+import { orderItem, order } from '#jest/fixtures/orders'
 import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
 import { PrintView } from './PrintView'
 

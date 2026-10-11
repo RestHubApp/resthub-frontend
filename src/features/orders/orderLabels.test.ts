@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { noteWithAllergy, order } from '#jest/fixtures/pedidos'
+import { noteWithAllergy, order } from '#jest/fixtures/orders'
 import { nextStepFor, stepDoneMessage } from './nextStep'
 import { allergyIn } from './noteFlags'
 import { deliveryLines, dishCount, isActive, orderPlace, STATUS_LABELS, STATUS_OPTIONS } from './orderLabels'

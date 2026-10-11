@@ -102,7 +102,7 @@ const restrictSyntaxExcept = (...owned) => [
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados*/**', 'e2e/.reporte*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'pruebas/accesibilidad/.wave-ext/**', 'pruebas/accesibilidad/reportes/**'],
+    ignores: ['dist/**', 'dist-e2e/**', 'e2e/.results*/**', 'e2e/.report*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'checks/accessibility/.wave-ext/**', 'checks/accessibility/reports/**'],
   },
 
   // ---------------------------------------------------------------------
@@ -515,7 +515,7 @@ export default tseslint.config(
             '**/*.test.{ts,tsx}',
             'jest/**',
             'e2e/**',
-            'pruebas/**',
+            'checks/**',
             '*.config.{js,ts,mjs}',
             'src/api/contract/**',
             'vite.*.ts',
@@ -682,14 +682,14 @@ export default tseslint.config(
   },
   // Playwright carga el reporter como `export default class`.
   {
-    files: ['e2e/soporte/reporteCobertura.ts'],
+    files: ['e2e/support/reportCoverage.ts'],
     rules: { 'import-x/no-default-export': 'off' },
   },
   // ---------------------------------------------------------------------
   // Scripts de medición de accesibilidad (Node, fuera de la aplicación).
   // ---------------------------------------------------------------------
   {
-    files: ['pruebas/accesibilidad/**/*.mjs'],
+    files: ['checks/accessibility/**/*.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
     extends: [tseslint.configs.disableTypeChecked],
   },

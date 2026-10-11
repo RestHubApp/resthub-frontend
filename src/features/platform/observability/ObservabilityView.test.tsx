@@ -9,7 +9,7 @@ import {
   restaurantSummary,
   ROUTES_OBS,
   SERIES_OBS,
-} from '#jest/fixtures/plataforma'
+} from '#jest/fixtures/platform'
 import { ErrorResponse, server } from '#jest/harness'
 
 const WINDOW_INDICATORS = 'Indicadores de la ventana'

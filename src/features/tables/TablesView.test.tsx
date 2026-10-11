@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { table, orderInTable } from '#jest/fixtures/inventario'
+import { table, orderInTable } from '#jest/fixtures/inventory'
 import { signInAs, handleMount, handleFirst, ErrorResponse, server } from '#jest/harness'
 import { TablesView } from './TablesView'
 

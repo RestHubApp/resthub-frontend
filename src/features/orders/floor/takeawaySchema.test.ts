@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { customer } from '#jest/fixtures/pedidos'
+import { customer } from '#jest/fixtures/orders'
 import { EMPTY_TAKEAWAY, fromCustomer, newOrderPath, takeawaySchema } from './takeawaySchema'
 
 describe('takeawaySchema', () => {

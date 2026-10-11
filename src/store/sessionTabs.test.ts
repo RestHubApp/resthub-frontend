@@ -5,7 +5,7 @@
 // carga su propio almacén (módulos nuevos) sobre el mismo `localStorage`.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { unstubAllGlobals } from '#jest/globals'
-import { type TestStorage, notify, fakeStorage, handleSaved, newTab, tokenThatExpires } from '#jest/pestanas'
+import { type TestStorage, notify, fakeStorage, handleSaved, newTab, tokenThatExpires } from '#jest/tabs'
 
 import type { CurrentUserResponse } from '@/api/types'
 

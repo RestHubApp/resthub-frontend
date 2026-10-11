@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen } from '@testing-library/react'
 
-import { handleMenu, table, order, activeSummary, lastBody } from '#jest/fixtures/pedidos'
+import { handleMenu, table, order, activeSummary, lastBody } from '#jest/fixtures/orders'
 import { signInAs, handleMount, server } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { NewOrderView } from './NewOrderView'

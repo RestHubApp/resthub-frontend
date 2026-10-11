@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { waitFor } from '@testing-library/react'
 
-import { handleMenu, dish } from '#jest/fixtures/inventario'
+import { handleMenu, dish } from '#jest/fixtures/inventory'
 import { signInAs, PERMISSIONS_WAITER, server } from '#jest/harness'
 import { patchItem, withCategory, withCategoryOrder, withItem, withItemOrder, withoutCategory } from './menuCache'
 import { moveId, sortByIds } from './menuOrder'

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
 
-import { noteWithAllergy, order } from '#jest/fixtures/pedidos'
+import { noteWithAllergy, order } from '#jest/fixtures/orders'
 import { signInAs, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
 import { ItemNote } from './ItemNote'
 import { nextStepFor } from './nextStep'

@@ -25,8 +25,8 @@ const VISUAL = /visual\/.*\.spec\.ts/u
 
 // Cada corrida limpia su carpeta de resultados: dos corridas a la vez (por
 // ejemplo, la E2E y la visual) necesitan carpetas distintas.
-const OUTPUT = process.env.E2E_OUTPUT ?? './e2e/.resultados'
-const REPORT = process.env.E2E_REPORT ?? './e2e/.reporte'
+const OUTPUT = process.env.E2E_OUTPUT ?? './e2e/.results'
+const REPORT = process.env.E2E_REPORT ?? './e2e/.report'
 
 export default defineConfig({
   testDir: './e2e',
@@ -41,12 +41,12 @@ export default defineConfig({
     timeout: 8_000,
     toHaveScreenshot: { animations: 'disabled', caret: 'hide', scale: 'css', maxDiffPixelRatio: 0.002 },
   },
-  snapshotPathTemplate: '{testDir}/visual/lineas-base/{projectName}/{arg}{ext}',
+  snapshotPathTemplate: '{testDir}/visual/baselines/{projectName}/{arg}{ext}',
   reporter: [
     ['list'],
     ['html', { outputFolder: REPORT, open: 'never' }],
     ['json', { outputFile: `${REPORT}-json/resultados.json` }],
-    ['./e2e/soporte/reporteCobertura.ts'],
+    ['./e2e/support/reportCoverage.ts'],
   ],
   use: {
     // E2E_BASE_URL sirve otra compilación sin tocar la de 5201 (la demostración del diff visual).
@@ -61,48 +61,48 @@ export default defineConfig({
     video: 'off',
   },
   projects: [
-    { name: 'cobertura', testMatch: /cobertura\.spec\.ts/u },
+    { name: 'coverage', testMatch: /coverage\.spec\.ts/u },
     {
-      name: 'escritorio',
-      testIgnore: [VISUAL, /cobertura\.spec\.ts/u],
-      grepInvert: /@solo-movil/u,
+      name: 'desktop',
+      testIgnore: [VISUAL, /coverage\.spec\.ts/u],
+      grepInvert: /@only-mobile/u,
       use: DESKTOP,
     },
     {
-      name: 'movil',
-      testIgnore: [VISUAL, /cobertura\.spec\.ts/u],
-      grep: /@movil|@solo-movil/u,
+      name: 'mobile',
+      testIgnore: [VISUAL, /coverage\.spec\.ts/u],
+      grep: /@mobile|@only-mobile/u,
       use: MOBILE,
     },
     // Regresión visual: las líneas base dependen del sistema operativo y de
     // sus fuentes, así que corre en local con `pnpm test:visual`, no en el CI.
-    { name: 'visual-chromium-escritorio', testMatch: VISUAL, use: DESKTOP },
-    { name: 'visual-chromium-movil', testMatch: VISUAL, use: MOBILE },
+    { name: 'visual-chromium-desktop', testMatch: VISUAL, use: DESKTOP },
+    { name: 'visual-chromium-mobile', testMatch: VISUAL, use: MOBILE },
     {
-      name: 'visual-firefox-escritorio',
+      name: 'visual-firefox-desktop',
       testMatch: VISUAL,
       use: { ...devices['Desktop Firefox'], viewport: DESKTOP.viewport },
     },
     {
-      name: 'visual-firefox-movil',
+      name: 'visual-firefox-mobile',
       testMatch: VISUAL,
       // Firefox no emula `isMobile`: se prueba el ancho y el toque.
       use: { ...devices['Desktop Firefox'], viewport: MOBILE.viewport, hasTouch: true },
     },
     {
-      name: 'visual-webkit-escritorio',
+      name: 'visual-webkit-desktop',
       testMatch: VISUAL,
       use: { ...devices['Desktop Safari'], viewport: DESKTOP.viewport, ...WEBKIT },
     },
     {
-      name: 'visual-webkit-movil',
+      name: 'visual-webkit-mobile',
       testMatch: VISUAL,
       use: { ...devices['iPhone 13'], viewport: MOBILE.viewport, ...WEBKIT },
     },
   ],
   webServer: [
     {
-      command: 'bash e2e/servidor/backend.sh',
+      command: 'bash e2e/server/backend.sh',
       url: `${API}/api/v1/health`,
       reuseExistingServer: !enCI,
       timeout: 180_000,

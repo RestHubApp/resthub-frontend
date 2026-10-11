@@ -1,11 +1,11 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { table, order, activeSummary } from '#jest/fixtures/pedidos'
+import { table, order, activeSummary } from '#jest/fixtures/orders'
 import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { OrdersView } from './OrdersView'
 
-const SALON = [
+const FLOOR = [
   table(),
   table({ id: 4, label: '4', status: 'occupied', active_order: activeSummary({ id: 8, number: 31 }) }),
   table({ id: 5, label: 'Terraza', status: 'occupied', active_order: activeSummary({ id: 9, number: 32, status: 'ready' }) }),
@@ -14,7 +14,7 @@ const TAKEAWAY = order({ id: 20, number: 40, type: 'takeaway', table_id: null, t
 
 function open(en = '/pedidos', permissions = PERMISSIONS_WAITER) {
   const api = server()
-    .on('get', '/tables', SALON)
+    .on('get', '/tables', FLOOR)
     .on('get', '/orders/active', [order(), TAKEAWAY])
     .on('get', '/orders', { items: [order(), order({ id: 6, number: 13, status: 'paid' })], total: 2 })
   signInAs(permissions)
@@ -57,7 +57,7 @@ describe('el salón del mesero', () => {
     const { api, user } = open()
     api.on('get', '/tables', new ErrorResponse(503, 'Servidor ocupado'))
     expect(await screen.findByText('Servidor ocupado')).toBeInTheDocument()
-    api.on('get', '/tables', SALON)
+    api.on('get', '/tables', FLOOR)
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
     expect(await screen.findByRole('heading', { name: '1 de 3 mesas libres' })).toBeInTheDocument()
   })

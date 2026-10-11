@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, screen } from '@testing-library/react'
 
-import { order } from '#jest/fixtures/pedidos'
+import { order } from '#jest/fixtures/orders'
 import { signInAs, handleMount, ErrorResponse, server, withoutNetwork } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { enqueueOrder, queuedOrders, removeQueued } from '@/store/offlineQueue'

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { signInToPlatform, mountPlatform, logRecord, restaurantSummary } from '#jest/fixtures/plataforma'
+import { signInToPlatform, mountPlatform, logRecord, restaurantSummary } from '#jest/fixtures/platform'
 import { ErrorResponse, server } from '#jest/harness'
 
 const PLATFORM_ACTIVITY = '/platform/activity'

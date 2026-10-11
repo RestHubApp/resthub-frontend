@@ -188,7 +188,7 @@ export const ICONS = {
   sort: ArrowUpDown,
   orderAscending: ArrowUpNarrowWide,
   orderDescending: ArrowDownWideNarrow,
-  ia: Sparkles,
+  ai: Sparkles,
   rules: ListChecks,
   grid: Table2,
   chart: ChartLine,

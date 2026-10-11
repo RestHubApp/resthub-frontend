@@ -6,8 +6,8 @@
     "jest/**/*.{ts,cjs}",
     "e2e/**/*.ts",
     "src/api/contract/**/*.ts",
-    "pruebas/**/*.mjs",
-    "e2e/visual/captura.css"
+    "checks/**/*.mjs",
+    "e2e/visual/capture.css"
   ],
   "project": [
     "src/**/*.{ts,tsx}",

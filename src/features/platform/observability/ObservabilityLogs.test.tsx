@@ -10,7 +10,7 @@ import {
   SUMMARY_OBS,
   ROUTES_OBS,
   SERIES_OBS,
-} from '#jest/fixtures/plataforma'
+} from '#jest/fixtures/platform'
 import { server } from '#jest/harness'
 
 const FILTER_LOGS = 'Filtrar logs'

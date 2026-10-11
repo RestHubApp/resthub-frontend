@@ -16,7 +16,7 @@ export function RestockNotice({ report }: RestockNoticeProps) {
   return (
     <div className="flex flex-col gap-2">
       <p className="m-0 flex items-start gap-2 rounded-lg bg-secondary px-3 py-2 text-sm text-secondary-foreground">
-        <Icon name="ia" size={18} className="mt-0.5 shrink-0" />
+        <Icon name="ai" size={18} className="mt-0.5 shrink-0" />
         <span>
           <strong className="font-semibold">La IA recomienda; tú decides.</strong> Cada sugerencia explica en qué se basa.
           Ninguna compra se hace sola: úsala como lista de revisión antes de ir al mercado.

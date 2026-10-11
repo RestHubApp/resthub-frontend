@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook } from '@testing-library/react'
 
-import { handleMenu, dish, section } from '#jest/fixtures/pedidos'
+import { handleMenu, dish, section } from '#jest/fixtures/orders'
 import { cartTotals } from './cartTotals'
 import { visibleSections } from './menuFilter'
 import { lineKeyFor, MAX_QUANTITY, toNewItems, useDraftActions, useDraftLines } from './useOrderDraft'

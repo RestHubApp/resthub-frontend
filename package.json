@@ -16,16 +16,16 @@
     "typecheck": "tsc -b",
     "knip": "knip --no-progress",
     "dup": "jscpd",
-    "a11y": "node pruebas/accesibilidad/todo.mjs",
+    "a11y": "node checks/accessibility/all.mjs",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:contract": "rm -rf pacts && jest --config jest.contract.config.js",
     "test:mutation": "stryker run",
     "generate:api": "openapi-typescript \"${VITE_API_URL:-http://localhost:8000}/api/v1/openapi.json\" -o src/api/schema.d.ts",
     "prepare": "husky",
-    "test:e2e": "playwright test --project=cobertura --project=escritorio --project=movil",
-    "test:visual": "playwright test --project=visual-chromium-escritorio --project=visual-chromium-movil --project=visual-firefox-escritorio --project=visual-firefox-movil --project=visual-webkit-escritorio --project=visual-webkit-movil",
-    "e2e:inventario": "node e2e/inventario/generar.ts"
+    "test:e2e": "playwright test --project=coverage --project=desktop --project=mobile",
+    "test:visual": "playwright test --project=visual-chromium-desktop --project=visual-chromium-mobile --project=visual-firefox-desktop --project=visual-firefox-mobile --project=visual-webkit-desktop --project=visual-webkit-mobile",
+    "e2e:inventory": "node e2e/inventory/generate.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",

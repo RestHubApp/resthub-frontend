@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { renderHook, waitFor } from '@testing-library/react'
 
-import { noticesChannel } from '#jest/canal'
+import { noticesChannel } from '#jest/channel'
 import { setAuthToken } from '@/services/api'
 import { useServerEvent } from './useServerEvent'
 
