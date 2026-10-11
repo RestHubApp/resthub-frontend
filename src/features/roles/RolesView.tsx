@@ -25,11 +25,11 @@ import { RoleRow } from './RoleRow'
 export function RolesView() {
   const roles = useQuery(rolesQuery())
   // Solo da nombre a los grupos del resumen: sin él, la lista igual se muestra.
-  const catalogo = useQuery({ ...permissionsQuery(), select: groupPermissions })
+  const catalog = useQuery({ ...permissionsQuery(), select: groupPermissions })
   const granted = usePermissions()
   // `undefined` cerrada; `null` para crear; un rol para editarlo o verlo.
-  const [abierto, setAbierto] = useState<Role | null | undefined>(undefined)
-  const lista = roles.data ?? []
+  const [open, openSet] = useState<Role | null | undefined>(undefined)
+  const list = roles.data ?? []
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,7 +38,7 @@ export function RolesView() {
         description="Qué puede hacer cada persona según su rol. El rol de cada cuenta se elige en Personal."
         actions={
           <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
-            setAbierto(null)
+            openSet(null)
           }}>
             <Icon name="agregar" size={16} />
             <span>Nuevo rol</span>
@@ -46,28 +46,28 @@ export function RolesView() {
         }
       />
       <RoleFormDialog
-        role={abierto ?? null}
-        open={abierto !== undefined}
-        onOpenChange={(valor) => {
-          if (!valor) {
-            setAbierto(undefined)
+        role={open ?? null}
+        open={open !== undefined}
+        onOpenChange={(value) => {
+          if (!value) {
+            openSet(undefined)
           }
         }}
       />
-      <SectionCard title="Roles" description={roles.isSuccess ? `${String(lista.length)} roles` : undefined}>
+      <SectionCard title="Roles" description={roles.isSuccess ? `${String(list.length)} roles` : undefined}>
         {roles.isPending ? <ListSkeleton label="Cargando roles…" count={3} itemClassName="h-16 rounded-lg" /> : null}
         {roles.isError ? (
           <FormMessage tone="error">{errorMessage(roles.error, 'No se pudieron cargar los roles.')}</FormMessage>
         ) : null}
         <ul className="m-0 flex list-none flex-col p-0">
-          {lista.map((rol) => (
+          {list.map((role) => (
             <RoleRow
-              key={rol.id}
-              role={rol}
-              groups={catalogo.data ?? []}
-              access={roleAccess(rol, granted)}
+              key={role.id}
+              role={role}
+              groups={catalog.data ?? []}
+              access={roleAccess(role, granted)}
               onOpen={() => {
-                setAbierto(rol)
+                openSet(role)
               }}
             />
           ))}

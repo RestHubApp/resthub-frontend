@@ -5,11 +5,11 @@ import { upsertInList } from '@/services/cacheList'
 const KIND_ORDER: Record<RoleKind, number> = { owner: 0, waiter: 1, custom: 2 }
 
 function before(role: Role, other: Role): boolean {
-  const porClase = KIND_ORDER[role.kind] - KIND_ORDER[other.kind]
-  return porClase === 0 ? role.name.localeCompare(other.name, 'es', { sensitivity: 'base' }) < 0 : porClase < 0
+  const byClass = KIND_ORDER[role.kind] - KIND_ORDER[other.kind]
+  return byClass === 0 ? role.name.localeCompare(other.name, 'es', { sensitivity: 'base' }) < 0 : byClass < 0
 }
 
 /** Los roles con el que devolvió el servidor, en su lugar. */
 export function withRole(roles: readonly Role[], role: Role): Role[] {
-  return upsertInList(roles, role, before, (previo) => previo.name === role.name)
+  return upsertInList(roles, role, before, (previous) => previous.name === role.name)
 }

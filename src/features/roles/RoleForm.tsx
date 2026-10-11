@@ -27,7 +27,7 @@ interface RoleFormProps {
   readonly onDone: () => void
 }
 
-const FALLO = 'No se pudo guardar el rol.'
+const FAILURE = 'No se pudo guardar el rol.'
 
 export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
   const granted = usePermissions()
@@ -35,14 +35,14 @@ export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
     resolver: zodResolver(roleSchema),
     defaultValues: valuesOf(role),
   })
-  const guardar = useRoleMutation({
-    mutationFn: (valores: RoleValues) => {
-      const payload = rolePayload(valores, role)
+  const save = useRoleMutation({
+    mutationFn: (values: RoleValues) => {
+      const payload = rolePayload(values, role)
       return role === null ? createRole(payload) : updateRole(role.id, payload)
     },
     roleId: role?.id,
-    failure: FALLO,
-    success: (guardado) => (role === null ? `Rol ${guardado.name} creado.` : `Rol ${guardado.name} guardado.`),
+    failure: FAILURE,
+    success: (saved) => (role === null ? `Rol ${saved.name} creado.` : `Rol ${saved.name} guardado.`),
     updateCache: withRole,
     onSuccess: onDone,
     inlineError: true,
@@ -53,8 +53,8 @@ export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          guardar.mutate(valores)
+        handleSubmit((values) => {
+          save.mutate(values)
         }),
       )}
     >
@@ -73,16 +73,16 @@ export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
         )}
       />
 
-      {guardar.isError ? <FormMessage tone="error">{errorMessage(guardar.error, FALLO)}</FormMessage> : null}
+      {save.isError ? <FormMessage tone="error">{errorMessage(save.error, FAILURE)}</FormMessage> : null}
 
       <DialogFormActions>
         <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onDone}>
           {readOnly ? 'Cerrar' : 'Cancelar'}
         </Button>
         {readOnly ? null : (
-          <Button type="submit" size="lg" className="h-11 px-4" disabled={guardar.isPending}>
+          <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
             <Icon name="confirmar" size={16} />
-            <span>{guardar.isPending ? 'Guardando…' : 'Guardar'}</span>
+            <span>{save.isPending ? 'Guardando…' : 'Guardar'}</span>
           </Button>
         )}
       </DialogFormActions>

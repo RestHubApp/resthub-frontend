@@ -29,19 +29,19 @@ export function PermissionPicker({
         </p>
       )}
       <div className="grid gap-3 sm:grid-cols-2">
-        {groups.map((grupo) => (
-          <fieldset key={grupo.name} className="m-0 min-w-0 rounded-lg border px-3 pt-1 pb-2">
-            <legend className="px-1 text-sm font-semibold">{grupo.name}</legend>
+        {groups.map((group) => (
+          <fieldset key={group.name} className="m-0 min-w-0 rounded-lg border px-3 pt-1 pb-2">
+            <legend className="px-1 text-sm font-semibold">{group.name}</legend>
             <ul className="m-0 flex list-none flex-col p-0">
-              {grupo.permissions.map((permiso) => (
+              {group.permissions.map((permission) => (
                 <PermissionOption
-                  key={permiso.code}
-                  permission={permiso}
-                  checked={selected.includes(permiso.code)}
-                  missing={!granted.includes(permiso.code)}
+                  key={permission.code}
+                  permission={permission}
+                  checked={selected.includes(permission.code)}
+                  missing={!granted.includes(permission.code)}
                   readOnly={readOnly}
-                  onCheckedChange={(marcado) => {
-                    onChange(togglePermission(selected, permiso.code, marcado))
+                  onCheckedChange={(marked) => {
+                    onChange(togglePermission(selected, permission.code, marked))
                   }}
                 />
               ))}

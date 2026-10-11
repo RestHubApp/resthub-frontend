@@ -31,16 +31,16 @@ type Editing = { readonly reservation: Reservation | null } | null
  */
 export function ReservationsView() {
   const timeZone = useTimeZone()
-  const puedeGestionar = useCan(PERMISSION.reservationsManage)
-  const [dia, setDia] = useState(() => todayIn(timeZone))
-  const reservas = useQuery(reservationsOfDayQuery(dia))
-  const mesas = useQuery(tablesQuery(true))
+  const canManage = useCan(PERMISSION.reservationsManage)
+  const [day, setDay] = useState(() => todayIn(timeZone))
+  const reservations = useQuery(reservationsOfDayQuery(day))
+  const tables = useQuery(tablesQuery(true))
   const estado = useReservationStatus()
-  const [editando, setEditando] = useState<Editing>(null)
-  const lista = reservas.data ?? []
-  const mesaDe = (id: number | null) => {
-    const mesa = mesas.data?.find((item) => item.id === id)
-    return mesa === undefined ? null : tableName(mesa.label)
+  const [editing, setEditing] = useState<Editing>(null)
+  const list = reservations.data ?? []
+  const tableOf = (id: number | null) => {
+    const table = tables.data?.find((item) => item.id === id)
+    return table === undefined ? null : tableName(table.label)
   }
 
   return (
@@ -48,9 +48,9 @@ export function ReservationsView() {
       <PageHeader
         title="Reservas"
         description="Quién viene, a qué hora y en qué mesa."
-        actions={puedeGestionar ? (
+        actions={canManage ? (
           <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
-            setEditando({ reservation: null })
+            setEditing({ reservation: null })
           }}>
             <Icon name="agregar" size={18} />
             <span>Nueva reserva</span>
@@ -58,39 +58,39 @@ export function ReservationsView() {
         ) : undefined}
       />
       <SectionCard
-        title={formatLongDate(dia)}
+        title={formatLongDate(day)}
         actions={
-          <Input type="date" aria-label="Día" className="h-11 w-auto" value={dia} onChange={(event) => {
+          <Input type="date" aria-label="Día" className="h-11 w-auto" value={day} onChange={(event) => {
             if (event.target.value !== '') {
-              setDia(event.target.value)
+              setDay(event.target.value)
             }
           }} />
         }
       >
-        {reservas.isPending ? <ListSkeleton label="Cargando reservas…" count={3} itemClassName="h-16 rounded-lg" /> : null}
-        {reservas.isError ? <RetryQueryError message={errorMessage(reservas.error, 'No se pudieron cargar las reservas.')} onRetry={() => { void reservas.refetch() }} /> : null}
-        {reservas.isSuccess && lista.length === 0 ? <EmptyState title="No hay reservas para este día" /> : null}
+        {reservations.isPending ? <ListSkeleton label="Cargando reservas…" count={3} itemClassName="h-16 rounded-lg" /> : null}
+        {reservations.isError ? <RetryQueryError message={errorMessage(reservations.error, 'No se pudieron cargar las reservas.')} onRetry={() => { void reservations.refetch() }} /> : null}
+        {reservations.isSuccess && list.length === 0 ? <EmptyState title="No hay reservas para este día" /> : null}
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
-          {lista.map((reserva) => (
+          {list.map((reservation) => (
             <ReservationRow
-              key={reserva.id}
-              reservation={reserva}
-              tableLabel={mesaDe(reserva.table_id)}
+              key={reservation.id}
+              reservation={reservation}
+              tableLabel={tableOf(reservation.table_id)}
               timeZone={timeZone}
-              canManage={puedeGestionar}
+              canManage={canManage}
               busy={estado.isPending}
               onEdit={() => {
-                setEditando({ reservation: reserva })
+                setEditing({ reservation: reservation })
               }}
               onStatus={(status) => {
-                estado.mutate({ id: reserva.id, status })
+                estado.mutate({ id: reservation.id, status })
               }}
             />
           ))}
         </ul>
       </SectionCard>
-      <ReservationDialog open={editando !== null} reservation={editando?.reservation ?? null} day={dia} onClose={() => {
-        setEditando(null)
+      <ReservationDialog open={editing !== null} reservation={editing?.reservation ?? null} day={day} onClose={() => {
+        setEditing(null)
       }} />
     </div>
   )

@@ -31,7 +31,7 @@ interface ReservationDialogProps {
  */
 export function ReservationDialog({ open, reservation, day, onClose: alCerrar }: ReservationDialogProps) {
   const timeZone = useTimeZone()
-  const mesas = useQuery({ ...tablesQuery(false), enabled: open })
+  const tables = useQuery({ ...tablesQuery(false), enabled: open })
   const form = useForm<ReservationValues>({
     resolver: zodResolver(reservationSchema),
     values: reservationDefaults(reservation, day, timeZone),
@@ -45,14 +45,14 @@ export function ReservationDialog({ open, reservation, day, onClose: alCerrar }:
     reset(reservationDefaults(reservation, day, timeZone))
     alCerrar()
   }
-  const guardar = useSaveReservation(reservation?.id, onClose)
+  const save = useSaveReservation(reservation?.id, onClose)
 
   return (
     <FormDialog
       open={open}
       onOpenChange={(abierto) => {
         if (!abierto) {
-          guardar.reset()
+          save.reset()
           onClose()
         }
       }}
@@ -62,12 +62,12 @@ export function ReservationDialog({ open, reservation, day, onClose: alCerrar }:
       <form
         noValidate
         className="grid gap-4 sm:grid-cols-2"
-        onSubmit={onSubmit(form.handleSubmit((values) => guardar.mutateAsync(reservationRequest(values, timeZone)).catch(() => undefined)))}
+        onSubmit={onSubmit(form.handleSubmit((values) => save.mutateAsync(reservationRequest(values, timeZone)).catch(() => undefined)))}
       >
-        <ReservationFields form={form} tables={mesas.data ?? []} />
-        {guardar.isError ? (
+        <ReservationFields form={form} tables={tables.data ?? []} />
+        {save.isError ? (
           <div className="sm:col-span-2">
-            <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudo guardar la reserva.')}</FormMessage>
+            <FormMessage tone="error">{errorMessage(save.error, 'No se pudo guardar la reserva.')}</FormMessage>
           </div>
         ) : null}
         <div className="sm:col-span-2">
@@ -75,8 +75,8 @@ export function ReservationDialog({ open, reservation, day, onClose: alCerrar }:
             <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onClose}>
               Cancelar
             </Button>
-            <Button type="submit" size="lg" className="h-11 px-4" disabled={guardar.isPending}>
-              {guardar.isPending ? 'Guardando…' : 'Guardar'}
+            <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
+              {save.isPending ? 'Guardando…' : 'Guardar'}
             </Button>
           </DialogFormActions>
         </div>

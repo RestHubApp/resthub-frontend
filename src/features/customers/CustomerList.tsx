@@ -14,37 +14,37 @@ interface CustomerListProps {
   readonly onOpen: (customerId: number) => void
 }
 
-function cuantos(total: number): string {
+function howMany(total: number): string {
   return total === 1 ? '1 cliente' : `${String(total)} clientes`
 }
 
 /** Buscar en la libreta por nombre o teléfono. Muestra los 50 primeros que coinciden. */
 export function CustomerList({ onOpen }: CustomerListProps) {
-  const [texto, setTexto] = useState('')
-  const busqueda = useDeferredValue(texto.trim())
-  const clientes = useQuery(customerSearchQuery(busqueda))
-  const lista = clientes.data?.items ?? []
-  const vacio = busqueda === '' ? 'Todavía no hay clientes' : 'Nadie coincide con la búsqueda'
+  const [text, setText] = useState('')
+  const search = useDeferredValue(text.trim())
+  const customers = useQuery(customerSearchQuery(search))
+  const list = customers.data?.items ?? []
+  const empty = search === '' ? 'Todavía no hay clientes' : 'Nadie coincide con la búsqueda'
 
   return (
-    <SectionCard title={clientes.data ? cuantos(clientes.data.total) : 'Clientes'}>
+    <SectionCard title={customers.data ? howMany(customers.data.total) : 'Clientes'}>
       <Input
         type="search"
         aria-label="Buscar por nombre o teléfono"
         placeholder="Buscar por nombre o teléfono"
         className="mb-3 h-11"
-        value={texto}
+        value={text}
         onChange={(event) => {
-          setTexto(event.target.value)
+          setText(event.target.value)
         }}
       />
-      {clientes.isPending ? <ListSkeleton label="Cargando clientes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
-      {clientes.isError ? <RetryQueryError message={errorMessage(clientes.error, 'No se pudieron cargar los clientes.')} onRetry={() => { void clientes.refetch() }} /> : null}
-      {clientes.isSuccess && lista.length === 0 ? <EmptyState title={vacio} /> : null}
+      {customers.isPending ? <ListSkeleton label="Cargando clientes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
+      {customers.isError ? <RetryQueryError message={errorMessage(customers.error, 'No se pudieron cargar los clientes.')} onRetry={() => { void customers.refetch() }} /> : null}
+      {customers.isSuccess && list.length === 0 ? <EmptyState title={empty} /> : null}
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
-        {lista.map((cliente) => (
-          <CustomerRow key={cliente.id} customer={cliente} onOpen={() => {
-            onOpen(cliente.id)
+        {list.map((customer) => (
+          <CustomerRow key={customer.id} customer={customer} onOpen={() => {
+            onOpen(customer.id)
           }} />
         ))}
       </ul>
