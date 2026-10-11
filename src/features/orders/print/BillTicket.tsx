@@ -17,12 +17,12 @@ const ROW = 'flex justify-between gap-2'
  * el sistema aparte y los imprime o envía el proveedor autorizado.
  */
 export function BillTicket({ order, restaurant, timeZone }: BillTicketProps) {
-  const paid = order.status === 'paid'
+  const isPaid = order.status === 'paid'
 
   return (
     <div className="flex flex-col gap-2 text-sm">
       <p className="m-0 text-center text-base font-bold">{restaurant}</p>
-      <p className="m-0 text-center text-xs uppercase">{paid ? 'Ticket de venta' : 'Precuenta'}</p>
+      <p className="m-0 text-center text-xs uppercase">{isPaid ? 'Ticket de venta' : 'Precuenta'}</p>
       <p className="m-0 text-center text-xs">
         Pedido #{order.number} · {orderPlace(order)} · {formatDateTime(order.paid_at ?? order.updated_at, timeZone)}
       </p>

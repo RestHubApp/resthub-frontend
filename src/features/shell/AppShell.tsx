@@ -46,7 +46,7 @@ interface AppShellProps {
  */
 export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
   const account = useSession((state) => state.account)
-  const preview = usePreview()
+  const isPreview = usePreview()
   const failed = useFailedQueries('restaurant')
   useAccountRefresh()
   useSessionRenewal()
@@ -74,7 +74,7 @@ export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
 
   return (
     <ShellScreensContext value={screens}>
-      {preview ? <PreviewBanner account={account} /> : null}
+      {isPreview ? <PreviewBanner account={account} /> : null}
       <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
         {SKIP_LINK}
         <AccessibilityWidget />

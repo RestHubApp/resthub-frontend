@@ -5,11 +5,11 @@
 // navegador: cada una carga su propio almacén sobre el mismo `localStorage`.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { unstubAllGlobals } from '#jest/globals'
-import { type TestStorage, notify, fakeStorage, handleSaved, newTab, tokenThatExpires } from '#jest/tabs'
+import { type TestStorage, notify, fakeStorage, readSaved, newTab, tokenThatExpires } from '#jest/tabs'
 
 import type { CurrentUserResponse, PlatformAdmin } from '@/api/types'
 
-const SECRET_PLATFORM = 'resthub.platform-session.v1'
+const PLATFORM_STORAGE_KEY = 'resthub.platform-session.v1'
 
 function admin(id: number): PlatformAdmin {
   return { id, email: `admin${String(id)}@resthub.dev`, full_name: `Admin ${String(id)}` }
@@ -44,7 +44,7 @@ describe('sesión de plataforma entre pestañas', () => {
     expect(two.usePlatformSession.getState().admin).toEqual(admin(1))
 
     one.usePlatformSession.getState().signOut()
-    notify(two.window, local, SECRET_PLATFORM)
+    notify(two.window, local, PLATFORM_STORAGE_KEY)
 
     expect(two.usePlatformSession.getState()).toMatchObject({ token: null, admin: null, expired: false })
   })
@@ -63,7 +63,7 @@ describe('sesión de plataforma entre pestañas', () => {
     two.usePlatformSession.getState().renew(tokenA, tokenThatExpires(7200, 'a2'), admin(1))
     three.usePlatformSession.getState().refresh(admin(1))
 
-    expect(handleSaved(local, SECRET_PLATFORM)).toEqual({ token: tokenB, admin: admin(2) })
+    expect(readSaved(local, PLATFORM_STORAGE_KEY)).toEqual({ token: tokenB, admin: admin(2) })
     expect(two.usePlatformSession.getState().token).toBeNull()
     expect(three.usePlatformSession.getState().token).toBeNull()
   })
@@ -77,7 +77,7 @@ describe('sesión de plataforma entre pestañas', () => {
     const fresh = tokenThatExpires(7200, 'a2')
 
     one.usePlatformSession.getState().renew(old, fresh, admin(1))
-    notify(two.window, local, SECRET_PLATFORM)
+    notify(two.window, local, PLATFORM_STORAGE_KEY)
 
     expect(two.usePlatformSession.getState()).toMatchObject({ token: fresh, admin: admin(1) })
   })
@@ -91,7 +91,7 @@ describe('sesión de plataforma entre pestañas', () => {
     const two = await openTab(local)
 
     one.usePlatformSession.getState().signOut()
-    notify(two.window, local, SECRET_PLATFORM)
+    notify(two.window, local, PLATFORM_STORAGE_KEY)
 
     expect(two.useSession.getState().token).toBe(token)
     expect(two.usePlatformSession.getState().token).toBeNull()

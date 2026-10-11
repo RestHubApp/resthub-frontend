@@ -93,7 +93,7 @@ export async function enqueueOrders(
   page: Page,
   account: { readonly userId: number; readonly restaurantId: number },
   orders: readonly OrderInQueue[],
-  storage: 'local' | 'pestana' = 'local',
+  storage: 'local' | 'tab' = 'local',
 ): Promise<void> {
   const queue = orders.map(({ table, dish }) => ({
     userId: account.userId,
@@ -108,9 +108,9 @@ export async function enqueueOrders(
     },
   }))
   await page.evaluate(
-    ([password, value, where]) => {
+    ([key, value, where]) => {
       const destination = where === 'local' ? localStorage : sessionStorage
-      destination.setItem(password, value)
+      destination.setItem(key, value)
     },
     [QUEUE, JSON.stringify(queue), storage] as const,
   )
@@ -124,8 +124,8 @@ export function ownerOf(session: Session): { userId: number; restaurantId: numbe
 
 /** Lo que quedó en la cola sin señal del navegador. */
 export async function savedQueue(page: Page): Promise<number> {
-  return page.evaluate((password) => {
-    const raw = localStorage.getItem(password)
+  return page.evaluate((key) => {
+    const raw = localStorage.getItem(key)
     return raw === null ? 0 : (JSON.parse(raw) as unknown[]).length
   }, QUEUE)
 }

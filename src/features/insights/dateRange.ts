@@ -7,7 +7,8 @@ export interface RangeDates {
   readonly date_to: string
 }
 
-export type RangePreset = 'hoy' | '7d' | '30d' | 'mes' | 'personalizado'
+export type FixedPreset = 'hoy' | '7d' | '30d' | 'mes'
+export type RangePreset = FixedPreset | 'personalizado'
 
 export const RANGE_PRESETS: readonly { readonly value: RangePreset; readonly label: string }[] = [
   { value: 'hoy', label: 'Hoy' },
@@ -17,7 +18,7 @@ export const RANGE_PRESETS: readonly { readonly value: RangePreset; readonly lab
   { value: 'personalizado', label: 'Personalizado' },
 ]
 
-export const DEFAULT_PRESET: Exclude<RangePreset, 'personalizado'> = '30d'
+export const DEFAULT_PRESET: FixedPreset = '30d'
 
 /** El tope de dias que acepta el servidor en un reporte. */
 export const MAX_RANGE_DAYS = 366
@@ -42,7 +43,7 @@ export function daysBetween(from: string, to: string): number {
 
 /** Las fechas de un rango predefinido, terminando hoy. */
 export function presetRange(
-  preset: Exclude<RangePreset, 'personalizado'>,
+  preset: FixedPreset,
   today: string,
 ): RangeDates {
   const start: Record<typeof preset, string> = {

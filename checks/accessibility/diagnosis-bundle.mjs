@@ -6,7 +6,7 @@ import { join } from 'node:path'
 
 const root = process.cwd()
 const manifest = JSON.parse(await readFile(join(root, 'dist/.vite/manifest.json'), 'utf8'))
-const files = new Map(Object.values(manifest).map((entryValue) => [entryValue.file, entryValue]))
+const files = new Map(Object.values(manifest).map((manifestEntry) => [manifestEntry.file, manifestEntry]))
 const entry = Object.values(manifest).find((item) => item.isEntry)
 if (!entry) throw new Error('El manifiesto no contiene el archivo inicial')
 const load = new Set()

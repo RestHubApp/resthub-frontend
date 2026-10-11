@@ -25,22 +25,22 @@ export function PermissionOption({
   const id = useId()
   const noteId = `${id}-nota`
   const nameId = `${id}-nombre`
-  const explain = missing && !readOnly
-  const off = missing || readOnly
+  const shouldExplain = missing && !readOnly
+  const isOff = missing || readOnly
 
   return (
     <li className="py-1">
       {/* La etiqueta envuelve la casilla: así nombra también el <input> oculto
           que Radix agrega dentro de un formulario. El botón se nombra con
           aria-labelledby, que es lo que leen todos los validadores. */}
-      <Label className={`flex min-h-11 items-center gap-3 font-normal ${off ? '' : 'cursor-pointer'}`}>
+      <Label className={`flex min-h-11 items-center gap-3 font-normal ${isOff ? '' : 'cursor-pointer'}`}>
         <Checkbox
           id={id}
           className="size-5"
           checked={checked}
-          disabled={off}
+          disabled={isOff}
           aria-labelledby={nameId}
-          aria-describedby={explain ? noteId : undefined}
+          aria-describedby={shouldExplain ? noteId : undefined}
           onCheckedChange={(value) => {
             onCheckedChange(value === true)
           }}
@@ -49,7 +49,7 @@ export function PermissionOption({
           <span id={nameId} className="leading-snug font-medium">
             {permission.label}
           </span>
-          {explain ? (
+          {shouldExplain ? (
             <span id={noteId} className="text-xs text-muted-foreground">
               Tu cuenta no tiene este permiso, así que no puedes darlo.
             </span>

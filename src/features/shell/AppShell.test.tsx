@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { signInAs, mountRoutes, SCREENSValue, PERMISSIONS_OWNER, PERMISSIONS_WAITER, handleFirst, ErrorResponse, second, server } from '#jest/harness'
+import { signInAs, mountRoutes, TEST_SCREENS, PERMISSIONS_OWNER, PERMISSIONS_WAITER, firstOf, ErrorResponse, second, server } from '#jest/harness'
 import { currentUserQueryKey } from '@/api/auth'
 import { queryClient } from '@/services/queryClient'
 import type { OpenOrderRequest } from '@/api/types'
@@ -17,7 +17,7 @@ const ACCESS_FORM = 'Formulario de acceso'
 const MENU = { name: 'Navegación principal' }
 const SIGN_OUT = { name: 'Cerrar sesión' }
 
-function openShell(screens: readonly ShellScreen[] = SCREENSValue, en = '/') {
+function openShell(screens: readonly ShellScreen[] = TEST_SCREENS, en = '/') {
   const routes = [
     {
       path: '/',
@@ -35,11 +35,11 @@ function openShell(screens: readonly ShellScreen[] = SCREENSValue, en = '/') {
 
 // Las pantallas reales del registro, con otra carga o precarga en las que se indican.
 function withChanges(changes: Record<string, Partial<ShellScreen>>): readonly ShellScreen[] {
-  return SCREENSValue.map((screenValue) => ({ ...screenValue, ...changes[screenValue.path] }))
+  return TEST_SCREENS.map((shellScreen) => ({ ...shellScreen, ...changes[shellScreen.path] }))
 }
 
 function sidebar() {
-  return handleFirst(screen.getAllByRole('navigation', MENU))
+  return firstOf(screen.getAllByRole('navigation', MENU))
 }
 
 function barContainer(): HTMLElement {
@@ -155,7 +155,7 @@ describe('AppShell: sesión y precargas', () => {
 
   it('sin sesión solo muestra la marca y el contenido del acceso', () => {
     server()
-    openShell(SCREENSValue, '/acceso')
+    openShell(TEST_SCREENS, '/acceso')
 
     expect(screen.getByText(ACCESS_FORM)).toBeInTheDocument()
     expect(screen.queryByRole('navigation', MENU)).not.toBeInTheDocument()

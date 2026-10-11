@@ -16,11 +16,11 @@ interface PrintLinksProps {
  * cualquier momento (antes de pagar es la precuenta, después el ticket).
  */
 export function PrintLinks({ order }: PrintLinksProps) {
-  const inKitchen = order.status !== 'open' && order.status !== 'cancelled'
+  const isInKitchen = order.status !== 'open' && order.status !== 'cancelled'
 
   return (
     <div className="flex flex-wrap gap-2">
-      {inKitchen ? (
+      {isInKitchen ? (
         <Button asChild variant="ghost" size="sm">
           <Link to={paths.orders.print(order.id, 'comanda')}>
             <Icon name="print" size={16} />

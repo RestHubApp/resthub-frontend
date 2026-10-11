@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { stockChange, ingredient } from '#jest/fixtures/inventory'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import { InventoryView } from './InventoryView'
 
 const INGREDIENTS = '/inventory/ingredients'
@@ -16,7 +16,7 @@ const SETTINGS = '/inventory/adjustments'
 function open() {
   const api = server().on('get', INGREDIENTS, [LIMON]).on('get', '/inventory/alerts/low-stock', []).on('get', '/restaurant', new ErrorResponse(404))
   signInAs()
-  return { api, ...handleMount(<InventoryView />, { path: '/inventario' }) }
+  return { api, ...mountScreen(<InventoryView />, { path: '/inventario' }) }
 }
 
 async function action(user: ReturnType<typeof open>['user'], button: string, title: string) {

@@ -1,25 +1,25 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { handleAccount, handleMount, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { buildAccount, mountScreen, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { useSession } from '@/store/session'
 import { LoginView } from './LoginView'
 
 const EMAIL = 'Correo'
-const SECRET = 'Contraseña'
+const SECRET_LABEL = 'Contraseña'
 const SIGN_IN = { name: 'Entrar' }
 const LOGIN = '/auth/login'
 // La contraseña de las cuentas de la semilla de desarrollo, no una credencial real.
 const TEST_SECRET = 'resthub123'
 
 function accessResponse() {
-  const { user, restaurant, permissions, preview } = handleAccount(PERMISSIONS_WAITER)
-  return { access_token: 'token-nuevo', token_type: 'bearer', expires_in: 3600, user, restaurant, permissions, preview }
+  const { user, restaurant, permissions, preview: isPreview } = buildAccount(PERMISSIONS_WAITER)
+  return { access_token: 'token-nuevo', token_type: 'bearer', expires_in: 3600, user, restaurant, permissions, preview: isPreview }
 }
 
 function openAccess(status?: { from: string }) {
   const api = server()
-  const mount = handleMount(<LoginView />, { path: '/acceso' })
+  const mount = mountScreen(<LoginView />, { path: '/acceso' })
   if (status) {
     void mount.router.navigate('/acceso', { state: status })
   }
@@ -32,7 +32,7 @@ describe('LoginView', () => {
     api.on('post', LOGIN, accessResponse())
 
     await user.type(screen.getByLabelText(EMAIL), 'mesero@resthub.dev')
-    await user.type(screen.getByLabelText(SECRET), TEST_SECRET)
+    await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
     await user.click(screen.getByRole('button', SIGN_IN))
 
     expect(await screen.findByRole('status', { name: 'Ruta actual' })).toHaveTextContent(/^\/$/u)
@@ -46,7 +46,7 @@ describe('LoginView', () => {
     api.on('post', LOGIN, accessResponse())
 
     await user.type(screen.getByLabelText(EMAIL), 'ana@resthub.dev')
-    await user.type(screen.getByLabelText(SECRET), TEST_SECRET)
+    await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
     await user.click(screen.getByRole('button', SIGN_IN))
 
     expect(await screen.findByRole('status', { name: 'Ruta actual' })).toHaveTextContent('/caja')
@@ -57,7 +57,7 @@ describe('LoginView', () => {
     api.on('post', LOGIN, new ErrorResponse(401, 'Correo o contraseña incorrectos.'))
 
     await user.type(screen.getByLabelText(EMAIL), 'ana@resthub.dev')
-    await user.type(screen.getByLabelText(SECRET), 'otra-clave')
+    await user.type(screen.getByLabelText(SECRET_LABEL), 'otra-clave')
     await user.click(screen.getByRole('button', SIGN_IN))
 
     expect(await screen.findByText('Correo o contraseña incorrectos.')).toBeInTheDocument()

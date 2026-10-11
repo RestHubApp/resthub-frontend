@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen, within } from '@testing-library/react'
 
-import { handleMenu, order, dish, section, lastBody } from '#jest/fixtures/orders'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { buildMenu, order, dish, section, lastBody } from '#jest/fixtures/orders'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { NewOrderView } from '@/features/orders/NewOrderView'
 import { useDraftActions } from './useOrderDraft'
@@ -11,13 +11,13 @@ const LOMO = 'Lomo saltado'
 const SEARCH = 'Buscar plato'
 const CHICHA = 'Chicha morada'
 
-function openMenu(menu: unknown = handleMenu()) {
+function openMenu(menu: unknown = buildMenu()) {
   const api = server()
     .on('get', '/menu', menu)
     .on('post', '/orders', order({ status: 'open', type: 'takeaway' }))
     .on('post', '/orders/5/send', order({ type: 'takeaway' }))
   signInAs()
-  return { api, ...handleMount(<NewOrderView />, { path: '/pedidos/nuevo', en: '/pedidos/nuevo?tipo=llevar' }) }
+  return { api, ...mountScreen(<NewOrderView />, { path: '/pedidos/nuevo', en: '/pedidos/nuevo?tipo=llevar' }) }
 }
 
 function plat(name: string) {
@@ -77,7 +77,7 @@ describe('la carta para tomar el pedido', () => {
   it('si la carta no carga, lo dice y deja reintentar', async () => {
     const { api, user } = openMenu(new ErrorResponse(500, 'Sin carta'))
     expect(await screen.findByText('Sin carta')).toBeInTheDocument()
-    api.on('get', '/menu', handleMenu())
+    api.on('get', '/menu', buildMenu())
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
     expect(await plat(LOMO)).toBeInTheDocument()
   })

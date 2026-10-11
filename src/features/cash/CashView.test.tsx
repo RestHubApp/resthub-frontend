@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { CLOSED_CASH_REGISTER, handleOpenCashRegister, cashRegisterSummary, cashRegisterShift } from '#jest/fixtures/cash'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { CLOSED_CASH_REGISTER, currentOpenCash, cashRegisterSummary, cashRegisterShift } from '#jest/fixtures/cash'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import { CashView } from './CashView'
 
 const PAGE_EMPTY = { items: [], total: 0, limit: 10, offset: 0 }
@@ -14,7 +14,7 @@ const OPEN_CASH_REGISTER = { name: 'Abrir caja' }
 function openCashRegister(actual = CLOSED_CASH_REGISTER) {
   const api = server().on('get', ACTUAL, actual).on('get', '/cash/sessions', PAGE_EMPTY)
   signInAs()
-  return { api, ...handleMount(<CashView />, { path: '/caja' }) }
+  return { api, ...mountScreen(<CashView />, { path: '/caja' }) }
 }
 
 describe('CashView', () => {
@@ -23,7 +23,7 @@ describe('CashView', () => {
     // Como el servidor: después de abrir, la caja actual es el turno nuevo.
     const shift = cashRegisterShift({ opening_amount: '150.50' })
     api.on('post', OPEN, () => {
-      api.on('get', ACTUAL, handleOpenCashRegister(shift))
+      api.on('get', ACTUAL, currentOpenCash(shift))
       return shift
     })
 
@@ -53,7 +53,7 @@ describe('CashView', () => {
       expected_cash: '200.00',
       by_method: [{ method: 'cash', method_label: 'Efectivo', payments: 2, amount: '50.00', tips: '0.00' }],
     })
-    openCashRegister(handleOpenCashRegister(cashRegisterShift({ summary })))
+    openCashRegister(currentOpenCash(cashRegisterShift({ summary })))
 
     const table = await screen.findByRole('table', { name: 'Por medio de pago' })
     expect(within(table).getByRole('rowheader', { name: 'Efectivo' })).toBeInTheDocument()
@@ -64,7 +64,7 @@ describe('CashView', () => {
   it('si el servidor falla, lo dice en vez de mostrar la caja vacía', async () => {
     server().on('get', ACTUAL, new ErrorResponse(500, 'Base caída')).on('get', '/cash/sessions', PAGE_EMPTY)
     signInAs()
-    handleMount(<CashView />)
+    mountScreen(<CashView />)
 
     expect(await screen.findByText('Base caída')).toBeInTheDocument()
     expect(screen.queryByRole('button', OPEN_CASH_REGISTER)).not.toBeInTheDocument()

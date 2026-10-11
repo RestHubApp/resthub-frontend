@@ -10,19 +10,19 @@ import { capture, captureWindow, expect, deadline, test } from './capture'
 /** Abre una confirmación, la captura y la cancela. */
 async function confirmation(page: Page, button: Locator, title: string, name: string): Promise<void> {
   await button.click()
-  const windowValue = page.getByRole('alertdialog', { name: title })
-  await captureWindow(windowValue, name)
-  await windowValue.getByRole('button', { name: 'Cancelar' }).click()
-  await expect(windowValue).toBeHidden()
+  const dialog = page.getByRole('alertdialog', { name: title })
+  await captureWindow(dialog, name)
+  await dialog.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(dialog).toBeHidden()
 }
 
 /** Abre un formulario en ventana, lo captura y lo cierra con Escape. */
 async function form(page: Page, button: Locator, title: string | RegExp, name: string): Promise<void> {
   await button.click()
-  const windowValue = page.getByRole('dialog', { name: title })
-  await captureWindow(windowValue, name)
+  const dialog = page.getByRole('dialog', { name: title })
+  await captureWindow(dialog, name)
   await page.keyboard.press('Escape')
-  await expect(windowValue).toBeHidden()
+  await expect(dialog).toBeHidden()
 }
 
 test('VIS-08 la carta con sus ventanas de alta, edición y confirmaciones', async ({ page, local }) => {

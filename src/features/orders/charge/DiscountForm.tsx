@@ -37,8 +37,8 @@ function limitHint(withoutCap: boolean, cap: string | undefined): string {
  * escriba un 20 % que va a volver rechazado.
  */
 export function DiscountForm({ order, onDone }: DiscountFormProps) {
-  const withoutCap = useCan(PERMISSION.ordersDiscountAny)
-  const restaurant = useQuery({ ...restaurantQuery, enabled: !withoutCap })
+  const hasNoCap = useCan(PERMISSION.ordersDiscountAny)
+  const restaurant = useQuery({ ...restaurantQuery, enabled: !hasNoCap })
   const { register, handleSubmit, formState } = useForm<DiscountValues>({
     resolver: zodResolver(discountSchema),
     defaultValues: { percent: '', reason: '' },
@@ -76,7 +76,7 @@ export function DiscountForm({ order, onDone }: DiscountFormProps) {
           label="Motivo"
           placeholder="Cliente frecuente, demora en cocina…"
           maxLength={MAX_ADJUSTMENT_REASON}
-          hint={limitHint(withoutCap, restaurant.data?.max_waiter_discount_percent)}
+          hint={limitHint(hasNoCap, restaurant.data?.max_waiter_discount_percent)}
           field={register('reason')}
           error={formState.errors.reason?.message}
         />

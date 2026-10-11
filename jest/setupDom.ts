@@ -46,12 +46,12 @@ if (typeof window !== 'undefined') {
       readonly root = null
       readonly rootMargin = ''
       readonly thresholds = [0]
-      alVer: IntersectionObserverCallback
-      constructor(alVer: IntersectionObserverCallback) {
-        this.alVer = alVer
+      onView: IntersectionObserverCallback
+      constructor(onView: IntersectionObserverCallback) {
+        this.onView = onView
       }
       observe = (target: Element) => {
-        this.alVer([{ isIntersecting: true, target: target } as IntersectionObserverEntry], this as unknown as IntersectionObserver)
+        this.onView([{ isIntersecting: true, target } as IntersectionObserverEntry], this as unknown as IntersectionObserver)
       }
       unobserve = () => undefined
       disconnect = () => undefined

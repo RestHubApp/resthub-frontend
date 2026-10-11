@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { invoice, paid, payment, handleOrder } from '#jest/fixtures/charge'
-import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { invoice, paid, payment, buildOrder } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { InvoicePanel } from './InvoicePanel'
 
@@ -13,7 +13,7 @@ const DIALOG = { name: 'Comprobante del pedido #34' }
 const ISSUE_SALES_RECEIPT = { name: 'Emitir boleta' }
 
 function paidBy(total: string): OrderResponse {
-  return paid(handleOrder({ total, balance: total }), payment({ amount: total }))
+  return paid(buildOrder({ total, balance: total }), payment({ amount: total }))
 }
 
 // Como el servidor: emitido, el comprobante queda como el del pedido.
@@ -27,7 +27,7 @@ function onIssue(api: ReturnType<typeof server>, issued: ReturnType<typeof invoi
 function issueFor(order: OrderResponse = paidBy('50.00'), permissions = PERMISSIONS_OWNER) {
   const api = server()
   signInAs(permissions)
-  return { api, ...handleMount(<InvoicePanel order={order} />) }
+  return { api, ...mountScreen(<InvoicePanel order={order} />) }
 }
 
 describe('InvoicePanel', () => {
@@ -114,7 +114,7 @@ describe('InvoicePanel', () => {
 
   it('sin permiso para emitir, o con el pedido sin pagar, no aparece ni consulta', () => {
     const { api } = issueFor(paidBy('50.00'), PERMISSIONS_WAITER)
-    handleMount(<InvoicePanel order={handleOrder()} />)
+    mountScreen(<InvoicePanel order={buildOrder()} />)
 
     expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
     expect(api.calls('get', OF_ORDER)).toHaveLength(0)

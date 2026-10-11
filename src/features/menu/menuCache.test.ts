@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { waitFor } from '@testing-library/react'
 
-import { handleMenu, dish } from '#jest/fixtures/inventory'
+import { buildMenu, dish } from '#jest/fixtures/inventory'
 import { signInAs, PERMISSIONS_WAITER, server } from '#jest/harness'
 import { patchItem, withCategory, withCategoryOrder, withItem, withItemOrder, withoutCategory } from './menuCache'
 import { moveId, sortByIds } from './menuOrder'
@@ -15,7 +15,7 @@ function urls(api: { requests: readonly { url: string }[] }): string[] {
   return api.requests.map((p) => p.url).sort((a, b) => a.localeCompare(b))
 }
 
-function names(menu: ReturnType<typeof handleMenu>) {
+function names(menu: ReturnType<typeof buildMenu>) {
   return menu.categories.map((c) => `${c.name}:${c.items.map((p) => p.name).join(',')}`)
 }
 
@@ -37,28 +37,28 @@ describe('menuOrder', () => {
 
 describe('menuCache', () => {
   it('cambia solo el plato indicado', () => {
-    const menu = patchItem(handleMenu(), 11, { is_available: true })
+    const menu = patchItem(buildMenu(), 11, { is_available: true })
     expect(menu.categories[0]?.items.map((p) => p.is_available)).toEqual([true, true])
   })
 
   it('reordena categorías y platos de una categoría', () => {
-    expect(names(withCategoryOrder(handleMenu(), [2, 1]))).toEqual(['Bebidas:', ENTRIES])
-    expect(names(withItemOrder(handleMenu(), 1, [11, 10]))[0]).toBe('Entradas:Causa,Ceviche')
+    expect(names(withCategoryOrder(buildMenu(), [2, 1]))).toEqual(['Bebidas:', ENTRIES])
+    expect(names(withItemOrder(buildMenu(), 1, [11, 10]))[0]).toBe('Entradas:Causa,Ceviche')
   })
 
   it('un plato nuevo entra al final de su categoría y uno movido sale de la anterior', () => {
-    expect(names(withItem(handleMenu(), dish({ id: 12, name: 'Chicha', category_id: 2 })))).toEqual([
+    expect(names(withItem(buildMenu(), dish({ id: 12, name: 'Chicha', category_id: 2 })))).toEqual([
       ENTRIES,
       'Bebidas:Chicha',
     ])
-    expect(names(withItem(handleMenu(), dish({ category_id: 2 })))).toEqual(['Entradas:Causa', 'Bebidas:Ceviche'])
-    expect(withItem(handleMenu(), dish({ price: '32.00' })).categories[0]?.items[0]?.price).toBe('32.00')
+    expect(names(withItem(buildMenu(), dish({ category_id: 2 })))).toEqual(['Entradas:Causa', 'Bebidas:Ceviche'])
+    expect(withItem(buildMenu(), dish({ price: '32.00' })).categories[0]?.items[0]?.price).toBe('32.00')
   })
 
   it('una categoría nueva va al final vacía; una existente se renombra conservando sus platos', () => {
-    expect(names(withCategory(handleMenu(), CATEGORY))).toEqual([ENTRIES, 'Bebidas:', 'Postres:'])
-    expect(names(withCategory(handleMenu(), { ...CATEGORY, id: 1, name: 'Piqueos' }))[0]).toBe('Piqueos:Ceviche,Causa')
-    expect(names(withoutCategory(handleMenu(), 2))).toEqual([ENTRIES])
+    expect(names(withCategory(buildMenu(), CATEGORY))).toEqual([ENTRIES, 'Bebidas:', 'Postres:'])
+    expect(names(withCategory(buildMenu(), { ...CATEGORY, id: 1, name: 'Piqueos' }))[0]).toBe('Piqueos:Ceviche,Causa')
+    expect(names(withoutCategory(buildMenu(), 2))).toEqual([ENTRIES])
   })
 })
 
@@ -89,7 +89,7 @@ describe('menuSchema', () => {
 
 describe('prefetchMenu', () => {
   it('el encargado adelanta la carta y los costos', async () => {
-    const api = server().on('get', '/menu', handleMenu()).on('get', '/inventory/recipes', [])
+    const api = server().on('get', '/menu', buildMenu()).on('get', '/inventory/recipes', [])
     signInAs()
     prefetchMenu()
     await waitFor(() => {
@@ -98,7 +98,7 @@ describe('prefetchMenu', () => {
   })
 
   it('el mesero adelanta la carta pero no los costos del inventario', async () => {
-    const api = server().on('get', '/menu', handleMenu())
+    const api = server().on('get', '/menu', buildMenu())
     signInAs(PERMISSIONS_WAITER)
     prefetchMenu()
     await waitFor(() => {

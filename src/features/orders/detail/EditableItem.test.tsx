@@ -1,19 +1,19 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { handleOrder, dish } from '#jest/fixtures/charge'
-import { signInAs, handleMount, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { buildOrder, dish } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { OrderItems } from './OrderItems'
 
 const DISH = '/orders/12/items/1'
 const NOTE = 'Sin cebolla'
-const open = handleOrder({ status: 'open', items: [dish({ notes: NOTE })], item_count: 1 })
+const open = buildOrder({ status: 'open', items: [dish({ notes: NOTE })], item_count: 1 })
 const withoutFlag = () => undefined
 
 function edit(order = open) {
   const api = server()
   signInAs(PERMISSIONS_WAITER)
-  return { api, ...handleMount(<OrderItems order={order} flagFor={withoutFlag} />) }
+  return { api, ...mountScreen(<OrderItems order={order} flagFor={withoutFlag} />) }
 }
 
 describe('platos de un pedido abierto', () => {
@@ -35,7 +35,7 @@ describe('platos de un pedido abierto', () => {
 
   it('con uno solo, «−» quita el plato y lo avisa', async () => {
     const { api, user } = edit()
-    api.on('delete', DISH, handleOrder({ status: 'open', items: [] }))
+    api.on('delete', DISH, buildOrder({ status: 'open', items: [] }))
 
     await user.click(screen.getByRole('button', { name: 'Quitar Lomo saltado' }))
 
@@ -72,7 +72,7 @@ describe('platos de un pedido abierto', () => {
 describe('platos de un pedido en cocina', () => {
   it('se muestran sin controles, con modificadores y precio', () => {
     const withOptions = dish({ modifiers: [{ group: 'Término', option: 'Tres cuartos', price: '0.00' }] })
-    edit(handleOrder({ status: 'in_kitchen', items: [withOptions] }))
+    edit(buildOrder({ status: 'in_kitchen', items: [withOptions] }))
 
     expect(screen.getByText('Tres cuartos')).toBeInTheDocument()
     expect(screen.getByText('S/ 30.00')).toBeInTheDocument()
@@ -80,7 +80,7 @@ describe('platos de un pedido en cocina', () => {
   })
 
   it('un pedido sin platos lo dice', () => {
-    edit(handleOrder({ status: 'in_kitchen', items: [] }))
+    edit(buildOrder({ status: 'in_kitchen', items: [] }))
 
     expect(screen.getByText('Este pedido no tiene platos.')).toBeInTheDocument()
   })

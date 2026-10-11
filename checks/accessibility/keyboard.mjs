@@ -24,8 +24,8 @@ function focus(page) {
   })
 }
 
-async function traverse(browser, id, vista, tabs) {
-  const context = await browser.newContext(contextOf(vista))
+async function traverse(browser, id, view, tabs) {
+  const context = await browser.newContext(contextOf(view))
   const page = await openStatus(browser, context, status(id))
   // El recorrido empieza desde el principio del documento, como al cargar.
   await page.evaluate(() => {
@@ -36,14 +36,14 @@ async function traverse(browser, id, vista, tabs) {
   for (let i = 0; i < tabs; i += 1) {
     await page.keyboard.press('Tab')
     steps.push(await focus(page))
-    if (i === 0 || i === 3) await page.screenshot({ path: join(dir, `${id}--${vista}--tab${String(i + 1)}.png`) })
+    if (i === 0 || i === 3) await page.screenshot({ path: join(dir, `${id}--${view}--tab${String(i + 1)}.png`) })
   }
   await context.close()
-  return { id, vista, steps }
+  return { id, view, steps }
 }
 
-async function dialog(browser, id, trigger, vista) {
-  const context = await browser.newContext(contextOf(vista))
+async function dialog(browser, id, trigger, view) {
+  const context = await browser.newContext(contextOf(view))
   const e = status(id)
   const page = await openStatus(browser, context, { ...e, class: 'ruta', wait: undefined, steps: [] })
   const button = page.getByRole('button', { name: trigger, exact: true }).first()
@@ -57,7 +57,7 @@ async function dialog(browser, id, trigger, vista) {
     await page.keyboard.press('Tab')
     path.push(await focus(page))
   }
-  await page.screenshot({ path: join(dir, `${id}--${vista}--dialogo.png`) })
+  await page.screenshot({ path: join(dir, `${id}--${view}--dialogo.png`) })
   await page.keyboard.press('Escape')
   // La animación de salida deja el diálogo en el DOM un momento; con la
   // máquina cargada puede pasar del segundo.
@@ -67,7 +67,7 @@ async function dialog(browser, id, trigger, vista) {
   const onClose = await focus(page)
   await context.close()
   return {
-    id, vista, trigger, onOpen,
+    id, view, trigger, onOpen,
     focusTrapped: path.every((p) => p.dialogInside),
     ringVisible: path.filter((p) => !p.visible).map((p) => p.name),
     closedWithEscape: closed,
@@ -76,26 +76,26 @@ async function dialog(browser, id, trigger, vista) {
   }
 }
 
-const browserValue = await launch()
+const browserInstance = await launch()
 const result = {
   routes: [
-    await traverse(browserValue, 'acceso', 'desktop', 6),
-    await traverse(browserValue, 'pedidos', 'mobile', 10),
-    await traverse(browserValue, 'pedidos-nuevo', 'mobile', 12),
-    await traverse(browserValue, 'tablero', 'desktop', 12),
+    await traverse(browserInstance, 'acceso', 'desktop', 6),
+    await traverse(browserInstance, 'pedidos', 'mobile', 10),
+    await traverse(browserInstance, 'pedidos-nuevo', 'mobile', 12),
+    await traverse(browserInstance, 'tablero', 'desktop', 12),
   ],
   dialogs: [
-    await dialog(browserValue, 'o-cobro', 'Cobrar', 'desktop'),
-    await dialog(browserValue, 'o-nueva-mesa', 'Nueva mesa', 'desktop'),
-    await dialog(browserValue, 'o-llevar', 'Para llevar / Delivery', 'mobile'),
-    await dialog(browserValue, 'o-desactivar-cuenta', 'Desactivar', 'desktop'),
+    await dialog(browserInstance, 'o-cobro', 'Cobrar', 'desktop'),
+    await dialog(browserInstance, 'o-nueva-mesa', 'Nueva mesa', 'desktop'),
+    await dialog(browserInstance, 'o-llevar', 'Para llevar / Delivery', 'mobile'),
+    await dialog(browserInstance, 'o-desactivar-cuenta', 'Desactivar', 'desktop'),
   ],
 }
-await browserValue.close()
+await browserInstance.close()
 await writeJson(join(dir, 'teclado.json'), result)
 for (const r of result.routes) {
-  console.log(`\n${r.id} (${r.vista}): ${r.steps.map((p, i) => `${String(i + 1)}. ${p.name}${p.visible ? '' : ' [sin anillo]'}`).join(' → ')}`)
+  console.log(`\n${r.id} (${r.view}): ${r.steps.map((p, i) => `${String(i + 1)}. ${p.name}${p.visible ? '' : ' [sin anillo]'}`).join(' → ')}`)
 }
 for (const d of result.dialogs) {
-  console.log(`\nDiálogo «${d.trigger}» en ${d.id} (${d.vista}): foco inicial en «${d.onOpen.name}», atrapado ${d.focusTrapped ? 'sí' : 'NO'}, anillo ausente en [${d.ringVisible.join(', ')}], Escape cierra ${d.closedWithEscape ? 'sí' : 'NO'}, foco devuelto ${d.focusReturned ? 'sí' : 'NO'} («${d.onClose.name}»)`)
+  console.log(`\nDiálogo «${d.trigger}» en ${d.id} (${d.view}): foco inicial en «${d.onOpen.name}», atrapado ${d.focusTrapped ? 'sí' : 'NO'}, anillo ausente en [${d.ringVisible.join(', ')}], Escape cierra ${d.closedWithEscape ? 'sí' : 'NO'}, foco devuelto ${d.focusReturned ? 'sí' : 'NO'} («${d.onClose.name}»)`)
 }

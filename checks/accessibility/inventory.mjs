@@ -3,7 +3,7 @@
 // desplegable, con la cuenta (rol) que lo abre.
 //
 // `ruta` admite marcadores `:nombre` que se reemplazan con `reports/datos.json`
-// (lo deja `datos.mjs`). `pasos` es lo que haría una persona para llegar al
+// (lo deja `data.mjs`). `pasos` es lo que haría una persona para llegar al
 // estado; cada paso es uno de:
 //   { boton: 'Nombre' | /regex/ }   clic en el botón con ese nombre accesible
 //   { pestana: 'Nombre' }           clic en la pestaña (role=tab)

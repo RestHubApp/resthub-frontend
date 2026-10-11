@@ -41,16 +41,16 @@ export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
     )
   }
 
-  const lost = Number(cost.margin) < 0
+  const isLost = Number(cost.margin) < 0
   return (
     <p className="m-0 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
       <span>
         Costo {formatMoney(cost.cost)} · Margen{' '}
-        <strong className={lost ? 'text-destructive' : 'text-foreground'}>
+        <strong className={isLost ? 'text-destructive' : 'text-foreground'}>
           {formatMoney(cost.margin)}
           {cost.margin_percent === null ? '' : ` (${formatPercent(cost.margin_percent)})`}
         </strong>
-        {lost ? ' · se vende a pérdida' : ''}
+        {isLost ? ' · se vende a pérdida' : ''}
       </span>
       <Link to={destination} state={FROM_MENU} className={LINK} aria-label={`Ver la receta de ${itemName}`}>
         <Icon name="recipe" size={16} />

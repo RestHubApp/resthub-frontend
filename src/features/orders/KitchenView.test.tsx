@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { orderItem, noteWithAllergy, order } from '#jest/fixtures/orders'
-import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { KitchenView } from './KitchenView'
 
 const IN_KITCHEN = order({
@@ -21,7 +21,7 @@ function open(permissions = PERMISSIONS_OWNER, active = [IN_KITCHEN, READY]) {
     .on('get', NOTES, { items: [noteWithAllergy()] })
     .on('post', '/orders/5/ready', order({ status: 'ready' }))
   signInAs(permissions)
-  return { api, ...handleMount(<KitchenView />, { path: '/cocina' }) }
+  return { api, ...mountScreen(<KitchenView />, { path: '/cocina' }) }
 }
 
 describe('KitchenView', () => {
@@ -76,7 +76,7 @@ describe('KitchenView', () => {
   it('si los pedidos no cargan, avisa', async () => {
     server().on('get', '/orders/active', new ErrorResponse(500, 'Error del servidor'))
     signInAs(PERMISSIONS_WAITER)
-    handleMount(<KitchenView />)
+    mountScreen(<KitchenView />)
     expect(await screen.findByText('Error del servidor')).toBeInTheDocument()
   })
 })

@@ -15,7 +15,7 @@ import { RecipeEditor } from './RecipeEditor'
 import { useIngredients } from './useIngredients'
 
 /** A dónde vuelve "Volver": al menú si se llegó desde un plato, si no a las recetas. */
-function returnValue(status: unknown): { readonly to: string; readonly label: string } {
+function returnFocus(status: unknown): { readonly to: string; readonly label: string } {
   const from = (status as { from?: unknown } | null)?.from
   return from === paths.menu ? { to: paths.menu, label: 'Volver al menú' } : { to: paths.inventory.recipes, label: 'Volver a recetas' }
 }
@@ -23,7 +23,7 @@ function returnValue(status: unknown): { readonly to: string; readonly label: st
 /** La receta de un plato, en su propia dirección para poder enlazarla desde el menú. */
 export function RecipeEditorView() {
   const menuItemId = Number(useParams()['menuItemId'])
-  const back = returnValue(useLocation().state)
+  const back = returnFocus(useLocation().state)
   const canManage = useCan(PERMISSION.inventoryManage)
   const recipe = useQuery({
     ...recipeQuery(menuItemId),
@@ -33,7 +33,7 @@ export function RecipeEditorView() {
   })
   const ingredients = useIngredients()
   const error = recipe.error ?? ingredients.error
-  const loading = error === null && (recipe.data === undefined || ingredients.data === undefined)
+  const isLoading = error === null && (recipe.data === undefined || ingredients.data === undefined)
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,7 +50,7 @@ export function RecipeEditorView() {
       {error === null ? null : (
         <FormMessage tone="error">{errorMessage(error, 'No se pudo cargar la receta.')}</FormMessage>
       )}
-      {loading ? <EmptyState title="Cargando la receta…" /> : null}
+      {isLoading ? <EmptyState title="Cargando la receta…" /> : null}
       {recipe.data !== undefined && ingredients.data !== undefined ? (
         <RecipeEditor
           key={menuItemId}

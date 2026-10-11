@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { CATALOG, role, ROLE_OWNER, ROLE_WAITER } from '#jest/fixtures/platform'
-import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server, type Request } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, ErrorResponse, server, type Request } from '#jest/harness'
 import type { PermissionCode, Role } from '@/api/types'
 import { RolesView } from './RolesView'
 
@@ -15,7 +15,7 @@ const SAVE = { name: 'Guardar' }
 function openRoles(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, roles: Role[] = [ROLE_OWNER, ROLE_WAITER, KITCHEN]) {
   const api = server().on('get', '/roles', roles).on('get', '/permissions', CATALOG)
   signInAs(permissions)
-  return { api, ...handleMount(<RolesView />, { path: '/roles' }) }
+  return { api, ...mountScreen(<RolesView />, { path: '/roles' }) }
 }
 
 function row(name: string): HTMLElement {
@@ -153,7 +153,7 @@ describe('RolesView: edición y borrado', () => {
   it('si no se pueden leer los roles, lo avisa', async () => {
     server().on('get', '/roles', new ErrorResponse(500, 'Servidor caído')).on('get', '/permissions', CATALOG)
     signInAs()
-    handleMount(<RolesView />)
+    mountScreen(<RolesView />)
 
     expect(await screen.findByText('Servidor caído')).toBeInTheDocument()
   })

@@ -23,15 +23,15 @@ export function TableStatusButton({ table }: TableStatusButtonProps) {
     updateCache: withTable,
     success: table.is_active ? `${tableName(table.label)} desactivada.` : `${tableName(table.label)} activada.`,
   })
-  const blocked = table.is_active && table.active_order !== null
+  const isBlocked = table.is_active && table.active_order !== null
 
   return (
     <Button
       type="button"
       variant={table.is_active ? 'ghost' : 'success'}
       className="h-11 px-3"
-      disabled={status.isPending || blocked}
-      title={blocked ? 'No se desactiva una mesa con un pedido en curso' : undefined}
+      disabled={status.isPending || isBlocked}
+      title={isBlocked ? 'No se desactiva una mesa con un pedido en curso' : undefined}
       onClick={() => {
         status.mutate(undefined)
       }}

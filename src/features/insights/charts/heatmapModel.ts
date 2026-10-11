@@ -19,11 +19,11 @@ export function heatmapModel(cells: readonly HourlyCell[]): HeatmapModel {
   const first = Math.min(...withSales.map((cell) => cell.hour))
   const last = Math.max(...withSales.map((cell) => cell.hour))
   const hours = Array.from({ length: last - first + 1 }, (_, index) => first + index)
-  const byPassword = new Map(cells.map((cell) => [`${String(cell.weekday)}-${String(cell.hour)}`, cell]))
+  const byKey = new Map(cells.map((cell) => [`${String(cell.weekday)}-${String(cell.hour)}`, cell]))
   const days = [...new Set(cells.map((cell) => cell.weekday))].sort((a, b) => a - b)
 
   const rows = days.map((weekday) => {
-    const dayCells = hours.flatMap((hour) => byPassword.get(`${String(weekday)}-${String(hour)}`) ?? [])
+    const dayCells = hours.flatMap((hour) => byKey.get(`${String(weekday)}-${String(hour)}`) ?? [])
     return { weekday, label: dayCells[0]?.weekday_label ?? '', cells: dayCells }
   })
   return { hours, rows, max: Math.max(...withSales.map((cell) => cell.paid_orders)) }

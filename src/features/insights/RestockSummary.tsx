@@ -17,23 +17,23 @@ export function RestockSummary({ counts, selected, onSelect }: RestockSummaryPro
     <section aria-label="Resumen por acción" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {ACTION_ORDER.map((action) => {
         const style = ACTION_STYLES[action]
-        const active = selected === action
+        const isActive = selected === action
         return (
           <button
             key={action}
             type="button"
-            aria-pressed={active}
+            aria-pressed={isActive}
             onClick={() => {
-              onSelect(active ? null : action)
+              onSelect(isActive ? null : action)
             }}
-            className={`flex flex-col items-start gap-2 rounded-xl bg-card p-4 text-left ring-1 outline-none transition-shadow focus-visible:ring-3 focus-visible:ring-ring/50 ${active ? 'ring-2 ring-foreground' : 'ring-foreground/10 hover:ring-foreground/30'}`}
+            className={`flex flex-col items-start gap-2 rounded-xl bg-card p-4 text-left ring-1 outline-none transition-shadow focus-visible:ring-3 focus-visible:ring-ring/50 ${isActive ? 'ring-2 ring-foreground' : 'ring-foreground/10 hover:ring-foreground/30'}`}
           >
             <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${TONE_BADGE[style.tone]}`}>
               <Icon name={style.icon} size={14} />
               {ACTION_LABELS[action]}
             </span>
             <span className="text-3xl leading-none font-semibold">{counts[action] ?? 0}</span>
-            <span className="text-xs text-muted-foreground">{active ? 'Mostrando solo estos' : 'insumos'}</span>
+            <span className="text-xs text-muted-foreground">{isActive ? 'Mostrando solo estos' : 'insumos'}</span>
           </button>
         )
       })}

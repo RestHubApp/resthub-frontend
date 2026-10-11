@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { fireEvent, screen, within } from '@testing-library/react'
 
 import { table, reservation } from '#jest/fixtures/panel'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import { ReservationsView } from './ReservationsView'
 
 const EDIT_URL = '/reservations/21'
@@ -20,7 +20,7 @@ function open() {
     .on('get', LIST, (request: { params: Record<string, unknown> }) => (request.params['day'] === DAY ? [reservation()] : []))
     .on('get', '/tables', [table(1, '1'), table(2, '2'), table(3, TERRACE)])
   signInAs()
-  const mount = handleMount(<ReservationsView />)
+  const mount = mountScreen(<ReservationsView />)
   fireEvent.change(screen.getByLabelText('Día'), { target: { value: DAY } })
   return { api, ...mount }
 }

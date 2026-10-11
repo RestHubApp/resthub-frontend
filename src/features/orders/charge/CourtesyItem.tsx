@@ -31,7 +31,7 @@ export function CourtesyItem({ order, item }: CourtesyItemProps) {
       setReason(null)
     },
   })
-  const valid = (reason ?? '').trim().length >= MIN_TEXT
+  const isValid = (reason ?? '').trim().length >= MIN_TEXT
 
   return (
     <li className="flex flex-col gap-2 rounded-md px-3 py-2 ring-1 ring-input">
@@ -86,7 +86,7 @@ export function CourtesyItem({ order, item }: CourtesyItemProps) {
           <Button
             type="button"
             size="sm"
-            disabled={!valid || change.isPending}
+            disabled={!isValid || change.isPending}
             onClick={() => {
               change.mutate(reason.trim())
             }}

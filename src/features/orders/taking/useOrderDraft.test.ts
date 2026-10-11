@@ -1,24 +1,24 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook } from '@testing-library/react'
 
-import { handleMenu, dish, section } from '#jest/fixtures/orders'
+import { buildMenu, dish, section } from '#jest/fixtures/orders'
 import { cartTotals } from './cartTotals'
 import { visibleSections } from './menuFilter'
 import { lineKeyFor, MAX_QUANTITY, toNewItems, useDraftActions, useDraftLines } from './useOrderDraft'
 
-const PASSWORD = 'mesa-3'
+const TABLE_KEY = 'mesa-3'
 const LOMO = dish()
 const JUG = { group: 'Tamaño', option: 'Jarra', price: '12.00' }
 const LIMON = { group: 'Extras', option: 'Limón', price: '0.50' }
 
-function draft(password = PASSWORD) {
-  return renderHook(() => ({ lines: useDraftLines(password), ...useDraftActions() }))
+function draft(tableKey = TABLE_KEY) {
+  return renderHook(() => ({ lines: useDraftLines(tableKey), ...useDraftActions() }))
 }
 
 afterEach(() => {
   const { result } = draft()
   act(() => {
-    result.current.clear(PASSWORD)
+    result.current.clear(TABLE_KEY)
     result.current.clear('llevar')
   })
 })
@@ -36,9 +36,9 @@ describe('borrador del pedido', () => {
     const { result } = draft()
     const chicha = dish({ id: 21, name: 'Chicha morada', price: '8.00' })
     act(() => {
-      result.current.add(PASSWORD, LOMO)
-      result.current.add(PASSWORD, LOMO)
-      result.current.add(PASSWORD, chicha, [JUG, LIMON])
+      result.current.add(TABLE_KEY, LOMO)
+      result.current.add(TABLE_KEY, LOMO)
+      result.current.add(TABLE_KEY, chicha, [JUG, LIMON])
     })
     expect(result.current.lines.map((line) => [line.name, line.quantity, line.unitPrice])).toEqual([
       ['Lomo saltado', 2, '32.00'],
@@ -49,16 +49,16 @@ describe('borrador del pedido', () => {
   it('la cantidad no pasa del tope del servidor y en cero quita el plato', () => {
     const { result } = draft()
     act(() => {
-      result.current.add(PASSWORD, LOMO)
-      result.current.setQuantity(PASSWORD, '11', 500)
+      result.current.add(TABLE_KEY, LOMO)
+      result.current.setQuantity(TABLE_KEY, '11', 500)
     })
     expect(result.current.lines[0]?.quantity).toBe(MAX_QUANTITY)
     act(() => {
-      result.current.add(PASSWORD, LOMO)
+      result.current.add(TABLE_KEY, LOMO)
     })
     expect(result.current.lines[0]?.quantity).toBe(MAX_QUANTITY)
     act(() => {
-      result.current.setQuantity(PASSWORD, '11', 0)
+      result.current.setQuantity(TABLE_KEY, '11', 0)
     })
     expect(result.current.lines).toEqual([])
   })
@@ -67,9 +67,9 @@ describe('borrador del pedido', () => {
     const { result } = draft()
     const takeaway = draft('llevar')
     act(() => {
-      result.current.add(PASSWORD, LOMO)
+      result.current.add(TABLE_KEY, LOMO)
       result.current.add('llevar', LOMO)
-      result.current.setNotes(PASSWORD, '11', '  sin cebolla ')
+      result.current.setNotes(TABLE_KEY, '11', '  sin cebolla ')
       result.current.clear('llevar')
     })
     expect(takeaway.result.current.lines).toEqual([])
@@ -79,7 +79,7 @@ describe('borrador del pedido', () => {
   it('al API viajan solo el grupo y la opción de cada extra', () => {
     const { result } = draft()
     act(() => {
-      result.current.add(PASSWORD, dish({ id: 21 }), [JUG])
+      result.current.add(TABLE_KEY, dish({ id: 21 }), [JUG])
     })
     expect(toNewItems(result.current.lines)[0]?.modifiers).toEqual([{ group: 'Tamaño', option: 'Jarra' }])
   })
@@ -89,9 +89,9 @@ describe('cartTotals', () => {
   it('suma platos y soles en centavos', () => {
     const { result } = draft()
     act(() => {
-      result.current.add(PASSWORD, dish({ price: '10.10' }))
-      result.current.setQuantity(PASSWORD, '11', 3)
-      result.current.add(PASSWORD, dish({ id: 12, price: '0.20' }))
+      result.current.add(TABLE_KEY, dish({ price: '10.10' }))
+      result.current.setQuantity(TABLE_KEY, '11', 3)
+      result.current.add(TABLE_KEY, dish({ id: 12, price: '0.20' }))
     })
     const { dishes, count, total } = cartTotals(result.current.lines)
     expect([dishes, count]).toEqual([4, '4 platos'])
@@ -101,7 +101,7 @@ describe('cartTotals', () => {
 })
 
 describe('visibleSections', () => {
-  const sections = handleMenu().categories
+  const sections = buildMenu().categories
 
   it('sin búsqueda muestra la categoría elegida, o la carta entera', () => {
     expect(visibleSections(sections, '', null).map((s) => s.name)).toEqual(['Fondos', 'Bebidas'])

@@ -25,12 +25,12 @@ const FRAGMENT = '#codigo=abc'
 function memory(initial: Record<string, string> = {}): KeyValueStorage {
   const data = new Map(Object.entries(initial))
   return {
-    getItem: (password) => data.get(password) ?? null,
-    setItem: (password, value) => {
-      data.set(password, value)
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => {
+      data.set(key, value)
     },
-    removeItem: (password) => {
-      data.delete(password)
+    removeItem: (key) => {
+      data.delete(key)
     },
   }
 }

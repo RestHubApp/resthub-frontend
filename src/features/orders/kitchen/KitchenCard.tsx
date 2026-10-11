@@ -32,12 +32,12 @@ export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
     success: stepDoneMessage,
     failure: 'No se pudo marcar como listo.',
   })
-  const allergy = allergyIn(order, flagFor) !== undefined
+  const hasAllergy = allergyIn(order, flagFor) !== undefined
 
   return (
     <article
       aria-label={`Pedido ${String(order.number)}`}
-      className={`flex flex-col gap-3 rounded-xl bg-card p-4 shadow-xs ${allergy ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
+      className={`flex flex-col gap-3 rounded-xl bg-card p-4 shadow-xs ${hasAllergy ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
     >
       <header className="flex items-start justify-between gap-2">
         <div>
@@ -46,7 +46,7 @@ export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
         </div>
         <div className="flex flex-col items-end gap-1">
           <ElapsedTime order={order} now={now} />
-          {allergy ? <AllergyAlert /> : null}
+          {hasAllergy ? <AllergyAlert /> : null}
         </div>
       </header>
       <ul className="m-0 flex list-none flex-col gap-2 border-t px-0 pt-3 pb-0 text-base">

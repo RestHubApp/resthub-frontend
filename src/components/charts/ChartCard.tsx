@@ -30,7 +30,7 @@ export function ChartCard({
   refreshing = false,
   actions,
 }: ChartCardProps) {
-  const [asTable, setAsTable] = useState(false)
+  const [isTableView, setIsTableView] = useState(false)
 
   return (
     <SectionCard
@@ -43,13 +43,13 @@ export function ChartCard({
             type="button"
             variant="outline"
             size="sm"
-            aria-pressed={asTable}
+            aria-pressed={isTableView}
             onClick={() => {
-              setAsTable((value) => !value)
+              setIsTableView((value) => !value)
             }}
           >
-            <Icon name={asTable ? 'chart' : 'grid'} size={14} />
-            <span>{asTable ? 'Ver gráfico' : 'Ver tabla'}</span>
+            <Icon name={isTableView ? 'chart' : 'grid'} size={14} />
+            <span>{isTableView ? 'Ver gráfico' : 'Ver tabla'}</span>
           </Button>
         </>
       }
@@ -58,7 +58,7 @@ export function ChartCard({
         aria-busy={refreshing}
         className={`transition-opacity ${refreshing ? 'opacity-50' : 'opacity-100'}`}
       >
-        {asTable ? table : chart}
+        {isTableView ? table : chart}
       </div>
     </SectionCard>
   )

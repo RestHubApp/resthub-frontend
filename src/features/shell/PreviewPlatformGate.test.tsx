@@ -9,12 +9,12 @@ import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 function memory() {
   const data = new Map<string, string>()
   return {
-    getItem: (password: string) => data.get(password) ?? null,
-    setItem: (password: string, value: string) => {
-      data.set(password, value)
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      data.set(key, value)
     },
-    removeItem: (password: string) => {
-      data.delete(password)
+    removeItem: (key: string) => {
+      data.delete(key)
     },
   }
 }

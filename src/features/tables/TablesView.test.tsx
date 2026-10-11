@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { table, orderInTable } from '#jest/fixtures/inventory'
-import { signInAs, handleMount, handleFirst, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, firstOf, ErrorResponse, server } from '#jest/harness'
 import { TablesView } from './TablesView'
 
 const TABLES = '/tables'
@@ -14,7 +14,7 @@ const NEW_TABLE = { name: 'Nueva mesa' }
 function openTables(tables = [table(), table({ id: 2, label: 'Terraza 2', position: 1 })]) {
   const api = server().on('get', TABLES, tables)
   signInAs()
-  return { api, ...handleMount(<TablesView />, { path: '/mesas' }) }
+  return { api, ...mountScreen(<TablesView />, { path: '/mesas' }) }
 }
 
 describe('TablesView: lista y nombre', () => {
@@ -70,7 +70,7 @@ describe('TablesView: lista y nombre', () => {
     const { api, user } = openTables()
     api.on('patch', '/tables/1', new ErrorResponse(409, 'Ya hay una mesa con ese nombre.'))
 
-    await user.click(handleFirst(await screen.findAllByRole('button', { name: 'Renombrar' })))
+    await user.click(firstOf(await screen.findAllByRole('button', { name: 'Renombrar' })))
     const window = await screen.findByRole('dialog', { name: 'Renombrar Mesa 1' })
     const field = within(window).getByLabelText(NAME)
     expect(field).toHaveValue('1')
@@ -125,7 +125,7 @@ describe('TablesView: orden y estado', () => {
   it('si no carga, lo dice', async () => {
     server().on('get', TABLES, new ErrorResponse(500, 'Servidor caído'))
     signInAs()
-    handleMount(<TablesView />)
+    mountScreen(<TablesView />)
     expect(await screen.findByText('Servidor caído')).toBeInTheDocument()
   })
 })

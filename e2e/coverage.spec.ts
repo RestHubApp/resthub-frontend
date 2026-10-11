@@ -21,13 +21,13 @@ function specs(folder: string): string[] {
   })
 }
 
-/** Los identificadores que marca cada archivo con `cubre('…')`. */
+/** Los identificadores que marca cada archivo con `covers('…')`. */
 function marked(files: readonly string[]): Map<string, string[]> {
   const map = new Map<string, string[]>()
   for (const file of files) {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     const source = readFileSync(file, 'utf8')
-    for (const call of source.matchAll(/cubre\(([^)]*)\)/gu)) {
+    for (const call of source.matchAll(/covers\(([^)]*)\)/gu)) {
       for (const literal of call[1].matchAll(/'([^']+)'/gu)) {
         const id = literal[1]
         map.set(id, [...(map.get(id) ?? []), relative(E2E, file)])

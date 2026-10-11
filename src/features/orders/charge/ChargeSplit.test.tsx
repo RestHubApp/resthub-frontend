@@ -1,8 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { paid, payment, handleOrder, dish } from '#jest/fixtures/charge'
-import { signInAs, handleMount, server, type Request } from '#jest/harness'
+import { paid, payment, buildOrder, dish } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, server, type Request } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { ChargeDialog } from './ChargeDialog'
 
@@ -29,7 +29,7 @@ function amountOf(request: Request, actual: OrderResponse): string {
   return body.amount ?? actual.balance
 }
 
-function chargeSplit(initial: OrderResponse = handleOrder()) {
+function chargeSplit(initial: OrderResponse = buildOrder()) {
   let actual = initial
   const api = server()
     .on('get', '/cash/current', { is_open: true, session: null })
@@ -39,7 +39,7 @@ function chargeSplit(initial: OrderResponse = handleOrder()) {
       return actual
     })
   signInAs()
-  return { api, ...handleMount(<ChargeDialog order={initial} onClose={jest.fn()} />) }
+  return { api, ...mountScreen(<ChargeDialog order={initial} onClose={jest.fn()} />) }
 }
 
 describe('cobro en partes iguales', () => {
@@ -71,7 +71,7 @@ describe('cobro en partes iguales', () => {
   })
 
   it('entre tres, el redondeo queda para el último', async () => {
-    const { user } = chargeSplit(handleOrder({ balance: '100.00', total: '100.00' }))
+    const { user } = chargeSplit(buildOrder({ balance: '100.00', total: '100.00' }))
 
     await user.click(await screen.findByRole('radio', EQUAL))
     await user.click(screen.getByRole('button', { name: 'Uno más de personas' }))
@@ -97,7 +97,7 @@ describe('cobro por platos', () => {
   })
 
   it('los platos ya pagados no se ofrecen y una cortesía no cuesta', async () => {
-    const order = handleOrder({
+    const order = buildOrder({
       items: [
         dish({ is_paid: true }),
         dish({ id: 2, name: 'Chicha morada', subtotal: '20.00' }),
@@ -120,7 +120,7 @@ describe('cobro por platos', () => {
 describe('la cuenta', () => {
   it('muestra cortesías, descuento y lo ya pagado antes de lo que falta', async () => {
     chargeSplit(
-      handleOrder({
+      buildOrder({
         subtotal: '58.00',
         courtesy_amount: '8.00',
         discount_amount: '5.00',

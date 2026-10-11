@@ -1,13 +1,13 @@
 import { useSearchParams } from 'react-router'
 
-import { customRangeProblem, DEFAULT_PRESET, isRangePreset, presetRange, type RangeDates, type RangePreset } from './dateRange'
+import { customRangeProblem, DEFAULT_PRESET, isRangePreset, presetRange, type FixedPreset, type RangeDates, type RangePreset } from './dateRange'
 import { todayIn } from '@/services/format'
 
 export interface InsightsRange {
   readonly preset: RangePreset
   /** Las fechas que se piden al servidor. */
   readonly params: RangeDates
-  readonly choosePreset: (preset: Exclude<RangePreset, 'personalizado'>) => void
+  readonly choosePreset: (preset: FixedPreset) => void
   readonly chooseCustom: (from: string, to: string) => void
 }
 

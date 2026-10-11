@@ -69,10 +69,10 @@ function columns(filters: ObsFilters): DataColumn<ObsRequestEntry>[] {
 
 /** Las peticiones una por una; su `request_id` lleva a sus logs. */
 export function RequestTable({ entries, isLoading, filters }: RequestTableProps) {
-  const columnsValue = useMemo(() => columns(filters), [filters])
+  const tableColumns = useMemo(() => columns(filters), [filters])
   return (
     <DataTable
-      columns={columnsValue}
+      columns={tableColumns}
       data={entries}
       isLoading={isLoading}
       emptyMessage="No hay peticiones con esos filtros en esta ventana."

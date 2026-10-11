@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook } from '@testing-library/react'
 
-import { handleAccount, PERMISSIONS_WAITER } from '#jest/harness'
+import { buildAccount, PERMISSIONS_WAITER } from '#jest/harness'
 import { enqueueOrder, queuedOrders, removeQueued, subscribeQueue, useQueuedOrders, type QueuedOrder } from './offlineQueue'
 
-const ANA = handleAccount(PERMISSIONS_WAITER)
-const LUIS = handleAccount(PERMISSIONS_WAITER, { user: { ...ANA.user, id: 8, full_name: 'Luis' } })
+const ANA = buildAccount(PERMISSIONS_WAITER)
+const LUIS = buildAccount(PERMISSIONS_WAITER, { user: { ...ANA.user, id: 8, full_name: 'Luis' } })
 
 function order(id: string, userId = ANA.user.id): QueuedOrder {
   return {
@@ -18,11 +18,11 @@ function order(id: string, userId = ANA.user.id): QueuedOrder {
 }
 
 afterEach(() => {
-  for (const orderValue of queuedOrders({ userId: ANA.user.id, restaurantId: 1 })) {
-    removeQueued(orderValue.request.client_request_id ?? '')
+  for (const orderResponse of queuedOrders({ userId: ANA.user.id, restaurantId: 1 })) {
+    removeQueued(orderResponse.request.client_request_id ?? '')
   }
-  for (const orderValue of queuedOrders({ userId: LUIS.user.id, restaurantId: 1 })) {
-    removeQueued(orderValue.request.client_request_id ?? '')
+  for (const orderResponse of queuedOrders({ userId: LUIS.user.id, restaurantId: 1 })) {
+    removeQueued(orderResponse.request.client_request_id ?? '')
   }
 })
 

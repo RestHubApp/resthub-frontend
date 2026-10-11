@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
-import { handleAccount, signInAs, handleMount, PERMISSIONS_WAITER, handleFirst, ErrorResponse, server } from '#jest/harness'
+import { buildAccount, signInAs, mountScreen, PERMISSIONS_WAITER, firstOf, ErrorResponse, server } from '#jest/harness'
 import { currentAuthToken } from '@/services/api'
 import { useSession } from '@/store/session'
 import { ProfileView } from './ProfileView'
@@ -14,7 +14,7 @@ const ACTUAL = 'Contraseña actual'
 const NEW = 'Nueva contraseña'
 const REPEAT = 'Repite la nueva contraseña'
 const CHANGE = { name: 'Cambiar contraseña' }
-const CHANGEValue = '/auth/me/password'
+const CHANGE_PASSWORD_URL = '/auth/me/password'
 const ACCESS = '/auth/login'
 const NEW_TOKEN = 'token-nuevo'
 const NOTICE = 'Tu contraseña cambió. Vuelve a iniciar sesión.'
@@ -22,7 +22,7 @@ const NOTICE = 'Tu contraseña cambió. Vuelve a iniciar sesión.'
 function openProfile(preview = false) {
   const api = server()
   signInAs(PERMISSIONS_WAITER, { preview })
-  return { api, ...handleMount(<ProfileView />, { path: '/perfil', routes: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
+  return { api, ...mountScreen(<ProfileView />, { path: '/perfil', routes: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
 }
 
 describe('ProfileView', () => {
@@ -45,12 +45,12 @@ describe('ProfileView', () => {
 
   it('cambia la contraseña y sigue con el token nuevo, sin un segundo acceso', async () => {
     const { api, user } = openProfile()
-    api.on('post', CHANGEValue, { ...handleAccount(PERMISSIONS_WAITER), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 })
+    api.on('post', CHANGE_PASSWORD_URL, { ...buildAccount(PERMISSIONS_WAITER), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 })
 
     await changePassword(user)
 
     expect(await screen.findByText('Contraseña actualizada.')).toBeInTheDocument()
-    expect(api.calls('post', CHANGEValue)[0]?.body).toEqual({ current_password: CURRENT_SECRET, new_password: NEW_SECRET })
+    expect(api.calls('post', CHANGE_PASSWORD_URL)[0]?.body).toEqual({ current_password: CURRENT_SECRET, new_password: NEW_SECRET })
     expect(api.calls('post', ACCESS)).toHaveLength(0)
     expect(useSession.getState().token).toBe(NEW_TOKEN)
     expect(currentAuthToken()).toBe(NEW_TOKEN)
@@ -59,7 +59,7 @@ describe('ProfileView', () => {
 
   it('si la respuesta no trae token, cierra la sesión y vuelve al acceso con el aviso', async () => {
     const { api, user, router } = openProfile()
-    api.on('post', CHANGEValue, null, 204)
+    api.on('post', CHANGE_PASSWORD_URL, null, 204)
 
     await changePassword(user)
 
@@ -72,14 +72,14 @@ describe('ProfileView', () => {
 
   it('si otra pestaña entró con otra cuenta mientras tanto, no pisa ni cierra esa sesión', async () => {
     const { api, user } = openProfile()
-    api.on('post', CHANGEValue, () => {
+    api.on('post', CHANGE_PASSWORD_URL, () => {
       useSession.setState({ token: 'token-de-otra-cuenta' })
-      return { ...handleAccount(PERMISSIONS_WAITER), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 }
+      return { ...buildAccount(PERMISSIONS_WAITER), access_token: NEW_TOKEN, token_type: 'bearer', expires_in: 3600 }
     })
 
     await changePassword(user)
 
-    await waitFor(() => { expect(api.calls('post', CHANGEValue)).toHaveLength(1); })
+    await waitFor(() => { expect(api.calls('post', CHANGE_PASSWORD_URL)).toHaveLength(1); })
     await new Promise((ready) => setTimeout(ready, 50))
     expect(useSession.getState().token).toBe('token-de-otra-cuenta')
     expect(useSession.getState().passwordChanged).toBe(false)
@@ -95,12 +95,12 @@ describe('ProfileView', () => {
 
     expect(await screen.findByText('Las dos contraseñas no coinciden')).toBeInTheDocument()
     expect(screen.getByText('La nueva contraseña tiene que ser distinta de la actual')).toBeInTheDocument()
-    expect(api.calls('post', CHANGEValue)).toHaveLength(0)
+    expect(api.calls('post', CHANGE_PASSWORD_URL)).toHaveLength(0)
   })
 
   it('si la actual está mal, muestra el motivo del servidor', async () => {
     const { api, user } = openProfile()
-    api.on('post', CHANGEValue, new ErrorResponse(400, 'La contraseña actual no coincide.'))
+    api.on('post', CHANGE_PASSWORD_URL, new ErrorResponse(400, 'La contraseña actual no coincide.'))
 
     await user.type(screen.getByLabelText(ACTUAL), 'equivocada1')
     await user.type(screen.getByLabelText(NEW), NEW_SECRET)
@@ -122,7 +122,7 @@ describe('ProfileView', () => {
     const field = screen.getByLabelText(ACTUAL)
     expect(field).toHaveAttribute('type', 'password')
 
-    await user.click(handleFirst(screen.getAllByRole('button', { name: /mostrar/i })))
+    await user.click(firstOf(screen.getAllByRole('button', { name: /mostrar/i })))
 
     expect(field).toHaveAttribute('type', 'text')
   })

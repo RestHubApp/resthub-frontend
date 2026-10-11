@@ -36,7 +36,7 @@ const TONE: Record<PurchaseOrder['status'], string> = {
 export function PurchaseOrdersPanel({ canManage }: PurchaseOrdersPanelProps) {
   const timeZone = useTimeZone()
   const orders = useQuery(purchaseOrdersQuery)
-  const [creating, setCreating] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
   const [receiving, setReceiving] = useState<PurchaseOrder | null>(null)
   const change = usePurchasingMutation({
     mutationFn: (payload: { id: number; action: 'send' | 'cancel' }) => changePurchaseOrder(payload.id, payload.action),
@@ -50,7 +50,7 @@ export function PurchaseOrdersPanel({ canManage }: PurchaseOrdersPanelProps) {
       title="Órdenes de compra"
       actions={canManage ? (
         <Button type="button" onClick={() => {
-          setCreating(true)
+          setIsCreating(true)
         }}>
           <Icon name="add" size={16} />
           <span>Nueva orden</span>
@@ -102,8 +102,8 @@ export function PurchaseOrdersPanel({ canManage }: PurchaseOrdersPanelProps) {
           </li>
         ))}
       </ul>
-      <PurchaseOrderDialog open={creating} onClose={() => {
-        setCreating(false)
+      <PurchaseOrderDialog open={isCreating} onClose={() => {
+        setIsCreating(false)
       }} />
       <ReceiveOrderDialog order={receiving} onClose={() => {
         setReceiving(null)

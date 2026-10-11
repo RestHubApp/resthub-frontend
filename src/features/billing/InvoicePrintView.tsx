@@ -22,13 +22,13 @@ export function InvoicePrintView() {
   // Los datos del emisor los ve el encargado; el mesero imprime sin encabezado
   // fiscal, que igual está en el PDF oficial del proveedor.
   const settings = useQuery({ ...billingSettingsQuery, enabled: canViewSettings })
-  const ready = invoice.isSuccess
+  const isReady = invoice.isSuccess
 
   useEffect(() => {
-    if (ready) {
+    if (isReady) {
       window.print()
     }
-  }, [ready])
+  }, [isReady])
 
   if (invoice.isPending) {
     return <EmptyState title="Preparando el comprobante…" />

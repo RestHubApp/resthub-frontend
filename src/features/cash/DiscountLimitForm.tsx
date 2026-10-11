@@ -36,7 +36,7 @@ export function DiscountLimitForm() {
   })
   const actual = restaurant.data?.max_waiter_discount_percent ?? ''
   const written = value ?? actual
-  const valid = PERCENTAGE.test(written.trim())
+  const isValid = PERCENTAGE.test(written.trim())
 
   return (
     <form
@@ -44,7 +44,7 @@ export function DiscountLimitForm() {
       className="flex flex-wrap items-end gap-3"
       onSubmit={(event) => {
         event.preventDefault()
-        if (valid) {
+        if (isValid) {
           save.mutate(written.trim().replace(',', '.'))
         }
       }}
@@ -56,13 +56,13 @@ export function DiscountLimitForm() {
           inputMode="decimal"
           className="w-32"
           value={written}
-          aria-invalid={!valid}
+          aria-invalid={!isValid}
           onChange={(event) => {
             setValue(event.target.value)
           }}
         />
       </div>
-      <Button type="submit" variant="outline" disabled={!valid || value === null || save.isPending}>
+      <Button type="submit" variant="outline" disabled={!isValid || value === null || save.isPending}>
         {save.isPending ? 'Guardando…' : 'Guardar tope'}
       </Button>
     </form>

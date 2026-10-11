@@ -80,15 +80,15 @@ export async function prepareData() {
   const orders = await call(t, 'GET', '/inventory/purchase-orders')
   if (orders.items.length === 0) {
     const ingredients = await call(t, 'GET', '/inventory/ingredients')
-    const list2 = Array.isArray(ingredients) ? ingredients : ingredients.items
+    const ingredientList = Array.isArray(ingredients) ? ingredients : ingredients.items
     const order = await call(t, 'POST', '/inventory/purchase-orders', {
       supplier_id: supplier.id, notes: 'Orden de las pruebas de accesibilidad',
-      lines: list2.slice(0, 2).map((i) => ({ ingredient_id: i.id, quantity: '1000', unit_cost: '0.01' })),
+      lines: ingredientList.slice(0, 2).map((i) => ({ ingredient_id: i.id, quantity: '1000', unit_cost: '0.01' })),
     })
     await call(t, 'POST', `/inventory/purchase-orders/${order.id}/send`)
     // Un borrador más, para ver los dos estados.
     await call(t, 'POST', '/inventory/purchase-orders', {
-      supplier_id: supplier.id, notes: 'Borrador', lines: [{ ingredient_id: list2[2].id, quantity: '500', unit_cost: '0.02' }],
+      supplier_id: supplier.id, notes: 'Borrador', lines: [{ ingredient_id: ingredientList[2].id, quantity: '500', unit_cost: '0.02' }],
     })
   }
 
@@ -120,9 +120,9 @@ export async function prepareData() {
     await call(t, 'POST', '/billing/invoices', { order_id: order.id, kind: 'boleta', customer_document_type: 'dni', customer_document_number: '12345678', customer_name: 'Lucía Quispe', customer_address: '' })
       .catch((e) => console.warn('comprobante:', e.message))
   }
-  const taxInvoices2 = await call(t, 'GET', '/billing/invoices')
-  ids.invoice = taxInvoices2.items[0]?.id ?? null
-  ids.orderCharged = taxInvoices2.items[0]?.order_id ?? null
+  const chargedInvoices = await call(t, 'GET', '/billing/invoices')
+  ids.invoice = chargedInvoices.items[0]?.id ?? null
+  ids.orderCharged = chargedInvoices.items[0]?.order_id ?? null
 
   // Un pedido en mesa servido, del mesero, listo para cobrar (cobro y comprobante).
   const tm = await token('waiter')
@@ -185,8 +185,8 @@ export async function prepareData() {
   const sessions = await call(t, 'GET', '/cash/sessions')
   ids.shiftCashRegister = (sessions.items ?? sessions).find((s) => !s.is_open)?.id ?? null
 
-  const tablesValue = await call(t, 'GET', '/tables')
-  ids.freeTable = tablesValue.filter((m) => !m.active_order).at(-1)?.id ?? null
+  const tablesResponse = await call(t, 'GET', '/tables')
+  ids.freeTable = tablesResponse.filter((m) => !m.active_order).at(-1)?.id ?? null
 
   await writeJson(join(REPORTS, 'datos.json'), ids)
   return ids

@@ -29,20 +29,20 @@ export function AvailabilityToggle({ item }: AvailabilityToggleProps) {
     preview: (menu, { id, isAvailable }) => patchItem(menu, id, { is_available: isAvailable }),
     failure: `No se pudo cambiar la disponibilidad de ${item.name}.`,
   })
-  const on = item.is_available
+  const isOn = item.is_available
 
   return (
     <button
       type="button"
       role="switch"
-      aria-checked={on}
+      aria-checked={isOn}
       aria-label={`Disponible hoy: ${item.name}`}
       onClick={() => {
-        change.mutate({ id: item.id, isAvailable: !on })
+        change.mutate({ id: item.id, isAvailable: !isOn })
       }}
       className={cn(
         'inline-flex h-11 shrink-0 basis-full items-center gap-2.5 rounded-full border px-2 pr-3.5 sm:basis-auto text-sm font-semibold outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50',
-        on
+        isOn
           ? 'border-success/30 bg-success/10 text-success hover:bg-success/15'
           : 'border-border bg-muted text-muted-foreground hover:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_6%)]',
       )}
@@ -51,13 +51,13 @@ export function AvailabilityToggle({ item }: AvailabilityToggleProps) {
         aria-hidden="true"
         className={cn(
           'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors',
-          on ? 'bg-success' : 'bg-input',
+          isOn ? 'bg-success' : 'bg-input',
         )}
       >
         <span
           className={cn(
             'absolute left-1 size-5 rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none',
-            on ? 'translate-x-5' : 'translate-x-0',
+            isOn ? 'translate-x-5' : 'translate-x-0',
           )}
         />
       </span>

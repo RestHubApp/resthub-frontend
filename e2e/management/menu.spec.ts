@@ -78,16 +78,16 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
   await expect(row).toContainText(soles('10.00'))
 
   // Agotado hoy: un toque, sin confirmar.
-  const switchValue = page.getByRole('switch', { name: 'Disponible hoy: Ceviche clásico' })
-  await switchValue.click()
-  await expect(switchValue).toHaveAttribute('aria-checked', 'false')
+  const availabilitySwitch = page.getByRole('switch', { name: 'Disponible hoy: Ceviche clásico' })
+  await availabilitySwitch.click()
+  await expect(availabilitySwitch).toHaveAttribute('aria-checked', 'false')
   await expect(page.getByRole('listitem').filter({ hasText: 'Ceviche clásico' })).toContainText('Agotado hoy')
   await expect(summary).toContainText('Hoy: 5 de 6 platos disponibles')
   await expect(summary).toContainText('Agotado hoy: Ceviche clásico.')
   await evidence(page, 'ges-12-2-agotado-hoy')
   await expect.poll(async () => (await menu(local)).flatMap((c) => c.items).find((p) => p.name === 'Ceviche clásico')?.is_available).toBe(false)
-  await switchValue.click()
-  await expect(switchValue).toHaveAttribute('aria-checked', 'true')
+  await availabilitySwitch.click()
+  await expect(availabilitySwitch).toHaveAttribute('aria-checked', 'true')
 
   // Sacar de la carta se confirma; volver a la carta, no.
   const aji = page.getByRole('listitem').filter({ hasText: 'Ají de gallina' })

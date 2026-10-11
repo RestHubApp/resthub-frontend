@@ -8,7 +8,7 @@ type AwayTarget = Extract<OrderTarget, { kind: 'takeaway' }>
 
 /** Lee de la URL a quién va un pedido para llevar o delivery. */
 function awayTarget(params: URLSearchParams): AwayTarget {
-  const text = (password: string) => (params.get(password) ?? '').trim()
+  const text = (key: string) => (params.get(key) ?? '').trim()
   const customerId = Number(params.get('clienteId'))
   const base = {
     kind: 'takeaway' as const,

@@ -20,7 +20,7 @@ interface OwnersSectionProps {
  * un encargado, lo hace el propio local desde «Personal».
  */
 export function OwnersSection({ restaurant }: OwnersSectionProps) {
-  const [adding, setAdding] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
 
   return (
     <SectionCard
@@ -32,7 +32,7 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
           size="lg"
           className="h-11 px-4"
           onClick={() => {
-            setAdding(true)
+            setIsAdding(true)
           }}
         >
           <Icon name="add" size={18} />
@@ -59,8 +59,8 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
         </ul>
       )}
       <FormDialog
-        open={adding}
-        onOpenChange={setAdding}
+        open={isAdding}
+        onOpenChange={setIsAdding}
         title="Agregar encargado"
         description={`Una cuenta más con el rol Encargado de ${restaurant.name}.`}
         size="lg"
@@ -68,7 +68,7 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
         <AddOwnerForm
           restaurantId={restaurant.id}
           onDone={() => {
-            setAdding(false)
+            setIsAdding(false)
           }}
         />
       </FormDialog>

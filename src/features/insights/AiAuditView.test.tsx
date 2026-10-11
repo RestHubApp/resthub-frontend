@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { decision } from '#jest/fixtures/indicators'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import type { AiDecision } from '@/api/types'
 import { AiAuditView } from './AiAuditView'
 
@@ -37,7 +37,7 @@ const WITHOUT_OUTPUT = decision({ id: 4, subject_label: 'Arroz', output: {} })
 function open(items: AiDecision[] = [decision(), NOTE, WASTE, WITHOUT_OUTPUT], total = items.length) {
   const api = server().on('get', ROUTE, { items, total })
   signInAs()
-  return { api, ...handleMount(<AiAuditView />, { path: '/panel/ia' }) }
+  return { api, ...mountScreen(<AiAuditView />, { path: '/panel/ia' }) }
 }
 
 function row(text: string): HTMLElement {
@@ -103,7 +103,7 @@ describe('AiAuditView', () => {
   it('si la auditoría falla lo dice', async () => {
     server().on('get', ROUTE, new ErrorResponse(403, 'Solo el encargado ve la auditoría'))
     signInAs()
-    handleMount(<AiAuditView />)
+    mountScreen(<AiAuditView />)
     expect(await screen.findByText('Solo el encargado ve la auditoría')).toBeInTheDocument()
   })
 })
@@ -126,7 +126,7 @@ describe('AiAuditView: IA externa', () => {
     const api = server().on('get', ROUTE, { items: [], total: 0 }).on('get', RESTAURANT, local(true))
     api.on('patch', RESTAURANT, local(false))
     signInAs()
-    const { user } = handleMount(<AiAuditView />, { path: '/panel/ia' })
+    const { user } = mountScreen(<AiAuditView />, { path: '/panel/ia' })
 
     const checkbox = await screen.findByRole('checkbox', { name: 'Usar la IA externa' })
     expect(checkbox).toBeChecked()
@@ -139,7 +139,7 @@ describe('AiAuditView: IA externa', () => {
   it('quien solo ve el panel no la puede cambiar', async () => {
     const api = server().on('get', ROUTE, { items: [], total: 0 })
     signInAs(['insights.read'])
-    handleMount(<AiAuditView />, { path: '/panel/ia' })
+    mountScreen(<AiAuditView />, { path: '/panel/ia' })
 
     expect(await screen.findByText('0 en total con estos filtros.')).toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Usar la IA externa' })).not.toBeInTheDocument()

@@ -67,17 +67,17 @@ function normalize(text: string): string {
 export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps) {
   const ingredients = useIngredients()
   const [search, setSearch] = useState('')
-  const [onlyLow, setOnlyLow] = useState(false)
+  const [isOnlyLow, setIsOnlyLow] = useState(false)
   const all = ingredients.data ?? WITHOUT_INGREDIENTS
 
   const visible = useMemo(() => {
     const text = normalize(search)
     return all.filter(
       (ingredient) =>
-        (!onlyLow || ingredient.is_low || ingredient.is_negative) &&
+        (!isOnlyLow || ingredient.is_low || ingredient.is_negative) &&
         (text === '' || normalize(ingredient.name).includes(text)),
     )
-  }, [all, search, onlyLow])
+  }, [all, search, isOnlyLow])
   const cols = useMemo(() => columns(canManage, onAction), [canManage, onAction])
 
   if (ingredients.isError) {
@@ -93,8 +93,8 @@ export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps)
       <IngredientFilters
         search={search}
         onSearch={setSearch}
-        onlyLow={onlyLow}
-        onOnlyLow={setOnlyLow}
+        onlyLow={isOnlyLow}
+        onOnlyLow={setIsOnlyLow}
         shown={visible.length}
         total={all.length}
       />

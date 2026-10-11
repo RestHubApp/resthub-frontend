@@ -63,7 +63,7 @@ export function useOfflineOrders() {
         if (!belongsTo(order, ownerOf(useSession.getState().account))) {
           break
         }
-        const followed = await sendQueued(order).then(
+        const wasFollowed = await sendQueued(order).then(
           (number) => {
             removeQueued(order.request.client_request_id ?? '')
             push({ tone: 'info', message: `${order.label}: pedido #${String(number)} enviado a cocina.` })
@@ -80,7 +80,7 @@ export function useOfflineOrders() {
             return true
           },
         )
-        if (!followed) {
+        if (!wasFollowed) {
           break
         }
       }

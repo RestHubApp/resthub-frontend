@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { handleMenu, category, dish } from '#jest/fixtures/inventory'
-import { signInAs, handleMount, handleFirst, ErrorResponse, server } from '#jest/harness'
+import { buildMenu, category, dish } from '#jest/fixtures/inventory'
+import { signInAs, mountScreen, firstOf, ErrorResponse, server } from '#jest/harness'
 import type { MenuResponse } from '@/api/types'
 import { MenuView } from './MenuView'
 
@@ -17,9 +17,9 @@ const DISH_10 = '/menu/items/10'
 const CATEGORY_1 = '/menu/categories/1'
 
 function openMenu() {
-  const api = server().on('get', MENU, handleMenu()).on('get', '/inventory/recipes', [])
+  const api = server().on('get', MENU, buildMenu()).on('get', '/inventory/recipes', [])
   signInAs()
-  return { api, ...handleMount(<MenuView />, { path: '/menu' }) }
+  return { api, ...mountScreen(<MenuView />, { path: '/menu' }) }
 }
 
 // Como el servidor: después del cambio, la carta que se relee ya lo trae.
@@ -31,7 +31,7 @@ function andThen(api: ReturnType<typeof openMenu>['api'], response: unknown, aft
 }
 
 function withCategory(extra: MenuResponse['categories'][number]): MenuResponse {
-  return { categories: [...handleMenu().categories, extra] }
+  return { categories: [...buildMenu().categories, extra] }
 }
 
 async function openNewDish(user: ReturnType<typeof openMenu>['user']) {
@@ -57,7 +57,7 @@ describe('crear en la carta', () => {
   it('un plato con opciones viaja con el precio con punto y sus grupos', async () => {
     const { api, user } = openMenu()
     const chicha = dish({ id: 12, name: 'Chicha', category_id: 2, price: '6.50' })
-    const after = handleMenu()
+    const after = buildMenu()
     after.categories[1]?.items.push(chicha)
     api.on('post', ITEMS, andThen(api, chicha, after))
     const window = await openNewDish(user)
@@ -128,8 +128,8 @@ describe('editar la carta', () => {
 
   it('sacar un plato de la carta se confirma antes de enviarse', async () => {
     const { api, user } = openMenu()
-    const outside = handleMenu()
-    outside.categories[0] = { ...handleFirst(handleMenu().categories), items: [dish({ is_active: false }), dish({ id: 11, name: 'Causa' })] }
+    const outside = buildMenu()
+    outside.categories[0] = { ...firstOf(buildMenu().categories), items: [dish({ is_active: false }), dish({ id: 11, name: 'Causa' })] }
     api.on('patch', DISH_10, andThen(api, dish({ is_active: false }), outside))
 
     const row = (await screen.findByRole('heading', { name: 'Ceviche' })).closest('li') as HTMLElement
@@ -151,7 +151,7 @@ describe('editar la carta', () => {
     expect(await screen.findByText('La categoría tiene platos.')).toBeInTheDocument()
 
     api.on('delete', '/menu/categories/2', null, 204)
-    api.on('get', MENU, { categories: [handleMenu().categories[0]] })
+    api.on('get', MENU, { categories: [buildMenu().categories[0]] })
     await user.click(screen.getByRole('button', { name: 'Eliminar la categoría Bebidas' }))
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }))
     expect(await screen.findByText('Categoría Bebidas eliminada.')).toBeInTheDocument()
@@ -174,7 +174,7 @@ describe('editar la carta', () => {
     const api = server().on('get', MENU, { categories: [category({ is_active: false })] }).on('get', '/inventory/recipes', [])
     api.on('patch', CATEGORY_1, { id: 1, name: 'Entradas', position: 0, is_active: true, created_at: CREATED })
     signInAs()
-    const { user } = handleMount(<MenuView />)
+    const { user } = mountScreen(<MenuView />)
 
     expect(await screen.findByText('Inactiva')).toBeInTheDocument()
     expect(screen.getByText('Hoy: 0 de 0 platos disponibles')).toBeInTheDocument()

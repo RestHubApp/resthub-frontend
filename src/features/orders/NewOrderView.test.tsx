@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen } from '@testing-library/react'
 
-import { handleMenu, table, order, activeSummary, lastBody } from '#jest/fixtures/orders'
-import { signInAs, handleMount, server } from '#jest/harness'
+import { buildMenu, table, order, activeSummary, lastBody } from '#jest/fixtures/orders'
+import { signInAs, mountScreen, server } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { NewOrderView } from './NewOrderView'
 import { useDraftActions } from './taking/useOrderDraft'
@@ -13,11 +13,11 @@ const ORDERS = '/orders'
 function open(query: string, tables = [table()]) {
   const api = server()
     .on('get', '/tables', tables)
-    .on('get', '/menu', handleMenu())
+    .on('get', '/menu', buildMenu())
     .on('post', ORDERS, order({ status: 'open' }))
     .on('post', '/orders/5/send', order())
   signInAs()
-  return { api, ...handleMount(<NewOrderView />, { path: ROUTE, en: `${ROUTE}?${query}` }) }
+  return { api, ...mountScreen(<NewOrderView />, { path: ROUTE, en: `${ROUTE}?${query}` }) }
 }
 
 async function sendUnLomo(mount: ReturnType<typeof open>) {
@@ -30,8 +30,8 @@ async function sendUnLomo(mount: ReturnType<typeof open>) {
 afterEach(() => {
   const { result } = renderHook(() => useDraftActions())
   act(() => {
-    for (const password of ['llevar', 'delivery', 'mesa-3', 'mesa-9']) {
-      result.current.clear(password)
+    for (const tableKey of ['llevar', 'delivery', 'mesa-3', 'mesa-9']) {
+      result.current.clear(tableKey)
     }
   })
 })

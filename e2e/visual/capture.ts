@@ -92,8 +92,8 @@ function normalize(route: string, text: string): string {
 
 function fixedData(route: string): unknown {
   if (route.startsWith(OBS)) {
-    const password = route.slice(OBS.length) as keyof typeof OBSERVABILITY
-    return OBSERVABILITY[password]
+    const key = route.slice(OBS.length) as keyof typeof OBSERVABILITY
+    return OBSERVABILITY[key]
   }
   return FIXED[route]
 }
@@ -103,8 +103,8 @@ async function respond(route: Route, request: Request): Promise<void> {
     await route.fallback()
     return
   }
-  const routeValue = new URL(request.url()).pathname
-  const fixed = fixedData(routeValue)
+  const pathname = new URL(request.url()).pathname
+  const fixed = fixedData(pathname)
   if (fixed !== undefined) {
     await route.fulfill({ json: fixed })
     return
@@ -114,7 +114,7 @@ async function respond(route: Route, request: Request): Promise<void> {
   // aun así se corta, se intenta una vez más.
   const options = { headers: { ...request.headers(), connection: 'close' } }
   const response = await route.fetch(options).catch(async () => route.fetch(options))
-  await route.fulfill({ response: response, body: normalize(routeValue, await response.text()) })
+  await route.fulfill({ response, body: normalize(pathname, await response.text()) })
 }
 
 function esApi(url: URL): boolean {
@@ -139,11 +139,11 @@ async function prepare(page: Page): Promise<void> {
 }
 
 /** Los accesorios de siempre, con la página ya preparada para capturar. */
-export const test = base.extend<{ capturable: undefined }>({
-  capturable: [
-    async ({ page }, use) => {
+export const test = base.extend<{ captureReady: undefined }>({
+  captureReady: [
+    async ({ page }, provide) => {
       await prepare(page)
-      await use(undefined)
+      await provide(undefined)
       await page.unrouteAll({ behavior: 'ignoreErrors' })
     },
     { auto: true },
@@ -218,12 +218,12 @@ export async function capture(page: Page, name: string, options: Options = {}): 
  * máscara sobre el fondo (la hora de un pedido detrás) se pintaría encima
  * del diálogo, porque las máscaras se pintan por encima de cualquier capa.
  */
-export async function captureWindow(windowValue: Locator, name: string, mask: readonly Locator[] = []): Promise<void> {
-  await expect(windowValue).toBeVisible()
-  await expect(windowValue.getByText(/^Cargando/u)).toHaveCount(0)
-  await sourcesLists(windowValue.page())
-  await expect(windowValue).toHaveScreenshot(`${name}.png`, {
-    mask: [...volatiles(windowValue), ...mask],
+export async function captureWindow(dialog: Locator, name: string, mask: readonly Locator[] = []): Promise<void> {
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByText(/^Cargando/u)).toHaveCount(0)
+  await sourcesLists(dialog.page())
+  await expect(dialog).toHaveScreenshot(`${name}.png`, {
+    mask: [...volatiles(dialog), ...mask],
     stylePath: STYLE,
     timeout: TIME_CAPTURE,
   })

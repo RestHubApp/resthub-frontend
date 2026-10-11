@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { handleOrder } from '#jest/fixtures/charge'
-import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server, withoutResponse } from '#jest/harness'
+import { buildOrder } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, ErrorResponse, server, withoutResponse } from '#jest/harness'
 import type { OrderResponse, PermissionCode } from '@/api/types'
 import { BoardView } from './BoardView'
 
@@ -13,9 +13,9 @@ function minutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * MINUTE).toISOString()
 }
 
-const IN_TABLE = handleOrder({ id: 1, number: 1, status: 'open', created_at: minutesAgo(0) })
-const IN_KITCHEN = handleOrder({ id: 2, number: 2, status: 'in_kitchen', created_at: minutesAgo(40), status_changed_at: minutesAgo(30) })
-const READY = handleOrder({
+const IN_TABLE = buildOrder({ id: 1, number: 1, status: 'open', created_at: minutesAgo(0) })
+const IN_KITCHEN = buildOrder({ id: 2, number: 2, status: 'in_kitchen', created_at: minutesAgo(40), status_changed_at: minutesAgo(30) })
+const READY = buildOrder({
   id: 3,
   number: 3,
   status: 'ready',
@@ -25,12 +25,12 @@ const READY = handleOrder({
   created_at: minutesAgo(20),
   status_changed_at: minutesAgo(16),
 })
-const SERVED = handleOrder({ id: 12, number: 34, status: 'served', created_at: minutesAgo(50) })
+const SERVED = buildOrder({ id: 12, number: 34, status: 'served', created_at: minutesAgo(50) })
 
 function board(orders: OrderResponse[] | ErrorResponse = [IN_TABLE, IN_KITCHEN, READY, SERVED], permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
   const api = server().on('get', ACTIVE, orders).on('get', '/cash/current', { is_open: true, session: null })
   signInAs(permissions)
-  return { api, ...handleMount(<BoardView />, { path: '/tablero' }) }
+  return { api, ...mountScreen(<BoardView />, { path: '/tablero' }) }
 }
 
 function column(name: RegExp) {
@@ -70,7 +70,7 @@ describe('BoardView', () => {
 
   it('el paso siguiente se da desde la tarjeta y se avisa', async () => {
     const { api, user } = board()
-    api.on('post', '/orders/2/ready', handleOrder({ id: 2, number: 2, status: 'ready' }))
+    api.on('post', '/orders/2/ready', buildOrder({ id: 2, number: 2, status: 'ready' }))
 
     await screen.findByRole('region', { name: /^En cocina/u })
     await user.click(column(/^En cocina/u).getByRole('button', { name: 'Marcar listo' }))
@@ -111,7 +111,7 @@ describe('BoardView mientras carga', () => {
   it('muestra las cuatro columnas vacías como esqueleto', async () => {
     server().on('get', ACTIVE, () => withoutResponse())
     signInAs()
-    handleMount(<BoardView />)
+    mountScreen(<BoardView />)
 
     expect(await screen.findByText('Servido, por cobrar')).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: /: \d/u })).not.toBeInTheDocument()

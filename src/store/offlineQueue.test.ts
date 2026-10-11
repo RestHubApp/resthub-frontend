@@ -29,12 +29,12 @@ function order(id: string, owner: { userId: number; restaurantId: number }): Que
 function fakeStorage(initial: Record<string, string> = {}) {
   const data = new Map(Object.entries(initial))
   return {
-    getItem: (password: string) => data.get(password) ?? null,
-    setItem: (password: string, value: string) => {
-      data.set(password, value)
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      data.set(key, value)
     },
-    removeItem: (password: string) => {
-      data.delete(password)
+    removeItem: (key: string) => {
+      data.delete(key)
     },
     data,
   }

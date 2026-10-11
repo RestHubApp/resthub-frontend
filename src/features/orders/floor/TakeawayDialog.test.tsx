@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { customer, lastBody } from '#jest/fixtures/orders'
-import { signInAs, handleMount, server, withoutResponse } from '#jest/harness'
+import { signInAs, mountScreen, server, withoutResponse } from '#jest/harness'
 import { TakeawayDialog } from './TakeawayDialog'
 
 const ADDRESS = 'Dirección de entrega'
@@ -19,7 +19,7 @@ function open() {
     .on('get', CUSTOMERS, { items: [], total: 0 })
     .on('post', CUSTOMERS, customer({ id: 55 }))
   signInAs()
-  const mount = handleMount(<TakeawayDialog />, { path: '/pedidos' })
+  const mount = mountScreen(<TakeawayDialog />, { path: '/pedidos' })
   return { api, ...mount }
 }
 

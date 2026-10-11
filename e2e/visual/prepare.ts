@@ -127,8 +127,8 @@ export async function orderInQueue(page: Page, { owner, table, dish, storage = '
     label: `Mesa ${table.label}`,
   }
   await page.evaluate(
-    ([password, value, where]) => {
-      window[where].setItem(password, value)
+    ([key, value, where]) => {
+      window[where].setItem(key, value)
     },
     [QUEUE, JSON.stringify([order]), storage] as const,
   )

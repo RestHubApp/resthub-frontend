@@ -53,8 +53,8 @@ function notice(type: string) {
   })
 }
 
-function invalidated(password: readonly unknown[]): boolean | undefined {
-  return queryClient.getQueryState(password)?.isInvalidated
+function invalidated(key: readonly unknown[]): boolean | undefined {
+  return queryClient.getQueryState(key)?.isInvalidated
 }
 
 beforeEach(() => {

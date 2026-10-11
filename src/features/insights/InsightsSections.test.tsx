@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { cell, waste, panelReports } from '#jest/fixtures/panel'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import { InsightsView } from './InsightsView'
 
 const WASTES = '/insights/waste'
@@ -13,7 +13,7 @@ function open(changes: Record<string, unknown> = {}) {
     api.on('get', route, data)
   }
   signInAs()
-  return { api, ...handleMount(<InsightsView />, { path: '/panel' }) }
+  return { api, ...mountScreen(<InsightsView />, { path: '/panel' }) }
 }
 
 function section(title: string): HTMLElement {
@@ -68,12 +68,12 @@ describe('InsightsView: secciones', () => {
     const { api, user } = open()
     api.on('post', '/insights/waste/classify', { classified: 1, remaining: 1, by_cause: [] })
     expect(await screen.findByText(/5 mermas por S\/ 82.40/u)).toBeInTheDocument()
-    const antes = api.calls('get', WASTES).length
+    const before = api.calls('get', WASTES).length
 
     await user.click(screen.getByRole('button', { name: 'Clasificar mermas pendientes (2)' }))
 
     expect(await screen.findByText('Se clasificaron 1 mermas; quedan 1 sin clasificar.')).toBeInTheDocument()
-    expect(api.calls('get', WASTES).length).toBeGreaterThan(antes)
+    expect(api.calls('get', WASTES).length).toBeGreaterThan(before)
   })
 
   it('si la IA falla al clasificar, lo dice', async () => {

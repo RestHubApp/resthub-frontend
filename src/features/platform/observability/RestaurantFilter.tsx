@@ -19,7 +19,7 @@ const RESTAURANTS = { limit: 100, offset: 0 } as const
 export function RestaurantFilter({ value, onChange }: RestaurantFilterProps) {
   const list = useQuery(platformRestaurantsQuery(RESTAURANTS))
   const locales = list.data?.items ?? []
-  const missing = value !== null && !locales.some((local) => local.id === value)
+  const isMissing = value !== null && !locales.some((local) => local.id === value)
 
   return (
     <div className="flex flex-col gap-2">
@@ -33,7 +33,7 @@ export function RestaurantFilter({ value, onChange }: RestaurantFilterProps) {
         }}
       >
         <NativeSelectOption value="">Todos los restaurantes</NativeSelectOption>
-        {missing ? <NativeSelectOption value={String(value)}>{`Restaurante #${String(value)}`}</NativeSelectOption> : null}
+        {isMissing ? <NativeSelectOption value={String(value)}>{`Restaurante #${String(value)}`}</NativeSelectOption> : null}
         {locales.map((local) => (
           <NativeSelectOption key={local.id} value={String(local.id)}>
             {local.name}

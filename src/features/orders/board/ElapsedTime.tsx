@@ -19,23 +19,23 @@ const LATE_MINUTES = 25
  * de ambar y pasados 25 se marca "Demorado", con texto y no solo con color.
  */
 export function ElapsedTime({ order, now }: ElapsedTimeProps) {
-  const watched = order.status === 'in_kitchen' || order.status === 'ready'
-  const minutes = minutesSince(watched ? order.status_changed_at : order.created_at, now)
-  const late = watched && minutes >= LATE_MINUTES
-  const alert = watched && minutes >= WARN_MINUTES
+  const isWatched = order.status === 'in_kitchen' || order.status === 'ready'
+  const minutes = minutesSince(isWatched ? order.status_changed_at : order.created_at, now)
+  const isLate = isWatched && minutes >= LATE_MINUTES
+  const isAlert = isWatched && minutes >= WARN_MINUTES
 
   let tone = 'bg-muted text-muted-foreground'
-  if (late) {
+  if (isLate) {
     tone = 'bg-destructive text-white'
-  } else if (alert) {
+  } else if (isAlert) {
     tone = 'bg-warning/15 text-warning'
   }
 
   return (
     <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${tone}`}>
-      <Icon name={late ? 'alert' : 'schedule'} size={14} />
+      <Icon name={isLate ? 'alert' : 'schedule'} size={14} />
       <span>
-        {late ? 'Demorado · ' : ''}
+        {isLate ? 'Demorado · ' : ''}
         {formatMinutes(minutes)}
       </span>
     </span>

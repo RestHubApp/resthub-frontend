@@ -29,11 +29,11 @@ function justCreated(status: unknown): boolean {
 /** La ficha de un restaurante: sus datos, su estado y sus encargados. */
 export function RestaurantDetailView() {
   const restaurantId = Number(useParams()['restaurantId'])
-  const created = justCreated(useLocation().state)
-  const valid = Number.isInteger(restaurantId) && restaurantId > 0
-  const card = useQuery({ ...platformRestaurantQuery(restaurantId), enabled: valid })
+  const wasCreated = justCreated(useLocation().state)
+  const isValid = Number.isInteger(restaurantId) && restaurantId > 0
+  const card = useQuery({ ...platformRestaurantQuery(restaurantId), enabled: isValid })
 
-  if (!valid || errorStatus(card.error) === NOT_FOUND) {
+  if (!isValid || errorStatus(card.error) === NOT_FOUND) {
     return (
       <div className="flex flex-col gap-5">
         {BACK}
@@ -68,7 +68,7 @@ export function RestaurantDetailView() {
           </span>
         }
       />
-      {created ? <FormMessage tone="ok">Restaurante creado. Su encargado ya puede entrar con su correo.</FormMessage> : null}
+      {wasCreated ? <FormMessage tone="ok">Restaurante creado. Su encargado ya puede entrar con su correo.</FormMessage> : null}
       <SectionCard title="Datos del restaurante">
         <RestaurantSettingsForm restaurant={restaurant} />
       </SectionCard>

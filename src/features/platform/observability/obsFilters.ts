@@ -116,9 +116,9 @@ export function obsSearch(filters: ObsFilters): URLSearchParams {
     route: filters.route.trim(),
     requestId: filters.requestId.trim(),
   }
-  for (const [password, value] of Object.entries(values) as [keyof ObsFilters, string][]) {
+  for (const [key, value] of Object.entries(values) as [keyof ObsFilters, string][]) {
     if (value !== '') {
-      params.set(PARAM[password], value)
+      params.set(PARAM[key], value)
     }
   }
   return params

@@ -1,18 +1,18 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { handleOrder } from '#jest/fixtures/charge'
-import { signInAs, handleMount, server } from '#jest/harness'
+import { buildOrder } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, server } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { CancelOrderDialog } from './CancelOrderDialog'
 
 const CANCEL = '/orders/12/cancel'
 
-function cancel(order: OrderResponse | null = handleOrder()) {
-  const api = server().on('post', CANCEL, handleOrder({ status: 'cancelled' }))
+function cancel(order: OrderResponse | null = buildOrder()) {
+  const api = server().on('post', CANCEL, buildOrder({ status: 'cancelled' }))
   signInAs()
   const onClose = jest.fn()
-  return { api, onClose, ...handleMount(<CancelOrderDialog order={order} onClose={onClose} />) }
+  return { api, onClose, ...mountScreen(<CancelOrderDialog order={order} onClose={onClose} />) }
 }
 
 describe('CancelOrderDialog', () => {
@@ -39,7 +39,7 @@ describe('CancelOrderDialog', () => {
   })
 
   it('para llevar no habla de mesas', async () => {
-    cancel(handleOrder({ type: 'takeaway', table_label: null, customer_name: 'Rosa' }))
+    cancel(buildOrder({ type: 'takeaway', table_label: null, customer_name: 'Rosa' }))
 
     expect(await screen.findByText('Para llevar · Rosa. El pedido pasa al historial como cancelado.')).toBeInTheDocument()
   })

@@ -28,8 +28,8 @@ function withIngredient(list: readonly Ingredient[], ingredient: Ingredient): In
 }
 
 function withAlert(list: readonly Ingredient[], ingredient: Ingredient): Ingredient[] {
-  const follows = ingredient.is_active && (ingredient.is_low || ingredient.is_negative)
-  return follows ? upsertInList(list, ingredient, missingMore, () => false) : removeFromList(list, ingredient.id)
+  const isFollowing = ingredient.is_active && (ingredient.is_low || ingredient.is_negative)
+  return isFollowing ? upsertInList(list, ingredient, missingMore, () => false) : removeFromList(list, ingredient.id)
 }
 
 /**

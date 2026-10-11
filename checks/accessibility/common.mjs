@@ -37,8 +37,8 @@ export const VIEWS = {
   mobile: { width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
 }
 
-export function contextOf(vista) {
-  const { width, height, ...rest } = VIEWS[vista]
+export function contextOf(view) {
+  const { width, height, ...rest } = VIEWS[view]
   return { viewport: { width, height }, ...rest, locale: 'es-PE', timezoneId: 'America/Lima' }
 }
 
@@ -73,7 +73,7 @@ export function filterViews(status) {
 }
 
 let dataCache = null
-export async function handleData() {
+export async function loadData() {
   // Sin datos.json (en el CI, que mide solo las pantallas sin sesión) no hay marcadores que resolver.
   const route = join(REPORTS, 'datos.json')
   dataCache ??= existsSync(route) ? await readJson(route) : {}
@@ -82,10 +82,10 @@ export async function handleData() {
 
 /** Reemplaza `:marcador` por su valor de `datos.json`. */
 export async function resolverRoute(route) {
-  const d = await handleData()
-  return route.replace(/:([a-zA-Z]+)/gu, (_, password) => {
-    if (d[password] === undefined || d[password] === null) throw new Error(`Falta «${password}» en datos.json`)
-    return String(d[password])
+  const d = await loadData()
+  return route.replace(/:([a-zA-Z]+)/gu, (_, key) => {
+    if (d[key] === undefined || d[key] === null) throw new Error(`Falta «${key}» en datos.json`)
+    return String(d[key])
   })
 }
 
@@ -251,4 +251,4 @@ async function openStatusWithoutLimit(browser, context, status) {
 }
 
 /** Nombre de archivo de un estado en una vista. */
-export const handlePassword = (status, vista) => `${status.id}--${vista}`
+export const rowKey = (status, view) => `${status.id}--${view}`

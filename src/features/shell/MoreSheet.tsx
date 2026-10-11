@@ -29,20 +29,20 @@ interface MoreSheetProps {
  * perfil y la salida. Se marca activo cuando la pantalla actual vive adentro.
  */
 export function MoreSheet({ entries, account }: MoreSheetProps) {
-  const [open, setOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const { pathname } = useLocation()
   const close = () => {
-    setOpen(false)
+    setIsOpen(false)
   }
   const label = entries.length > 0 ? 'Más' : 'Cuenta'
-  const inside = pathname === paths.profile || entries.some((entry) => entry.to === pathname)
+  const isInside = pathname === paths.profile || entries.some((entry) => entry.to === pathname)
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <button
           type="button"
-          className={inside ? TAB_ACTIVE : TAB_IDLE}
+          className={isInside ? TAB_ACTIVE : TAB_IDLE}
         >
           <ShellIcon name={entries.length > 0 ? 'more' : 'profile'} size={22} />
           <span>{label}</span>

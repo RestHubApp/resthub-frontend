@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { taxSettings, invoice } from '#jest/fixtures/panel'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import type { BillingSettings, Invoice } from '@/api/types'
 import { BillingView } from './BillingView'
 
@@ -14,7 +14,7 @@ const SAVE = { name: 'Guardar datos fiscales' }
 function open(settings: BillingSettings = taxSettings(), issued: Invoice[] = []) {
   const api = server().on('get', SETTINGS, settings).on('get', ISSUED, { items: issued, total: issued.length })
   signInAs()
-  return { api, ...handleMount(<BillingView />) }
+  return { api, ...mountScreen(<BillingView />) }
 }
 
 describe('BillingView: datos fiscales', () => {
@@ -117,7 +117,7 @@ describe('BillingView: emitidos', () => {
       .on('get', SETTINGS, taxSettings())
       .on('get', ISSUED, { items: [invoice()], total: 30 })
     signInAs()
-    const { user } = handleMount(<BillingView />)
+    const { user } = mountScreen(<BillingView />)
 
     await user.click(await screen.findByRole('button', { name: 'Siguiente' }))
 
@@ -128,7 +128,7 @@ describe('BillingView: emitidos', () => {
   it('si la lista falla muestra el error', async () => {
     server().on('get', SETTINGS, taxSettings()).on('get', ISSUED, new ErrorResponse(500, 'Sin base'))
     signInAs()
-    handleMount(<BillingView />)
+    mountScreen(<BillingView />)
     expect(await screen.findByText('Sin base')).toBeInTheDocument()
   })
 })

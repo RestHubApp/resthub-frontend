@@ -9,10 +9,10 @@ const ORDERS = 'orders'
 
 function listen(topic: string, enabled = true) {
   const received: string[] = []
-  const vista = renderHook(() => {
+  const view = renderHook(() => {
     useServerEvent(topic, (data) => received.push(data), enabled)
   })
-  return { received, ...vista }
+  return { received, ...view }
 }
 
 afterEach(() => {

@@ -9,17 +9,17 @@ import { z } from 'zod'
 /** Un texto que explica algo necesita al menos unas palabras. */
 export const MIN_TEXT = 5
 
-function handleMax(max: number): string {
+function maxMessage(max: number): string {
   return `Usa como máximo ${String(max)} caracteres`
 }
 
 /** Un texto obligatorio: se recorta y necesita al menos cinco caracteres. */
 export function textRequired(max: number, order: string) {
-  return z.string().trim().min(1, order).min(MIN_TEXT, `${order} (al menos ${String(MIN_TEXT)} caracteres)`).max(max, handleMax(max))
+  return z.string().trim().min(1, order).min(MIN_TEXT, `${order} (al menos ${String(MIN_TEXT)} caracteres)`).max(max, maxMessage(max))
 }
 
 export function textOptional(max: number) {
-  return z.string().trim().max(max, handleMax(max))
+  return z.string().trim().max(max, maxMessage(max))
 }
 
 interface NumberDecimal {

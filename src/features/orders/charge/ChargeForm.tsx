@@ -46,12 +46,12 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
   const method = useWatch({ control, name: 'payment_method' })
   const amount = useWatch({ control, name: 'amount_received' })
   const tip = tipCents(useWatch({ control, name: 'tip' })) ?? 0
-  const closed = cashRegister.data?.is_open === false
+  const isClosed = cashRegister.data?.is_open === false
   const toCharge = payment.part + tip
 
   return (
     <div className="flex flex-col gap-5">
-      {closed ? <CashClosedNotice /> : null}
+      {isClosed ? <CashClosedNotice /> : null}
       <BillSummary order={order} />
       <PaymentsDone order={order} />
       {/* Fuera del formulario del pago: el descuento tiene el suyo, y un
@@ -88,7 +88,7 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
             size="lg"
             variant="success"
             className="h-11 px-5 text-base"
-            disabled={closed || !payment.canCharge}
+            disabled={isClosed || !payment.canCharge}
           >
             <Icon name="payment" size={18} />
             <span>{payment.payment.isPending ? 'Cobrando…' : 'Confirmar pago'}</span>

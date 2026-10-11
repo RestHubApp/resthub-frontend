@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { screen } from '@testing-library/react'
 
 import { orderItem, order } from '#jest/fixtures/orders'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import { PrintView } from './PrintView'
 
 const ROUTE = '/imprimir/:orderId/:kind'
@@ -35,7 +35,7 @@ const DELIVERY_PAID = order({
 function open(kind: string, response: unknown = DELIVERY_PAID) {
   server().on('get', '/orders/5', response)
   signInAs()
-  return handleMount(<PrintView />, { path: ROUTE, en: `/imprimir/5/${kind}` })
+  return mountScreen(<PrintView />, { path: ROUTE, en: `/imprimir/5/${kind}` })
 }
 
 beforeEach(() => {

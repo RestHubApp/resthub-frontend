@@ -22,7 +22,7 @@ const ACTIONS: readonly { status: ReservationStatus; label: string; variant: 'de
 
 /** Una reserva del día: hora, a nombre de quién, cuántos, mesa y qué hacer. */
 export function ReservationRow({ reservation, tableLabel, timeZone, canManage, busy, onEdit, onStatus }: ReservationRowProps) {
-  const pending = reservation.status === 'booked'
+  const isPending = reservation.status === 'booked'
   const detail = [
     `${String(reservation.party_size)} personas`,
     tableLabel ?? 'sin mesa',
@@ -42,7 +42,7 @@ export function ReservationRow({ reservation, tableLabel, timeZone, canManage, b
           <span className="text-xs text-muted-foreground">{detail.join(' · ')}</span>
         </span>
       </span>
-      {canManage && pending ? (
+      {canManage && isPending ? (
         <span className="flex flex-wrap gap-2">
           {ACTIONS.map((action) => (
             <Button key={action.status} type="button" size="sm" variant={action.variant} disabled={busy} onClick={() => {

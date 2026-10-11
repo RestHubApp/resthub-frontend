@@ -17,10 +17,10 @@ function byName(account: StaffResponse, other: StaffResponse): boolean {
 }
 
 function withAccount(page: StaffListResponse, account: StaffResponse): StaffListResponse {
-  const fresh = !page.items.some((actual) => actual.id === account.id)
+  const isFresh = !page.items.some((actual) => actual.id === account.id)
   return {
     items: upsertInList(page.items, account, byName, (preview) => preview.full_name === account.full_name),
-    total: fresh ? page.total + 1 : page.total,
+    total: isFresh ? page.total + 1 : page.total,
   }
 }
 

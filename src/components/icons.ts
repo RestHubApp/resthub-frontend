@@ -131,7 +131,7 @@ export const ICONS = {
   cancel: CircleX,
   signOut: LogOut,
   signIn: LogIn,
-  ver: Eye,
+  view: Eye,
   hide: EyeOff,
   search: Search,
   previous: ChevronLeft,

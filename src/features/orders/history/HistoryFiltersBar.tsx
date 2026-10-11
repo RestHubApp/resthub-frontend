@@ -23,8 +23,8 @@ const STAFF = { limit: MAX_STAFF_PAGE, ordering: 'full_name' } as const
  * ese permiso el filtro no aparece, en vez de mostrarse vacio.
  */
 export function HistoryFiltersBar({ value, onChange }: HistoryFiltersBarProps) {
-  const viewStaff = useCan(PERMISSION.staffManage)
-  const staff = useQuery({ ...staffQuery(STAFF), enabled: viewStaff })
+  const canViewStaff = useCan(PERMISSION.staffManage)
+  const staff = useQuery({ ...staffQuery(STAFF), enabled: canViewStaff })
   const change = (partial: Partial<HistoryFilters>) => {
     onChange({ ...value, ...partial })
   }
@@ -51,7 +51,7 @@ export function HistoryFiltersBar({ value, onChange }: HistoryFiltersBarProps) {
           <NativeSelectOption key={option.value} value={option.value}>{option.label}</NativeSelectOption>
         ))}
       </FilterSelect>
-      {viewStaff ? (
+      {canViewStaff ? (
         <FilterSelect id="historial-mesero" label="Mesero" anyLabel="Cualquiera" value={value.waiterId} onChange={(waiterId) => {
           change({ waiterId })
         }}>

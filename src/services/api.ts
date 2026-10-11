@@ -87,8 +87,8 @@ function destinationOf(destination: RequestTarget): Destination {
   if (base === null || url?.origin !== base.origin) {
     return 'foreign'
   }
-  const platformValue = `${base.pathname.replace(/\/$/u, '')}${PLATFORM_PREFIX}`
-  return url.pathname === platformValue || url.pathname.startsWith(`${platformValue}/`) ? 'platform' : 'restaurant'
+  const platformPath = `${base.pathname.replace(/\/$/u, '')}${PLATFORM_PREFIX}`
+  return url.pathname === platformPath || url.pathname.startsWith(`${platformPath}/`) ? 'platform' : 'restaurant'
 }
 
 /**

@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { panelReports, salesSummary } from '#jest/fixtures/panel'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import { todayIn } from '@/services/format'
 import { addDays } from './dateRange'
 import { InsightsView } from './InsightsView'
@@ -15,7 +15,7 @@ function open(en = '/panel', changes: Record<string, unknown> = {}) {
     api.on('get', route, data)
   }
   signInAs()
-  return { api, ...handleMount(<InsightsView />, { path: '/panel', en }) }
+  return { api, ...mountScreen(<InsightsView />, { path: '/panel', en }) }
 }
 
 function today(): string {

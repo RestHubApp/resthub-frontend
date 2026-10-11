@@ -25,7 +25,7 @@ function destinationOf(status: unknown): string {
  */
 export function PlatformLoginView() {
   const admin = usePlatformSession((state) => state.admin)
-  const expired = usePlatformSession((state) => state.expired)
+  const isExpired = usePlatformSession((state) => state.expired)
   const signIn = usePlatformSession((state) => state.signIn)
   const destination = destinationOf(useLocation().state)
 
@@ -47,7 +47,7 @@ export function PlatformLoginView() {
           </p>
         </CardHeader>
         <CardContent className="px-6 sm:px-8">
-          <PlatformLoginForm expired={expired} onSignedIn={signIn} />
+          <PlatformLoginForm expired={isExpired} onSignedIn={signIn} />
         </CardContent>
         <CardFooter className="justify-center px-6 py-4 text-sm sm:px-8">
           <Link

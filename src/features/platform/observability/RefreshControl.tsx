@@ -13,8 +13,8 @@ interface RefreshControlProps {
 /** Pausar o reanudar la actualización automática, y releer ya. */
 export function RefreshControl({ refresh }: RefreshControlProps) {
   const queryClient = useQueryClient()
-  const reading = useIsFetching({ queryKey: platformObservabilityQueryKey }) > 0
-  const { paused, setPaused, visibility } = refresh
+  const isReading = useIsFetching({ queryKey: platformObservabilityQueryKey }) > 0
+  const { paused: isPaused, setPaused, visibility } = refresh
 
   return (
     <div className="flex flex-col gap-2">
@@ -25,27 +25,27 @@ export function RefreshControl({ refresh }: RefreshControlProps) {
           variant="outline"
           size="lg"
           className="h-11 px-4"
-          aria-pressed={paused}
+          aria-pressed={isPaused}
           onClick={() => {
-            setPaused(!paused)
+            setPaused(!isPaused)
           }}
         >
-          <Icon name={paused ? 'resume' : 'pause'} size={16} />
-          <span>{paused ? 'Reanudar' : 'Pausar'}</span>
+          <Icon name={isPaused ? 'resume' : 'pause'} size={16} />
+          <span>{isPaused ? 'Reanudar' : 'Pausar'}</span>
         </Button>
         <Button
           type="button"
           variant="ghost"
           size="lg"
           className="h-11 px-4"
-          disabled={reading}
+          disabled={isReading}
           onClick={() => void queryClient.invalidateQueries({ queryKey: platformObservabilityQueryKey })}
         >
-          <Icon name="update" size={16} className={reading ? 'motion-safe:animate-spin' : undefined} />
-          <span>{reading ? 'Actualizando…' : 'Actualizar ahora'}</span>
+          <Icon name="update" size={16} className={isReading ? 'motion-safe:animate-spin' : undefined} />
+          <span>{isReading ? 'Actualizando…' : 'Actualizar ahora'}</span>
         </Button>
         <p role="status" className="m-0 text-sm text-muted-foreground">
-          {refreshStatus(paused, visibility)}
+          {refreshStatus(isPaused, visibility)}
         </p>
       </div>
     </div>

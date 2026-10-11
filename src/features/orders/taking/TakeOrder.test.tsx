@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen, within } from '@testing-library/react'
 
-import { handleMenu, table, order, lastBody } from '#jest/fixtures/orders'
-import { signInAs, handleMount, handleFirst, ErrorResponse, server, withoutNetwork } from '#jest/harness'
+import { buildMenu, table, order, lastBody } from '#jest/fixtures/orders'
+import { signInAs, mountScreen, firstOf, ErrorResponse, server, withoutNetwork } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { ownerOf, queuedOrders, removeQueued } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
@@ -18,11 +18,11 @@ const LOMO = 'Lomo saltado'
 function takeOrderInTable() {
   const api = server()
     .on('get', '/tables', [table()])
-    .on('get', '/menu', handleMenu())
+    .on('get', '/menu', buildMenu())
     .on('post', ORDERS, order({ status: 'open' }))
     .on('post', SEND, order())
   signInAs()
-  return { api, ...handleMount(<NewOrderView />, { path: '/pedidos/nuevo', en: '/pedidos/nuevo?mesa=3' }) }
+  return { api, ...mountScreen(<NewOrderView />, { path: '/pedidos/nuevo', en: '/pedidos/nuevo?mesa=3' }) }
 }
 
 async function select(user: ReturnType<typeof takeOrderInTable>['user'], name: string) {
@@ -32,7 +32,7 @@ async function select(user: ReturnType<typeof takeOrderInTable>['user'], name: s
 
 async function send(user: ReturnType<typeof takeOrderInTable>['user']) {
   // El botón de la barra; el del resumen solo está con el resumen abierto.
-  await user.click(handleFirst(screen.getAllByRole('button', SEND_TO_KITCHEN)))
+  await user.click(firstOf(screen.getAllByRole('button', SEND_TO_KITCHEN)))
 }
 
 function currentRoute() {

@@ -11,21 +11,21 @@ export function tokenThatExpires(secondsFromNow: number, stamp = ''): string {
 }
 
 export interface TestStorage {
-  getItem: (password: string) => string | null
-  setItem: (password: string, value: string) => void
-  removeItem: (password: string) => void
+  getItem: (key: string) => string | null
+  setItem: (key: string, value: string) => void
+  removeItem: (key: string) => void
   readonly data: Map<string, string>
 }
 
 export function fakeStorage(): TestStorage {
   const data = new Map<string, string>()
   return {
-    getItem: (password) => data.get(password) ?? null,
-    setItem: (password, value) => {
-      data.set(password, value)
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => {
+      data.set(key, value)
     },
-    removeItem: (password) => {
-      data.delete(password)
+    removeItem: (key) => {
+      data.delete(key)
     },
     data,
   }
@@ -55,7 +55,7 @@ export function notify(window: EventTarget, storageArea: unknown, key: string | 
 }
 
 /** Lo guardado en `localStorage` bajo esa clave, ya leído. */
-export function handleSaved(local: TestStorage, password: string): unknown {
-  const raw = local.data.get(password)
+export function readSaved(local: TestStorage, key: string): unknown {
+  const raw = local.data.get(key)
   return raw === undefined ? null : JSON.parse(raw)
 }

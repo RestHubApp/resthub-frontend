@@ -54,8 +54,8 @@ export function movement(changes: Partial<Movement> = {}): Movement {
 }
 
 /** Lo que devuelven compra, merma y ajuste: el insumo como quedó y su movimiento. */
-export function stockChange(ingredientValue: Ingredient, mov: Partial<Movement> = {}): StockChange {
-  return { ingredient: ingredientValue, movement: movement({ ingredient_id: ingredientValue.id, ...mov }) }
+export function stockChange(sourceIngredient: Ingredient, mov: Partial<Movement> = {}): StockChange {
+  return { ingredient: sourceIngredient, movement: movement({ ingredient_id: sourceIngredient.id, ...mov }) }
 }
 
 export function dishCost(changes: Partial<DishCost> = {}): DishCost {
@@ -166,7 +166,7 @@ export function table(changes: Partial<TableState> = {}): TableState {
 export function orderInTable(number = 12): NonNullable<TableState['active_order']> {
   return {
     id: 100 + number,
-    number: number,
+    number,
     status: 'open',
     status_label: 'Abierto',
     status_changed_at: CREATED,
@@ -202,7 +202,7 @@ export function category(changes: Partial<MenuSection> = {}): MenuSection {
 }
 
 /** Dos categorías: Entradas (Ceviche y Causa, esta agotada) y Bebidas vacía. */
-export function handleMenu(): MenuResponse {
+export function buildMenu(): MenuResponse {
   return {
     categories: [
       category({

@@ -185,9 +185,9 @@ test('ACC-09 cerrar sesión con pedidos sin enviar avisa y conserva la cola @mob
     { table: local.table('3'), dish: local.dish('Chicha morada') },
   ])
   await page.reload()
-  const inMobile = test.info().project.name === 'mobile'
+  const isMobile = test.info().project.name === 'mobile'
   const openOutput = async () => {
-    if (inMobile) {
+    if (isMobile) {
       await navigation(page).getByRole('button', { name: 'Cuenta' }).click()
       await page.getByRole('dialog', { name: 'Cuenta' }).getByRole('button', { name: 'Cerrar sesión' }).click()
       return
@@ -201,7 +201,7 @@ test('ACC-09 cerrar sesión con pedidos sin enviar avisa y conserva la cola @mob
   await notice.getByRole('button', { name: 'Cancelar' }).click()
   await expect(notice).toBeHidden()
   await expect(page).toHaveURL(/\/perfil$/u)
-  if (inMobile) {
+  if (isMobile) {
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog', { name: 'Cuenta' })).toBeHidden()
   }

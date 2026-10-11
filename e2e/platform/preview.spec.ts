@@ -39,9 +39,11 @@ async function touchAndWaitClosing(page: Page, button: Locator): Promise<void> {
 }
 
 /** Pulsa «Ver como …» y devuelve la pestaña nueva que abre. */
-async function viewAs(page: Page, context: BrowserContext, as: 'encargado' | 'mesero'): Promise<Page> {
+const AS_LABELS = { owner: 'encargado', waiter: 'mesero' } as const
+
+async function viewAs(page: Page, context: BrowserContext, as: keyof typeof AS_LABELS): Promise<Page> {
   const fresh = context.waitForEvent('page')
-  await page.getByRole('button', { name: `Ver como ${as}` }).click()
+  await page.getByRole('button', { name: `Ver como ${AS_LABELS[as]}` }).click()
   const tab = await fresh
   await expect(tab.getByRole('region', { name: SLOT })).toBeVisible({ timeout: 15_000 })
   return tab
@@ -83,7 +85,7 @@ test('PLA-12 la vista previa como encargado abre otra pestaña con su franja y t
   )
   await withSampleRestaurant(async () => {
     await openAsPlatform(page, platform, '/plataforma/vista-previa')
-    const preview = await viewAs(page, context, 'encargado')
+    const preview = await viewAs(page, context, 'owner')
     await expect(page.getByText('Se abrió la vista previa como encargado en otra pestaña.')).toBeVisible()
     await expect(preview).toHaveURL(/\/pedidos$/u)
     const slot = preview.getByRole('region', { name: SLOT })
@@ -119,7 +121,7 @@ test('PLA-13 la vista previa como mesero muestra su franja y avisa antes de desc
   )
   await withSampleRestaurant(async () => {
     await openAsPlatform(page, platform, '/plataforma/vista-previa')
-    const preview = await viewAs(page, context, 'mesero')
+    const preview = await viewAs(page, context, 'waiter')
     await expect(preview).toHaveURL(/\/pedidos$/u)
     const slot = preview.getByRole('region', { name: SLOT })
     await expect(slot).toContainText('Vista previa · Restaurante de muestra · como Mesero')
@@ -137,7 +139,7 @@ test('PLA-13 la vista previa como mesero muestra su franja y avisa antes de desc
       return { userId: account.user.id, restaurantId: account.restaurant.id }
     })
     await withoutOrdersSending(preview)
-    await enqueueOrders(preview, account, [{ table: { id: 1, label: '5' }, dish: { id: 1 } }], 'pestana')
+    await enqueueOrders(preview, account, [{ table: { id: 1, label: '5' }, dish: { id: 1 } }], 'tab')
     await preview.reload()
     await preview.getByRole('button', { name: SIGN_OUT }).click()
     const notice = preview.getByRole('alertdialog', { name: '¿Salir con pedidos sin enviar?' })

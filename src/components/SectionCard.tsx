@@ -49,7 +49,7 @@ export function SectionCard({
   defaultOpen = true,
   scrollable = false,
 }: SectionCardProps) {
-  const [open, setOpen] = useState(defaultOpen)
+  const [isOpen, setIsOpen] = useState(defaultOpen)
   const contentId = useId()
 
   return (
@@ -60,10 +60,10 @@ export function SectionCard({
             title={title}
             as={as}
             description={description}
-            open={open}
+            open={isOpen}
             controls={contentId}
             onToggle={() => {
-              setOpen((value) => !value)
+              setIsOpen((value) => !value)
             }}
           />
         ) : (
@@ -75,7 +75,7 @@ export function SectionCard({
       </CardHeader>
       <CardContent
         id={contentId}
-        hidden={collapsible && !open}
+        hidden={collapsible && !isOpen}
         {...scrollProps(scrollable, title)}
       >
         {children}

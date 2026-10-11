@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { table, order, activeSummary } from '#jest/fixtures/orders'
-import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import { OrdersView } from './OrdersView'
 
 const FLOOR = [
@@ -18,7 +18,7 @@ function open(en = '/pedidos', permissions = PERMISSIONS_WAITER) {
     .on('get', '/orders/active', [order(), TAKEAWAY])
     .on('get', '/orders', { items: [order(), order({ id: 6, number: 13, status: 'paid' })], total: 2 })
   signInAs(permissions)
-  return { api, ...handleMount(<OrdersView />, { path: '/pedidos', en }) }
+  return { api, ...mountScreen(<OrdersView />, { path: '/pedidos', en }) }
 }
 
 describe('el salón del mesero', () => {
@@ -41,14 +41,14 @@ describe('el salón del mesero', () => {
   it('sin mesas, el encargado puede ir a crearlas y el mesero no', async () => {
     server().on('get', '/tables', [])
     signInAs(PERMISSIONS_OWNER)
-    const { unmount } = handleMount(<OrdersView />, { path: '/pedidos' })
+    const { unmount } = mountScreen(<OrdersView />, { path: '/pedidos' })
     expect(await screen.findByText('No hay mesas activas')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Crear mesas' })).toHaveAttribute('href', '/mesas')
     unmount()
 
     server().on('get', '/tables', [])
     signInAs(PERMISSIONS_WAITER)
-    handleMount(<OrdersView />, { path: '/pedidos' })
+    mountScreen(<OrdersView />, { path: '/pedidos' })
     expect(await screen.findByText('No hay mesas activas')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Crear mesas' })).not.toBeInTheDocument()
   })

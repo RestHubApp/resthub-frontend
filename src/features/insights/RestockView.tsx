@@ -30,7 +30,7 @@ function visible(item: RestockItem, filter: RestockAction | null, viewWait: bool
 export function RestockView() {
   const { recommendation, update } = useRestock()
   const [filter, setFilter] = useState<RestockAction | null>(null)
-  const [viewWait, setViewWait] = useState(false)
+  const [isViewingWait, setIsViewingWait] = useState(false)
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,8 +53,8 @@ export function RestockView() {
       ) : null}
       <ReportState data={recommendation.data} error={recommendation.error} errorText="No se pudo cargar la reposición.">
         {(report) => {
-          const visibleItems = report.items.filter((item) => visible(item, filter, viewWait)).sort(byUrgency)
-          const inWait = filter === null && !viewWait ? report.items.filter((item) => item.action === 'wait').length : 0
+          const visibleItems = report.items.filter((item) => visible(item, filter, isViewingWait)).sort(byUrgency)
+          const inWait = filter === null && !isViewingWait ? report.items.filter((item) => item.action === 'wait').length : 0
           return (
             <div className={`flex flex-col gap-6 transition-opacity ${update.isPending ? 'opacity-50' : ''}`}>
               <RestockNotice report={report} />
@@ -69,7 +69,7 @@ export function RestockView() {
                 </ul>
               )}
               {inWait > 0 ? (
-                <Button type="button" variant="outline" className="self-start" onClick={() => { setViewWait(true) }}>
+                <Button type="button" variant="outline" className="self-start" onClick={() => { setIsViewingWait(true) }}>
                   <Icon name="expand" size={16} />
                   <span>{`Ver también los ${String(inWait)} insumos que pueden esperar`}</span>
                 </Button>

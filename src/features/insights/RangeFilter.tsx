@@ -28,7 +28,7 @@ function periodText(period: InsightsPeriod): string {
  * rangos de siempre; el personalizado abre dos fechas.
  */
 export function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
-  const [customizing, setCustomizing] = useState(range.preset === 'personalizado')
+  const [isCustomizing, setIsCustomizing] = useState(range.preset === 'personalizado')
   const today = todayIn(timeZone)
 
   return (
@@ -36,23 +36,23 @@ export function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div role="group" aria-label="Rango de fechas" className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
           {RANGE_PRESETS.map((preset) => {
-            const active = preset.value === 'personalizado' ? customizing : !customizing && range.preset === preset.value
+            const isActive = preset.value === 'personalizado' ? isCustomizing : !isCustomizing && range.preset === preset.value
             return (
               <button
                 key={preset.value}
                 type="button"
-                aria-pressed={active}
+                aria-pressed={isActive}
                 onClick={() => {
                   if (preset.value === 'personalizado') {
-                    setCustomizing(true)
+                    setIsCustomizing(true)
                     return
                   }
-                  setCustomizing(false)
+                  setIsCustomizing(false)
                   range.choosePreset(preset.value)
                 }}
-                className={active ? `${OPTION} bg-card font-semibold text-foreground shadow-sm` : `${OPTION} text-muted-foreground hover:text-foreground`}
+                className={isActive ? `${OPTION} bg-card font-semibold text-foreground shadow-sm` : `${OPTION} text-muted-foreground hover:text-foreground`}
               >
-                {active ? <Icon name="confirm" size={14} /> : null}
+                {isActive ? <Icon name="confirm" size={14} /> : null}
                 {preset.label}
               </button>
             )
@@ -65,7 +65,7 @@ export function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
           </p>
         )}
       </div>
-      {customizing ? (
+      {isCustomizing ? (
         <CustomRangeForm initialFrom={range.params.date_from} initialTo={range.params.date_to} max={today} onApply={range.chooseCustom} />
       ) : null}
     </section>

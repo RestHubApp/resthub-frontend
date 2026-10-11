@@ -141,9 +141,9 @@ export async function analyzeWithWave(page, { timeout = 60_000 } = {}) {
   const categories = await page.evaluate(() => JSON.parse(JSON.stringify(window.wave.results.categories)))
   const counts = {}
   const items = []
-  for (const [password, type] of Object.entries(CATEGORIES)) {
+  for (const [key, type] of Object.entries(CATEGORIES)) {
     const category = categories[type] ?? { count: 0, items: {} }
-    counts[password] = category.count ?? 0
+    counts[key] = category.count ?? 0
     for (const item of Object.values(category.items ?? {})) {
       items.push({
         type,

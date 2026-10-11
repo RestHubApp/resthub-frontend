@@ -30,10 +30,10 @@ export function TakeOrder({ target, title, description, notice }: TakeOrderProps
   const lines = useDraftLines(key)
   const { add, setQuantity, setNotes } = useDraftActions()
   const send = useSubmitDraft(target, title)
-  const [summary, setSummary] = useState(false)
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false)
   const submitLabel = target.kind === 'add' ? 'Agregar al pedido' : 'Enviar a cocina'
   const submit = () => {
-    setSummary(false)
+    setIsSummaryOpen(false)
     send.mutate(lines)
   }
 
@@ -61,13 +61,13 @@ export function TakeOrder({ target, title, description, notice }: TakeOrderProps
         submitLabel={submitLabel}
         pending={send.isPending}
         onOpen={() => {
-          setSummary(true)
+          setIsSummaryOpen(true)
         }}
         onSubmit={submit}
       />
       <CartSheet
-        open={summary}
-        onOpenChange={setSummary}
+        open={isSummaryOpen}
+        onOpenChange={setIsSummaryOpen}
         title={`Resumen · ${title}`}
         lines={lines}
         onQuantity={(lineKey, quantity) => {

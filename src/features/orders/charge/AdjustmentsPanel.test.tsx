@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { payment, handleOrder, dish } from '#jest/fixtures/charge'
-import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, handleFirst, ErrorResponse, server } from '#jest/harness'
+import { payment, buildOrder, dish } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, firstOf, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { AdjustmentsPanel } from './AdjustmentsPanel'
 
@@ -13,7 +13,7 @@ const APPLY = { name: 'Aplicar descuento' }
 const PERCENTAGE = 'Descuento %'
 const REASON = 'Motivo'
 
-function adjust(order: OrderResponse = handleOrder(), permissions = PERMISSIONS_WAITER) {
+function adjust(order: OrderResponse = buildOrder(), permissions = PERMISSIONS_WAITER) {
   const api = server()
     .on('get', '/restaurant', { max_waiter_discount_percent: '10.00' })
     .on('put', DISCOUNT, (request: { body: unknown }) => ({
@@ -21,7 +21,7 @@ function adjust(order: OrderResponse = handleOrder(), permissions = PERMISSIONS_
       discount_percent: (request.body as { percent: string }).percent,
     }))
   signInAs(permissions)
-  return { api, ...handleMount(<AdjustmentsPanel order={order} />) }
+  return { api, ...mountScreen(<AdjustmentsPanel order={order} />) }
 }
 
 describe('descuento del pedido', () => {
@@ -40,7 +40,7 @@ describe('descuento del pedido', () => {
   })
 
   it('el encargado descuenta sin tope y no consulta el del mesero', async () => {
-    const { api, user } = adjust(handleOrder(), PERMISSIONS_OWNER)
+    const { api, user } = adjust(buildOrder(), PERMISSIONS_OWNER)
 
     await user.click(screen.getByRole('button', APPLY))
 
@@ -74,7 +74,7 @@ describe('descuento del pedido', () => {
   })
 
   it('con descuento se puede cambiar o quitar, y quitarlo envía cero', async () => {
-    const { api, user } = adjust(handleOrder({ discount_amount: '5.00', discount_percent: '10.00' }))
+    const { api, user } = adjust(buildOrder({ discount_amount: '5.00', discount_percent: '10.00' }))
 
     expect(screen.getByRole('button', { name: 'Cambiar descuento (10.0 %)' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Quitar descuento' }))
@@ -84,7 +84,7 @@ describe('descuento del pedido', () => {
   })
 
   it('después del primer pago ya no se puede ajustar la cuenta', () => {
-    adjust(handleOrder({ payments: [payment()] }), PERMISSIONS_OWNER)
+    adjust(buildOrder({ payments: [payment()] }), PERMISSIONS_OWNER)
 
     expect(screen.queryByRole('region', { name: 'Descuentos y cortesías' })).not.toBeInTheDocument()
   })
@@ -98,11 +98,11 @@ describe('cortesías', () => {
   })
 
   it('invitar pide un motivo de al menos cinco letras', async () => {
-    const { api, user } = adjust(handleOrder(), PERMISSIONS_OWNER)
-    api.on('put', COURTESY, handleOrder())
+    const { api, user } = adjust(buildOrder(), PERMISSIONS_OWNER)
+    api.on('put', COURTESY, buildOrder())
 
     await user.click(screen.getByText(INVITE_DISH))
-    await user.click(handleFirst(screen.getAllByRole('button', { name: 'Invitar' })))
+    await user.click(firstOf(screen.getAllByRole('button', { name: 'Invitar' })))
     const reason = screen.getByLabelText('Motivo de la cortesía de Lomo saltado')
     await user.type(reason, 'Cump')
     expect(screen.getByRole('button', { name: 'Confirmar' })).toBeDisabled()
@@ -115,8 +115,8 @@ describe('cortesías', () => {
 
   it('un plato invitado muestra el motivo y se puede volver a cobrar', async () => {
     const invited = dish({ is_courtesy: true, courtesy_reason: 'Error de cocina' })
-    const { api, user } = adjust(handleOrder({ items: [invited] }), PERMISSIONS_OWNER)
-    api.on('delete', COURTESY, handleOrder())
+    const { api, user } = adjust(buildOrder({ items: [invited] }), PERMISSIONS_OWNER)
+    api.on('delete', COURTESY, buildOrder())
 
     expect(screen.getByText('Invita la casa: Error de cocina')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Cobrar' }))

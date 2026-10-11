@@ -75,7 +75,7 @@ export function StaffView() {
   const granted = usePermissions()
   const ownId = useSession((state) => state.account?.user.id)
   const canManage = (account: StaffResponse) => canManageAccount(account, roles.data, granted)
-  const [creating, setCreating] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,7 +88,7 @@ export function StaffView() {
             size="lg"
             className="h-10 px-4"
             onClick={() => {
-              setCreating(true)
+              setIsCreating(true)
             }}
           >
             <Icon name="add" size={16} />
@@ -98,8 +98,8 @@ export function StaffView() {
       />
 
       <FormDialog
-        open={creating}
-        onOpenChange={setCreating}
+        open={isCreating}
+        onOpenChange={setIsCreating}
         title="Nueva cuenta"
         description="El rol decide qué puede hacer: un mesero toma pedidos desde su celular; un encargado administra el restaurante."
         size="lg"
@@ -109,7 +109,7 @@ export function StaffView() {
             <StaffCreateForm
               roles={options}
               onDone={() => {
-                setCreating(false)
+                setIsCreating(false)
               }}
             />
           )}

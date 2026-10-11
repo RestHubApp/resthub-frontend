@@ -11,11 +11,11 @@ import type { NextStep } from './nextStep'
  * lo exige igual; acá solo se evita mostrar un botón que va a responder 403.
  */
 export function useCanTakeStep(order: OrderResponse, step: NextStep | undefined): boolean {
-  const withPermission = useCan(step?.permission ?? PERMISSION.ordersTake)
+  const hasPermission = useCan(step?.permission ?? PERMISSION.ordersTake)
   const canViewAll = useCan(PERMISSION.ordersReadAll)
-  const own = useSession((state) => state.account?.user.id === order.waiter_id)
-  if (step === undefined || !withPermission) {
+  const isOwn = useSession((state) => state.account?.user.id === order.waiter_id)
+  if (step === undefined || !hasPermission) {
     return false
   }
-  return step.action !== 'charge' || own || canViewAll
+  return step.action !== 'charge' || isOwn || canViewAll
 }

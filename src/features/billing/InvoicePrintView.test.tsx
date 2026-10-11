@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
 import { taxSettings, invoice } from '#jest/fixtures/panel'
-import { signInAs, handleMount, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import type { Invoice } from '@/api/types'
 import { InvoicePrintView } from './InvoicePrintView'
 
@@ -12,7 +12,7 @@ function print(taxInvoice: Invoice | ErrorResponse, permissions?: Parameters<typ
   const printSpy = jest.spyOn(window, 'print')
   const api = server().on('get', '/billing/invoices/5', taxInvoice).on('get', '/billing/settings', taxSettings())
   signInAs(permissions)
-  const { user } = handleMount(<InvoicePrintView />, { path: ROUTE, en: '/comprobantes/5/imprimir' })
+  const { user } = mountScreen(<InvoicePrintView />, { path: ROUTE, en: '/comprobantes/5/imprimir' })
   return { api, printSpy, user }
 }
 

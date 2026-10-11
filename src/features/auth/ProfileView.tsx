@@ -15,7 +15,7 @@ const DATA = 'm-0 text-base font-medium break-words'
  */
 export function ProfileView() {
   const account = useSession((state) => state.account)
-  const preview = usePreview()
+  const isPreview = usePreview()
 
   if (account === null) {
     return null
@@ -44,7 +44,7 @@ export function ProfileView() {
       </SectionCard>
 
       {/* La cuenta de muestra no tiene contraseña y el servidor rechaza cambiarla. */}
-      {preview ? null : (
+      {isPreview ? null : (
         <SectionCard title="Cambiar contraseña">
           <ChangePasswordForm />
         </SectionCard>

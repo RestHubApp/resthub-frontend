@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { table, payment, handleOrder } from '#jest/fixtures/charge'
-import { signInAs, handleMount, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
+import { table, payment, buildOrder } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
 import type { ActiveOrderSummary, OrderResponse, PermissionCode } from '@/api/types'
 import { TableMoves } from './TableMoves'
 
@@ -34,16 +34,16 @@ const FLOOR = [
   table({ id: 6, label: '6', status: 'occupied', active_order: summary(21, 8) }),
 ]
 
-function move(permissions: readonly PermissionCode[] = PERMISSIONS_WAITER, order: OrderResponse = handleOrder()) {
+function move(permissions: readonly PermissionCode[] = PERMISSIONS_WAITER, order: OrderResponse = buildOrder()) {
   const api = server().on('get', '/tables', FLOOR)
   signInAs(permissions)
-  return { api, ...handleMount(<TableMoves order={order} />) }
+  return { api, ...mountScreen(<TableMoves order={order} />) }
 }
 
 describe('TableMoves', () => {
   it('cambiar de mesa ofrece solo las libres y muda el pedido', async () => {
     const { api, user } = move()
-    api.on('post', '/orders/12/move', handleOrder({ table_id: 4, table_label: '4' }))
+    api.on('post', '/orders/12/move', buildOrder({ table_id: 4, table_label: '4' }))
 
     await user.click(screen.getByRole('button', MOVE))
     const window = within(await screen.findByRole('dialog', MOVE))
@@ -56,7 +56,7 @@ describe('TableMoves', () => {
 
   it('el mesero solo une mesas suyas, y nunca la misma', async () => {
     const { api, user } = move()
-    api.on('post', '/orders/12/merge', handleOrder())
+    api.on('post', '/orders/12/merge', buildOrder())
 
     await user.click(screen.getByRole('button', JOIN))
     const window = within(await screen.findByRole('dialog', { name: 'Unir otra mesa a esta' }))
@@ -88,8 +88,8 @@ describe('TableMoves', () => {
   })
 
   it('con un pago hecho, o en la mesa de otro mesero, no se ofrece unir', () => {
-    move(PERMISSIONS_WAITER, handleOrder({ payments: [payment()] }))
-    move(PERMISSIONS_WAITER, handleOrder({ waiter_id: 8 }))
+    move(PERMISSIONS_WAITER, buildOrder({ payments: [payment()] }))
+    move(PERMISSIONS_WAITER, buildOrder({ waiter_id: 8 }))
 
     expect(screen.queryByRole('button', JOIN)).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', MOVE)).toHaveLength(2)

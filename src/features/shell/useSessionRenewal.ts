@@ -13,9 +13,9 @@ import { usePreview, useSession } from '@/store/session'
 export function useSessionRenewal(): void {
   const token = useSession((state) => state.token)
   const renew = useSession((state) => state.renew)
-  const preview = usePreview()
+  const isPreview = usePreview()
 
-  useTokenRenewal(preview ? null : token, async (origin) => {
+  useTokenRenewal(isPreview ? null : token, async (origin) => {
     const fresh = await renewSession()
     renew(origin, fresh.access_token, sessionOf(fresh))
   })

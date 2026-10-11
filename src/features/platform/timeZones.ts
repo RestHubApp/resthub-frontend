@@ -63,9 +63,9 @@ export function isValidTimeZone(zone: string): boolean {
   } catch {
     return false
   }
-  const onlyUppercase = canonical !== zone && canonical.toLowerCase() === zone.toLowerCase()
-  const offset = /^[+-]/u.test(canonical)
-  return !onlyUppercase && !offset
+  const isOnlyUppercase = canonical !== zone && canonical.toLowerCase() === zone.toLowerCase()
+  const hasOffset = /^[+-]/u.test(canonical)
+  return !isOnlyUppercase && !hasOffset
 }
 
 /**

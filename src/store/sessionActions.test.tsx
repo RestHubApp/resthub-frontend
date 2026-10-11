@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { renderHook } from '@testing-library/react'
 
-import { handleAccount, PERMISSIONS_WAITER } from '#jest/harness'
+import { buildAccount, PERMISSIONS_WAITER } from '#jest/harness'
 import { currentAuthToken } from '@/services/api'
 import { queryClient } from '@/services/queryClient'
 import { RESTAURANT_SESSION_KEY } from '@/services/tabStorage'
@@ -16,7 +16,7 @@ import {
   useTimeZone,
 } from './session'
 
-const WAITER = handleAccount(PERMISSIONS_WAITER)
+const WAITER = buildAccount(PERMISSIONS_WAITER)
 const CHARGE = 'orders.charge'
 const BOGOTA = 'America/Bogota'
 
@@ -55,7 +55,7 @@ describe('sesión de restaurante', () => {
     expect(useSession.getState().account).toBeNull()
 
     useSession.getState().signIn('t-1', WAITER)
-    const renamed = handleAccount(PERMISSIONS_WAITER, { preview: false, user: { ...WAITER.user, full_name: 'Ana T.' } })
+    const renamed = buildAccount(PERMISSIONS_WAITER, { preview: false, user: { ...WAITER.user, full_name: 'Ana T.' } })
     useSession.getState().refresh(renamed)
     expect(useSession.getState().account?.user.full_name).toBe('Ana T.')
     expect(saved()).toEqual({ token: 't-1', account: renamed })
@@ -126,7 +126,7 @@ describe('permisos de la cuenta', () => {
   })
 
   it('«hoy» y las horas son las de la zona del local', () => {
-    useSession.getState().signIn('t-1', handleAccount(PERMISSIONS_WAITER, { restaurant: { ...WAITER.restaurant, timezone: BOGOTA } }))
+    useSession.getState().signIn('t-1', buildAccount(PERMISSIONS_WAITER, { restaurant: { ...WAITER.restaurant, timezone: BOGOTA } }))
     expect(currentTimeZone()).toBe(BOGOTA)
     expect(renderHook(() => useTimeZone()).result.current).toBe(BOGOTA)
   })

@@ -134,9 +134,9 @@ export function salesSummary(changes: Partial<SalesSummary> = {}): SalesSummary 
   }
 }
 
-export function cell(weekday: number, hour: number, paid_orders: number): HourlyCell {
+export function cell(weekday: number, hour: number, paidOrders: number): HourlyCell {
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-  return { weekday, weekday_label: days[weekday] ?? '', hour, paid_orders, sales: String(paid_orders * 30), average_sales: '30.00' }
+  return { weekday, weekday_label: days[weekday] ?? '', hour, paid_orders: paidOrders, sales: String(paidOrders * 30), average_sales: '30.00' }
 }
 
 export function waste(changes: Partial<WasteReport> = {}): WasteReport {
@@ -166,7 +166,7 @@ export function panelReports(): Record<string, unknown> {
         { date: '2026-09-26', sales: '834.50', paid_orders: 28, average_ticket: '29.80' },
       ],
     },
-    '/insights/sales/hourly': { period: PERIOD, cells: [cell(4, 19, 3), peak, cell(5, 13, 0)], peak: peak },
+    '/insights/sales/hourly': { period: PERIOD, cells: [cell(4, 19, 3), peak, cell(5, 13, 0)], peak },
     '/insights/dishes/top': { period: PERIOD, dishes: [{ menu_item_id: 1, name: 'Ceviche', quantity: 18, revenue: '540.00' }] },
     '/insights/payments': {
       period: PERIOD,

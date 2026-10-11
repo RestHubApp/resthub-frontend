@@ -20,7 +20,7 @@ const LEVELS = [
 export function LogFilters({ filters, onChange }: LogFiltersProps) {
   const [search, setSearch] = useDraft(filters.logSearch)
   const [request, setRequest] = useDraft(filters.logRequestId)
-  const active = filters.logLevel !== null || filters.logSearch !== '' || filters.logRequestId !== ''
+  const isActive = filters.logLevel !== null || filters.logSearch !== '' || filters.logRequestId !== ''
   return (
     <form
       role="search"
@@ -61,7 +61,7 @@ export function LogFilters({ filters, onChange }: LogFiltersProps) {
         maxLength={MAX_REQUEST_ID}
       />
       <FilterActions
-        active={active}
+        active={isActive}
         onClear={() => {
           onChange({ logLevel: null, logSearch: '', logRequestId: '' })
         }}

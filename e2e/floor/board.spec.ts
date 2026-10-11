@@ -127,8 +127,8 @@ test('SAL-29 el historial filtra por fecha, estado, tipo y mesero, y despliega e
   await expect(rows.first()).toContainText('Tarjeta')
 
   // El desplegable de la fila muestra los platos y cómo se pagó.
-  const ver = page.getByRole('button', { name: `Ver el detalle del pedido #${String(paid.number)}` })
-  await ver.click()
+  const view = page.getByRole('button', { name: `Ver el detalle del pedido #${String(paid.number)}` })
+  await view.click()
   const hide = page.getByRole('button', { name: `Ocultar el detalle del pedido #${String(paid.number)}` })
   await expect(hide).toHaveAttribute('aria-expanded', 'true')
   await expect(page.getByText('Pagado con')).toBeVisible()

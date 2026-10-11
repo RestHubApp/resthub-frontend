@@ -85,7 +85,7 @@ export function PreviewLauncher() {
               handleOpen(as)
             }}
           >
-            <Icon name="ver" size={18} />
+            <Icon name="view" size={18} />
             <span>{start.isPending && start.variables === as ? 'Abriendo…' : `Ver como ${PREVIEW_AS_LABELS[as]}`}</span>
           </Button>
         ))}

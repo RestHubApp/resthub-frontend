@@ -172,9 +172,9 @@ async function createRestaurantEmpty(): Promise<RestaurantEmpty> {
 
 /** Los accesorios comunes más el restaurante vacío, para los estados vacíos. */
 export const test = base.extend<{ empty: RestaurantEmpty }>({
-  empty: async ({}, use) => {
+  empty: async ({}, provide) => {
     const empty = await createRestaurantEmpty()
-    await use(empty)
+    await provide(empty)
     await empty.http.dispose()
   },
 })
@@ -182,10 +182,10 @@ export const test = base.extend<{ empty: RestaurantEmpty }>({
 /** Cuenta las veces que la página pide imprimir, sin abrir el diálogo del sistema. */
 export async function countPrints(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const windowValue = window as unknown as { prints: number }
-    windowValue.prints = 0
+    const dialog = window as unknown as { prints: number }
+    dialog.prints = 0
     window.print = () => {
-      windowValue.prints += 1
+      dialog.prints += 1
     }
   })
 }

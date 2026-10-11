@@ -37,10 +37,10 @@ describe('onSubmit', () => {
       received.push(event)
       return Promise.resolve('enviado')
     }
-    const eventValue = { preventDefault: jest.fn() } as unknown as Parameters<ReturnType<typeof onSubmit>>[0]
-    const send: (e: typeof eventValue) => unknown = onSubmit(sending)
+    const fakeEvent = { preventDefault: jest.fn() } as unknown as Parameters<ReturnType<typeof onSubmit>>[0]
+    const send: (e: typeof fakeEvent) => unknown = onSubmit(sending)
 
-    expect(send(eventValue)).toBeUndefined()
-    expect(received).toEqual([eventValue])
+    expect(send(fakeEvent)).toBeUndefined()
+    expect(received).toEqual([fakeEvent])
   })
 })

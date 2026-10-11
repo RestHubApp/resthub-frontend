@@ -22,9 +22,9 @@ interface CustomerLookupProps {
 export function CustomerLookup({ onPick }: CustomerLookupProps) {
   const [text, setText] = useState('')
   const search = useDeferredValue(text.trim())
-  const active = search.length >= MIN_SEARCH
-  const customers = useQuery({ ...customerSearchQuery(search), enabled: active })
-  const found = active ? (customers.data?.items ?? []).slice(0, MAX_RESULTS) : []
+  const isActive = search.length >= MIN_SEARCH
+  const customers = useQuery({ ...customerSearchQuery(search), enabled: isActive })
+  const found = isActive ? (customers.data?.items ?? []).slice(0, MAX_RESULTS) : []
 
   return (
     <div className="flex flex-col gap-2">
@@ -66,7 +66,7 @@ export function CustomerLookup({ onPick }: CustomerLookupProps) {
           ))}
         </ul>
       ) : null}
-      {active && customers.isSuccess && found.length === 0 ? (
+      {isActive && customers.isSuccess && found.length === 0 ? (
         <p className="m-0 text-xs text-muted-foreground">No está en la libreta: escribe sus datos abajo.</p>
       ) : null}
     </div>

@@ -184,6 +184,6 @@ test('GES-34 el encargado descarga los datos de un cliente y, a su pedido, los b
   await expect(notice(page, 'Los datos del cliente se borraron.')).toBeVisible()
   await expect(card).toBeHidden()
   await expect(page.getByText('Todavía no hay clientes')).toBeVisible()
-  const orderValue = await api(local).get(`/orders/${String(orderId)}`)
-  expect(orderValue).toMatchObject({ customer_name: 'Cliente eliminado', customer_phone: '', delivery_address: '' })
+  const orderResponse = await api(local).get(`/orders/${String(orderId)}`)
+  expect(orderResponse).toMatchObject({ customer_name: 'Cliente eliminado', customer_phone: '', delivery_address: '' })
 })

@@ -22,8 +22,8 @@ interface AdjustmentsPanelProps {
  * lo que pagó cada uno. Las cortesías son del encargado.
  */
 export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
-  const [discounting, setDiscounting] = useState(false)
-  const invites = useCan(PERMISSION.ordersDiscountAny)
+  const [isDiscounting, setIsDiscounting] = useState(false)
+  const isInviting = useCan(PERMISSION.ordersDiscountAny)
   const remove = useOrderAction({
     mutationFn: () => applyDiscount(order.id, { percent: '0', reason: '' }),
     success: () => 'Descuento quitado.',
@@ -32,14 +32,14 @@ export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
   if (order.payments.length > 0) {
     return null
   }
-  const withDiscount = toCents(order.discount_amount) > 0
+  const hasDiscount = toCents(order.discount_amount) > 0
   const closeDiscount = () => {
-    setDiscounting(false)
+    setIsDiscounting(false)
   }
 
   return (
     <section aria-label="Descuentos y cortesías" className="flex flex-col gap-2">
-      {discounting ? (
+      {isDiscounting ? (
         <DiscountForm order={order} onDone={closeDiscount} />
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -47,15 +47,15 @@ export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
             type="button"
             variant="outline"
             onClick={() => {
-              setDiscounting(true)
+              setIsDiscounting(true)
             }}
           >
             <Icon name="discount" size={16} />
             <span>
-              {withDiscount ? `Cambiar descuento (${formatPercent(order.discount_percent)})` : 'Aplicar descuento'}
+              {hasDiscount ? `Cambiar descuento (${formatPercent(order.discount_percent)})` : 'Aplicar descuento'}
             </span>
           </Button>
-          {withDiscount ? (
+          {hasDiscount ? (
             <Button
               type="button"
               variant="ghost"
@@ -69,7 +69,7 @@ export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
           ) : null}
         </div>
       )}
-      {invites ? (
+      {isInviting ? (
         <details className="rounded-lg ring-1 ring-input">
           <summary className="cursor-pointer px-3 py-2 text-sm font-medium">Invitar un plato (cortesía)</summary>
           <ul className="m-0 flex list-none flex-col gap-1 p-2">

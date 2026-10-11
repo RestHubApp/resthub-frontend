@@ -10,16 +10,16 @@ import { join } from 'node:path'
 import { ROOT } from './common.mjs'
 
 const STEPS = {
-  data: ['datos.mjs'],
+  data: ['data.mjs'],
   axe: ['axe.mjs'],
   'axe-sin-widget': ['axe.mjs', { A11Y_WITHOUT_WIDGET: '1', A11Y_CLASS: 'ruta' }],
   lighthouse: ['lighthouse.mjs'],
-  wave: ['medir-wave.mjs'],
-  keyboard: ['teclado.mjs'],
-  summary: ['resumen.mjs'],
+  wave: ['measure-wave.mjs'],
+  keyboard: ['keyboard.mjs'],
+  summary: ['summary.mjs'],
 }
 const orders = process.argv.slice(2)
-const order = orders.length > 0 ? ['datos', ...orders.filter((p) => p !== 'datos'), 'resumen'] : Object.keys(STEPS)
+const order = orders.length > 0 ? ['data', ...orders.filter((p) => p !== 'data'), 'summary'] : Object.keys(STEPS)
 let failures = 0
 for (const step of [...new Set(order)]) {
   const [file, environment = {}] = STEPS[step] ?? []

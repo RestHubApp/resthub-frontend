@@ -5,11 +5,11 @@
 // carga su propio almacén (módulos nuevos) sobre el mismo `localStorage`.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { unstubAllGlobals } from '#jest/globals'
-import { type TestStorage, notify, fakeStorage, handleSaved, newTab, tokenThatExpires } from '#jest/tabs'
+import { type TestStorage, notify, fakeStorage, readSaved, newTab, tokenThatExpires } from '#jest/tabs'
 
 import type { CurrentUserResponse } from '@/api/types'
 
-const SECRET = 'resthub.session.v2'
+const STORAGE_KEY = 'resthub.session.v2'
 const PREVIEW = 'resthub.vista-previa.sesion.v1'
 const MARK = 'resthub.vista-previa.pestana.v1'
 
@@ -30,7 +30,7 @@ async function openTab(local: TestStorage, route = '/') {
 }
 
 function saved(local: TestStorage) {
-  return handleSaved(local, SECRET) as { token: string; account: CurrentUserResponse } | null
+  return readSaved(local, STORAGE_KEY) as { token: string; account: CurrentUserResponse } | null
 }
 
 beforeEach(() => {
@@ -79,7 +79,7 @@ describe('sesión de restaurante entre pestañas', () => {
     one.useSession.getState().signOut()
     two.useSession.getState().refresh(account(1, { permissions: ['orders.take'] }))
 
-    expect(local.data.has(SECRET)).toBe(false)
+    expect(local.data.has(STORAGE_KEY)).toBe(false)
     expect(two.useSession.getState().token).toBeNull()
   })
 
@@ -93,7 +93,7 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
     const two = await openTab(local)
 
     one.useSession.getState().signOut()
-    notify(two.window, local, SECRET)
+    notify(two.window, local, STORAGE_KEY)
 
     expect(two.useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
     expect(two.currentAuthToken()).toBeNull()
@@ -108,7 +108,7 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
 
     // Entrar como B sin pasar por «Cerrar sesión» (otra ventana de la PWA).
     one.useSession.getState().signIn(tokenB, account(2))
-    notify(two.window, local, SECRET)
+    notify(two.window, local, STORAGE_KEY)
 
     expect(two.useSession.getState().token).toBeNull()
     expect(saved(local)).toEqual({ token: tokenB, account: account(2) })
@@ -123,7 +123,7 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
     const fresh = tokenThatExpires(7200, 'a2')
 
     one.useSession.getState().renew(old, fresh, account(1))
-    notify(two.window, local, SECRET)
+    notify(two.window, local, STORAGE_KEY)
 
     expect(two.useSession.getState()).toMatchObject({ token: fresh, account: account(1) })
     expect(two.currentAuthToken()).toBe(fresh)
@@ -143,7 +143,7 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
     // La pestaña que cambia la clave renueva con el token de la respuesta.
     one.useSession.getState().renew(old, fresh, account(1))
     expect(saved(local)?.token).toBe(fresh)
-    notify(two.window, local, SECRET)
+    notify(two.window, local, STORAGE_KEY)
 
     expect(two.useSession.getState()).toMatchObject({ token: fresh, account: account(1) })
     expect(two.currentAuthToken()).toBe(fresh)
@@ -174,7 +174,7 @@ describe('sesión de restaurante: casos de borde', () => {
     const token = tokenThatExpires(3600)
 
     one.useSession.getState().signIn(token, account(1))
-    notify(two.window, local, SECRET)
+    notify(two.window, local, STORAGE_KEY)
 
     expect(two.useSession.getState()).toMatchObject({ token, account: account(1), expired: false })
   })
@@ -198,9 +198,9 @@ describe('sesión de restaurante: casos de borde', () => {
     one.useSession.getState().signIn(token, account(1))
     const two = await openTab(local)
 
-    local.data.delete(SECRET)
+    local.data.delete(STORAGE_KEY)
     notify(two.window, local, 'resthub.pedidos-sin-enviar.v2')
-    notify(two.window, fakeStorage(), SECRET)
+    notify(two.window, fakeStorage(), STORAGE_KEY)
 
     expect(two.useSession.getState().token).toBe(token)
   })
@@ -214,14 +214,14 @@ describe('sesión de restaurante: casos de borde', () => {
     preview.useSession.getState().startPreview(previewToken, account(9, { preview: true }))
 
     real.useSession.getState().signOut()
-    notify(preview.window, local, SECRET)
+    notify(preview.window, local, STORAGE_KEY)
     const renewed = tokenThatExpires(3600, 'previa2')
     preview.useSession.getState().renew(previewToken, renewed, account(9, { preview: true }))
 
     expect(preview.useSession.getState().token).toBe(renewed)
     expect(JSON.parse(preview.tab.data.get(PREVIEW) ?? 'null')).toMatchObject({ token: renewed })
     expect(preview.tab.data.get(MARK)).toBe('1')
-    expect(local.data.has(SECRET)).toBe(false)
+    expect(local.data.has(STORAGE_KEY)).toBe(false)
   })
 
   it('sin almacenamiento la renovación sigue funcionando en la pestaña', async () => {

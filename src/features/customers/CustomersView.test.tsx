@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
 import { customer } from '#jest/fixtures/panel'
-import { signInAs, handleMount, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import type { Customer } from '@/api/types'
 import { CustomersView } from './CustomersView'
 
@@ -21,7 +21,7 @@ function open(customers: Customer[] = [customer()], permissions?: Parameters<typ
     return { items, total: items.length }
   })
   signInAs(permissions)
-  return { api, ...handleMount(<CustomersView />) }
+  return { api, ...mountScreen(<CustomersView />) }
 }
 
 describe('CustomersView: lista', () => {
@@ -53,7 +53,7 @@ describe('CustomersView: lista', () => {
   it('si la búsqueda falla muestra el error', async () => {
     server().on('get', LIST, new ErrorResponse(500, 'Sin base'))
     signInAs()
-    handleMount(<CustomersView />)
+    mountScreen(<CustomersView />)
     expect(await screen.findByText('Sin base')).toBeInTheDocument()
   })
 })

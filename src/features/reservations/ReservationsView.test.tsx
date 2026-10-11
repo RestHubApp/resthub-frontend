@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { fireEvent, screen } from '@testing-library/react'
 
 import { table, reservation } from '#jest/fixtures/panel'
-import { signInAs, handleMount, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
 import type { Reservation } from '@/api/types'
 import { ReservationsView } from './ReservationsView'
 
@@ -17,7 +17,7 @@ function open(reservations: Reservation[] = [reservation()], permissions?: Param
     .on('get', LIST, (request: { params: Record<string, unknown> }) => (request.params['day'] === DAY ? reservations : []))
     .on('get', '/tables', [table(1, '1'), table(2, '2'), table(3, 'Terraza')])
   signInAs(permissions)
-  const mount = handleMount(<ReservationsView />)
+  const mount = mountScreen(<ReservationsView />)
   fireEvent.change(screen.getByLabelText('Día'), { target: { value: DAY } })
   return { api, ...mount }
 }
@@ -57,7 +57,7 @@ describe('ReservationsView: el día', () => {
   it('si la lista falla muestra el error', async () => {
     server().on('get', LIST, new ErrorResponse(500, 'Sin base')).on('get', '/tables', [])
     signInAs()
-    handleMount(<ReservationsView />)
+    mountScreen(<ReservationsView />)
     expect(await screen.findByText('Sin base')).toBeInTheDocument()
   })
 })

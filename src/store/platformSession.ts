@@ -40,14 +40,14 @@ interface PlatformSessionState {
 // navegador: vive solo en su memoria (y el área de plataforma no se muestra
 // ahí). Si no, un 401 o un «Salir» en esa pestaña cerraría la sesión real del
 // administrador en todas las demás.
-function handleStorage(): Storage | null {
+function getStorage(): Storage | null {
   return isPreviewTab() ? null : localStorage
 }
 
 // Una lectura o escritura puede fallar en una ventana privada o con el
 // almacenamiento bloqueado: se trata como «no hay sesión guardada».
 function readStored(): StoredPlatformSession | null {
-  const read = handleRead()
+  const read = readStoredResult()
   return read.ok ? read.session : null
 }
 
@@ -55,9 +55,9 @@ type Read = { readonly ok: true; readonly session: StoredPlatformSession | null 
 
 // Distingue «no hay sesión guardada» de «no se pudo leer»: sin almacenamiento
 // no se sabe qué hizo otra pestaña, y eso no alcanza para cerrar esta.
-function handleRead(): Read {
+function readStoredResult(): Read {
   try {
-    const storage = handleStorage()
+    const storage = getStorage()
     if (storage === null) {
       return { ok: false }
     }
@@ -75,7 +75,7 @@ const persistence: { token: string | null } = { token: null }
 function writeStored(session: StoredPlatformSession | null): void {
   persistence.token = null
   try {
-    const storage = handleStorage()
+    const storage = getStorage()
     if (session === null) {
       storage?.removeItem(PLATFORM_STORAGE_KEY)
       return
@@ -94,11 +94,11 @@ function writeStored(session: StoredPlatformSession | null): void {
  */
 function otherTabChange(token: string): boolean {
   // Compara tokens para saber cuál sesión escribió esta pestaña, no para verificar un secreto.
-  const writtenByThis = persistence.token === token
-  if (!writtenByThis) {
+  const wasWrittenByThis = persistence.token === token
+  if (!wasWrittenByThis) {
     return false
   }
-  const read = handleRead()
+  const read = readStoredResult()
   return read.ok && read.session?.token !== token
 }
 
@@ -206,7 +206,7 @@ setPlatformUnauthorizedHandler(() => {
  * de vista previa no guarda la sesión de plataforma y no se sincroniza.
  */
 function syncWithStoredPlatformSession(): void {
-  const read = handleRead()
+  const read = readStoredResult()
   if (!read.ok) {
     return
   }
@@ -235,7 +235,7 @@ function syncWithStoredPlatformSession(): void {
 // `key === null` es que se vació el almacenamiento entero.
 if (typeof window !== 'undefined' && !isPreviewTab()) {
   window.addEventListener('storage', (event: StorageEvent) => {
-    if (event.storageArea !== null && event.storageArea !== handleStorage()) {
+    if (event.storageArea !== null && event.storageArea !== getStorage()) {
       return
     }
     if (event.key === PLATFORM_STORAGE_KEY || event.key === null) {

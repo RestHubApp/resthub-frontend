@@ -28,10 +28,10 @@ const coverage = { axe: [0, 0], wave: [0, 0], lighthouse: [0, 0] }
 const violations = []
 
 for (const e of STATUSES) {
-  for (const vista of filterViews(e)) {
-    const a = iAxe.get(`${e.id}--${vista}`)
-    const w = iWave.get(`${e.id}--${vista}`)
-    const l = e.class === 'ruta' ? iLh.get(`${e.id}--${vista}`) : null
+  for (const view of filterViews(e)) {
+    const a = iAxe.get(`${e.id}--${view}`)
+    const w = iWave.get(`${e.id}--${view}`)
+    const l = e.class === 'ruta' ? iLh.get(`${e.id}--${view}`) : null
     coverage.axe[1] += 1
     coverage.wave[1] += 1
     if (a && !a.error) coverage.axe[0] += 1
@@ -40,16 +40,16 @@ for (const e of STATUSES) {
       coverage.lighthouse[1] += 1
       if (l && !l.error) coverage.lighthouse[0] += 1
     }
-    rowsStatus.push({ id: e.id, name: e.name, type: e.type, vista, axe: a, wave: w, lighthouse: l })
-    if (a?.byImpact && (a.byImpact.critical > 0 || a.byImpact.serious > 0)) violations.push(`axe ${e.id} ${vista}: ${a.violations.filter((v) => ['critical', 'serious'].includes(v.impact)).map((v) => v.rule).join(', ')}`)
-    if (w?.counts && (w.counts.errors > 0 || w.counts.contrast > 0)) violations.push(`WAVE ${e.id} ${vista}: ${w.counts.errors} errors, ${w.counts.contrast} contrast`)
+    rowsStatus.push({ id: e.id, name: e.name, type: e.type, view, axe: a, wave: w, lighthouse: l })
+    if (a?.byImpact && (a.byImpact.critical > 0 || a.byImpact.serious > 0)) violations.push(`axe ${e.id} ${view}: ${a.violations.filter((v) => ['critical', 'serious'].includes(v.impact)).map((v) => v.rule).join(', ')}`)
+    if (w?.counts && (w.counts.errors > 0 || w.counts.contrast > 0)) violations.push(`WAVE ${e.id} ${view}: ${w.counts.errors} errors, ${w.counts.contrast} contrast`)
     if (l?.scores) {
       const p = l.scores
-      const perfMeta = vista === 'desktop' ? META.lhPerfDesktop : MOBILE_ACCOUNTS.has(e.account) ? META.lhPerfMobile : META.lhPerfMobileManagement
-      if (p.accessibility < META.lhA11y) violations.push(`Lighthouse ${e.id} ${vista}: accessibility ${p.accessibility}`)
-      if (p['best-practices'] < META.lhBp) violations.push(`Lighthouse ${e.id} ${vista}: best-practices ${p['best-practices']}`)
-      if (p.performance < perfMeta) violations.push(`Lighthouse ${e.id} ${vista}: performance ${p.performance} (< ${perfMeta})`)
-      if (e.id === 'acceso' && p.seo < META.lhSeoAccess) violations.push(`Lighthouse ${e.id} ${vista}: seo ${p.seo}`)
+      const perfMeta = view === 'desktop' ? META.lhPerfDesktop : MOBILE_ACCOUNTS.has(e.account) ? META.lhPerfMobile : META.lhPerfMobileManagement
+      if (p.accessibility < META.lhA11y) violations.push(`Lighthouse ${e.id} ${view}: accessibility ${p.accessibility}`)
+      if (p['best-practices'] < META.lhBp) violations.push(`Lighthouse ${e.id} ${view}: best-practices ${p['best-practices']}`)
+      if (p.performance < perfMeta) violations.push(`Lighthouse ${e.id} ${view}: performance ${p.performance} (< ${perfMeta})`)
+      if (e.id === 'acceso' && p.seo < META.lhSeoAccess) violations.push(`Lighthouse ${e.id} ${view}: seo ${p.seo}`)
     }
   }
 }
@@ -58,7 +58,7 @@ for (const e of STATUSES) {
 const routesRouter = ROUTER_ROUTES.map((pattern) => {
   const statuses = STATUSES.filter((e) => e.class === 'ruta' && e.pattern === pattern)
   const measured = (i, k) => statuses.some((e) => filterViews(e).every((v) => i.get(`${e.id}--${v}`) && !i.get(`${e.id}--${v}`).error)) && k
-  return { patron: pattern, statuses: statuses.map((e) => e.id), axe: Boolean(measured(iAxe, true)), wave: Boolean(measured(iWave, true)), lighthouse: Boolean(measured(iLh, true)) }
+  return { pattern, statuses: statuses.map((e) => e.id), axe: Boolean(measured(iAxe, true)), wave: Boolean(measured(iWave, true)), lighthouse: Boolean(measured(iLh, true)) }
 })
 
 const pct = ([h, t]) => (t === 0 ? '—' : `${((100 * h) / t).toFixed(1)} %`)
@@ -92,7 +92,7 @@ axe: critical/serious/moderate/minor (reglas violadas). WAVE: errors/contrast/al
 
 | Estado | Tipo | Vista | axe | WAVE | Lighthouse |
 |---|---|---|---|---|---|
-${rowsStatus.map((f) => `| ${f.name} (\`${f.id}\`) | ${f.type} | ${f.vista} | ${axeCell(f.axe)} | ${waveCell(f.wave)} | ${lhCell(f.lighthouse)} |`).join('\n')}
+${rowsStatus.map((f) => `| ${f.name} (\`${f.id}\`) | ${f.type} | ${f.view} | ${axeCell(f.axe)} | ${waveCell(f.wave)} | ${lhCell(f.lighthouse)} |`).join('\n')}
 
 ## Rutas del router
 
@@ -109,6 +109,6 @@ ${[['Con el widget', axe.rows.filter((f) => f.class === 'ruta')], ['Sin el widge
   .join('\n')}
 `
 await writeFile(join(REPORTS, 'resumen.md'), md)
-await writeJson(join(REPORTS, 'resumen.json'), { coverage, routesRouter, violations, rows: rowsStatus.map((f) => ({ id: f.id, vista: f.vista, axe: f.axe?.byImpact ?? f.axe?.error, wave: f.wave?.counts ?? f.wave?.error, lighthouse: f.lighthouse?.scores ?? f.lighthouse?.error ?? null })) })
+await writeJson(join(REPORTS, 'resumen.json'), { coverage, routesRouter, violations, rows: rowsStatus.map((f) => ({ id: f.id, view: f.view, axe: f.axe?.byImpact ?? f.axe?.error, wave: f.wave?.counts ?? f.wave?.error, lighthouse: f.lighthouse?.scores ?? f.lighthouse?.error ?? null })) })
 console.log(`Cobertura: axe ${pct(coverage.axe)}, WAVE ${pct(coverage.wave)}, Lighthouse ${pct(coverage.lighthouse)}. Incumplimientos: ${violations.length}`)
 for (const i of violations) console.log(`  - ${i}`)

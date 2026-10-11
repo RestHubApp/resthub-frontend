@@ -66,9 +66,9 @@ test('OFF-02 si el pedido llegó pero la respuesta se perdió, el reintento no l
   // respuesta: para el celular es igual que no tener señal. Mientras dura el
   // corte, los reintentos automáticos tampoco llegan.
   let sent = 0
-  let withoutSignal = true
+  let hasNoSignal = true
   await page.route('**/api/v1/orders', async (route) => {
-    if (route.request().method() !== 'POST' || !withoutSignal) {
+    if (route.request().method() !== 'POST' || !hasNoSignal) {
       await route.fallback()
       return
     }
@@ -84,7 +84,7 @@ test('OFF-02 si el pedido llegó pero la respuesta se perdió, el reintento no l
   expect(await tableOrders(local, local.table('1').id)).toHaveLength(1)
   await evidence(page, 'off-02-1-en-cola-aunque-llego')
 
-  withoutSignal = false
+  hasNoSignal = false
   await queue.getByRole('button', { name: 'Reintentar' }).click()
   await expect(page.getByText(/Mesa 1: pedido #\d+ enviado a cocina/u)).toBeVisible()
   await expect(queue).toBeHidden()

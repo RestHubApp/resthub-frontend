@@ -9,12 +9,12 @@ import { saveStaffMember, STAFF_LIST_QUERY } from './staffList'
 const NAME_ANA = 'Ana Pérez'
 const NAME_BEATRIZ = 'Beatriz Gómez'
 
-function member(id: number, full_name: string, role_id = 1): StaffResponse {
+function member(id: number, fullName: string, roleId = 1): StaffResponse {
   return {
     id,
-    full_name,
+    full_name: fullName,
     email: `${String(id)}@resthub.dev`,
-    role_id,
+    role_id: roleId,
     is_active: true,
     created_at: '2026-01-01T00:00:00Z',
     role_label: 'Mesero',

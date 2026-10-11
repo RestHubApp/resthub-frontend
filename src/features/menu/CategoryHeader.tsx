@@ -43,7 +43,7 @@ export function CategoryHeader({
   onMove,
   onAddItem,
 }: CategoryHeaderProps) {
-  const [editing, setEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   return (
     <div className="flex flex-col gap-3 border-b px-5 pb-4 md:flex-row md:items-start md:justify-between">
@@ -69,7 +69,7 @@ export function CategoryHeader({
           className="h-11 px-3"
           aria-label={`Editar la categoría ${category.name}`}
           onClick={() => {
-            setEditing(true)
+            setIsEditing(true)
           }}
         >
           <Icon name="edit" size={16} />
@@ -79,11 +79,11 @@ export function CategoryHeader({
         {category.items.length === 0 ? <DeleteCategoryButton category={category} /> : null}
       </div>
 
-      <FormDialog open={editing} onOpenChange={setEditing} title={`Editar ${category.name}`}>
+      <FormDialog open={isEditing} onOpenChange={setIsEditing} title={`Editar ${category.name}`}>
         <CategoryForm
           category={category}
           onDone={() => {
-            setEditing(false)
+            setIsEditing(false)
           }}
         />
       </FormDialog>

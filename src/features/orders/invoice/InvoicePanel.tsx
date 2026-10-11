@@ -39,7 +39,7 @@ function isLinkSafe(url: string): boolean {
  */
 export function InvoicePanel({ order }: InvoicePanelProps) {
   const can = useCan(PERMISSION.billingIssue)
-  const [issuing, setIssuing] = useState(false)
+  const [isIssuing, setIsIssuing] = useState(false)
   const invoice = useQuery({ ...orderInvoiceQuery(order.id), enabled: can && order.status === 'paid' })
   if (!can || order.status !== 'paid' || invoice.isPending) {
     return null
@@ -50,13 +50,13 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
     return (
       <>
         <Button type="button" variant="outline" className="self-start" onClick={() => {
-          setIssuing(true)
+          setIsIssuing(true)
         }}>
           <Icon name="recipe" size={16} />
           <span>Emitir boleta o factura</span>
         </Button>
-        <InvoiceDialog order={order} open={issuing} onClose={() => {
-          setIssuing(false)
+        <InvoiceDialog order={order} open={isIssuing} onClose={() => {
+          setIsIssuing(false)
         }} />
       </>
     )

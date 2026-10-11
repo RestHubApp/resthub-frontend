@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
-import { handleOrder } from '#jest/fixtures/charge'
-import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
+import { buildOrder } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import type { OrderResponse, PermissionCode } from '@/api/types'
 import { todayIn } from '@/services/format'
 import { HistoryView } from './HistoryView'
@@ -13,7 +13,7 @@ function page(items: OrderResponse[], total = items.length) {
   return { items, total, limit: 25, offset: 0 }
 }
 
-const CHARGED = handleOrder({ status: 'paid', payment_method_label: 'Yape', notes: 'Sin ají', paid_at: '2026-09-26T18:00:00Z' })
+const CHARGED = buildOrder({ status: 'paid', payment_method_label: 'Yape', notes: 'Sin ají', paid_at: '2026-09-26T18:00:00Z' })
 
 function history(response: unknown = page([CHARGED]), permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
   const api = server()
@@ -23,7 +23,7 @@ function history(response: unknown = page([CHARGED]), permissions: readonly Perm
       total: 1,
     })
   signInAs(permissions)
-  return { api, ...handleMount(<HistoryView />, { path: '/tablero/historial' }) }
+  return { api, ...mountScreen(<HistoryView />, { path: '/tablero/historial' }) }
 }
 
 function lastQuery(api: ReturnType<typeof server>) {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen } from '@testing-library/react'
 
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import type { OwnRestaurant } from '@/api/types'
 import { DiscountLimitForm } from './DiscountLimitForm'
 
@@ -27,7 +27,7 @@ function restaurant(changes: Partial<OwnRestaurant> = {}): OwnRestaurant {
 function open() {
   const api = server().on('get', ROUTE, restaurant())
   signInAs()
-  return { api, ...handleMount(<DiscountLimitForm />) }
+  return { api, ...mountScreen(<DiscountLimitForm />) }
 }
 
 describe('DiscountLimitForm', () => {

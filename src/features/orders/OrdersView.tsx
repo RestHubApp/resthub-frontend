@@ -11,10 +11,10 @@ import { OfflineOrdersBanner } from './offline/OfflineOrdersBanner'
 import { useLiveUpdates } from './useLiveUpdates'
 
 const VIEWS = ['mesas', 'llevar', 'mios'] as const
-type Vista = (typeof VIEWS)[number]
+type View = (typeof VIEWS)[number]
 
-function vistaDe(value: string | null): Vista {
-  return VIEWS.find((vista) => vista === value) ?? 'mesas'
+function viewOf(value: string | null): View {
+  return VIEWS.find((view) => view === value) ?? 'mesas'
 }
 
 const TRIGGER = 'min-h-10 text-sm data-active:font-semibold'
@@ -28,7 +28,7 @@ const TRIGGER = 'min-h-10 text-sm data-active:font-semibold'
 export function OrdersView() {
   const live = useLiveUpdates()
   const [params, setParams] = useSearchParams()
-  const vista = vistaDe(params.get('vista'))
+  const view = viewOf(params.get('vista'))
 
   return (
     <div className="flex flex-col gap-5">
@@ -44,7 +44,7 @@ export function OrdersView() {
       />
       <OfflineOrdersBanner />
       <Tabs
-        value={vista}
+        value={view}
         onValueChange={(value) => {
           setParams({ vista: value }, { replace: true })
         }}

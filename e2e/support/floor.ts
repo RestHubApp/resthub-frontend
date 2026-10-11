@@ -209,10 +209,10 @@ export async function dishWithOptions(local: Local): Promise<Dish> {
  */
 export async function countPrints(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const windowValue = window as unknown as { prints: number }
-    windowValue.prints = 0
+    const dialog = window as unknown as { prints: number }
+    dialog.prints = 0
     window.print = () => {
-      windowValue.prints += 1
+      dialog.prints += 1
     }
   })
 }

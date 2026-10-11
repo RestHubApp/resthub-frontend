@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-import { acotarConnections, precargarSource, siennaAutoalojado } from './vite.plugins'
+import { boundConnections, preloadSource, handleSiennaSelfHosted } from './vite.plugins'
 
 // El color de la marca. Tiene que coincidir con el `theme-color` de index.html
 // y con `--primary` de index.css, o la barra del sistema cambia de tono al
@@ -37,9 +37,9 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    precargarSource(),
-    siennaAutoalojado(),
-    acotarConnections(),
+    preloadSource(),
+    handleSiennaSelfHosted(),
+    boundConnections(),
     // Instalable: el service worker solo guarda el armazon de la aplicacion
     // (HTML, JS, CSS e iconos). Ninguna respuesta del API se guarda en cache.
     // Sin senal, lo unico que espera es un pedido nuevo del mesero, en una cola

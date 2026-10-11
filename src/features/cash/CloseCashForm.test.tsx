@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { cashRegisterSummary, cashRegisterShift } from '#jest/fixtures/cash'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import type { CashSession } from '@/api/types'
 import { CloseCashForm } from './CloseCashForm'
 
@@ -10,7 +10,7 @@ const CASH = 'Efectivo contado'
 const CLOSE = { name: 'Cerrar caja' }
 
 /** «Cerrar caja» y, en la confirmación, «Cerrar caja» otra vez. */
-async function closeAndConfirm(user: ReturnType<typeof handleMount>['user']) {
+async function closeAndConfirm(user: ReturnType<typeof mountScreen>['user']) {
   await user.click(screen.getByRole('button', CLOSE))
   const confirmation = await screen.findByRole('alertdialog', { name: '¿Cerrar la caja?' })
   await user.click(within(confirmation).getByRole('button', CLOSE))
@@ -21,7 +21,7 @@ function closeShift(shift: CashSession = cashRegisterShift({ summary: cashRegist
   const api = server().on('get', '/cash/current', { is_open: true, session: shift })
   signInAs()
   const onClosed = jest.fn<(session: CashSession) => void>()
-  return { api, onClosed, ...handleMount(<CloseCashForm session={shift} onClosed={onClosed} />) }
+  return { api, onClosed, ...mountScreen(<CloseCashForm session={shift} onClosed={onClosed} />) }
 }
 
 describe('CloseCashForm', () => {

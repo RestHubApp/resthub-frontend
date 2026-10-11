@@ -42,7 +42,7 @@ function buildColumns(timeZone: string): DataColumn<OrderResponse>[] {
         aria-label={`${isExpanded ? 'Ocultar' : 'Ver'} el detalle del pedido #${String(order.number)}`}
         onClick={toggleExpanded}
       >
-        <Icon name={isExpanded ? 'hide' : 'ver'} size={16} />
+        <Icon name={isExpanded ? 'hide' : 'view'} size={16} />
         <span>{isExpanded ? 'Ocultar' : 'Ver'}</span>
       </Button>
     ),

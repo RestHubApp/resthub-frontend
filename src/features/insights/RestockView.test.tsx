@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { ingredientToReview, restock } from '#jest/fixtures/indicators'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import type { RestockReport } from '@/api/types'
 import { RestockView } from './RestockView'
 
@@ -32,7 +32,7 @@ const PAPA = ingredientToReview({ ingredient_id: 3, name: 'Papa', action: 'buy_t
 function open(report: RestockReport | ErrorResponse = restock([ARROZ, PAPA, LIMON])) {
   const api = server().on('get', ROUTE, report)
   signInAs()
-  return { api, ...handleMount(<RestockView />, { path: '/panel/reposicion' }) }
+  return { api, ...mountScreen(<RestockView />, { path: '/panel/reposicion' }) }
 }
 
 function names(): string[] {

@@ -125,8 +125,8 @@ function writeStoredSession(session: StoredSession | null): void {
  */
 function otherTabChange(token: string): boolean {
   // Compara tokens para saber cuál sesión escribió esta pestaña, no para verificar un secreto.
-  const writtenByThis = persistence.token === token
-  if (isPreviewTab() || !writtenByThis) {
+  const wasWrittenByThis = persistence.token === token
+  if (isPreviewTab() || !wasWrittenByThis) {
     return false
   }
   const read = readSaved()

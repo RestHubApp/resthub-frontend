@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { act, screen, within } from '@testing-library/react'
 
 import { dishCost, ingredient, recipe } from '#jest/fixtures/inventory'
-import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import type { PermissionCode, Recipe } from '@/api/types'
 import { InventoryView } from './InventoryView'
 import { RecipeEditorView } from './RecipeEditorView'
@@ -18,7 +18,7 @@ const ROUTE = { path: '/inventario/recetas/:menuItemId', en: EN }
 function openRecipe(initial: Recipe = recipe(), permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
   const api = server().on('get', RECIPE, initial).on('get', INGREDIENTS, [ingredient(), CEBOLLA])
   signInAs(permissions)
-  return { api, ...handleMount(<RecipeEditorView />, ROUTE) }
+  return { api, ...mountScreen(<RecipeEditorView />, ROUTE) }
 }
 
 function value(term: string) {
@@ -104,7 +104,7 @@ describe('RecipeEditorView', () => {
   it('llegando desde el menú, vuelve al menú', async () => {
     server().on('get', RECIPE, new ErrorResponse(404, 'Ese plato no existe.')).on('get', INGREDIENTS, [])
     signInAs()
-    const { router } = handleMount(<RecipeEditorView />, ROUTE)
+    const { router } = mountScreen(<RecipeEditorView />, ROUTE)
     await act(() => router.navigate(EN, { state: { from: '/menu' } }))
 
     expect(await screen.findByText('Ese plato no existe.')).toBeInTheDocument()
@@ -122,7 +122,7 @@ describe('RecipesPanel', () => {
       .on('get', INGREDIENTS, [])
       .on('get', '/inventory/alerts/low-stock', [])
     signInAs(ONLY_READ)
-    handleMount(<InventoryView />, { path: '/inventario', en: '/inventario?vista=recetas' })
+    mountScreen(<InventoryView />, { path: '/inventario', en: '/inventario?vista=recetas' })
 
     const row = (await screen.findByText('Ceviche')).closest('tr') as HTMLElement
     expect(within(row).getByText('S/ 18.00')).toBeInTheDocument()

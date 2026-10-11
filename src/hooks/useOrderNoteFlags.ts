@@ -44,14 +44,14 @@ function keyOf(orderId: number, orderItemId: number | null): string {
  * distintivo de alergia.
  */
 export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNoteFlagsOptions = {}): OrderNoteFlags {
-  const { enabled = true, live = true, classifyPending = true } = options
+  const { enabled: isEnabled = true, live: isLive = true, classifyPending: isClassifyPending = true } = options
   const queryClient = useQueryClient()
   const ids = useMemo(() => [...new Set(orderIds)].sort((a, b) => a - b).slice(0, MAX_ORDER_NOTES_ORDERS), [orderIds])
-  const active = enabled && ids.length > 0
+  const isActive = isEnabled && ids.length > 0
 
   const notes = useQuery({
     ...orderNotesQuery(ids),
-    enabled: active,
+    enabled: isActive,
     // Al llegar un pedido nuevo cambia la lista de ids: los distintivos de los
     // que ya estaban siguen a la vista mientras se pregunta por la lista nueva.
     placeholderData: keepPreviousData,
@@ -59,9 +59,9 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
 
   useServerEvent('insights', () => {
     void queryClient.invalidateQueries({ queryKey: orderNotesQueryKey })
-  }, active && live)
+  }, isActive && isLive)
 
-  const { mutate: classify, isPending: classifying } = useMutation({
+  const { mutate: classify, isPending: isClassifying } = useMutation({
     mutationFn: classifyOrderNotes,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: orderNotesQueryKey }),
   })
@@ -75,31 +75,31 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
   // Lo pendiente de clasificar; vacio si la pantalla no lo pidio.
   const pending = useMemo(
     () =>
-      classifyPending
+      isClassifyPending
         ? (items ?? []).filter((item) => item.status === 'pending').map((item) => keyOf(item.order_id, item.order_item_id))
         : [],
-    [items, classifyPending],
+    [items, isClassifyPending],
   )
   useEffect(() => {
-    const fresh = pending.filter((password) => !ordered.current.has(password))
-    if (fresh.length === 0 || classifying) {
+    const fresh = pending.filter((key) => !ordered.current.has(key))
+    if (fresh.length === 0 || isClassifying) {
       return
     }
-    for (const password of fresh) {
-      ordered.current.add(password)
+    for (const key of fresh) {
+      ordered.current.add(key)
     }
     classify()
-  }, [pending, classify, classifying])
+  }, [pending, classify, isClassifying])
 
   return useMemo(() => {
     const list = items ?? []
-    const byPassword = new Map(list.map((item) => [keyOf(item.order_id, item.order_item_id), item]))
+    const byKey = new Map(list.map((item) => [keyOf(item.order_id, item.order_item_id), item]))
     return {
       flags: list,
-      flagFor: (orderId, orderItemId) => byPassword.get(keyOf(orderId, orderItemId)),
+      flagFor: (orderId, orderItemId) => byKey.get(keyOf(orderId, orderItemId)),
       allergyCount: list.filter((item) => item.mentions_allergy === true).length,
-      isLoading: notes.isPending && active,
+      isLoading: notes.isPending && isActive,
       error: notes.error,
     }
-  }, [items, notes.isPending, notes.error, active])
+  }, [items, notes.isPending, notes.error, isActive])
 }

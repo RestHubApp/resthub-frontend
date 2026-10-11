@@ -2,7 +2,7 @@
 // en móvil. Con un modal abierto, axe analiza el documento entero: el diálogo
 // y lo que queda detrás (que Radix marca con aria-hidden).
 //
-// Variables: A11Y_ONLY, A11Y_CLASS, A11Y_VIEWS (ver comun.mjs) y
+// Variables: A11Y_ONLY, A11Y_CLASS, A11Y_VIEWS (ver common.mjs) y
 // A11Y_WITHOUT_WIDGET=1 para medir sin el widget de accesibilidad Sienna (se
 // bloquea la descarga de su archivo), que deja los reportes en `axe-sin-widget/`.
 import { writeFile } from 'node:fs/promises'
@@ -10,7 +10,7 @@ import { join } from 'node:path'
 
 import AxeBuilder from '@axe-core/playwright'
 
-import { openStatus, ensureDir, handlePassword, contextOf, writeJson, filterStatuses, filterViews, launch, REPORTS } from './common.mjs'
+import { openStatus, ensureDir, rowKey, contextOf, writeJson, filterStatuses, filterViews, launch, REPORTS } from './common.mjs'
 
 export const LABELS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']
 export const IMPACTS = ['critical', 'serious', 'moderate', 'minor']
@@ -44,20 +44,20 @@ function summarize(result) {
 const rows = []
 const browser = await launch()
 for (const status of filterStatuses()) {
-  for (const vista of filterViews(status)) {
-    const context = await browser.newContext(contextOf(vista))
+  for (const view of filterViews(status)) {
+    const context = await browser.newContext(contextOf(view))
     if (withoutWidget) await context.route(/sienna-accessibility/u, (route) => route.abort())
     try {
       const page = await openStatus(browser, context, status)
       const result = await new AxeBuilder({ page }).withTags(LABELS).analyze()
-      const row = { id: status.id, name: status.name, class: status.class, type: status.type, vista, url: page.url(), ...summarize(result) }
-      await writeJson(join(dir, `${handlePassword(status, vista)}.json`), row)
+      const row = { id: status.id, name: status.name, class: status.class, type: status.type, view, url: page.url(), ...summarize(result) }
+      await writeJson(join(dir, `${rowKey(status, view)}.json`), row)
       rows.push(row)
       const { critical, serious, moderate, minor } = row.byImpact
-      console.log(`${handlePassword(status, vista).padEnd(40)} crit ${critical} ser ${serious} mod ${moderate} min ${minor}  ${row.violations.map((v) => `${v.rule}(${v.nodes})`).join(' ')}`)
+      console.log(`${rowKey(status, view).padEnd(40)} crit ${critical} ser ${serious} mod ${moderate} min ${minor}  ${row.violations.map((v) => `${v.rule}(${v.nodes})`).join(' ')}`)
     } catch (error) {
-      rows.push({ id: status.id, name: status.name, class: status.class, type: status.type, vista, error: error.message.split('\n')[0] })
-      console.log(`${handlePassword(status, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
+      rows.push({ id: status.id, name: status.name, class: status.class, type: status.type, view, error: error.message.split('\n')[0] })
+      console.log(`${rowKey(status, view).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
     }
     await context.close()
   }
@@ -69,8 +69,8 @@ const { existsSync } = await import('node:fs')
 const { readJson } = await import('./common.mjs')
 const routeSummary = join(dir, 'resumen.json')
 const previous = existsSync(routeSummary) && (process.env.A11Y_ONLY || process.env.A11Y_CLASS || process.env.A11Y_VIEWS) ? await readJson(routeSummary) : { rows: [] }
-const fresh = new Set(rows.map((f) => `${f.id}--${f.vista}`))
-const all = [...previous.rows.filter((f) => !fresh.has(`${f.id}--${f.vista}`)), ...rows]
+const fresh = new Set(rows.map((f) => `${f.id}--${f.view}`))
+const all = [...previous.rows.filter((f) => !fresh.has(`${f.id}--${f.view}`)), ...rows]
 await writeJson(routeSummary, { date: new Date().toISOString(), labels: LABELS, withoutWidget, rows: all })
 
 // Reporte HTML legible (se abre y se captura como evidencia).
@@ -82,7 +82,7 @@ const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>
 <p>Etiquetas: ${LABELS.join(', ')}. Totales de reglas violadas: critical ${totals.critical}, serious ${totals.serious}, moderate ${totals.moderate}, minor ${totals.minor}. Fecha: ${new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' })}.</p>
 <table><thead><tr><th>Estado</th><th>Tipo</th><th>Vista</th><th>Critical</th><th>Serious</th><th>Moderate</th><th>Minor</th><th>Reglas (nodos)</th></tr></thead><tbody>
 ${all
-  .map((f) => `<tr><td>${escape(f.name)}<br><small>${escape(f.id)}</small></td><td>${escape(f.type)}</td><td>${f.vista}</td>${
+  .map((f) => `<tr><td>${escape(f.name)}<br><small>${escape(f.id)}</small></td><td>${escape(f.type)}</td><td>${f.view}</td>${
     f.error
       ? `<td colspan="5" class="c">No se pudo abrir: ${escape(f.error)}</td>`
       : `${IMPACTS.map((i) => `<td class="${f.byImpact[i] ? (i === 'critical' ? 'c' : 's') : 'ok'}">${f.byImpact[i]}</td>`).join('')}<td>${f.violations.map((v) => `${escape(v.rule)} (${v.nodes})`).join(', ') || '—'}</td>`

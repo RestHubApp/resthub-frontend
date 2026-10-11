@@ -8,7 +8,7 @@ import { openAs } from '../support/fixtures'
 import { capture, captureWindow, expect, deadline, test } from './capture'
 import { inKitchen } from './prepare'
 
-interface WindowValue {
+interface WindowSpec {
   readonly button: Locator
   readonly role: 'dialog' | 'alertdialog'
   readonly title: string
@@ -25,7 +25,7 @@ async function form(page: Page, button: Locator, title: string, name: string): P
 }
 
 /** Abre una ventana, la captura y la cancela. */
-async function handleWindow(page: Page, { button, role, title, name }: WindowValue): Promise<void> {
+async function checkWindow(page: Page, { button, role, title, name }: WindowSpec): Promise<void> {
   await button.click()
   const open = page.getByRole(role, { name: title })
   await captureWindow(open, name)
@@ -63,10 +63,10 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
   const waiter = page.getByRole('row', { name: /Mesero Prueba/u })
   await expect(waiter).toContainText('mesero@e2e.resthub.dev')
   await capture(page, 'personal')
-  await handleWindow(page, { button: page.getByRole('button', { name: 'Nueva cuenta' }), role: 'dialog', title: 'Nueva cuenta', name: 'dialogo-nueva-cuenta' })
-  await handleWindow(page, { button: waiter.getByRole('button', { name: 'Editar' }), role: 'dialog', title: 'Editar a Mesero Prueba', name: 'dialogo-editar-cuenta' })
-  await handleWindow(page, { button: waiter.getByRole('button', { name: 'Contraseña' }), role: 'dialog', title: 'Restablecer la contraseña de Mesero Prueba', name: 'dialogo-restablecer-contrasena' })
-  await handleWindow(page, { button: waiter.getByRole('button', { name: 'Desactivar' }), role: 'alertdialog', title: '¿Desactivar a Mesero Prueba?', name: 'confirmar-desactivar-cuenta' })
+  await checkWindow(page, { button: page.getByRole('button', { name: 'Nueva cuenta' }), role: 'dialog', title: 'Nueva cuenta', name: 'dialogo-nueva-cuenta' })
+  await checkWindow(page, { button: waiter.getByRole('button', { name: 'Editar' }), role: 'dialog', title: 'Editar a Mesero Prueba', name: 'dialogo-editar-cuenta' })
+  await checkWindow(page, { button: waiter.getByRole('button', { name: 'Contraseña' }), role: 'dialog', title: 'Restablecer la contraseña de Mesero Prueba', name: 'dialogo-restablecer-contrasena' })
+  await checkWindow(page, { button: waiter.getByRole('button', { name: 'Desactivar' }), role: 'alertdialog', title: '¿Desactivar a Mesero Prueba?', name: 'confirmar-desactivar-cuenta' })
 
   await page.goto('/roles')
   await expect(page.getByRole('heading', { level: 1, name: 'Roles' })).toBeVisible()
@@ -77,5 +77,5 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
   await form(page, owner.getByRole('button', { name: 'Ver permisos' }), 'Encargado', 'dialogo-ver-permisos-rol')
   const cashier = page.getByRole('listitem').filter({ hasText: /^Cajero/u })
   await form(page, cashier.getByRole('button', { name: 'Editar' }), 'Editar Cajero', 'dialogo-editar-rol')
-  await handleWindow(page, { button: page.getByRole('button', { name: 'Eliminar el rol Cajero' }), role: 'alertdialog', title: '¿Eliminar el rol Cajero?', name: 'confirmar-eliminar-rol' })
+  await checkWindow(page, { button: page.getByRole('button', { name: 'Eliminar el rol Cajero' }), role: 'alertdialog', title: '¿Eliminar el rol Cajero?', name: 'confirmar-eliminar-rol' })
 })

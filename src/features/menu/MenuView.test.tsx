@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { handleMenu, dishCost, dish } from '#jest/fixtures/inventory'
-import { signInAs, handleMount, PERMISSIONS_OWNER, handleFirst, ErrorResponse, server } from '#jest/harness'
+import { buildMenu, dishCost, dish } from '#jest/fixtures/inventory'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, firstOf, ErrorResponse, server } from '#jest/harness'
 import type { MenuResponse } from '@/api/types'
 import { MenuView } from './MenuView'
 
@@ -13,12 +13,12 @@ const ORDER_DISHES = '/menu/categories/1/items/order'
 const CHECKED = 'aria-checked'
 const AVAILABLE_CEVICHE = { name: 'Disponible hoy: Ceviche' }
 
-function openMenu(initial: MenuResponse = handleMenu(), permissions = PERMISSIONS_OWNER) {
+function openMenu(initial: MenuResponse = buildMenu(), permissions = PERMISSIONS_OWNER) {
   const api = server()
     .on('get', MENU, initial)
     .on('get', COSTS, [dishCost(), dishCost({ menu_item_id: 11, menu_item_name: 'Causa', has_recipe: false, cost: null, margin: null, margin_percent: null })])
   signInAs(permissions)
-  return { api, ...handleMount(<MenuView />, { path: '/menu' }) }
+  return { api, ...mountScreen(<MenuView />, { path: '/menu' }) }
 }
 
 describe('MenuView: la carta', () => {
@@ -43,15 +43,15 @@ describe('MenuView: la carta', () => {
   })
 
   it('marca el plato que se vende a pérdida', async () => {
-    server().on('get', MENU, handleMenu()).on('get', COSTS, [dishCost({ cost: '35.00', margin: '-5.00', margin_percent: '-16.7' })])
+    server().on('get', MENU, buildMenu()).on('get', COSTS, [dishCost({ cost: '35.00', margin: '-5.00', margin_percent: '-16.7' })])
     signInAs()
-    handleMount(<MenuView />)
+    mountScreen(<MenuView />)
 
     expect(await screen.findByText(/se vende a pérdida/u)).toBeInTheDocument()
   })
 
   it('sin permiso de inventario no pide los costos ni muestra márgenes', async () => {
-    const { api } = openMenu(handleMenu(), PERMISSIONS_OWNER.filter((p) => p !== 'inventory.read'))
+    const { api } = openMenu(buildMenu(), PERMISSIONS_OWNER.filter((p) => p !== 'inventory.read'))
 
     await screen.findByRole('region', { name: 'Entradas' })
     expect(api.calls('get', COSTS)).toHaveLength(0)
@@ -68,7 +68,7 @@ describe('MenuView: la carta', () => {
   it('si no carga, muestra el error del servidor', async () => {
     server().on('get', MENU, new ErrorResponse(500, 'Carta no disponible'))
     signInAs()
-    handleMount(<MenuView />)
+    mountScreen(<MenuView />)
     expect(await screen.findByText('Carta no disponible')).toBeInTheDocument()
   })
 })
@@ -77,17 +77,17 @@ describe('MenuView: disponible hoy', () => {
   it('apagar el interruptor marca el plato agotado al instante y lo envía', async () => {
     const { api, user } = openMenu()
     api.on('patch', AVAILABILITY, () => {
-      const fresh = handleMenu()
+      const fresh = buildMenu()
       const ceviche = { ...dish(), is_available: false }
-      const first = handleFirst(fresh.categories)
+      const first = firstOf(fresh.categories)
       fresh.categories[0] = { ...first, items: [ceviche, ...first.items.slice(1)] }
       api.on('get', MENU, fresh)
       return ceviche
     })
 
-    const switchValue = await screen.findByRole('switch', AVAILABLE_CEVICHE)
-    expect(switchValue).toHaveAttribute(CHECKED, 'true')
-    await user.click(switchValue)
+    const availabilitySwitch = await screen.findByRole('switch', AVAILABLE_CEVICHE)
+    expect(availabilitySwitch).toHaveAttribute(CHECKED, 'true')
+    await user.click(availabilitySwitch)
 
     expect(screen.getByRole('switch', AVAILABLE_CEVICHE)).toHaveAttribute(CHECKED, 'false')
     expect(api.calls('patch', AVAILABILITY)[0]?.body).toEqual({ is_available: false })

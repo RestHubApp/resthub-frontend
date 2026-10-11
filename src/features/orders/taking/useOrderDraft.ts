@@ -84,8 +84,8 @@ const useDraftStore = create<DraftState>((set) => ({
     set((state) => {
       const lines = state.drafts[key] ?? EMPTY
       const lineKey = lineKeyFor(item.id, modifiers)
-      const exists = lines.some((line) => line.lineKey === lineKey)
-      const next = exists
+      const isExisting = lines.some((line) => line.lineKey === lineKey)
+      const next = isExisting
         ? update(lines, lineKey, (line) => ({
             ...line,
             quantity: Math.min(line.quantity + 1, MAX_QUANTITY),

@@ -37,7 +37,7 @@ export function PasswordField({
   hint,
   placeholder,
 }: PasswordFieldProps) {
-  const [visible, setVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
   const ids = fieldIds(id, hint, error)
 
   return (
@@ -46,7 +46,7 @@ export function PasswordField({
       <FieldIcon icon="lock">
         <Input
           id={id}
-          type={visible ? 'text' : 'password'}
+          type={isVisible ? 'text' : 'password'}
           className="h-10 pr-11"
           autoComplete={autoComplete}
           spellCheck={false}
@@ -62,12 +62,12 @@ export function PasswordField({
             size="icon-sm"
             className="text-muted-foreground"
             aria-controls={id}
-            aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            aria-label={isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             onClick={() => {
-              setVisible((actual) => !actual)
+              setIsVisible((actual) => !actual)
             }}
           >
-            <Icon name={visible ? 'hide' : 'ver'} size={18} />
+            <Icon name={isVisible ? 'hide' : 'view'} size={18} />
           </Button>
         </div>
       </FieldIcon>

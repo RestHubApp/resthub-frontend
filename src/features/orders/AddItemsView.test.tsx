@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook, screen } from '@testing-library/react'
 
-import { handleMenu, order, lastBody } from '#jest/fixtures/orders'
-import { signInAs, handleMount, server } from '#jest/harness'
+import { buildMenu, order, lastBody } from '#jest/fixtures/orders'
+import { signInAs, mountScreen, server } from '#jest/harness'
 import { AddItemsView } from './AddItemsView'
 import { useDraftActions } from './taking/useOrderDraft'
 
 function open(actual = order({ status: 'served', status_label: 'Servido, por cobrar' })) {
   const api = server()
     .on('get', '/orders/5', actual)
-    .on('get', '/menu', handleMenu())
+    .on('get', '/menu', buildMenu())
     .on('post', '/orders/5/items', order({ status: 'in_kitchen' }))
   signInAs()
-  return { api, ...handleMount(<AddItemsView />, { path: '/pedidos/:orderId/agregar', en: '/pedidos/5/agregar' }) }
+  return { api, ...mountScreen(<AddItemsView />, { path: '/pedidos/:orderId/agregar', en: '/pedidos/5/agregar' }) }
 }
 
 afterEach(() => {

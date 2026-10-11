@@ -11,7 +11,7 @@ export function AddItemsView() {
   const orderId = Number(useParams()['orderId'])
   const orderResult = useQuery(orderQuery(orderId))
   const order = orderResult.data
-  const closed = order !== undefined && !isActive(order.status)
+  const isClosed = order !== undefined && !isActive(order.status)
 
   return (
     <TakeOrder
@@ -19,7 +19,7 @@ export function AddItemsView() {
       title={order === undefined ? 'Agregar platos' : `Pedido #${String(order.number)} · ${orderPlace(order)}`}
       description="Agrega platos. Si el pedido ya estaba listo o servido, vuelve a cocina."
       notice={
-        closed ? (
+        isClosed ? (
           <FormMessage tone="error">Este pedido ya está {order.status_label.toLowerCase()}: no admite más platos.</FormMessage>
         ) : undefined
       }

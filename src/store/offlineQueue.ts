@@ -41,7 +41,7 @@ const listeners = new Set<Listener>()
 const EMPTY: readonly QueuedOrder[] = []
 const cache: { value: readonly QueuedOrder[] | null } = { value: null }
 // `useSyncExternalStore` necesita la misma lista mientras la cola no cambie.
-const vista: { base: readonly QueuedOrder[] | null; owner: string; value: readonly QueuedOrder[] } = {
+const view: { base: readonly QueuedOrder[] | null; owner: string; value: readonly QueuedOrder[] } = {
   base: null,
   owner: '',
   value: EMPTY,
@@ -120,12 +120,12 @@ export function queuedOrders(owner: QueueOwner | null): readonly QueuedOrder[] {
   }
   const base = read()
   const password = `${String(owner.userId)}:${String(owner.restaurantId)}`
-  if (vista.base !== base || vista.owner !== password) {
-    vista.base = base
-    vista.owner = password
-    vista.value = base.filter((order) => belongsTo(order, owner))
+  if (view.base !== base || view.owner !== password) {
+    view.base = base
+    view.owner = password
+    view.value = base.filter((order) => belongsTo(order, owner))
   }
-  return vista.value
+  return view.value
 }
 
 export function enqueueOrder(order: QueuedOrder): void {

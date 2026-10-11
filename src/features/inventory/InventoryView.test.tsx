@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { ingredient } from '#jest/fixtures/inventory'
-import { signInAs, handleMount, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, ErrorResponse, server } from '#jest/harness'
 import type { Ingredient, PermissionCode } from '@/api/types'
 import { InventoryView } from './InventoryView'
 
@@ -35,7 +35,7 @@ function open(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, alerts
     .on('get', ALERTS, alerts)
     .on('get', RESTAURANT, local())
   signInAs(permissions)
-  return { api, ...handleMount(<InventoryView />, { path: '/inventario', en }) }
+  return { api, ...mountScreen(<InventoryView />, { path: '/inventario', en }) }
 }
 
 describe('InventoryView: resumen y alertas', () => {
@@ -124,7 +124,7 @@ describe('InventoryView: tabla de insumos', () => {
   it('si los insumos no cargan, lo dice', async () => {
     server().on('get', INGREDIENTS, new ErrorResponse(500, 'Inventario caído')).on('get', ALERTS, []).on('get', RESTAURANT, local())
     signInAs()
-    handleMount(<InventoryView />)
+    mountScreen(<InventoryView />)
     expect(await screen.findByText('Inventario caído')).toBeInTheDocument()
   })
 })

@@ -53,7 +53,7 @@ const SHELL_ICONS = {
   profile: UserRound,
   accessibility: Accessibility,
   signOut: LogOut,
-  ver: Eye,
+  view: Eye,
   restaurant: Store,
   correct: CircleCheck,
   alert: CircleAlert,
@@ -76,7 +76,7 @@ const STROKE_WIDTH = 1.75
 
 /** La misma pinta que `Icon`, para el puñado de iconos que dibuja el armazón. */
 export function ShellIcon({ name, size = DEFAULT_SIZE, label, className }: ShellIconProps) {
-  const named = label !== undefined && label !== ''
+  const isNamed = label !== undefined && label !== ''
   const Glyph = SHELL_ICONS[name]
 
   return (
@@ -84,9 +84,9 @@ export function ShellIcon({ name, size = DEFAULT_SIZE, label, className }: Shell
       className={className}
       size={size}
       strokeWidth={STROKE_WIDTH}
-      role={named ? 'img' : undefined}
+      role={isNamed ? 'img' : undefined}
       aria-label={label}
-      aria-hidden={named ? undefined : true}
+      aria-hidden={isNamed ? undefined : true}
       focusable="false"
     />
   )

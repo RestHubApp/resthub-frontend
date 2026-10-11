@@ -35,7 +35,7 @@ function toggle(selected: Selected, group: string, option: string, max: number):
  */
 export function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps) {
   const [selected, selectedSet] = useState<Selected>({})
-  const [failure, setFailure] = useState(false)
+  const [hasFailure, setHasFailure] = useState(false)
   if (item === null) {
     return null
   }
@@ -52,7 +52,7 @@ export function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps
     onClose()
   }
   const toggleChoice = (group: string, option: string, max: number) => {
-    selectedSet((antes) => toggle(antes, group, option, max))
+    selectedSet((before) => toggle(before, group, option, max))
   }
 
   return (
@@ -90,7 +90,7 @@ export function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps
           </div>
         </fieldset>
       ))}
-      {failure ? (
+      {hasFailure ? (
         <FormMessage tone="error">No se pudo agregar el plato. Las opciones siguen elegidas; vuelve a intentarlo.</FormMessage>
       ) : null}
       <Button
@@ -101,10 +101,10 @@ export function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps
         onClick={() => {
           void Promise.resolve(onConfirm(item, modifiers)).then((accepted) => {
             if (accepted === false) {
-              setFailure(true)
+              setHasFailure(true)
               return
             }
-            setFailure(false)
+            setHasFailure(false)
             selectedSet({})
           })
         }}

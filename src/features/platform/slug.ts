@@ -52,6 +52,6 @@ export function isValidSlug(value: string): boolean {
  * respeta.
  */
 export function followSlug(previousName: string, nextName: string, currentSlug: string): string {
-  const following = currentSlug === '' || currentSlug === suggestSlug(previousName)
-  return following ? suggestSlug(nextName) : currentSlug
+  const isFollowing = currentSlug === '' || currentSlug === suggestSlug(previousName)
+  return isFollowing ? suggestSlug(nextName) : currentSlug
 }

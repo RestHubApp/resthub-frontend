@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, screen } from '@testing-library/react'
 
 import { order } from '#jest/fixtures/orders'
-import { signInAs, handleMount, ErrorResponse, server, withoutNetwork } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server, withoutNetwork } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
 import { enqueueOrder, queuedOrders, removeQueued } from '@/store/offlineQueue'
 import { OfflineOrdersBanner } from './OfflineOrdersBanner'
@@ -30,7 +30,7 @@ function enqueue(label: string, id: string, owner = OWNER) {
 function open(responseOnOpen: unknown = order({ status: 'open' })) {
   const api = server().on('post', ORDERS, responseOnOpen).on('post', SEND, order())
   signInAs()
-  return { api, ...handleMount(<OfflineOrdersBanner />) }
+  return { api, ...mountScreen(<OfflineOrdersBanner />) }
 }
 
 afterEach(() => {

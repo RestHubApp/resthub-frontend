@@ -17,8 +17,8 @@ export const currentUserQueryKey = ['auth', 'me'] as const
  * permisos y si es una vista previa. Es lo mismo que devuelve `GET /auth/me`.
  */
 export function sessionOf(response: AccessTokenResponse): CurrentUserResponse {
-  const { user, restaurant, permissions, preview, terms_version, terms_accepted } = response
-  return { user, restaurant, permissions, preview, terms_version, terms_accepted }
+  const { user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted } = response
+  return { user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted }
 }
 
 /** El token y, en la misma respuesta, la cuenta, su restaurante y sus permisos. */

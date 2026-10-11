@@ -46,7 +46,7 @@ export function payment(changes: Partial<PaymentResponse> = {}): PaymentResponse
 }
 
 /** Un pedido en mesa servido y por cobrar: dos platos de S/ 30 y S/ 20. */
-export function handleOrder(changes: Partial<OrderResponse> = {}): OrderResponse {
+export function buildOrder(changes: Partial<OrderResponse> = {}): OrderResponse {
   return {
     id: 12,
     number: 34,

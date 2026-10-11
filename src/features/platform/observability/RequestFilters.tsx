@@ -26,7 +26,7 @@ function statuses(statusMin: number | null) {
 export function RequestFilters({ filters, onChange }: RequestFiltersProps) {
   const [route, setRoute] = useDraft(filters.route)
   const [request, setRequest] = useDraft(filters.requestId)
-  const active = filters.statusMin !== null || filters.route !== '' || filters.requestId !== ''
+  const isActive = filters.statusMin !== null || filters.route !== '' || filters.requestId !== ''
   return (
     <form
       role="search"
@@ -67,7 +67,7 @@ export function RequestFilters({ filters, onChange }: RequestFiltersProps) {
         maxLength={MAX_REQUEST_ID}
       />
       <FilterActions
-        active={active}
+        active={isActive}
         onClear={() => {
           onChange({ statusMin: null, route: '', requestId: '' })
         }}

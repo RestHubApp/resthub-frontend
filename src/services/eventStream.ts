@@ -102,11 +102,11 @@ export async function readEventStream({
 
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
     let pending = ''
-    let finished = false
-    while (!finished) {
-      const { value, done } = await reader.read()
-      finished = done
-      if (!done) renew()
+    let isFinished = false
+    while (!isFinished) {
+      const { value, done: isDone } = await reader.read()
+      isFinished = isDone
+      if (!isDone) renew()
       pending += (value ?? '').replaceAll('\r\n', '\n')
       let cutoff = pending.indexOf('\n\n')
       while (cutoff !== -1) {

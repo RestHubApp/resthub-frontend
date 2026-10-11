@@ -7,8 +7,8 @@ import { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
-const SECRET = 'resthub.platform-session.v1'
-const SECRET_RESTAURANT = 'resthub.session.v2'
+const PLATFORM_STORAGE_KEY = 'resthub.platform-session.v1'
+const RESTAURANT_STORAGE_KEY = 'resthub.session.v2'
 const ADMIN = { id: 1, full_name: 'Equipo RestHub', email: 'plataforma@resthub.dev' }
 
 function tokenThatExpires(secondsFromNow: number): string {
@@ -19,12 +19,12 @@ function tokenThatExpires(secondsFromNow: number): string {
 function fakeStorage(initial: Record<string, string> = {}) {
   const data = new Map(Object.entries(initial))
   return {
-    getItem: (password: string) => data.get(password) ?? null,
-    setItem: (password: string, value: string) => {
-      data.set(password, value)
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      data.set(key, value)
     },
-    removeItem: (password: string) => {
-      data.delete(password)
+    removeItem: (key: string) => {
+      data.delete(key)
     },
     data,
   }
@@ -53,27 +53,27 @@ afterEach(() => {
 describe('sesión de plataforma', () => {
   it('se guarda en su propia clave y no toca la del restaurante', async () => {
     const restaurant = JSON.stringify({ token: 'r', account: {} })
-    const { storage, usePlatformSession } = await load({ [SECRET_RESTAURANT]: restaurant })
+    const { storage, usePlatformSession } = await load({ [RESTAURANT_STORAGE_KEY]: restaurant })
     const token = tokenThatExpires(3600)
 
     usePlatformSession.getState().signIn(token, ADMIN)
 
-    expect(JSON.parse(storage.data.get(SECRET) ?? '{}')).toEqual({ token, admin: ADMIN })
-    expect(storage.data.get(SECRET_RESTAURANT)).toBe(restaurant)
+    expect(JSON.parse(storage.data.get(PLATFORM_STORAGE_KEY) ?? '{}')).toEqual({ token, admin: ADMIN })
+    expect(storage.data.get(RESTAURANT_STORAGE_KEY)).toBe(restaurant)
 
     usePlatformSession.getState().signOut()
-    expect(storage.data.has(SECRET)).toBe(false)
-    expect(storage.data.get(SECRET_RESTAURANT)).toBe(restaurant)
+    expect(storage.data.has(PLATFORM_STORAGE_KEY)).toBe(false)
+    expect(storage.data.get(RESTAURANT_STORAGE_KEY)).toBe(restaurant)
   })
 
   it('recupera una sesión guardada vigente y descarta una vencida', async () => {
     const current = tokenThatExpires(3600)
-    const open = await load({ [SECRET]: JSON.stringify({ token: current, admin: ADMIN }) })
+    const open = await load({ [PLATFORM_STORAGE_KEY]: JSON.stringify({ token: current, admin: ADMIN }) })
     expect(open.usePlatformSession.getState()).toMatchObject({ token: current, admin: ADMIN, expired: false })
 
-    const expired = await load({ [SECRET]: JSON.stringify({ token: tokenThatExpires(-10), admin: ADMIN }) })
+    const expired = await load({ [PLATFORM_STORAGE_KEY]: JSON.stringify({ token: tokenThatExpires(-10), admin: ADMIN }) })
     expect(expired.usePlatformSession.getState()).toMatchObject({ token: null, admin: null, expired: true })
-    expect(expired.storage.data.has(SECRET)).toBe(false)
+    expect(expired.storage.data.has(PLATFORM_STORAGE_KEY)).toBe(false)
   })
 
   it('se cierra sola cuando vence el token', async () => {
@@ -105,7 +105,7 @@ describe('sesión de plataforma', () => {
     const mutationFn = () => Promise.resolve(null)
     await mutations
       .build(queryClient, { mutationKey: platformMutationKeys.addOwner, mutationFn })
-      .execute({ password: 'x'.repeat(12) })
+      .execute({ key: 'x'.repeat(12) })
     await mutations.build(queryClient, { mutationKey: ['orders', 'create'], mutationFn }).execute(undefined)
 
     usePlatformSession.getState().signOut()
@@ -142,7 +142,7 @@ describe('renovación de la sesión de plataforma', () => {
     usePlatformSession.getState().renew(old, fresh, ADMIN)
 
     expect(usePlatformSession.getState().token).toBe(fresh)
-    expect(JSON.parse(storage.data.get(SECRET) ?? '{}')).toEqual({ token: fresh, admin: ADMIN })
+    expect(JSON.parse(storage.data.get(PLATFORM_STORAGE_KEY) ?? '{}')).toEqual({ token: fresh, admin: ADMIN })
   })
 
   it('descarta una renovación que llega después de que la sesión cambió', async () => {
@@ -158,19 +158,19 @@ describe('renovación de la sesión de plataforma', () => {
     usePlatformSession.getState().renew(old, tokenThatExpires(7200), ADMIN)
 
     expect(usePlatformSession.getState()).toMatchObject({ token: otherAccount, admin: OTHER })
-    expect(JSON.parse(storage.data.get(SECRET) ?? '{}')).toEqual({ token: otherAccount, admin: OTHER })
+    expect(JSON.parse(storage.data.get(PLATFORM_STORAGE_KEY) ?? '{}')).toEqual({ token: otherAccount, admin: OTHER })
 
     // Y sin sesión abierta tampoco revive la que se cerró.
     usePlatformSession.getState().signOut()
     usePlatformSession.getState().renew(otherAccount, tokenThatExpires(7200), OTHER)
     expect(usePlatformSession.getState().token).toBeNull()
-    expect(storage.data.has(SECRET)).toBe(false)
+    expect(storage.data.has(PLATFORM_STORAGE_KEY)).toBe(false)
   })
 })
 
 // Una pestaña de vista previa recién cargada, con la sesión real de plataforma en localStorage.
 async function loadInPreview(token: string) {
-  const storage = fakeStorage({ [SECRET]: JSON.stringify({ token, admin: ADMIN }) })
+  const storage = fakeStorage({ [PLATFORM_STORAGE_KEY]: JSON.stringify({ token, admin: ADMIN }) })
   stubGlobal('localStorage', storage)
   stubGlobal('sessionStorage', fakeStorage())
   stubGlobal('location', { pathname: '/vista-previa', search: '', hash: '' })
@@ -189,22 +189,22 @@ describe('en una pestaña de vista previa', () => {
   it('entrar, salir o vencer queda en memoria y no toca la sesión real', async () => {
     const real = tokenThatExpires(3600)
     const { storage, usePlatformSession } = await loadInPreview(real)
-    const saved = storage.data.get(SECRET)
+    const saved = storage.data.get(PLATFORM_STORAGE_KEY)
 
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
-    expect(storage.data.get(SECRET)).toBe(saved)
+    expect(storage.data.get(PLATFORM_STORAGE_KEY)).toBe(saved)
 
     usePlatformSession.getState().signOut()
-    expect(storage.data.get(SECRET)).toBe(saved)
+    expect(storage.data.get(PLATFORM_STORAGE_KEY)).toBe(saved)
 
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
     usePlatformSession.getState().expire()
-    expect(storage.data.get(SECRET)).toBe(saved)
+    expect(storage.data.get(PLATFORM_STORAGE_KEY)).toBe(saved)
   })
 
   it('un 401 de plataforma ahí no borra la sesión real', async () => {
     const { storage, usePlatformSession, api } = await loadInPreview(tokenThatExpires(3600))
-    const saved = storage.data.get(SECRET)
+    const saved = storage.data.get(PLATFORM_STORAGE_KEY)
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
     const adapter = (config: InternalAxiosRequestConfig) => {
       const response = { data: {}, status: 401, statusText: 'Unauthorized', headers: {}, config }
@@ -214,6 +214,6 @@ describe('en una pestaña de vista previa', () => {
     await expect(api.get('/platform/restaurants', { adapter })).rejects.toThrow()
 
     expect(usePlatformSession.getState().token).toBeNull()
-    expect(storage.data.get(SECRET)).toBe(saved)
+    expect(storage.data.get(PLATFORM_STORAGE_KEY)).toBe(saved)
   })
 })

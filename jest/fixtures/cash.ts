@@ -41,6 +41,6 @@ export function cashRegisterShift(changes: Partial<CashSession> = {}): CashSessi
 
 export const CLOSED_CASH_REGISTER: CurrentCash = { is_open: false, session: null }
 
-export function handleOpenCashRegister(shift: CashSession = cashRegisterShift()): CurrentCash {
+export function currentOpenCash(shift: CashSession = cashRegisterShift()): CurrentCash {
   return { is_open: true, session: shift }
 }

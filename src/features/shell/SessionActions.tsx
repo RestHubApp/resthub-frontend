@@ -21,7 +21,7 @@ interface SessionActionsProps {
  */
 export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActionsProps) {
   const signOut = useSession((state) => state.signOut)
-  const preview = usePreview()
+  const isPreview = usePreview()
   const pending = useQueuedOrders(useSession((state) => state.account))
   const navigate = useNavigate()
 
@@ -36,7 +36,7 @@ export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActio
 
   const howMany =
     pending.length === 1 ? 'Un pedido tuyo espera' : `${String(pending.length)} pedidos tuyos esperan`
-  const signOutItem = (onClick?: () => void) => (
+  const signOutMenuItem = (onClick?: () => void) => (
     <Button type="button" variant="ghost" className="h-11 justify-start gap-3 px-3" onClick={onClick}>
       <ShellIcon name="signOut" size={18} />
       <span>Cerrar sesión</span>
@@ -45,12 +45,12 @@ export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActio
 
   const output =
     pending.length === 0 ? (
-      signOutItem(handleSignOut)
+      signOutMenuItem(handleSignOut)
     ) : (
       // Los pedidos no se borran, pero no salen hasta que esta cuenta vuelva
       // a entrar: quien cierra la sesion tiene que saberlo.
       <ConfirmDialog
-        trigger={signOutItem()}
+        trigger={signOutMenuItem()}
         title="¿Cerrar sesión con pedidos sin enviar?"
         description={`${howMany} señal: ${pending.map((order) => order.label).join(', ')}. Quedan guardados en este celular y se envían cuando vuelvas a entrar con tu cuenta.`}
         confirmLabel="Cerrar sesión"
@@ -70,7 +70,7 @@ export function SessionActions({ fullName, roleLabel, onNavigate }: SessionActio
           </span>
         </Link>
       </Button>
-      {preview ? null : output}
+      {isPreview ? null : output}
     </div>
   )
 }

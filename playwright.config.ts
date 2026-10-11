@@ -10,7 +10,7 @@ const FRONT_PORT = 5201
 const FRONT = `http://localhost:${String(FRONT_PORT)}`
 const API = `http://localhost:${String(BACKEND_PORT)}`
 const enCI = process.env.CI !== undefined
-const TRABAJADORES = enCI ? 2 : 4
+const WORKERS = enCI ? 2 : 4
 
 // El celular del mesero: 390 px de ancho, táctil.
 const MOBILE = { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } }
@@ -18,8 +18,8 @@ const DESKTOP = { ...devices['Desktop Chrome'], viewport: { width: 1366, height:
 
 // En WSL sin root, WebKit se lanza con un envoltorio que agrega las librerías
 // del sistema que faltan (ver e2e/README.md). En el CI no hace falta.
-const webkitLanzador = process.env.E2E_WEBKIT_EXECUTABLE
-const WEBKIT = webkitLanzador === undefined ? {} : { launchOptions: { executablePath: webkitLanzador } }
+const webkitLauncher = process.env.E2E_WEBKIT_EXECUTABLE
+const WEBKIT = webkitLauncher === undefined ? {} : { launchOptions: { executablePath: webkitLauncher } }
 
 const VISUAL = /visual\/.*\.spec\.ts/u
 
@@ -35,7 +35,7 @@ export default defineConfig({
   forbidOnly: enCI,
   // Una prueba intermitente se arregla, no se reintenta.
   retries: 0,
-  workers: process.env.E2E_WORKERS === undefined ? TRABAJADORES : Number(process.env.E2E_WORKERS),
+  workers: process.env.E2E_WORKERS === undefined ? WORKERS : Number(process.env.E2E_WORKERS),
   timeout: 45_000,
   expect: {
     timeout: 8_000,

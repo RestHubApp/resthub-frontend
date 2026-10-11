@@ -34,7 +34,7 @@ function openPanel(en = '/plataforma/observabilidad') {
 }
 
 // La tarjeta de un gráfico: la que tiene su título como encabezado.
-function handleCard(title: string): HTMLElement {
+function getCard(title: string): HTMLElement {
   const card = screen.getByRole('heading', { name: title }).closest<HTMLElement>('[data-slot="card"]')
   if (card === null) {
     throw new Error(`No se encontró la tarjeta «${title}».`)
@@ -62,7 +62,7 @@ describe('ObservabilityView', () => {
 
     const bars = await screen.findByRole('list', { name: 'Respuestas por estado HTTP' })
     expect(within(bars).getByLabelText('500 · error del servidor: 7')).toBeInTheDocument()
-    await user.click(within(handleCard('Respuestas por estado')).getByRole('button', { name: 'Ver tabla' }))
+    await user.click(within(getCard('Respuestas por estado')).getByRole('button', { name: 'Ver tabla' }))
 
     const table = screen.getByRole('table', { name: 'Respuestas por estado' })
     expect(within(table).getByRole('row', { name: /404 · error del cliente 33/u })).toBeInTheDocument()
@@ -72,8 +72,8 @@ describe('ObservabilityView', () => {
     const { user } = openPanel()
     await screen.findByRole('heading', { name: 'Tráfico' })
 
-    await user.click(within(handleCard('Tráfico')).getByRole('button', { name: 'Ver tabla' }))
-    await user.click(within(handleCard('Latencia p95')).getByRole('button', { name: 'Ver tabla' }))
+    await user.click(within(getCard('Tráfico')).getByRole('button', { name: 'Ver tabla' }))
+    await user.click(within(getCard('Latencia p95')).getByRole('button', { name: 'Ver tabla' }))
 
     expect(within(screen.getByRole('table', { name: 'Tráfico por cubo' })).getAllByRole('row')).toHaveLength(3)
     expect(within(screen.getByRole('table', { name: 'Latencia p95 por cubo' })).getByText('56 ms')).toBeInTheDocument()

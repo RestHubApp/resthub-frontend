@@ -9,15 +9,15 @@ import { useSession } from '@/store/session'
  * de golpe y no sabe si hizo algo mal.
  */
 export function SessionExpiredNotice() {
-  const expired = useSession((state) => state.expired)
-  const passwordChanged = useSession((state) => state.passwordChanged)
+  const isExpired = useSession((state) => state.expired)
+  const wasPasswordChanged = useSession((state) => state.passwordChanged)
 
   return (
     <>
-      <div hidden={!expired}>
+      <div hidden={!isExpired}>
         <FormMessage tone="error">Tu sesión venció. Vuelve a entrar para seguir donde estabas.</FormMessage>
       </div>
-      <div hidden={!passwordChanged}>
+      <div hidden={!wasPasswordChanged}>
         <FormMessage tone="ok">Tu contraseña cambió. Vuelve a iniciar sesión.</FormMessage>
       </div>
     </>

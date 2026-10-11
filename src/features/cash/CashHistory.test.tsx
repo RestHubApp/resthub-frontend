@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { cashRegisterSummary, cashRegisterShift } from '#jest/fixtures/cash'
-import { signInAs, handleMount, ErrorResponse, server } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import type { CashSession } from '@/api/types'
 import { CashHistory } from './CashHistory'
 
@@ -28,7 +28,7 @@ function open(items: CashSession[], total = items.length) {
     total,
   }))
   signInAs()
-  return { api, ...handleMount(<CashHistory />) }
+  return { api, ...mountScreen(<CashHistory />) }
 }
 
 describe('CashHistory', () => {
@@ -97,7 +97,7 @@ describe('CashHistory', () => {
   it('si la lista falla muestra el error', async () => {
     server().on('get', SESSIONS, new ErrorResponse(500, 'Sin conexión con la base'))
     signInAs()
-    handleMount(<CashHistory />)
+    mountScreen(<CashHistory />)
     expect(await screen.findByText('Sin conexión con la base')).toBeInTheDocument()
   })
 })

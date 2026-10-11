@@ -1,5 +1,5 @@
 // Cuenta los elementos del inventario de interfaz que recorrieron las pruebas
-// que pasaron, por proyecto, y lo deja en e2e/.report/cobertura-ui-resultado.json.
+// que pasaron, por proyecto, y lo deja en e2e/.report/coverage-ui-result.json.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
@@ -11,7 +11,7 @@ interface Element {
 }
 
 const ROOT = join(import.meta.dirname, '..')
-const OUTPUT = `${process.env.E2E_REPORT ?? join(ROOT, '.reporte')}-coverage-ui.json`
+const OUTPUT = `${process.env.E2E_REPORT ?? join(ROOT, '.report')}-coverage-ui.json`
 
 export default class ReportCoverage implements Reporter {
   private readonly seen = new Map<string, Set<string>>()
@@ -22,7 +22,7 @@ export default class ReportCoverage implements Reporter {
     }
     const project = test.parent.project()?.name ?? ''
     const ids = [...test.annotations, ...result.annotations]
-      .filter((note) => note.type === 'cubre' && note.description !== undefined)
+      .filter((note) => note.type === 'covers' && note.description !== undefined)
       .map((note) => String(note.description))
     const set = this.seen.get(project) ?? new Set<string>()
     for (const id of ids) {

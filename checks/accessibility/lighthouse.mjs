@@ -45,11 +45,11 @@ await browserSessions.close()
 // carpetas relativas dentro del repositorio.
 const profile = mkdtempSync(join(process.env.A11Y_TMP ?? tmpdir(), 'resthub-lighthouse-'))
 const PORT = Number(process.env.A11Y_PORT_CDP ?? 9302)
-const processValue = spawn(process.env.CHROME_PATH ?? chromium.executablePath(), [
+const chromeProcess = spawn(process.env.CHROME_PATH ?? chromium.executablePath(), [
   '--headless=new', '--no-first-run', '--no-default-browser-check', '--disable-gpu',
   `--remote-debugging-port=${String(PORT)}`, `--user-data-dir=${profile}`, 'about:blank',
 ], { stdio: 'ignore' })
-const chrome = { port: PORT, kill: () => processValue.kill() }
+const chrome = { port: PORT, kill: () => chromeProcess.kill() }
 for (let i = 0; i < 100; i += 1) {
   const ready = await fetch(`http://127.0.0.1:${String(PORT)}/json/version`).then((r) => r.ok, () => false)
   if (ready) break
@@ -126,9 +126,9 @@ await browser.disconnect()
 chrome.kill()
 // Chromium aún escribe en su perfil unos instantes tras `kill()`. Si se
 // borra antes, WSL devuelve ENOTEMPTY y se perdería el resumen ya medido.
-if (processValue.exitCode === null && processValue.signalCode === null) {
+if (chromeProcess.exitCode === null && chromeProcess.signalCode === null) {
   await Promise.race([
-    new Promise((resolve) => { processValue.once('exit', resolve) }),
+    new Promise((resolve) => { chromeProcess.once('exit', resolve) }),
     new Promise((resolve) => { setTimeout(resolve, 5000) }),
   ])
 }
@@ -140,8 +140,8 @@ try {
 
 // Resumen combinado con lo que ya había si se midió una parte.
 const routeSummary = join(dir, 'resumen.json')
-const previousValue = existsSync(routeSummary) && (process.env.A11Y_ONLY || process.env.A11Y_PRESETS) ? await readJson(routeSummary) : { rows: [] }
+const previousRows = existsSync(routeSummary) && (process.env.A11Y_ONLY || process.env.A11Y_PRESETS) ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.preset}`))
-const all = [...previousValue.rows.filter((f) => !fresh.has(`${f.id}--${f.preset}`)), ...rows]
+const all = [...previousRows.rows.filter((f) => !fresh.has(`${f.id}--${f.preset}`)), ...rows]
 await writeJson(routeSummary, { date: new Date().toISOString(), categories: CATEGORIES, repeat, rows: all })
 console.log(`\nLighthouse: ${rows.length} mediciones`)

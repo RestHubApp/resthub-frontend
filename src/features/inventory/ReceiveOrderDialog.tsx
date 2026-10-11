@@ -53,7 +53,7 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
     quantity: (values[line.id]?.quantity ?? '0').replace(',', '.'),
     unit_cost: (values[line.id]?.unitCost ?? '0').replace(',', '.'),
   }))
-  const valid = lines.every((line) => NUMBER.test(line.quantity) && NUMBER.test(line.unit_cost))
+  const isValid = lines.every((line) => NUMBER.test(line.quantity) && NUMBER.test(line.unit_cost))
 
   return (
     <FormDialog open title={`Recibir la orden ${String(order.number)}`} description={order.supplier_name} onOpenChange={(open) => {
@@ -82,7 +82,7 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
         <Button type="button" variant="outline" onClick={onClose}>
           Cancelar
         </Button>
-        <Button type="button" variant="success" disabled={!valid || receive.isPending} onClick={() => {
+        <Button type="button" variant="success" disabled={!isValid || receive.isPending} onClick={() => {
           receive.mutate({ orderId: order.id, lines })
         }}>
           {receive.isPending ? 'Recibiendo…' : 'Recibir y cargar al stock'}

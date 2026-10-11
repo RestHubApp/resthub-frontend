@@ -10,11 +10,11 @@ const PERCENT = 100
 
 // El servidor no trae la variación de cancelados: se calcula igual que las otras.
 function cancelledChange(summary: SalesSummary): string | null {
-  const antes = summary.previous.cancelled_orders
-  if (antes === 0) {
+  const before = summary.previous.cancelled_orders
+  if (before === 0) {
     return null
   }
-  return String(((summary.cancelled_orders - antes) / antes) * PERCENT)
+  return String(((summary.cancelled_orders - before) / before) * PERCENT)
 }
 
 /** Ventas, pedidos pagados, ticket promedio y cancelados del período, contra el anterior. */

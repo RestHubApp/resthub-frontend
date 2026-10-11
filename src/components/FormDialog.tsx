@@ -35,13 +35,13 @@ export function FormDialog({
   // La ventana se abre desde estado y no desde su propio disparador, así que
   // Radix no sabe a dónde devolver el foco. Se recuerda lo que lo tenía al
   // abrir: quien usa teclado vuelve al botón que la abrió y no al inicio.
-  const returnValue = useRef<HTMLElement | null>(null)
+  const returnFocus = useRef<HTMLElement | null>(null)
   const [openFrom, setOpenFrom] = useState(0)
   const failures = useMutationState({
     filters: { status: 'error' },
     select: (mutation) => mutation.state.submittedAt,
   })
-  const failureInThisDialog = open && failures.some((moment) => moment >= openFrom)
+  const hasFailureInThisDialog = open && failures.some((moment) => moment >= openFrom)
   // Sin descripción, Radix pide decirlo explícitamente para no anunciar un vacío.
   const withoutDescription = description === undefined ? { 'aria-describedby': undefined } : {}
 
@@ -51,13 +51,13 @@ export function FormDialog({
         {...withoutDescription}
         className={`max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto p-5 sm:p-6 ${WIDTHS[size]}`}
         onOpenAutoFocus={() => {
-          returnValue.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+          returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
           setOpenFrom(Date.now())
         }}
         onCloseAutoFocus={(event) => {
-          if (returnValue.current?.isConnected === true) {
+          if (returnFocus.current?.isConnected === true) {
             event.preventDefault()
-            returnValue.current.focus()
+            returnFocus.current.focus()
           }
         }}
       >
@@ -65,7 +65,7 @@ export function FormDialog({
           <DialogTitle className="text-lg leading-tight font-semibold">{title}</DialogTitle>
           {description === undefined ? null : <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        {failureInThisDialog ? (
+        {hasFailureInThisDialog ? (
           // De respaldo: si el formulario ya dice por qué no se guardó, no se repite.
           <div className="[[role=dialog]:has([data-falla=propia])_&]:hidden">
             <FormMessage tone="error" fallback>

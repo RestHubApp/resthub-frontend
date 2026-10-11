@@ -19,12 +19,12 @@ export interface ObsRefresh {
 
 /** La actualización automática del panel: cada 30 s con la pestaña a la vista, con pausa manual. */
 export function useObsRefresh(): ObsRefresh {
-  const [paused, setPaused] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
   const visibility = usePageVisibility()
   return {
-    paused,
-    setPaused,
+    paused: isPaused,
+    setPaused: setIsPaused,
     visibility,
-    live: { refetchInterval: refreshInterval(paused, visibility), refetchOnWindowFocus: !paused },
+    live: { refetchInterval: refreshInterval(isPaused, visibility), refetchOnWindowFocus: !isPaused },
   }
 }

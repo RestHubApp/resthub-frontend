@@ -22,8 +22,8 @@ function margin(cost: DishCost) {
   if (cost.margin === null) {
     return <StatusBadge label="Sin receta" tone="pending" />
   }
-  const lost = Number(cost.margin) < 0
-  return <span className={lost ? 'font-semibold text-destructive' : 'font-semibold'}>{formatMoney(cost.margin)}</span>
+  const isLost = Number(cost.margin) < 0
+  return <span className={isLost ? 'font-semibold text-destructive' : 'font-semibold'}>{formatMoney(cost.margin)}</span>
 }
 
 function columns(canManage: boolean): DataColumn<DishCost>[] {

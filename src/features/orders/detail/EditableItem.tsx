@@ -28,12 +28,12 @@ interface EditableItemProps {
  * que se habla con la cocina y el servidor lo rechaza.
  */
 export function EditableItem({ orderId, item, flag }: EditableItemProps) {
-  const [editing, setEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const change = useOrderAction({
     mutationFn: (payload: ChangeItemRequest) => changeOrderItem(orderId, item.id, payload),
     failure: 'No se pudo cambiar el plato.',
     onSuccess: () => {
-      setEditing(false)
+      setIsEditing(false)
     },
   })
   const remove = useOrderAction({
@@ -65,16 +65,16 @@ export function EditableItem({ orderId, item, flag }: EditableItemProps) {
       </div>
       <ItemNote note={item.notes} flag={flag} />
       <Button type="button" variant="ghost" className="h-11 w-fit px-3" onClick={() => {
-        setEditing(true)
+        setIsEditing(true)
       }}>
         <Icon name="note" size={16} />
         <span>{item.notes === '' ? 'Agregar nota' : 'Cambiar nota'}</span>
       </Button>
-      {editing ? (
+      {isEditing ? (
         <Suspense fallback={null}>
           <ItemNoteDialog
-            open={editing}
-            onOpenChange={setEditing}
+            open={isEditing}
+            onOpenChange={setIsEditing}
             dish={item.name}
             notes={item.notes}
             pending={change.isPending}

@@ -20,7 +20,7 @@ export function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
   const last = order.payments.at(-1)
   const change = last?.change ?? null
   const received = last?.amount_received ?? ''
-  const tips = toCents(order.tips) > 0
+  const hasTips = toCents(order.tips) > 0
 
   return (
     <div className="flex flex-col gap-4">
@@ -41,7 +41,7 @@ export function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
       <dl className="m-0 grid grid-cols-2 gap-y-1 text-sm">
         <dt className="text-muted-foreground">Total cobrado</dt>
         <dd className="m-0 text-right tabular-nums">{formatMoney(order.total)}</dd>
-        {tips ? (
+        {hasTips ? (
           <>
             <dt className="text-muted-foreground">Propinas</dt>
             <dd className="m-0 text-right tabular-nums">{formatMoney(order.tips)}</dd>

@@ -32,8 +32,8 @@ export function MenuItemRow({
   isLast,
   onMove,
 }: MenuItemRowProps) {
-  const [editing, setEditing] = useState(false)
-  const outOfStock = item.is_active && !item.is_available
+  const [isEditing, setIsEditing] = useState(false)
+  const isOutOfStock = item.is_active && !item.is_available
 
   return (
     <li
@@ -46,7 +46,7 @@ export function MenuItemRow({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <h3 className="m-0 text-base font-semibold text-foreground">{item.name}</h3>
           <span className="font-semibold text-foreground tabular-nums">{formatMoney(item.price)}</span>
-          {outOfStock ? <StatusBadge label="Agotado hoy" tone="cancelled" /> : null}
+          {isOutOfStock ? <StatusBadge label="Agotado hoy" tone="cancelled" /> : null}
           {item.is_active ? null : <StatusBadge label="Fuera de la carta" />}
         </div>
         {item.description === '' ? null : (
@@ -64,7 +64,7 @@ export function MenuItemRow({
           className="h-11 px-3"
           aria-label={`Editar ${item.name}`}
           onClick={() => {
-            setEditing(true)
+            setIsEditing(true)
           }}
         >
           <Icon name="edit" size={16} />
@@ -73,12 +73,12 @@ export function MenuItemRow({
         <MenuItemStatusButton item={item} />
       </div>
 
-      <FormDialog open={editing} onOpenChange={setEditing} title={`Editar ${item.name}`} size="lg">
+      <FormDialog open={isEditing} onOpenChange={setIsEditing} title={`Editar ${item.name}`} size="lg">
         <MenuItemForm
           item={item}
           categories={categories}
           onDone={() => {
-            setEditing(false)
+            setIsEditing(false)
           }}
         />
       </FormDialog>

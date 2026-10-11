@@ -21,10 +21,10 @@ interface Split {
 }
 
 function payloadFor(order: OrderResponse, values: ChargeValues, { mode, part, dishes }: Split): PaymentRequest {
-  const cash = values.payment_method === 'cash'
+  const isCash = values.payment_method === 'cash'
   const base: PaymentRequest = {
     payment_method: values.payment_method,
-    amount_received: cash ? decimalForApi(values.amount_received) : null,
+    amount_received: isCash ? decimalForApi(values.amount_received) : null,
     tip: decimalForApi(values.tip) ?? '0',
     // El saldo que ve quien cobra: si cambió (otro pago, un doble toque), el
     // servidor no cobra dos veces.
@@ -72,10 +72,10 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
       }
       form.reset({ payment_method: form.getValues('payment_method'), amount_received: '', tip: '' })
       setDishes([])
-      setPersonas((antes) => Math.max(antes - 1, 1))
+      setPersonas((before) => Math.max(before - 1, 1))
     },
   })
-  const withoutDishes = mode === 'items' && dishes.length === 0
+  const hasNoDishes = mode === 'items' && dishes.length === 0
 
   return {
     form,
@@ -87,7 +87,7 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
     setDishes,
     part,
     payment,
-    canCharge: !withoutDishes && !payment.isPending,
+    canCharge: !hasNoDishes && !payment.isPending,
     send: form.handleSubmit((values) => {
       payment.mutate(payloadFor(order, values, { mode, part, dishes }))
     }),

@@ -15,7 +15,7 @@ interface Entry {
 const ENTRIES: readonly Entry[] = [
   { to: paths.platform.home, label: 'Restaurantes', icon: 'restaurant', within: paths.platform.restaurant('') },
   { to: paths.platform.activity, label: 'Bitácora', icon: 'history' },
-  { to: paths.platform.preview, label: 'Vista previa', icon: 'ver' },
+  { to: paths.platform.preview, label: 'Vista previa', icon: 'view' },
   { to: paths.platform.observability, label: 'Observabilidad', icon: 'observability' },
 ]
 
@@ -40,10 +40,10 @@ export function PlatformNav({ pathname }: PlatformNavProps) {
     <nav aria-label="Administración del sistema" className="order-last w-full sm:order-none sm:w-auto">
       <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
         {ENTRIES.map((entry) => {
-          const actual = active(entry, pathname)
+          const isCurrent = active(entry, pathname)
           return (
             <li key={entry.to}>
-              <Link to={entry.to} className={actual ? ACTIVE : INACTIVE} aria-current={actual ? 'page' : undefined}>
+              <Link to={entry.to} className={isCurrent ? ACTIVE : INACTIVE} aria-current={isCurrent ? 'page' : undefined}>
                 <Icon name={entry.icon} size={18} />
                 <span>{entry.label}</span>
               </Link>

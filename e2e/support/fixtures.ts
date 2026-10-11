@@ -22,25 +22,25 @@ interface Accessories {
 }
 
 export const test = base.extend<Accessories>({
-  page: async ({ page }, use) => {
+  page: async ({ page }, provide) => {
     await page.addInitScript(() => {
       window.__RESTHUB_E2E = true
     })
-    await use(page)
+    await provide(page)
   },
-  local: async ({}, use) => {
+  local: async ({}, provide) => {
     const local = await createRestaurant()
-    await use(local)
+    await provide(local)
     await local.http.dispose()
   },
-  restaurantWithCashRegister: async ({}, use) => {
+  restaurantWithCashRegister: async ({}, provide) => {
     const local = await createRestaurant({ openCashRegister: true })
-    await use(local)
+    await provide(local)
     await local.http.dispose()
   },
-  platform: async ({}, use) => {
+  platform: async ({}, provide) => {
     const http = await newHttp()
-    await use(await signInPlatformByApi(http))
+    await provide(await signInPlatformByApi(http))
     await http.dispose()
   },
 })
@@ -56,8 +56,8 @@ export const expect = expectBase
 export async function openAs(page: Page, session: Session, destination = '/'): Promise<void> {
   await page.goto('/acceso')
   await page.evaluate(
-    ([password, value]) => {
-      localStorage.setItem(password, value)
+    ([key, value]) => {
+      localStorage.setItem(key, value)
     },
     [SESSION, JSON.stringify({ token: session.token, account: session.account })] as const,
   )
@@ -67,8 +67,8 @@ export async function openAs(page: Page, session: Session, destination = '/'): P
 export async function openAsPlatform(page: Page, session: SessionPlatform, destination = '/plataforma'): Promise<void> {
   await page.goto('/plataforma/acceso')
   await page.evaluate(
-    ([password, value]) => {
-      localStorage.setItem(password, value)
+    ([key, value]) => {
+      localStorage.setItem(key, value)
     },
     [SESSION_PLATFORM, JSON.stringify({ token: session.token, admin: session.admin })] as const,
   )

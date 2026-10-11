@@ -20,7 +20,7 @@ import { usePlatformSession } from '../src/store/platformSession'
 import { useSession } from '../src/store/session'
 
 /** Las pantallas del restaurante tal como las registra el router: de ellas salen el menú y la precarga del armazón. */
-export const SCREENSValue = SCREENS
+export const TEST_SCREENS = SCREENS
 
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
@@ -75,8 +75,8 @@ function bodyOf(data: unknown): unknown {
 
 function headersOf(config: InternalAxiosRequestConfig): Record<string, string> {
   const flat: Record<string, string> = {}
-  for (const [password, value] of Object.entries(AxiosHeaders.from(config.headers).toJSON())) {
-    flat[password.toLowerCase()] = String(value)
+  for (const [key, value] of Object.entries(AxiosHeaders.from(config.headers).toJSON())) {
+    flat[key.toLowerCase()] = String(value)
   }
   return flat
 }
@@ -183,7 +183,7 @@ export const PERMISSIONS_WAITER: readonly PermissionCode[] = [
 ]
 
 /** Una cuenta de restaurante con los permisos dados. */
-export function handleAccount(permissions: readonly PermissionCode[], changes: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
+export function buildAccount(permissions: readonly PermissionCode[], changes: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
   return {
     permissions: [...permissions],
     preview: false,
@@ -202,7 +202,7 @@ export function signInToPlatform(): void {
 
 /** Abre una sesión de restaurante sin pasar por el acceso. */
 export function signInAs(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, changes: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
-  const account = handleAccount(permissions, changes)
+  const account = buildAccount(permissions, changes)
   setAuthToken('token-de-prueba')
   useSession.setState({ token: 'token-de-prueba', account, expired: false, passwordChanged: false })
   return account
@@ -229,7 +229,7 @@ interface MountOptions {
 }
 
 /** Monta una pantalla dentro de un router en memoria y con el caché de la aplicación. */
-export function handleMount(screen: ReactElement, { path = '/', en = path, routes = [] }: MountOptions = {}): Mount {
+export function mountScreen(screen: ReactElement, { path = '/', en = path, routes = [] }: MountOptions = {}): Mount {
   return mountRoutes([{ path, element: screen }, ...routes], en)
 }
 
@@ -238,14 +238,14 @@ export function handleMount(screen: ReactElement, { path = '/', en = path, route
 // prueba que abre la misma pantalla la encuentra «cargada» y sin componente.
 function copy(routes: readonly RouteObject[]): RouteObject[] {
   return routes.map((route) => {
-    const copyValue: RouteObject = { ...route }
+    const routeCopy: RouteObject = { ...route }
     if (typeof route.lazy === 'object') {
-      copyValue.lazy = { ...route.lazy }
+      routeCopy.lazy = { ...route.lazy }
     }
     if (route.children) {
-      copyValue.children = copy(route.children)
+      routeCopy.children = copy(route.children)
     }
-    return copyValue
+    return routeCopy
   })
 }
 
@@ -284,7 +284,7 @@ afterEach(() => {
 })
 
 /** El primer elemento de una lista que la prueba da por no vacia; falla con un mensaje claro si no. */
-export function handleFirst<T>(list: readonly T[]): T {
+export function firstOf<T>(list: readonly T[]): T {
   const element = list[0]
   if (element === undefined) {
     throw new Error('Se esperaba al menos un elemento.')

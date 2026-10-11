@@ -11,15 +11,15 @@ import { ShellIcon } from './ShellIcon'
  * real. Una vista previa vencida se vuelve a abrir desde la administración.
  */
 export function PreviewEndedView() {
-  const expired = useSession((state) => state.expired)
+  const isExpired = useSession((state) => state.expired)
 
   return (
     <main id="contenido" tabIndex={-1} className="flex min-h-dvh flex-col justify-center bg-background px-4 py-6 outline-none sm:px-6">
       <div className="mx-auto w-full max-w-md">
         <EmptyState
-          title={expired ? 'La vista previa venció' : 'Saliste de la vista previa'}
+          title={isExpired ? 'La vista previa venció' : 'Saliste de la vista previa'}
           description={
-            expired
+            isExpired
               ? 'Duraba 30 minutos y no se renueva. Abre otra desde «Vista previa» en la administración del sistema.'
               : 'Esta pestaña ya no tiene sesión. Puedes cerrarla.'
           }

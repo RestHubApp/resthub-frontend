@@ -21,12 +21,12 @@ jest.mock('@/api/auth', () => ({
 function memory(initial: Record<string, string> = {}) {
   const data = new Map(Object.entries(initial))
   return {
-    getItem: (password: string) => data.get(password) ?? null,
-    setItem: (password: string, value: string) => {
-      data.set(password, value)
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      data.set(key, value)
     },
-    removeItem: (password: string) => {
-      data.delete(password)
+    removeItem: (key: string) => {
+      data.delete(key)
     },
     data,
   }
@@ -47,7 +47,7 @@ async function page({ loadedIn, browsedTo }: Load) {
     Object.assign(location, { pathname, search, hash })
   }
   // Como el navegador: reescribir el historial cambia la dirección sin cargar la página.
-  const history = { state: null, replaceState: jest.fn((_: unknown, __: string, url: string) => {
+  const history = { state: null, replaceState: jest.fn((_: unknown, _title: string, url: string) => {
       ir(url)
     }),
   }

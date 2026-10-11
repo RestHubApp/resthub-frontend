@@ -25,8 +25,8 @@ async function show(page: Page, load: string, title: string): Promise<void> {
   const button = page.getByRole('button', { name: load, exact: true })
   // Al acercar el botón, el observer monta la sección y lo quita del DOM.
   await button.scrollIntoViewIfNeeded()
-  const mounted = await titleLoc.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true, () => false)
-  if (!mounted) await button.click()
+  const isMounted = await titleLoc.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true, () => false)
+  if (!isMounted) await button.click()
   await expect(titleLoc).toBeVisible()
 }
 
@@ -105,10 +105,10 @@ test('PLA-16 el panel de observabilidad muestra indicadores y gráficos, cambia 
   // Una ruta lleva a sus peticiones, filtradas por su plantilla.
   await show(page, 'Cargar peticiones', 'Peticiones')
   const first = routes.getByRole('link', { name: /^Ver peticiones de /u }).first()
-  const nameValue = (await first.getAttribute('aria-label')) ?? ''
-  const template = nameValue.replace(/^Ver peticiones de \S+ /u, '')
+  const rowName = (await first.getAttribute('aria-label')) ?? ''
+  const template = rowName.replace(/^Ver peticiones de \S+ /u, '')
   // La tabla puede reordenarse al llegar la relectura: se toca la ruta leída, no «la primera».
-  await routes.getByRole('link', { name: nameValue, exact: true }).first().click()
+  await routes.getByRole('link', { name: rowName, exact: true }).first().click()
   await expect(page).toHaveURL(/ruta=/u)
   await expect(page.getByLabel('Ruta (plantilla)')).toHaveValue(template)
 
@@ -200,9 +200,9 @@ test('PLA-18 si una lectura del panel falla, la sección lo dice y «Reintentar�
   platform,
 }) => {
   covers('estado:observabilidad.error')
-  let fail = true
+  let shouldFail = true
   await page.route('**/api/v1/platform/observability/summary**', async (route) => {
-    if (fail) {
+    if (shouldFail) {
       await route.fulfill({ status: 500, contentType: 'application/json', body: '{"detail":"error"}' })
       return
     }
@@ -212,7 +212,7 @@ test('PLA-18 si una lectura del panel falla, la sección lo dice y «Reintentar�
   const retry = page.getByRole('button', { name: 'Reintentar' }).first()
   await expect(retry).toBeVisible()
   await evidence(page, 'pla-18-error')
-  fail = false
+  shouldFail = false
   // La consulta reintenta sola una vez (`debeReintentar`); si ese reintento
   // automático cae justo después de que `fallar` pasa a `false`, la sección
   // se recupera por su cuenta y el botón desaparece antes de que termine

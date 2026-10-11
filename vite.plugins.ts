@@ -14,7 +14,7 @@ import { loadEnv, type Plugin } from 'vite'
 const SIENNA_CDN = 'https://cdn.jsdelivr.net/npm/sienna-accessibility/dist/'
 const SIENNA_BASE = '/sienna/'
 const SIENNA_FILES = ['fonts/OpenDyslexic3-Regular.woff', 'fonts/OpenDyslexic3-Regular.ttf', 'locales/es.json'] as const
-export function siennaAutoalojado(): Plugin {
+export function handleSiennaSelfHosted(): Plugin {
   const dist = fileURLToPath(new URL('node_modules/sienna-accessibility/dist', import.meta.url))
   const read = (file: string) => readFileSync(join(dist, file)) // eslint-disable-line security/detect-non-literal-fs-filename -- lista fija de arriba
   return {
@@ -45,7 +45,7 @@ export function siennaAutoalojado(): Plugin {
 // Al compilar con VITE_API_URL se suma una CSP en <meta> que lo acota al propio
 // origen y al del API: el navegador aplica las dos y gana la más estricta, de
 // modo que una inyección no puede sacar datos a un dominio ajeno.
-export function acotarConnections(): Plugin {
+export function boundConnections(): Plugin {
   // Solo corre al compilar (`apply: 'build'`), por eso el modo es producción.
   const api = (loadEnv('production', process.cwd(), 'VITE_').VITE_API_URL as string | undefined) ?? ''
   return {
@@ -64,7 +64,7 @@ export function acotarConnections(): Plugin {
 // La fuente de la interfaz la pide el CSS, así que el navegador la descubre
 // recién al bajarlo (HTML → CSS → fuente) y el texto sale con la de respaldo
 // hasta entonces. Precargarla la baja en paralelo con el CSS.
-export function precargarSource(): Plugin {
+export function preloadSource(): Plugin {
   return {
     name: 'resthub:precargar-fuente',
     apply: 'build',

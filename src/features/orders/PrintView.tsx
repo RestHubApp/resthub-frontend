@@ -24,17 +24,17 @@ import { QueryError } from './QueryError'
 export function PrintView() {
   const params = useParams()
   const orderId = Number(params['orderId'])
-  const ticket = params['kind'] === 'comanda'
+  const isTicket = params['kind'] === 'comanda'
   const timeZone = useTimeZone()
   const restaurant = useSession((state) => state.account?.restaurant.name ?? '')
   const order = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
-  const ready = order.isSuccess
+  const isReady = order.isSuccess
 
   useEffect(() => {
-    if (ready) {
+    if (isReady) {
       window.print()
     }
-  }, [ready])
+  }, [isReady])
 
   if (order.isPending) {
     return <EmptyState title="Preparando la hoja…" />
@@ -47,7 +47,7 @@ export function PrintView() {
     <div className="flex flex-col items-center gap-4">
       <style>{PRINT_CSS}</style>
       {/* La hoja no lleva título visible; el lector de pantalla sí lo necesita. */}
-      <h1 className="sr-only">{`${ticket ? 'Comanda' : 'Precuenta'} del pedido #${String(order.data.number)}`}</h1>
+      <h1 className="sr-only">{`${isTicket ? 'Comanda' : 'Precuenta'} del pedido #${String(order.data.number)}`}</h1>
       <div className="flex w-full max-w-sm items-center justify-between gap-2 print:hidden">
         <BackLink to={paths.orders.detail(orderId)} label="Pedido" />
         <Button type="button" onClick={() => {
@@ -58,7 +58,7 @@ export function PrintView() {
         </Button>
       </div>
       <article id="hoja-impresa" className="w-[74mm] bg-white p-3 font-mono text-black shadow-md">
-        {ticket ? (
+        {isTicket ? (
           <KitchenTicket order={order.data} timeZone={timeZone} />
         ) : (
           <BillTicket order={order.data} restaurant={restaurant} timeZone={timeZone} />

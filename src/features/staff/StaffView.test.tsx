@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { TEAM, member, role, ROLE_OWNER, ROLE_WAITER } from '#jest/fixtures/platform'
-import { signInAs, handleMount, PERMISSIONS_OWNER, handleFirst, ErrorResponse, server, type Request } from '#jest/harness'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, firstOf, ErrorResponse, server, type Request } from '#jest/harness'
 import type { PermissionCode } from '@/api/types'
 import { StaffView } from './StaffView'
 
@@ -30,7 +30,7 @@ function openStaff(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
     .on('get', '/staff', () => ({ items: team.map((account) => ({ ...account })), total: team.length }))
     .on('get', '/roles', ROLES)
   signInAs(permissions)
-  return { api, save, ...handleMount(<StaffView />, { path: '/personal' }) }
+  return { api, save, ...mountScreen(<StaffView />, { path: '/personal' }) }
 }
 
 async function rowOf(name: string | RegExp): Promise<HTMLElement> {
@@ -89,7 +89,7 @@ describe('StaffView', () => {
 
   it('la cuenta propia cambia el nombre pero no el rol, ni se desactiva', async () => {
     const { api, save, user } = openStaff()
-    api.on('patch', '/staff/7', (request: Request) => save({ ...handleFirst(TEAM), ...(request.body as object) }))
+    api.on('patch', '/staff/7', (request: Request) => save({ ...firstOf(TEAM), ...(request.body as object) }))
     const own = await rowOf(/Ana Torres/u)
 
     expect(within(own).queryByRole('button', { name: 'Contraseña' })).not.toBeInTheDocument()
@@ -135,7 +135,7 @@ describe('StaffView: cambios sobre otras cuentas', () => {
   it('desactivar se confirma; activar va directo', async () => {
     const { api, save, user } = openStaff()
     api.on('patch', '/staff/8/status', () => save(member({ is_active: false })))
-    api.on('patch', '/staff/9/status', () => save({ ...(TEAM.at(2) ?? handleFirst(TEAM)), is_active: true }))
+    api.on('patch', '/staff/9/status', () => save({ ...(TEAM.at(2) ?? firstOf(TEAM)), is_active: true }))
 
     await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Desactivar' }))
     const notice = await screen.findByRole('alertdialog', { name: '¿Desactivar a Luis Quispe?' })
@@ -168,7 +168,7 @@ describe('StaffView: cambios sobre otras cuentas', () => {
   it('si no se puede cargar el personal, lo dice', async () => {
     server().on('get', '/staff', new ErrorResponse(500, 'Sin conexión con la base')).on('get', '/roles', ROLES)
     signInAs()
-    handleMount(<StaffView />)
+    mountScreen(<StaffView />)
 
     expect(await screen.findByText('Sin conexión con la base')).toBeInTheDocument()
   })

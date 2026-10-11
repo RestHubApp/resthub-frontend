@@ -134,7 +134,7 @@ export function section(changes: Partial<OrderMenuSection> = {}): OrderMenuSecti
 }
 
 /** Una carta con fondos, bebidas (con opciones en la chicha) y un plato agotado. */
-export function handleMenu(): OrderMenu {
+export function buildMenu(): OrderMenu {
   return {
     categories: [
       section({

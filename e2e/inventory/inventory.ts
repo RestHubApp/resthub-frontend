@@ -42,11 +42,11 @@ function routerRoutes(): Element[] {
   routes.set('/plataforma/*', 'src/router/routes.tsx')
   return [...routes]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([path, originValue]) => ({
+    .map(([path, sourceFile]) => ({
       id: `ruta:${path}`,
       type: 'ruta',
       description: path.endsWith('*') ? 'Una ruta que no existe redirige al inicio' : `Pantalla ${path}`,
-      origin: originValue,
+      origin: sourceFile,
     }))
 }
 
