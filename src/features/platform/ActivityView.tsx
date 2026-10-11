@@ -37,6 +37,7 @@ export function ActivityView() {
           <PlatformQueryError error={log.error} fallback="No se pudo cargar la bitácora." onRetry={() => void log.refetch()} />
         ) : (
           <DataTable
+            label="Bitácora de plataforma"
             columns={COLUMNS}
             data={log.data?.items ?? []}
             isLoading={log.isPending}

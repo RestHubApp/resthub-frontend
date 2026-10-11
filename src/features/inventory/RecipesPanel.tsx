@@ -38,6 +38,7 @@ export function RecipesPanel({ canManage }: RecipesPanelProps) {
         {noticeWithoutRecipe(withoutRecipe)}
       </p>
       <DataTable
+        label="Costo y margen por plato"
         columns={buildRecipeColumns(canManage)}
         data={costs.data ?? []}
         isLoading={costs.isPending}

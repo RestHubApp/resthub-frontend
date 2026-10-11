@@ -29,6 +29,7 @@ export function MovementsPanel() {
         <MutationError isError error={book.error} fallback="No se pudo cargar el libro de movimientos." />
       ) : (
         <DataTable
+          label="Libro de movimientos"
           columns={columns}
           data={book.data?.items ?? []}
           isLoading={book.isPending}

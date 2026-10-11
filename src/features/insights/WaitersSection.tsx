@@ -30,6 +30,7 @@ export function WaitersSection({ range }: WaitersSectionProps) {
         <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el rendimiento por mesero.">
           {({ waiters }) => (
             <DataTable
+              label="Rendimiento por mesero"
               columns={COLUMNS}
               data={waiters}
               isLoading={false}

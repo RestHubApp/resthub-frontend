@@ -162,7 +162,7 @@ export function sessionScript(storage) {
   return `(() => { try {
     const a = ${dataJson};
     for (const { name, value } of a.local) localStorage.setItem(name, value);
-    for (const { name, value } of a.sesion) sessionStorage.setItem(name, value);
+    for (const { name, value } of a.session) sessionStorage.setItem(name, value);
   } catch (e) {} })();`
 }
 
@@ -195,7 +195,8 @@ async function runStep(page, step) {
   const first = (loc) => loc.filter({ visible: true }).first()
   if (step.button) return first(page.getByRole('button', { name: step.button, exact: typeof step.button === 'string' })).click()
   if (step.tab) return first(page.getByRole('tab', { name: step.tab, exact: typeof step.tab === 'string' })).click()
-  if (step.option) return page.getByRole('radio', { name: step.option }).first().check({ force: true })
+  // Los radios de las fichas son sr-only: fuera de la ventana para el puntero, pero con foco y clic de teclado.
+  if (step.option) return page.getByRole('radio', { name: step.option }).first().evaluate((radio) => { radio.click() })
   if (step.date) {
     // Una fecha relativa a hoy, en días (-7: hace una semana), en el campo con esa etiqueta.
     const day = new Date(Date.now() - 5 * 3600_000 + step.days * 86_400_000).toISOString().slice(0, 10)

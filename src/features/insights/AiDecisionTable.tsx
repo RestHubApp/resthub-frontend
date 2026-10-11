@@ -101,6 +101,7 @@ export function AiDecisionTable({ decisions, isLoading }: AiDecisionTableProps) 
   const tableColumns = useMemo(() => columns(timeZone), [timeZone])
   return (
     <DataTable
+      label="Decisiones de la IA"
       columns={tableColumns}
       data={decisions}
       isLoading={isLoading}

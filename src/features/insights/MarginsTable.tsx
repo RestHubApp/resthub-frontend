@@ -81,7 +81,7 @@ export function MarginsTable({ dishes }: MarginsTableProps) {
 
   return (
     <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
-      <Table>
+      <Table label="Margen por plato">
         <caption className="sr-only">Margen por plato, ordenable por columna</caption>
         <TableHeader>
           {table.getHeaderGroups().map((group) => (

@@ -45,5 +45,5 @@ export function RestaurantsTable({ items, isLoading, emptyMessage, error, onRetr
     return <PlatformQueryError error={error} fallback="No se pudo cargar la lista." onRetry={onRetry} />
   }
 
-  return <DataTable columns={COLUMNS} data={items} isLoading={isLoading} emptyMessage={emptyMessage} getRowId={(r) => String(r.id)} />
+  return <DataTable label="Restaurantes" columns={COLUMNS} data={items} isLoading={isLoading} emptyMessage={emptyMessage} getRowId={(r) => String(r.id)} />
 }

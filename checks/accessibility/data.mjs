@@ -45,9 +45,22 @@ async function accountWithoutTerms(t) {
   })
 }
 
+// Cobrar necesita la caja abierta, y «Turno» necesita un turno ya cerrado: con
+// la semilla sola no hay ninguno de los dos.
+async function prepareCash(t) {
+  const isClosed = (s) => !s.is_open
+  const sessions = await call(t, 'GET', '/cash/sessions')
+  if (!(sessions.items ?? sessions).some(isClosed)) {
+    if (!(await call(t, 'GET', '/cash/current')).is_open) await call(t, 'POST', '/cash/open', { opening_amount: '100.00', notes: '' })
+    await call(t, 'POST', '/cash/close', { counted_cash: '100.00', notes: 'Turno de las pruebas de accesibilidad' })
+  }
+  if (!(await call(t, 'GET', '/cash/current')).is_open) await call(t, 'POST', '/cash/open', { opening_amount: '100.00', notes: '' })
+}
+
 export async function prepareData() {
   await acceptTerms()
   const t = await token('owner')
+  await prepareCash(t)
   await accountWithoutTerms(t)
   const ids = {}
 
@@ -95,7 +108,7 @@ export async function prepareData() {
   // Datos fiscales, un pedido cobrado con comprobante y uno servido por cobrar.
   await call(t, 'PUT', '/billing/settings', {
     ruc: '20123456789', legal_name: 'Restaurante Demo S.A.C.', address: 'Jr. Lima 456, Lima',
-    igv_rate: '18.00', sales_receipt_series: 'B001', tax_invoice_series: 'F001', provider_url: '', provider_token: null,
+    igv_rate: '18.00', boleta_series: 'B001', factura_series: 'F001', provider_url: '', provider_token: null,
   })
   const menu = await call(t, 'GET', '/menu')
   const dishes = menu.categories.flatMap((c) => c.items ?? [])

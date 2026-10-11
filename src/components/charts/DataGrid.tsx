@@ -22,7 +22,7 @@ const NUMERIC = 'text-right tabular-nums'
 export function DataGrid<T>({ caption, columns, rows, rowKey }: DataGridProps<T>) {
   return (
     <div className="max-h-96 overflow-auto rounded-xl ring-1 ring-foreground/10">
-      <Table>
+      <Table label={caption}>
         <caption className="sr-only">{caption}</caption>
         <TableHeader>
           <TableRow>
