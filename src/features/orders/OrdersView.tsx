@@ -46,7 +46,7 @@ export function OrdersView() {
       <Tabs
         value={view}
         onValueChange={(value) => {
-          setParams({ vista: value }, { replace: true })
+          setParams({ 'vista': value }, { replace: true })
         }}
         className="gap-4"
       >

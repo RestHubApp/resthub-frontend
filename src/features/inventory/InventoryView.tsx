@@ -40,7 +40,7 @@ export function InventoryView() {
     setAction(fresh)
   }, [])
   const irA = (fresh: InventorySection) => {
-    setParams(fresh === 'insumos' ? {} : { vista: fresh }, { replace: true })
+    setParams(fresh === 'insumos' ? {} : { 'vista': fresh }, { replace: true })
   }
 
   return (
