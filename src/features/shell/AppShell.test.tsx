@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { entrarComo, montarRutas, PERMISOS_ENCARGADO, PERMISOS_MESERO, primero, RespuestaDeError, segundo, servidor } from '#jest/harness'
+import { entrarComo, montarRutas, PANTALLAS, PERMISOS_ENCARGADO, PERMISOS_MESERO, primero, RespuestaDeError, segundo, servidor } from '#jest/harness'
 import { currentUserQueryKey } from '@/api/auth'
 import { queryClient } from '@/services/queryClient'
 import type { OpenOrderRequest } from '@/api/types'
 import { enqueueOrder, removeQueued } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
 import { AppShell } from './AppShell'
-import type { ScreenPreload } from './screenPreload'
+import type { ShellScreen } from './shellScreens'
 
 const ORDERS_TAKE = 'orders.take'
 const CASH_MANAGE = 'cash.manage'
@@ -17,7 +17,7 @@ const FORMULARIO_DE_ACCESO = 'Formulario de acceso'
 const MENU = { name: 'Navegación principal' }
 const SALIR = { name: 'Cerrar sesión' }
 
-function abrirArmazon(screens: readonly ScreenPreload[] = [], en = '/') {
+function abrirArmazon(screens: readonly ShellScreen[] = PANTALLAS, en = '/') {
   const rutas = [
     {
       path: '/',
@@ -31,6 +31,11 @@ function abrirArmazon(screens: readonly ScreenPreload[] = [], en = '/') {
     },
   ]
   return montarRutas(rutas, en)
+}
+
+// Las pantallas reales del registro, con otra carga o precarga en las que se indican.
+function conCambios(cambios: Record<string, Partial<ShellScreen>>): readonly ShellScreen[] {
+  return PANTALLAS.map((pantalla) => ({ ...pantalla, ...cambios[pantalla.path] }))
 }
 
 function barraLateral() {
@@ -150,7 +155,7 @@ describe('AppShell: sesión y precargas', () => {
 
   it('sin sesión solo muestra la marca y el contenido del acceso', () => {
     servidor()
-    abrirArmazon([], '/acceso')
+    abrirArmazon(PANTALLAS, '/acceso')
 
     expect(screen.getByText(FORMULARIO_DE_ACCESO)).toBeInTheDocument()
     expect(screen.queryByRole('navigation', MENU)).not.toBeInTheDocument()
@@ -169,10 +174,7 @@ describe('AppShell: sesión y precargas', () => {
     entrarComo(PERMISOS_MESERO)
     const caja = jest.fn(() => Promise.resolve())
     const cocina = jest.fn(() => Promise.resolve())
-    const { user } = abrirArmazon([
-      { path: 'caja', permission: CASH_MANAGE, load: caja },
-      { path: 'cocina', permission: ORDERS_TAKE, load: cocina },
-    ])
+    const { user } = abrirArmazon(conCambios({ '/caja': { load: caja }, '/cocina': { load: cocina } }))
 
     expect(cocina).not.toHaveBeenCalled()
     expect(caja).not.toHaveBeenCalled()
@@ -185,7 +187,7 @@ describe('AppShell: sesión y precargas', () => {
     servidor()
     entrarComo(PERMISOS_ENCARGADO)
     const prefetch = jest.fn()
-    const { user } = abrirArmazon([{ path: 'caja', permission: CASH_MANAGE, prefetch }])
+    const { user } = abrirArmazon(conCambios({ '/caja': { prefetch } }))
 
     await user.hover(within(barraLateral()).getByRole('link', { name: 'Caja' }))
 

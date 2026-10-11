@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
 import { MIN_PASSWORD } from '@/services/fieldRules'
+import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 import {
   type ChangePasswordForm as Formulario,
@@ -78,7 +79,7 @@ export function ChangePasswordForm() {
       if (resultado === 'renovada') {
         reset(EMPTY_CHANGE_PASSWORD)
       } else if (resultado === 'cerrada') {
-        void navigate('/acceso', { replace: true })
+        void navigate(paths.login, { replace: true })
       }
     },
   })

@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { aiDecisionsQuery } from '@/api/insights'
+import { PERMISSION } from '@/api/permissions'
 import type { AiDecisionParams, DecisionEngine, DecisionKind } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { SectionCard } from '@/components/SectionCard'
@@ -44,7 +45,7 @@ export function AiAuditView() {
   const [engine, setEngine] = useState<DecisionEngine | ''>('')
   const [pagina, setPagina] = useState(0)
   // Encender o apagar la IA externa es una preferencia del local.
-  const canManageRestaurant = useCan('restaurant.manage')
+  const canManageRestaurant = useCan(PERMISSION.restaurantManage)
   const params = queryParams(kind, engine, pagina)
   const decisiones = useQuery({ ...aiDecisionsQuery(params), placeholderData: keepPreviousData })
   const total = decisiones.data?.total ?? 0

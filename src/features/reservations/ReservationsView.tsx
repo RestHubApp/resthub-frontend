@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { PERMISSION } from '@/api/permissions'
 import { reservationsOfDayQuery } from '@/api/reservations'
 import { tableName, tablesQuery } from '@/api/tables'
 import type { Reservation } from '@/api/types'
@@ -30,7 +31,7 @@ type Editing = { readonly reservation: Reservation | null } | null
  */
 export function ReservationsView() {
   const timeZone = useTimeZone()
-  const puedeGestionar = useCan('reservations.manage')
+  const puedeGestionar = useCan(PERMISSION.reservationsManage)
   const [dia, setDia] = useState(() => todayIn(timeZone))
   const reservas = useQuery(reservationsOfDayQuery(dia))
   const mesas = useQuery(tablesQuery(true))

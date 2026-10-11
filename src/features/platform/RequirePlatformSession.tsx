@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 
+import { paths } from '@/services/paths'
 import { usePlatformSession } from '@/store/platformSession'
 
 /**
@@ -14,7 +15,7 @@ export function RequirePlatformSession() {
   const location = useLocation()
 
   if (admin === null) {
-    return <Navigate to="/plataforma/acceso" replace state={{ from: location.pathname }} />
+    return <Navigate to={paths.platform.login} replace state={{ from: location.pathname }} />
   }
   return <Outlet />
 }

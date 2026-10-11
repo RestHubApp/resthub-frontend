@@ -16,6 +16,7 @@ import { OrderSummary } from './history/OrderSummary'
 import { orderPlace } from './orderLabels'
 import { OrderStatusBadge } from './OrderStatusBadge'
 import { QueryError } from './QueryError'
+import { paths } from '@/services/paths'
 import { useTimeZone } from '@/store/session'
 import { formatDateTime, formatMoney, todayIn } from '@/services/format'
 
@@ -68,7 +69,7 @@ export function HistoryView() {
 
   return (
     <div className="flex flex-col gap-5">
-      <BackLink to="/tablero" label="Tablero" />
+      <BackLink to={paths.board.list} label="Tablero" />
       <PageHeader title="Historial de pedidos" description="Todos los pedidos: pagados, cancelados o en curso." />
       <SectionCard title="Filtros" as="h2">
         <HistoryFiltersBar

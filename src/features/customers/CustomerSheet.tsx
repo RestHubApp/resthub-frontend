@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { customerQuery } from '@/api/customers'
+import { PERMISSION } from '@/api/permissions'
 import type { Customer } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -23,7 +24,7 @@ function contacto(customer: Customer): string {
 /** Un cliente: sus datos, cuánto viene y gasta, y sus últimos pedidos. */
 export function CustomerSheet({ customerId, canEdit, onEdit, onClose }: CustomerSheetProps) {
   const timeZone = useTimeZone()
-  const canErase = useCan('customers.erase')
+  const canErase = useCan(PERMISSION.customersErase)
   const cliente = useQuery({ ...customerQuery(customerId ?? 0), enabled: customerId !== null })
   const datos = cliente.data
 

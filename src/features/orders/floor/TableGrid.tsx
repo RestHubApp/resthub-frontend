@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
+import { PERMISSION } from '@/api/permissions'
 import { tablesQuery } from '@/api/tables'
 import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
 import { QueryError } from '@/features/orders/QueryError'
 import { TableCard } from './TableCard'
@@ -12,7 +14,7 @@ import { TableCard } from './TableCard'
 /** Las mesas activas del salon, en el orden en que las acomodo el encargado. */
 export function TableGrid() {
   const mesas = useQuery(tablesQuery(false))
-  const canManage = useCan('tables.manage')
+  const canManage = useCan(PERMISSION.tablesManage)
 
   if (mesas.isPending) {
     return (
@@ -41,7 +43,7 @@ export function TableGrid() {
       >
         {canManage ? (
           <Button asChild variant="outline" size="lg" className="h-11 px-4">
-            <Link to="/mesas">Crear mesas</Link>
+            <Link to={paths.tables}>Crear mesas</Link>
           </Button>
         ) : null}
       </EmptyState>

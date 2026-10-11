@@ -7,6 +7,7 @@ import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { errorMessage, errorStatus } from '@/services/api'
+import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 
 // La versión cambió mientras se leía: se relee la sesión y se pide la nueva.
@@ -41,7 +42,7 @@ export function TermsGate({ account }: { readonly account: CurrentUserResponse }
             {`Hola, ${account.user.full_name}. En RestHub vas a trabajar con datos personales de clientes, como su teléfono, su dirección o sus alergias. La Ley N.º 29733 pide que los uses solo para atender al restaurante y que los cuides.`}
           </p>
           <p className="m-0">
-            <Link to="/privacidad" target="_blank" className="inline-flex min-h-11 items-center underline underline-offset-4">
+            <Link to={paths.privacy} target="_blank" className="inline-flex min-h-11 items-center underline underline-offset-4">
               {`Leer los términos de uso y la política de privacidad (versión ${account.terms_version})`}
             </Link>
           </p>

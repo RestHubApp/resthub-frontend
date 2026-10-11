@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router'
 
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 import { usePlatformSession } from '@/store/platformSession'
 import { PlatformNav } from './PlatformNav'
 
@@ -20,14 +21,14 @@ export function PlatformHeader() {
 
   const salir = () => {
     signOut()
-    void navigate('/plataforma/acceso', { replace: true })
+    void navigate(paths.platform.login, { replace: true })
   }
 
   return (
     <header className="bg-foreground text-background">
       <div className="mx-auto flex w-full max-w-[1100px] flex-wrap items-center gap-x-4 gap-y-2 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-6">
         <Link
-          to="/plataforma"
+          to={paths.platform.home}
           className="inline-flex min-h-11 items-center gap-2.5 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-background/60"
         >
           <span className="font-heading text-lg font-black tracking-tight">RestHub</span>

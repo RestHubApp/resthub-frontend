@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 import { LowStockRow } from './LowStockRow'
 import { ReportState } from './ReportState'
 
@@ -19,7 +20,7 @@ export function LowStockSection() {
       description="El stock de ahora, sin importar el rango elegido."
       actions={
         <Button asChild variant="outline" size="sm">
-          <Link to="/panel/reposicion">
+          <Link to={paths.insights.restock}>
             <Icon name="comprar" size={14} />
             <span>Ver reposición sugerida</span>
           </Link>

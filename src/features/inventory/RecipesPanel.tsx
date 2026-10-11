@@ -10,6 +10,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { buttonVariants } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { formatMoney, formatPercent } from '@/services/format'
+import { paths } from '@/services/paths'
 
 interface RecipesPanelProps {
   readonly canManage: boolean
@@ -54,7 +55,7 @@ function columnas(canManage: boolean): DataColumn<DishCost>[] {
         const texto = costo.has_recipe ? `${verbo} receta` : 'Crear receta'
         return (
           <Link
-            to={`/inventario/recetas/${String(costo.menu_item_id)}`}
+            to={paths.inventory.recipe(costo.menu_item_id)}
             className={buttonVariants({ variant: costo.has_recipe ? 'outline' : 'secondary', className: 'h-11 px-3' })}
             aria-label={`${texto} de ${costo.menu_item_name}`}
           >

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Suspense, useMemo, useState } from 'react'
+import { PERMISSION } from '@/api/permissions'
 import { lazyNamed } from '@/components/lazyNamed'
 import { Link } from 'react-router'
 
@@ -9,6 +10,7 @@ import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useOrderNoteFlags } from '@/hooks/useOrderNoteFlags'
+import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
 import { BoardColumn } from './board/BoardColumn'
 import { BoardSkeleton } from './board/BoardSkeleton'
@@ -48,7 +50,7 @@ export function BoardView() {
   const ids = useMemo(() => pedidos.map((order) => order.id), [pedidos])
   // El tablero ya escucha el canal de avisos: el tema `insights` refresca las
   // notas desde useLiveUpdates y no hace falta una segunda conexión.
-  const veAlergias = useCan('insights.read')
+  const veAlergias = useCan(PERMISSION.insightsRead)
   const notas = useOrderNoteFlags(ids, { enabled: veAlergias, live: false })
   const visibles = tipo === 'all' ? pedidos : pedidos.filter((order) => order.type === tipo)
 
@@ -61,7 +63,7 @@ export function BoardView() {
           <div className="flex flex-wrap items-center gap-3">
             <LiveIndicator status={live} />
             <Button asChild variant="outline" size="lg" className="h-11 px-4">
-              <Link to="/tablero/historial">
+              <Link to={paths.board.history}>
                 <Icon name="historial" size={18} />
                 <span>Historial</span>
               </Link>

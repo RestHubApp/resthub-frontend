@@ -6,6 +6,7 @@ import { orderQuery } from '@/api/orders'
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 import { useSession, useTimeZone } from '@/store/session'
 import { BackLink } from '@/components/BackLink'
 import { BillTicket } from './print/BillTicket'
@@ -48,7 +49,7 @@ export function PrintView() {
       {/* La hoja no lleva título visible; el lector de pantalla sí lo necesita. */}
       <h1 className="sr-only">{`${comanda ? 'Comanda' : 'Precuenta'} del pedido #${String(pedido.data.number)}`}</h1>
       <div className="flex w-full max-w-sm items-center justify-between gap-2 print:hidden">
-        <BackLink to={`/pedidos/${String(orderId)}`} label="Pedido" />
+        <BackLink to={paths.orders.detail(orderId)} label="Pedido" />
         <Button type="button" onClick={() => {
           window.print()
         }}>

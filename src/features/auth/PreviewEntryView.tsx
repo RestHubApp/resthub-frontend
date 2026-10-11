@@ -4,6 +4,7 @@ import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { appUrl } from '@/services/leaveTab'
+import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 import { AuthCard } from './AuthCard'
 import { FAILURE_MESSAGES } from './previewCode'
@@ -39,7 +40,7 @@ export function PreviewEntryView() {
           </Button>
           <Button asChild size="lg" className="h-11 w-full">
             <a
-              href={appUrl('/plataforma/vista-previa')}
+              href={appUrl(paths.platform.preview)}
               onClick={() => {
                 useSession.getState().exitPreview()
               }}

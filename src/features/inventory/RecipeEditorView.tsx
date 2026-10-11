@@ -2,29 +2,29 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation, useParams } from 'react-router'
 
 import { recipeQuery } from '@/api/inventory'
+import { PERMISSION } from '@/api/permissions'
 import { EmptyState } from '@/components/EmptyState'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
+import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
 import { RecipeEditor } from './RecipeEditor'
 import { useIngredients } from './useIngredients'
 
-const RECETAS = '/inventario?vista=recetas'
-
 /** A dónde vuelve "Volver": al menú si se llegó desde un plato, si no a las recetas. */
 function regreso(estado: unknown): { readonly to: string; readonly label: string } {
   const desde = (estado as { from?: unknown } | null)?.from
-  return desde === '/menu' ? { to: '/menu', label: 'Volver al menú' } : { to: RECETAS, label: 'Volver a recetas' }
+  return desde === paths.menu ? { to: paths.menu, label: 'Volver al menú' } : { to: paths.inventory.recipes, label: 'Volver a recetas' }
 }
 
 /** La receta de un plato, en su propia dirección para poder enlazarla desde el menú. */
 export function RecipeEditorView() {
   const menuItemId = Number(useParams()['menuItemId'])
   const volver = regreso(useLocation().state)
-  const canManage = useCan('inventory.manage')
+  const canManage = useCan(PERMISSION.inventoryManage)
   const receta = useQuery({
     ...recipeQuery(menuItemId),
     enabled: Number.isInteger(menuItemId),

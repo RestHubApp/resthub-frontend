@@ -1,4 +1,5 @@
 import type { NewItemRequest, OpenOrderRequest } from '@/api/types'
+import { paths } from '@/services/paths'
 
 /** A dónde y a quién se entrega un delivery. */
 interface DeliveryInfo {
@@ -35,9 +36,9 @@ export function draftKey(target: OrderTarget): string {
 /** A donde vuelve "Atras". */
 export function backPath(target: OrderTarget): string {
   if (target.kind === 'add') {
-    return `/pedidos/${String(target.orderId)}`
+    return paths.orders.detail(target.orderId)
   }
-  return target.kind === 'takeaway' ? '/pedidos?vista=llevar' : '/pedidos'
+  return target.kind === 'takeaway' ? paths.orders.takeaway : paths.orders.list
 }
 
 /**

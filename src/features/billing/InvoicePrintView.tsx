@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router'
 
 import { billingSettingsQuery, invoiceQuery } from '@/api/billing'
+import { PERMISSION } from '@/api/permissions'
 import { EmptyState } from '@/components/EmptyState'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
@@ -16,7 +17,7 @@ import { InvoiceSheet } from './InvoiceSheet'
 export function InvoicePrintView() {
   const invoiceId = Number(useParams()["invoiceId"])
   const timeZone = useTimeZone()
-  const veAjustes = useCan('billing.manage')
+  const veAjustes = useCan(PERMISSION.billingManage)
   const comprobante = useQuery({ ...invoiceQuery(invoiceId), enabled: Number.isInteger(invoiceId) })
   // Los datos del emisor los ve el encargado; el mesero imprime sin encabezado
   // fiscal, que igual está en el PDF oficial del proveedor.

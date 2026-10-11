@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { applyDiscount } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
@@ -22,7 +23,7 @@ interface AdjustmentsPanelProps {
  */
 export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
   const [descontando, setDescontando] = useState(false)
-  const invita = useCan('orders.discount_any')
+  const invita = useCan(PERMISSION.ordersDiscountAny)
   const quitar = useOrderAction({
     mutationFn: () => applyDiscount(order.id, { percent: '0', reason: '' }),
     success: () => 'Descuento quitado.',

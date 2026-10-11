@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { PERMISSION } from '@/api/permissions'
 import { MAX_STAFF_PAGE, staffQuery } from '@/api/staff'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { useCan } from '@/store/session'
@@ -22,7 +23,7 @@ const PERSONAL = { limit: MAX_STAFF_PAGE, ordering: 'full_name' } as const
  * ese permiso el filtro no aparece, en vez de mostrarse vacio.
  */
 export function HistoryFiltersBar({ value, onChange }: HistoryFiltersBarProps) {
-  const verPersonal = useCan('staff.manage')
+  const verPersonal = useCan(PERMISSION.staffManage)
   const personal = useQuery({ ...staffQuery(PERSONAL), enabled: verPersonal })
   const cambiar = (parcial: Partial<HistoryFilters>) => {
     onChange({ ...value, ...parcial })

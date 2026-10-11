@@ -2,11 +2,12 @@ import { NavLink } from 'react-router'
 
 import { Icon } from '@/components/Icon'
 import type { IconName } from '@/components/icons'
+import { paths } from '@/services/paths'
 
 const TABS: readonly { to: string; label: string; icon: IconName; end?: boolean }[] = [
-  { to: '/panel', label: 'Indicadores', icon: 'indicadores', end: true },
-  { to: '/panel/reposicion', label: 'Reposición', icon: 'comprar' },
-  { to: '/panel/ia', label: 'Auditoría de IA', icon: 'ia' },
+  { to: paths.insights.overview, label: 'Indicadores', icon: 'indicadores', end: true },
+  { to: paths.insights.restock, label: 'Reposición', icon: 'comprar' },
+  { to: paths.insights.aiAudit, label: 'Auditoría de IA', icon: 'ia' },
 ]
 
 const BASE =

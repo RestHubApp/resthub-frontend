@@ -12,6 +12,7 @@ import { TablePagination } from '@/components/TablePagination'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatDateTime } from '@/services/format'
+import { paths } from '@/services/paths'
 import { PlatformQueryError } from './PlatformQueryError'
 import { PLATFORM_TIME_ZONE } from './platformTime'
 import { MAX_RESTAURANT_SEARCH, pageCount, restaurantListParams, staffSummary } from './restaurantList'
@@ -24,7 +25,7 @@ const COLUMNAS: DataColumn<PlatformRestaurantSummary>[] = [
     className: 'whitespace-normal',
     cell: (r) => (
       <Link
-        to={`/plataforma/restaurantes/${String(r.id)}`}
+        to={paths.platform.restaurant(r.id)}
         className="rounded font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         {r.name}
@@ -59,7 +60,7 @@ export function RestaurantsView() {
         description="Los locales que usan RestHub: quién está activo y cuánto personal tiene."
         actions={
           <Button asChild size="lg" className="h-11 px-4">
-            <Link to="/plataforma/restaurantes/nuevo">
+            <Link to={paths.platform.newRestaurant}>
               <Icon name="agregar" size={18} />
               <span>Nuevo restaurante</span>
             </Link>

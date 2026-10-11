@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
+import { PERMISSION } from '@/api/permissions'
 import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -30,7 +31,7 @@ function seccionDe(valor: string | null): InventorySection {
  * llevar directo a las alertas.
  */
 export function InventoryView() {
-  const canManage = useCan('inventory.manage')
+  const canManage = useCan(PERMISSION.inventoryManage)
   const [params, setParams] = useSearchParams()
   const seccion = seccionDe(params.get('vista'))
   const alertas = useLowStock()

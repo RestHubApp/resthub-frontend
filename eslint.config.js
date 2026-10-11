@@ -17,6 +17,52 @@ import sonarjs from 'eslint-plugin-sonarjs'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
+// ---------------------------------------------------------------------
+// Fuentes unicas por sintaxis (no-restricted-syntax).
+//
+// ESLint admite una sola lista de `no-restricted-syntax` por archivo, asi que
+// cada fuente unica aporta su grupo de selectores y cada bloque de mas abajo
+// compone los grupos que le tocan: `restrictSyntax(...)` los pide todos y
+// `restrictSyntaxExcept('routes')` deja fuera el del modulo que es dueño de
+// esa fuente. En los selectores, `\x2F` es la barra: esquery no deja
+// escribirla dentro de una expresion regular.
+// ---------------------------------------------------------------------
+const SLASH_START = String.raw`/^\x2F/`
+
+// Un literal de ruta es un string (o la primera parte de una plantilla) que
+// empieza con barra, en un enlace, una navegacion o la definicion de una ruta.
+const routeValues = [`Literal[value=${SLASH_START}]`, `TemplateLiteral > TemplateElement:first-child[value.raw=${SLASH_START}]`]
+const routeContexts = [
+  'JSXAttribute[name.name=/^(to|href)$/] ',
+  'CallExpression[callee.name=/^(navigate|redirect|appUrl|closeTabOrGo)$/] ',
+  'Property[key.name=/^(to|from|path)$/] > ',
+]
+
+const SYNTAX_SOURCES = {
+  routes: {
+    message:
+      'Las rutas salen de src/services/paths.ts: usa paths.<pantalla> (por ejemplo paths.orders.detail(id)) y, si no existe, agregala alli.',
+    selectors: routeContexts.flatMap((context) => routeValues.map((value) => `${context}${value}`)),
+  },
+  permissions: {
+    message:
+      'Los permisos tienen nombre en src/api/permissions.ts: usa PERMISSION.<nombre> y, si no existe, agregalo alli.',
+    selectors: [
+      String.raw`CallExpression[callee.name=/^(useCan|can|hasPermission)$/] Literal[value=/^[a-z_]+\.[a-z_]+$/]`,
+      "Property[key.name='permission'] > Literal",
+      "JSXAttribute[name.name='permission'] Literal",
+    ],
+  },
+}
+
+/** La regla compuesta con todos los grupos menos los de los modulos que son dueños de esa fuente. */
+const restrictSyntaxExcept = (...owned) => [
+  'error',
+  ...Object.entries(SYNTAX_SOURCES)
+    .filter(([name]) => !owned.includes(name))
+    .flatMap(([, { selectors, message }]) => selectors.map((selector) => ({ selector, message }))),
+]
+
 export default tseslint.config(
   {
     ignores: ['dist/**', 'dist-e2e/**', 'e2e/.resultados*/**', 'e2e/.reporte*/**', 'node_modules/**', 'src/api/schema.d.ts', 'coverage/**', 'reports/**', '.stryker-tmp/**', 'pruebas/accesibilidad/.wave-ext/**', 'pruebas/accesibilidad/reportes/**'],
@@ -194,6 +240,28 @@ export default tseslint.config(
   },
 
   // ---------------------------------------------------------------------
+  // Fuentes unicas: rutas y permisos.
+  //
+  // Cada dato vive en un solo modulo (ver SYNTAX_SOURCES arriba) y fuera de el
+  // un literal es una copia que se desfasa. Los bloques de mas abajo dejan
+  // fuera de cada grupo al modulo que es dueño de esa fuente. Las pruebas
+  // pueden escribir los literales: asi comprueban lo que ve el usuario.
+  // ---------------------------------------------------------------------
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept() },
+  },
+  {
+    files: ['src/api/permissions.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('permissions') },
+  },
+  {
+    files: ['src/services/paths.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('routes') },
+  },
+
+  // ---------------------------------------------------------------------
   // Nombrado de carpetas y archivos.
   // ---------------------------------------------------------------------
   {
@@ -296,10 +364,14 @@ export default tseslint.config(
               ],
             },
             {
+              // Ademas de las pantallas, el registro de pantallas lee las rutas
+              // (services) y los permisos con nombre (api).
               from: [{ element: { type: 'router' } }],
               allow: [
                 { to: { element: { type: 'features' } } },
                 { to: { element: { type: 'components' } } },
+                { to: { element: { type: 'services' } } },
+                { to: { element: { type: 'api' } } },
               ],
             },
             {

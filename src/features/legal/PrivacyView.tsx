@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
 
+import { paths } from '@/services/paths'
+
 /**
  * La versión de este texto. Es la misma que `TERMS_VERSION` en el backend
  * (`accounts/domain/entities.py`): si el texto cambia, cambian las dos y cada
@@ -92,7 +94,7 @@ export function PrivacyView() {
         </section>
       ))}
       <p className="m-0">
-        <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">
+        <Link to={paths.home} className="inline-flex min-h-11 items-center underline underline-offset-4">
           Volver a RestHub
         </Link>
       </p>

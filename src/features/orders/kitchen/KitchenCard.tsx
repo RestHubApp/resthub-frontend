@@ -1,4 +1,5 @@
 import { advanceOrder } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
@@ -25,7 +26,7 @@ interface KitchenCardProps {
  * Marcar listo lo hace quien tiene `orders.manage`; el resto solo mira.
  */
 export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
-  const puedeMarcar = useCan('orders.manage') && order.status === 'in_kitchen'
+  const puedeMarcar = useCan(PERMISSION.ordersManage) && order.status === 'in_kitchen'
   const listo = useOrderAction({
     mutationFn: () => advanceOrder(order.id, 'ready'),
     success: stepDoneMessage,

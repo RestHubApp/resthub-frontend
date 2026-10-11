@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
 import { activeOrdersQuery } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
 import { EmptyState } from '@/components/EmptyState'
 import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
@@ -32,7 +33,7 @@ export function KitchenView() {
   const listos = pedidos.filter((order) => order.status === 'ready')
   const ids = useMemo(() => pedidos.map((order) => order.id), [pedidos])
   // Las alergias las ve quien tiene el panel; el resto ve las notas tal cual.
-  const veAlergias = useCan('insights.read')
+  const veAlergias = useCan(PERMISSION.insightsRead)
   const notas = useOrderNoteFlags(ids, { enabled: veAlergias, live: false })
 
   return (

@@ -10,6 +10,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { TablePagination } from '@/components/TablePagination'
 import { errorMessage } from '@/services/api'
 import { formatDateTime, formatSignedQuantity } from '@/services/format'
+import { paths } from '@/services/paths'
 import { useTimeZone } from '@/store/session'
 import { MovementFilters } from './MovementFilters'
 import { KIND_TONES } from './movementKinds'
@@ -47,7 +48,7 @@ function columnas(timeZone: string): DataColumn<Movement>[] {
         mov.reason || '—'
       ) : (
         // El enlace usa el id; el texto, el número del día que ve el personal.
-        <Link to={`/pedidos/${String(mov.order_id)}`} className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link to={paths.orders.detail(mov.order_id)} className="font-medium text-primary underline-offset-4 hover:underline">
           {mov.order_number === null ? 'Ver pedido' : `Pedido #${String(mov.order_number)}`}
         </Link>
       ),

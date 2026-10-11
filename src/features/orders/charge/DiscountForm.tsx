@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 import { applyDiscount } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
 import { restaurantQuery } from '@/api/restaurant'
 import type { DiscountRequest, OrderResponse } from '@/api/types'
 import { decimalParaApi } from '@/components/formRules'
@@ -36,7 +37,7 @@ function limitHint(sinTope: boolean, tope: string | undefined): string {
  * escriba un 20 % que va a volver rechazado.
  */
 export function DiscountForm({ order, onDone }: DiscountFormProps) {
-  const sinTope = useCan('orders.discount_any')
+  const sinTope = useCan(PERMISSION.ordersDiscountAny)
   const restaurante = useQuery({ ...restaurantQuery, enabled: !sinTope })
   const { register, handleSubmit, formState } = useForm<DiscountValues>({
     resolver: zodResolver(discountSchema),

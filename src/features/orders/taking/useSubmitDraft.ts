@@ -5,6 +5,7 @@ import { addOrderItems, advanceOrder, openOrder, ordersQueryKey } from '@/api/or
 import { tablesQueryKey } from '@/api/tables'
 import type { OpenOrderRequest, OrderResponse } from '@/api/types'
 import { errorMessage } from '@/services/api'
+import { paths } from '@/services/paths'
 import { useNotifications } from '@/store/notifications'
 import { enqueueOrder, ownerOf, type QueueOwner } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
@@ -99,12 +100,12 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
       clear(key)
       if (order === QUEUED) {
         push({ tone: 'warning', message: `Sin señal: el pedido de ${label} quedó guardado y se enviará solo.` })
-        await navigate('/pedidos')
+        await navigate(paths.orders.list)
         return
       }
       await refrescar()
       push({ tone: 'info', message: successMessage(target, order) })
-      await navigate(target.kind === 'add' ? `/pedidos/${String(order.id)}` : '/pedidos')
+      await navigate(target.kind === 'add' ? paths.orders.detail(order.id) : paths.orders.list)
     },
     onError: async (error) => {
       if (!(error instanceof NotSentError)) {
@@ -117,7 +118,7 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
         tone: 'warning',
         message: `El pedido #${String(error.order.number)} quedó abierto sin enviar: ${errorMessage(error.cause, 'reintenta desde su detalle.')}`,
       })
-      await navigate(`/pedidos/${String(error.order.id)}`)
+      await navigate(paths.orders.detail(error.order.id))
     },
   })
 }

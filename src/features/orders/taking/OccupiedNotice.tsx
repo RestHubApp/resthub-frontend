@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 
 import { FormMessage } from '@/components/FormMessage'
+import { paths } from '@/services/paths'
 
 interface OccupiedNoticeProps {
   readonly orderId: number
@@ -12,7 +13,7 @@ export function OccupiedNotice({ orderId, number }: OccupiedNoticeProps) {
   return (
     <FormMessage tone="error">
       Esta mesa ya tiene el pedido #{number}.{' '}
-      <Link to={`/pedidos/${String(orderId)}`} className="font-semibold underline">
+      <Link to={paths.orders.detail(orderId)} className="font-semibold underline">
         Ver el pedido
       </Link>
     </FormMessage>

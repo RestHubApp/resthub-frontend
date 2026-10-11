@@ -29,27 +29,17 @@ function archivos(carpeta: string): string[] {
 }
 
 function rutasDelRouter(): Elemento[] {
-  const fuente = readFileSync(join(SRC, 'router', 'routes.tsx'), 'utf8')
-  const inicioPlataforma = fuente.indexOf('const PLATAFORMA')
-  const finPlataforma = fuente.indexOf('const VISTA_PREVIA')
+  // Cada ruta está una sola vez en `routePatterns`; las comodines de cada área
+  // (una ruta que no existe lleva al inicio) las arma el router, no el módulo.
+  const fuente = readFileSync(join(SRC, 'services', 'paths.ts'), 'utf8')
+  const patrones = /export const routePatterns = \{([^}]*)\}/u.exec(fuente)?.[1] ?? ''
+  const origen = 'src/services/paths.ts'
   const rutas = new Map<string, string>()
-  for (const coincidencia of fuente.matchAll(/path: '([^']+)'/gu)) {
-    const camino = coincidencia[1]
-    const posicion = coincidencia.index
-    const dePlataforma = posicion > inicioPlataforma && posicion < finPlataforma
-    let completa: string
-    if (camino.startsWith('/')) {
-      completa = camino
-    } else if (dePlataforma) {
-      completa = camino === '*' ? '/plataforma/*' : `/plataforma/${camino}`
-    } else {
-      completa = `/${camino}`
-    }
-    rutas.set(completa, 'src/router/routes.tsx')
+  for (const coincidencia of patrones.matchAll(/: '(\/[^']*)'/gu)) {
+    rutas.set(coincidencia[1], origen)
   }
-  // Las rutas índice no llevan `path`: el inicio de cada armazón.
-  rutas.set('/', 'src/router/routes.tsx (index: HomeRedirect)')
-  rutas.set('/plataforma', 'src/router/routes.tsx (index: RestaurantsView)')
+  rutas.set('/*', 'src/router/routes.tsx')
+  rutas.set('/plataforma/*', 'src/router/routes.tsx')
   return [...rutas]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([camino, origen]) => ({

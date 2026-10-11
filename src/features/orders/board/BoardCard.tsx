@@ -9,6 +9,7 @@ import { orderPlace } from '@/features/orders/orderLabels'
 import { BoardCardActions } from './BoardCardActions'
 import { ElapsedTime } from './ElapsedTime'
 import { formatMoney, minutesSince } from '@/services/format'
+import { paths } from '@/services/paths'
 
 interface BoardCardProps {
   readonly order: OrderResponse
@@ -38,7 +39,7 @@ export function BoardCard({ order, now, flagFor, onCharge, onCancel }: BoardCard
     >
       <header className="flex items-start justify-between gap-2">
         <h3 id={tituloId} className="m-0 font-heading text-2xl leading-none font-black tabular-nums">
-          <Link to={`/pedidos/${String(order.id)}`} className="rounded outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50">
+          <Link to={paths.orders.detail(order.id)} className="rounded outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50">
             <span className="sr-only">Pedido </span>#{order.number}
           </Link>
         </h3>

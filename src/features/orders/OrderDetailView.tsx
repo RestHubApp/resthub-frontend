@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { Suspense, useState } from 'react'
+import { PERMISSION } from '@/api/permissions'
 import { lazyNamed } from '@/components/lazyNamed'
 import { useParams } from 'react-router'
 
 import { orderQuery } from '@/api/orders'
 import { EmptyState } from '@/components/EmptyState'
 import { useOrderNoteFlags } from '@/hooks/useOrderNoteFlags'
+import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
 import { BackLink } from '@/components/BackLink'
 import { OrderActions } from './detail/OrderActions'
@@ -36,7 +38,7 @@ export function OrderDetailView() {
   const live = useLiveUpdates()
   const pedido = useQuery({ ...orderQuery(orderId), enabled: Number.isInteger(orderId) })
   // Las alergias las ve el encargado; useLiveUpdates ya refresca las notas.
-  const veAlergias = useCan('insights.read')
+  const veAlergias = useCan(PERMISSION.insightsRead)
   const notas = useOrderNoteFlags(Number.isInteger(orderId) ? [orderId] : [], { enabled: veAlergias, live: false })
   const [dialogo, setDialogo] = useState<'charge' | 'cancel' | null>(null)
   const cerrar = () => {
@@ -49,7 +51,7 @@ export function OrderDetailView() {
   if (pedido.isError) {
     return (
       <div className="flex flex-col gap-4">
-        <BackLink to="/pedidos" label="Pedidos" />
+        <BackLink to={paths.orders.list} label="Pedidos" />
         <QueryError error={pedido.error} fallback="No se pudo cargar el pedido." onRetry={() => void pedido.refetch()} />
       </div>
     )
@@ -59,7 +61,7 @@ export function OrderDetailView() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <BackLink to="/pedidos" label="Pedidos" />
+        <BackLink to={paths.orders.list} label="Pedidos" />
         <LiveIndicator status={live} />
       </div>
       <OrderHeader order={order} flagFor={notas.flagFor} />

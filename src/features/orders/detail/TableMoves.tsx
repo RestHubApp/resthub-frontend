@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { mergeOrders, moveOrder } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
 import { tableName } from '@/api/tables'
 import type { OrderResponse, TableState } from '@/api/types'
 import { Icon } from '@/components/Icon'
@@ -26,7 +27,7 @@ const BOTON = 'h-11 px-4'
  */
 export function TableMoves({ order }: TableMovesProps) {
   const [dialogo, setDialogo] = useState<Dialogo>(null)
-  const veTodos = useCan('orders.read_all')
+  const veTodos = useCan(PERMISSION.ordersReadAll)
   const yo = useSession((state) => state.account?.user.id)
   const esMia = (waiterId: number) => veTodos || waiterId === yo
   const cerrar = () => {

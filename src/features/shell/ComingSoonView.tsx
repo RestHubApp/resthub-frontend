@@ -4,6 +4,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
 import { entryFor } from './navigation'
+import { useShellScreens } from './shellScreens'
 
 /**
  * El lugar de una pantalla que todavia no existe.
@@ -12,7 +13,7 @@ import { entryFor } from './navigation'
  * queda en su sitio y con su permiso, y reemplazarla es cambiar un componente.
  */
 export function ComingSoonView() {
-  const entry = entryFor(useLocation().pathname)
+  const entry = entryFor(useShellScreens(), useLocation().pathname)
 
   return (
     <div className="flex flex-col gap-6">

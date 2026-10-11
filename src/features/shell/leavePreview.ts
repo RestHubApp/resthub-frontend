@@ -1,8 +1,9 @@
 import { closeTabOrGo } from '@/services/leaveTab'
+import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 
 /** Adónde vuelve la pestaña si el navegador no la deja cerrar. */
-const VUELTA = '/plataforma/vista-previa'
+const VUELTA = paths.platform.preview
 
 /**
  * Sale de la vista previa: borra su sesión y su cola entera (`exitPreview`) y

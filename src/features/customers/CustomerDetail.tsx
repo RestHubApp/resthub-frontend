@@ -4,6 +4,7 @@ import type { Customer } from '@/api/types'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { formatDateTime, formatMoney } from '@/services/format'
+import { paths } from '@/services/paths'
 
 interface CustomerDetailProps {
   readonly customer: Customer
@@ -52,7 +53,7 @@ export function CustomerDetail({ customer, timeZone, canEdit, onEdit }: Customer
         {customer.recent_orders.map((pedido) => (
           <li key={pedido.order_id}>
             <Link
-              to={`/pedidos/${String(pedido.order_id)}`}
+              to={paths.orders.detail(pedido.order_id)}
               className="flex min-h-11 items-center justify-between gap-2 rounded-md px-2 hover:bg-muted"
             >
               <span>

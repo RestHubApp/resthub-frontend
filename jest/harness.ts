@@ -11,12 +11,16 @@ import { createElement, type ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider, useLocation, type RouteObject } from 'react-router'
 
 import type { CurrentUserResponse, PermissionCode } from '../src/api/types'
+import { SCREENS } from '../src/router/screens'
 import { ToastStack } from '../src/features/shell/ToastStack'
 import { api, setAuthToken } from '../src/services/api'
 import { queryClient } from '../src/services/queryClient'
 import { useNotifications } from '../src/store/notifications'
 import { usePlatformSession } from '../src/store/platformSession'
 import { useSession } from '../src/store/session'
+
+/** Las pantallas del restaurante tal como las registra el router: de ellas salen el menú y la precarga del armazón. */
+export const PANTALLAS = SCREENS
 
 export type Metodo = 'get' | 'post' | 'put' | 'patch' | 'delete'
 

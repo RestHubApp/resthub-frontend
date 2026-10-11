@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { PERMISSION } from '@/api/permissions'
 import type { Customer } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
@@ -18,7 +19,7 @@ type Editing = { readonly customer: Customer | null } | null
  * busca, se corrigen datos y se anotan preferencias.
  */
 export function CustomersView() {
-  const puedeEditar = useCan('customers.manage')
+  const puedeEditar = useCan(PERMISSION.customersManage)
   const [abierto, setAbierto] = useState<number | null>(null)
   const [editando, setEditando] = useState<Editing>(null)
   const nuevo = (

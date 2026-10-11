@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 
 import { Icon } from '@/components/Icon'
 import type { IconName } from '@/components/icons'
+import { paths } from '@/services/paths'
 
 interface Entry {
   readonly to: string
@@ -12,10 +13,10 @@ interface Entry {
 }
 
 const ENTRADAS: readonly Entry[] = [
-  { to: '/plataforma', label: 'Restaurantes', icon: 'restaurante', within: '/plataforma/restaurantes/' },
-  { to: '/plataforma/bitacora', label: 'Bitácora', icon: 'historial' },
-  { to: '/plataforma/vista-previa', label: 'Vista previa', icon: 'ver' },
-  { to: '/plataforma/observabilidad', label: 'Observabilidad', icon: 'observabilidad' },
+  { to: paths.platform.home, label: 'Restaurantes', icon: 'restaurante', within: paths.platform.restaurant('') },
+  { to: paths.platform.activity, label: 'Bitácora', icon: 'historial' },
+  { to: paths.platform.preview, label: 'Vista previa', icon: 'ver' },
+  { to: paths.platform.observability, label: 'Observabilidad', icon: 'observabilidad' },
 ]
 
 const BASE =

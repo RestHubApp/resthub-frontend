@@ -1,4 +1,5 @@
 import type { CurrentUserResponse } from '@/api/types'
+import { paths } from '@/services/paths'
 import { Brand } from './Brand'
 import type { NavEntry } from './navigation'
 import { NavList } from './NavList'
@@ -17,7 +18,7 @@ export function SideNav({ entries, account }: SideNavProps) {
     <div className="hidden border-r bg-card lg:block">
       <aside className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-5 p-4">
         <div className="px-1 pt-1">
-          <Brand to="/" />
+          <Brand to={paths.home} />
         </div>
         <RestaurantName name={account.restaurant.name} variant="sidebar" />
         <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto">

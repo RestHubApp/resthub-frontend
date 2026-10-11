@@ -3,9 +3,11 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 
 import { orderInvoiceQuery } from '@/api/billing'
+import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
 import { InvoiceDialog } from './InvoiceDialog'
 
@@ -36,7 +38,7 @@ function esEnlaceSeguro(url: string): boolean {
  * muestra el número, cómo lo recibió SUNAT y el PDF del proveedor.
  */
 export function InvoicePanel({ order }: InvoicePanelProps) {
-  const puede = useCan('billing.issue')
+  const puede = useCan(PERMISSION.billingIssue)
   const [emitiendo, setEmitiendo] = useState(false)
   const comprobante = useQuery({ ...orderInvoiceQuery(order.id), enabled: puede && order.status === 'paid' })
   if (!puede || order.status !== 'paid' || comprobante.isPending) {
@@ -70,7 +72,7 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
         </a>
       )}
       <Button asChild variant="ghost" size="sm">
-        <Link to={`/comprobantes/${String(emitido.id)}/imprimir`}>
+        <Link to={paths.billing.print(emitido.id)}>
           <Icon name="imprimir" size={14} />
           <span>Imprimir</span>
         </Link>

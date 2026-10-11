@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router'
 
 import { BackLink } from '@/components/BackLink'
 import { PageHeader } from '@/components/PageHeader'
+import { paths } from '@/services/paths'
 import { NewRestaurantForm } from './NewRestaurantForm'
 
 /** Dar de alta un restaurante. Al crearlo se abre su ficha, con lo que devolvió el servidor. */
@@ -10,20 +11,20 @@ export function NewRestaurantView() {
 
   return (
     <div className="flex flex-col gap-5">
-      <BackLink to="/plataforma" label="Restaurantes" />
+      <BackLink to={paths.platform.home} label="Restaurantes" />
       <PageHeader
         title="Nuevo restaurante"
         description="El local, su zona horaria y la cuenta de quien lo va a administrar."
       />
       <NewRestaurantForm
         onCreated={(restaurante) => {
-          void navigate(`/plataforma/restaurantes/${String(restaurante.id)}`, {
+          void navigate(paths.platform.restaurant(restaurante.id), {
             replace: true,
             state: { created: true },
           })
         }}
         onCancel={() => {
-          void navigate('/plataforma')
+          void navigate(paths.platform.home)
         }}
       />
     </div>

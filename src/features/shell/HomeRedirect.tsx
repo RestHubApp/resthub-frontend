@@ -1,7 +1,9 @@
 import { Navigate } from 'react-router'
 
+import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 import { entriesFor } from './navigation'
+import { useShellScreens } from './shellScreens'
 
 /**
  * La raiz no tiene pantalla propia: lleva a donde trabaja cada cuenta.
@@ -11,10 +13,11 @@ import { entriesFor } from './navigation'
  */
 export function HomeRedirect() {
   const account = useSession((state) => state.account)
+  const screens = useShellScreens()
 
   if (account === null) {
-    return <Navigate to="/acceso" replace />
+    return <Navigate to={paths.login} replace />
   }
-  const primera = entriesFor(account.permissions).at(0)
-  return <Navigate to={primera?.to ?? '/perfil'} replace />
+  const primera = entriesFor(screens, account.permissions).at(0)
+  return <Navigate to={primera?.to ?? paths.profile} replace />
 }

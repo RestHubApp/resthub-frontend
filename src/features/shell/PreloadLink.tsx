@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react'
 import { NavLink } from 'react-router'
 
-import { useScreenPreload } from './screenPreload'
+import { useScreenPreload } from './shellScreens'
 
 type PreloadLinkProps = ComponentProps<typeof NavLink> & { readonly to: string }
 

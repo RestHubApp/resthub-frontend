@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
 import { errorStatus } from '@/services/api'
 import { formatDateTime } from '@/services/format'
+import { paths } from '@/services/paths'
 import { OwnersSection } from './OwnersSection'
 import { PlatformQueryError } from './PlatformQueryError'
 import { PLATFORM_TIME_ZONE } from './platformTime'
@@ -19,7 +20,7 @@ import { RestaurantStatusBadge } from './RestaurantStatusBadge'
 import { RestaurantStatusButton } from './RestaurantStatusButton'
 
 const NOT_FOUND = 404
-const VOLVER = <BackLink to="/plataforma" label="Restaurantes" />
+const VOLVER = <BackLink to={paths.platform.home} label="Restaurantes" />
 
 function recienCreado(estado: unknown): boolean {
   return typeof estado === 'object' && estado !== null && 'created' in estado && estado.created === true
