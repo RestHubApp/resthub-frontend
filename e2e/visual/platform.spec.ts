@@ -67,12 +67,16 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
   // solo paso, en vez de tocar el botón, que el propio observador puede
   // desprender del DOM a medio clic (la pestaña de scroll-y-clic quedaba
   // esperando un botón que ya no estaba).
-  await page
-    .getByText('Rutas del API', { exact: true })
-    .evaluate((el) => { el.scrollIntoView({ block: 'center' }) })
-    .catch(() => undefined)
+  // Con el armazón único la pantalla ancha monta algunas secciones sola: se baja
+  // por la página hasta que el observador las haya cargado todas.
+  await page.mouse.move(700, 500)
+  for (const step of [1, 2, 3, 4, 5, 6]) {
+    await page.mouse.wheel(0, 500 * step)
+    await page.waitForTimeout(300)
+  }
   await expect(page.getByRole('heading', { name: 'Rutas' })).toBeVisible()
   await expect(page.getByText('orders.open_failed')).toBeVisible()
+  await expect(page.getByText('5 peticiones', { exact: true })).toBeVisible()
   await capture(page, 'plataforma-observabilidad')
 
   await page.getByRole('link', { name: 'Vista previa' }).click()
