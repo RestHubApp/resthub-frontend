@@ -169,6 +169,18 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
   `prevent-abbreviations`, `no-null`, `prefer-global-this` ni `no-useless-undefined`
   (chocan con el proyecto).
 
+## Dependencias y versiones
+
+- **Dependabot** (`.github/dependabot.yml`) abre cada lunes PRs agrupados contra
+  `develop` (dependencias de producción y de desarrollo por separado, más las
+  acciones de GitHub cada mes). Espera 3 días desde que sale una versión antes de
+  proponerla. Se revisan y fusionan como cualquier PR: el CI es el mismo.
+- **release-please** (`.github/workflows/release.yml`): al fusionar `develop` en
+  `main`, abre un PR de versión contra `main` con el `CHANGELOG.md` y el número
+  nuevo según los commits convencionales (`feat` sube la menor, `fix` el parche;
+  antes de 1.0 un cambio incompatible sube la menor). Al fusionar ese PR crea la
+  etiqueta `vX.Y.Z` y la release. No edites a mano la versión ni el changelog.
+
 ## Búsqueda de código
 
 Si están instalados, usa CodeGraph y tgrep antes que grep/find o leer archivos
