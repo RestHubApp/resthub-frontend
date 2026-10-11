@@ -1,7 +1,7 @@
-import type { RestockReport } from '../../api/types'
-import Icon from '../../components/Icon'
-import { formatDateTime } from '../../services/format'
-import { useTimeZone } from '../../store/session'
+import type { RestockReport } from '@/api/types'
+import Icon from '@/components/Icon'
+import { formatDateTime } from '@/services/format'
+import { useTimeZone } from '@/store/session'
 
 interface RestockNoticeProps {
   readonly report: RestockReport

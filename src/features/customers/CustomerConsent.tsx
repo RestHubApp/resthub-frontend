@@ -1,9 +1,9 @@
 import { type Control, Controller, type FieldErrors } from 'react-hook-form'
 
-import type { Customer } from '../../api/types'
-import ConsentField from '../../components/ConsentField'
-import { formatDateTime } from '../../services/format'
-import { useTimeZone } from '../../store/session'
+import type { Customer } from '@/api/types'
+import ConsentField from '@/components/ConsentField'
+import { formatDateTime } from '@/services/format'
+import { useTimeZone } from '@/store/session'
 import type { CustomerValues } from './customerSchema'
 
 interface CustomerConsentProps {

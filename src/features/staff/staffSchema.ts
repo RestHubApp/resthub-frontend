@@ -1,12 +1,12 @@
 import { z } from 'zod'
 
-import type { CreateStaffRequest, StaffResponse, UpdateStaffRequest } from '../../api/types'
+import type { CreateStaffRequest, StaffResponse, UpdateStaffRequest } from '@/api/types'
 import {
   correoRule,
   MAX_NOMBRE_COMPLETO,
   nombreRule,
   passwordRule,
-} from '../../services/fieldRules'
+} from '@/services/fieldRules'
 
 // La lista nativa entrega texto: el rol pasa a numero recien al enviarlo.
 const roleRule = z.string().regex(/^\d+$/u, 'Elige el rol')

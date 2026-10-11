@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { menuQueryKey } from '../../api/menu'
-import type { MenuResponse } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { menuQueryKey } from '@/api/menu'
+import type { MenuResponse } from '@/api/types'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
 import { MENU_KEY } from './useMenuData'
 
 interface MenuChange<TVars> {

@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { CASH_PAGE_SIZE, cashSessionsQuery } from '../../api/cash'
-import EmptyState from '../../components/EmptyState'
-import FormMessage from '../../components/FormMessage'
-import ListSkeleton from '../../components/ListSkeleton'
-import TablePagination from '../../components/TablePagination'
-import { errorMessage } from '../../services/api'
+import { CASH_PAGE_SIZE, cashSessionsQuery } from '@/api/cash'
+import EmptyState from '@/components/EmptyState'
+import FormMessage from '@/components/FormMessage'
+import ListSkeleton from '@/components/ListSkeleton'
+import TablePagination from '@/components/TablePagination'
+import { errorMessage } from '@/services/api'
 import CashSessionDialog from './CashSessionDialog'
 import CashSessionRow from './CashSessionRow'
 

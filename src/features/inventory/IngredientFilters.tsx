@@ -1,9 +1,9 @@
 import { useId } from 'react'
 
-import FieldIcon from '../../components/FieldIcon'
-import { Checkbox } from '../../components/ui/checkbox'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
+import FieldIcon from '@/components/FieldIcon'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface IngredientFiltersProps {
   readonly search: string

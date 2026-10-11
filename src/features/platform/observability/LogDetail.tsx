@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { obsLogQuery } from '../../../api/observability'
+import { obsLogQuery } from '@/api/observability'
 import type { ObsFilters } from './obsFilters'
 import LogDetailBody from './LogDetailBody'
 import ObsQueryState from './ObsQueryState'

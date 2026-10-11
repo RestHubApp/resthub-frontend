@@ -1,8 +1,8 @@
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 
-import { obsRequestsQuery } from '../../../api/observability'
-import SectionCard from '../../../components/SectionCard'
-import PlatformQueryError from '../PlatformQueryError'
+import { obsRequestsQuery } from '@/api/observability'
+import SectionCard from '@/components/SectionCard'
+import PlatformQueryError from '@/features/platform/PlatformQueryError'
 import LoadMoreButton from './LoadMoreButton'
 import { type ObsFilters, requestsParams } from './obsFilters'
 import RequestFilters from './RequestFilters'

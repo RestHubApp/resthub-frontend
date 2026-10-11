@@ -7,12 +7,12 @@ import {
   platformMutationKeys,
   platformSandboxQueryKey,
   startPlatformPreview,
-} from '../../api/platform'
-import type { PreviewAs } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { errorMessage, errorStatus } from '../../services/api'
+} from '@/api/platform'
+import type { PreviewAs } from '@/api/types'
+import FormMessage from '@/components/FormMessage'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { errorMessage, errorStatus } from '@/services/api'
 import { openPreviewTab, PREVIEW_AS_LABELS, previewUrl } from './previewLink'
 import PreviewOpenedNotice from './PreviewOpenedNotice'
 import SandboxResetButton from './SandboxResetButton'

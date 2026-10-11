@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { newOrderPath } from '../floor/takeawaySchema'
+import { newOrderPath } from '@/features/orders/floor/takeawaySchema'
 import { draftKey, openRequest } from './orderTarget'
 
 const items = [{ menu_item_id: 1, quantity: 2, notes: '', modifiers: [] }]

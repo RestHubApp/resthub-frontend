@@ -1,5 +1,5 @@
-import type { OrderResponse } from '../../../api/types'
-import type { FlagFor } from '../noteFlags'
+import type { OrderResponse } from '@/api/types'
+import type { FlagFor } from '@/features/orders/noteFlags'
 import BoardCard from './BoardCard'
 
 interface BoardColumnProps {

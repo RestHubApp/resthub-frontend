@@ -1,12 +1,12 @@
 import { useState } from 'react'
 
-import { mergeOrders, moveOrder } from '../../../api/orders'
-import { tableName } from '../../../api/tables'
-import type { OrderResponse, TableState } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
-import { useCan, useSession } from '../../../store/session'
-import { useOrderAction } from '../useOrderAction'
+import { mergeOrders, moveOrder } from '@/api/orders'
+import { tableName } from '@/api/tables'
+import type { OrderResponse, TableState } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { useCan, useSession } from '@/store/session'
+import { useOrderAction } from '@/features/orders/useOrderAction'
 import TablePickerDialog from './TablePickerDialog'
 
 interface TableMovesProps {

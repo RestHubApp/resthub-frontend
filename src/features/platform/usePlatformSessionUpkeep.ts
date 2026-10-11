@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-import { platformMeQuery, renewPlatformSession } from '../../api/platform'
-import { useTokenRenewal } from '../../hooks/useTokenRenewal'
-import { usePlatformSession } from '../../store/platformSession'
+import { platformMeQuery, renewPlatformSession } from '@/api/platform'
+import { useTokenRenewal } from '@/hooks/useTokenRenewal'
+import { usePlatformSession } from '@/store/platformSession'
 
 const REFRESH_MS = 5 * 60_000
 

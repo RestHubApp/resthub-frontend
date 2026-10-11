@@ -1,4 +1,4 @@
-import { formatCents } from '../../services/format'
+import { formatCents } from '@/services/format'
 
 /** "Sobran S/ 2.00", "Faltan S/ 4.00" o "Cuadra". */
 export function differenceLabel(cents: number): string {

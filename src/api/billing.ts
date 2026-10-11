@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api, errorStatus, SLOW_TIMEOUT_MS } from '../services/api'
+import { api, errorStatus, SLOW_TIMEOUT_MS } from '@/services/api'
 import type {
   BillingSettings,
   BillingSettingsRequest,

@@ -1,6 +1,6 @@
-import type { CashSession } from '../../api/types'
-import { formatDateTime, formatMoney, toCents } from '../../services/format'
-import { useTimeZone } from '../../store/session'
+import type { CashSession } from '@/api/types'
+import { formatDateTime, formatMoney, toCents } from '@/services/format'
+import { useTimeZone } from '@/store/session'
 
 interface CashSessionRowProps {
   readonly session: CashSession

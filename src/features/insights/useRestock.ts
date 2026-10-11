@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { aiDecisionsQueryKey, refreshRestock, restockQuery } from '../../api/insights'
+import { aiDecisionsQueryKey, refreshRestock, restockQuery } from '@/api/insights'
 
 /** La recomendación de reposición y la acción de pedirla de nuevo. */
 export function useRestock() {

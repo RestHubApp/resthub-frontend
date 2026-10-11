@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { mesa, pago, pedido } from '#jest/fixtures/cobro'
 import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, servidor } from '#jest/harness'
-import type { ActiveOrderSummary, OrderResponse, PermissionCode } from '../../../api/types'
+import type { ActiveOrderSummary, OrderResponse, PermissionCode } from '@/api/types'
 import TableMoves from './TableMoves'
 
 const UNIR = { name: 'Unir otra mesa' }

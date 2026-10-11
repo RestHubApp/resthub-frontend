@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
 
 import { cuenta, entrarComo, montar, montarRutas, PERMISOS_ENCARGADO, RespuestaDeError, servidor } from '#jest/harness'
-import { useSession } from '../../store/session'
+import { useSession } from '@/store/session'
 import AppShell from './AppShell'
 import ComingSoonView from './ComingSoonView'
 import HomeRedirect from './HomeRedirect'

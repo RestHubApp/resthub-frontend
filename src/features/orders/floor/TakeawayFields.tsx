@@ -1,6 +1,6 @@
 import type { UseFormReturn } from 'react-hook-form'
 
-import TextField from '../../../components/TextField'
+import TextField from '@/components/TextField'
 import { MAX_CLIENTE, MAX_DIRECCION, MAX_REFERENCIA, MAX_TELEFONO, type TakeawayValues } from './takeawaySchema'
 
 interface TakeawayFieldsProps {

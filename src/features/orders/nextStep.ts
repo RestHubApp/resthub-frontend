@@ -1,6 +1,6 @@
-import type { OrderStep } from '../../api/orders'
-import type { OrderResponse, OrderStatus, PermissionCode } from '../../api/types'
-import type { IconName } from '../../components/icons'
+import type { OrderStep } from '@/api/orders'
+import type { OrderResponse, OrderStatus, PermissionCode } from '@/api/types'
+import type { IconName } from '@/components/icons'
 import { STATUS_LABELS } from './orderLabels'
 
 /** Lo siguiente que se hace con un pedido en cada estado, y quien puede hacerlo. */

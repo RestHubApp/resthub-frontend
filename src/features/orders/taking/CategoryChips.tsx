@@ -1,4 +1,4 @@
-import type { OrderMenuSection } from '../../../api/types'
+import type { OrderMenuSection } from '@/api/types'
 
 interface CategoryChipsProps {
   readonly sections: readonly OrderMenuSection[]

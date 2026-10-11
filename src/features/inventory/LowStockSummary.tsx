@@ -1,8 +1,8 @@
 import { cn } from 'cn'
 
-import Icon from '../../components/Icon'
-import ListSkeleton from '../../components/ListSkeleton'
-import { Button } from '../../components/ui/button'
+import Icon from '@/components/Icon'
+import ListSkeleton from '@/components/ListSkeleton'
+import { Button } from '@/components/ui/button'
 import { useLowStock } from './useLowStock'
 
 interface LowStockSummaryProps {

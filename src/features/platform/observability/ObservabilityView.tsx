@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 
-import PageHeader from '../../../components/PageHeader'
+import PageHeader from '@/components/PageHeader'
 import DeferredSection from './DeferredSection'
 import LatencySection from './LatencySection'
 import { windowParams } from './obsFilters'

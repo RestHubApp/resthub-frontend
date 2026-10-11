@@ -1,5 +1,5 @@
-import type { RestockAction } from '../../api/types'
-import type { IconName } from '../../components/icons'
+import type { RestockAction } from '@/api/types'
+import type { IconName } from '@/components/icons'
 
 export type StatusTone = 'critical' | 'warning' | 'good' | 'neutral'
 

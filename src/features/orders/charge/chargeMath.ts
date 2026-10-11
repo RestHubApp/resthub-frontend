@@ -1,5 +1,5 @@
-import type { OrderItemResponse, OrderResponse } from '../../../api/types'
-import { toCents } from '../../../services/format'
+import type { OrderItemResponse, OrderResponse } from '@/api/types'
+import { toCents } from '@/services/format'
 
 // Las cuentas del cobro en céntimos, con las mismas reglas que el servidor.
 // Sirven para mostrar cuánto se va a cobrar antes de mandarlo; el monto que

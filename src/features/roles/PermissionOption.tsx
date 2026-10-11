@@ -1,8 +1,8 @@
 import { useId } from 'react'
 
-import type { PermissionInfo } from '../../api/types'
-import { Checkbox } from '../../components/ui/checkbox'
-import { Label } from '../../components/ui/label'
+import type { PermissionInfo } from '@/api/types'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 interface PermissionOptionProps {
   readonly permission: PermissionInfo

@@ -1,4 +1,4 @@
-import Icon from '../../../components/Icon'
+import Icon from '@/components/Icon'
 
 /** Sin caja abierta no se cobra: lo dice antes de que alguien arme el cobro. */
 export default function CashClosedNotice() {

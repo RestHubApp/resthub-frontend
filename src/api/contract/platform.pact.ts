@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { QueryClient } from '@tanstack/react-query'
 
-import { PLATFORM_PAGE_SIZE, platformRestaurantsQuery } from '../platform'
+import { PLATFORM_PAGE_SIZE, platformRestaurantsQuery } from '@/api/platform'
 import {
   API_PREFIX,
   bearer,

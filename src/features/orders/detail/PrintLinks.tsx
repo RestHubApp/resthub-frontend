@@ -1,8 +1,8 @@
 import { Link } from 'react-router'
 
-import type { OrderResponse } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
+import type { OrderResponse } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 
 interface PrintLinksProps {
   readonly order: OrderResponse

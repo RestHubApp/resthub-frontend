@@ -1,5 +1,5 @@
-import type { MovementKind } from '../../api/types'
-import type { StatusTone } from '../../components/StatusBadge'
+import type { MovementKind } from '@/api/types'
+import type { StatusTone } from '@/components/StatusBadge'
 
 /** Los tipos de movimiento, en el orden del filtro. El servidor manda el mismo texto en `kind_label`. */
 export const KIND_OPTIONS: readonly { readonly value: MovementKind; readonly label: string }[] = [

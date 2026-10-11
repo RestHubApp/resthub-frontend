@@ -1,12 +1,12 @@
 import { useState } from 'react'
 
-import { receivePurchaseOrder } from '../../api/purchasing'
-import type { PurchaseOrder } from '../../api/types'
-import DialogFormActions from '../../components/DialogFormActions'
-import FormDialog from '../../components/FormDialog'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { formatMoney, formatQuantity } from '../../services/format'
+import { receivePurchaseOrder } from '@/api/purchasing'
+import type { PurchaseOrder } from '@/api/types'
+import DialogFormActions from '@/components/DialogFormActions'
+import FormDialog from '@/components/FormDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { formatMoney, formatQuantity } from '@/services/format'
 import { usePurchasingMutation } from './usePurchasingMutation'
 
 interface ReceiveOrderDialogProps {

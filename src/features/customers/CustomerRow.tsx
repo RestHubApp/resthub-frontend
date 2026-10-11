@@ -1,6 +1,6 @@
-import type { Customer } from '../../api/types'
-import StatusBadge from '../../components/StatusBadge'
-import { formatMoney } from '../../services/format'
+import type { Customer } from '@/api/types'
+import StatusBadge from '@/components/StatusBadge'
+import { formatMoney } from '@/services/format'
 
 interface CustomerRowProps {
   readonly customer: Customer

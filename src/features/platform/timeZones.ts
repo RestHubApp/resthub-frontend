@@ -1,4 +1,4 @@
-import { DEFAULT_TIME_ZONE } from '../../services/format'
+import { DEFAULT_TIME_ZONE } from '@/services/format'
 
 export interface TimeZoneOption {
   readonly value: string

@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router'
 
-import EmptyState from '../../components/EmptyState'
-import { isPreviewTab } from '../../services/tabStorage'
+import EmptyState from '@/components/EmptyState'
+import { isPreviewTab } from '@/services/tabStorage'
 import PreviewExitButton from './PreviewExitButton'
 
 /**

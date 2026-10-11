@@ -1,9 +1,9 @@
 import { Link } from 'react-router'
 
-import type { Customer } from '../../api/types'
-import StatusBadge from '../../components/StatusBadge'
-import { Button } from '../../components/ui/button'
-import { formatDateTime, formatMoney } from '../../services/format'
+import type { Customer } from '@/api/types'
+import StatusBadge from '@/components/StatusBadge'
+import { Button } from '@/components/ui/button'
+import { formatDateTime, formatMoney } from '@/services/format'
 
 interface CustomerDetailProps {
   readonly customer: Customer

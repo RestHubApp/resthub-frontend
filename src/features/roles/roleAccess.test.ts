@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import type { PermissionCode, Role } from '../../api/types'
+import type { PermissionCode, Role } from '@/api/types'
 import { roleAccess } from './roleAccess'
 
 const CAJA: PermissionCode = 'cash.manage'

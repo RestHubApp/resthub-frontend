@@ -1,4 +1,4 @@
-import type { ObsLogLevel } from '../../../api/types'
+import type { ObsLogLevel } from '@/api/types'
 import FilterActions from './FilterActions'
 import FilterSelect from './FilterSelect'
 import FilterTextField from './FilterTextField'

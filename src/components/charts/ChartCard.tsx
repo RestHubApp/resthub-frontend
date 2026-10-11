@@ -1,8 +1,8 @@
 import { type ReactNode, useState } from 'react'
 
-import Icon from '../Icon'
-import SectionCard from '../SectionCard'
-import { Button } from '../ui/button'
+import Icon from '@/components/Icon'
+import SectionCard from '@/components/SectionCard'
+import { Button } from '@/components/ui/button'
 
 interface ChartCardProps {
   readonly title: string

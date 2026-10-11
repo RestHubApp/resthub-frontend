@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { cashSessionQuery } from '../../api/cash'
-import type { CashSession } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import FormDialog from '../../components/FormDialog'
-import RetryQueryError from '../../components/RetryQueryError'
-import { errorMessage } from '../../services/api'
-import { formatMoney } from '../../services/format'
+import { cashSessionQuery } from '@/api/cash'
+import type { CashSession } from '@/api/types'
+import EmptyState from '@/components/EmptyState'
+import FormDialog from '@/components/FormDialog'
+import RetryQueryError from '@/components/RetryQueryError'
+import { errorMessage } from '@/services/api'
+import { formatMoney } from '@/services/format'
 import CashSummaryView from './CashSummaryView'
 
 interface CashSessionDialogProps {

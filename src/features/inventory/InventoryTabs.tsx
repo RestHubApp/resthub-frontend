@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
-import Icon from '../../components/Icon'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
+import Icon from '@/components/Icon'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { type InventorySection, SECTIONS } from './inventorySections'
 
 interface InventoryTabsProps {

@@ -1,4 +1,4 @@
-import type { OrderResponse } from '../../../api/types'
+import type { OrderResponse } from '@/api/types'
 import ChargeContent from './ChargeContent'
 
 interface ChargeDialogProps {

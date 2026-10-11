@@ -1,5 +1,5 @@
 import { cn } from 'cn'
-import { formatMoney, formatPercent } from '../../services/format'
+import { formatMoney, formatPercent } from '@/services/format'
 
 
 interface RecipeTotalsProps {

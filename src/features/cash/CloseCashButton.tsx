@@ -1,4 +1,4 @@
-import Icon from '../../components/Icon'
+import Icon from '@/components/Icon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,9 +8,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog'
-import { Button } from '../../components/ui/button'
-import { formatCents } from '../../services/format'
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { formatCents } from '@/services/format'
 import { differenceLabel } from './cashDifference'
 
 interface CloseCashButtonProps {

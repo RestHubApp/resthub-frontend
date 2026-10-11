@@ -1,4 +1,4 @@
-import type { AdjustmentRequest, Ingredient } from '../../api/types'
+import type { AdjustmentRequest, Ingredient } from '@/api/types'
 import type { AdjustmentValues } from './inventorySchema'
 import { findInputUnit, parseDecimal, toBaseQuantity } from './units'
 

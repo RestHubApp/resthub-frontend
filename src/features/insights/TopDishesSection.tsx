@@ -1,12 +1,12 @@
-import { fetchTopDishes, insightsReportQuery } from '../../api/insights'
-import type { InsightsRangeParams, TopDish } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import BarList from '../../components/charts/BarList'
-import ChartCard from '../../components/charts/ChartCard'
-import DataGrid from '../../components/charts/DataGrid'
+import { fetchTopDishes, insightsReportQuery } from '@/api/insights'
+import type { InsightsRangeParams, TopDish } from '@/api/types'
+import EmptyState from '@/components/EmptyState'
+import BarList from '@/components/charts/BarList'
+import ChartCard from '@/components/charts/ChartCard'
+import DataGrid from '@/components/charts/DataGrid'
 import ReportState from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
-import { formatInteger, formatMoney } from '../../services/format'
+import { formatInteger, formatMoney } from '@/services/format'
 
 interface TopDishesSectionProps {
   readonly range: InsightsRangeParams

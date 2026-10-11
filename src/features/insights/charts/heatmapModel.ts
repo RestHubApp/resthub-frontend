@@ -1,4 +1,4 @@
-import type { HourlyCell } from '../../../api/types'
+import type { HourlyCell } from '@/api/types'
 
 export const HEAT_STEPS = 5
 

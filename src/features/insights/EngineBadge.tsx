@@ -1,5 +1,5 @@
-import type { AiDecision, DecisionEngine } from '../../api/types'
-import Icon from '../../components/Icon'
+import type { AiDecision, DecisionEngine } from '@/api/types'
+import Icon from '@/components/Icon'
 
 interface EngineBadgeProps {
   readonly engine: DecisionEngine

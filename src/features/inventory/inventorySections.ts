@@ -1,4 +1,4 @@
-import type { IconName } from '../../components/icons'
+import type { IconName } from '@/components/icons'
 
 /** Las secciones del inventario, en el orden de las pestañas. */
 export type InventorySection = 'insumos' | 'movimientos' | 'alertas' | 'recetas' | 'compras' | 'proveedores'

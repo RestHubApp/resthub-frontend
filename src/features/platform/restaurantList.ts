@@ -1,5 +1,5 @@
-import { PLATFORM_PAGE_SIZE } from '../../api/platform'
-import type { PlatformActivityParams, PlatformRestaurantListParams } from '../../api/types'
+import { PLATFORM_PAGE_SIZE } from '@/api/platform'
+import type { PlatformActivityParams, PlatformRestaurantListParams } from '@/api/types'
 
 /** El largo máximo de la búsqueda que acepta el backend. */
 export const MAX_RESTAURANT_SEARCH = 120

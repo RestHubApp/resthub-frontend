@@ -6,15 +6,15 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
-import type * as Auth from '../../api/auth'
+import type * as Auth from '@/api/auth'
 
 // La fábrica de `jest.mock` corre al importar el módulo, después de esta línea:
 // Jest solo le deja usar variables con prefijo `mock`.
 const mockExchangePreviewCode = jest.fn<typeof Auth.exchangePreviewCode>()
 const exchangePreviewCode = mockExchangePreviewCode
 
-jest.mock('../../api/auth', () => ({
-  ...jest.requireActual<typeof Auth>('../../api/auth'),
+jest.mock('@/api/auth', () => ({
+  ...jest.requireActual<typeof Auth>('@/api/auth'),
   exchangePreviewCode: mockExchangePreviewCode,
 }))
 

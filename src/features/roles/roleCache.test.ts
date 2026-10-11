@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import type { Role } from '../../api/types'
+import type { Role } from '@/api/types'
 import { withRole } from './roleCache'
 
 function role(id: number, kind: Role['kind'], name: string): Role {

@@ -1,5 +1,5 @@
-import type { ObsWindow } from '../../../api/types'
-import { Button } from '../../../components/ui/button'
+import type { ObsWindow } from '@/api/types'
+import { Button } from '@/components/ui/button'
 import { WINDOWS } from './obsFilters'
 
 interface WindowPickerProps {

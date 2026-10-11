@@ -1,13 +1,13 @@
-import { fetchWasteReport, insightsReportQuery } from '../../api/insights'
-import type { InsightsRangeParams, WasteByIngredient } from '../../api/types'
-import ChartCard from '../../components/charts/ChartCard'
-import DataGrid from '../../components/charts/DataGrid'
+import { fetchWasteReport, insightsReportQuery } from '@/api/insights'
+import type { InsightsRangeParams, WasteByIngredient } from '@/api/types'
+import ChartCard from '@/components/charts/ChartCard'
+import DataGrid from '@/components/charts/DataGrid'
 import ClassifyWasteButton from './ClassifyWasteButton'
 import ReportState from './ReportState'
 import { WASTE_REPORT } from './useClassifyWaste'
 import { useInsightsReport } from './useInsightsReport'
 import WasteCharts from './WasteCharts'
-import { formatInteger, formatMoney, formatQuantity } from '../../services/format'
+import { formatInteger, formatMoney, formatQuantity } from '@/services/format'
 
 interface WasteSectionProps {
   readonly range: InsightsRangeParams

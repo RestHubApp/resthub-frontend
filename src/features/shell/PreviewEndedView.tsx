@@ -1,6 +1,6 @@
-import EmptyState from '../../components/EmptyState'
-import { Button } from '../../components/ui/button'
-import { useSession } from '../../store/session'
+import EmptyState from '@/components/EmptyState'
+import { Button } from '@/components/ui/button'
+import { useSession } from '@/store/session'
 import { leavePreview } from './leavePreview'
 import ShellIcon from './ShellIcon'
 

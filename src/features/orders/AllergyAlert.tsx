@@ -1,4 +1,4 @@
-import Icon from '../../components/Icon'
+import Icon from '@/components/Icon'
 
 /**
  * El aviso de que un pedido tiene una alergia en alguna nota, para el

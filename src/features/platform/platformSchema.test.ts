@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import type { PlatformRestaurantDetail } from '../../api/types'
+import type { PlatformRestaurantDetail } from '@/api/types'
 import {
   createRestaurantPayload,
   createRestaurantSchema,

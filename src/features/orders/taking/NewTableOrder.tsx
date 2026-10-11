@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { tableName, tablesQuery } from '../../../api/tables'
-import EmptyState from '../../../components/EmptyState'
-import { Button } from '../../../components/ui/button'
+import { tableName, tablesQuery } from '@/api/tables'
+import EmptyState from '@/components/EmptyState'
+import { Button } from '@/components/ui/button'
 import OccupiedNotice from './OccupiedNotice'
 import TakeOrder from './TakeOrder'
 

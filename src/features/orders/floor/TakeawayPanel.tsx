@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { activeOrdersQuery } from '../../../api/orders'
-import EmptyState from '../../../components/EmptyState'
-import ListSkeleton from '../../../components/ListSkeleton'
-import QueryError from '../QueryError'
+import { activeOrdersQuery } from '@/api/orders'
+import EmptyState from '@/components/EmptyState'
+import ListSkeleton from '@/components/ListSkeleton'
+import QueryError from '@/features/orders/QueryError'
 import OrderList from './OrderList'
 
 /** Los pedidos para llevar que todavia no se cobran, de todos los meseros. */

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { inventoryQueryKey } from '../../api/inventory'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { inventoryQueryKey } from '@/api/inventory'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
 
 interface PurchasingMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>

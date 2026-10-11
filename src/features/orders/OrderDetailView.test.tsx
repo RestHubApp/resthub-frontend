@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 
 import { pedido } from '#jest/fixtures/cobro'
 import { entrarComo, montar, PERMISOS_ENCARGADO, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
-import type { OrderResponse, PermissionCode } from '../../api/types'
+import type { OrderResponse, PermissionCode } from '@/api/types'
 import OrderDetailView from './OrderDetailView'
 
 const PEDIDO = '/orders/12'

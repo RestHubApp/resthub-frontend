@@ -1,5 +1,5 @@
-import type { CashSession, CashSummary } from '../../api/types'
-import { formatMoney, formatInteger, toCents } from '../../services/format'
+import type { CashSession, CashSummary } from '@/api/types'
+import { formatMoney, formatInteger, toCents } from '@/services/format'
 import CashTile from './CashTile'
 
 interface CashSummaryViewProps {

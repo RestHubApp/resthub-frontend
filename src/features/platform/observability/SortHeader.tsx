@@ -1,6 +1,6 @@
-import type { ObsRouteSort } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import { TableHead } from '../../../components/ui/table'
+import type { ObsRouteSort } from '@/api/types'
+import Icon from '@/components/Icon'
+import { TableHead } from '@/components/ui/table'
 import { ariaSort } from './routeSort'
 
 interface SortHeaderProps {

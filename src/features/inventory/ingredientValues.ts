@@ -1,4 +1,4 @@
-import type { Ingredient, IngredientUnit } from '../../api/types'
+import type { Ingredient, IngredientUnit } from '@/api/types'
 import type { IngredientValues } from './inventorySchema'
 import { findInputUnit, fromBase, inputUnits, parseDecimal, priceUnit, toBaseCost, toBaseQuantity } from './units'
 

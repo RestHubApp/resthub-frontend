@@ -1,8 +1,8 @@
 import { Link } from 'react-router'
 
-import type { ObsRouteSort, ObsRouteStats } from '../../../api/types'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table'
-import { formatInteger, formatMilliseconds } from '../../../services/format'
+import type { ObsRouteSort, ObsRouteStats } from '@/api/types'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { formatInteger, formatMilliseconds } from '@/services/format'
 import { type ObsFilters, requestsOfRoute } from './obsFilters'
 import { ROUTE_SORTS } from './routeSort'
 import SortHeader from './SortHeader'

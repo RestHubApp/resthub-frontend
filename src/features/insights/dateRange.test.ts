@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 
 import { celda } from '#jest/fixtures/panel'
 import { entrarComo, PERMISOS_MESERO, servidor } from '#jest/harness'
-import { queryClient } from '../../services/queryClient'
+import { queryClient } from '@/services/queryClient'
 import { heatColor, heatmapModel, heatStep } from './charts/heatmapModel'
 import { addDays, customRangeProblem, daysBetween, isRangePreset, MAX_RANGE_DAYS, presetRange } from './dateRange'
 import { prefetchInsights } from './prefetchInsights'

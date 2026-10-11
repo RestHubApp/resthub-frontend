@@ -1,6 +1,6 @@
-import type { Ingredient } from '../../api/types'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import type { Ingredient } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import PurchaseLineEditor from './PurchaseLineEditor'
 import { emptyLine, type LineDraft } from './purchaseLines'
 

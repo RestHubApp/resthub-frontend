@@ -10,7 +10,7 @@ import {
 } from '@tanstack/react-table'
 import { Fragment, type ReactNode, useMemo } from 'react'
 
-import { usePagination } from '../hooks/usePagination'
+import { usePagination } from '@/hooks/usePagination'
 import DataTableSkeleton from './DataTableSkeleton'
 import EmptyState from './EmptyState'
 import TablePagination from './TablePagination'

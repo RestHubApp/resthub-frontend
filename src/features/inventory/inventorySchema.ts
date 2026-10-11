@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { decimalRule, textoObligatorio, textoOpcional } from '../../components/formRules'
+import { decimalRule, textoObligatorio, textoOpcional } from '@/components/formRules'
 import { parseDecimal } from './units'
 
 // Los limites repiten los del backend: avisan mientras se escribe.

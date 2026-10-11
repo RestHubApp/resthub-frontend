@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { tableName, tablesQuery } from '../../../api/tables'
-import type { TableState } from '../../../api/types'
-import EmptyState from '../../../components/EmptyState'
-import FormDialog from '../../../components/FormDialog'
-import RetryQueryError from '../../../components/RetryQueryError'
-import { Button } from '../../../components/ui/button'
-import { formatMoney } from '../../../services/format'
-import { errorMessage } from '../../../services/api'
+import { tableName, tablesQuery } from '@/api/tables'
+import type { TableState } from '@/api/types'
+import EmptyState from '@/components/EmptyState'
+import FormDialog from '@/components/FormDialog'
+import RetryQueryError from '@/components/RetryQueryError'
+import { Button } from '@/components/ui/button'
+import { formatMoney } from '@/services/format'
+import { errorMessage } from '@/services/api'
 
 interface TablePickerDialogProps {
   readonly open: boolean

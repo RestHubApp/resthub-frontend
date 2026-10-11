@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api, SLOW_TIMEOUT_MS } from '../services/api'
+import { api, SLOW_TIMEOUT_MS } from '@/services/api'
 import type {
   AiDecisionPage,
   AiDecisionParams,

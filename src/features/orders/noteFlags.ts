@@ -1,5 +1,5 @@
-import type { OrderResponse } from '../../api/types'
-import type { OrderNoteFlag, OrderNoteFlags } from '../../hooks/useOrderNoteFlags'
+import type { OrderResponse } from '@/api/types'
+import type { OrderNoteFlag, OrderNoteFlags } from '@/hooks/useOrderNoteFlags'
 
 export type FlagFor = OrderNoteFlags['flagFor']
 

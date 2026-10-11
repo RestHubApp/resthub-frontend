@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
-import { logger } from '../services/logger'
-import { tokenExpiresAt } from '../services/tokenExpiry'
+import { logger } from '@/services/logger'
+import { tokenExpiresAt } from '@/services/tokenExpiry'
 
 // Se renueva unos minutos antes de que venza, con margen para un celular lento.
 const MARGEN_MS = 5 * 60_000

@@ -1,4 +1,4 @@
-import type { MenuSection } from '../../api/types'
+import type { MenuSection } from '@/api/types'
 
 interface TodaySummaryProps {
   readonly categories: readonly MenuSection[]

@@ -1,5 +1,5 @@
-import type { TableResponse, TableState } from '../../api/types'
-import { upsertInList } from '../../services/cacheList'
+import type { TableResponse, TableState } from '@/api/types'
+import { upsertInList } from '@/services/cacheList'
 
 function alFinal(): boolean {
   return false

@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import FormMessage from '../../../components/FormMessage'
+import FormMessage from '@/components/FormMessage'
 
 interface OccupiedNoticeProps {
   readonly orderId: number

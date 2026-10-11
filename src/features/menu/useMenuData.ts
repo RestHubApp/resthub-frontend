@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
-import { dishCostsQuery } from '../../api/inventory'
-import { menuQuery } from '../../api/menu'
-import type { DishCost } from '../../api/types'
-import { useCan } from '../../store/session'
+import { dishCostsQuery } from '@/api/inventory'
+import { menuQuery } from '@/api/menu'
+import type { DishCost } from '@/api/types'
+import { useCan } from '@/store/session'
 
 /** La carta completa, con lo desactivado: esta pantalla es la de quien la administra. */
 export const MENU_QUERY = menuQuery(true)

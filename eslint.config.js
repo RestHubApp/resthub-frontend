@@ -7,6 +7,7 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import pluginQuery from '@tanstack/eslint-plugin-query'
 import reactEffect from 'eslint-plugin-react-you-might-not-need-an-effect'
 import noBarrelFiles from 'eslint-plugin-no-barrel-files'
+import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import checkFile from 'eslint-plugin-check-file'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -387,6 +388,23 @@ export default tseslint.config(
       'import-x/no-mutable-exports': 'error',
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Rutas de importación: dentro de src, todo lo que no esté en la misma
+  // carpeta se importa con el alias @/. Así un import no depende de la
+  // profundidad del archivo y mover o renombrar una carpeta no obliga a
+  // reescribir los `../../..` de quien la usa.
+  // ---------------------------------------------------------------------
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    plugins: { 'no-relative-import-paths': noRelativeImportPaths },
+    rules: {
+      'no-relative-import-paths/no-relative-import-paths': [
+        'error',
+        { allowSameFolder: true, rootDir: 'src', prefix: '@' },
+      ],
     },
   },
 

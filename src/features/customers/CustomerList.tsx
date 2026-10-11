@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { useDeferredValue, useState } from 'react'
 
-import { customerSearchQuery } from '../../api/customers'
-import EmptyState from '../../components/EmptyState'
-import ListSkeleton from '../../components/ListSkeleton'
-import RetryQueryError from '../../components/RetryQueryError'
-import SectionCard from '../../components/SectionCard'
-import { Input } from '../../components/ui/input'
-import { errorMessage } from '../../services/api'
+import { customerSearchQuery } from '@/api/customers'
+import EmptyState from '@/components/EmptyState'
+import ListSkeleton from '@/components/ListSkeleton'
+import RetryQueryError from '@/components/RetryQueryError'
+import SectionCard from '@/components/SectionCard'
+import { Input } from '@/components/ui/input'
+import { errorMessage } from '@/services/api'
 import CustomerRow from './CustomerRow'
 
 interface CustomerListProps {

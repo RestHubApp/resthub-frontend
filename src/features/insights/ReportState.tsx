@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
 
-import FormMessage from '../../components/FormMessage'
-import ListSkeleton from '../../components/ListSkeleton'
-import { errorMessage } from '../../services/api'
+import FormMessage from '@/components/FormMessage'
+import ListSkeleton from '@/components/ListSkeleton'
+import { errorMessage } from '@/services/api'
 
 interface ReportStateProps<T> {
   readonly data: T | undefined

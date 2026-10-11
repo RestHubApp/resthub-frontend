@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { MAX_STAFF_PAGE, staffQuery } from '../../../api/staff'
-import { NativeSelectOption } from '../../../components/ui/native-select'
-import { useCan } from '../../../store/session'
-import { STATUS_OPTIONS, TYPE_OPTIONS } from '../orderLabels'
+import { MAX_STAFF_PAGE, staffQuery } from '@/api/staff'
+import { NativeSelectOption } from '@/components/ui/native-select'
+import { useCan } from '@/store/session'
+import { STATUS_OPTIONS, TYPE_OPTIONS } from '@/features/orders/orderLabels'
 import DateFilter from './DateFilter'
 import FilterSelect from './FilterSelect'
 import type { HistoryFilters } from './historyFilters'

@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router'
 
-import PageHeader from '../../components/PageHeader'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
+import PageHeader from '@/components/PageHeader'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import MyOrdersPanel from './floor/MyOrdersPanel'
 import TableGrid from './floor/TableGrid'
 import TakeawayDialog from './floor/TakeawayDialog'

@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import type { PermissionCode } from '../../api/types'
+import type { PermissionCode } from '@/api/types'
 
 /** Lo que se puede adelantar de una pantalla antes de abrirla. */
 export interface ScreenPreload {

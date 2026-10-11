@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
-import { Button } from '../../components/ui/button'
-import { useNotifications } from '../../store/notifications'
+import { Button } from '@/components/ui/button'
+import { useNotifications } from '@/store/notifications'
 import ShellIcon from './ShellIcon'
 
 const AUTO_DISMISS_MS = 8_000

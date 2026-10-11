@@ -1,4 +1,4 @@
-import StatusBadge from '../../components/StatusBadge'
+import StatusBadge from '@/components/StatusBadge'
 
 interface RestaurantStatusBadgeProps {
   readonly active: boolean

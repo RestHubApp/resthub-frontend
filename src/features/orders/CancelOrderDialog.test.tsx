@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { pedido } from '#jest/fixtures/cobro'
 import { entrarComo, montar, servidor } from '#jest/harness'
-import type { OrderResponse } from '../../api/types'
+import type { OrderResponse } from '@/api/types'
 import CancelOrderDialog from './CancelOrderDialog'
 
 const CANCELAR = '/orders/12/cancel'

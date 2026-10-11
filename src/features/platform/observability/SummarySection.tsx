@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
-import { obsSummaryQuery } from '../../../api/observability'
-import type { ObsWindowParams } from '../../../api/types'
+import { obsSummaryQuery } from '@/api/observability'
+import type { ObsWindowParams } from '@/api/types'
 import ObsQueryState from './ObsQueryState'
 import SampledNotice from './SampledNotice'
 import SummaryTiles from './SummaryTiles'

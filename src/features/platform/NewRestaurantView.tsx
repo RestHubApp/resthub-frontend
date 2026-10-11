@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router'
 
-import BackLink from '../../components/BackLink'
-import PageHeader from '../../components/PageHeader'
+import BackLink from '@/components/BackLink'
+import PageHeader from '@/components/PageHeader'
 import NewRestaurantForm from './NewRestaurantForm'
 
 /** Dar de alta un restaurante. Al crearlo se abre su ficha, con lo que devolvió el servidor. */

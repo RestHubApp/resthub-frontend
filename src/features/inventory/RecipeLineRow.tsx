@@ -1,12 +1,12 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from '../../components/FieldError'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
+import FieldError from '@/components/FieldError'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import type { RecipeIngredient } from './recipeMath'
 import { baseUnitLabel, formatUnitCost } from './units'
-import { formatMoney } from '../../services/format'
+import { formatMoney } from '@/services/format'
 
 interface RecipeLineRowProps {
   readonly index: number

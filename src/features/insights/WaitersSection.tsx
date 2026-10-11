@@ -1,10 +1,10 @@
-import { fetchWaiterPerformance, insightsReportQuery } from '../../api/insights'
-import type { InsightsRangeParams, WaiterPerformance } from '../../api/types'
-import DataTable, { type DataColumn } from '../../components/DataTable'
-import SectionCard from '../../components/SectionCard'
+import { fetchWaiterPerformance, insightsReportQuery } from '@/api/insights'
+import type { InsightsRangeParams, WaiterPerformance } from '@/api/types'
+import DataTable, { type DataColumn } from '@/components/DataTable'
+import SectionCard from '@/components/SectionCard'
 import ReportState from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
-import { formatInteger, formatMoney } from '../../services/format'
+import { formatInteger, formatMoney } from '@/services/format'
 
 interface WaitersSectionProps {
   readonly range: InsightsRangeParams

@@ -1,4 +1,4 @@
-import type { PermissionCode } from '../../api/types'
+import type { PermissionCode } from '@/api/types'
 import type { PermissionGroup } from './permissionGroups'
 import { togglePermission } from './permissionGroups'
 import PermissionOption from './PermissionOption'

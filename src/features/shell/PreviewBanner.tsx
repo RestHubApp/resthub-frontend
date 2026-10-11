@@ -1,8 +1,8 @@
 import { type RefObject, useEffect, useRef } from 'react'
 
-import type { CurrentUserResponse } from '../../api/types'
-import { tokenExpiresAt } from '../../services/tokenExpiry'
-import { useSession } from '../../store/session'
+import type { CurrentUserResponse } from '@/api/types'
+import { tokenExpiresAt } from '@/services/tokenExpiry'
+import { useSession } from '@/store/session'
 import { previewTimeLeft } from './previewCountdown'
 import PreviewExitButton from './PreviewExitButton'
 import ShellIcon from './ShellIcon'

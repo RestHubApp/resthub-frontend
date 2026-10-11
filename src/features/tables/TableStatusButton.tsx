@@ -1,7 +1,7 @@
-import { tableName, updateTable } from '../../api/tables'
-import type { TableState } from '../../api/types'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import { tableName, updateTable } from '@/api/tables'
+import type { TableState } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import { withTable } from './tableCache'
 import { useTableMutation } from './useTableMutation'
 

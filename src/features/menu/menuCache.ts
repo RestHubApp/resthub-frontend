@@ -1,4 +1,4 @@
-import type { MenuCategory, MenuItem, MenuResponse, MenuSection } from '../../api/types'
+import type { MenuCategory, MenuItem, MenuResponse, MenuSection } from '@/api/types'
 import { sortByIds } from './menuOrder'
 
 // Cambios sobre la carta guardada en caché, para que la pantalla responda al

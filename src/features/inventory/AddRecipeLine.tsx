@@ -1,9 +1,9 @@
 import { useId, useState } from 'react'
 
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { Label } from '../../components/ui/label'
-import { NativeSelect, NativeSelectOption } from '../../components/ui/native-select'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import type { RecipeIngredient } from './recipeMath'
 import { baseUnitLabel } from './units'
 

@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 
-import { rolesQuery } from '../../api/roles'
-import type { Role } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import ListSkeleton from '../../components/ListSkeleton'
-import { errorMessage } from '../../services/api'
-import { usePermissions } from '../../store/session'
+import { rolesQuery } from '@/api/roles'
+import type { Role } from '@/api/types'
+import FormMessage from '@/components/FormMessage'
+import ListSkeleton from '@/components/ListSkeleton'
+import { errorMessage } from '@/services/api'
+import { usePermissions } from '@/store/session'
 import { roleOptions } from './roleOptions'
 
 interface RoleOptionsGateProps {

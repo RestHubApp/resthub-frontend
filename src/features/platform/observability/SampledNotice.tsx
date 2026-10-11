@@ -1,4 +1,4 @@
-import Icon from '../../../components/Icon'
+import Icon from '@/components/Icon'
 
 /** El aviso de que los percentiles salen de una muestra y no de todas las peticiones. */
 export default function SampledNotice({ children }: { readonly children: string }) {

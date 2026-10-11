@@ -1,4 +1,4 @@
-import StatusBadge, { type StatusTone } from '../../../components/StatusBadge'
+import StatusBadge, { type StatusTone } from '@/components/StatusBadge'
 
 const SERVER_ERROR = 500
 const CLIENT_ERROR = 400

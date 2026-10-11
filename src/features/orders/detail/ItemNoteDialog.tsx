@@ -2,12 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import DialogFormActions from '../../../components/DialogFormActions'
-import FormDialog from '../../../components/FormDialog'
-import { textoOpcional } from '../../../components/formRules'
-import TextField from '../../../components/TextField'
-import { Button } from '../../../components/ui/button'
-import { onSubmit } from '../../../hooks/formSubmit'
+import DialogFormActions from '@/components/DialogFormActions'
+import FormDialog from '@/components/FormDialog'
+import { textoOpcional } from '@/components/formRules'
+import TextField from '@/components/TextField'
+import { Button } from '@/components/ui/button'
+import { onSubmit } from '@/hooks/formSubmit'
 
 // El mismo tope que el servidor.
 const MAX_NOTA = 200

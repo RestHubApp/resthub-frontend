@@ -1,5 +1,5 @@
-import type { MenuSection } from '../../api/types'
-import FormDialog from '../../components/FormDialog'
+import type { MenuSection } from '@/api/types'
+import FormDialog from '@/components/FormDialog'
 import CategoryForm from './CategoryForm'
 import MenuItemForm from './MenuItemForm'
 

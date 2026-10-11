@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
-import type { StaffResponse } from '../../api/types'
-import FormDialog from '../../components/FormDialog'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import type { StaffResponse } from '@/api/types'
+import FormDialog from '@/components/FormDialog'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import RoleOptionsGate from './RoleOptionsGate'
 import StaffEditForm from './StaffEditForm'
 import StaffPasswordForm from './StaffPasswordForm'

@@ -1,8 +1,8 @@
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 
-import { platformObservabilityQueryKey } from '../../../api/observability'
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
+import { platformObservabilityQueryKey } from '@/api/observability'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import { refreshStatus } from './autoRefresh'
 import type { ObsRefresh } from './useObsRefresh'
 

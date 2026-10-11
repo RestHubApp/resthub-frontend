@@ -1,5 +1,5 @@
-import FormMessage from '../../components/FormMessage'
-import { useSession } from '../../store/session'
+import FormMessage from '@/components/FormMessage'
+import { useSession } from '@/store/session'
 
 /**
  * Explica por qué se volvió al acceso cuando la sesión se cerró sin que la

@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
+import { api } from '@/services/api'
 import type { CreateTableRequest, TableResponse, TableState, UpdateTableRequest } from './types'
 
 // Las mesas del salon: su estado para el mesero y su administracion.

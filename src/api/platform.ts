@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
-import { PLATFORM_QUERY_ROOT } from '../services/queryClient'
+import { api } from '@/services/api'
+import { PLATFORM_QUERY_ROOT } from '@/services/queryClient'
 import type {
   CreatePlatformRestaurantRequest,
   PlatformActivityPage,

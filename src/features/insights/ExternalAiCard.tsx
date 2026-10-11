@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '../../api/restaurant'
-import { Checkbox } from '../../components/ui/checkbox'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '@/api/restaurant'
+import { Checkbox } from '@/components/ui/checkbox'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
 
 /**
  * Si las notas y los motivos de merma van a la IA externa (Ley N.º 29733).

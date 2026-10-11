@@ -1,8 +1,8 @@
-import type { Ingredient, IngredientUnit } from '../../api/types'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { NativeSelect, NativeSelectOption } from '../../components/ui/native-select'
+import type { Ingredient, IngredientUnit } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import type { LineDraft } from './purchaseLines'
 
 // Las cantidades de la orden van en la unidad base del insumo, como el libro.

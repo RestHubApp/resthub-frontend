@@ -1,4 +1,4 @@
-import type { AiDecision } from '../../api/types'
+import type { AiDecision } from '@/api/types'
 
 interface AiDecisionDetailProps {
   readonly decision: AiDecision

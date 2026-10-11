@@ -1,5 +1,5 @@
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 
 interface FilterActionsProps {
   /** Si hay algún filtro aplicado; sin ninguno no se ofrece quitarlos. */

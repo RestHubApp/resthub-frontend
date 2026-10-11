@@ -1,6 +1,6 @@
-import { renewSession, sessionOf } from '../../api/auth'
-import { useTokenRenewal } from '../../hooks/useTokenRenewal'
-import { usePreview, useSession } from '../../store/session'
+import { renewSession, sessionOf } from '@/api/auth'
+import { useTokenRenewal } from '@/hooks/useTokenRenewal'
+import { usePreview, useSession } from '@/store/session'
 
 /**
  * Renueva el token del restaurante antes de que venza mientras la aplicación

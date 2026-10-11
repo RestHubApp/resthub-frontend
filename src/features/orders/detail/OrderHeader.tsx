@@ -1,11 +1,11 @@
-import type { OrderResponse } from '../../../api/types'
-import OrderStatusBadge from '../OrderStatusBadge'
-import { formatMoney, formatTime } from '../../../services/format'
-import { useTimeZone } from '../../../store/session'
-import AllergyAlert from '../AllergyAlert'
-import ItemNote from '../ItemNote'
-import { allergyIn, type FlagFor } from '../noteFlags'
-import { dishCount, orderPlace } from '../orderLabels'
+import type { OrderResponse } from '@/api/types'
+import OrderStatusBadge from '@/features/orders/OrderStatusBadge'
+import { formatMoney, formatTime } from '@/services/format'
+import { useTimeZone } from '@/store/session'
+import AllergyAlert from '@/features/orders/AllergyAlert'
+import ItemNote from '@/features/orders/ItemNote'
+import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
+import { dishCount, orderPlace } from '@/features/orders/orderLabels'
 
 interface OrderHeaderProps {
   readonly order: OrderResponse

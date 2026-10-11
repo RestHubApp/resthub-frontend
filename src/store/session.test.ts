@@ -6,7 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
-import type { CurrentUserResponse } from '../api/types'
+import type { CurrentUserResponse } from '@/api/types'
 
 const CLAVE = 'resthub.session.v2'
 

@@ -4,15 +4,15 @@ import type {
   CreatePlatformRestaurantRequest,
   PlatformRestaurantDetail,
   UpdatePlatformRestaurantRequest,
-} from '../../api/types'
-import { DEFAULT_TIME_ZONE } from '../../services/format'
+} from '@/api/types'
+import { DEFAULT_TIME_ZONE } from '@/services/format'
 import {
   correoRule,
   MAX_NOMBRE_COMPLETO,
   MAX_PASSWORD,
   nombreRule,
   passwordRule,
-} from '../../services/fieldRules'
+} from '@/services/fieldRules'
 import { MAX_SLUG, SLUG_PATTERN } from './slug'
 import { isValidTimeZone } from './timeZones'
 

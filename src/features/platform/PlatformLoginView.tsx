@@ -1,7 +1,7 @@
 import { Link, Navigate, useLocation } from 'react-router'
 
-import { Card, CardContent, CardFooter, CardHeader } from '../../components/ui/card'
-import { usePlatformSession } from '../../store/platformSession'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { usePlatformSession } from '@/store/platformSession'
 import PlatformLoginForm from './PlatformLoginForm'
 
 const INICIO = '/plataforma'

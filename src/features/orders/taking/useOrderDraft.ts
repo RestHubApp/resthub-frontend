@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
-import type { NewItemRequest, OrderMenuItem } from '../../../api/types'
-import { centsToApi, toCents } from '../../../services/format'
+import type { NewItemRequest, OrderMenuItem } from '@/api/types'
+import { centsToApi, toCents } from '@/services/format'
 
 /** Una opción elegida de un grupo del plato, con lo que suma al precio. */
 export interface DraftModifier {

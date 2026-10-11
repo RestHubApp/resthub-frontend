@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useWatch } from 'react-hook-form'
 
-import { registerPurchase } from '../../api/inventory'
-import type { Ingredient } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import TextField from '../../components/TextField'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
+import { registerPurchase } from '@/api/inventory'
+import type { Ingredient } from '@/api/types'
+import FormMessage from '@/components/FormMessage'
+import TextField from '@/components/TextField'
+import { onSubmit } from '@/hooks/formSubmit'
+import { errorMessage } from '@/services/api'
 import ChoiceField from './ChoiceField'
 import FormButtons from './FormButtons'
 import { purchaseSchema, type PurchaseValues } from './inventorySchema'
@@ -15,7 +15,7 @@ import QuantityField from './QuantityField'
 import StockPreview from './StockPreview'
 import { inputUnits, priceUnit } from './units'
 import { useInventoryChange } from './useInventoryChange'
-import { formatQuantity } from '../../services/format'
+import { formatQuantity } from '@/services/format'
 
 interface PurchaseFormProps {
   readonly ingredient: Ingredient

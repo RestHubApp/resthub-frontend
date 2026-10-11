@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '../../components/ui/card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card'
 
 interface AuthCardProps {
   readonly title: string

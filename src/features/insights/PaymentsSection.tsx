@@ -1,12 +1,12 @@
-import { fetchPaymentMix, insightsReportQuery } from '../../api/insights'
-import type { InsightsRangeParams, PaymentShare } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import BarList from '../../components/charts/BarList'
-import ChartCard from '../../components/charts/ChartCard'
-import DataGrid from '../../components/charts/DataGrid'
+import { fetchPaymentMix, insightsReportQuery } from '@/api/insights'
+import type { InsightsRangeParams, PaymentShare } from '@/api/types'
+import EmptyState from '@/components/EmptyState'
+import BarList from '@/components/charts/BarList'
+import ChartCard from '@/components/charts/ChartCard'
+import DataGrid from '@/components/charts/DataGrid'
 import ReportState from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
-import { formatInteger, formatMoney, formatPercent, toNumber } from '../../services/format'
+import { formatInteger, formatMoney, formatPercent, toNumber } from '@/services/format'
 
 interface PaymentsSectionProps {
   readonly range: InsightsRangeParams

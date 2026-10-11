@@ -1,4 +1,4 @@
-import type { PermissionCode, PermissionInfo, Role, RoleKind } from '../../api/types'
+import type { PermissionCode, PermissionInfo, Role, RoleKind } from '@/api/types'
 
 export interface PermissionGroup {
   readonly name: string

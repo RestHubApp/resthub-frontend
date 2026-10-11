@@ -3,7 +3,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 
 import { carta, costoDePlato, plato } from '#jest/fixtures/inventario'
 import { entrarComo, montar, PERMISOS_ENCARGADO, primero, RespuestaDeError, servidor } from '#jest/harness'
-import type { MenuResponse } from '../../api/types'
+import type { MenuResponse } from '@/api/types'
 import MenuView from './MenuView'
 
 const MENU = '/menu'

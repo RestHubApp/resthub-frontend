@@ -1,8 +1,8 @@
 import { useLocation } from 'react-router'
 
-import EmptyState from '../../components/EmptyState'
-import Icon from '../../components/Icon'
-import PageHeader from '../../components/PageHeader'
+import EmptyState from '@/components/EmptyState'
+import Icon from '@/components/Icon'
+import PageHeader from '@/components/PageHeader'
 import { entryFor } from './navigation'
 
 /**

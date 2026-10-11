@@ -1,6 +1,6 @@
-import AllergyBadge from '../../components/AllergyBadge'
-import Icon from '../../components/Icon'
-import type { OrderNoteFlag } from '../../hooks/useOrderNoteFlags'
+import AllergyBadge from '@/components/AllergyBadge'
+import Icon from '@/components/Icon'
+import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 
 interface ItemNoteProps {
   readonly note: string

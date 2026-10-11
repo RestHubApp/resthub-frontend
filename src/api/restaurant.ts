@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
+import { api } from '@/services/api'
 import type { OwnRestaurant, UpdateRestaurantRequest } from './types'
 
 // El restaurante de la cuenta: cualquiera lo lee, el encargado lo edita.

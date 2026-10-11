@@ -1,5 +1,5 @@
-import { salesSummaryQuery } from '../../api/insights'
-import ListSkeleton from '../../components/ListSkeleton'
+import { salesSummaryQuery } from '@/api/insights'
+import ListSkeleton from '@/components/ListSkeleton'
 import HourlySection from './HourlySection'
 import KpiRow from './KpiRow'
 import LowStockSection from './LowStockSection'
@@ -14,7 +14,7 @@ import { useInsightsRange } from './useInsightsRange'
 import { useInsightsReport } from './useInsightsReport'
 import WaitersSection from './WaitersSection'
 import WasteSection from './WasteSection'
-import { useTimeZone } from '../../store/session'
+import { useTimeZone } from '@/store/session'
 
 const KPI_CARGANDO = (
   <ListSkeleton

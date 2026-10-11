@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useDeferredValue, useState } from 'react'
 
-import { customerSearchQuery } from '../../../api/customers'
-import type { Customer } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import { Input } from '../../../components/ui/input'
+import { customerSearchQuery } from '@/api/customers'
+import type { Customer } from '@/api/types'
+import Icon from '@/components/Icon'
+import { Input } from '@/components/ui/input'
 
 const MIN_BUSQUEDA = 3
 const MAX_RESULTADOS = 5

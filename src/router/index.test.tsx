@@ -24,7 +24,7 @@ async function llegaA(enMemoria: ReturnType<typeof abrir>, ruta: string) {
 // con la cobertura encendida y la máquina ocupada eso pasaba del plazo de una
 // prueba. Se compilan antes, fuera del tiempo de cada caso.
 beforeAll(async () => {
-  await Promise.all([import('../features/cash/CashView'), import('../features/insights/InsightsView'), import('../features/auth/ProfileView')])
+  await Promise.all([import('@/features/cash/CashView'), import('@/features/insights/InsightsView'), import('@/features/auth/ProfileView')])
 }, 120_000)
 
 describe('guardas de las rutas del restaurante', () => {

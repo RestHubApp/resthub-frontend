@@ -1,5 +1,5 @@
-import type { ObsSummary } from '../../../api/types'
-import { formatInteger, formatMilliseconds } from '../../../services/format'
+import type { ObsSummary } from '@/api/types'
+import { formatInteger, formatMilliseconds } from '@/services/format'
 import MetricTile from './MetricTile'
 import { formatErrorRate } from './obsLabels'
 

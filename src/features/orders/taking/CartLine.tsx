@@ -1,8 +1,8 @@
-import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
-import QuantityStepper from '../QuantityStepper'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import QuantityStepper from '@/features/orders/QuantityStepper'
 import { type DraftLine, MAX_QUANTITY } from './useOrderDraft'
-import { formatCents, toCents } from '../../../services/format'
+import { formatCents, toCents } from '@/services/format'
 
 interface CartLineProps {
   readonly line: DraftLine

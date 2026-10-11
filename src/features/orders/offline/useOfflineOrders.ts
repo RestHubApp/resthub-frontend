@@ -1,12 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
 
-import { advanceOrder, openOrder, ordersQueryKey } from '../../../api/orders'
-import { tablesQueryKey } from '../../../api/tables'
-import { errorMessage, errorStatus } from '../../../services/api'
-import { useNotifications } from '../../../store/notifications'
-import { belongsTo, ownerOf, type QueuedOrder, queuedOrders, removeQueued, useQueuedOrders } from '../../../store/offlineQueue'
-import { useSession } from '../../../store/session'
+import { advanceOrder, openOrder, ordersQueryKey } from '@/api/orders'
+import { tablesQueryKey } from '@/api/tables'
+import { errorMessage, errorStatus } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
+import { belongsTo, ownerOf, type QueuedOrder, queuedOrders, removeQueued, useQueuedOrders } from '@/store/offlineQueue'
+import { useSession } from '@/store/session'
 
 const CONFLICT = 409
 const UNAUTHORIZED = 401

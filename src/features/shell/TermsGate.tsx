@@ -1,13 +1,13 @@
 import { useMutation } from '@tanstack/react-query'
 import { Link } from 'react-router'
 
-import { acceptTerms, fetchCurrentUser } from '../../api/auth'
-import type { CurrentUserResponse } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import { Button } from '../../components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '../../components/ui/card'
-import { errorMessage, errorStatus } from '../../services/api'
-import { useSession } from '../../store/session'
+import { acceptTerms, fetchCurrentUser } from '@/api/auth'
+import type { CurrentUserResponse } from '@/api/types'
+import FormMessage from '@/components/FormMessage'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { errorMessage, errorStatus } from '@/services/api'
+import { useSession } from '@/store/session'
 
 // La versión cambió mientras se leía: se relee la sesión y se pide la nueva.
 const VERSION_CAMBIADA = 409

@@ -1,5 +1,5 @@
-import LoadingRegion from '../../../components/LoadingRegion'
-import { Skeleton } from '../../../components/ui/skeleton'
+import LoadingRegion from '@/components/LoadingRegion'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface BoardSkeletonProps {
   /** Los títulos de las columnas, que ya se conocen antes de los pedidos. */

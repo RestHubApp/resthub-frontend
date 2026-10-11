@@ -1,5 +1,5 @@
 import ShellIcon from './ShellIcon'
-import type { CurrentUserResponse } from '../../api/types'
+import type { CurrentUserResponse } from '@/api/types'
 import MoreSheet from './MoreSheet'
 import type { NavEntry } from './navigation'
 import PreloadLink from './PreloadLink'

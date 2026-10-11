@@ -1,4 +1,4 @@
-import type { ObsRouteSort, ObsRouteStats } from '../../../api/types'
+import type { ObsRouteSort, ObsRouteStats } from '@/api/types'
 
 export interface RouteSortOption {
   readonly value: ObsRouteSort

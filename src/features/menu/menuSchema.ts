@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import type { MenuItem } from '../../api/types'
-import { decimalParaApi, decimalRule, textoOpcional } from '../../components/formRules'
+import type { MenuItem } from '@/api/types'
+import { decimalParaApi, decimalRule, textoOpcional } from '@/components/formRules'
 
 // Los limites repiten los del backend: avisan mientras se escribe.
 const MAX_CATEGORIA = 60

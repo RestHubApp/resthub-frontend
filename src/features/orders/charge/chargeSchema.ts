@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { toCents } from '../../../services/format'
+import { toCents } from '@/services/format'
 
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)

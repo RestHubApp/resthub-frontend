@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { tablesQuery, tablesQueryKey } from '../../api/tables'
-import type { TableState } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { tablesQuery, tablesQueryKey } from '@/api/tables'
+import type { TableState } from '@/api/types'
+import { errorMessage } from '@/services/api'
+import { useNotifications } from '@/store/notifications'
 
 interface TableMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>

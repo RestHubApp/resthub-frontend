@@ -1,5 +1,5 @@
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 
 interface QuantityStepperProps {
   /** El plato, para que cada boton diga de que plato quita o agrega. */

@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 
-import type { PlatformAdmin } from '../api/types'
-import { setPlatformAuthToken, setPlatformUnauthorizedHandler } from '../services/api'
-import { logger } from '../services/logger'
-import { clearQueriesOf, PLATFORM_QUERY_ROOT } from '../services/queryClient'
-import { isPreviewTab } from '../services/tabStorage'
-import { expiryTimer, isTokenExpired } from '../services/tokenExpiry'
+import type { PlatformAdmin } from '@/api/types'
+import { setPlatformAuthToken, setPlatformUnauthorizedHandler } from '@/services/api'
+import { logger } from '@/services/logger'
+import { clearQueriesOf, PLATFORM_QUERY_ROOT } from '@/services/queryClient'
+import { isPreviewTab } from '@/services/tabStorage'
+import { expiryTimer, isTokenExpired } from '@/services/tokenExpiry'
 
 // La sesión del administrador del sistema. Es otra sesión, no un rol: vive en
 // su propia clave, con su propio token, y abrirla o cerrarla no toca la del

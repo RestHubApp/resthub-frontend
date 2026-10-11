@@ -1,5 +1,5 @@
-import type { Ingredient } from '../../api/types'
-import FormDialog from '../../components/FormDialog'
+import type { Ingredient } from '@/api/types'
+import FormDialog from '@/components/FormDialog'
 import AdjustmentForm from './AdjustmentForm'
 import IngredientForm from './IngredientForm'
 import PurchaseForm from './PurchaseForm'

@@ -1,9 +1,9 @@
-import { deleteRole } from '../../api/roles'
-import type { Role } from '../../api/types'
-import ConfirmDialog from '../../components/ConfirmDialog'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { removeFromList } from '../../services/cacheList'
+import { deleteRole } from '@/api/roles'
+import type { Role } from '@/api/types'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import Icon from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { removeFromList } from '@/services/cacheList'
 import { useRoleMutation } from './useRoleMutation'
 
 interface DeleteRoleButtonProps {

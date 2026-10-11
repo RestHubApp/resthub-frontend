@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import type { PermissionCode, PermissionInfo } from '../../api/types'
+import type { PermissionCode, PermissionInfo } from '@/api/types'
 import { groupPermissions, memberCountLabel, permissionSummary, togglePermission } from './permissionGroups'
 
 const PEDIDOS = 'Pedidos'

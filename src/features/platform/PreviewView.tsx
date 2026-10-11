@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { platformSandboxQuery } from '../../api/platform'
-import ListSkeleton from '../../components/ListSkeleton'
-import PageHeader from '../../components/PageHeader'
-import SectionCard from '../../components/SectionCard'
+import { platformSandboxQuery } from '@/api/platform'
+import ListSkeleton from '@/components/ListSkeleton'
+import PageHeader from '@/components/PageHeader'
+import SectionCard from '@/components/SectionCard'
 import PlatformQueryError from './PlatformQueryError'
 import PreviewLauncher from './PreviewLauncher'
 import SandboxResetButton from './SandboxResetButton'

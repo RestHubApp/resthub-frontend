@@ -1,4 +1,4 @@
-import type { OrderNoteFlag } from '../hooks/useOrderNoteFlags'
+import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 import Icon from './Icon'
 
 interface AllergyBadgeProps {

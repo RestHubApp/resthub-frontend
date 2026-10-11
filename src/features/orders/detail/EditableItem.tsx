@@ -1,15 +1,15 @@
 import { lazy, Suspense, useState } from 'react'
 
-import { changeOrderItem, removeOrderItem } from '../../../api/orders'
-import type { ChangeItemRequest, OrderItemResponse } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import type { OrderNoteFlag } from '../../../hooks/useOrderNoteFlags'
-import { Button } from '../../../components/ui/button'
-import ItemNote from '../ItemNote'
-import QuantityStepper from '../QuantityStepper'
-import { MAX_QUANTITY } from '../taking/useOrderDraft'
-import { useOrderAction } from '../useOrderAction'
-import { formatMoney } from '../../../services/format'
+import { changeOrderItem, removeOrderItem } from '@/api/orders'
+import type { ChangeItemRequest, OrderItemResponse } from '@/api/types'
+import Icon from '@/components/Icon'
+import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
+import { Button } from '@/components/ui/button'
+import ItemNote from '@/features/orders/ItemNote'
+import QuantityStepper from '@/features/orders/QuantityStepper'
+import { MAX_QUANTITY } from '@/features/orders/taking/useOrderDraft'
+import { useOrderAction } from '@/features/orders/useOrderAction'
+import { formatMoney } from '@/services/format'
 
 // El diálogo trae react-hook-form y zod: se baja la primera vez que se edita una nota.
 const ItemNoteDialog = lazy(() => import('./ItemNoteDialog'))

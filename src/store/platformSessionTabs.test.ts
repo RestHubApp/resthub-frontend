@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { unstubAllGlobals } from '#jest/globals'
 import { type AlmacenDePrueba, avisar, fakeStorage, guardado, nuevaPestana, tokenQueVence } from '#jest/pestanas'
 
-import type { CurrentUserResponse, PlatformAdmin } from '../api/types'
+import type { CurrentUserResponse, PlatformAdmin } from '@/api/types'
 
 const CLAVE_PLATAFORMA = 'resthub.platform-session.v1'
 

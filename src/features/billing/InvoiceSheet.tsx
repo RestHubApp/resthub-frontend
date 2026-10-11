@@ -1,5 +1,5 @@
-import type { BillingSettings, Invoice } from '../../api/types'
-import { formatDateTime, formatMoney, formatPercent, toCents } from '../../services/format'
+import type { BillingSettings, Invoice } from '@/api/types'
+import { formatDateTime, formatMoney, formatPercent, toCents } from '@/services/format'
 
 interface InvoiceSheetProps {
   readonly invoice: Invoice

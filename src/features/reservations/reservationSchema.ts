@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
-import type { Reservation, ReservationRequest, ReservationStatus } from '../../api/types'
-import type { StatusTone } from '../../components/StatusBadge'
-import { textoOpcional } from '../../components/formRules'
-import { wallClockIn, zonedInstant } from '../../services/format'
+import type { Reservation, ReservationRequest, ReservationStatus } from '@/api/types'
+import type { StatusTone } from '@/components/StatusBadge'
+import { textoOpcional } from '@/components/formRules'
+import { wallClockIn, zonedInstant } from '@/services/format'
 
 // Los topes repiten los del backend (`reservations/domain/reservations.py`).
 export const LIMITES = { name: 80, phone: 20, notes: 300, party: 50, minDuration: 30, maxDuration: 360 } as const

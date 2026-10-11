@@ -1,6 +1,6 @@
-import type { PlatformSandbox } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import { formatDateTime } from '../../services/format'
+import type { PlatformSandbox } from '@/api/types'
+import EmptyState from '@/components/EmptyState'
+import { formatDateTime } from '@/services/format'
 import { PLATFORM_TIME_ZONE } from './platformTime'
 
 const TERMINO = 'm-0 text-sm text-muted-foreground'

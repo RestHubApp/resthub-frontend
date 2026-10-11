@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
-import ListSkeleton from '../../../components/ListSkeleton'
-import PlatformQueryError from '../PlatformQueryError'
+import ListSkeleton from '@/components/ListSkeleton'
+import PlatformQueryError from '@/features/platform/PlatformQueryError'
 
 interface QueryLike<T> {
   readonly data: T | undefined

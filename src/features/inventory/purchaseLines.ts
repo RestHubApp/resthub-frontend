@@ -1,4 +1,4 @@
-import type { PurchaseSuggestion } from '../../api/types'
+import type { PurchaseSuggestion } from '@/api/types'
 
 /** Una línea de la orden mientras se escribe, con los textos del formulario. */
 export interface LineDraft {

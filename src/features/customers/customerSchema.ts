@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import type { Customer, CustomerRequest } from '../../api/types'
-import { textoOpcional } from '../../components/formRules'
+import type { Customer, CustomerRequest } from '@/api/types'
+import { textoOpcional } from '@/components/formRules'
 
 // Los topes repiten los del backend (`customers/domain/customers.py`).
 export const LIMITES = { name: 80, phone: 20, email: 120, address: 200, reference: 150, notes: 300 } as const

@@ -1,8 +1,8 @@
 import { Link } from 'react-router'
 
-import type { Invoice } from '../../api/types'
-import { Button } from '../../components/ui/button'
-import { formatDateTime, formatMoney } from '../../services/format'
+import type { Invoice } from '@/api/types'
+import { Button } from '@/components/ui/button'
+import { formatDateTime, formatMoney } from '@/services/format'
 
 interface InvoiceRowProps {
   readonly invoice: Invoice

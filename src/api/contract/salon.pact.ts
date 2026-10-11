@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { fetchOrderMenu } from '../orders'
-import { fetchTables } from '../tables'
-import type { OrderMenu, TableState } from '../types'
+import { fetchOrderMenu } from '@/api/orders'
+import { fetchTables } from '@/api/tables'
+import type { OrderMenu, TableState } from '@/api/types'
 import {
   API_PREFIX,
   arrayContaining,
