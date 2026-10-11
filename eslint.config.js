@@ -53,6 +53,43 @@ const SYNTAX_SOURCES = {
       "JSXAttribute[name.name='permission'] Literal",
     ],
   },
+  queryKeys: {
+    message:
+      'Las claves de consulta se definen una vez en src/api con queryOptions; usa la consulta (xQuery()) o la clave exportada (xQueryKey).',
+    selectors: ["Property[key.name='queryKey'] > ArrayExpression"],
+  },
+  colors: {
+    message: 'Los colores son los tokens de index.css (clases de Tailwind); un hex o rgb() suelto se desfasa del tema.',
+    selectors: [
+      String.raw`Literal[value=/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]`,
+      String.raw`Literal[value=/\b(rgba?|hsla?|oklch|oklab)\(/]`,
+      String.raw`TemplateElement[value.raw=/\b(rgba?|hsla?|oklch|oklab)\(/]`,
+    ],
+  },
+  roles: {
+    message:
+      'La interfaz pregunta por permisos (useCan), nunca por el rol: comparar su clase o su id solo se hace en features/roles y features/staff.',
+    selectors: [
+      String.raw`BinaryExpression[operator=/^[!=]==?$/] MemberExpression[property.name=/^(role_id|user_role_id|role_kind|role_name)$/]`,
+      String.raw`BinaryExpression[operator=/^[!=]==?$/] MemberExpression[property.name='kind'][object.name=/^[rR]ole$/]`,
+    ],
+  },
+  storage: {
+    message: 'El almacenamiento del navegador y la red pasan por src/services (tabStorage, api) y src/store, que ya limpian al cerrar sesion.',
+    selectors: [
+      String.raw`MemberExpression[object.name=/^(window|globalThis)$/][property.name=/^(localStorage|sessionStorage|fetch)$/]`,
+      String.raw`Identifier[name=/^(localStorage|sessionStorage)$/]:not(MemberExpression > Identifier.property, Property > Identifier.key)`,
+      "CallExpression[callee.name='fetch']",
+    ],
+  },
+  axios: {
+    message: 'Solo src/services/api.ts habla con Axios; las pantallas usan las funciones de src/api.',
+    selectors: ["ImportDeclaration[source.value='axios']"],
+  },
+  apiSchema: {
+    message: 'schema.d.ts es generado: solo src/api/types.ts lo importa y expone los tipos con nombre.',
+    selectors: [String.raw`ImportDeclaration[source.value=/(^|\x2F)schema$/]`],
+  },
 }
 
 /** La regla compuesta con todos los grupos menos los de los modulos que son dueños de esa fuente. */
@@ -240,7 +277,8 @@ export default tseslint.config(
   },
 
   // ---------------------------------------------------------------------
-  // Fuentes unicas: rutas y permisos.
+  // Fuentes unicas: rutas, permisos, claves de consulta, colores, roles,
+  // almacenamiento, Axios y el esquema generado.
   //
   // Cada dato vive en un solo modulo (ver SYNTAX_SOURCES arriba) y fuera de el
   // un literal es una copia que se desfasa. Los bloques de mas abajo dejan
@@ -253,12 +291,39 @@ export default tseslint.config(
     rules: { 'no-restricted-syntax': restrictSyntaxExcept() },
   },
   {
+    files: ['src/api/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('queryKeys') },
+  },
+  {
     files: ['src/api/permissions.ts'],
-    rules: { 'no-restricted-syntax': restrictSyntaxExcept('permissions') },
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('queryKeys', 'permissions') },
+  },
+  {
+    files: ['src/api/types.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('queryKeys', 'apiSchema') },
+  },
+  {
+    files: ['src/services/**/*.{ts,tsx}', 'src/store/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage') },
   },
   {
     files: ['src/services/paths.ts'],
-    rules: { 'no-restricted-syntax': restrictSyntaxExcept('routes') },
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage', 'routes') },
+  },
+  {
+    files: ['src/services/api.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('storage', 'axios') },
+  },
+  {
+    files: ['src/components/ui/**/*.{ts,tsx}', 'src/components/printSheet.ts'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('colors') },
+  },
+  {
+    files: ['src/features/roles/**/*.{ts,tsx}', 'src/features/staff/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: { 'no-restricted-syntax': restrictSyntaxExcept('roles') },
   },
 
   // ---------------------------------------------------------------------
