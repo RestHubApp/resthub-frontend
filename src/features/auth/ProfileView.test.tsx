@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 
 import { cuenta, entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
 import { currentAuthToken } from '../../services/api'
@@ -68,6 +68,21 @@ describe('ProfileView', () => {
     expect(useSession.getState().token).toBeNull()
     expect(useSession.getState().passwordChanged).toBe(true)
     expect(api.llamadas('post', ACCESO)).toHaveLength(0)
+  })
+
+  it('si otra pestaña entró con otra cuenta mientras tanto, no pisa ni cierra esa sesión', async () => {
+    const { api, user } = abrirPerfil()
+    api.on('post', CAMBIO, () => {
+      useSession.setState({ token: 'token-de-otra-cuenta' })
+      return { ...cuenta(PERMISOS_MESERO), access_token: TOKEN_NUEVO, token_type: 'bearer', expires_in: 3600 }
+    })
+
+    await cambiarClave(user)
+
+    await waitFor(() => { expect(api.llamadas('post', CAMBIO)).toHaveLength(1); })
+    await new Promise((listo) => setTimeout(listo, 50))
+    expect(useSession.getState().token).toBe('token-de-otra-cuenta')
+    expect(useSession.getState().passwordChanged).toBe(false)
   })
 
   it('no envía si las dos contraseñas nuevas no coinciden o repiten la actual', async () => {

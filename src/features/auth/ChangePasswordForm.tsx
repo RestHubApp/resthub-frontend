@@ -18,6 +18,37 @@ import {
   EMPTY_CHANGE_PASSWORD,
 } from './passwordSchema'
 
+type Cambio = Awaited<ReturnType<typeof changeOwnPassword>>
+
+/**
+ * Sigue con el token que devolvió el cambio de contraseña.
+ *
+ * El servidor corta todos los tokens anteriores, el de `origen` incluido, y
+ * devuelve el único válido: al quedar guardado, las otras pestañas lo adoptan
+ * en vez de seguir con uno que da 401. Sin segundo acceso: la clave nueva no
+ * vuelve a viajar.
+ */
+function seguirConElTokenNuevo(respuesta: Cambio, origen: string | null): 'renovada' | 'cerrada' | 'ajena' {
+  // Un servidor viejo respondía 204 sin cuerpo: ahí no hay token que usar.
+  const nuevo = (respuesta as Partial<Cambio> | null | undefined)?.access_token ?? ''
+  if (origen !== null && nuevo !== '') {
+    useSession.getState().renew(origen, nuevo, sessionOf(respuesta))
+  }
+  const actual = useSession.getState().token
+  if (nuevo !== '' && actual === nuevo) {
+    return 'renovada'
+  }
+  // Otra pestaña ya entró con otra sesión y esta la adoptó: cerrar aquí
+  // borraría lo guardado y sacaría también a esa otra cuenta.
+  if (actual !== null && actual !== origen) {
+    return 'ajena'
+  }
+  // Sin token nuevo, o la sesión se cerró en otra pestaña: seguir con el
+  // token viejo solo daría 401. Se cierra y se vuelve al acceso con el aviso.
+  useSession.getState().signOutAfterPasswordChange()
+  return 'cerrada'
+}
+
 /**
  * Cambio de la contraseña propia.
  *
@@ -32,31 +63,23 @@ export default function ChangePasswordForm() {
   })
 
   const cambiar = useMutation({
-    mutationFn: (valores: Formulario) =>
-      changeOwnPassword({
+    // El token se toma al enviar: si otra pestaña entra con otra cuenta
+    // mientras tanto, compararlo al terminar pisaría esa sesión ajena.
+    mutationFn: async (valores: Formulario) => {
+      const origen = useSession.getState().token
+      const respuesta = await changeOwnPassword({
         current_password: valores.current_password,
         new_password: valores.new_password,
-      }),
-    onSuccess: (respuesta) => {
-      // El servidor corta todos los tokens anteriores, este incluido, y
-      // devuelve el único válido: se cambia aquí y, al quedar guardado, las
-      // otras pestañas lo adoptan en vez de seguir con uno que da 401. Sin
-      // segundo acceso: la clave nueva no vuelve a viajar.
-      const { token, renew } = useSession.getState()
-      // Un servidor viejo respondía 204 sin cuerpo: ahí no hay token que usar.
-      const nuevo = (respuesta as Partial<typeof respuesta> | null | undefined)?.access_token ?? ''
-      if (token !== null && nuevo !== '') {
-        renew(token, nuevo, sessionOf(respuesta))
-      }
-      if (nuevo !== '' && useSession.getState().token === nuevo) {
+      })
+      return { respuesta, origen }
+    },
+    onSuccess: ({ respuesta, origen }) => {
+      const resultado = seguirConElTokenNuevo(respuesta, origen)
+      if (resultado === 'renovada') {
         reset(EMPTY_CHANGE_PASSWORD)
-        return
+      } else if (resultado === 'cerrada') {
+        void navigate('/acceso', { replace: true })
       }
-      // Sin token nuevo, o la sesión ya no era esta (se cerró o cambió en otra
-      // pestaña): seguir con el token viejo solo daría 401. Se cierra y se
-      // vuelve al acceso con el aviso.
-      useSession.getState().signOutAfterPasswordChange()
-      void navigate('/acceso', { replace: true })
     },
   })
 
