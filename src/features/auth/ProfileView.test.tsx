@@ -1,8 +1,11 @@
 import { describe, expect, it } from '@jest/globals'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 
-import { entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { cuenta, entrarComo, montar, PERMISOS_MESERO, RespuestaDeError, servidor } from '#jest/harness'
+import { currentAuthToken } from '../../services/api'
+import { useSession } from '../../store/session'
 import ProfileView from './ProfileView'
+import SessionExpiredNotice from './SessionExpiredNotice'
 
 // Contraseñas de prueba, no credenciales reales.
 const CLAVE_ACTUAL = 'resthub123'
@@ -12,11 +15,14 @@ const NUEVA = 'Nueva contraseña'
 const REPETIR = 'Repite la nueva contraseña'
 const CAMBIAR = { name: 'Cambiar contraseña' }
 const CAMBIO = '/auth/me/password'
+const ACCESO = '/auth/login'
+const TOKEN_NUEVO = 'token-nuevo'
+const AVISO = 'Tu contraseña cambió. Vuelve a iniciar sesión.'
 
 function abrirPerfil(preview = false) {
   const api = servidor()
   entrarComo(PERMISOS_MESERO, { preview })
-  return { api, ...montar(<ProfileView />, { path: '/perfil' }) }
+  return { api, ...montar(<ProfileView />, { path: '/perfil', rutas: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
 }
 
 describe('ProfileView', () => {
@@ -30,18 +36,53 @@ describe('ProfileView', () => {
     expect(screen.queryByRole('textbox', { name: 'Nombre' })).not.toBeInTheDocument()
   })
 
-  it('cambia la contraseña con la actual y avisa al terminar', async () => {
-    const { api, user } = abrirPerfil()
-    api.on('post', CAMBIO, null, 204)
-
+  async function cambiarClave(user: ReturnType<typeof abrirPerfil>['user']) {
     await user.type(screen.getByLabelText(ACTUAL), CLAVE_ACTUAL)
     await user.type(screen.getByLabelText(NUEVA), CLAVE_NUEVA)
     await user.type(screen.getByLabelText(REPETIR), CLAVE_NUEVA)
     await user.click(screen.getByRole('button', CAMBIAR))
+  }
+
+  it('cambia la contraseña y sigue con el token nuevo, sin un segundo acceso', async () => {
+    const { api, user } = abrirPerfil()
+    api.on('post', CAMBIO, { ...cuenta(PERMISOS_MESERO), access_token: TOKEN_NUEVO, token_type: 'bearer', expires_in: 3600 })
+
+    await cambiarClave(user)
 
     expect(await screen.findByText('Contraseña actualizada.')).toBeInTheDocument()
     expect(api.llamadas('post', CAMBIO)[0]?.body).toEqual({ current_password: CLAVE_ACTUAL, new_password: CLAVE_NUEVA })
+    expect(api.llamadas('post', ACCESO)).toHaveLength(0)
+    expect(useSession.getState().token).toBe(TOKEN_NUEVO)
+    expect(currentAuthToken()).toBe(TOKEN_NUEVO)
     expect(screen.getByLabelText(ACTUAL)).toHaveValue('')
+  })
+
+  it('si la respuesta no trae token, cierra la sesión y vuelve al acceso con el aviso', async () => {
+    const { api, user, router } = abrirPerfil()
+    api.on('post', CAMBIO, null, 204)
+
+    await cambiarClave(user)
+
+    expect(await screen.findByText(AVISO)).toBeVisible()
+    expect(router.state.location.pathname).toBe('/acceso')
+    expect(useSession.getState().token).toBeNull()
+    expect(useSession.getState().passwordChanged).toBe(true)
+    expect(api.llamadas('post', ACCESO)).toHaveLength(0)
+  })
+
+  it('si otra pestaña entró con otra cuenta mientras tanto, no pisa ni cierra esa sesión', async () => {
+    const { api, user } = abrirPerfil()
+    api.on('post', CAMBIO, () => {
+      useSession.setState({ token: 'token-de-otra-cuenta' })
+      return { ...cuenta(PERMISOS_MESERO), access_token: TOKEN_NUEVO, token_type: 'bearer', expires_in: 3600 }
+    })
+
+    await cambiarClave(user)
+
+    await waitFor(() => { expect(api.llamadas('post', CAMBIO)).toHaveLength(1); })
+    await new Promise((listo) => setTimeout(listo, 50))
+    expect(useSession.getState().token).toBe('token-de-otra-cuenta')
+    expect(useSession.getState().passwordChanged).toBe(false)
   })
 
   it('no envía si las dos contraseñas nuevas no coinciden o repiten la actual', async () => {

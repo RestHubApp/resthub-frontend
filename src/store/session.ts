@@ -30,6 +30,8 @@ interface SessionState {
   account: CurrentUserResponse | null
   /** La sesion se cerro sola porque el token vencio: el acceso lo explica. */
   expired: boolean
+  /** La sesion se cerro porque no se pudo seguir tras cambiar la contraseña: el acceso lo explica. */
+  passwordChanged: boolean
   signIn: (token: string, account: CurrentUserResponse) => void
   /** Aplica una lectura nueva de `GET /auth/me`: nombre, restaurante o permisos. */
   refresh: (account: CurrentUserResponse) => void
@@ -42,6 +44,12 @@ interface SessionState {
   signOut: () => void
   /** Cierra la sesion porque el servidor ya no acepta el token. */
   expire: () => void
+  /**
+   * Cierra la sesion despues de cambiar la contraseña propia cuando no se pudo
+   * seguir con el token nuevo: el servidor ya revoco el que habia y usarlo solo
+   * daria 401.
+   */
+  signOutAfterPasswordChange: () => void
   /**
    * Abre la sesion de vista previa que entrego `POST /auth/preview`.
    *
@@ -56,19 +64,21 @@ interface SessionState {
   exitPreview: () => void
 }
 
-/**
- * Lee la sesion guardada del navegador.
- *
- * El token se guarda para que recargar la pagina no eche al usuario.
- * Cualquier lectura puede fallar en una ventana privada o con el
- * almacenamiento bloqueado, asi que el fallo se trata como "no hay sesion".
- */
-function readStoredSession(): StoredSession | null {
+type Lectura = { readonly ok: true; readonly session: StoredSession | null } | { readonly ok: false }
+
+// Lee la sesion guardada del navegador (el token se guarda para que recargar
+// la pagina no eche al usuario). Distingue «no hay sesión guardada» de «no se
+// pudo leer»: sin almacenamiento no se sabe qué hizo otra pestaña, y eso no
+// alcanza para cerrar la sesión de esta.
+function leerGuardada(): Lectura {
+  if (ALMACEN === null) {
+    return { ok: false }
+  }
   try {
-    const raw = ALMACEN?.getItem(STORAGE_KEY) ?? null
-    return raw === null ? null : (JSON.parse(raw) as StoredSession)
+    const raw = ALMACEN.getItem(STORAGE_KEY)
+    return { ok: true, session: raw === null ? null : (JSON.parse(raw) as StoredSession) }
   } catch {
-    return null
+    return { ok: false }
   }
 }
 
@@ -86,17 +96,41 @@ function forgetOldSessions(): void {
   }
 }
 
+// El token que esta pestana guardo (o restauro) en el almacenamiento, si lo
+// logro. Solo se compara lo guardado con lo que la pestana escribio: si nunca
+// llego a guardarse (almacenamiento bloqueado o lleno), no hay nada que otra
+// pestana haya podido cambiar.
+const persistencia: { token: string | null } = { token: null }
+
 function writeStoredSession(session: StoredSession | null): void {
+  persistencia.token = null
   try {
     if (session === null) {
       ALMACEN?.removeItem(STORAGE_KEY)
       return
     }
     ALMACEN?.setItem(STORAGE_KEY, JSON.stringify(session))
+    persistencia.token = ALMACEN === null ? null : session.token
   } catch {
     // Sin almacenamiento la sesion dura lo que dure la pestana. Es una
     // degradacion aceptable; perder el acceso por no poder escribir no lo es.
   }
+}
+
+/**
+ * Si otra pestana cambio la sesion guardada despues de que esta guardo `token`:
+ * la cerro, entro otra cuenta o ya la renovo. Entonces esta pestana no debe
+ * escribir encima; lo guardado manda. Una vista previa vive en su propia
+ * pestana y ninguna otra la toca.
+ */
+function otraPestanaLaCambio(token: string): boolean {
+  // Compara tokens para saber cuál sesión escribió esta pestaña, no para verificar un secreto.
+  const escritaPorEsta = persistencia.token === token
+  if (isPreviewTab() || !escritaPorEsta) {
+    return false
+  }
+  const lectura = leerGuardada()
+  return lectura.ok && lectura.session?.token !== token
 }
 
 // Cierra la sesion en el momento en que vence su token.
@@ -116,17 +150,30 @@ function limpiarSesion(): void {
   discardPreviewQueue()
 }
 
+/**
+ * Cierra la sesion solo en esta pestana, sin tocar lo guardado: lo guardado ya
+ * es de otra pestana (que la cerro o abrio otra cuenta) y borrarlo la echaria.
+ */
+function soltarSesion(): void {
+  setAuthToken(null)
+  persistencia.token = null
+  programarVencimiento(null)
+  clearQueriesExcept(PLATFORM_QUERY_ROOT)
+}
+
 /** Si lo guardado se puede seguir usando: vigente y, en una vista previa, marcado como tal. */
 function vigente(session: StoredSession | null): session is StoredSession {
   return session !== null && !isTokenExpired(session.token) && (!isPreviewTab() || session.account.preview)
 }
 
 forgetOldSessions()
-const guardada = readStoredSession()
+const lecturaInicial = leerGuardada()
+const guardada = lecturaInicial.ok ? lecturaInicial.session : null
 const restored = vigente(guardada) ? guardada : null
 if (guardada !== null && restored === null) {
   writeStoredSession(null)
 }
+persistencia.token = restored?.token ?? null
 // Una vista previa que se recarga ya vencida tampoco guarda su cola.
 if (restored === null) {
   discardPreviewQueue()
@@ -137,11 +184,12 @@ export const useSession = create<SessionState>((set, get) => ({
   token: restored?.token ?? null,
   account: restored?.account ?? null,
   expired: guardada !== null && restored === null,
+  passwordChanged: false,
 
   signIn: (token, account) => {
     setAuthToken(token)
     writeStoredSession({ token, account })
-    set({ token, account, expired: false })
+    set({ token, account, expired: false, passwordChanged: false })
     programarVencimiento(token)
     logger.info(
       { userId: account.user.id, roleId: account.user.role_id, restaurantId: account.restaurant.id },
@@ -155,12 +203,23 @@ export const useSession = create<SessionState>((set, get) => ({
     if (token === null) {
       return
     }
+    if (otraPestanaLaCambio(token)) {
+      syncWithStoredSession()
+      return
+    }
     writeStoredSession({ token, account })
     set({ account })
   },
 
   renew: (origin, token, account) => {
     if (get().token !== origin) {
+      return
+    }
+    // Otra pestana cerro la sesion o entro otra cuenta mientras esta renovaba:
+    // escribir el token renovado resucitaria la sesion cerrada o pisaria la
+    // de la otra cuenta. Esta pestana se pone al dia con lo guardado.
+    if (otraPestanaLaCambio(origin)) {
+      syncWithStoredSession()
       return
     }
     setAuthToken(token)
@@ -172,8 +231,13 @@ export const useSession = create<SessionState>((set, get) => ({
 
   signOut: () => {
     limpiarSesion()
-    set({ token: null, account: null, expired: false })
+    set({ token: null, account: null, expired: false, passwordChanged: false })
     logger.info('auth.signed_out')
+  },
+
+  signOutAfterPasswordChange: () => {
+    get().signOut()
+    set({ passwordChanged: true })
   },
 
   expire: () => {
@@ -181,7 +245,7 @@ export const useSession = create<SessionState>((set, get) => ({
       return
     }
     limpiarSesion()
-    set({ token: null, account: null, expired: true })
+    set({ token: null, account: null, expired: true, passwordChanged: false })
     logger.warn('auth.session_expired')
   },
 
@@ -202,7 +266,7 @@ export const useSession = create<SessionState>((set, get) => ({
     }
     limpiarSesion()
     setPreviewTabMark(false)
-    set({ token: null, account: null, expired: false })
+    set({ token: null, account: null, expired: false, passwordChanged: false })
     logger.info('auth.preview_exited')
   },
 }))
@@ -211,6 +275,62 @@ programarVencimiento(restored?.token ?? null)
 setUnauthorizedHandler(() => {
   useSession.getState().expire()
 })
+
+/**
+ * Pone esta pestana al dia con la sesion guardada en el navegador, que otra
+ * pestana (o la ventana de la PWA) acaba de cambiar.
+ *
+ * - La misma cuenta con otro token (otra pestana la renovo o releyo sus
+ *   permisos), o una sesion nueva cuando esta pestana no tenia ninguna: se adopta.
+ * - Nada guardado, una sesion vencida u otra cuenta: esta pestana cierra la
+ *   suya sin borrar lo guardado. Seguir con la cuenta anterior dejaria a quien
+ *   usa el celular despues operando con la identidad de otro.
+ *
+ * Una pestana de vista previa guarda su sesion en su propio `sessionStorage`
+ * y no se sincroniza con nadie.
+ */
+export function syncWithStoredSession(): void {
+  if (isPreviewTab()) {
+    return
+  }
+  const lectura = leerGuardada()
+  if (!lectura.ok) {
+    return
+  }
+  const actual = lectura.session
+  const estado = useSession.getState()
+  if (actual !== null && actual.token === estado.token) {
+    return
+  }
+  if (vigente(actual) && (estado.account === null || (actual.account.user.id === estado.account.user.id && actual.account.restaurant.id === estado.account.restaurant.id))) {
+    setAuthToken(actual.token)
+    persistencia.token = actual.token
+    programarVencimiento(actual.token)
+    useSession.setState({ token: actual.token, account: actual.account, expired: false, passwordChanged: false })
+    logger.info('auth.synced_from_other_tab')
+    return
+  }
+  if (estado.token === null) {
+    return
+  }
+  soltarSesion()
+  useSession.setState({ token: null, account: null, expired: false, passwordChanged: false })
+  logger.info('auth.signed_out_in_other_tab')
+}
+
+// El navegador avisa a las demas pestanas del mismo origen cuando una cambia
+// `localStorage`; la que lo cambio no recibe el aviso. `key === null` es que
+// se vacio el almacenamiento entero.
+if (typeof window !== 'undefined' && !isPreviewTab()) {
+  window.addEventListener('storage', (event: StorageEvent) => {
+    if (event.storageArea !== null && event.storageArea !== ALMACEN) {
+      return
+    }
+    if (event.key === STORAGE_KEY || event.key === null) {
+      syncWithStoredSession()
+    }
+  })
+}
 
 /** Si la sesion abierta es una vista previa del local de muestra, segun el servidor. */
 export function usePreview(): boolean {

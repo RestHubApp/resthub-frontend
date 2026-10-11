@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router'
 
-import { changeOwnPassword, login, sessionOf } from '../../api/auth'
+import { changeOwnPassword, sessionOf } from '../../api/auth'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import PasswordField from '../../components/PasswordField'
@@ -17,6 +18,37 @@ import {
   EMPTY_CHANGE_PASSWORD,
 } from './passwordSchema'
 
+type Cambio = Awaited<ReturnType<typeof changeOwnPassword>>
+
+/**
+ * Sigue con el token que devolvió el cambio de contraseña.
+ *
+ * El servidor corta todos los tokens anteriores, el de `origen` incluido, y
+ * devuelve el único válido: al quedar guardado, las otras pestañas lo adoptan
+ * en vez de seguir con uno que da 401. Sin segundo acceso: la clave nueva no
+ * vuelve a viajar.
+ */
+function seguirConElTokenNuevo(respuesta: Cambio, origen: string | null): 'renovada' | 'cerrada' | 'ajena' {
+  // Un servidor viejo respondía 204 sin cuerpo: ahí no hay token que usar.
+  const nuevo = (respuesta as Partial<Cambio> | null | undefined)?.access_token ?? ''
+  if (origen !== null && nuevo !== '') {
+    useSession.getState().renew(origen, nuevo, sessionOf(respuesta))
+  }
+  const actual = useSession.getState().token
+  if (nuevo !== '' && actual === nuevo) {
+    return 'renovada'
+  }
+  // Otra pestaña ya entró con otra sesión y esta la adoptó: cerrar aquí
+  // borraría lo guardado y sacaría también a esa otra cuenta.
+  if (actual !== null && actual !== origen) {
+    return 'ajena'
+  }
+  // Sin token nuevo, o la sesión se cerró en otra pestaña: seguir con el
+  // token viejo solo daría 401. Se cierra y se vuelve al acceso con el aviso.
+  useSession.getState().signOutAfterPasswordChange()
+  return 'cerrada'
+}
+
 /**
  * Cambio de la contraseña propia.
  *
@@ -24,30 +56,29 @@ import {
  * laptop sin bloquear no deberian alcanzar para quedarse con la cuenta.
  */
 export default function ChangePasswordForm() {
+  const navigate = useNavigate()
   const { register, handleSubmit, formState, reset } = useForm<Formulario>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: EMPTY_CHANGE_PASSWORD,
   })
 
   const cambiar = useMutation({
-    mutationFn: (valores: Formulario) =>
-      changeOwnPassword({
+    // El token se toma al enviar: si otra pestaña entra con otra cuenta
+    // mientras tanto, compararlo al terminar pisaría esa sesión ajena.
+    mutationFn: async (valores: Formulario) => {
+      const origen = useSession.getState().token
+      const respuesta = await changeOwnPassword({
         current_password: valores.current_password,
         new_password: valores.new_password,
-      }),
-    onSuccess: async (_, valores) => {
-      reset(EMPTY_CHANGE_PASSWORD)
-      // Cambiar la contraseña corta las sesiones anteriores, también esta: se
-      // entra de nuevo con la clave nueva para no sacar a la persona de la app.
-      const { token, account, renew } = useSession.getState()
-      if (token === null || account === null) {
-        return
-      }
-      try {
-        const nueva = await login({ email: account.user.email, password: valores.new_password })
-        renew(token, nueva.access_token, sessionOf(nueva))
-      } catch {
-        // Sin renovar, la próxima petición da 401 y el acceso lo explica.
+      })
+      return { respuesta, origen }
+    },
+    onSuccess: ({ respuesta, origen }) => {
+      const resultado = seguirConElTokenNuevo(respuesta, origen)
+      if (resultado === 'renovada') {
+        reset(EMPTY_CHANGE_PASSWORD)
+      } else if (resultado === 'cerrada') {
+        void navigate('/acceso', { replace: true })
       }
     },
   })

@@ -47,15 +47,33 @@ function almacen(): Storage | null {
 // Una lectura o escritura puede fallar en una ventana privada o con el
 // almacenamiento bloqueado: se trata como «no hay sesión guardada».
 function readStored(): StoredPlatformSession | null {
+  const lectura = leer()
+  return lectura.ok ? lectura.session : null
+}
+
+type Lectura = { readonly ok: true; readonly session: StoredPlatformSession | null } | { readonly ok: false }
+
+// Distingue «no hay sesión guardada» de «no se pudo leer»: sin almacenamiento
+// no se sabe qué hizo otra pestaña, y eso no alcanza para cerrar esta.
+function leer(): Lectura {
   try {
-    const raw = almacen()?.getItem(PLATFORM_STORAGE_KEY) ?? null
-    return raw === null ? null : (JSON.parse(raw) as StoredPlatformSession)
+    const storage = almacen()
+    if (storage === null) {
+      return { ok: false }
+    }
+    const raw = storage.getItem(PLATFORM_STORAGE_KEY)
+    return { ok: true, session: raw === null ? null : (JSON.parse(raw) as StoredPlatformSession) }
   } catch {
-    return null
+    return { ok: false }
   }
 }
 
+// El token que esta pestaña logró guardar (o restauró). Solo se compara lo
+// guardado con lo que esta pestaña escribió.
+const persistencia: { token: string | null } = { token: null }
+
 function writeStored(session: StoredPlatformSession | null): void {
+  persistencia.token = null
   try {
     const storage = almacen()
     if (session === null) {
@@ -63,9 +81,25 @@ function writeStored(session: StoredPlatformSession | null): void {
       return
     }
     storage?.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(session))
+    persistencia.token = storage === null ? null : session.token
   } catch {
     // Sin almacenamiento la sesión dura lo que dure la pestaña.
   }
+}
+
+/**
+ * Si otra pestaña cambió la sesión guardada después de que esta guardó
+ * `token` (la cerró, entró otro administrador o ya la renovó): esta no debe
+ * escribir encima.
+ */
+function otraPestanaLaCambio(token: string): boolean {
+  // Compara tokens para saber cuál sesión escribió esta pestaña, no para verificar un secreto.
+  const escritaPorEsta = persistencia.token === token
+  if (!escritaPorEsta) {
+    return false
+  }
+  const lectura = leer()
+  return lectura.ok && lectura.session?.token !== token
 }
 
 const programarVencimiento = expiryTimer(() => {
@@ -81,6 +115,14 @@ function limpiar(): void {
   clearQueriesOf(PLATFORM_QUERY_ROOT)
 }
 
+/** Cierra la sesión solo en esta pestaña, sin tocar lo guardado, que ya es de otra. */
+function soltar(): void {
+  setPlatformAuthToken(null)
+  persistencia.token = null
+  programarVencimiento(null)
+  clearQueriesOf(PLATFORM_QUERY_ROOT)
+}
+
 function abrir(token: string, admin: PlatformAdmin): void {
   setPlatformAuthToken(token)
   writeStored({ token, admin })
@@ -92,6 +134,7 @@ const restored = guardada !== null && !isTokenExpired(guardada.token) ? guardada
 if (guardada !== null && restored === null) {
   writeStored(null)
 }
+persistencia.token = restored?.token ?? null
 setPlatformAuthToken(restored?.token ?? null)
 
 export const usePlatformSession = create<PlatformSessionState>((set, get) => ({
@@ -111,12 +154,22 @@ export const usePlatformSession = create<PlatformSessionState>((set, get) => ({
     if (token === null) {
       return
     }
+    if (otraPestanaLaCambio(token)) {
+      syncWithStoredPlatformSession()
+      return
+    }
     writeStored({ token, admin })
     set({ admin })
   },
 
   renew: (origin, token, admin) => {
     if (get().token !== origin) {
+      return
+    }
+    // Otra pestaña cerró la sesión o entró otro administrador mientras esta
+    // renovaba: escribir encima la resucitaría o pisaría la del otro.
+    if (otraPestanaLaCambio(origin)) {
+      syncWithStoredPlatformSession()
       return
     }
     abrir(token, admin)
@@ -144,3 +197,49 @@ programarVencimiento(restored?.token ?? null)
 setPlatformUnauthorizedHandler(() => {
   usePlatformSession.getState().expire()
 })
+
+/**
+ * Pone esta pestaña al día con la sesión de plataforma guardada, que otra
+ * pestaña acaba de cambiar: adopta la del mismo administrador (renovada) o una
+ * nueva si esta no tenía ninguna; si ya no hay sesión, venció o es de otro
+ * administrador, cierra la de esta pestaña sin borrar lo guardado. Una pestaña
+ * de vista previa no guarda la sesión de plataforma y no se sincroniza.
+ */
+export function syncWithStoredPlatformSession(): void {
+  const lectura = leer()
+  if (!lectura.ok) {
+    return
+  }
+  const actual = lectura.session
+  const estado = usePlatformSession.getState()
+  if (actual !== null && actual.token === estado.token) {
+    return
+  }
+  if (actual !== null && !isTokenExpired(actual.token) && (estado.admin === null || estado.admin.id === actual.admin.id)) {
+    setPlatformAuthToken(actual.token)
+    persistencia.token = actual.token
+    programarVencimiento(actual.token)
+    usePlatformSession.setState({ token: actual.token, admin: actual.admin, expired: false })
+    logger.info('platform.synced_from_other_tab')
+    return
+  }
+  if (estado.token === null) {
+    return
+  }
+  soltar()
+  usePlatformSession.setState({ token: null, admin: null, expired: false })
+  logger.info('platform.signed_out_in_other_tab')
+}
+
+// El navegador avisa a las demás pestañas cuando una cambia `localStorage`.
+// `key === null` es que se vació el almacenamiento entero.
+if (typeof window !== 'undefined' && !isPreviewTab()) {
+  window.addEventListener('storage', (event: StorageEvent) => {
+    if (event.storageArea !== null && event.storageArea !== almacen()) {
+      return
+    }
+    if (event.key === PLATFORM_STORAGE_KEY || event.key === null) {
+      syncWithStoredPlatformSession()
+    }
+  })
+}
