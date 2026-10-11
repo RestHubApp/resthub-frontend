@@ -56,7 +56,7 @@ describe('TakeawayDialog', () => {
     const mount = open()
     const window = await openWindow(mount)
     await mount.user.click(within(window).getByRole('radio', { name: 'Delivery' }))
-    expect(within(window).getByRole('radio', { name: 'Delivery' })).toHaveAttribute('aria-checked', 'true')
+    expect(within(window).getByRole('radio', { name: 'Delivery' })).toBeChecked()
     await mount.user.click(within(window).getByRole('button', SELECT))
 
     expect(await within(window).findByText('Escribe el nombre de quien recibe')).toBeInTheDocument()

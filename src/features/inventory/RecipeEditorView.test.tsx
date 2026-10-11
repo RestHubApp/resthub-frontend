@@ -25,6 +25,14 @@ function value(term: string) {
   return screen.getByText(term).nextElementSibling
 }
 
+function rowOf(text: string): HTMLElement {
+  const row = screen.getAllByRole('row').find((candidate) => within(candidate).queryByText(text) !== null)
+  if (row === undefined) {
+    throw new Error(`No se encontró la fila de ${text}`)
+  }
+  return row
+}
+
 describe('RecipeEditorView', () => {
   it('muestra precio, costo y margen de la porción y cada línea con su costo', async () => {
     openRecipe()
@@ -124,7 +132,8 @@ describe('RecipesPanel', () => {
     signInAs(ONLY_READ)
     mountScreen(<InventoryView />, { path: '/inventario', en: '/inventario?vista=recetas' })
 
-    const row = (await screen.findByText('Ceviche')).closest('tr') as HTMLElement
+    await screen.findByText('Ceviche')
+    const row = rowOf('Ceviche')
     expect(within(row).getByText('S/ 18.00')).toBeInTheDocument()
     expect(within(row).getByRole('link', { name: 'Ver receta de Ceviche' })).toHaveAttribute('href', EN)
     expect(screen.getByText('Sin receta')).toBeInTheDocument()

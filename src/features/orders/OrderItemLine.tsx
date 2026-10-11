@@ -8,7 +8,7 @@ interface OrderItemLineProps {
   /** La cocina no necesita precios; el mesero y la caja, si. */
   readonly showPrice?: boolean
   /** La lectura de su nota, para marcar una alergia. */
-  readonly flag?: OrderNoteFlag
+  readonly flag?: OrderNoteFlag | undefined
 }
 
 /** "2 × Lomo saltado", con su nota resaltada debajo. */

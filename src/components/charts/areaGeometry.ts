@@ -39,14 +39,13 @@ function pathOf(values: readonly number[], x: (index: number) => number, y: (val
  */
 export function areaGeometry(
   points: readonly SeriesPoint[],
-  width: number,
-  height: number,
+  size: { readonly width: number; readonly height: number },
   overlay: readonly number[] = [],
 ): AreaGeometry {
   const plotLeft = AREA_MARGIN.left
-  const plotRight = Math.max(plotLeft + 1, width - AREA_MARGIN.right)
+  const plotRight = Math.max(plotLeft + 1, size.width - AREA_MARGIN.right)
   const plotTop = AREA_MARGIN.top
-  const plotBottom = height - AREA_MARGIN.bottom
+  const plotBottom = size.height - AREA_MARGIN.bottom
   const max = Math.max(0, ...points.map((point) => point.value), ...overlay)
   const ticks = niceTicks(max)
   const cap = ticks.at(-1) ?? 1

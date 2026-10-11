@@ -9,7 +9,7 @@ interface IngredientUnitFieldProps {
   /** El insumo que se edita: su unidad se muestra y no se cambia. */
   readonly ingredient: Ingredient | undefined
   readonly field: UseFormRegisterReturn
-  readonly error?: string
+  readonly error?: string | undefined
 }
 
 /**

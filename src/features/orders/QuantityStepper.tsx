@@ -1,5 +1,6 @@
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
+import { minusState } from './stepperState'
 
 interface QuantityStepperProps {
   /** El plato, para que cada boton diga de que plato quita o agrega. */
@@ -23,8 +24,7 @@ export function QuantityStepper({
   disabled = false,
   canRemove = true,
 }: QuantityStepperProps) {
-  // Con la cantidad en 1, "−" quita el plato, si se puede quitar.
-  const shouldRemoveDish = quantity <= 1 && canRemove
+  const { shouldRemoveDish, isDisabled: isMinusDisabled } = minusState(quantity, canRemove, disabled)
 
   return (
     <div className="flex items-center gap-1">
@@ -33,7 +33,7 @@ export function QuantityStepper({
         variant="outline"
         className={BUTTON}
         aria-label={shouldRemoveDish ? `Quitar ${name}` : `Uno menos de ${name}`}
-        disabled={disabled || quantity <= 1 && !canRemove}
+        disabled={isMinusDisabled}
         onClick={() => {
           onChange(quantity - 1)
         }}

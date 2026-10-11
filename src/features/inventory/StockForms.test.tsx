@@ -86,7 +86,7 @@ describe('compras, mermas y ajustes', () => {
     expect(within(window).getByLabelText('Costo por kg (S/)')).toHaveValue('4')
     await user.type(within(window).getByLabelText('Cantidad comprada'), '5')
     expect(within(window).getByText(/Total S\/\s20\.00 · sale a S\/\s4\.00 por kg/u)).toBeInTheDocument()
-    expect(within(window).getByText(/quedará en/u).parentElement).toHaveTextContent('Hoy hay 5 kg → quedará en 10 kg')
+    expect(within(window).getByTestId('stock-preview')).toHaveTextContent('Hoy hay 5 kg → quedará en 10 kg')
     await user.click(within(window).getByRole('button', { name: 'Registrar compra' }))
 
     expect(await screen.findByText('Compra registrada: Limón queda en 10 kg')).toBeInTheDocument()
@@ -132,7 +132,7 @@ describe('compras, mermas y ajustes', () => {
     const window = await action(user, 'Ajuste de Limón', 'Ajustar stock: Limón')
 
     await user.type(within(window).getByLabelText('Stock contado'), '3')
-    expect(within(window).getByText(/quedará en/u).parentElement).toHaveTextContent('quedará en 3 kg')
+    expect(within(window).getByTestId('stock-preview')).toHaveTextContent('quedará en 3 kg')
     await user.click(within(window).getByRole('button', { name: 'Guardar ajuste' }))
 
     expect(await screen.findByText('Ajuste de −2 kg: Limón queda en 3 kg')).toBeInTheDocument()

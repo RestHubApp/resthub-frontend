@@ -13,9 +13,9 @@ interface OwnerFieldsProps {
     readonly password: UseFormRegisterReturn
   }
   readonly errors: {
-    readonly full_name?: string
-    readonly email?: string
-    readonly password?: string
+    readonly full_name?: string | undefined
+    readonly email?: string | undefined
+    readonly password?: string | undefined
   }
 }
 

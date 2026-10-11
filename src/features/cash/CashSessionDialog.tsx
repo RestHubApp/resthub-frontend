@@ -2,12 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 
 import { cashSessionQuery } from '@/api/cash'
 import type { CashSession } from '@/api/types'
-import { EmptyState } from '@/components/EmptyState'
 import { FormDialog } from '@/components/FormDialog'
-import { RetryQueryError } from '@/components/RetryQueryError'
-import { errorMessage } from '@/services/api'
 import { formatMoney } from '@/services/format'
-import { CashSummaryView } from './CashSummaryView'
+import { CashSessionContent } from './CashSessionContent'
 
 interface CashSessionDialogProps {
   /** El turno a mostrar; `null` cierra la ventana. */
@@ -29,7 +26,6 @@ export function CashSessionDialog({ sessionId, onClose }: CashSessionDialogProps
   if (sessionId === null) {
     return null
   }
-  const data = shift.data
 
   return (
     <FormDialog
@@ -41,12 +37,9 @@ export function CashSessionDialog({ sessionId, onClose }: CashSessionDialogProps
         }
       }}
       title={`Turno de caja ${String(sessionId)}`}
-      description={countedLabel(data)}
+      description={countedLabel(shift.data)}
     >
-      {shift.isPending ? <EmptyState title="Cargando el arqueo…" /> : null}
-      {shift.isError ? <RetryQueryError message={errorMessage(shift.error, 'No se pudo cargar el turno.')} onRetry={() => { void shift.refetch() }} /> : null}
-      {data?.summary ? <CashSummaryView session={data} summary={data.summary} /> : null}
-      {data !== undefined && data.closing_notes !== '' ? <p className="m-0 text-sm">Nota: {data.closing_notes}</p> : null}
+      <CashSessionContent shift={shift} />
     </FormDialog>
   )
 }

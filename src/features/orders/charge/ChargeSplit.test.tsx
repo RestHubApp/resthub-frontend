@@ -47,7 +47,7 @@ describe('cobro en partes iguales', () => {
     const { api, user } = chargeSplit()
 
     await user.click(await screen.findByRole('radio', EQUAL))
-    expect(screen.getByText('Paga cada una').nextSibling).toHaveTextContent('S/ 25.00')
+    expect(screen.getByTestId('equal-split-part')).toHaveTextContent(/Paga cada una\s*S\/ 25\.00/u)
     await user.click(screen.getByRole('radio', { name: 'Tarjeta' }))
     await user.click(screen.getByRole('button', CONFIRM))
 
@@ -76,7 +76,7 @@ describe('cobro en partes iguales', () => {
     await user.click(await screen.findByRole('radio', EQUAL))
     await user.click(screen.getByRole('button', { name: 'Uno más de personas' }))
 
-    expect(screen.getByText('Paga cada una').nextSibling).toHaveTextContent('S/ 33.33')
+    expect(screen.getByTestId('equal-split-part')).toHaveTextContent(/Paga cada una\s*S\/ 33\.33/u)
   })
 })
 
@@ -88,7 +88,7 @@ describe('cobro por platos', () => {
     expect(screen.getByText('Elige al menos un plato')).toBeInTheDocument()
     expect(screen.getByRole('button', CONFIRM)).toBeDisabled()
     await user.click(screen.getByRole('checkbox', { name: /Chicha morada/u }))
-    expect(screen.getByText('Paga, con el descuento del pedido').nextSibling).toHaveTextContent('S/ 20.00')
+    expect(screen.getByTestId('item-split-charge')).toHaveTextContent(/Paga, con el descuento del pedido\s*S\/ 20\.00/u)
     await user.click(screen.getByRole('radio', { name: 'Yape' }))
     await user.click(screen.getByRole('button', CONFIRM))
 
@@ -134,7 +134,7 @@ describe('la cuenta', () => {
     expect(await screen.findByText('Cortesías')).toBeInTheDocument()
     expect(screen.getByText('Descuento 10.0 %')).toBeInTheDocument()
     expect(screen.getByText('Ya pagado')).toBeInTheDocument()
-    expect(screen.getByText('Falta cobrar').nextSibling).toHaveTextContent('S/ 25.00')
+    expect(screen.getByTestId('bill-balance')).toHaveTextContent(/Falta cobrar\s*S\/ 25\.00/u)
     expect(screen.getByRole('region', { name: 'Pagos registrados' })).toHaveTextContent('+ S/ 2.00')
   })
 })

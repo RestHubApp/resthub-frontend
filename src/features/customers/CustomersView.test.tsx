@@ -134,10 +134,10 @@ describe('CustomersView: ficha y edición', () => {
     const window = await screen.findByRole('dialog', { name: NEW })
     const checkbox = within(window).getByRole('checkbox', { name: /Ley N\.º 29733/u })
     // Dentro de un formulario, Radix agrega un <input> oculto junto a su botón.
-    const hidden = checkbox.parentElement?.querySelector('input[type="checkbox"]')
+    const label = within(window).getByTestId('consent-label')
 
-    expect(hidden?.closest('label')).toBe(checkbox.closest('label'))
-    expect(checkbox.closest('label')).not.toBeNull()
+    expect(within(label).getAllByRole('checkbox', { hidden: true })).toHaveLength(2)
+    expect(within(label).getByRole('checkbox', { name: /Ley N\.º 29733/u })).toBe(checkbox)
   })
 })
 

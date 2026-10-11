@@ -24,20 +24,31 @@ function serialize(fields: Fields): Fields {
   }))
 }
 
+/** Arma el registro: nivel, hora, contexto, campos serializados y mensaje. */
+function buildPayload(level: Level, context: Fields, args: readonly [LogArgument, (string | undefined)?]): Fields {
+  const [first, message] = args
+  const isText = typeof first === 'string'
+  return {
+    level: severity[level], time: Date.now(), ...context,
+    ...(isText ? {} : serialize(first)),
+    msg: isText ? first : message ?? '',
+  }
+}
+
+/** Escribe el registro en el método de consola que corresponde al nivel. */
+function emit(level: Level, payload: Fields): void {
+  if (level === 'fatal' || level === 'error') console.error(payload)
+  else if (level === 'warn') console.warn(payload)
+  // eslint-disable-next-line no-console -- El adaptador de logs es el único lugar donde se usa la consola deliberadamente.
+  else if (level === 'info') console.info(payload)
+  // eslint-disable-next-line no-console -- El nivel debug solo se emite si el entorno lo habilita.
+  else console.debug(payload)
+}
+
 function createLogger(context: Fields = {}) {
   const log = (level: Level, first: LogArgument, message?: string): void => {
     if (severity[level] < minimum) return
-    const payload = {
-      level: severity[level], time: Date.now(), ...context,
-      ...(typeof first === 'string' ? {} : serialize(first)),
-      msg: typeof first === 'string' ? first : message ?? '',
-    }
-    if (level === 'fatal' || level === 'error') console.error(payload)
-    else if (level === 'warn') console.warn(payload)
-    // eslint-disable-next-line no-console -- El adaptador de logs es el único lugar donde se usa la consola deliberadamente.
-    else if (level === 'info') console.info(payload)
-    // eslint-disable-next-line no-console -- El nivel debug solo se emite si el entorno lo habilita.
-    else console.debug(payload)
+    emit(level, buildPayload(level, context, [first, message]))
   }
   return {
     child: (extra: Fields) => createLogger({ ...context, ...extra }),

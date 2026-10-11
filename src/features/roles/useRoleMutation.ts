@@ -11,7 +11,7 @@ import { useSession } from '@/store/session'
 interface RoleMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>
   /** El rol que cambia: si es el de quien mira, su menú cambia con él. */
-  readonly roleId?: number
+  readonly roleId?: number | undefined
   readonly failure: string
   readonly success: (result: TResult) => string
   /** Cómo quedan los roles con la respuesta del servidor, sin esperar a releerlos. */

@@ -117,12 +117,15 @@ export interface SessionTokens {
  */
 export function tokenFor(destination: RequestTarget, tokens: SessionTokens): string | null {
   switch (destinationOf(destination)) {
-    case 'platform':
+    case 'platform': {
       return tokens.platform
-    case 'restaurant':
+    }
+    case 'restaurant': {
       return tokens.restaurant
-    case 'foreign':
+    }
+    case 'foreign': {
       return null
+    }
   }
 }
 
@@ -323,10 +326,14 @@ function forgetTransportFailure(config: InternalAxiosRequestConfig): void {
   if ((config.method ?? 'get').toLowerCase() === 'get') clearApiFailureOf(scopeOf(config.url))
 }
 
+/** Una lectura en primer plano: ni escritura ni consulta de fondo. */
+function isForegroundRead(error: AxiosError): boolean {
+  if ((error.config?.method ?? 'get').toLowerCase() !== 'get') return false
+  return error.config?.background !== true
+}
+
 function rememberTransportFailure(error: unknown): void {
-  if (!axios.isAxiosError(error) || !isTransportFailure(error)) return
-  if ((error.config?.method ?? 'get').toLowerCase() !== 'get') return
-  if (error.config?.background === true) return
+  if (!axios.isAxiosError(error) || !isTransportFailure(error) || !isForegroundRead(error)) return
   const scope = scopeOf(error.config?.url)
   noteApiFailure(
     scope,

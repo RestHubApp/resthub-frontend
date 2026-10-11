@@ -70,7 +70,7 @@ function decode(route: string): string {
   try {
     return route
       .split('/')
-      .map((stretch) => decodeURIComponent(stretch).replace(/\//gu, '%2F'))
+      .map((stretch) => decodeURIComponent(stretch).replaceAll('/', '%2F'))
       .join('/')
   } catch {
     // Un `%` mal escrito: el router tampoco la decodifica.

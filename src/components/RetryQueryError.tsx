@@ -12,7 +12,7 @@ interface RetryQueryErrorProps {
 export function RetryQueryError({ message, onRetry, fallback = false }: RetryQueryErrorProps) {
   return (
     // `data-reintento`: esta falla ya ofrece reintentar (ver `ApiFailureNotice`).
-    <div className="flex flex-col items-start gap-3" data-reintento={fallback ? undefined : ''}>
+    <div className="flex flex-col items-start gap-3" data-testid="retry-query-error" data-reintento={fallback ? undefined : ''}>
       <FormMessage tone="error" fallback={fallback}>{message}</FormMessage>
       <Button type="button" variant="outline" onClick={onRetry}>Reintentar</Button>
     </div>

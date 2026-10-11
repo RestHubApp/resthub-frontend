@@ -3,12 +3,10 @@ import { useState } from 'react'
 import { grantCourtesy, revokeCourtesy } from '@/api/orders'
 import type { OrderItemResponse, OrderResponse } from '@/api/types'
 import { MIN_TEXT } from '@/components/formRules'
-import { Icon } from '@/components/Icon'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { formatMoney } from '@/services/format'
 import { useOrderAction } from '@/features/orders/useOrderAction'
-import { MAX_ADJUSTMENT_REASON } from './discountSchema'
+import { CourtesyActions } from './CourtesyActions'
+import { CourtesyReason } from './CourtesyReason'
 
 interface CourtesyItemProps {
   readonly order: OrderResponse
@@ -44,56 +42,29 @@ export function CourtesyItem({ order, item }: CourtesyItemProps) {
         </span>
         <span className="flex items-center gap-2">
           <span className="tabular-nums">{formatMoney(item.subtotal)}</span>
-          {item.is_courtesy ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={change.isPending}
-              onClick={() => {
-                change.mutate(null)
-              }}
-            >
-              Cobrar
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={reason !== null}
-              onClick={() => {
-                setReason('')
-              }}
-            >
-              <Icon name="courtesy" size={14} />
-              <span>Invitar</span>
-            </Button>
-          )}
+          <CourtesyActions
+            item={item}
+            isPending={change.isPending}
+            isReasonOpen={reason !== null}
+            onRevoke={() => {
+              change.mutate(null)
+            }}
+            onInvite={() => {
+              setReason('')
+            }}
+          />
         </span>
       </div>
       {reason === null ? null : (
-        <div className="flex gap-2">
-          <Input
-            aria-label={`Motivo de la cortesía de ${item.name}`}
-            placeholder="Error de cocina, cumpleaños…"
-            maxLength={MAX_ADJUSTMENT_REASON}
-            value={reason}
-            onChange={(event) => {
-              setReason(event.target.value)
-            }}
-          />
-          <Button
-            type="button"
-            size="sm"
-            disabled={!isValid || change.isPending}
-            onClick={() => {
-              change.mutate(reason.trim())
-            }}
-          >
-            Confirmar
-          </Button>
-        </div>
+        <CourtesyReason
+          itemName={item.name}
+          value={reason}
+          isConfirmDisabled={!isValid || change.isPending}
+          onChange={setReason}
+          onConfirm={() => {
+            change.mutate(reason.trim())
+          }}
+        />
       )}
     </li>
   )

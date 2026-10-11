@@ -1,12 +1,9 @@
 import { useState } from 'react'
 
 import type { StaffResponse } from '@/api/types'
-import { FormDialog } from '@/components/FormDialog'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { RoleOptionsGate } from './RoleOptionsGate'
-import { StaffEditForm } from './StaffEditForm'
-import { StaffPasswordForm } from './StaffPasswordForm'
+import { type StaffDialog, StaffRowDialogs } from './StaffRowDialogs'
 import { StaffStatusButton } from './StaffStatusButton'
 
 interface StaffRowActionsProps {
@@ -17,18 +14,11 @@ interface StaffRowActionsProps {
   readonly manageable: boolean
 }
 
-type Dialog = 'editar' | 'contrasena' | null
-
 /** Lo que se hace con una cuenta del personal desde el listado. */
 export function StaffRowActions({ account, isSelf, manageable }: StaffRowActionsProps) {
-  const [dialog, setDialog] = useState<Dialog>(null)
+  const [dialog, setDialog] = useState<StaffDialog>(null)
   const close = () => {
     setDialog(null)
-  }
-  const onChange = (open: boolean) => {
-    if (!open) {
-      close()
-    }
   }
 
   if (!manageable) {
@@ -67,19 +57,7 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
       )}
       <StaffStatusButton account={account} disabled={isSelf} />
 
-      <FormDialog open={dialog === 'editar'} onOpenChange={onChange} title={`Editar a ${account.full_name}`}>
-        <RoleOptionsGate currentRoleId={account.role_id}>
-          {(options) => <StaffEditForm account={account} roles={options} isSelf={isSelf} onDone={close} />}
-        </RoleOptionsGate>
-      </FormDialog>
-      <FormDialog
-        open={dialog === 'contrasena'}
-        onOpenChange={onChange}
-        title={`Restablecer la contraseña de ${account.full_name}`}
-        description="Tu propia contraseña se cambia en Mi perfil."
-      >
-        <StaffPasswordForm account={account} onDone={close} />
-      </FormDialog>
+      <StaffRowDialogs account={account} isSelf={isSelf} dialog={dialog} onClose={close} />
     </div>
   )
 }

@@ -24,7 +24,7 @@ export function EqualSplitField({ remaining, partCents, onChange }: EqualSplitFi
           onChange={onChange}
         />
       </div>
-      <p className="m-0 text-right">
+      <p className="m-0 text-right" data-testid="equal-split-part">
         <span className="block text-xs text-muted-foreground">
           {remaining === 1 ? 'Paga lo que falta' : 'Paga cada una'}
         </span>

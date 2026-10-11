@@ -38,6 +38,22 @@ function open(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, alerts
   return { api, ...mountScreen(<InventoryView />, { path: '/inventario', en }) }
 }
 
+function cardOf(name: string): HTMLElement {
+  const card = screen.getAllByRole('listitem').find((item) => within(item).queryByRole('heading', { name }) !== null)
+  if (card === undefined) {
+    throw new Error(`No se encontró la tarjeta de ${name}`)
+  }
+  return card
+}
+
+function rowOf(text: string): HTMLElement {
+  const row = screen.getAllByRole('row').find((candidate) => within(candidate).queryByText(text) !== null)
+  if (row === undefined) {
+    throw new Error(`No se encontró la fila de ${text}`)
+  }
+  return row
+}
+
 describe('InventoryView: resumen y alertas', () => {
   it('dice cuántos insumos hay por reponer y cuántos en negativo', async () => {
     open()
@@ -56,10 +72,11 @@ describe('InventoryView: resumen y alertas', () => {
     const { user } = open()
     await user.click(await screen.findByRole('button', { name: 'Ver alertas' }))
 
-    const papa = (await screen.findByRole('heading', { name: 'Papa amarilla' })).closest('li') as HTMLElement
+    await screen.findByRole('heading', { name: PAPA.name })
+    const papa = cardOf(PAPA.name)
     expect(within(papa).getByText('Bajo mínimo')).toBeInTheDocument()
     expect(within(papa).getByText('2.2 kg')).toBeInTheDocument()
-    const aceite = screen.getByRole('heading', { name: 'Aceite' }).closest('li') as HTMLElement
+    const aceite = cardOf('Aceite')
     expect(within(aceite).getByText('Negativo')).toBeInTheDocument()
 
     await user.click(within(papa).getByRole('button', { name: 'Registrar compra de Papa amarilla' }))
@@ -81,7 +98,8 @@ describe('InventoryView: resumen y alertas', () => {
 describe('InventoryView: tabla de insumos', () => {
   it('muestra stock, estado, mínimo y costo por kilo de cada insumo', async () => {
     open()
-    const row = (await screen.findByText('Limón')).closest('tr') as HTMLElement
+    await screen.findByText('Limón')
+    const row = rowOf('Limón')
     expect(within(row).getByText('5 kg')).toBeInTheDocument()
     expect(within(row).getByText('Suficiente')).toBeInTheDocument()
     expect(within(row).getByText('S/ 4.00 por kg')).toBeInTheDocument()

@@ -1,22 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-import { anonymizeCustomer, customersQueryKey, exportCustomer } from '@/api/customers'
-import type { Customer, CustomerExport } from '@/api/types'
+import type { Customer } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
-import { useNotifications } from '@/store/notifications'
-
-/** Entrega el archivo al navegador, como cualquier descarga. */
-function download(data: CustomerExport, customerId: number): void {
-  const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(file)
-  link.download = `cliente-${String(customerId)}-datos.json`
-  link.click()
-  URL.revokeObjectURL(link.href)
-}
+import { useCustomerRights } from './useCustomerRights'
 
 interface CustomerRightsProps {
   readonly customer: Customer
@@ -32,22 +19,7 @@ interface CustomerRightsProps {
  * conservan. La rectificación es «Editar datos».
  */
 export function CustomerRights({ customer, onErased }: CustomerRightsProps) {
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-  const exportAction = useMutation({
-    mutationFn: () => exportCustomer(customer.id),
-    onSuccess: (data) => {
-      download(data, customer.id)
-    },
-  })
-  const remove = useMutation({
-    mutationFn: () => anonymizeCustomer(customer.id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: customersQueryKey })
-      push({ tone: 'info', message: 'Los datos del cliente se borraron.' })
-      onErased()
-    },
-  })
+  const { exportAction, remove } = useCustomerRights(customer.id, onErased)
   const failure = exportAction.error ?? remove.error
 
   return (

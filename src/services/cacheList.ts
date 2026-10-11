@@ -21,9 +21,9 @@ function always(): boolean {
 export function upsertInList<T extends Identified>(
   list: readonly T[],
   item: T,
-  before: (item: T, other: T) => boolean,
-  stays: (previous: T) => boolean = always,
+  ...order: readonly [before: (item: T, other: T) => boolean, stays?: (previous: T) => boolean]
 ): T[] {
+  const [before, stays = always] = order
   const previous = list.find((actual) => actual.id === item.id)
   if (previous !== undefined && stays(previous)) {
     return list.map((actual) => (actual.id === item.id ? item : actual))

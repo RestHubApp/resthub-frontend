@@ -4,15 +4,13 @@ import { useState } from 'react'
 import type { DishCost, MenuItem, MenuSection } from '@/api/types'
 import { FormDialog } from '@/components/FormDialog'
 import { Icon } from '@/components/Icon'
-import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { AvailabilityToggle } from './AvailabilityToggle'
-import { DishMargin } from './DishMargin'
 import type { Direction } from './menuOrder'
 import { MenuItemForm } from './MenuItemForm'
+import { MenuItemInfo } from './MenuItemInfo'
 import { MenuItemStatusButton } from './MenuItemStatusButton'
 import { MoveButtons } from './MoveButtons'
-import { formatMoney } from '@/services/format'
 
 interface MenuItemRowProps {
   readonly item: MenuItem
@@ -33,7 +31,6 @@ export function MenuItemRow({
   onMove,
 }: MenuItemRowProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const isOutOfStock = item.is_active && !item.is_available
 
   return (
     <li
@@ -42,18 +39,7 @@ export function MenuItemRow({
         !item.is_active && 'bg-muted/60',
       )}
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <h3 className="m-0 text-base font-semibold text-foreground">{item.name}</h3>
-          <span className="font-semibold text-foreground tabular-nums">{formatMoney(item.price)}</span>
-          {isOutOfStock ? <StatusBadge label="Agotado hoy" tone="cancelled" /> : null}
-          {item.is_active ? null : <StatusBadge label="Fuera de la carta" />}
-        </div>
-        {item.description === '' ? null : (
-          <p className="m-0 line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
-        )}
-        <DishMargin itemId={item.id} itemName={item.name} cost={cost} />
-      </div>
+      <MenuItemInfo item={item} cost={cost} />
 
       <div className="flex flex-wrap items-center gap-2">
         {item.is_active ? <AvailabilityToggle item={item} /> : null}

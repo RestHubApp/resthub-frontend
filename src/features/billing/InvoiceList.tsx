@@ -2,12 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { invoicesQuery } from '@/api/billing'
-import { EmptyState } from '@/components/EmptyState'
-import { ListSkeleton } from '@/components/ListSkeleton'
-import { RetryQueryError } from '@/components/RetryQueryError'
 import { TablePagination } from '@/components/TablePagination'
-import { errorMessage } from '@/services/api'
 import { useTimeZone } from '@/store/session'
+import { InvoiceListStatus } from './InvoiceListStatus'
 import { InvoiceRow } from './InvoiceRow'
 import { useResendInvoice } from './useResendInvoice'
 
@@ -24,9 +21,15 @@ export function InvoiceList() {
 
   return (
     <>
-      {issued.isPending ? <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
-      {issued.isError ? <RetryQueryError message={errorMessage(issued.error, 'No se pudieron cargar los comprobantes.')} onRetry={() => { void issued.refetch() }} /> : null}
-      {issued.isSuccess && list.length === 0 ? <EmptyState title="Todavía no se emitió ningún comprobante" /> : null}
+      <InvoiceListStatus
+        isPending={issued.isPending}
+        isError={issued.isError}
+        isEmpty={issued.isSuccess && list.length === 0}
+        error={issued.error}
+        onRetry={() => {
+          void issued.refetch()
+        }}
+      />
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {list.map((invoice) => (
           <InvoiceRow

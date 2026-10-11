@@ -1,20 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router'
-
-import { PERMISSION } from '@/api/permissions'
 import { tablesQuery } from '@/api/tables'
-import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { Button } from '@/components/ui/button'
-import { paths } from '@/services/paths'
-import { useCan } from '@/store/session'
 import { QueryError } from '@/features/orders/QueryError'
+import { EmptyTables } from './EmptyTables'
 import { TableCard } from './TableCard'
 
 /** Las mesas activas del salon, en el orden en que las acomodo el encargado. */
 export function TableGrid() {
   const tables = useQuery(tablesQuery(false))
-  const canManage = useCan(PERMISSION.tablesManage)
 
   if (tables.isPending) {
     return (
@@ -36,18 +29,7 @@ export function TableGrid() {
     )
   }
   if (tables.data.length === 0) {
-    return (
-      <EmptyState
-        title="No hay mesas activas"
-        description="Los pedidos para llevar siguen funcionando."
-      >
-        {canManage ? (
-          <Button asChild variant="outline" size="lg" className="h-11 px-4">
-            <Link to={paths.tables}>Crear mesas</Link>
-          </Button>
-        ) : null}
-      </EmptyState>
-    )
+    return <EmptyTables />
   }
 
   const free = tables.data.filter((table) => table.active_order === null).length

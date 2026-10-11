@@ -1,8 +1,5 @@
-import { Suspense } from 'react'
-import { lazyNamed } from '@/components/lazyNamed'
-
 import { PageHeader } from '@/components/PageHeader'
-import { DeferredSection } from './DeferredSection'
+import { DeferredPanels } from './DeferredPanels'
 import { LatencySection } from './LatencySection'
 import { windowParams } from './obsFilters'
 import { ObsToolbar } from './ObsToolbar'
@@ -12,10 +9,6 @@ import { TrafficSection } from './TrafficSection'
 import { useHashFocus } from './useHashFocus'
 import { useObsFilters } from './useObsFilters'
 import { useObsRefresh } from './useObsRefresh'
-
-const RoutesSection = lazyNamed(() => import('./RoutesSection'), 'RoutesSection')
-const LogsSection = lazyNamed(() => import('./LogsSection'), 'LogsSection')
-const RequestsSection = lazyNamed(() => import('./RequestsSection'), 'RequestsSection')
 
 /**
  * Cómo anda la aplicación: tráfico, errores, latencias, rutas y logs de la
@@ -44,21 +37,7 @@ export function ObservabilityView() {
         <LatencySection params={params} live={live} />
         <StatusSection params={params} live={live} />
       </div>
-      <DeferredSection name="Rutas del API">
-        <Suspense fallback={<p role="status">Cargando las rutas…</p>}>
-          <RoutesSection filters={filters} live={live} />
-        </Suspense>
-      </DeferredSection>
-      <DeferredSection name="Logs" anchor="logs">
-        <Suspense fallback={<p role="status">Cargando los logs…</p>}>
-          <LogsSection filters={filters} onChange={update} live={live} />
-        </Suspense>
-      </DeferredSection>
-      <DeferredSection name="Peticiones" anchor="peticiones">
-        <Suspense fallback={<p role="status">Cargando las peticiones…</p>}>
-          <RequestsSection filters={filters} onChange={update} live={live} />
-        </Suspense>
-      </DeferredSection>
+      <DeferredPanels filters={filters} onChange={update} live={live} />
     </div>
   )
 }

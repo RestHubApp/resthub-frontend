@@ -34,7 +34,7 @@ describe('HistoryView', () => {
   it('arranca con los pedidos de hoy en el local y los lista con su pago', async () => {
     const { api } = history()
 
-    const row = (await screen.findByText('#34')).closest('tr') as HTMLElement
+    const row = await screen.findByRole('row', { name: /#34/u })
     expect(within(row).getByText('Mesa 3')).toBeInTheDocument()
     expect(within(row).getByText('Yape')).toBeInTheDocument()
     expect(within(row).getByText('Pagado')).toBeInTheDocument()

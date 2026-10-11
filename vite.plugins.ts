@@ -47,7 +47,7 @@ export function handleSiennaSelfHosted(): Plugin {
 // modo que una inyección no puede sacar datos a un dominio ajeno.
 export function boundConnections(): Plugin {
   // Solo corre al compilar (`apply: 'build'`), por eso el modo es producción.
-  const api = (loadEnv('production', process.cwd(), 'VITE_').VITE_API_URL as string | undefined) ?? ''
+  const api = (loadEnv('production', process.cwd(), 'VITE_')['VITE_API_URL'] as string | undefined) ?? ''
   return {
     name: 'resthub:acotar-conexiones',
     apply: 'build',

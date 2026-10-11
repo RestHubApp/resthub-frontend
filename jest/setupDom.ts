@@ -61,9 +61,9 @@ if (typeof window !== 'undefined') {
   }
   // Radix Select y los menús usan la captura de puntero y el desplazamiento.
   const element = window.HTMLElement.prototype as unknown as Record<string, unknown>
-  element.hasPointerCapture ??= () => false
-  element.releasePointerCapture ??= () => undefined
-  element.scrollIntoView ??= () => undefined
+  element['hasPointerCapture'] ??= () => false
+  element['releasePointerCapture'] ??= () => undefined
+  element['scrollIntoView'] ??= () => undefined
   // jsdom avisa «Not implemented» y no hace nada: en las pruebas basta con eso, sin el aviso.
   window.scrollTo = () => undefined
   window.print = () => undefined

@@ -7,7 +7,7 @@ import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
 import { OrderItemLine } from '@/features/orders/OrderItemLine'
 import { orderPlace } from '@/features/orders/orderLabels'
 import { BoardCardActions } from './BoardCardActions'
-import { ElapsedTime } from './ElapsedTime'
+import { ElapsedTime } from '@/features/orders/ElapsedTime'
 import { formatMoney, minutesSince } from '@/services/format'
 import { paths } from '@/services/paths'
 

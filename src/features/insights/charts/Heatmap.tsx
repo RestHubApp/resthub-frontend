@@ -1,9 +1,13 @@
+import { useId } from 'react'
+
 import type { HourlyCell } from '@/api/types'
 import { ChartTooltip, type TooltipRow } from '@/components/charts/ChartTooltip'
-import { heatColor, heatmapModel, heatStep } from './heatmapModel'
-import { HeatmapLegend } from './HeatmapLegend'
-import { useChartCursor } from '@/components/charts/useChartCursor'
 import { useElementWidth } from '@/components/charts/useElementWidth'
+import { HeatmapHeader } from './HeatmapHeader'
+import { HeatmapLegend } from './HeatmapLegend'
+import { CELL_HEIGHT, heatmapModel } from './heatmapModel'
+import { HeatmapRows } from './HeatmapRows'
+import { useHeatmapCursor } from './useHeatmapCursor'
 
 interface HeatmapProps {
   readonly cells: readonly HourlyCell[]
@@ -14,23 +18,7 @@ interface HeatmapProps {
 
 const LABEL_WIDTH = 44
 const GAP = 2
-const CELL_HEIGHT = 28
 const HEADER_HEIGHT = 20
-// Las marcas del pico: un anillo del color de la superficie y otro de tinta.
-const PEAK_RING = '0 0 0 2px var(--card), 0 0 0 4px var(--foreground)'
-const ACTIVE_RING = '0 0 0 2px var(--card), 0 0 0 3px var(--muted-foreground)'
-
-function sameCell(a: HourlyCell, b: HourlyCell | null | undefined): boolean {
-  return b?.weekday === a.weekday && b.hour === a.hour
-}
-
-// El pico conserva su anillo; la celda señalada lleva uno más suave.
-function ringFor(cell: HourlyCell, peak: HourlyCell | null, active: HourlyCell | undefined): string | undefined {
-  if (sameCell(cell, peak)) {
-    return PEAK_RING
-  }
-  return sameCell(cell, active) ? ACTIVE_RING : undefined
-}
 
 /**
  * Pedidos por día de la semana y hora: una rampa de un solo tono, más oscuro
@@ -39,24 +27,21 @@ function ringFor(cell: HourlyCell, peak: HourlyCell | null, active: HourlyCell |
  */
 export function Heatmap({ cells, peak, label, describe }: HeatmapProps) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
+  const idPrefix = useId()
   const model = heatmapModel(cells)
-  const columns = model.hours.length
-  const cursor = useChartCursor(model.rows.length * columns, columns)
+  const { cursor, columns, row, column, active } = useHeatmapCursor(model)
   const widthCell = columns === 0 ? 0 : (width - LABEL_WIDTH - GAP * columns) / columns
-  const eachHowMuch = widthCell >= 34 ? 1 : 2
-
-  const active = cursor.active === null ? undefined : model.rows[Math.floor(cursor.active / columns)]?.cells[cursor.active % columns]
-  const row = cursor.active === null ? 0 : Math.floor(cursor.active / columns)
-  const column = cursor.active === null ? 0 : cursor.active % columns
+  const cellId = (r: number, c: number) => `${idPrefix}-${String(r)}-${String(c)}`
 
   return (
     <div className="flex flex-col gap-3">
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Grafico navegable con flechas: ningun rol ARIA de widget describe un mapa de calor con cursor, y el foco es lo que da acceso por teclado al tooltip. */}
       <div
         ref={ref}
-        role="img"
+        role="grid"
         aria-label={label}
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- El foco da acceso por teclado al cursor del grafico (ver arriba).
+        aria-rowcount={model.rows.length + 1}
+        aria-colcount={columns + 1}
+        aria-activedescendant={active === undefined ? undefined : cellId(row, column)}
         tabIndex={0}
         onKeyDown={cursor.onKeyDown}
         onFocus={cursor.onFocus}
@@ -65,32 +50,15 @@ export function Heatmap({ cells, peak, label, describe }: HeatmapProps) {
         className="relative grid rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         style={{ gridTemplateColumns: `${String(LABEL_WIDTH)}px repeat(${String(columns)}, minmax(0, 1fr))`, gap: GAP }}
       >
-        <span aria-hidden />
-        {model.hours.map((hour, index) => (
-          <span key={hour} aria-hidden className="text-center text-[11px] leading-5 text-muted-foreground tabular-nums">
-            {index % eachHowMuch === 0 ? String(hour) : ''}
-          </span>
-        ))}
-        {model.rows.map((row, r) => [
-          <span key={`d${String(row.weekday)}`} aria-hidden className="text-xs leading-7 text-muted-foreground">
-            {row.label.slice(0, 3)}
-          </span>,
-          ...row.cells.map((cell, c) => (
-            <span
-              key={`${String(cell.weekday)}-${String(cell.hour)}`}
-              aria-hidden
-              onPointerEnter={() => {
-                cursor.setActive(r * columns + c)
-              }}
-              className="rounded-[4px]"
-              style={{
-                height: CELL_HEIGHT,
-                background: heatColor(heatStep(cell.paid_orders, model.max)),
-                boxShadow: ringFor(cell, peak, active),
-              }}
-            />
-          )),
-        ])}
+        <HeatmapHeader hours={model.hours} everyHours={widthCell >= 34 ? 1 : 2} />
+        <HeatmapRows
+          model={model}
+          peak={peak}
+          active={active}
+          describe={describe}
+          cellId={cellId}
+          onPoint={cursor.setActive}
+        />
         {active === undefined ? null : (
           <ChartTooltip
             x={LABEL_WIDTH + (column + 0.5) * (widthCell + GAP)}

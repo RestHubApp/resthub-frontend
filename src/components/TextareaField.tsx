@@ -14,7 +14,7 @@ interface TextareaFieldProps {
   /** Lo que devuelve `register(...)` de react-hook-form. */
   readonly field: UseFormRegisterReturn
   readonly icon?: IconName
-  readonly error?: string
+  readonly error?: string | undefined
   readonly hint?: string
   readonly rows?: number
   readonly placeholder?: string

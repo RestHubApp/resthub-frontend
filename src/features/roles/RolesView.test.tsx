@@ -146,7 +146,7 @@ describe('RolesView: edición y borrado', () => {
     expect(within(window).getByText('El encargado siempre tiene todos los permisos y su rol no se cambia.')).toBeInTheDocument()
     expect(await within(window).findByRole('checkbox', { name: 'Ver el panel BI' })).toBeChecked()
     expect(within(window).queryByRole('button', SAVE)).not.toBeInTheDocument()
-    await user.click(within(window.querySelector('form') as HTMLElement).getByRole('button', { name: 'Cerrar' }))
+    await user.click(within(window).getByTestId('role-form-done'))
     expect(screen.queryByRole('dialog', { name: 'Encargado' })).not.toBeInTheDocument()
   })
 

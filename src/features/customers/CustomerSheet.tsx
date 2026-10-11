@@ -1,14 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { customerQuery } from '@/api/customers'
-import { PERMISSION } from '@/api/permissions'
 import type { Customer } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { errorMessage } from '@/services/api'
-import { useCan, useTimeZone } from '@/store/session'
-import { CustomerDetail } from './CustomerDetail'
-import { CustomerRights } from './CustomerRights'
+import { CustomerSheetBody } from './CustomerSheetBody'
 
 interface CustomerSheetProps {
   readonly customerId: number | null
@@ -23,8 +18,6 @@ function contact(customer: Customer): string {
 
 /** Un cliente: sus datos, cuánto viene y gasta, y sus últimos pedidos. */
 export function CustomerSheet({ customerId, canEdit, onEdit, onClose }: CustomerSheetProps) {
-  const timeZone = useTimeZone()
-  const canErase = useCan(PERMISSION.customersErase)
   const customer = useQuery({ ...customerQuery(customerId ?? 0), enabled: customerId !== null })
   const data = customer.data
 
@@ -41,11 +34,13 @@ export function CustomerSheet({ customerId, canEdit, onEdit, onClose }: Customer
             {data ? contact(data) : 'Cargando…'}
           </SheetDescription>
         </SheetHeader>
-        {customer.isError ? <FormMessage tone="error">{errorMessage(customer.error, 'No se pudo cargar.')}</FormMessage> : null}
-        {data ? <CustomerDetail customer={data} timeZone={timeZone} canEdit={canEdit} onEdit={() => {
-          onEdit(data)
-        }} /> : null}
-        {data && canErase ? <CustomerRights customer={data} onErased={onClose} /> : null}
+        <CustomerSheetBody
+          customer={data}
+          error={customer.error}
+          canEdit={canEdit}
+          onEdit={onEdit}
+          onClose={onClose}
+        />
       </SheetContent>
     </Sheet>
   )

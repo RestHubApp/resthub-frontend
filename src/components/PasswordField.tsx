@@ -16,7 +16,7 @@ interface PasswordFieldProps {
   /** Lo que devuelve `register(...)` de react-hook-form. */
   readonly field: UseFormRegisterReturn
   readonly autoComplete: 'current-password' | 'new-password'
-  readonly error?: string
+  readonly error?: string | undefined
   readonly hint?: string
   readonly placeholder?: string
 }

@@ -132,7 +132,10 @@ describe('editar la carta', () => {
     outside.categories[0] = { ...firstOf(buildMenu().categories), items: [dish({ is_active: false }), dish({ id: 11, name: 'Causa' })] }
     api.on('patch', DISH_10, andThen(api, dish({ is_active: false }), outside))
 
-    const row = (await screen.findByRole('heading', { name: 'Ceviche' })).closest('li') as HTMLElement
+    const row = (await screen.findAllByRole('listitem')).find((item) => within(item).queryByRole('heading', { name: 'Ceviche' }) !== null)
+    if (row === undefined) {
+      throw new Error('No se encontró la fila de Ceviche.')
+    }
     await user.click(within(row).getByRole('button', { name: 'Desactivar' }))
     const confirm = await screen.findByRole('alertdialog', { name: '¿Sacar Ceviche de la carta?' })
     expect(api.calls('patch', DISH_10)).toHaveLength(0)

@@ -5,6 +5,7 @@ import { customerSearchQuery } from '@/api/customers'
 import type { Customer } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { Input } from '@/components/ui/input'
+import { CustomerResults } from './CustomerResults'
 
 const MIN_SEARCH = 3
 const MAX_RESULTS = 5
@@ -46,25 +47,13 @@ export function CustomerLookup({ onPick }: CustomerLookupProps) {
         />
       </div>
       {found.length > 0 ? (
-        <ul className="m-0 flex list-none flex-col gap-1 p-0">
-          {found.map((customer) => (
-            <li key={customer.id}>
-              <button
-                type="button"
-                className="flex min-h-11 w-full flex-col items-start rounded-md px-3 py-2 text-left hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-                onClick={() => {
-                  onPick(customer)
-                  setText('')
-                }}
-              >
-                <span className="font-medium">{customer.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {[customer.phone, customer.address].filter((data) => data !== '').join(' · ') || 'Sin datos de contacto'}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <CustomerResults
+          customers={found}
+          onPick={(customer) => {
+            onPick(customer)
+            setText('')
+          }}
+        />
       ) : null}
       {isActive && customers.isSuccess && found.length === 0 ? (
         <p className="m-0 text-xs text-muted-foreground">No está en la libreta: escribe sus datos abajo.</p>

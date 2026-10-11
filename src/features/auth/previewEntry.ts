@@ -12,6 +12,42 @@ import { failureOf, previewCodeFrom, type PreviewEntryFailure, withoutHash } fro
 export type PreviewEntryResult = PreviewEntryFailure | 'reloading'
 
 /**
+ * Saca el código de la dirección y deja la barra limpia.
+ *
+ * El código se sacó de la barra al cargar la página (`tabStorage`). Si esta
+ * pestaña de vista previa llegó acá navegando, puede seguir en la dirección.
+ */
+function takeCode(): string | null {
+  const fragment = takeEntryFragment() ?? window.location.hash
+  if (window.location.hash !== '') {
+    window.history.replaceState(window.history.state, '', withoutHash(window.location))
+  }
+  return previewCodeFrom(fragment)
+}
+
+/** Sin código: quien ya está en una vista previa sigue al inicio; los demás ven el aviso. */
+function withoutCode(): PreviewEntryResult | Response {
+  return useSession.getState().account?.preview === true ? redirect(paths.home) : 'missing'
+}
+
+/** Canjea el código y abre la sesión de vista previa, o devuelve por qué falló. */
+async function exchange(code: string): Promise<PreviewEntryResult | Response> {
+  try {
+    const response = await exchangePreviewCode({ code: code })
+    if (!response.preview) {
+      logger.error('auth.preview_not_marked')
+      return 'failed'
+    }
+    useSession.getState().startPreview(response.access_token, sessionOf(response))
+    return redirect(paths.home)
+  } catch (error) {
+    const reason = failureOf(errorStatus(error))
+    logger.warn({ reason: reason }, 'auth.preview_exchange_failed')
+    return reason
+  }
+}
+
+/**
  * Canjea el código de vista previa y entra a la aplicación con esa sesión.
  *
  * Es el `loader` de `/vista-previa` y no un efecto de la pantalla: corre una
@@ -33,29 +69,6 @@ export async function previewEntryLoader(): Promise<PreviewEntryResult | Respons
     return 'reloading'
   }
 
-  // El código se sacó de la barra al cargar la página (`tabStorage`). Si esta
-  // pestaña de vista previa llegó acá navegando, puede seguir en la dirección.
-  const fragment = takeEntryFragment() ?? window.location.hash
-  if (window.location.hash !== '') {
-    window.history.replaceState(window.history.state, '', withoutHash(window.location))
-  }
-  const code = previewCodeFrom(fragment)
-
-  if (code === null) {
-    return useSession.getState().account?.preview === true ? redirect(paths.home) : 'missing'
-  }
-
-  try {
-    const response = await exchangePreviewCode({ code: code })
-    if (!response.preview) {
-      logger.error('auth.preview_not_marked')
-      return 'failed'
-    }
-    useSession.getState().startPreview(response.access_token, sessionOf(response))
-    return redirect(paths.home)
-  } catch (error) {
-    const reason = failureOf(errorStatus(error))
-    logger.warn({ reason: reason }, 'auth.preview_exchange_failed')
-    return reason
-  }
+  const code = takeCode()
+  return code === null ? withoutCode() : exchange(code)
 }

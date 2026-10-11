@@ -50,7 +50,7 @@ export function BillSummary({ order }: BillSummaryProps) {
           ))}
         </dl>
       )}
-      <p className="m-0 flex items-baseline justify-between">
+      <p className="m-0 flex items-baseline justify-between" data-testid="bill-balance">
         <span className="font-medium">{toCents(order.paid_amount) > 0 ? 'Falta cobrar' : 'Total a cobrar'}</span>
         <span className="text-2xl font-bold tabular-nums">{formatMoney(order.balance)}</span>
       </p>

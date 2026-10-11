@@ -1,17 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
-import { useMemo } from 'react'
-
-import { activeOrdersQuery } from '@/api/orders'
-import { PERMISSION } from '@/api/permissions'
 import { EmptyState } from '@/components/EmptyState'
 import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
-import { useOrderNoteFlags } from '@/hooks/useOrderNoteFlags'
-import { useCan } from '@/store/session'
 import { BoardSkeleton } from './board/BoardSkeleton'
 import { KitchenCard } from './kitchen/KitchenCard'
 import { LiveIndicator } from './LiveIndicator'
 import { QueryError } from './QueryError'
+import { useActiveOrders } from './useActiveOrders'
 import { useLiveUpdates } from './useLiveUpdates'
 import { useNow } from './useNow'
 
@@ -27,14 +21,9 @@ const REFRESH_MS = 15_000
 export function KitchenView() {
   const live = useLiveUpdates()
   const now = useNow(REFRESH_MS)
-  const active = useQuery(activeOrdersQuery)
-  const orders = useMemo(() => active.data ?? [], [active.data])
+  const { active, orders, flagFor } = useActiveOrders()
   const inKitchen = orders.filter((order) => order.status === 'in_kitchen')
   const ready = orders.filter((order) => order.status === 'ready')
-  const ids = useMemo(() => orders.map((order) => order.id), [orders])
-  // Las alergias las ve quien tiene el panel; el resto ve las notas tal cual.
-  const canViewAllergies = useCan(PERMISSION.insightsRead)
-  const notes = useOrderNoteFlags(ids, { enabled: canViewAllergies, live: false })
 
   return (
     <div className="flex flex-col gap-5">
@@ -56,7 +45,7 @@ export function KitchenView() {
             {active.isSuccess && inKitchen.length === 0 ? <EmptyState title="Nada pendiente en cocina" /> : null}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {inKitchen.map((order) => (
-                <KitchenCard key={order.id} order={order} now={now} flagFor={notes.flagFor} />
+                <KitchenCard key={order.id} order={order} now={now} flagFor={flagFor} />
               ))}
             </div>
           </SectionCard>
@@ -64,7 +53,7 @@ export function KitchenView() {
             {active.isSuccess && ready.length === 0 ? <EmptyState title="Nada esperando a salir" /> : null}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {ready.map((order) => (
-                <KitchenCard key={order.id} order={order} now={now} flagFor={notes.flagFor} />
+                <KitchenCard key={order.id} order={order} now={now} flagFor={flagFor} />
               ))}
             </div>
           </SectionCard>

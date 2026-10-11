@@ -34,10 +34,7 @@ export function RequestFilters({ filters, onChange }: RequestFiltersProps) {
       className="flex flex-wrap items-end gap-3"
       onSubmit={(event) => {
         event.preventDefault()
-        onChange({
-          route: route.trim(),
-          requestId: request.trim(),
-        })
+        onChange({ route: route.trim(), requestId: request.trim() })
       }}
     >
       <FilterSelect

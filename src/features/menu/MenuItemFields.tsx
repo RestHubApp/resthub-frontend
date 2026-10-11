@@ -1,10 +1,9 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 
 import type { MenuSection } from '@/api/types'
-import { SelectField } from '@/components/SelectField'
 import { TextareaField } from '@/components/TextareaField'
 import { TextField } from '@/components/TextField'
-import { NativeSelectOption } from '@/components/ui/native-select'
+import { MenuItemCategorySelect } from './MenuItemCategorySelect'
 import type { MenuItemValues } from './menuSchema'
 
 interface MenuItemFieldsProps {
@@ -38,20 +37,7 @@ export function MenuItemFields({ register, errors, categories }: MenuItemFieldsP
         field={register('price')}
         error={errors.price?.message}
       />
-      <SelectField
-        id="item-category"
-        label="Categoría"
-        icon="dishMenu"
-        placeholder="Elige una categoría"
-        field={register('category_id')}
-        error={errors.category_id?.message}
-      >
-        {categories.map((category) => (
-          <NativeSelectOption key={category.id} value={String(category.id)}>
-            {category.is_active ? category.name : `${category.name} (inactiva)`}
-          </NativeSelectOption>
-        ))}
-      </SelectField>
+      <MenuItemCategorySelect register={register} error={errors.category_id?.message} categories={categories} />
       <div className="sm:col-span-2">
         <TextareaField
           id="item-description"

@@ -6,12 +6,9 @@ import { billingSettingsQuery, invoiceQuery } from '@/api/billing'
 import { PERMISSION } from '@/api/permissions'
 import { EmptyState } from '@/components/EmptyState'
 import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
-import { PRINT_CSS } from '@/components/printSheet'
-import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/services/api'
 import { useCan, useTimeZone } from '@/store/session'
-import { InvoiceSheet } from './InvoiceSheet'
+import { InvoicePrintPaper } from './InvoicePrintPaper'
 
 /** La hoja del comprobante para la impresora térmica; se imprime sola al abrirla. */
 export function InvoicePrintView() {
@@ -37,20 +34,5 @@ export function InvoicePrintView() {
     return <FormMessage tone="error">{errorMessage(invoice.error, 'No se pudo cargar el comprobante.')}</FormMessage>
   }
 
-  return (
-    <div className="flex flex-col items-center gap-4">
-      <style>{PRINT_CSS}</style>
-      {/* La hoja no lleva título visible; el lector de pantalla sí lo necesita. */}
-      <h1 className="sr-only">{`Comprobante ${invoice.data.code}`}</h1>
-      <Button type="button" className="print:hidden" onClick={() => {
-        window.print()
-      }}>
-        <Icon name="print" size={16} />
-        <span>Imprimir</span>
-      </Button>
-      <article id="hoja-impresa" className="w-[74mm] bg-white p-3 font-mono text-black shadow-md">
-        <InvoiceSheet invoice={invoice.data} settings={settings.data ?? null} timeZone={timeZone} />
-      </article>
-    </div>
-  )
+  return <InvoicePrintPaper invoice={invoice.data} settings={settings.data ?? null} timeZone={timeZone} />
 }

@@ -17,13 +17,7 @@ function open(changes: Record<string, unknown> = {}) {
 }
 
 function section(title: string): HTMLElement {
-  // eslint-disable-next-line security/detect-non-literal-regexp -- el texto lo fija la prueba; se busca por coincidencia parcial del nombre accesible
-  const header = screen.getByRole('heading', { name: new RegExp(title, 'u') })
-  const card = header.closest('[data-slot="card"]')
-  if (!(card instanceof HTMLElement)) {
-    throw new Error(`No se encontró la tarjeta de ${title}`)
-  }
-  return card
+  return screen.getByTestId(`section-${title}`)
 }
 
 describe('InsightsView: secciones', () => {
@@ -44,7 +38,7 @@ describe('InsightsView: secciones', () => {
     expect(within(section('Platos más vendidos')).getByText('18 porc.')).toBeInTheDocument()
     expect(within(section('Ingresos por medio de pago')).getByText('Yape')).toBeInTheDocument()
     expect(await screen.findByRole('cell', { name: 'Luis Rojas' })).toBeInTheDocument()
-    expect(screen.getByRole('meter', { name: 'Stock de Limón respecto del mínimo' })).toHaveAttribute('aria-valuenow', '0.5')
+    expect(screen.getByRole('meter', { name: 'Stock de Limón respecto del mínimo' })).toHaveValue(0.5)
     expect(screen.getByText(/Quedan 0.5 kg de un mínimo de 2 kg; faltan\s+1.5 kg\./u)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Ver reposición sugerida' })).toHaveAttribute('href', '/panel/reposicion')
   })

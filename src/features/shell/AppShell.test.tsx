@@ -42,14 +42,6 @@ function sidebar() {
   return firstOf(screen.getAllByRole('navigation', MENU))
 }
 
-function barContainer(): HTMLElement {
-  const container = sidebar().parentElement
-  if (container === null) {
-    throw new Error('La barra lateral no tiene contenedor.')
-  }
-  return container
-}
-
 function bottomBar() {
   return second(screen.getAllByRole('navigation', MENU))
 }
@@ -126,7 +118,7 @@ describe('AppShell: sesión y precargas', () => {
     signInAs(PERMISSIONS_WAITER)
     const { user } = openShell()
 
-    await user.click(within(barContainer()).getByRole('button', SIGN_OUT))
+    await user.click(screen.getByRole('button', SIGN_OUT))
 
     expect(await screen.findByText(ACCESS_FORM)).toBeInTheDocument()
     expect(useSession.getState().account).toBeNull()
@@ -144,7 +136,7 @@ describe('AppShell: sesión y precargas', () => {
     })
     const { user } = openShell()
 
-    await user.click(within(barContainer()).getByRole('button', SIGN_OUT))
+    await user.click(screen.getByRole('button', SIGN_OUT))
 
     const notice = await screen.findByRole('alertdialog')
     expect(within(notice).getByText(/Un pedido tuyo espera señal: Mesa 3/u)).toBeInTheDocument()

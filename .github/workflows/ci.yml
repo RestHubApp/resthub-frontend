@@ -41,7 +41,7 @@ jobs:
       - name: Código sin uso (knip)
         run: pnpm knip
 
-      # Código repetido: falla si pasa del 1 % de las líneas.
+      # Código repetido: falla si pasa del 0,5 % de las líneas.
       - name: Duplicación (jscpd)
         run: pnpm dup
 
@@ -50,6 +50,14 @@ jobs:
 
       - name: Verificación de tipos y compilación
         run: pnpm build
+
+      # Porcentaje de expresiones con tipo conocido (sin any): no puede bajar de 99,7 %.
+      - name: Cobertura de tipos
+        run: pnpm type-coverage
+
+      # Peso del paquete (gzip) contra el presupuesto del package.json; usa el dist del paso anterior.
+      - name: Presupuesto de tamaño (size-limit)
+        run: pnpm size
 
       # Dependencias con vulnerabilidades conocidas de severidad alta o crítica.
       - name: Auditoría de dependencias

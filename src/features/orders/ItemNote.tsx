@@ -8,7 +8,7 @@ interface ItemNoteProps {
    * Cómo leyó la nota la clasificación (`flagFor` de `useOrderNoteFlags`).
    * Si menciona una alergia, la nota pasa a rojo y lleva el distintivo.
    */
-  readonly flag?: OrderNoteFlag
+  readonly flag?: OrderNoteFlag | undefined
   /** Texto antes de la nota: "Nota del pedido". Sin él, la nota es de un plato. */
   readonly label?: string
 }

@@ -14,7 +14,7 @@ const TONE_CLASSES: Record<StatusTone, string> = {
 interface StatusBadgeProps {
   readonly label: string
   /** Sin tono, la etiqueta es neutra. */
-  readonly tone?: StatusTone
+  readonly tone?: StatusTone | undefined
 }
 
 export function StatusBadge({ label, tone }: StatusBadgeProps) {

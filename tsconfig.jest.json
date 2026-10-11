@@ -21,6 +21,8 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "noPropertyAccessFromIndexSignature": true,
     "noUncheckedSideEffectImports": true
   },
   "include": ["jest/**/*.ts", "src/vite-env.d.ts", "src/api/contract/**/*.ts"]

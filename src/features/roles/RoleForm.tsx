@@ -1,21 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
-import { createRole, updateRole } from '@/api/roles'
 import type { Role } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
-import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
-import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
-import { usePermissions } from '@/store/session'
 import type { PermissionGroup } from './permissionGroups'
-import { PermissionPicker } from './PermissionPicker'
-import { withRole } from './roleCache'
+import { RoleFormFooter } from './RoleFormFooter'
 import { RoleNameField } from './RoleNameField'
-import { rolePayload, roleSchema, type RoleValues, valuesOf } from './roleSchema'
-import { useRoleMutation } from './useRoleMutation'
+import { RolePermissionsField } from './RolePermissionsField'
+import { roleSchema, type RoleValues, valuesOf } from './roleSchema'
+import { ROLE_SAVE_FAILURE, useRoleSave } from './useRoleSave'
 
 interface RoleFormProps {
   /** `null` crea un rol. */
@@ -27,26 +20,13 @@ interface RoleFormProps {
   readonly onDone: () => void
 }
 
-const FAILURE = 'No se pudo guardar el rol.'
-
+/** El formulario de un rol: su nombre, sus permisos y los botones de guardar. */
 export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
-  const granted = usePermissions()
   const { register, handleSubmit, formState, control } = useForm<RoleValues>({
     resolver: zodResolver(roleSchema),
     defaultValues: valuesOf(role),
   })
-  const save = useRoleMutation({
-    mutationFn: (values: RoleValues) => {
-      const payload = rolePayload(values, role)
-      return role === null ? createRole(payload) : updateRole(role.id, payload)
-    },
-    roleId: role?.id,
-    failure: FAILURE,
-    success: (saved) => (role === null ? `Rol ${saved.name} creado.` : `Rol ${saved.name} guardado.`),
-    updateCache: withRole,
-    onSuccess: onDone,
-    inlineError: true,
-  })
+  const save = useRoleSave(role, onDone)
 
   return (
     <form
@@ -59,33 +39,15 @@ export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
       )}
     >
       <RoleNameField role={role} readOnly={readOnly} field={register('name')} error={formState.errors.name?.message} />
-      <Controller
-        control={control}
-        name="permissions"
-        render={({ field }) => (
-          <PermissionPicker
-            groups={groups}
-            selected={field.value}
-            onChange={field.onChange}
-            granted={granted}
-            readOnly={readOnly}
-          />
-        )}
+      <RolePermissionsField control={control} groups={groups} readOnly={readOnly} />
+      <RoleFormFooter
+        readOnly={readOnly}
+        isError={save.isError}
+        error={save.error}
+        isPending={save.isPending}
+        failureText={ROLE_SAVE_FAILURE}
+        onDone={onDone}
       />
-
-      {save.isError ? <FormMessage tone="error">{errorMessage(save.error, FAILURE)}</FormMessage> : null}
-
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onDone}>
-          {readOnly ? 'Cerrar' : 'Cancelar'}
-        </Button>
-        {readOnly ? null : (
-          <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
-            <Icon name="confirm" size={16} />
-            <span>{save.isPending ? 'Guardando…' : 'Guardar'}</span>
-          </Button>
-        )}
-      </DialogFormActions>
     </form>
   )
 }

@@ -10,7 +10,7 @@ interface IconProps {
    * que ya dice lo mismo.
    */
   readonly label?: string
-  readonly className?: string
+  readonly className?: string | undefined
 }
 
 const DEFAULT_SIZE = 20

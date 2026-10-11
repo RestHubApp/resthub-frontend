@@ -1,41 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
 
-import { advanceOrder, openOrder, ordersQueryKey } from '@/api/orders'
+import { ordersQueryKey } from '@/api/orders'
 import { tablesQueryKey } from '@/api/tables'
-import { errorMessage, errorStatus } from '@/services/api'
 import { useNotifications } from '@/store/notifications'
-import { belongsTo, ownerOf, type QueuedOrder, queuedOrders, removeQueued, useQueuedOrders } from '@/store/offlineQueue'
+import { belongsTo, ownerOf, queuedOrders, useQueuedOrders } from '@/store/offlineQueue'
 import { useSession } from '@/store/session'
+import { deliverQueued } from './deliverQueued'
 
-const CONFLICT = 409
-const UNAUTHORIZED = 401
 // Mientras haya pedidos esperando, se reintenta cada medio minuto por si el
 // navegador no avisa que volvió la señal (pasa en algunos celulares).
 const RETRY_MS = 30_000
-
-// El servidor no llegó a atender: el proxy delante responde por él.
-const SERVER_UNREACHABLE = new Set([502, 503, 504])
-
-/**
- * Sin respuesta del servidor: no hay señal, se cortó o el servidor no está.
- * Vale reintentar, porque el pedido lleva su id y no se duplica.
- */
-export function isOffline(error: unknown): boolean {
-  const status = errorStatus(error)
-  return status === undefined || SERVER_UNREACHABLE.has(status)
-}
-
-/** Abre el pedido y lo manda a cocina; si ya estaba en cocina, el 409 vale como hecho. */
-async function sendQueued(order: QueuedOrder): Promise<number> {
-  const open = await openOrder(order.request)
-  await advanceOrder(open.id, 'send').catch((error: unknown) => {
-    if (errorStatus(error) !== CONFLICT) {
-      throw error
-    }
-  })
-  return open.number
-}
 
 /**
  * Los pedidos tomados sin señal y el envío automático al volver la conexión.
@@ -63,23 +38,7 @@ export function useOfflineOrders() {
         if (!belongsTo(order, ownerOf(useSession.getState().account))) {
           break
         }
-        const wasFollowed = await sendQueued(order).then(
-          (number) => {
-            removeQueued(order.request.client_request_id ?? '')
-            push({ tone: 'info', message: `${order.label}: pedido #${String(number)} enviado a cocina.` })
-            return true
-          },
-          (error: unknown) => {
-            // Sin señal se corta y se reintenta después, igual que con la sesión
-            // vencida: vuelve a salir cuando esa cuenta entre. Un rechazo sale de la cola.
-            if (isOffline(error) || errorStatus(error) === UNAUTHORIZED) {
-              return false
-            }
-            removeQueued(order.request.client_request_id ?? '')
-            push({ tone: 'warning', message: `${order.label}: ${errorMessage(error, 'no se pudo enviar.')}` })
-            return true
-          },
-        )
+        const wasFollowed = await deliverQueued(order, push)
         if (!wasFollowed) {
           break
         }

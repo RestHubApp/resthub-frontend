@@ -2,11 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { CASH_PAGE_SIZE, cashSessionsQuery } from '@/api/cash'
-import { EmptyState } from '@/components/EmptyState'
-import { FormMessage } from '@/components/FormMessage'
-import { ListSkeleton } from '@/components/ListSkeleton'
 import { TablePagination } from '@/components/TablePagination'
-import { errorMessage } from '@/services/api'
+import { CashHistoryStatus } from './CashHistoryStatus'
 import { CashSessionDialog } from './CashSessionDialog'
 import { CashSessionRow } from './CashSessionRow'
 
@@ -20,11 +17,11 @@ export function CashHistory() {
 
   return (
     <div className="flex flex-col gap-3">
-      {shifts.isPending ? <ListSkeleton label="Cargando turnos…" count={4} itemClassName="h-14 rounded-lg" /> : null}
-      {shifts.isError ? (
-        <FormMessage tone="error">{errorMessage(shifts.error, 'No se pudieron cargar los turnos.')}</FormMessage>
-      ) : null}
-      {shifts.isSuccess && list.length === 0 ? <EmptyState title="Todavía no hay turnos de caja" /> : null}
+      <CashHistoryStatus
+        isPending={shifts.isPending}
+        error={shifts.error}
+        isEmpty={shifts.isSuccess && list.length === 0}
+      />
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {list.map((shift) => (
           <CashSessionRow key={shift.id} session={shift} onOpen={openSet} />

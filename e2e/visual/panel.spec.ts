@@ -27,7 +27,7 @@ test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', a
       page.getByRole('img', { name: /^Ventas por día/u }),
       page.getByRole('region', { name: 'Período', exact: true }).getByRole('paragraph'),
       // El anillo de la hora pico sobresale del mapa: se enmascara su contenedor.
-      page.getByRole('img', { name: /^Mapa de calor de pedidos/u }).locator('..'),
+      page.getByRole('grid', { name: /^Mapa de calor de pedidos/u }).locator('..'),
       page.getByText(/^Hora pico:/u),
     ],
   })

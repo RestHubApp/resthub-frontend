@@ -14,7 +14,7 @@ export function MyOrdersPanel() {
   const userId = useSession((state) => state.account?.user.id)
   const timeZone = useTimeZone()
   const today = todayIn(timeZone)
-  const params = { waiter_id: userId, date_from: today, date_to: today, limit: MAX_ORDERS_PAGE }
+  const params = { ...(userId === undefined ? {} : { waiter_id: userId }), date_from: today, date_to: today, limit: MAX_ORDERS_PAGE }
   const orders = useQuery({ ...ordersQuery(params), enabled: userId !== undefined })
 
   if (orders.isPending) {

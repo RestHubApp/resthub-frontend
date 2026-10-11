@@ -15,7 +15,7 @@ interface SelectFieldProps {
   /** Lo que devuelve `register(...)` de react-hook-form. */
   readonly field: UseFormRegisterReturn
   readonly icon?: IconName
-  readonly error?: string
+  readonly error?: string | undefined
   readonly hint?: string
   /** Texto de la opcion vacia. Sin el, la lista no ofrece "ninguna". */
   readonly placeholder?: string

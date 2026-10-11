@@ -1,19 +1,12 @@
 import { salesSummaryQuery } from '@/api/insights'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { HourlySection } from './HourlySection'
+import { InsightsSectionGrid } from './InsightsSectionGrid'
 import { KpiRow } from './KpiRow'
-import { LowStockSection } from './LowStockSection'
-import { MarginsSection } from './MarginsSection'
 import { PanelHeader } from './PanelHeader'
-import { PaymentsSection } from './PaymentsSection'
 import { RangeFilter } from './RangeFilter'
 import { ReportState } from './ReportState'
-import { SalesTrendSection } from './SalesTrendSection'
-import { TopDishesSection } from './TopDishesSection'
 import { useInsightsRange } from './useInsightsRange'
 import { useInsightsReport } from './useInsightsReport'
-import { WaitersSection } from './WaitersSection'
-import { WasteSection } from './WasteSection'
 import { useTimeZone } from '@/store/session'
 
 const KPI_LOADING = (
@@ -46,20 +39,7 @@ export function InsightsView() {
           {(data) => <KpiRow summary={data} />}
         </ReportState>
       </div>
-      <SalesTrendSection range={range.params} />
-      <HourlySection range={range.params} />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <TopDishesSection range={range.params} />
-        <PaymentsSection range={range.params} />
-      </div>
-      <MarginsSection range={range.params} />
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="min-w-0 xl:col-span-2">
-          <WaitersSection range={range.params} />
-        </div>
-        <LowStockSection />
-      </div>
-      <WasteSection range={range.params} />
+      <InsightsSectionGrid range={range.params} />
     </div>
   )
 }

@@ -20,7 +20,7 @@ export function StockPreview({ ingredient, delta }: StockPreviewProps) {
   const min = Number(ingredient.min_stock)
 
   return (
-    <p aria-live="polite" className="m-0 rounded-lg bg-muted px-3 py-2 text-sm">
+    <p aria-live="polite" data-testid="stock-preview" className="m-0 rounded-lg bg-muted px-3 py-2 text-sm">
       Hoy hay <strong>{formatQuantity(actual, ingredient.unit)}</strong>
       {remains === null ? null : (
         <>

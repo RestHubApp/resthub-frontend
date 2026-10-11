@@ -7,7 +7,7 @@ import { timeZoneLabel, timeZoneOptions } from './timeZones'
 interface TimeZoneFieldProps {
   readonly id: string
   readonly field: UseFormRegisterReturn
-  readonly error?: string
+  readonly error?: string | undefined
   /** La zona guardada del restaurante, para que aparezca aunque no sea de las comunes. */
   readonly current?: string
 }

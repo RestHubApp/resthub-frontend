@@ -3,12 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 import { addPlatformOwner, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } from '@/api/platform'
-import { DialogFormActions } from '@/components/DialogFormActions'
-import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
-import { Button } from '@/components/ui/button'
+import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
 import { OwnerFields } from './OwnerFields'
 import { EMPTY_OWNER, ownerSchema, type OwnerValues } from './platformSchema'
 import { saveOwner } from './restaurantCache'
@@ -56,18 +52,12 @@ export function AddOwnerForm({ restaurantId, onDone }: AddOwnerFormProps) {
           password: errors.password?.message,
         }}
       />
-      {registration.isError ? (
-        <FormMessage tone="error">{errorMessage(registration.error, 'No se pudo agregar al encargado.')}</FormMessage>
-      ) : null}
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
-          Cancelar
-        </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={registration.isPending}>
-          <Icon name="add" size={16} />
-          <span>{registration.isPending ? 'Agregando…' : 'Agregar encargado'}</span>
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={registration}
+        failureText="No se pudo agregar al encargado."
+        onCancel={onDone}
+        submit={{ label: 'Agregar encargado', pendingLabel: 'Agregando…', icon: 'add' }}
+      />
     </form>
   )
 }

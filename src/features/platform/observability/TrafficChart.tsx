@@ -19,7 +19,7 @@ export function TrafficChart({ series }: { readonly series: ObsTimeseries }) {
     <div className="flex flex-col gap-3">
       <SeriesLegend items={LEGEND} />
       <AreaChart
-        points={toSeries(points, bucket, PLATFORM_TIME_ZONE, (p) => p.requests)}
+        points={toSeries(points, { bucketSeconds: bucket, timeZone: PLATFORM_TIME_ZONE, value: (p) => p.requests })}
         overlay={{ values: points.map((p) => p.errors_5xx), color: ERRORS }}
         label={`Peticiones y errores 5xx por cubo de ${formatBucket(bucket)}, horas de Lima`}
         formatValue={formatInteger}

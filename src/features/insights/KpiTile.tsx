@@ -9,7 +9,7 @@ interface KpiTileProps {
   /** Si subir es bueno (ventas) o malo (cancelados). */
   readonly higherIsBetter: boolean
   readonly comparedTo: string
-  readonly detail?: string
+  readonly detail?: string | undefined
 }
 
 type Tone = 'good' | 'bad' | 'flat'
@@ -51,7 +51,7 @@ export function KpiTile({ label, value, change, higherIsBetter, comparedTo, deta
       {number === null ? (
         <p className="m-0 text-xs text-muted-foreground">Sin datos del período anterior</p>
       ) : (
-        <p className={`m-0 flex flex-wrap items-center gap-1 text-xs ${TONE_CLASS[toneFor(number, higherIsBetter)]}`}>
+        <p data-testid="kpi-change" className={`m-0 flex flex-wrap items-center gap-1 text-xs ${TONE_CLASS[toneFor(number, higherIsBetter)]}`}>
           <Icon name={iconFor(number)} size={14} />
           <span className="font-semibold">{formatChange(number)}</span>
           <span className="text-muted-foreground">vs. {comparedTo}</span>

@@ -1,37 +1,10 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router'
-import { z } from 'zod'
+import { Link, Navigate, useLocation } from 'react-router'
 
-import { login, sessionOf } from '@/api/auth'
-import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
-import { PasswordField } from '@/components/PasswordField'
-import { TextField } from '@/components/TextField'
-import { Button } from '@/components/ui/button'
-import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
-import { emailRule, MAX_PASSWORD } from '@/services/fieldRules'
 import { paths } from '@/services/paths'
 import { isPreviewTab } from '@/services/tabStorage'
-import { useSession } from '@/store/session'
 import { AuthAside } from './AuthAside'
 import { AuthCard } from './AuthCard'
-import { SessionExpiredNotice } from './SessionExpiredNotice'
-
-const schema = z.object({
-  email: emailRule,
-  // Al entrar no se exige el minimo: la respuesta del servidor ya dice si
-  // la contrasena no coincide, y repetir aca la regla no agrega nada. El
-  // maximo si, porque el servidor rechaza una mas larga antes de mirarla.
-  password: z
-    .string()
-    .min(1, 'Escribe tu contraseña')
-    .max(MAX_PASSWORD, `Usa como máximo ${String(MAX_PASSWORD)} caracteres`),
-})
-
-type Form = z.infer<typeof schema>
+import { LoginForm } from './LoginForm'
 
 const PANEL = (
   <AuthAside
@@ -72,25 +45,9 @@ function destinationOf(status: unknown): string {
   return typeof from === 'string' && from.startsWith('/') && from !== paths.login ? from : paths.home
 }
 
+/** Pantalla de acceso: panel lateral, formulario y enlaces del pie. */
 export function LoginView() {
-  const signIn = useSession((state) => state.signIn)
-  const navigate = useNavigate()
   const destination = destinationOf(useLocation().state)
-  const { register, handleSubmit, formState } = useForm<Form>({
-    resolver: zodResolver(schema),
-    mode: 'onTouched',
-    defaultValues: { email: '', password: '' },
-  })
-
-  const access = useMutation({
-    mutationFn: login,
-    // La respuesta ya trae la cuenta, el restaurante y los permisos: la sesion
-    // se abre sin pedir `/auth/me` aparte.
-    onSuccess: (response) => {
-      signIn(response.access_token, sessionOf(response))
-      void navigate(destination, { replace: true })
-    },
-  })
 
   // Una pestaña de vista previa no es para entrar con una cuenta real: su
   // sesion se guardaria en la pestaña, no en el navegador.
@@ -100,48 +57,7 @@ export function LoginView() {
 
   return (
     <AuthCard title="Iniciar sesión" aside={PANEL} footer={PLATFORM}>
-      <form
-        noValidate
-        className="flex flex-col gap-5"
-        onSubmit={onSubmit(
-          handleSubmit((values) => {
-            access.mutate(values)
-          }),
-        )}
-      >
-        <SessionExpiredNotice />
-        <TextField
-          id="email"
-          label="Correo"
-          placeholder="nombre@correo.com"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          spellCheck={false}
-          field={register('email')}
-          error={formState.errors.email?.message}
-        />
-
-        <PasswordField
-          id="password"
-          label="Contraseña"
-          placeholder="Tu contraseña"
-          autoComplete="current-password"
-          field={register('password')}
-          error={formState.errors.password?.message}
-        />
-
-        {access.isError ? (
-          <FormMessage tone="error">
-            {errorMessage(access.error, 'No se pudo iniciar sesión. Inténtalo de nuevo.')}
-          </FormMessage>
-        ) : null}
-
-        <Button type="submit" size="lg" className="h-11 w-full" disabled={access.isPending}>
-          <Icon name="signIn" size={18} />
-          <span>{access.isPending ? 'Entrando…' : 'Entrar'}</span>
-        </Button>
-      </form>
+      <LoginForm destination={destination} />
     </AuthCard>
   )
 }

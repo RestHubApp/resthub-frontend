@@ -1,13 +1,9 @@
 import { useState } from 'react'
 
-import { EmptyState } from '@/components/EmptyState'
-import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
-import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/api'
 import { CategorySection } from './CategorySection'
-import { MenuSkeleton } from './MenuSkeleton'
+import { MenuHeaderActions } from './MenuHeaderActions'
+import { MenuStatus } from './MenuStatus'
 import { NewMenuDialogs, type NewMenuDialog } from './NewMenuDialogs'
 import { TodaySummary } from './TodaySummary'
 import { useMenuData } from './useMenuData'
@@ -33,43 +29,15 @@ export function MenuView() {
         title="Menú"
         description="Marca cada mañana lo que no hay hoy. Desactivar un plato lo saca de la carta hasta que lo vuelvas a activar."
         actions={
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="h-11 px-4"
-              onClick={open({ type: 'categoria' })}
-            >
-              <Icon name="add" size={16} />
-              <span>Nueva categoría</span>
-            </Button>
-            <Button
-              type="button"
-              size="lg"
-              className="h-11 px-4"
-              disabled={categories.length === 0}
-              onClick={open({ type: 'plato' })}
-            >
-              <Icon name="add" size={16} />
-              <span>Nuevo plato</span>
-            </Button>
-          </>
+          <MenuHeaderActions
+            canAddItem={categories.length > 0}
+            onNewCategory={open({ type: 'categoria' })}
+            onNewItem={open({ type: 'plato' })}
+          />
         }
       />
 
-      {menu.isPending ? <MenuSkeleton /> : null}
-      {menu.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(menu.error, 'No se pudo cargar la carta.')}
-        </FormMessage>
-      ) : null}
-      {menu.isSuccess && categories.length === 0 ? (
-        <EmptyState
-          title="La carta está vacía"
-          description="Empieza por una categoría, como Entradas o Bebidas, y agrégale sus platos."
-        />
-      ) : null}
+      <MenuStatus isPending={menu.isPending} error={menu.error} isEmpty={menu.isSuccess && categories.length === 0} />
 
       {categories.length > 0 ? <TodaySummary categories={categories} /> : null}
 

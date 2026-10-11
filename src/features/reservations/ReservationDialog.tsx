@@ -4,12 +4,7 @@ import { useForm } from 'react-hook-form'
 
 import { tablesQuery } from '@/api/tables'
 import type { Reservation } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
-import { FormDialog } from '@/components/FormDialog'
-import { FormMessage } from '@/components/FormMessage'
-import { Button } from '@/components/ui/button'
-import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
+import { SaveFormDialog } from '@/components/SaveFormDialog'
 import { useTimeZone } from '@/store/session'
 import { ReservationFields } from './ReservationFields'
 import { reservationDefaults, reservationRequest, reservationSchema, type ReservationValues } from './reservationSchema'
@@ -48,39 +43,15 @@ export function ReservationDialog({ open, reservation, day, onClose: handleClose
   const save = useSaveReservation(reservation?.id, onClose)
 
   return (
-    <FormDialog
+    <SaveFormDialog
       open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen) {
-          save.reset()
-          onClose()
-        }
-      }}
       title={reservation === null ? 'Nueva reserva' : `Reserva de ${reservation.customer_name}`}
-      size="lg"
+      onClose={onClose}
+      save={save}
+      failureText="No se pudo guardar la reserva."
+      handleSubmit={form.handleSubmit((values) => save.mutateAsync(reservationRequest(values, timeZone)).catch(() => undefined))}
     >
-      <form
-        noValidate
-        className="grid gap-4 sm:grid-cols-2"
-        onSubmit={onSubmit(form.handleSubmit((values) => save.mutateAsync(reservationRequest(values, timeZone)).catch(() => undefined)))}
-      >
-        <ReservationFields form={form} tables={tables.data ?? []} />
-        {save.isError ? (
-          <div className="sm:col-span-2">
-            <FormMessage tone="error">{errorMessage(save.error, 'No se pudo guardar la reserva.')}</FormMessage>
-          </div>
-        ) : null}
-        <div className="sm:col-span-2">
-          <DialogFormActions>
-            <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
-              {save.isPending ? 'Guardando…' : 'Guardar'}
-            </Button>
-          </DialogFormActions>
-        </div>
-      </form>
-    </FormDialog>
+      <ReservationFields form={form} tables={tables.data ?? []} />
+    </SaveFormDialog>
   )
 }

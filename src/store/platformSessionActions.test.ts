@@ -7,7 +7,7 @@ const ADMIN = { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestH
 
 function saved(): unknown {
   const text = localStorage.getItem(PLATFORM_STORAGE_KEY)
-  return text === null ? null : (JSON.parse(text) as unknown)
+  return text === null ? null : JSON.parse(text)
 }
 
 afterEach(() => {

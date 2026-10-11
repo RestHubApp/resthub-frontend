@@ -45,7 +45,7 @@ export function ItemSplitPicker({ order, selected, chargeCents, onChange }: Item
           </li>
         ))}
       </ul>
-      <p className="m-0 flex items-baseline justify-between px-1 text-sm">
+      <p className="m-0 flex items-baseline justify-between px-1 text-sm" data-testid="item-split-charge">
         <span className="text-muted-foreground">
           {selected.length === 0 ? 'Elige al menos un plato' : 'Paga, con el descuento del pedido'}
         </span>

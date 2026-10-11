@@ -1,6 +1,6 @@
 interface FieldHintProps {
   readonly id: string
-  readonly hint?: string
+  readonly hint?: string | undefined
 }
 
 /** La ayuda de un campo, o nada. */

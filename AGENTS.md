@@ -22,8 +22,8 @@ los PR tampoco pueden llevar esas marcas (lo revisa el workflow `Atribución`).
 
 ## Reglas de calidad (CI)
 
-Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip` y
-`pnpm dup`. Lo que hay que saber al escribir código:
+Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
+`pnpm dup`, `pnpm type-coverage` y `pnpm size`. Lo que hay que saber al escribir código:
 
 - **Imports** (`import-x`): sin ciclos, sin imports duplicados ni a sí mismo,
   sin `../` redundantes, sin dependencias no declaradas, sin `export let`, y
@@ -91,20 +91,61 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip` y
   (`no-restricted-imports`). Un cambio de ruta o de permiso se hace en su
   módulo y el compilador señala el resto.
 - **Accesibilidad** (`jsx-a11y` estricto): nada de `tabIndex` ni manejadores
-  en elementos no interactivos. Si un control de verdad no tiene rol ARIA que
-  lo describa, la excepción va en su línea con el motivo.
+  en elementos no interactivos; no hay ningún `eslint-disable` de `jsx-a11y` en
+  el código. Lo que recibe foco o eventos es un elemento nativo interactivo (una
+  fila de gráfico con detalle es un `<button>` dentro del `<li>`), una región
+  desplazable lleva `role="region"` con su `tabIndex`, y un gráfico navegable con
+  flechas es una grilla (`role="grid"` con filas, encabezados y `gridcell`, y
+  `aria-activedescendant` para la celda señalada).
+- **Tamaño y complejidad** (ESLint, en producción): función de 50 líneas como
+  máximo (`max-lines-per-function`, sin blancos ni comentarios), `complexity` 8,
+  `max-params` 3 (más de tres parámetros son un objeto de opciones) y
+  `import-x/max-dependencies` 12 (un archivo que importa más de 12 módulos se
+  parte). Se cumplen extrayendo componentes (uno por archivo), hooks `useX` y
+  funciones puras; nunca con `eslint-disable`. Las pruebas, `jest/`, `e2e/` y
+  los pactos conservan el límite anterior (80 líneas, complejidad 10, 4
+  parámetros).
+- **Subcarpetas de una característica** (`import-x/no-restricted-paths`, zonas
+  armadas leyendo el disco): `orders/charge` no importa de `orders/invoice` ni de
+  ninguna otra hermana; solo de sí misma y de la raíz de su característica. Lo
+  que comparten dos hermanas sube a la raíz (`orders/ElapsedTime.tsx`,
+  `orders/InvoicePanel.tsx`).
+- **Formularios que guardan**: el pie con el error y los botones es
+  `components/FormFooter`; una ventana de dos columnas que guarda una sola cosa
+  es `components/SaveFormDialog`. No se vuelve a escribir esa estructura.
 - **TanStack Query**: toda consulta se define con `queryOptions` en `src/api/`
   (clave y `queryFn` juntas) y la vista la usa con `useQuery(xQuery(...))`.
   No se escriben `queryKey` a mano fuera de `src/api/`.
-- **TypeScript**: `switch` exhaustivo, condiciones booleanas explícitas
+- **TypeScript**: `exactOptionalPropertyTypes` (una prop opcional que puede
+  recibir `undefined` se declara `prop?: T | undefined`; se omite la clave en
+  vez de pasar `undefined` a una API externa), `noPropertyAccessFromIndexSignature`
+  (`env['VITE_X']`), `@total-typescript/ts-reset` (`src/reset.d.ts`: `JSON.parse`
+  devuelve `unknown`, `filter(Boolean)` estrecha), `switch` exhaustivo, condiciones booleanas explícitas
   (`strict-boolean-expressions`), nada usado antes de declararse, y los accesos
   por índice (`lista[0]`, `params['id']`) pueden ser `undefined`.
 - **Efectos**: lo que reacciona a un evento va en el manejador, no en un
   `useEffect` (`react-you-might-not-need-an-effect`).
 - **Código sin uso** (`knip`): no se exporta lo que nadie importa. `src/components/ui/`
   queda fuera porque lo gestiona el CLI de shadcn.
-- **Duplicación** (`jscpd`, `.jscpd.json`): tope del 1 % (bloques de 5 líneas o
+- **Duplicación** (`jscpd`, `.jscpd.json`): tope del 0,5 % (bloques de 5 líneas o
   50 tokens), sin contar pruebas, `ui/` ni `schema.d.ts`.
+- **Cobertura de tipos** (`pnpm type-coverage`, configuración `typeCoverage` del
+  `package.json`): modo estricto, mínimo 99,7 % de expresiones con tipo. Un
+  `any` colado lo baja; no se baja el umbral para que pase.
+- **Tamaño del paquete** (`pnpm size`, `size-limit` en el `package.json`, gzip,
+  necesita `dist/` de `pnpm build`): presupuestos del bundle principal, de los
+  chunks grandes (React, zod, Sienna, API y hooks compartidos) y del total, con
+  un 10 % de holgura sobre lo medido. Si crece, se investiga qué entró; el
+  presupuesto se sube solo con una razón escrita en el PR.
+- **Pruebas** (`testing-library` y `jest-dom`, solo en `*.test.*`): consultas por
+  rol, etiqueta o texto con `screen` o `within`; sin `container.querySelector`,
+  sin `closest`/`parentElement` y sin `debug()`. Aserciones de jest-dom
+  (`toHaveAttribute`, `toBeInTheDocument`…) en vez de comparar propiedades a mano.
+- **Unicorn** (subconjunto en `eslint.config.js`, cada regla con su motivo):
+  `node:` en los imports del núcleo, `replaceAll`, `at()`, `for...of` en vez de
+  `forEach`, llaves en cada `case`, `structuredClone`, etc. Sin `filename-case`,
+  `prevent-abbreviations`, `no-null`, `prefer-global-this` ni `no-useless-undefined`
+  (chocan con el proyecto).
 
 ## Búsqueda de código
 

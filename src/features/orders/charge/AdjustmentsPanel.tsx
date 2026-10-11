@@ -3,12 +3,10 @@ import { useState } from 'react'
 import { applyDiscount } from '@/api/orders'
 import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
-import { Icon } from '@/components/Icon'
-import { Button } from '@/components/ui/button'
-import { formatPercent, toCents } from '@/services/format'
 import { useCan } from '@/store/session'
 import { useOrderAction } from '@/features/orders/useOrderAction'
-import { CourtesyItem } from './CourtesyItem'
+import { CourtesyList } from './CourtesyList'
+import { DiscountControls } from './DiscountControls'
 import { DiscountForm } from './DiscountForm'
 
 interface AdjustmentsPanelProps {
@@ -32,9 +30,14 @@ export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
   if (order.payments.length > 0) {
     return null
   }
-  const hasDiscount = toCents(order.discount_amount) > 0
   const closeDiscount = () => {
     setIsDiscounting(false)
+  }
+  const startDiscount = () => {
+    setIsDiscounting(true)
+  }
+  const removeDiscount = () => {
+    remove.mutate()
   }
 
   return (
@@ -42,43 +45,14 @@ export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
       {isDiscounting ? (
         <DiscountForm order={order} onDone={closeDiscount} />
       ) : (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setIsDiscounting(true)
-            }}
-          >
-            <Icon name="discount" size={16} />
-            <span>
-              {hasDiscount ? `Cambiar descuento (${formatPercent(order.discount_percent)})` : 'Aplicar descuento'}
-            </span>
-          </Button>
-          {hasDiscount ? (
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={remove.isPending}
-              onClick={() => {
-                remove.mutate()
-              }}
-            >
-              Quitar descuento
-            </Button>
-          ) : null}
-        </div>
+        <DiscountControls
+          order={order}
+          isRemoving={remove.isPending}
+          onStart={startDiscount}
+          onRemove={removeDiscount}
+        />
       )}
-      {isInviting ? (
-        <details className="rounded-lg ring-1 ring-input">
-          <summary className="cursor-pointer px-3 py-2 text-sm font-medium">Invitar un plato (cortesía)</summary>
-          <ul className="m-0 flex list-none flex-col gap-1 p-2">
-            {order.items.map((item) => (
-              <CourtesyItem key={item.id} order={order} item={item} />
-            ))}
-          </ul>
-        </details>
-      ) : null}
+      {isInviting ? <CourtesyList order={order} /> : null}
     </section>
   )
 }

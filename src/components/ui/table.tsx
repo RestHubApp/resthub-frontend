@@ -5,11 +5,13 @@ import { cn } from "cn"
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    // Enfocable: en pantallas angostas la tabla se desplaza de costado, y sin
-    // foco quien usa teclado no podría hacerlo.
+    // Región desplazable y enfocable: en pantallas angostas la tabla se
+    // desplaza de costado, y sin foco quien usa teclado no podría hacerlo
+    // (WCAG 2.1.1). El rol `region` es el que admite jsx-a11y para un
+    // contenedor con tabIndex.
     <div
       data-slot="table-container"
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Region desplazable: el foco permite el desplazamiento por teclado (WCAG 2.1.1).
+      role="region"
       tabIndex={0}
       className="relative w-full overflow-x-auto rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >

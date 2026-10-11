@@ -22,7 +22,7 @@ const BOGOTA = 'America/Bogota'
 
 function saved(): unknown {
   const text = localStorage.getItem(RESTAURANT_SESSION_KEY)
-  return text === null ? null : (JSON.parse(text) as unknown)
+  return text === null ? null : JSON.parse(text)
 }
 
 afterEach(() => {

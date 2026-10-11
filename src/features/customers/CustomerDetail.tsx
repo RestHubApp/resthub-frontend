@@ -1,10 +1,8 @@
-import { Link } from 'react-router'
-
 import type { Customer } from '@/api/types'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
-import { formatDateTime, formatMoney } from '@/services/format'
-import { paths } from '@/services/paths'
+import { formatMoney } from '@/services/format'
+import { CustomerRecentOrders } from './CustomerRecentOrders'
 
 interface CustomerDetailProps {
   readonly customer: Customer
@@ -14,14 +12,6 @@ interface CustomerDetailProps {
 }
 
 /** Las cifras de un cliente, su dirección, sus notas y sus últimos pedidos. */
-// El tipo de pedido con el mismo nombre que usan el tablero y el historial.
-// El API manda el tipo como texto libre: uno que no está en la lista se muestra tal cual.
-const TYPES: Partial<Record<string, string>> = {
-  dine_in: 'En mesa',
-  takeaway: 'Para llevar',
-  delivery: 'Delivery',
-}
-
 export function CustomerDetail({ customer, timeZone, canEdit, onEdit }: CustomerDetailProps) {
   const figures = [
     { label: 'Visitas', value: String(customer.visits) },
@@ -47,25 +37,7 @@ export function CustomerDetail({ customer, timeZone, canEdit, onEdit }: Customer
       {customer.consent_at === null ? <StatusBadge label="Sin consentimiento registrado" tone="pending" /> : null}
       {address.length > 0 ? <p className="m-0 text-sm">{address.join(' · ')}</p> : null}
       {customer.notes === '' ? null : <p className="m-0 rounded-md bg-muted p-3 text-sm">{customer.notes}</p>}
-      <h3 className="m-0 text-sm font-semibold">Últimos pedidos</h3>
-      {customer.recent_orders.length === 0 ? <p className="m-0 text-sm text-muted-foreground">Todavía no pidió.</p> : null}
-      <ul className="m-0 flex list-none flex-col gap-1 p-0">
-        {customer.recent_orders.map((order) => (
-          <li key={order.order_id}>
-            <Link
-              to={paths.orders.detail(order.order_id)}
-              className="flex min-h-11 items-center justify-between gap-2 rounded-md px-2 hover:bg-muted"
-            >
-              <span>
-                #{order.number} · {TYPES[order.type] ?? order.type}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {formatMoney(order.total)} · {formatDateTime(order.created_at, timeZone)}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <CustomerRecentOrders orders={customer.recent_orders} timeZone={timeZone} />
       {canEdit ? (
         <Button type="button" variant="outline" size="lg" className="h-11" onClick={onEdit}>
           Editar datos

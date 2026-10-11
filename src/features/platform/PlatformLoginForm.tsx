@@ -1,17 +1,11 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
-
-import { PASSWORD_MUTATION_GC_TIME, platformLogin, platformMutationKeys } from '@/api/platform'
 import type { PlatformAdmin } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { PasswordField } from '@/components/PasswordField'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
-import { onSubmit } from '@/hooks/formSubmit'
 import { errorMessage } from '@/services/api'
-import { platformLoginSchema, type PlatformLoginValues } from './platformSchema'
+import { usePlatformLogin } from './usePlatformLogin'
 
 interface PlatformLoginFormProps {
   /** La sesión venció sola: se explica antes del formulario. */
@@ -21,31 +15,10 @@ interface PlatformLoginFormProps {
 
 /** Correo y contraseña de una cuenta de plataforma. Un 429 dice cuándo volver a intentar. */
 export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProps) {
-  const { register, handleSubmit, formState } = useForm<PlatformLoginValues>({
-    resolver: zodResolver(platformLoginSchema),
-    mode: 'onTouched',
-    defaultValues: { email: '', password: '' },
-  })
-
-  const access = useMutation({
-    mutationKey: platformMutationKeys.login,
-    mutationFn: platformLogin,
-    gcTime: PASSWORD_MUTATION_GC_TIME,
-    onSuccess: ({ access_token: token, admin }) => {
-      onSignedIn(token, admin)
-    },
-  })
+  const { register, errors, access, submit } = usePlatformLogin(onSignedIn)
 
   return (
-    <form
-      noValidate
-      className="flex flex-col gap-5"
-      onSubmit={onSubmit(
-        handleSubmit((values) => {
-          access.mutate(values)
-        }),
-      )}
-    >
+    <form noValidate className="flex flex-col gap-5" onSubmit={submit}>
       <div hidden={!expired}>
         <FormMessage tone="error">Tu sesión de administración venció. Vuelve a entrar.</FormMessage>
       </div>
@@ -58,7 +31,7 @@ export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProp
         autoComplete="username"
         spellCheck={false}
         field={register('email')}
-        error={formState.errors.email?.message}
+        error={errors.email?.message}
       />
       <PasswordField
         id="platform-password"
@@ -66,7 +39,7 @@ export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProp
         placeholder="Tu contraseña"
         autoComplete="current-password"
         field={register('password')}
-        error={formState.errors.password?.message}
+        error={errors.password?.message}
       />
       {access.isError ? (
         <FormMessage tone="error">

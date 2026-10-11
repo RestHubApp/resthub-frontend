@@ -16,7 +16,7 @@ interface ConsentFieldProps {
   readonly id: string
   readonly checked: boolean
   readonly onChange: (checked: boolean) => void
-  readonly error?: string
+  readonly error?: string | undefined
 }
 
 /**
@@ -33,7 +33,7 @@ export function ConsentField({ id, checked, onChange, error }: ConsentFieldProps
   const textId = `${id}-texto`
   return (
     <div className="flex flex-col gap-1">
-      <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md border border-input p-3 text-sm">
+      <label data-testid="consent-label" className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md border border-input p-3 text-sm">
         <Checkbox
           id={id}
           className="mt-0.5"

@@ -1,21 +1,14 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
-
-import { registerPurchase } from '@/api/inventory'
 import type { Ingredient } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
 import { ChoiceField } from './ChoiceField'
 import { FormButtons } from './FormButtons'
-import { purchaseSchema, type PurchaseValues } from './inventorySchema'
-import { costHint, costLabel, purchaseDefaults, purchaseMath, purchasePayload } from './purchaseMath'
+import { MutationError } from './MutationError'
+import { costHint, costLabel } from './purchaseMath'
 import { QuantityField } from './QuantityField'
 import { StockPreview } from './StockPreview'
 import { inputUnits, priceUnit } from './units'
-import { useInventoryChange } from './useInventoryChange'
-import { formatQuantity } from '@/services/format'
+import { usePurchaseForm } from './usePurchaseForm'
 
 interface PurchaseFormProps {
   readonly ingredient: Ingredient
@@ -24,39 +17,17 @@ interface PurchaseFormProps {
 
 /** Registra una compra: entra stock y se actualiza lo que cuesta el insumo. */
 export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
-  const units = inputUnits(ingredient.unit)
   const price = priceUnit(ingredient.unit)
-  const { register, handleSubmit, formState, control } = useForm<PurchaseValues>({
-    resolver: zodResolver(purchaseSchema),
-    defaultValues: purchaseDefaults(ingredient),
-  })
-  const values = useWatch({ control }) as PurchaseValues
-  const accounts = purchaseMath(values, ingredient.unit)
-
-  const purchase = useInventoryChange({
-    send: (data: PurchaseValues) => registerPurchase(purchasePayload(ingredient.id, data, ingredient.unit)),
-    success: (result) =>
-      `Compra registrada: ${ingredient.name} queda en ${formatQuantity(result.ingredient.stock, ingredient.unit)}`,
-    onDone,
-  })
-  const errors = formState.errors
+  const { register, submit, errors, costMode, accounts, purchase } = usePurchaseForm(ingredient, onDone)
 
   return (
-    <form
-      noValidate
-      className="flex flex-col gap-5"
-      onSubmit={onSubmit(
-        handleSubmit((data) => {
-          purchase.mutate(data)
-        }),
-      )}
-    >
+    <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(submit)}>
       <QuantityField
         id="purchase-quantity"
         label="Cantidad comprada"
         amount={register('quantity')}
         unit={register('quantity_unit')}
-        units={units}
+        units={inputUnits(ingredient.unit)}
         error={errors.quantity?.message}
       />
       <ChoiceField
@@ -69,7 +40,7 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
       />
       <TextField
         id="purchase-cost"
-        label={costLabel(values.cost_mode, price.label)}
+        label={costLabel(costMode, price.label)}
         icon="cost"
         inputMode="decimal"
         autoComplete="off"
@@ -87,11 +58,7 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
       />
       <StockPreview ingredient={ingredient} delta={accounts?.baseQuantity ?? null} />
 
-      {purchase.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(purchase.error, 'No se pudo registrar la compra.')}
-        </FormMessage>
-      ) : null}
+      <MutationError isError={purchase.isError} error={purchase.error} fallback="No se pudo registrar la compra." />
       <FormButtons label="Registrar compra" icon="purchase" pending={purchase.isPending} onCancel={onDone} />
     </form>
   )

@@ -85,9 +85,9 @@ const CARD_WITH_REGISTRATION = /^\/api\/v1\/platform\/restaurants\/\d+$/u
 function normalize(route: string, text: string): string {
   const withoutSuffixes = SUFFIXES.reduce((actual, [pattern, replacement]) => actual.replace(pattern, replacement), text)
   if (CARD_WITH_REGISTRATION.test(route)) {
-    return withoutSuffixes.replace(INSTANT, '"2026-09-27T17:00:00Z"')
+    return withoutSuffixes.replaceAll(INSTANT, '"2026-09-27T17:00:00Z"')
   }
-  return LISTS_WITH_HOUR.some((list) => list.test(route)) ? withoutSuffixes.replace(INSTANT, '"$1T17:00:00Z"') : withoutSuffixes
+  return LISTS_WITH_HOUR.some((list) => list.test(route)) ? withoutSuffixes.replaceAll(INSTANT, '"$1T17:00:00Z"') : withoutSuffixes
 }
 
 function fixedData(route: string): unknown {

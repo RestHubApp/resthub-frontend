@@ -175,7 +175,7 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
   restaurantWithCashRegister: local,
 }) => {
   covers(
-    'desplegable:orders/charge/AdjustmentsPanel',
+    'desplegable:orders/charge/CourtesyList',
     'funcion:cobro.cortesia',
     'funcion:cobro.quitar-cortesia',
     'funcion:cobro.descuento-sin-tope',
@@ -207,7 +207,12 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
   await expect(chicha).not.toContainText('Invita la casa')
   await expect(dialog).toContainText(/Total a cobrar\s*S\/\s*40\.00/u)
   await chicha.getByRole('button', { name: 'Invitar' }).click()
-  await reason.fill('Cumpleaños')
+  // Al reabrirlo, el formulario puede volver a montarse justo después de
+  // escribir y perder el motivo: se reintenta hasta que Confirmar se habilite.
+  await expect(async () => {
+    await reason.fill('Cumpleaños')
+    await expect(chicha.getByRole('button', { name: 'Confirmar' })).toBeEnabled({ timeout: 1000 })
+  }).toPass()
   await chicha.getByRole('button', { name: 'Confirmar' }).click()
   await expect(chicha).toContainText('Invita la casa: Cumpleaños')
 
