@@ -13,7 +13,7 @@ export interface GroupDraft {
   readonly options: string
 }
 
-export interface ParsedOption {
+interface ParsedOption {
   readonly name: string
   readonly price: string
 }

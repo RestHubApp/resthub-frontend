@@ -14,11 +14,11 @@ import type {
 export const cashQueryKey = ['cash'] as const
 export const currentCashQueryKey = [...cashQueryKey, 'current'] as const
 
-export function cashSessionsQueryKey(offset: number) {
+function cashSessionsQueryKey(offset: number) {
   return [...cashQueryKey, 'sessions', offset] as const
 }
 
-export function cashSessionQueryKey(sessionId: number) {
+function cashSessionQueryKey(sessionId: number) {
   return [...cashQueryKey, 'session', sessionId] as const
 }
 
@@ -38,7 +38,7 @@ export const currentCashQuery = queryOptions({
 
 export const CASH_PAGE_SIZE = 10
 
-export async function fetchCashSessions(offset: number): Promise<CashSessionPage> {
+async function fetchCashSessions(offset: number): Promise<CashSessionPage> {
   const { data } = await api.get<CashSessionPage>('/cash/sessions', {
     params: { limit: CASH_PAGE_SIZE, offset },
   })
@@ -52,7 +52,7 @@ export function cashSessionsQuery(offset: number) {
   })
 }
 
-export async function fetchCashSession(sessionId: number): Promise<CashSession> {
+async function fetchCashSession(sessionId: number): Promise<CashSession> {
   const { data } = await api.get<CashSession>(`/cash/sessions/${String(sessionId)}`)
   return data
 }

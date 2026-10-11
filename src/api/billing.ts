@@ -13,17 +13,17 @@ import type {
 
 export const billingQueryKey = ['billing'] as const
 export const billingSettingsQueryKey = [...billingQueryKey, 'settings'] as const
-export const invoicesQueryKey = [...billingQueryKey, 'invoices'] as const
+const invoicesQueryKey = [...billingQueryKey, 'invoices'] as const
 
 export function orderInvoiceQueryKey(orderId: number) {
   return [...billingQueryKey, 'order', orderId] as const
 }
 
-export function invoiceQueryKey(invoiceId: number) {
+function invoiceQueryKey(invoiceId: number) {
   return [...billingQueryKey, 'invoice', invoiceId] as const
 }
 
-export async function fetchBillingSettings(): Promise<BillingSettings> {
+async function fetchBillingSettings(): Promise<BillingSettings> {
   const { data } = await api.get<BillingSettings>('/billing/settings')
   return data
 }
@@ -38,7 +38,7 @@ export async function updateBillingSettings(payload: BillingSettingsRequest): Pr
   return data
 }
 
-export async function fetchInvoices(offset = 0): Promise<InvoicePage> {
+async function fetchInvoices(offset = 0): Promise<InvoicePage> {
   const { data } = await api.get<InvoicePage>('/billing/invoices', { params: { limit: 25, offset } })
   return data
 }
@@ -47,7 +47,7 @@ export function invoicesQuery(offset: number) {
   return queryOptions({ queryKey: [...invoicesQueryKey, offset], queryFn: () => fetchInvoices(offset) })
 }
 
-export async function fetchInvoice(invoiceId: number): Promise<Invoice> {
+async function fetchInvoice(invoiceId: number): Promise<Invoice> {
   const { data } = await api.get<Invoice>(`/billing/invoices/${String(invoiceId)}`)
   return data
 }

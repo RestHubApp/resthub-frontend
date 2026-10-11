@@ -15,11 +15,11 @@ import type {
 // Compras del inventario: proveedores, órdenes de compra y sugerencias.
 // Cuelgan de la raíz del inventario: recibir una orden cambia el stock.
 
-export const suppliersQueryKey = [...inventoryQueryKey, 'suppliers'] as const
-export const purchaseOrdersQueryKey = [...inventoryQueryKey, 'purchase-orders'] as const
-export const purchaseSuggestionsQueryKey = [...inventoryQueryKey, 'purchase-suggestions'] as const
+const suppliersQueryKey = [...inventoryQueryKey, 'suppliers'] as const
+const purchaseOrdersQueryKey = [...inventoryQueryKey, 'purchase-orders'] as const
+const purchaseSuggestionsQueryKey = [...inventoryQueryKey, 'purchase-suggestions'] as const
 
-export async function fetchSuppliers(): Promise<Supplier[]> {
+async function fetchSuppliers(): Promise<Supplier[]> {
   const { data } = await api.get<Supplier[]>('/inventory/suppliers')
   return data
 }
@@ -34,7 +34,7 @@ export async function saveSupplier(payload: SupplierRequest, supplierId?: number
   return data
 }
 
-export async function fetchPurchaseOrders(): Promise<PurchaseOrderPage> {
+async function fetchPurchaseOrders(): Promise<PurchaseOrderPage> {
   const { data } = await api.get<PurchaseOrderPage>('/inventory/purchase-orders', {
     params: { limit: 100 },
   })
@@ -46,7 +46,7 @@ export const purchaseOrdersQuery = queryOptions({
   queryFn: fetchPurchaseOrders,
 })
 
-export async function fetchPurchaseSuggestions(): Promise<PurchaseSuggestion[]> {
+async function fetchPurchaseSuggestions(): Promise<PurchaseSuggestion[]> {
   const { data } = await api.get<PurchaseSuggestion[]>('/inventory/purchase-suggestions')
   return data
 }

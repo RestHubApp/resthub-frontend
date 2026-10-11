@@ -6,14 +6,14 @@ import type { PermissionCode, PermissionInfo, Role, RoleRequest } from './types'
 // Los roles del restaurante y el catálogo de permisos con que se arman.
 
 export const rolesQueryKey = ['roles'] as const
-export const permissionsQueryKey = ['permissions'] as const
+const permissionsQueryKey = ['permissions'] as const
 
 function rolePath(roleId: number): string {
   return `/roles/${String(roleId)}`
 }
 
 /** Encargado, mesero y los personalizados por nombre, en ese orden. */
-export async function fetchRoles(): Promise<Role[]> {
+async function fetchRoles(): Promise<Role[]> {
   const { data } = await api.get<Role[]>('/roles')
   return data
 }
@@ -24,7 +24,7 @@ export function rolesQuery() {
 }
 
 /** Cada permiso con su nombre en la interfaz y su grupo, ya ordenados. */
-export async function fetchPermissions(): Promise<PermissionInfo[]> {
+async function fetchPermissions(): Promise<PermissionInfo[]> {
   const { data } = await api.get<PermissionInfo[]>('/permissions')
   return data
 }

@@ -15,12 +15,12 @@ import type {
 
 export const menuQueryKey = ['menu'] as const
 
-export function menuListQueryKey(includeInactive: boolean) {
+function menuListQueryKey(includeInactive: boolean) {
   return [...menuQueryKey, { includeInactive }] as const
 }
 
 /** Con `includeInactive`, también lo desactivado: solo lo pide quien administra el menú. */
-export async function fetchMenu(includeInactive = false): Promise<MenuResponse> {
+async function fetchMenu(includeInactive = false): Promise<MenuResponse> {
   const { data } = await api.get<MenuResponse>('/menu', {
     params: includeInactive ? { include_inactive: true } : undefined,
   })

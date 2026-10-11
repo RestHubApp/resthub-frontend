@@ -18,7 +18,7 @@ interface AreaChartProps {
   readonly overlay?: AreaOverlay
 }
 
-export interface AreaOverlay {
+interface AreaOverlay {
   /** Un valor por punto de `points`, en el mismo orden. */
   readonly values: readonly number[]
   readonly color: string

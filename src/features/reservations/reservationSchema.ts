@@ -7,7 +7,7 @@ import { wallClockIn, zonedInstant } from '../../services/format'
 
 // Los topes repiten los del backend (`reservations/domain/reservations.py`).
 export const LIMITES = { name: 80, phone: 20, notes: 300, party: 50, minDuration: 30, maxDuration: 360 } as const
-export const DURACION_POR_DEFECTO = 120
+const DURACION_POR_DEFECTO = 120
 
 const entero = (min: number, max: number, que: string) =>
   z

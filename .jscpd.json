@@ -1,0 +1,17 @@
+{
+  "path": ["src"],
+  "minLines": 5,
+  "minTokens": 50,
+  "threshold": 1,
+  "format": ["typescript", "tsx"],
+  "ignore": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/schema.d.ts",
+    "**/contract/**",
+    "**/components/ui/**"
+  ],
+  "reporters": ["console"],
+  "gitignore": true,
+  "silent": false
+}

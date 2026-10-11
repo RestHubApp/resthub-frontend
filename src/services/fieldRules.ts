@@ -10,7 +10,6 @@ import { z } from 'zod'
 export const MIN_PASSWORD = 10
 export const MAX_PASSWORD = 128
 export const MAX_NOMBRE_COMPLETO = 120
-export const MAX_TELEFONO = 20
 
 // Letras de cualquier idioma, con tildes y enie, separadas por un espacio, un
 // guion o un apostrofo: "María José", "Pérez-Luna", "O'Brien".

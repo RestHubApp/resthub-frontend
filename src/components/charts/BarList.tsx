@@ -2,7 +2,7 @@ import { type FocusEvent, type PointerEvent, type ReactNode, useRef, useState } 
 
 import ChartTooltip, { type TooltipRow } from './ChartTooltip'
 
-export interface BarDatum {
+interface BarDatum {
   readonly key: string
   readonly label: string
   readonly value: number

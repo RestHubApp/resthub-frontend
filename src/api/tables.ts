@@ -7,7 +7,7 @@ import type { CreateTableRequest, TableResponse, TableState, UpdateTableRequest 
 
 export const tablesQueryKey = ['tables'] as const
 
-export function tablesListQueryKey(includeInactive: boolean) {
+function tablesListQueryKey(includeInactive: boolean) {
   return [...tablesQueryKey, { includeInactive }] as const
 }
 

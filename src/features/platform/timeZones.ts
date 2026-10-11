@@ -6,7 +6,7 @@ export interface TimeZoneOption {
 }
 
 /** El largo máximo que acepta el backend. */
-export const MAX_TIME_ZONE = 64
+const MAX_TIME_ZONE = 64
 
 /**
  * Las zonas horarias que se ofrecen al dar de alta un restaurante.
