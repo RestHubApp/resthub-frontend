@@ -41,6 +41,12 @@ export function insightsReportQuery<T>(
 export const restockQueryKey = [...insightsQueryKey, 'restock'] as const
 export const aiDecisionsQueryKey = [...insightsQueryKey, 'ai-decisions'] as const
 export const orderNotesQueryKey = [...insightsQueryKey, 'order-notes'] as const
+export const lowStockQueryKey = [...insightsQueryKey, 'low-stock'] as const
+
+/** La raiz de las claves de un reporte del panel, para invalidarlos todos a la vez. */
+export function insightsReportRootKey(report: string) {
+  return [...insightsQueryKey, report] as const
+}
 
 async function report<T>(path: string, range: InsightsRangeParams, extra = {}): Promise<T> {
   const { data } = await api.get<T>(`/insights${path}`, { params: { ...range, ...extra } })
@@ -129,4 +135,22 @@ export async function fetchOrderNotes(orderIds: readonly number[]): Promise<Orde
 /** Clasifica las notas pendientes del restaurante (lo normal es que ocurra al enviar a cocina). */
 export async function classifyOrderNotes(): Promise<void> {
   await api.post('/insights/order-notes/classify', undefined, { timeout: SLOW_TIMEOUT_MS })
+}
+
+export const lowStockQuery = queryOptions({ queryKey: lowStockQueryKey, queryFn: fetchLowStock })
+
+export const restockQuery = queryOptions({ queryKey: restockQueryKey, queryFn: fetchRestock })
+
+export function aiDecisionsQuery(params: AiDecisionParams) {
+  return queryOptions({
+    queryKey: [...aiDecisionsQueryKey, params],
+    queryFn: () => fetchAiDecisions(params),
+  })
+}
+
+export function orderNotesQuery(orderIds: readonly number[]) {
+  return queryOptions({
+    queryKey: [...orderNotesQueryKey, orderIds],
+    queryFn: () => fetchOrderNotes(orderIds),
+  })
 }

@@ -123,3 +123,11 @@ export async function replaceRecipe(
   const { data } = await api.put<Recipe>(recipePath(menuItemId), payload)
   return data
 }
+
+export function movementsQuery(params: MovementListParams) {
+  return queryOptions({ queryKey: movementListQueryKey(params), queryFn: () => fetchMovements(params) })
+}
+
+export function recipeQuery(menuItemId: number) {
+  return queryOptions({ queryKey: recipeQueryKey(menuItemId), queryFn: () => fetchRecipe(menuItemId) })
+}

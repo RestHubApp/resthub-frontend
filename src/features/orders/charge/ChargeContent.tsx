@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { fetchOrder, orderQueryKey } from '../../../api/orders'
+import { orderQuery } from '../../../api/orders'
 import type { OrderResponse } from '../../../api/types'
 import FormDialog from '../../../components/FormDialog'
 import { orderPlace } from '../orderLabels'
@@ -19,11 +19,7 @@ interface ChargeContentProps {
  */
 export default function ChargeContent({ order, onClose }: ChargeContentProps) {
   const [cobrado, setCobrado] = useState<OrderResponse | null>(null)
-  const vivo = useQuery({
-    queryKey: orderQueryKey(order.id),
-    queryFn: () => fetchOrder(order.id),
-    initialData: order,
-  })
+  const vivo = useQuery({ ...orderQuery(order.id), initialData: order })
   const actual = vivo.data
 
   return (

@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
-import { fetchMovements, movementListQueryKey } from '../../api/inventory'
+import { movementsQuery } from '../../api/inventory'
 import type { Movement, MovementKind, MovementListParams } from '../../api/types'
 import DataTable, { type DataColumn } from '../../components/DataTable'
 import FormMessage from '../../components/FormMessage'
@@ -70,11 +70,7 @@ export default function MovementsPanel() {
     ...(insumo === '' ? {} : { ingredient_id: Number(insumo) }),
     ...(tipo === '' ? {} : { kind: [tipo as MovementKind] }),
   }
-  const libro = useQuery({
-    queryKey: movementListQueryKey(params),
-    queryFn: () => fetchMovements(params),
-    placeholderData: keepPreviousData,
-  })
+  const libro = useQuery({ ...movementsQuery(params), placeholderData: keepPreviousData })
   const paginas = Math.max(1, Math.ceil((libro.data?.total ?? 0) / POR_PAGINA))
 
   return (

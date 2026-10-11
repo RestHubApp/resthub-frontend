@@ -1,7 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef } from 'react'
 
-import { classifyOrderNotes, fetchOrderNotes, MAX_ORDER_NOTES_ORDERS, orderNotesQueryKey } from '../api/insights'
+import { classifyOrderNotes, MAX_ORDER_NOTES_ORDERS, orderNotesQuery, orderNotesQueryKey } from '../api/insights'
 import type { OrderNoteClassification } from '../api/types'
 import { useServerEvent } from './useServerEvent'
 
@@ -50,8 +50,7 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
   const activo = enabled && ids.length > 0
 
   const notas = useQuery({
-    queryKey: [...orderNotesQueryKey, ids],
-    queryFn: () => fetchOrderNotes(ids),
+    ...orderNotesQuery(ids),
     enabled: activo,
     // Al llegar un pedido nuevo cambia la lista de ids: los distintivos de los
     // que ya estaban siguen a la vista mientras se pregunta por la lista nueva.
@@ -62,7 +61,7 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
     void queryClient.invalidateQueries({ queryKey: orderNotesQueryKey })
   }, activo && live)
 
-  const clasificar = useMutation({
+  const { mutate: clasificar, isPending: clasificando } = useMutation({
     mutationFn: classifyOrderNotes,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: orderNotesQueryKey }),
   })
@@ -78,14 +77,14 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
       .filter((item) => item.status === 'pending')
       .map((item) => keyOf(item.order_id, item.order_item_id))
       .filter((clave) => !pedidas.current.has(clave))
-    if (!classifyPending || nuevas.length === 0 || clasificar.isPending) {
+    if (!classifyPending || nuevas.length === 0 || clasificando) {
       return
     }
     for (const clave of nuevas) {
       pedidas.current.add(clave)
     }
-    clasificar.mutate()
-  }, [items, classifyPending, clasificar])
+    clasificar()
+  }, [items, classifyPending, clasificar, clasificando])
 
   return useMemo(() => {
     const lista = items ?? []

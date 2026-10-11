@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useParams } from 'react-router'
 
-import { billingSettingsQuery, fetchInvoice, invoiceQueryKey } from '../../api/billing'
+import { billingSettingsQuery, invoiceQuery } from '../../api/billing'
 import EmptyState from '../../components/EmptyState'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
@@ -17,11 +17,7 @@ export default function InvoicePrintView() {
   const invoiceId = Number(useParams().invoiceId)
   const timeZone = useTimeZone()
   const veAjustes = useCan('billing.manage')
-  const comprobante = useQuery({
-    queryKey: invoiceQueryKey(invoiceId),
-    queryFn: () => fetchInvoice(invoiceId),
-    enabled: Number.isInteger(invoiceId),
-  })
+  const comprobante = useQuery({ ...invoiceQuery(invoiceId), enabled: Number.isInteger(invoiceId) })
   // Los datos del emisor los ve el encargado; el mesero imprime sin encabezado
   // fiscal, que igual está en el PDF oficial del proveedor.
   const ajustes = useQuery({ ...billingSettingsQuery, enabled: veAjustes })

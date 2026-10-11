@@ -68,6 +68,6 @@ export function clearQueriesExcept(keep: string): void {
 
 /** Lo contrario: vacía solo las consultas y mutaciones bajo `root`. */
 export function clearQueriesOf(root: string): void {
-  queryClient.removeQueries({ queryKey: [root] })
+  queryClient.removeQueries({ predicate: (query) => query.queryKey[0] === root })
   removeMutations((mutationKey) => mutationKey?.[0] === root)
 }

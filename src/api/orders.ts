@@ -178,3 +178,11 @@ export async function mergeOrders(orderId: number, sourceOrderId: number): Promi
   })
   return data
 }
+
+export function orderQuery(orderId: number) {
+  return queryOptions({ queryKey: orderQueryKey(orderId), queryFn: () => fetchOrder(orderId) })
+}
+
+export function ordersQuery(params: OrderListParams) {
+  return queryOptions({ queryKey: orderListQueryKey(params), queryFn: () => fetchOrders(params) })
+}

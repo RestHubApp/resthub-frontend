@@ -77,3 +77,11 @@ export async function resendInvoice(invoiceId: number): Promise<Invoice> {
   })
   return data
 }
+
+export function invoiceQuery(invoiceId: number) {
+  return queryOptions({ queryKey: invoiceQueryKey(invoiceId), queryFn: () => fetchInvoice(invoiceId) })
+}
+
+export function orderInvoiceQuery(orderId: number) {
+  return queryOptions({ queryKey: orderInvoiceQueryKey(orderId), queryFn: () => fetchOrderInvoice(orderId) })
+}

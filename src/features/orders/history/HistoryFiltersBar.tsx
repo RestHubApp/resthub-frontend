@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { fetchStaff, MAX_STAFF_PAGE, staffListQueryKey } from '../../../api/staff'
+import { MAX_STAFF_PAGE, staffQuery } from '../../../api/staff'
 import { NativeSelectOption } from '../../../components/ui/native-select'
 import { useCan } from '../../../store/session'
 import { STATUS_OPTIONS, TYPE_OPTIONS } from '../orderLabels'
@@ -23,11 +23,7 @@ const PERSONAL = { limit: MAX_STAFF_PAGE, ordering: 'full_name' } as const
  */
 export default function HistoryFiltersBar({ value, onChange }: HistoryFiltersBarProps) {
   const verPersonal = useCan('staff.manage')
-  const personal = useQuery({
-    queryKey: staffListQueryKey(PERSONAL),
-    queryFn: () => fetchStaff(PERSONAL),
-    enabled: verPersonal,
-  })
+  const personal = useQuery({ ...staffQuery(PERSONAL), enabled: verPersonal })
   const cambiar = (parcial: Partial<HistoryFilters>) => {
     onChange({ ...value, ...parcial })
   }

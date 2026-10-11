@@ -66,3 +66,7 @@ export async function closeCash(payload: CloseCashRequest): Promise<CashSession>
   const { data } = await api.post<CashSession>('/cash/close', payload)
   return data
 }
+
+export function cashSessionQuery(sessionId: number) {
+  return queryOptions({ queryKey: cashSessionQueryKey(sessionId), queryFn: () => fetchCashSession(sessionId) })
+}

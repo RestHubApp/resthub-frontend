@@ -4,6 +4,7 @@ import boundaries from 'eslint-plugin-boundaries'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import importX from 'eslint-plugin-import-x'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
+import pluginQuery from '@tanstack/eslint-plugin-query'
 import noBarrelFiles from 'eslint-plugin-no-barrel-files'
 import checkFile from 'eslint-plugin-check-file'
 import react from 'eslint-plugin-react'
@@ -399,6 +400,18 @@ export default tseslint.config(
       // Un bloque desplazable (traceback, JSON) debe poder enfocarse para
       // desplazarse con teclado; si es una region con nombre, es valido.
       'jsx-a11y/no-noninteractive-tabindex': ['error', { roles: ['tabpanel', 'region'], tags: [] }],
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // TanStack Query: claves exhaustivas, queryOptions como fuente unica.
+  // ---------------------------------------------------------------------
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { '@tanstack/query': pluginQuery },
+    rules: {
+      ...pluginQuery.configs['flat/recommended'][0].rules,
+      '@tanstack/query/prefer-query-options': 'error',
     },
   },
 

@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 
-import { fetchOrders, orderListQueryKey } from '../../api/orders'
+import { ordersQuery } from '../../api/orders'
 import type { OrderResponse } from '../../api/types'
 import DataTable, { type DataColumn } from '../../components/DataTable'
 import Icon from '../../components/Icon'
@@ -62,11 +62,7 @@ export default function HistoryView() {
   const [filtros, setFiltros] = useState<HistoryFilters>({ from: hoy, to: hoy, status: '', type: '', waiterId: '' })
   const [pagina, setPagina] = useState(0)
   const params = toParams(filtros, pagina)
-  const historial = useQuery({
-    queryKey: orderListQueryKey(params),
-    queryFn: () => fetchOrders(params),
-    placeholderData: keepPreviousData,
-  })
+  const historial = useQuery({ ...ordersQuery(params), placeholderData: keepPreviousData })
   const total = historial.data?.total ?? 0
   const paginas = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
