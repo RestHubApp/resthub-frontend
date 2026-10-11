@@ -32,6 +32,41 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip` y
 - **Rutas de import** (`no-relative-import-paths`): dentro de `src`, lo que no
   está en la misma carpeta se importa con `@/` (`@/api/auth`, no
   `../../api/auth`). Vale también para `import()` dinámicos y `jest.mock`.
+- **Solo exports con nombre** (`import-x/no-default-export`): ningún `export default`
+  en `src`. Un símbolo, un nombre. Solo los archivos de configuración de
+  herramientas (`*.config.*`, el reporter de Playwright) lo conservan, y lo
+  declara su bloque en `eslint.config.js`. Para `React.lazy` usa
+  `lazyNamed(() => import('@/…/X'), 'X')` (`src/components/lazyNamed.ts`); para
+  una ruta perezosa, `asDefault(...)` del mismo archivo.
+- **Sin `index.ts(x)`** (`check-file/no-index`): cada archivo lleva un nombre que
+  dice qué es (`router/routes.tsx`, no `router/index.tsx`).
+- **Pantallas y rutas, una sola fuente**: `src/router/screens.ts` registra cada
+  pantalla del restaurante con su ruta, su permiso, su carga perezosa, su
+  precarga y su entrada de menú (`nav`). De ahí salen las rutas, las guardas de
+  permiso (`RequireSession`), el menú lateral e inferior y la precarga del
+  armazón, que recibe el registro por prop. Una pantalla nueva es una entrada
+  allí; no se toca otra lista. Las pantallas de plataforma y la vista previa se
+  declaran en `src/router/routes.tsx`.
+- **Rutas** (`src/services/paths.ts`): `routePatterns` guarda cada ruta una vez
+  (`/pedidos/:orderId`) y `paths` da constructores tipados
+  (`paths.orders.detail(id)`). Prohibido un literal de ruta (`'/…'`) en `to=`,
+  `href=`, `navigate(`, `redirect(`, `appUrl(`, `<Navigate` o `path:`/`from:`
+  fuera de ese módulo. Las claves nuevas van en inglés; el valor es la URL que
+  ve el usuario. Las pruebas (Jest y Playwright) sí pueden usar la URL literal.
+- **Permisos** (`src/api/permissions.ts`): los códigos los define el backend
+  (`PermissionCode`); la interfaz los nombra con `PERMISSION.ordersCharge`. No se
+  escribe `'orders.charge'` en `useCan(`, `can(`, `hasPermission(` ni en una
+  propiedad `permission`. Para un permiso nuevo, agrégalo allí.
+- **Otras fuentes únicas** (`no-restricted-syntax`, mismo bloque de
+  `eslint.config.js`): las claves de consulta solo se escriben en `src/api`
+  (`queryKey: [...]` fuera de allí está prohibido); los colores son tokens de
+  `index.css` (sin `#fff` ni `rgb()` fuera de `components/ui` y `printSheet.ts`);
+  el rol no se compara fuera de `features/roles` y `features/staff` (se pregunta
+  por permisos); `localStorage`, `sessionStorage` y `fetch` solo en `services/`
+  y `store/`; Axios solo en `services/api.ts`; `schema.d.ts` solo lo importa
+  `api/types.ts`; los iconos salen de `components/icons.ts`
+  (`no-restricted-imports`). Un cambio de ruta o de permiso se hace en su
+  módulo y el compilador señala el resto.
 - **Accesibilidad** (`jsx-a11y` estricto): nada de `tabIndex` ni manejadores
   en elementos no interactivos. Si un control de verdad no tiene rol ARIA que
   lo describa, la excepción va en su línea con el motivo.
