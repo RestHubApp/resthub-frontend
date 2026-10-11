@@ -5,12 +5,11 @@ import { platformRestaurantQuery } from '@/api/platform'
 import { BackLink } from '@/components/BackLink'
 import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { errorStatus } from '@/services/apiError'
+import { hasCode } from '@/services/apiError'
 import { paths } from '@/services/paths'
 import { PlatformQueryError } from './PlatformQueryError'
 import { RestaurantDetailContent } from './RestaurantDetailContent'
 
-const NOT_FOUND = 404
 const BACK = <BackLink to={paths.platform.home} label="Restaurantes" />
 
 function justCreated(status: unknown): boolean {
@@ -24,7 +23,7 @@ export function RestaurantDetailView() {
   const isValid = Number.isInteger(restaurantId) && restaurantId > 0
   const card = useQuery({ ...platformRestaurantQuery(restaurantId), enabled: isValid })
 
-  if (!isValid || errorStatus(card.error) === NOT_FOUND) {
+  if (!isValid || hasCode(card.error, 'restaurant_not_found')) {
     return (
       <div className="flex flex-col gap-5">
         {BACK}

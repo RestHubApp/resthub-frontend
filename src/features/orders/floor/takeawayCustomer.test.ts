@@ -80,7 +80,7 @@ describe('withCustomer', () => {
 
   it('si falla o vence el plazo, el formulario se entera y no pierde los datos', async () => {
     customersAnswer('cut')
-    await expect(withCustomer(delivery)).rejects.toMatchObject({ code: 'network' })
+    await expect(withCustomer(delivery)).rejects.toMatchObject({ reason: 'network' })
   })
 
   it('si el teléfono ya está en la libreta, sigue sin el alta y el servidor lo reconoce', async () => {

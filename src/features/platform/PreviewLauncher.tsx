@@ -2,7 +2,7 @@ import type { PreviewAs } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { errorMessage, errorStatus } from '@/services/apiError'
+import { errorMessage, hasCode } from '@/services/apiError'
 import { PREVIEW_AS_LABELS } from './previewLink'
 import { PreviewOpenedNotice } from './PreviewOpenedNotice'
 import { SandboxResetButton } from './SandboxResetButton'
@@ -10,7 +10,6 @@ import { usePreviewLauncher } from './usePreviewLauncher'
 
 // El local de muestra no tiene una cuenta activa de ese tipo: el servidor
 // sugiere reiniciarlo.
-const CONFLICT = 409
 const AS: readonly PreviewAs[] = ['owner', 'waiter']
 
 /**
@@ -46,7 +45,7 @@ export function PreviewLauncher() {
       {start.isError ? (
         <FormMessage tone="error">{errorMessage(start.error, 'No se pudo abrir la vista previa.')}</FormMessage>
       ) : null}
-      {errorStatus(start.error) === CONFLICT ? (
+      {hasCode(start.error, 'sandbox_account_unavailable') ? (
         <SandboxResetButton
           exists
           onReset={() => {

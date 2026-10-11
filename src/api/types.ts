@@ -6,6 +6,8 @@ import type { components, operations, paths } from './schema'
 /** Todas las rutas del contrato: el cliente tipado de `src/api/client.ts` se arma con ellas. */
 export type ApiPaths = paths
 
+/** El código estable de un error del API (`{ detail, code }`): lo que decide qué hace la interfaz. */
+export type ErrorCode = components['schemas']['ErrorCode']
 
 export type AccessTokenResponse = components['schemas']['AccessTokenResponse']
 export type LoginRequest = components['schemas']['LoginRequest']

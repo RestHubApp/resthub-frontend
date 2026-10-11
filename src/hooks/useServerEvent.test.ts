@@ -74,12 +74,28 @@ describe('useServerEvent', () => {
   it('con 401 no reintenta: la credencial no va a mejorar sola', async () => {
     jest.useFakeTimers()
     const channel = noticesChannel()
-    channel.respondWith(401)
+    channel.respondWith(401, 'unauthenticated')
     setAuthToken('vencido')
     listen(ORDERS)
 
     await jest.advanceTimersByTimeAsync(10_000)
     expect(channel.connections).toHaveLength(1)
+  })
+
+  it('con `forbidden` tampoco reintenta, pero un error sin código de acceso sí', async () => {
+    jest.useFakeTimers()
+    const channel = noticesChannel()
+    channel.respondWith(403, 'forbidden')
+    setAuthToken('t')
+    listen(ORDERS)
+    await jest.advanceTimersByTimeAsync(10_000)
+    expect(channel.connections).toHaveLength(1)
+
+    channel.respondWith(503, 'database_unavailable')
+    await jest.advanceTimersByTimeAsync(0)
+    listen(ORDERS)
+    await jest.advanceTimersByTimeAsync(3001)
+    expect(channel.connections.length).toBeGreaterThan(2)
   })
 
   it('al desmontarse cierra la conexión y no reintenta', async () => {

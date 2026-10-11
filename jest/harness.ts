@@ -12,7 +12,7 @@ import { createElement, type ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider, useLocation, type RouteObject } from 'react-router'
 
 import { mswServer } from './mswServer'
-import type { CurrentUserResponse, PermissionCode } from '../src/api/types'
+import type { CurrentUserResponse, ErrorCode, PermissionCode } from '../src/api/types'
 import { RouteError } from '../src/router/RouteError'
 import { SCREENS } from '../src/router/screens'
 import { ToastStack } from '../src/features/shell/ToastStack'
@@ -48,14 +48,32 @@ interface Route {
   times: number | null
 }
 
-/** Un error del API con el cuerpo de FastAPI (`{ detail }`). */
+// El código genérico que el servidor pone a un error sin código propio, según su estado.
+const CODE_BY_STATUS: Readonly<Partial<Record<number, ErrorCode>>> = {
+  400: 'bad_request',
+  401: 'unauthenticated',
+  403: 'forbidden',
+  404: 'not_found',
+  405: 'method_not_allowed',
+  409: 'conflict',
+  422: 'unprocessable',
+  429: 'rate_limited',
+  503: 'database_unavailable',
+}
+
+/**
+ * Un error del API con el cuerpo del servidor (`{ detail, code }`). Sin `code`
+ * lleva el genérico de su estado, como el servidor con un error sin código propio.
+ */
 export class ErrorResponse {
   readonly status: number
   readonly detail: unknown
+  readonly code: ErrorCode
 
-  constructor(status: number, detail: unknown = 'Error de prueba') {
+  constructor(status: number, detail: unknown = 'Error de prueba', code?: ErrorCode) {
     this.status = status
     this.detail = detail
+    this.code = code ?? CODE_BY_STATUS[status] ?? 'http_error'
   }
 }
 
@@ -160,7 +178,7 @@ export class FakeServer {
 /** La respuesta HTTP de lo que declaró la prueba: un error del API, un valor JSON o nada. */
 function responseOf(value: unknown, routeStatus: number): Response {
   const status = value instanceof ErrorResponse ? value.status : routeStatus
-  const data = value instanceof ErrorResponse ? { detail: value.detail } : value
+  const data = value instanceof ErrorResponse ? { detail: value.detail, code: value.code } : value
   if (status === 204 || data === undefined) {
     return new Response(null, { status: status === 200 ? 204 : status })
   }

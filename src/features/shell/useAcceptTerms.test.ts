@@ -32,7 +32,7 @@ describe('useAcceptTerms', () => {
 
   it('si la versión cambió (409) relee la cuenta', async () => {
     const newer = buildAccount(PERMISSIONS_OWNER, { terms_accepted: false, terms_version: '2027-01' })
-    server().on('post', TERMS, new ErrorResponse(409, 'Cambió')).on('get', '/auth/me', newer)
+    server().on('post', TERMS, new ErrorResponse(409, 'Cambió', 'outdated_terms')).on('get', '/auth/me', newer)
     signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
     const { result } = renderHook(() => useAcceptTerms('2026-01'), { wrapper })
 

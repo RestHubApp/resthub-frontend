@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
+import { isSessionCode } from '@/services/apiError'
 import { apiUrl } from '@/services/apiRouting'
 import { EventStreamError, readEventStream } from '@/services/eventStream'
 import { logger } from '@/services/logger'
@@ -12,7 +13,6 @@ export type LiveStatus = 'connecting' | 'live' | 'offline'
 
 // El mismo plazo que anuncia el servidor en el aviso `ready`.
 const RETRY_MS = 3000
-const UNAUTHORIZED = 401
 
 const liveLogger = logger.child({ module: 'realtime' })
 
@@ -44,7 +44,7 @@ export function useLiveUpdates(): LiveStatus {
         return
       }
       setStatus('offline')
-      if (error instanceof EventStreamError && error.status === UNAUTHORIZED) {
+      if (error instanceof EventStreamError && isSessionCode(error.code)) {
         return
       }
       liveLogger.warn({ err: error }, 'realtime.disconnected')

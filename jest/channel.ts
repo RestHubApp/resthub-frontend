@@ -2,6 +2,7 @@
 // hooks que escuchan `useServerEvent`.
 import { HttpResponse, http } from 'msw'
 
+import type { ErrorCode } from '../src/api/types'
 import { mswServer } from './mswServer'
 
 /**
@@ -12,10 +13,12 @@ export class FakeChannel {
   readonly connections: { url: string; authorization: string | null }[] = []
   private readonly flows = new Set<ReadableStreamDefaultController<Uint8Array>>()
   private status = 200
+  private code: ErrorCode | undefined
 
-  /** Las próximas conexiones responden con este estado (p. ej. 401). */
-  respondWith(status: number): void {
+  /** Las próximas conexiones responden con este estado y el `code` del error del API (p. ej. 401 `unauthenticated`). */
+  respondWith(status: number, code?: ErrorCode): void {
     this.status = status
+    this.code = code
   }
 
   issue(type: string, data: string): void {
@@ -37,7 +40,9 @@ export class FakeChannel {
   readonly handler = http.get('*/api/v1/events', ({ request }) => {
     this.connections.push({ url: request.url, authorization: request.headers.get('Authorization') })
     if (this.status !== 200) {
-      return new HttpResponse(null, { status: this.status })
+      return this.code === undefined
+        ? new HttpResponse(null, { status: this.status })
+        : HttpResponse.json({ detail: 'Error de prueba', code: this.code }, { status: this.status })
     }
     const flows = this.flows
     const body = new ReadableStream<Uint8Array>({

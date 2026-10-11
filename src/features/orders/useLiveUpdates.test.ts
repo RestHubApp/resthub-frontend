@@ -6,6 +6,7 @@ import { createElement, type ReactNode } from 'react'
 
 import { signInAs } from '#jest/harness'
 import { mswServer } from '#jest/mswServer'
+import type { ErrorCode } from '@/api/types'
 import { queryClient } from '@/services/queryClient'
 import { useLiveUpdates } from './useLiveUpdates'
 
@@ -20,6 +21,7 @@ interface Connection {
 
 const connections: Connection[] = []
 let responseStatus = 200
+let responseCode: ErrorCode | undefined
 
 function fakeChannel({ request }: { readonly request: Request }): Response {
   let handler: ReadableStreamDefaultController<Uint8Array> | null = null
@@ -35,8 +37,10 @@ function fakeChannel({ request }: { readonly request: Request }): Response {
     write: (text) => handler?.enqueue(encoder.encode(text)),
     close: () => handler?.close(),
   })
-  const body = responseStatus === 200 ? flow : null
-  return new HttpResponse(body, { status: responseStatus })
+  if (responseStatus !== 200) {
+    return HttpResponse.json({ detail: 'Error de prueba', code: responseCode }, { status: responseStatus })
+  }
+  return new HttpResponse(flow, { status: responseStatus })
 }
 
 function wrapper({ children }: { readonly children: ReactNode }) {
@@ -61,6 +65,7 @@ function invalidated(key: readonly unknown[]): boolean | undefined {
 beforeEach(() => {
   connections.length = 0
   responseStatus = 200
+  responseCode = undefined
   mswServer.use(http.get('*/api/v1/events', fakeChannel))
   queryClient.setQueryData(['orders', 'active'], [])
   queryClient.setQueryData(['tables', { includeInactive: false }], [])
@@ -128,6 +133,7 @@ describe('useLiveUpdates', () => {
   it('un 401 no se reintenta: la credencial ya no vale', async () => {
     jest.useFakeTimers()
     responseStatus = 401
+    responseCode = 'unauthenticated'
     const { result } = listen()
     await waitFor(() => {
       expect(result.current).toBe('offline')

@@ -13,7 +13,7 @@
 import createClient, { type Client } from 'openapi-fetch'
 
 import { bearerFor, expireSessionOf } from './apiCredentials'
-import { ApiError, errorMessage, isTransportFailure, type ApiErrorCode } from './apiError'
+import { ApiError, errorMessage, isSessionEnded, isTransportFailure, type NoResponseReason } from './apiError'
 import { clearApiFailureOf, noteApiFailure, type ApiFailureScope } from './apiFailure'
 import { apiOrigin } from './apiRouting'
 import { logger } from './logger'
@@ -28,7 +28,6 @@ export type ApiClient<TPaths extends object> = Client<TPaths>
 const REQUEST_ID_HEADER = 'X-Request-ID'
 
 const SERVER_ERROR = 500
-const UNAUTHORIZED = 401
 
 // Sin límite, una conexión colgada deja la petición abierta para siempre: el
 // pedido nunca cae en la cola sin señal y el botón se queda en «Enviando…».
@@ -137,8 +136,8 @@ function logOf(current: Exchange, extra: object) {
 // Sin respuesta es un corte de red o un servidor caído. Un 4xx es la
 // respuesta esperada a un dato inválido: se anota como aviso, no como error.
 function registerFailure(current: Exchange, error: ApiError): void {
-  const data = logOf(current, { status: error.status, code: error.code })
-  if (error.code === 'canceled') {
+  const data = logOf(current, { status: error.status, code: error.code, reason: error.reason })
+  if (error.reason === 'canceled') {
     httpLogger.debug(data, 'http.request_canceled')
   } else if (error.status === undefined || error.status >= SERVER_ERROR) {
     httpLogger.error(data, 'http.request_failed')
@@ -158,22 +157,22 @@ function rememberTransportFailure(current: Exchange, error: ApiError): void {
 /**
  * Anota el fallo y lo lanza.
  *
- * Un 401 de una petición que llevaba credencial es una sesión vencida o
- * revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
- * y el acceso explica qué pasó. Un 401 sin credencial, como una contraseña
- * equivocada al entrar, lo resuelve su propio formulario. Se cierra solo
+ * Un error de sesión (`unauthenticated`, `invalid_token`) de una petición que
+ * llevaba credencial es una sesión vencida o revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
+ * y el acceso explica qué pasó. Un rechazo sin credencial, como una contraseña
+ * equivocada al entrar (`invalid_credentials`), lo resuelve su propio formulario. Se cierra solo
  * la sesión dueña de la ruta: la otra sigue abierta.
  */
 function fail(current: Exchange, error: ApiError): never {
   registerFailure(current, error)
   rememberTransportFailure(current, error)
-  if (error.status === UNAUTHORIZED && current.hasCredential) {
+  if (current.hasCredential && isSessionEnded(error)) {
     expireSessionOf(current.request.url)
   }
   throw error
 }
 
-function errorOf(current: Exchange, failure: { status?: number; body?: unknown; code?: ApiErrorCode; cause?: unknown }): ApiError {
+function errorOf(current: Exchange, failure: { status?: number; body?: unknown; reason?: NoResponseReason; cause?: unknown }): ApiError {
   return new ApiError({ method: current.request.method.toLowerCase(), path: pathOf(current.request), requestId: current.id, ...failure })
 }
 
@@ -212,7 +211,7 @@ function startTimer(signal: AbortSignal, ms: number) {
   }
 }
 
-function codeOf(request: Request, hasExpired: boolean): ApiErrorCode {
+function reasonOf(request: Request, hasExpired: boolean): NoResponseReason {
   if (request.signal.aborted) return 'canceled'
   return hasExpired ? 'timeout' : 'network'
 }
@@ -226,7 +225,7 @@ async function exchange(request: Request, options: CallOptions): Promise<Respons
     return await settle(current, await fetch(request, { signal: timer.signal }))
   } catch (cause) {
     if (cause instanceof ApiError) throw cause
-    return fail(current, errorOf(current, { code: codeOf(request, timer.hasExpired()), cause }))
+    return fail(current, errorOf(current, { reason: reasonOf(request, timer.hasExpired()), cause }))
   } finally {
     timer.stop()
   }

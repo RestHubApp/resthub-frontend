@@ -1,3 +1,5 @@
+import { hasCode, hasNoResponse } from '@/services/apiError'
+
 // El código de vista previa llega en el fragmento de la dirección
 // (`/vista-previa#codigo=…`) y no en la consulta: el fragmento no viaja al
 // servidor que sirve la aplicación, así que no queda en sus registros.
@@ -6,8 +8,6 @@
 const PREVIEW_CODE_PARAM = 'codigo'
 // Un código de verdad es mucho más corto; algo más largo no se manda.
 const MAX_CODE_LENGTH = 256
-const UNAUTHORIZED = 401
-const UNPROCESSABLE = 422
 
 /** El código del fragmento, o `null` si no hay uno que valga la pena canjear. */
 export function previewCodeFrom(hash: string): string | null {
@@ -25,17 +25,17 @@ export function withoutHash(location: { readonly pathname: string; readonly sear
 export type PreviewEntryFailure = 'missing' | 'invalid' | 'offline' | 'failed'
 
 /**
- * El motivo de un canje fallido, según lo que respondió el servidor.
+ * El motivo de un canje fallido, según el código que respondió el servidor.
  *
- * Un 401 es un código inválido, vencido o ya usado: el servidor no dice cuál.
- * Sin respuesta, no hubo conexión; y como el código se usa una sola vez, no
- * se reintenta: se pide otro desde la administración.
+ * `invalid_preview_code` es un código inválido, vencido o ya usado: el
+ * servidor no dice cuál. Sin respuesta, no hubo conexión; y como el código se
+ * usa una sola vez, no se reintenta: se pide otro desde la administración.
  */
-export function failureOf(status: number | undefined): PreviewEntryFailure {
-  if (status === undefined) {
-    return 'offline'
+export function failureOf(error: unknown): PreviewEntryFailure {
+  if (hasCode(error, 'invalid_preview_code', 'validation_error')) {
+    return 'invalid'
   }
-  return status === UNAUTHORIZED || status === UNPROCESSABLE ? 'invalid' : 'failed'
+  return hasNoResponse(error) ? 'offline' : 'failed'
 }
 
 export const FAILURE_MESSAGES: Readonly<Record<PreviewEntryFailure, string>> = {

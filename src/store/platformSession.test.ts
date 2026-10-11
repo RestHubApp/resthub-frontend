@@ -212,7 +212,7 @@ describe('en una pestaña de vista previa', () => {
     const { storage, usePlatformSession, renewPlatformSession } = await loadInPreview(tokenThatExpires(3600))
     const saved = storage.data.get(PLATFORM_STORAGE_KEY)
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
-    mswServer.use(http.all('*/api/v1/*', () => HttpResponse.json({}, { status: 401 })))
+    mswServer.use(http.all('*/api/v1/*', () => HttpResponse.json({ detail: 'vencida', code: 'unauthenticated' }, { status: 401 })))
 
     await expect(renewPlatformSession()).rejects.toThrow()
 

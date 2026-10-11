@@ -157,7 +157,7 @@ describe('RequireSession: términos y privacidad', () => {
 
   it('si la versión cambió mientras se leía, la relee y la vuelve a pedir', async () => {
     const api = server()
-    api.on('post', TERMS, new ErrorResponse(409, 'Los términos cambiaron.'))
+    api.on('post', TERMS, new ErrorResponse(409, 'Los términos cambiaron.', 'outdated_terms'))
     api.on('get', '/auth/me', buildAccount(PERMISSIONS_OWNER, { terms_accepted: false, terms_version: '2027-01' }))
     signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
     const { user } = openProtected()

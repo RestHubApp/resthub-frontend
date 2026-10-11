@@ -130,7 +130,7 @@ describe('RestaurantDetailView: encargados y errores', () => {
   })
 
   it('un restaurante que no existe se muestra como «no existe»', async () => {
-    openCard(new ErrorResponse(404, 'No existe'))
+    openCard(new ErrorResponse(404, 'No existe', 'restaurant_not_found'))
 
     expect(await screen.findByText('Este restaurante no existe.')).toBeInTheDocument()
   })

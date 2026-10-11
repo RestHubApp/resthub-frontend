@@ -8,6 +8,8 @@ const PLATFORM_ACTIVITY = '/platform/activity'
 
 const SAMPLE = '/platform/sandbox'
 const PREVIEW = '/platform/preview'
+const VIEW_AS_WAITER = { name: 'Ver como mesero' }
+const NO_WAITER = 'El local de muestra no tiene un mesero activo.'
 const RESET = { name: 'Reiniciar local de muestra' }
 const LOCAL = { restaurant: restaurantSummary({ id: 99, name: 'Muestra RestHub', slug: 'muestra' }), accounts: [
   { full_name: 'Encargada de muestra', kind: 'owner' as const, role_label: 'Encargado' },
@@ -49,7 +51,7 @@ describe('PreviewView', () => {
     const { api, user } = openPreview()
     api.on('post', PREVIEW, { code: 'abc 123', expires_in: 60 })
 
-    await user.click(await screen.findByRole('button', { name: 'Ver como mesero' }))
+    await user.click(await screen.findByRole('button', VIEW_AS_WAITER))
 
     expect(await screen.findByText('Se abrió la vista previa como mesero en otra pestaña.')).toBeInTheDocument()
     expect(api.calls('post', PREVIEW)[0]?.body).toEqual({ as: 'waiter' })
@@ -62,13 +64,23 @@ describe('PreviewView', () => {
 
   it('si al local le falta esa cuenta (409), ofrece reiniciarlo', async () => {
     const { api, user } = openPreview()
-    api.on('post', PREVIEW, new ErrorResponse(409, 'El local de muestra no tiene un mesero activo.'))
+    api.on('post', PREVIEW, new ErrorResponse(409, NO_WAITER, 'sandbox_account_unavailable'))
 
-    await user.click(await screen.findByRole('button', { name: 'Ver como mesero' }))
+    await user.click(await screen.findByRole('button', VIEW_AS_WAITER))
 
-    expect(await screen.findByText('El local de muestra no tiene un mesero activo.')).toBeInTheDocument()
+    expect(await screen.findByText(NO_WAITER)).toBeInTheDocument()
     expect(screen.getAllByRole('button', RESET)).toHaveLength(2)
     expect(openTab).not.toHaveBeenCalled()
+  })
+
+  it('un 409 con otro código no ofrece reiniciar: decide el código, no el estado ni el texto', async () => {
+    const { api, user } = openPreview()
+    api.on('post', PREVIEW, new ErrorResponse(409, NO_WAITER, 'sandbox_already_active'))
+
+    await user.click(await screen.findByRole('button', VIEW_AS_WAITER))
+
+    expect(await screen.findByText(NO_WAITER)).toBeInTheDocument()
+    expect(screen.getAllByRole('button', RESET)).toHaveLength(1)
   })
 
   it('reiniciar se confirma, archiva el local y muestra el nuevo', async () => {

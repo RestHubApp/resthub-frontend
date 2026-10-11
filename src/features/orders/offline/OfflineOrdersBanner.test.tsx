@@ -63,9 +63,18 @@ describe('pedidos que esperan señal', () => {
   it('si ya estaba en cocina (409), cuenta como enviado', async () => {
     enqueue('Mesa 3', 'a')
     const { api } = open()
-    api.on('post', SEND, new ErrorResponse(409, 'El pedido ya está en cocina.'))
+    api.on('post', SEND, new ErrorResponse(409, 'El pedido ya está en cocina.', 'invalid_transition'))
     expect(await screen.findByText(SENT)).toBeInTheDocument()
     expect(queuedOrders(OWNER)).toHaveLength(0)
+  })
+
+  it('un 409 con otro código no cuenta como enviado, aunque el texto diga «en cocina»', async () => {
+    enqueue('Mesa 3', 'a')
+    const { api } = open()
+    api.on('post', SEND, new ErrorResponse(409, 'El pedido ya está en cocina.', 'order_already_invoiced'))
+    expect(await screen.findByText('Mesa 3: El pedido ya está en cocina.')).toBeInTheDocument()
+    expect(queuedOrders(OWNER)).toHaveLength(0)
+    expect(screen.queryByText(SENT)).not.toBeInTheDocument()
   })
 
   it('un rechazo de verdad se avisa y sale de la cola', async () => {

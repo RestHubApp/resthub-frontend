@@ -98,6 +98,21 @@ const SYNTAX_SOURCES = {
       "CallExpression[callee.name='fetch']",
     ],
   },
+  errorText: {
+    message:
+      'Ninguna decisión depende del texto del error: el servidor manda un `code` estable (ErrorCode). Decide con hasCode(error, \'codigo\'), isSessionEnded o isUnreachable de services/apiError; errorMessage solo se muestra.',
+    selectors: [
+      // errorMessage(error, …).includes('…'), .startsWith, .match, etc.
+      "CallExpression[callee.type='MemberExpression'][callee.object.type='CallExpression'][callee.object.callee.name='errorMessage']",
+      // errorMessage(error, …) === '…', y cualquier otra comparación.
+      "BinaryExpression > CallExpression[callee.name='errorMessage']",
+      // Un `switch` sobre el texto.
+      "SwitchStatement > CallExpression.discriminant[callee.name='errorMessage']",
+      // El `detail` del cuerpo leído a mano en una condición: se lee con errorMessage para mostrarlo.
+      "BinaryExpression > MemberExpression[property.name='detail'][object.property.name='body']",
+      "CallExpression[callee.property.name=/^(includes|startsWith|endsWith|match|test)$/] > MemberExpression.callee > MemberExpression[property.name='detail'][object.property.name='body']",
+    ],
+  },
   apiSchema: {
     message: 'schema.d.ts es generado: solo src/api/types.ts lo importa y expone los tipos con nombre.',
     selectors: [String.raw`ImportDeclaration[source.value=/(^|\x2F)schema$/]`],
@@ -535,8 +550,14 @@ export default tseslint.config(
               ],
             },
             {
+              // Los servicios no conocen la capa api, salvo por los tipos del
+              // contrato (`ErrorCode` en el error del cliente HTTP): un `import type` no
+              // trae código a la ejecución ni crea un ciclo.
               from: [{ element: { type: 'services' } }],
-              allow: [{ to: { element: { type: 'services' } } }],
+              allow: [
+                { to: { element: { type: 'services' } } },
+                { to: { element: { type: 'api' } }, dependency: { kind: 'type' } },
+              ],
             },
           ],
         },
