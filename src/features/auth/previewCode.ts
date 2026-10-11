@@ -11,9 +11,9 @@ const UNPROCESSABLE = 422
 
 /** El código del fragmento, o `null` si no hay uno que valga la pena canjear. */
 export function previewCodeFrom(hash: string): string | null {
-  const datos = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash)
-  const codigo = (datos.get(PREVIEW_CODE_PARAM) ?? '').trim()
-  return codigo === '' || codigo.length > MAX_CODE_LENGTH ? null : codigo
+  const data = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash)
+  const code = (data.get(PREVIEW_CODE_PARAM) ?? '').trim()
+  return code === '' || code.length > MAX_CODE_LENGTH ? null : code
 }
 
 /** La misma dirección sin el fragmento: lo que queda en la barra y en el historial. */

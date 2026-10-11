@@ -19,7 +19,7 @@ import {
   EMPTY_CHANGE_PASSWORD,
 } from './passwordSchema'
 
-type Cambio = Awaited<ReturnType<typeof changeOwnPassword>>
+type Change = Awaited<ReturnType<typeof changeOwnPassword>>
 
 /**
  * Sigue con el token que devolvió el cambio de contraseña.
@@ -29,19 +29,19 @@ type Cambio = Awaited<ReturnType<typeof changeOwnPassword>>
  * en vez de seguir con uno que da 401. Sin segundo acceso: la clave nueva no
  * vuelve a viajar.
  */
-function seguirConElTokenNuevo(respuesta: Cambio, origen: string | null): 'renovada' | 'cerrada' | 'ajena' {
+function followWithNewToken(response: Change, origin: string | null): 'renovada' | 'cerrada' | 'ajena' {
   // Un servidor viejo respondía 204 sin cuerpo: ahí no hay token que usar.
-  const nuevo = (respuesta as Partial<Cambio> | null | undefined)?.access_token ?? ''
-  if (origen !== null && nuevo !== '') {
-    useSession.getState().renew(origen, nuevo, sessionOf(respuesta))
+  const fresh = (response as Partial<Change> | null | undefined)?.access_token ?? ''
+  if (origin !== null && fresh !== '') {
+    useSession.getState().renew(origin, fresh, sessionOf(response))
   }
   const actual = useSession.getState().token
-  if (nuevo !== '' && actual === nuevo) {
+  if (fresh !== '' && actual === fresh) {
     return 'renovada'
   }
   // Otra pestaña ya entró con otra sesión y esta la adoptó: cerrar aquí
   // borraría lo guardado y sacaría también a esa otra cuenta.
-  if (actual !== null && actual !== origen) {
+  if (actual !== null && actual !== origin) {
     return 'ajena'
   }
   // Sin token nuevo, o la sesión se cerró en otra pestaña: seguir con el
@@ -63,36 +63,36 @@ export function ChangePasswordForm() {
     defaultValues: EMPTY_CHANGE_PASSWORD,
   })
 
-  const cambiar = useMutation({
+  const change = useMutation({
     // El token se toma al enviar: si otra pestaña entra con otra cuenta
     // mientras tanto, compararlo al terminar pisaría esa sesión ajena.
-    mutationFn: async (valores: Formulario) => {
-      const origen = useSession.getState().token
-      const respuesta = await changeOwnPassword({
-        current_password: valores.current_password,
-        new_password: valores.new_password,
+    mutationFn: async (values: Formulario) => {
+      const origin = useSession.getState().token
+      const response = await changeOwnPassword({
+        current_password: values.current_password,
+        new_password: values.new_password,
       })
-      return { respuesta, origen }
+      return { respuesta: response, origen: origin }
     },
-    onSuccess: ({ respuesta, origen }) => {
-      const resultado = seguirConElTokenNuevo(respuesta, origen)
-      if (resultado === 'renovada') {
+    onSuccess: ({ respuesta: response, origen: origin }) => {
+      const result = followWithNewToken(response, origin)
+      if (result === 'renovada') {
         reset(EMPTY_CHANGE_PASSWORD)
-      } else if (resultado === 'cerrada') {
+      } else if (result === 'cerrada') {
         void navigate(paths.login, { replace: true })
       }
     },
   })
 
-  const errores = formState.errors
+  const errors = formState.errors
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          cambiar.mutate(valores)
+        handleSubmit((values) => {
+          change.mutate(values)
         }),
       )}
     >
@@ -101,7 +101,7 @@ export function ChangePasswordForm() {
         label="Contraseña actual"
         autoComplete="current-password"
         field={register('current_password')}
-        error={errores.current_password?.message}
+        error={errors.current_password?.message}
       />
       <div className="grid items-start gap-5 sm:grid-cols-2">
         <PasswordField
@@ -110,32 +110,32 @@ export function ChangePasswordForm() {
           autoComplete="new-password"
           hint={`Al menos ${String(MIN_PASSWORD)} caracteres.`}
           field={register('new_password')}
-          error={errores.new_password?.message}
+          error={errors.new_password?.message}
         />
         <PasswordField
           id="confirm_password"
           label="Repite la nueva contraseña"
           autoComplete="new-password"
           field={register('confirm_password')}
-          error={errores.confirm_password?.message}
+          error={errors.confirm_password?.message}
         />
       </div>
 
-      {cambiar.isError ? (
+      {change.isError ? (
         <FormMessage tone="error">
-          {errorMessage(cambiar.error, 'No se pudo cambiar la contraseña.')}
+          {errorMessage(change.error, 'No se pudo cambiar la contraseña.')}
         </FormMessage>
       ) : null}
-      {cambiar.isSuccess ? <FormMessage tone="ok">Contraseña actualizada.</FormMessage> : null}
+      {change.isSuccess ? <FormMessage tone="ok">Contraseña actualizada.</FormMessage> : null}
 
       <Button
         type="submit"
         size="lg"
         className="h-11 w-full sm:h-10 sm:w-auto sm:self-start sm:px-4"
-        disabled={cambiar.isPending}
+        disabled={change.isPending}
       >
         <Icon name="llave" size={16} />
-        <span>{cambiar.isPending ? 'Guardando…' : 'Cambiar contraseña'}</span>
+        <span>{change.isPending ? 'Guardando…' : 'Cambiar contraseña'}</span>
       </Button>
     </form>
   )

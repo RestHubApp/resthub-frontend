@@ -18,21 +18,21 @@ jest.mock('@/api/auth', () => ({
   exchangePreviewCode: mockExchangePreviewCode,
 }))
 
-function memoria(inicial: Record<string, string> = {}) {
-  const datos = new Map(Object.entries(inicial))
+function memory(initial: Record<string, string> = {}) {
+  const data = new Map(Object.entries(initial))
   return {
-    getItem: (clave: string) => datos.get(clave) ?? null,
-    setItem: (clave: string, valor: string) => {
-      datos.set(clave, valor)
+    getItem: (password: string) => data.get(password) ?? null,
+    setItem: (password: string, value: string) => {
+      data.set(password, value)
     },
-    removeItem: (clave: string) => {
-      datos.delete(clave)
+    removeItem: (password: string) => {
+      data.delete(password)
     },
-    datos,
+    datos: data,
   }
 }
 
-interface Carga {
+interface Load {
   /** La dirección con que se cargó la página: decide si la pestaña es de vista previa. */
   readonly cargadaEn: string
   /** Adónde se llegó navegando dentro de la aplicación antes de correr el `loader`. */
@@ -40,7 +40,7 @@ interface Carga {
 }
 
 // Cada prueba es una página recién cargada: la pestaña elige su almacenamiento al importar.
-async function pagina({ cargadaEn, navegoA }: Carga) {
+async function page({ cargadaEn: loadedIn, navegoA: browsedTo }: Load) {
   const location = { pathname: '', search: '', hash: '', replace: jest.fn(), reload: jest.fn() }
   const ir = (url: string) => {
     const { pathname, search, hash } = new URL(url, 'http://localhost')
@@ -51,17 +51,17 @@ async function pagina({ cargadaEn, navegoA }: Carga) {
       ir(url)
     }),
   }
-  ir(cargadaEn)
+  ir(loadedIn)
   stubGlobal('location', location)
   stubGlobal('history', history)
   stubGlobal('window', { location, history, addEventListener: jest.fn() })
-  stubGlobal('localStorage', memoria())
-  stubGlobal('sessionStorage', memoria())
+  stubGlobal('localStorage', memory())
+  stubGlobal('sessionStorage', memory())
   jest.resetModules()
   exchangePreviewCode.mockReset()
   const modulo = await import('./previewEntry')
-  if (navegoA !== undefined) {
-    ir(navegoA)
+  if (browsedTo !== undefined) {
+    ir(browsedTo)
   }
   return { ...modulo, location, history }
 }
@@ -72,7 +72,7 @@ afterEach(() => {
 
 describe('previewEntryLoader', () => {
   it('si se llegó navegando desde una pestaña normal, carga una vez la ruta de canje de la aplicación', async () => {
-    const { previewEntryLoader, location } = await pagina({ cargadaEn: '/pedidos', navegoA: '/Vista-Previa#codigo=abc' })
+    const { previewEntryLoader, location } = await page({ cargadaEn: '/pedidos', navegoA: '/Vista-Previa#codigo=abc' })
 
     expect(await previewEntryLoader()).toBe('reloading')
 
@@ -83,8 +83,8 @@ describe('previewEntryLoader', () => {
   })
 
   it('una pestaña cargada en la ruta escrita con mayúsculas o escapes canjea sin recargar', async () => {
-    for (const ruta of ['/Vista-Previa', '/vista%2Dprevia/']) {
-      const { previewEntryLoader, location } = await pagina({ cargadaEn: `${ruta}#codigo=abc` })
+    for (const route of ['/Vista-Previa', '/vista%2Dprevia/']) {
+      const { previewEntryLoader, location } = await page({ cargadaEn: `${route}#codigo=abc` })
       exchangePreviewCode.mockRejectedValue(new Error('sin red'))
 
       expect(await previewEntryLoader()).toBe('offline')
@@ -97,7 +97,7 @@ describe('previewEntryLoader', () => {
   })
 
   it('el código ya salió de la barra al cargar la página y el canje lo toma de la memoria', async () => {
-    const { previewEntryLoader, location } = await pagina({ cargadaEn: '/vista-previa#codigo=abc' })
+    const { previewEntryLoader, location } = await page({ cargadaEn: '/vista-previa#codigo=abc' })
     // Antes de bajar la pantalla de canje: si su archivo no llegara, el código ya no está.
     expect(location.hash).toBe('')
     exchangePreviewCode.mockRejectedValue(new Error('sin red'))

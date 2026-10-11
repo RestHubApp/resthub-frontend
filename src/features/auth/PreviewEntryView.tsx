@@ -19,17 +19,17 @@ import { PreviewEntryPending } from './PreviewEntryPending'
  * previa y vuelve a leer la sesión de plataforma del navegador.
  */
 export function PreviewEntryView() {
-  const resultado = useLoaderData<PreviewEntryResult>()
+  const result = useLoaderData<PreviewEntryResult>()
 
-  if (resultado === 'reloading') {
+  if (result === 'reloading') {
     return <PreviewEntryPending />
   }
 
   return (
     <main id="contenido" tabIndex={-1} className="flex min-h-dvh flex-col bg-background px-4 py-6 outline-none sm:px-6">
-      <AuthCard title="No se pudo abrir la vista previa" description={FAILURE_MESSAGES[resultado]}>
+      <AuthCard title="No se pudo abrir la vista previa" description={FAILURE_MESSAGES[result]}>
         <div className="flex flex-col gap-4">
-          <FormMessage tone="error">{FAILURE_MESSAGES[resultado]}</FormMessage>
+          <FormMessage tone="error">{FAILURE_MESSAGES[result]}</FormMessage>
           <p className="m-0 text-base text-muted-foreground">
             Pide otra desde «Vista previa» en la administración del sistema: cada código sirve una sola vez.
           </p>

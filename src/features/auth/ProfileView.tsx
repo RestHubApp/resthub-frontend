@@ -3,8 +3,8 @@ import { SectionCard } from '@/components/SectionCard'
 import { usePreview, useSession } from '@/store/session'
 import { ChangePasswordForm } from './ChangePasswordForm'
 
-const TERMINO = 'm-0 text-sm text-muted-foreground'
-const DATO = 'm-0 text-base font-medium break-words'
+const TERM = 'm-0 text-sm text-muted-foreground'
+const DATA = 'm-0 text-base font-medium break-words'
 
 /**
  * La cuenta propia.
@@ -21,7 +21,7 @@ export function ProfileView() {
     return null
   }
 
-  const datos = [
+  const data = [
     { termino: 'Nombre', dato: account.user.full_name },
     { termino: 'Correo', dato: account.user.email },
     { termino: 'Rol', dato: account.user.role_label },
@@ -34,10 +34,10 @@ export function ProfileView() {
 
       <SectionCard title="Tus datos">
         <dl className="m-0 grid gap-4 sm:grid-cols-2">
-          {datos.map((item) => (
+          {data.map((item) => (
             <div key={item.termino} className="flex flex-col gap-0.5">
-              <dt className={TERMINO}>{item.termino}</dt>
-              <dd className={DATO}>{item.dato}</dd>
+              <dt className={TERM}>{item.termino}</dt>
+              <dd className={DATA}>{item.dato}</dd>
             </div>
           ))}
         </dl>
