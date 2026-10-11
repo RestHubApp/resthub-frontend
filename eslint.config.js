@@ -50,7 +50,7 @@ export default tseslint.config(
       ...react.configs.flat.recommended.rules,
       ...react.configs.flat['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
 
       // SOLID, responsabilidad unica: un archivo describe un componente.
       'react/no-multi-comp': ['error', { ignoreStateless: false }],
@@ -142,7 +142,7 @@ export default tseslint.config(
     rules: {
       'react/no-multi-comp': 'off',
       'react-refresh/only-export-components': [
-        'warn',
+        'error',
         { allowConstantExport: true, allowExportNames: ['buttonVariants', 'badgeVariants', 'tabsListVariants'] },
       ],
     },
@@ -401,6 +401,9 @@ export default tseslint.config(
       // Un bloque desplazable (traceback, JSON) debe poder enfocarse para
       // desplazarse con teclado; si es una region con nombre, es valido.
       'jsx-a11y/no-noninteractive-tabindex': ['error', { roles: ['tabpanel', 'region'], tags: [] }],
+      // Safari/VoiceOver deja de anunciar como lista un <ul> con `list-style: none`:
+      // ahí el role="list" explícito no es redundante.
+      'jsx-a11y/no-redundant-roles': ['error', { ul: ['list'], ol: ['list'] }],
     },
   },
 
