@@ -2645,8 +2645,18 @@ export interface components {
          * @enum {string}
          */
         Engine: "jev" | "rules";
-        /** ErrorResponse */
+        /**
+         * ErrorCode
+         * @description Código estable de un error del API (ver `resthub.core.error_codes`).
+         * @enum {string}
+         */
+        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_not_found" | "invoice_number_taken" | "log_entry_not_found" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "weak_password" | "wrong_current_password";
+        /**
+         * ErrorResponse
+         * @description Un error del API: el texto para la persona y el código estable.
+         */
         ErrorResponse: {
+            code: components["schemas"]["ErrorCode"];
             /** Detail */
             detail: string;
         };
@@ -2702,8 +2712,14 @@ export interface components {
         FallbackReason: "not_configured" | "unavailable" | "low_confidence" | "disabled";
         /** HTTPValidationError */
         HTTPValidationError: {
+            code: components["schemas"]["ErrorCode"];
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+            /**
+             * Errors
+             * @description La misma lista que `detail`, bajo una clave que no cambiará de forma.
+             */
+            errors: components["schemas"]["ValidationError"][];
         };
         /**
          * HealthResponse
