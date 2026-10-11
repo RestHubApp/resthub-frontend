@@ -8,7 +8,7 @@ import { RouterProvider } from 'react-router/dom'
 // Primero: al cargarse elige el almacenamiento de la pestaña y saca de la barra
 // el código de vista previa, antes de que el router lea la dirección.
 import './services/tabStorage'
-import { router } from './router'
+import { router } from '@/router/routes'
 import { logger, logUncaughtErrors } from './services/logger'
 import { queryClient } from './services/queryClient'
 import './index.css'

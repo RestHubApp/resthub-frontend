@@ -29,7 +29,7 @@ function archivos(carpeta: string): string[] {
 }
 
 function rutasDelRouter(): Elemento[] {
-  const fuente = readFileSync(join(SRC, 'router', 'index.tsx'), 'utf8')
+  const fuente = readFileSync(join(SRC, 'router', 'routes.tsx'), 'utf8')
   const inicioPlataforma = fuente.indexOf('const PLATAFORMA')
   const finPlataforma = fuente.indexOf('const VISTA_PREVIA')
   const rutas = new Map<string, string>()
@@ -45,11 +45,11 @@ function rutasDelRouter(): Elemento[] {
     } else {
       completa = `/${camino}`
     }
-    rutas.set(completa, 'src/router/index.tsx')
+    rutas.set(completa, 'src/router/routes.tsx')
   }
   // Las rutas índice no llevan `path`: el inicio de cada armazón.
-  rutas.set('/', 'src/router/index.tsx (index: HomeRedirect)')
-  rutas.set('/plataforma', 'src/router/index.tsx (index: RestaurantsView)')
+  rutas.set('/', 'src/router/routes.tsx (index: HomeRedirect)')
+  rutas.set('/plataforma', 'src/router/routes.tsx (index: RestaurantsView)')
   return [...rutas]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([camino, origen]) => ({

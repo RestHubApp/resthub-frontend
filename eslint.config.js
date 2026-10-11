@@ -222,7 +222,7 @@ export default tseslint.config(
         },
         { ignoreMiddleExtensions: true },
       ],
-      'check-file/no-index': 'off',
+      'check-file/no-index': 'error',
     },
   },
 
