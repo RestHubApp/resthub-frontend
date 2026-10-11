@@ -17,7 +17,7 @@ interface IngredientsPanelProps {
 const WITHOUT_INGREDIENTS: readonly Ingredient[] = []
 
 function normalize(text: string): string {
-  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim()
+  return text.normalize('NFD').replaceAll(/\p{M}/gu, '').toLowerCase().trim()
 }
 
 /** Los insumos con su stock, para buscar, revisar y registrar. */

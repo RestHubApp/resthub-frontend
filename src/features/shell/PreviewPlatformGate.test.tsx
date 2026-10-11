@@ -27,7 +27,7 @@ async function platformScreen(loadedIn: string): Promise<string> {
   jest.resetModules()
   // React, el router y el renderizador salen del mismo registro de módulos que
   // el componente: con dos copias de React, los hooks no encuentran su contexto.
-  const { renderToString } = await import('react-dom/server')
+  const { renderToString: toHtml } = await import('react-dom/server')
   const { createStaticHandler, createStaticRouter, StaticRouterProvider } = await import('react-router')
   const { PreviewPlatformGate } = await import('./PreviewPlatformGate')
   const routes = [
@@ -38,7 +38,7 @@ async function platformScreen(loadedIn: string): Promise<string> {
   if (context instanceof Response) {
     throw new Error('La ruta no debería redirigir.')
   }
-  return renderToString(<StaticRouterProvider router={createStaticRouter(handler.dataRoutes, context)} context={context} />)
+  return toHtml(<StaticRouterProvider router={createStaticRouter(handler.dataRoutes, context)} context={context} />)
 }
 
 afterEach(() => {

@@ -74,16 +74,24 @@ describe('InsightsView: rango de fechas', () => {
   })
 })
 
+function changeOf(kpis: HTMLElement, text: string): HTMLElement {
+  const change = within(kpis).getAllByTestId('kpi-change').find((element) => element.textContent.includes(text))
+  if (change === undefined) {
+    throw new Error(`No se encontró la variación ${text}`)
+  }
+  return change
+}
+
 describe('InsightsView: indicadores', () => {
   it('cada KPI dice cuánto cambió, con el tono según si es bueno o malo', async () => {
     open()
     const kpis = await screen.findByRole('region', { name: 'Indicadores del período' })
     expect(within(kpis).getByText('S/ 1,234.50')).toBeInTheDocument()
-    expect(within(kpis).getByText('+12.5 %').parentElement).toHaveClass('text-success')
-    expect(within(kpis).getByText('−5.0 %').parentElement).toHaveClass('text-destructive')
-    expect(within(kpis).getByText('0.0 %').parentElement).toHaveClass('text-muted-foreground')
+    expect(changeOf(kpis, '+12.5 %')).toHaveClass('text-success')
+    expect(changeOf(kpis, '−5.0 %')).toHaveClass('text-destructive')
+    expect(changeOf(kpis, '0.0 %')).toHaveClass('text-muted-foreground')
     expect(within(kpis).getByText('S/ 45.00 sin cobrar')).toBeInTheDocument()
-    expect(within(kpis).getByText('+50.0 %').parentElement).toHaveClass('text-destructive')
+    expect(changeOf(kpis, '+50.0 %')).toHaveClass('text-destructive')
   })
 
   it('sin período anterior lo dice en vez de inventar una variación', async () => {

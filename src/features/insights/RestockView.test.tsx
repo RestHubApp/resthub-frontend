@@ -40,6 +40,14 @@ function names(): string[] {
   return within(list).getAllByRole('heading').map((h) => h.textContent)
 }
 
+function cardOf(name: string): HTMLElement {
+  const card = screen.getAllByRole('listitem').find((item) => within(item).queryByRole('heading', { name }) !== null)
+  if (card === undefined) {
+    throw new Error(`No se encontró la tarjeta de ${name}`)
+  }
+  return card
+}
+
 describe('RestockView', () => {
   it('ordena por urgencia y deja plegado lo que puede esperar', async () => {
     const { user } = open()
@@ -53,7 +61,8 @@ describe('RestockView', () => {
 
   it('cada tarjeta explica la decisión con sus números y el motor', async () => {
     const { user } = open()
-    const limon = (await screen.findByRole('heading', { name: 'Limón' })).closest('li') as HTMLElement
+    await screen.findByRole('heading', { name: 'Limón' })
+    const limon = cardOf('Limón')
     expect(within(limon).getByText('Se acaba mañana y el consumo sube.')).toBeInTheDocument()
     expect(within(limon).getByText('Urgencia crítica')).toBeInTheDocument()
     expect(within(limon).getByText('0.5 kg / 2 kg')).toBeInTheDocument()
@@ -63,7 +72,7 @@ describe('RestockView', () => {
     expect(within(limon).getByTitle('Decidió Jev, el modelo de decisiones de TypeSafe AI')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /Ver también/u }))
-    const arroz = screen.getByRole('heading', { name: 'Arroz' }).closest('li') as HTMLElement
+    const arroz = cardOf('Arroz')
     expect(within(arroz).getByText('Sin consumo')).toBeInTheDocument()
     expect(within(arroz).getByText('Regla fija')).toBeInTheDocument()
     expect(within(arroz).getByTitle('Jev no respondió a tiempo')).toHaveTextContent('Respaldo: no disponible')

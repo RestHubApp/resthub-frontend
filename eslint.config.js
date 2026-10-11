@@ -15,6 +15,9 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import security from 'eslint-plugin-security'
 import sonarjs from 'eslint-plugin-sonarjs'
+import jestDom from 'eslint-plugin-jest-dom'
+import testingLibrary from 'eslint-plugin-testing-library'
+import unicorn from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import { readdirSync } from 'node:fs'
@@ -767,6 +770,70 @@ export default tseslint.config(
     // Lo que Jest carga como CommonJS: el entorno, el plugin de Babel y los módulos sustitutos.
     files: ['jest/**/*.cjs'],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
+
+  // ---------------------------------------------------------------------
+  // Pruebas: buenas prácticas de Testing Library y de jest-dom, solo sobre
+  // los archivos de prueba (consultas por rol, esperas con `findBy`, sin
+  // `container.querySelector`, aserciones que dicen lo que miden).
+  // ---------------------------------------------------------------------
+  {
+    ...testingLibrary.configs['flat/react'],
+    files: ['src/**/*.test.{ts,tsx}'],
+  },
+  {
+    ...jestDom.configs['flat/recommended'],
+    files: ['src/**/*.test.{ts,tsx}'],
+  },
+
+  // ---------------------------------------------------------------------
+  // Unicorn, solo un subconjunto: reglas que cazan errores o idiomas viejos
+  // y que se corrigen solas. Quedan fuera las de estilo personal y las que
+  // chocan con el proyecto: `filename-case` (check-file ya fija los nombres),
+  // `prevent-abbreviations` (cspell + naming-convention ya cubren los nombres),
+  // `no-null` (el contrato del API usa null), `no-array-reduce`/`no-nested-ternary`,
+  // `prefer-global-this` (`window.setTimeout` devuelve `number` y `globalThis.setTimeout`,
+  // `Timeout`: rompe los tipos del navegador) y `no-useless-undefined` (reescribe
+  // `() => undefined` como una función vacía, que `no-empty-function` prohíbe).
+  // ---------------------------------------------------------------------
+  {
+    files: ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'jest/**/*.ts'],
+    plugins: { unicorn },
+    rules: {
+      // `node:fs` y no `fs`: el prefijo deja claro que es del núcleo de Node.
+      'unicorn/prefer-node-protocol': 'error',
+      // `replaceAll` dice lo que hace; `replace(/x/g)` esconde la bandera.
+      'unicorn/prefer-string-replace-all': 'error',
+      // `forEach` no se puede cortar ni espera promesas; `for...of` sí.
+      'unicorn/no-for-each': 'error',
+      // `at(-1)` y no `arr[arr.length - 1]`.
+      'unicorn/prefer-at': 'error',
+      // Copiar con spread algo que ya es un arreglo nuevo es ruido.
+      'unicorn/no-useless-spread': 'error',
+      // Un `Error` se crea con `new`, y con mensaje.
+      'unicorn/throw-new-error': 'error',
+      'unicorn/error-message': 'error',
+      // Las llaves en cada `case` evitan que una declaración se filtre a otro.
+      'unicorn/switch-case-braces': 'error',
+      // `Number.isNaN` y `Number.parseInt`, no las globales con coerción.
+      'unicorn/prefer-number-properties': 'error',
+      // Lo que dice la intención: `includes`, `some`, `startsWith`/`endsWith`.
+      'unicorn/prefer-includes': 'error',
+      'unicorn/prefer-array-some': 'error',
+      'unicorn/prefer-string-starts-ends-with': 'error',
+      // Un `catch` que no usa el error no lo declara.
+      'unicorn/prefer-optional-catch-binding': 'error',
+      // `typeof x === 'undefined'` es `x === undefined` con tipos.
+      'unicorn/no-typeof-undefined': 'error',
+      // Los constructores nativos: `new Map()` pero `String(x)`.
+      'unicorn/new-for-builtins': 'error',
+      // `instanceof Array` falla entre marcos; `Array.isArray` no.
+      'unicorn/no-instanceof-builtins': 'error',
+      // `structuredClone` y no `JSON.parse(JSON.stringify())`.
+      'unicorn/prefer-structured-clone': 'error',
+      // Un solo `push` con varios valores, no varios seguidos.
+      'unicorn/no-array-push-push': 'error',
+    },
   },
 
   // ---------------------------------------------------------------------

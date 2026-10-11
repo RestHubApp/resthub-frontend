@@ -85,9 +85,12 @@ describe('BillingView: emitidos', () => {
 
   it('un comprobante aceptado se imprime pero no se reenvía', async () => {
     open(taxSettings(), [invoice()])
-    const row = (await screen.findByText(/B001-12 · S\/ 60.00/u)).closest('li')
-    expect(row).not.toBeNull()
-    const inRow = within(row as HTMLElement)
+    await screen.findByText(/B001-12 · S\/ 60.00/u)
+    const row = screen.getAllByRole('listitem').find((item) => within(item).queryByText(/B001-12 · S\/ 60.00/u) !== null)
+    if (row === undefined) {
+      throw new Error('No se encontró la fila del comprobante')
+    }
+    const inRow = within(row)
     expect(inRow.getByRole('link', { name: 'Imprimir' })).toHaveAttribute('href', '/comprobantes/5/imprimir')
     expect(inRow.queryByRole('button', { name: 'Reenviar' })).not.toBeInTheDocument()
   })

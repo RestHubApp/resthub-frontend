@@ -11,9 +11,10 @@ describe('CashDifferenceBar', () => {
   })
 
   it('anuncia la diferencia cuando hay monto', () => {
-    const { container } = render(<CashDifferenceBar difference={0} />)
+    render(<CashDifferenceBar difference={0} />)
 
-    expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent('Diferencia')
+    expect(screen.getByTestId('cash-difference')).toHaveAttribute('aria-live', 'polite')
+    expect(screen.getByTestId('cash-difference')).toHaveTextContent('Diferencia')
     expect(screen.queryByText('—')).not.toBeInTheDocument()
   })
 })

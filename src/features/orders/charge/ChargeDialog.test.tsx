@@ -46,7 +46,7 @@ describe('ChargeDialog: todo junto', () => {
     expect(await screen.findByRole('dialog', CHARGING)).toBeInTheDocument()
     expect(screen.getByText('Total a cobrar')).toBeInTheDocument()
     await user.type(screen.getByLabelText(RECEIVED), '100')
-    expect(screen.getByText('Vuelto').nextSibling).toHaveTextContent('S/ 50.00')
+    expect(screen.getByTestId('cash-change')).toHaveTextContent(/Vuelto\s*S\/ 50\.00/u)
     await user.click(screen.getByRole('button', CONFIRM))
 
     expect(await screen.findByRole('dialog', REGISTERED)).toBeInTheDocument()
@@ -64,7 +64,7 @@ describe('ChargeDialog: todo junto', () => {
     const { api, user } = charge()
 
     await user.type(await screen.findByLabelText(RECEIVED), '40')
-    expect(screen.getByText('Vuelto').nextSibling).toHaveTextContent('—')
+    expect(screen.getByTestId('cash-change')).toHaveTextContent(/Vuelto\s*—/u)
     await user.click(screen.getByRole('button', CONFIRM))
 
     expect(await screen.findByText('El monto no cubre lo que se cobra')).toBeInTheDocument()

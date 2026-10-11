@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 
 import { AreaSeriesMarks } from './AreaSeriesMarks'
 import { areaGeometry } from './areaGeometry'
@@ -26,13 +26,13 @@ function renderMarks(activeIndex: number | null) {
 
 describe('AreaSeriesMarks', () => {
   it('rotula el máximo y no dibuja cursor si no hay punto activo', () => {
-    const { container, getByText } = renderMarks(null)
-    expect(getByText('Máx. S/ 30')).toBeTruthy()
-    expect(container.querySelector('line')).toBeNull()
+    renderMarks(null)
+    expect(screen.getByText('Máx. S/ 30')).toBeInTheDocument()
+    expect(screen.queryByTestId('area-cursor')).not.toBeInTheDocument()
   })
 
   it('dibuja la cruz del cursor sobre el punto activo', () => {
-    const { container } = renderMarks(0)
-    expect(container.querySelector('line')).not.toBeNull()
+    renderMarks(0)
+    expect(screen.getByTestId('area-cursor')).toBeInTheDocument()
   })
 })

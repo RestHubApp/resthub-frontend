@@ -66,14 +66,14 @@ describe('borrador del pedido', () => {
 
   it('cada mesa tiene su borrador y limpiar uno no toca el otro', () => {
     const { result } = draft()
-    const takeaway = draft('llevar')
+    const { result: takeawayResult } = draft('llevar')
     act(() => {
       result.current.add(TABLE_KEY, LOMO)
       result.current.add('llevar', LOMO)
       result.current.setNotes(TABLE_KEY, '11', '  sin cebolla ')
       result.current.clear('llevar')
     })
-    expect(takeaway.result.current.lines).toEqual([])
+    expect(takeawayResult.current.lines).toEqual([])
     expect(toNewItems(result.current.lines)).toEqual([{ menu_item_id: 11, quantity: 1, notes: 'sin cebolla', modifiers: [] }])
   })
 
@@ -97,7 +97,7 @@ describe('cartTotals', () => {
     const { dishes, count, total } = cartTotals(result.current.lines)
     expect([dishes, count]).toEqual([4, '4 platos'])
     // Intl separa «S/» del monto con un espacio duro.
-    expect(total.replace(/\s/gu, ' ')).toBe('S/ 30.50')
+    expect(total.replaceAll(/\s/gu, ' ')).toBe('S/ 30.50')
   })
 })
 

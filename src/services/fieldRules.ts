@@ -22,17 +22,17 @@ const MAX_DIGITS_PHONE = 15
 
 /** Quita lo que no puede ir en un nombre mientras la persona escribe. */
 export function onlyLetters(value: string): string {
-  return value.replace(/[^\p{L} '-]/gu, '')
+  return value.replaceAll(/[^\p{L} '-]/gu, '')
 }
 
 /** Deja solo los digitos. */
 export function onlyDigits(value: string): string {
-  return value.replace(/\D/gu, '')
+  return value.replaceAll(/\D/gu, '')
 }
 
 /** Deja digitos, espacios y el `+` del codigo de pais. */
 export function onlyPhone(value: string): string {
-  return value.replace(/[^\d +]/gu, '')
+  return value.replaceAll(/[^\d +]/gu, '')
 }
 
 function countDigits(value: string): number {

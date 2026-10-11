@@ -86,7 +86,7 @@ function codeOverlays(): Element[] {
   for (const route of sources) {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
     const source = readFileSync(route, 'utf8')
-    const file = relative(SRC, route).replace(/\\/gu, '/').replace(/^features\//u, '').replace(/\.tsx$/u, '')
+    const file = relative(SRC, route).replaceAll('\\', '/').replace(/^features\//u, '').replace(/\.tsx$/u, '')
     const inFile: Element[] = []
     for (const { label, type } of OVERLAYS) {
       // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
@@ -99,12 +99,12 @@ function codeOverlays(): Element[] {
     for (let i = 0; i < expandable; i += 1) {
       inFile.push({ id: '', type: 'desplegable', description: 'Sección que se abre y se cierra', origin: `src/${relative(SRC, route)}` })
     }
-    inFile.forEach((element, index) => {
+    for (const [index, element] of inFile.entries()) {
       const repeated = inFile.filter((other) => other.type === element.type).length
       const order = inFile.slice(0, index).filter((other) => other.type === element.type).length + 1
       const suffix = repeated > 1 ? `#${String(order)}` : ''
       items.push({ ...element, id: `${element.type}:${file}${suffix}` })
-    })
+    }
   }
   return items.sort((a, b) => a.id.localeCompare(b.id))
 }

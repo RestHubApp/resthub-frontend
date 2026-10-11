@@ -58,7 +58,7 @@ export function OrderClosedInfo({ order }: OrderClosedInfoProps) {
     <div className="flex flex-col gap-3">
       <dl className="m-0 grid grid-cols-2 gap-y-1 rounded-lg bg-success/10 px-4 py-3 text-sm text-success">
         {paidRows(order, timeZone).map((row) => (
-          <div key={row.label} className="contents">
+          <div key={row.label} className="contents" data-testid={`paid-row-${row.label}`}>
             <dt>{row.label}</dt>
             <dd className="m-0 text-right tabular-nums">{row.value}</dd>
           </div>

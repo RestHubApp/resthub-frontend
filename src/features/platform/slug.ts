@@ -8,7 +8,7 @@ export const MAX_SLUG = 60
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
 
 function withoutAccents(value: string): string {
-  return value.normalize('NFD').replace(/\p{M}/gu, '')
+  return value.normalize('NFD').replaceAll(/\p{M}/gu, '')
 }
 
 /**
@@ -20,7 +20,7 @@ function withoutAccents(value: string): string {
 export function suggestSlug(name: string): string {
   return withoutAccents(name)
     .toLowerCase()
-    .replace(/[^a-z0-9]+/gu, '-')
+    .replaceAll(/[^a-z0-9]+/gu, '-')
     .replace(/^-/u, '')
     .slice(0, MAX_SLUG)
     .replace(/-$/u, '')
@@ -35,9 +35,9 @@ export function suggestSlug(name: string): string {
 export function sanitizeSlugInput(value: string): string {
   return withoutAccents(value)
     .toLowerCase()
-    .replace(/\s+/gu, '-')
-    .replace(/[^a-z0-9-]/gu, '')
-    .replace(/-{2,}/gu, '-')
+    .replaceAll(/\s+/gu, '-')
+    .replaceAll(/[^a-z0-9-]/gu, '')
+    .replaceAll(/-{2,}/gu, '-')
 }
 
 export function isValidSlug(value: string): boolean {

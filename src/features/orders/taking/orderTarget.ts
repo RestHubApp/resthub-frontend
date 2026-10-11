@@ -24,12 +24,15 @@ export type OrderTarget =
 /** La clave del borrador: cada mesa y cada pedido tiene el suyo. */
 export function draftKey(target: OrderTarget): string {
   switch (target.kind) {
-    case 'table':
+    case 'table': {
       return `mesa-${String(target.tableId)}`
-    case 'takeaway':
+    }
+    case 'takeaway': {
       return target.delivery === undefined ? 'llevar' : 'delivery'
-    case 'add':
+    }
+    case 'add': {
       return `pedido-${String(target.orderId)}`
+    }
   }
 }
 

@@ -42,6 +42,7 @@ export function CashAmountField({
       <QuickAmounts totalCents={totalCents} onQuick={onQuick} />
       <p
         aria-live="polite"
+        data-testid="cash-change"
         className="m-0 flex items-baseline justify-between rounded-lg bg-muted px-4 py-3"
       >
         <span className="font-medium">Vuelto</span>

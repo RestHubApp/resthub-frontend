@@ -117,12 +117,15 @@ export interface SessionTokens {
  */
 export function tokenFor(destination: RequestTarget, tokens: SessionTokens): string | null {
   switch (destinationOf(destination)) {
-    case 'platform':
+    case 'platform': {
       return tokens.platform
-    case 'restaurant':
+    }
+    case 'restaurant': {
       return tokens.restaurant
-    case 'foreign':
+    }
+    case 'foreign': {
       return null
+    }
   }
 }
 

@@ -28,16 +28,21 @@ function title(action: StockAction): string {
 
 function form(action: StockAction, onClose: () => void) {
   switch (action.kind) {
-    case 'create':
+    case 'create': {
       return <IngredientForm onDone={onClose} />
-    case 'edit':
+    }
+    case 'edit': {
       return <IngredientForm ingredient={action.ingredient} onDone={onClose} />
-    case 'purchase':
+    }
+    case 'purchase': {
       return <PurchaseForm ingredient={action.ingredient} onDone={onClose} />
-    case 'waste':
+    }
+    case 'waste': {
       return <WasteForm ingredient={action.ingredient} onDone={onClose} />
-    case 'adjustment':
+    }
+    case 'adjustment': {
       return <AdjustmentForm ingredient={action.ingredient} onDone={onClose} />
+    }
   }
 }
 

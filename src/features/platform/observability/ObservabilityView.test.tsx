@@ -35,11 +35,7 @@ function openPanel(en = '/plataforma/observabilidad') {
 
 // La tarjeta de un gráfico: la que tiene su título como encabezado.
 function getCard(title: string): HTMLElement {
-  const card = screen.getByRole('heading', { name: title }).closest<HTMLElement>('[data-slot="card"]')
-  if (card === null) {
-    throw new Error(`No se encontró la tarjeta «${title}».`)
-  }
-  return card
+  return screen.getByTestId(`section-${title}`)
 }
 
 function lastRead(api: ReturnType<typeof openPanel>['api'], route: string) {

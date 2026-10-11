@@ -12,7 +12,7 @@ const LIMON = ingredient()
 
 // Intl separa «S/» del monto con un espacio que no se corta.
 function flat(text: string | undefined): string | undefined {
-  return text?.replace(/\s/gu, ' ')
+  return text?.replaceAll(/\s/gu, ' ')
 }
 const PURCHASE = { quantity: '5', quantity_unit: 'kg', cost_mode: 'unit' as const, cost: '4.20', reason: '' }
 

@@ -31,12 +31,13 @@ function spyConsole() {
 describe('nivel de los logs', () => {
   it('con nivel error descarta avisos, información y depuración', async () => {
     const { logger } = await loggerWith({ VITE_LOG_LEVEL: 'error' })
+    const { debug: writeVerbose } = logger
     const console = spyConsole()
 
     logger.error('visible')
     logger.warn('oculto')
     logger.info('oculto')
-    logger.debug('oculto')
+    writeVerbose('oculto')
 
     expect(console.error).toHaveBeenCalledTimes(1)
     expect(console.warn).not.toHaveBeenCalled()
@@ -46,9 +47,10 @@ describe('nivel de los logs', () => {
 
   it('sin nivel válido, en desarrollo se ve desde debug y se oculta trace', async () => {
     const { logger } = await loggerWith({ VITE_LOG_LEVEL: 'ruidoso', DEV: true })
+    const { debug: writeVerbose } = logger
     const console = spyConsole()
 
-    logger.debug('visible')
+    writeVerbose('visible')
     logger.trace('oculto')
 
     expect(console.debug).toHaveBeenCalledTimes(1)
@@ -57,9 +59,10 @@ describe('nivel de los logs', () => {
 
   it('en producción descarta información y depuración, y deja avisos y errores', async () => {
     const { logger } = await loggerWith({ VITE_LOG_LEVEL: undefined, DEV: false })
+    const { debug: writeVerbose } = logger
     const console = spyConsole()
 
-    logger.debug('oculto')
+    writeVerbose('oculto')
     logger.info('oculto')
     logger.warn('aviso')
     logger.error('fallo')

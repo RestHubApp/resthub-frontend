@@ -8,7 +8,7 @@ interface CashDifferenceBarProps {
 /** La diferencia entre lo contado y lo esperado, anunciada mientras se escribe. */
 export function CashDifferenceBar({ difference }: CashDifferenceBarProps) {
   return (
-    <p aria-live="polite" className="m-0 flex items-baseline justify-between rounded-lg bg-muted px-4 py-3">
+    <p aria-live="polite" data-testid="cash-difference" className="m-0 flex items-baseline justify-between rounded-lg bg-muted px-4 py-3">
       <span className="font-medium">Diferencia</span>
       <span className="text-xl font-bold tabular-nums">
         {difference === null ? '—' : differenceLabel(difference)}

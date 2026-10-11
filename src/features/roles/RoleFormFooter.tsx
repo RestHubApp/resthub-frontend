@@ -20,7 +20,7 @@ export function RoleFormFooter({ readOnly, isError, error, isPending, failureTex
       {isError ? <FormMessage tone="error">{errorMessage(error, failureText)}</FormMessage> : null}
 
       <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onDone}>
+        <Button type="button" variant="outline" size="lg" className="h-11 px-4" data-testid="role-form-done" onClick={onDone}>
           {readOnly ? 'Cerrar' : 'Cancelar'}
         </Button>
         {readOnly ? null : (

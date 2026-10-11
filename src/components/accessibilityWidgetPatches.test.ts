@@ -14,8 +14,8 @@ describe('accessibilityWidgetPatches', () => {
     const button = document.createElement('a')
     button.setAttribute(ARIA_LABEL, 'Open Accessibility Menu')
     patchMenuButton(button)
-    expect(button.getAttribute(ARIA_LABEL)).toBe(OPEN_LABEL)
-    expect(button.getAttribute('title')).toBe(OPEN_LABEL)
+    expect(button).toHaveAttribute(ARIA_LABEL, OPEN_LABEL)
+    expect(button).toHaveAttribute('title', OPEN_LABEL)
   })
 
   it('fija la capa del menú, traduce el cierre y nombra las opciones por su texto', () => {
