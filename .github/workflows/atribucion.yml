@@ -16,13 +16,14 @@ jobs:
     name: Sin atribución de IA en el PR
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
       - name: Revisar título y descripción
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          patron='(generated with|🤖|co-authored-by:.*(claude|anthropic))'
-          if printf '%s\n%s\n' "$PR_TITLE" "$PR_BODY" | grep -Eiq "$patron"; then
+          if ! { printf '%s\n' "$PR_TITLE"; printf '%s\n' "$PR_BODY"; } | sh .husky/atribucion.sh; then
             echo "::error::El título o la descripción del PR contienen atribución de una herramienta de IA. Quítala."
             exit 1
           fi
