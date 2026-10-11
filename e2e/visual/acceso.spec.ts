@@ -38,7 +38,7 @@ test('VIS-02 el inicio y una ruta que no existe llevan a la pantalla de cada cue
   await expect(page).toHaveURL(/\/acceso$/u)
   await expect(page.getByRole('heading', { name: 'Iniciar sesión' })).toBeVisible()
 
-  await openAs(page, local.cocina, '/')
+  await openAs(page, local.kitchen, '/')
   await expect(page).toHaveURL(/\/tablero$/u)
   await expect(page.getByRole('heading', { level: 1, name: 'Tablero' })).toBeVisible()
   await capture(page, 'inicio-cocina-tablero')
@@ -48,7 +48,7 @@ test('VIS-02 el inicio y una ruta que no existe llevan a la pantalla de cada cue
     localStorage.clear()
   })
   await page.goto('about:blank')
-  await openAs(page, local.mesero, '/no-existe/de-verdad')
+  await openAs(page, local.waiter, '/no-existe/de-verdad')
   await expect(page).toHaveURL(/\/pedidos$/u)
   await expect(page.getByRole('heading', { name: '4 de 4 mesas libres' })).toBeVisible()
   await capture(page, 'ruta-inexistente-mesero')

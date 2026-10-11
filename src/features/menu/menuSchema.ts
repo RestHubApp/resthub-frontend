@@ -28,7 +28,7 @@ export const menuItemSchema = z.object({
     .min(1, 'Escribe el nombre del plato')
     .max(MAX_DISH, `Usa como máximo ${String(MAX_DISH)} caracteres`),
   description: textOptional(MAX_DESCRIPTION),
-  price: decimalRule({ max: MAX_PRICE, decimales: 2, unidad: 'soles', obligatorio: true }),
+  price: decimalRule({ max: MAX_PRICE, decimals: 2, unit: 'soles', required: true }),
 })
 
 export type MenuItemValues = z.infer<typeof menuItemSchema>

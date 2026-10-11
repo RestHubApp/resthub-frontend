@@ -20,20 +20,20 @@ export const PASSWORD = 'resthub123'
 
 /** Cuentas de la semilla (`scripts/seed_dev.py`) y las dos de vista previa. */
 export const ACCOUNTS = {
-  encargado: { correo: 'admin@resthub.dev', acceso: '/acceso' },
-  mesero: { correo: 'mesero@resthub.dev', acceso: '/acceso' },
-  cocina: { correo: 'cocina@resthub.dev', acceso: '/acceso' },
-  plataforma: { correo: 'plataforma@resthub.dev', acceso: '/plataforma/acceso' },
+  owner: { email: 'admin@resthub.dev', access: '/acceso' },
+  waiter: { email: 'mesero@resthub.dev', access: '/acceso' },
+  kitchen: { email: 'cocina@resthub.dev', access: '/acceso' },
+  platform: { email: 'plataforma@resthub.dev', access: '/plataforma/acceso' },
   // Un mesero que todavía no aceptó los términos: ve la puerta «Antes de empezar».
-  'sin-terminos': { correo: 'nuevo-a11y@resthub.dev', acceso: '/acceso' },
+  'sin-terminos': { email: 'nuevo-a11y@resthub.dev', access: '/acceso' },
   // La pestaña que abre «Ver como…» desde el área de plataforma.
-  'vp-encargado': { vistaPrevia: 'owner' },
-  'vp-mesero': { vistaPrevia: 'waiter' },
+  'vp-encargado': { preview: 'owner' },
+  'vp-mesero': { preview: 'waiter' },
 }
 
 /** Tamaños de pantalla. El móvil es el celular del mesero (390 × 844). */
 export const VIEWS = {
-  escritorio: { width: 1366, height: 900, isMobile: false, hasTouch: false, deviceScaleFactor: 1 },
+  desktop: { width: 1366, height: 900, isMobile: false, hasTouch: false, deviceScaleFactor: 1 },
   movil: { width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
 }
 
@@ -64,7 +64,7 @@ export async function readJson(route) {
 export function filterStatuses(list = STATUSES) {
   const only = process.env.A11Y_SOLO?.split(',').filter(Boolean)
   const kind = process.env.A11Y_CLASE
-  return list.filter((e) => (!only || only.includes(e.id)) && (!kind || e.clase === kind))
+  return list.filter((e) => (!only || only.includes(e.id)) && (!kind || e.class === kind))
 }
 
 export function filterViews(status) {
@@ -93,7 +93,7 @@ const routeSession = (account) => join(REPORTS, '.sesiones', `${account}.json`)
 
 async function callApi(method, route, body, token) {
   const r = await fetch(`${API_URL}/api/v1${route}`, {
-    method: method,
+    method,
     headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
     body: body ? JSON.stringify(body) : undefined,
   })
@@ -105,7 +105,7 @@ async function callApi(method, route, body, token) {
 async function readStorage(page) {
   return page.evaluate(() => ({
     local: Object.entries(localStorage).map(([name, value]) => ({ name, value })),
-    sesion: Object.entries(sessionStorage).map(([name, value]) => ({ name, value })),
+    session: Object.entries(sessionStorage).map(([name, value]) => ({ name, value })),
   }))
 }
 
@@ -123,7 +123,7 @@ export async function signIn(browser, account) {
   const context = await browser.newContext(contextOf('escritorio'))
   const page = await context.newPage()
   if (dataAccount.vistaPrevia) {
-    const { access_token: token } = await callApi('POST', '/platform/auth/login', { email: ACCOUNTS.plataforma.correo, password: PASSWORD })
+    const { access_token: token } = await callApi('POST', '/platform/auth/login', { email: ACCOUNTS.platform.email, password: PASSWORD })
     const { code } = await callApi('POST', '/platform/preview', { as: dataAccount.vistaPrevia }, token)
     await page.goto(`${BASE_URL}/vista-previa#codigo=${encodeURIComponent(code)}`)
     await page.waitForURL((url) => !url.pathname.startsWith('/vista-previa'), { timeout: 20_000 })
@@ -158,7 +158,7 @@ export async function session(browser, account) {
  * (`evaluateOnNewDocument` de Puppeteer).
  */
 export function sessionScript(storage) {
-  const dataJson = JSON.stringify(storage ?? { local: [], sesion: [] })
+  const dataJson = JSON.stringify(storage ?? { local: [], session: [] })
   return `(() => { try {
     const a = ${dataJson};
     for (const { name, value } of a.local) localStorage.setItem(name, value);

@@ -42,7 +42,7 @@ describe('BillingView: datos fiscales', () => {
     await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('Datos fiscales guardados.')).toBeInTheDocument()
-    expect(api.llamadas('put', SETTINGS)[0]?.body).toMatchObject({
+    expect(api.calls('put', SETTINGS)[0]?.body).toMatchObject({
       igv_rate: '10.5',
       boleta_series: 'B002',
       factura_series: 'F001',
@@ -62,7 +62,7 @@ describe('BillingView: datos fiscales', () => {
 
     expect(await screen.findByText('El RUC tiene 11 dígitos y empieza en 10 o 20')).toBeInTheDocument()
     expect(screen.getByText('Cuatro caracteres, empieza con F')).toBeInTheDocument()
-    expect(api.llamadas('put', SETTINGS)).toHaveLength(0)
+    expect(api.calls('put', SETTINGS)).toHaveLength(0)
   })
 
   it('un error del servidor al guardar se muestra en el formulario', async () => {
@@ -73,7 +73,7 @@ describe('BillingView: datos fiscales', () => {
     await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('El proveedor rechazó el token')).toBeInTheDocument()
-    expect(api.llamadas('put', SETTINGS)[0]?.body).toMatchObject({ provider_token: 'secreto' })
+    expect(api.calls('put', SETTINGS)[0]?.body).toMatchObject({ provider_token: 'secreto' })
   })
 })
 
@@ -122,7 +122,7 @@ describe('BillingView: emitidos', () => {
     await user.click(await screen.findByRole('button', { name: 'Siguiente' }))
 
     expect(await screen.findByText('Página 2 de 2')).toBeInTheDocument()
-    expect(api.llamadas('get', ISSUED).at(-1)?.params).toEqual({ limit: 25, offset: 25 })
+    expect(api.calls('get', ISSUED).at(-1)?.params).toEqual({ limit: 25, offset: 25 })
   })
 
   it('si la lista falla muestra el error', async () => {

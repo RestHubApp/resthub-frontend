@@ -36,7 +36,7 @@ export function TableStatusButton({ table }: TableStatusButtonProps) {
         status.mutate(undefined)
       }}
     >
-      <Icon name="encender" size={16} />
+      <Icon name="turnOn" size={16} />
       <span>{table.is_active ? 'Desactivar' : 'Activar'}</span>
     </Button>
   )

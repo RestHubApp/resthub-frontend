@@ -40,7 +40,7 @@ export function RolesView() {
           <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
             openSet(null)
           }}>
-            <Icon name="agregar" size={16} />
+            <Icon name="add" size={16} />
             <span>Nuevo rol</span>
           </Button>
         }

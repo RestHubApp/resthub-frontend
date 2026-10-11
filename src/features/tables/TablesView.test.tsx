@@ -30,7 +30,7 @@ describe('TablesView: lista y nombre', () => {
   it('pide todas las mesas, también las desactivadas', async () => {
     const { api } = openTables()
     await screen.findByText('Mesa 1')
-    expect(api.llamadas('get', TABLES)[0]?.params).toEqual({ include_inactive: true })
+    expect(api.calls('get', TABLES)[0]?.params).toEqual({ include_inactive: true })
   })
 
   it('sin mesas invita a crear la primera', async () => {
@@ -51,7 +51,7 @@ describe('TablesView: lista y nombre', () => {
     await user.click(within(window).getByRole('button', SAVE))
 
     expect(await screen.findByText('Mesa creada.')).toBeInTheDocument()
-    expect(api.llamadas('post', TABLES)[0]?.body).toEqual({ label: 'Patio' })
+    expect(api.calls('post', TABLES)[0]?.body).toEqual({ label: 'Patio' })
     expect(screen.getByText('Patio')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
@@ -63,7 +63,7 @@ describe('TablesView: lista y nombre', () => {
     await user.click(within(await screen.findByRole('dialog')).getByRole('button', SAVE))
 
     expect(await screen.findByText('Escribe el nombre de la mesa')).toBeInTheDocument()
-    expect(api.llamadas('post', TABLES)).toHaveLength(0)
+    expect(api.calls('post', TABLES)).toHaveLength(0)
   })
 
   it('si el nombre ya existe, muestra lo que dijo el servidor dentro de la ventana', async () => {
@@ -79,7 +79,7 @@ describe('TablesView: lista y nombre', () => {
     await user.click(within(window).getByRole('button', SAVE))
 
     expect(await within(window).findByText('Ya hay una mesa con ese nombre.')).toBeInTheDocument()
-    expect(api.llamadas('patch', '/tables/1')[0]?.body).toEqual({ label: 'Terraza 2' })
+    expect(api.calls('patch', '/tables/1')[0]?.body).toEqual({ label: 'Terraza 2' })
   })
 
 })
@@ -99,7 +99,7 @@ describe('TablesView: orden y estado', () => {
     expect(screen.getByRole('button', { name: 'Bajar Terraza 2' })).toBeDisabled()
     await user.click(screen.getByRole('button', { name: 'Bajar Mesa 1' }))
 
-    expect(api.llamadas('put', '/tables/order')[0]?.body).toEqual({ ids: [2, 1] })
+    expect(api.calls('put', '/tables/order')[0]?.body).toEqual({ ids: [2, 1] })
     expect(await screen.findByRole('button', { name: 'Subir Terraza 2' })).toBeDisabled()
   })
 
@@ -119,7 +119,7 @@ describe('TablesView: orden y estado', () => {
     api.on('patch', '/tables/1', { id: 1, label: '1', position: 0, is_active: false, created_at: CREATED })
     await user.click(screen.getByRole('button', { name: 'Desactivar' }))
     expect(await screen.findByText('Mesa 1 desactivada.')).toBeInTheDocument()
-    expect(api.llamadas('patch', '/tables/1')[1]?.body).toEqual({ is_active: false })
+    expect(api.calls('patch', '/tables/1')[1]?.body).toEqual({ is_active: false })
   })
 
   it('si no carga, lo dice', async () => {

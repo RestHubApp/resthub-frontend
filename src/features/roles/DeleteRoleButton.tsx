@@ -34,7 +34,7 @@ export function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
           aria-label={`Eliminar el rol ${role.name}`}
           disabled={remove.isPending}
         >
-          <Icon name="eliminar" size={16} />
+          <Icon name="delete" size={16} />
           <span>Eliminar</span>
         </Button>
       }

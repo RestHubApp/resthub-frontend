@@ -31,7 +31,7 @@ export function MenuItemFields({ register, errors, categories }: MenuItemFieldsP
         id="item-price"
         label="Precio (S/)"
         placeholder="28.00"
-        icon="precio"
+        icon="price"
         inputMode="decimal"
         autoComplete="off"
         hint="Con punto o coma para los céntimos."
@@ -41,7 +41,7 @@ export function MenuItemFields({ register, errors, categories }: MenuItemFieldsP
       <SelectField
         id="item-category"
         label="Categoría"
-        icon="carta"
+        icon="dishMenu"
         placeholder="Elige una categoría"
         field={register('category_id')}
         error={errors.category_id?.message}
@@ -56,7 +56,7 @@ export function MenuItemFields({ register, errors, categories }: MenuItemFieldsP
         <TextareaField
           id="item-description"
           label="Descripción (opcional)"
-          icon="descripcion"
+          icon="description"
           placeholder="Pescado del día, leche de tigre, camote y choclo."
           hint="La lee el mesero para contestar qué lleva el plato."
           field={register('description')}

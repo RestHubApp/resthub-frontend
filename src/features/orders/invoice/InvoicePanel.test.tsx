@@ -44,7 +44,7 @@ describe('InvoicePanel', () => {
     expect(await screen.findByText('Boleta B001-15')).toBeInTheDocument()
     expect(screen.getByText('Aceptada por SUNAT')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Imprimir' })).toHaveAttribute('href', '/comprobantes/90/imprimir')
-    expect(api.llamadas('post', ISSUE)[0]?.body).toEqual({
+    expect(api.calls('post', ISSUE)[0]?.body).toEqual({
       order_id: 12,
       kind: 'boleta',
       customer_document_type: 'none',
@@ -83,7 +83,7 @@ describe('InvoicePanel', () => {
     await user.click(dialog.getByRole('button', { name: 'Emitir factura' }))
 
     expect(await screen.findByText('Factura F001-3')).toBeInTheDocument()
-    expect(api.llamadas('post', ISSUE)[0]?.body).toMatchObject({
+    expect(api.calls('post', ISSUE)[0]?.body).toMatchObject({
       kind: 'factura',
       customer_document_type: 'ruc',
       customer_document_number: '20123456789',
@@ -117,6 +117,6 @@ describe('InvoicePanel', () => {
     handleMount(<InvoicePanel order={handleOrder()} />)
 
     expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
-    expect(api.llamadas('get', OF_ORDER)).toHaveLength(0)
+    expect(api.calls('get', OF_ORDER)).toHaveLength(0)
   })
 })

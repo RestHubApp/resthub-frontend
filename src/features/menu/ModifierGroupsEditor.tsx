@@ -56,7 +56,7 @@ export function ModifierGroupsEditor({ groups, error, onChange }: ModifierGroups
               <Button type="button" variant="ghost" size="sm" aria-label={`Quitar el grupo ${group.name}`} onClick={() => {
                 onChange(groups.filter((_, i) => i !== index))
               }}>
-                <Icon name="eliminar" size={16} />
+                <Icon name="delete" size={16} />
               </Button>
             </div>
             <Label htmlFor={`${id}-opciones`} className="text-sm text-muted-foreground">
@@ -73,7 +73,7 @@ export function ModifierGroupsEditor({ groups, error, onChange }: ModifierGroups
         <Button type="button" variant="outline" className="self-start" onClick={() => {
           onChange([...groups, emptyGroup()])
         }}>
-          <Icon name="agregar" size={16} />
+          <Icon name="add" size={16} />
           <span>Agregar grupo de opciones</span>
         </Button>
       ) : null}

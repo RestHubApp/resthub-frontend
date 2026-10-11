@@ -8,7 +8,7 @@ import { join } from 'node:path'
 
 async function call(token, method, route, body) {
   const response = await fetch(`${API_URL}/api/v1${route}`, {
-    method: method,
+    method,
     headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
     body: body === undefined ? undefined : JSON.stringify(body),
   })
@@ -37,9 +37,9 @@ async function acceptTerms() {
 }
 
 async function accountWithoutTerms(t) {
-  const waiter = await call(null, 'POST', '/auth/login', { email: ACCOUNTS.mesero.correo, password: PASSWORD })
+  const waiter = await call(null, 'POST', '/auth/login', { email: ACCOUNTS.waiter.email, password: PASSWORD })
   await call(t, 'POST', '/staff', {
-    email: ACCOUNTS['sin-terminos'].correo, full_name: 'Mesero nuevo (pruebas a11y)', password: PASSWORD, role_id: waiter.user.role_id,
+    email: ACCOUNTS['sin-terminos'].email, full_name: 'Mesero nuevo (pruebas a11y)', password: PASSWORD, role_id: waiter.user.role_id,
   }).catch((error) => {
     if (!String(error.message).includes('409')) throw error
   })
@@ -178,7 +178,7 @@ export async function prepareData() {
   // registro de observabilidad: así la tabla de registros tiene una fila que abrir.
   const records = await call(tp, 'GET', '/platform/observability/logs')
   if (records.items.length === 0) {
-    await call(null, 'POST', '/platform/auth/login', { email: ACCOUNTS.plataforma.correo, password: 'clave-equivocada-a11y' }).catch(() => undefined)
+    await call(null, 'POST', '/platform/auth/login', { email: ACCOUNTS.platform.email, password: 'clave-equivocada-a11y' }).catch(() => undefined)
   }
   const restaurants = await call(tp, 'GET', '/platform/restaurants')
   ids.restaurante = (restaurants.items ?? restaurants)[0].id

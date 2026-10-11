@@ -24,7 +24,7 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
     'funcion:caja.sin-caja-no-se-cobra',
     'estado:caja.historial-vacio',
   )
-  await openAs(page, local.encargado, '/caja')
+  await openAs(page, local.owner, '/caja')
   await expect(page.getByRole('heading', { level: 1, name: 'Caja' })).toBeVisible()
   await expect(page.getByText('Todavía no hay turnos de caja')).toBeVisible()
 
@@ -38,8 +38,8 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
   await evidence(page, 'ges-01-1-caja-abierta')
 
   // Dos cobros del salón: uno en efectivo con propina y otro con Yape.
-  await sell(local, { mesa: local.mesa('1'), items: [{ plato: local.plato('Lomo saltado') }], propina: '3.00' })
-  await sell(local, { mesa: local.mesa('2'), items: [{ plato: local.plato('Ají de gallina') }], metodo: 'yape' })
+  await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado') }], tip: '3.00' })
+  await sell(local, { table: local.table('2'), items: [{ dish: local.dish('Ají de gallina') }], method: 'yape' })
   const actual = (await api(local).get('/cash/current')).session as { summary: { expected_cash: string } }
   expect(actual.summary.expected_cash).toBe('185.00')
 
@@ -84,7 +84,7 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
   await expect(page.getByRole('heading', { name: 'Turno en curso' })).toBeHidden()
 
   // Sin caja abierta, el servidor no deja cobrar.
-  await expect(sell(local, { mesa: local.mesa('3'), items: [{ plato: local.plato('Chicha morada') }] })).rejects.toThrow(
+  await expect(sell(local, { table: local.table('3'), items: [{ dish: local.dish('Chicha morada') }] })).rejects.toThrow(
     /La caja está cerrada/u,
   )
 
@@ -102,7 +102,7 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
 
-  const sessions = await api(local).lista('/cash/sessions')
+  const sessions = await api(local).list('/cash/sessions')
   expect(sessions[0]).toMatchObject({ is_open: false, counted_cash: '183.50', expected_cash: '185.00', difference: '-1.50' })
 })
 
@@ -113,7 +113,7 @@ test('GES-02 el encargado valida el monto inicial, cambia el tope de descuento d
     'funcion:caja.tope-descuento',
     'funcion:caja.aviso-pedidos-sin-cobrar',
   )
-  await openAs(page, local.encargado, '/caja')
+  await openAs(page, local.owner, '/caja')
   await page.getByRole('button', { name: 'Abrir caja' }).click()
   await expect(page.getByText('Escribe el monto')).toBeVisible()
   await page.getByLabel('Efectivo inicial').fill('cien')
@@ -147,10 +147,10 @@ test('GES-02 el encargado valida el monto inicial, cambia el tope de descuento d
   await page.getByLabel('Efectivo inicial').fill('80,50')
   await page.getByRole('button', { name: 'Abrir caja' }).click()
   await expect(notice(page, /Caja abierta con S\/\s*80\.50/u)).toBeVisible()
-  await api(local, local.mesero).post('/orders', {
+  await api(local, local.waiter).post('/orders', {
     type: 'dine_in',
-    table_id: local.mesa('3').id,
-    items: [{ menu_item_id: local.plato('Chicha morada').id, quantity: 1, notes: '' }],
+    table_id: local.table('3').id,
+    items: [{ menu_item_id: local.dish('Chicha morada').id, quantity: 1, notes: '' }],
   })
   await page.reload()
   await expect(page.getByText(/Hay 1 pedido sin cobrar\.\s*Puedes cerrar igual/u)).toBeVisible()
@@ -169,7 +169,7 @@ test('GES-03 el historial de turnos se pagina y la caja avisa si el servidor fal
     await owner.post('/cash/open', { opening_amount: String(shift), notes: '' })
     await owner.post('/cash/close', { counted_cash: String(shift), notes: '' })
   }
-  await openAs(page, local.encargado, '/caja')
+  await openAs(page, local.owner, '/caja')
   const historyValue = page.getByRole('heading', { name: 'Turnos anteriores' }).locator('xpath=../../..')
   const pagination = historyValue.getByRole('navigation', { name: 'Paginación' })
   await expect(pagination).toContainText('Página 1 de 2')

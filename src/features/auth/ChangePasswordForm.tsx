@@ -72,9 +72,9 @@ export function ChangePasswordForm() {
         current_password: values.current_password,
         new_password: values.new_password,
       })
-      return { respuesta: response, origen: origin }
+      return { response, origin }
     },
-    onSuccess: ({ respuesta: response, origen: origin }) => {
+    onSuccess: ({ response, origin }) => {
       const result = followWithNewToken(response, origin)
       if (result === 'renovada') {
         reset(EMPTY_CHANGE_PASSWORD)
@@ -134,7 +134,7 @@ export function ChangePasswordForm() {
         className="h-11 w-full sm:h-10 sm:w-auto sm:self-start sm:px-4"
         disabled={change.isPending}
       >
-        <Icon name="llave" size={16} />
+        <Icon name="key" size={16} />
         <span>{change.isPending ? 'Guardando…' : 'Cambiar contraseña'}</span>
       </Button>
     </form>

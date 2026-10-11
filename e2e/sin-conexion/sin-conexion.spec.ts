@@ -8,7 +8,7 @@ import { covers } from '../soporte/cobertura'
 import { openAs, evidence, expect, test } from '../soporte/fixtures'
 
 async function tableOrders(local: Local, tableId: number) {
-  const active = await new Customer(local.http, local.encargado.token).lista('/orders/active')
+  const active = await new Customer(local.http, local.owner.token).list('/orders/active')
   return active.filter((order) => order.table_id === tableId)
 }
 
@@ -25,7 +25,7 @@ test('OFF-01 sin señal el pedido queda en la cola del celular y sale solo al vo
   local,
 }) => {
   covers('funcion:pedidos.sin-conexion-encolar', 'funcion:pedidos.sin-conexion-reenviar', 'estado:pedidos.cola-sin-senal')
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   await selectLomo(page)
   await evidence(page, 'off-01-1-plato-elegido')
 
@@ -38,7 +38,7 @@ test('OFF-01 sin señal el pedido queda en la cola del celular y sale solo al vo
   await expect(queue).toContainText('Mesa 1')
   await expect(page).toHaveURL(/\/pedidos$/u)
   await evidence(page, 'off-01-2-en-cola')
-  expect(await tableOrders(local, local.mesa('1').id)).toHaveLength(0)
+  expect(await tableOrders(local, local.table('1').id)).toHaveLength(0)
 
   await context.setOffline(false)
   await expect(page.getByText(/Mesa 1: pedido #\d+ enviado a cocina/u)).toBeVisible()
@@ -49,7 +49,7 @@ test('OFF-01 sin señal el pedido queda en la cola del celular y sale solo al vo
   await context.setOffline(true)
   await context.setOffline(false)
   await expect
-    .poll(async () => (await tableOrders(local, local.mesa('1').id)).map((p) => p.status))
+    .poll(async () => (await tableOrders(local, local.table('1').id)).map((p) => p.status))
     .toEqual(['in_kitchen'])
   await expect(page.getByRole('link', { name: /Mesa 1/u })).toContainText(/cocina/iu)
 })
@@ -59,7 +59,7 @@ test('OFF-02 si el pedido llegó pero la respuesta se perdió, el reintento no l
   local,
 }) => {
   covers('funcion:pedidos.sin-conexion-sin-duplicar')
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   await selectLomo(page)
 
   // El servidor recibe y guarda el pedido, pero al celular no le llega la
@@ -81,14 +81,14 @@ test('OFF-02 si el pedido llegó pero la respuesta se perdió, el reintento no l
   await page.getByRole('button', { name: 'Enviar a cocina' }).click()
   const queue = page.getByRole('status').filter({ hasText: '1 pedido espera señal' })
   await expect(queue).toBeVisible()
-  expect(await tableOrders(local, local.mesa('1').id)).toHaveLength(1)
+  expect(await tableOrders(local, local.table('1').id)).toHaveLength(1)
   await evidence(page, 'off-02-1-en-cola-aunque-llego')
 
   withoutSignal = false
   await queue.getByRole('button', { name: 'Reintentar' }).click()
   await expect(page.getByText(/Mesa 1: pedido #\d+ enviado a cocina/u)).toBeVisible()
   await expect(queue).toBeHidden()
-  const orders = await tableOrders(local, local.mesa('1').id)
+  const orders = await tableOrders(local, local.table('1').id)
   expect(orders).toHaveLength(1)
   expect(orders[0]?.status).toBe('in_kitchen')
 })

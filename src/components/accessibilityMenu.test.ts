@@ -3,12 +3,12 @@ import { waitFor } from '@testing-library/react'
 
 import { openAccessibilityMenu } from './accessibilityMenu'
 
-function widgetButton(): { boton: HTMLAnchorElement; clic: jest.Mock } {
+function widgetButton(): { button: HTMLAnchorElement; click: jest.Mock } {
   const button = document.createElement('a')
   button.className = 'asw-menu-btn'
   const click = jest.fn()
   button.addEventListener('click', click)
-  return { boton: button, clic: click }
+  return { button, click }
 }
 
 describe('openAccessibilityMenu', () => {
@@ -17,7 +17,7 @@ describe('openAccessibilityMenu', () => {
   })
 
   it('con el widget ya cargado, toca su botón', () => {
-    const { boton: button, clic: click } = widgetButton()
+    const { button, click } = widgetButton()
     document.body.append(button)
 
     openAccessibilityMenu()
@@ -26,7 +26,7 @@ describe('openAccessibilityMenu', () => {
   })
 
   it('si el widget todavía no cargó, lo carga y abre el menú cuando aparece su botón', async () => {
-    const { boton: button, clic: click } = widgetButton()
+    const { button, click } = widgetButton()
 
     openAccessibilityMenu()
     expect(click).not.toHaveBeenCalled()

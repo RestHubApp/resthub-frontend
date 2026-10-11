@@ -51,7 +51,7 @@ describe('TableMoves', () => {
 
     expect(window.queryByRole('button', { name: /Terraza/u })).not.toBeInTheDocument()
     expect(await screen.findByText('Pedido #34 ahora en Mesa 4.')).toBeInTheDocument()
-    expect(api.llamadas('post', '/orders/12/move')[0]?.body).toEqual({ table_id: 4 })
+    expect(api.calls('post', '/orders/12/move')[0]?.body).toEqual({ table_id: 4 })
   })
 
   it('el mesero solo une mesas suyas, y nunca la misma', async () => {
@@ -67,7 +67,7 @@ describe('TableMoves', () => {
     expect(window.queryByRole('button', { name: /Mesa 3/u })).not.toBeInTheDocument()
     await user.click(terrace)
     expect(await screen.findByText('Mesas unidas en el pedido #34.')).toBeInTheDocument()
-    expect(api.llamadas('post', '/orders/12/merge')[0]?.body).toEqual({ source_order_id: 20 })
+    expect(api.calls('post', '/orders/12/merge')[0]?.body).toEqual({ source_order_id: 20 })
   })
 
   it('el encargado puede unir mesas de cualquier mesero', async () => {

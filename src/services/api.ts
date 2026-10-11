@@ -27,7 +27,7 @@ export const SLOW_TIMEOUT_MS = 60_000
 // almacenes; los servicios son la capa mas baja y no pueden importarlos.
 interface Credential {
   token: string | null
-  alVencer: (() => void) | null
+  onExpire: (() => void) | null
 }
 
 declare module 'axios' {
@@ -48,8 +48,8 @@ declare module 'axios' {
   }
 }
 
-const restaurant: Credential = { token: null, alVencer: null }
-const platform: Credential = { token: null, alVencer: null }
+const restaurant: Credential = { token: null, onExpire: null }
+const platform: Credential = { token: null, onExpire: null }
 
 /** El prefijo de las rutas del administrador del sistema, relativo a `/api/v1`. */
 const PLATFORM_PREFIX = '/platform'
@@ -132,12 +132,12 @@ function credentialOf(destination: RequestTarget): Credential {
 
 /** Qué hacer cuando el servidor rechaza la credencial de una petición de restaurante. */
 export function setUnauthorizedHandler(handler: (() => void) | null): void {
-  restaurant.alVencer = handler
+  restaurant.onExpire = handler
 }
 
 /** Lo mismo, para las peticiones del administrador del sistema. */
 export function setPlatformUnauthorizedHandler(handler: (() => void) | null): void {
-  platform.alVencer = handler
+  platform.onExpire = handler
 }
 
 /**
@@ -265,7 +265,7 @@ api.interceptors.response.use(
       error.response?.status === UNAUTHORIZED &&
       error.config?.headers.has('Authorization') === true
     ) {
-      credentialOf(error.config).alVencer?.()
+      credentialOf(error.config).onExpire?.()
     }
     throw error
   },

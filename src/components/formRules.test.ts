@@ -8,8 +8,8 @@ function error(rule: { safeParse: (v: string) => { error?: { issues: { message: 
 }
 
 describe('reglas de formulario compartidas', () => {
-  const price = decimalRule({ max: 1000, decimales: 2, unidad: 'soles', obligatorio: true })
-  const waste = decimalRule({ max: 50, decimales: 3, unidad: 'kg' })
+  const price = decimalRule({ max: 1000, decimals: 2, unit: 'soles', required: true })
+  const waste = decimalRule({ max: 50, decimals: 3, unit: 'kg' })
 
   it('un monto obligatorio vacío pide el valor', () => {
     expect(error(price, '  ')).toBe('Escribe un valor')

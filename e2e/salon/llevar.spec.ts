@@ -29,7 +29,7 @@ test('SAL-22 el mesero toma un pedido para llevar y lo encuentra en sus pestaña
     'funcion:pedidos.pestana-llevar',
     'funcion:pedidos.pestana-mis-pedidos',
   )
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   let windowValue = await openTakeaway(page)
   await windowValue.getByRole('textbox', { name: 'Nombre del cliente (opcional)' }).fill('Borrador')
   await windowValue.getByRole('button', { name: 'Cancelar' }).click()
@@ -63,7 +63,7 @@ test('SAL-22 el mesero toma un pedido para llevar y lo encuentra en sus pestaña
   await tabs.getByRole('tab', { name: 'Mesas' }).click()
   await expect(page.getByRole('heading', { name: '4 de 4 mesas libres' })).toBeVisible()
 
-  const [order] = await api(local, local.mesero).lista('/orders/active')
+  const [order] = await api(local, local.waiter).list('/orders/active')
   expect(order).toMatchObject({ type: 'takeaway', customer_name: 'Ana', status: 'in_kitchen' })
 })
 
@@ -72,7 +72,7 @@ test('SAL-23 un delivery exige nombre, teléfono y dirección, y el cliente nuev
   local,
 }) => {
   covers('funcion:pedidos.delivery', 'funcion:pedidos.cliente-nuevo-a-libreta', 'funcion:pedido.datos-delivery')
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   const windowValue = await openTakeaway(page)
   await windowValue.getByRole('radio', { name: 'Delivery' }).click()
   await windowValue.getByRole('button', { name: 'Elegir platos' }).click()
@@ -92,9 +92,9 @@ test('SAL-23 un delivery exige nombre, teléfono y dirección, y el cliente nuev
   await expect(page.getByText('Nuevo delivery a Jr. Huallaga 450, Cercado.')).toBeVisible()
   await sendUnDish(page, /^Ají de gallina/u)
 
-  const customers = await api(local).lista('/customers?q=912345678')
+  const customers = await api(local).list('/customers?q=912345678')
   expect(customers).toEqual([expect.objectContaining({ name: 'Luis Quispe', address: 'Jr. Huallaga 450, Cercado' })])
-  const [order] = await api(local, local.mesero).lista('/orders/active')
+  const [order] = await api(local, local.waiter).list('/orders/active')
   expect(order).toMatchObject({ type: 'delivery', customer_phone: '912345678', customer_id: customers[0].id })
 
   await page.goto(`/pedidos/${String(id(order))}`)
@@ -110,7 +110,7 @@ test('SAL-23B sin el consentimiento del cliente, el delivery sale igual y no que
   local,
 }) => {
   covers('funcion:pedidos.delivery-sin-consentimiento')
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   const windowValue = await openTakeaway(page)
   await windowValue.getByRole('radio', { name: 'Delivery' }).click()
   await windowValue.getByRole('textbox', { name: 'Nombre de quien recibe' }).fill('Marta Rojas')
@@ -121,8 +121,8 @@ test('SAL-23B sin el consentimiento del cliente, el delivery sale igual y no que
   await expect(page.getByRole('heading', { level: 1, name: 'Delivery · Marta Rojas' })).toBeVisible()
   await sendUnDish(page, /^Ají de gallina/u)
 
-  expect(await api(local).lista('/customers?q=934567812')).toEqual([])
-  const [order] = await api(local, local.mesero).lista('/orders/active')
+  expect(await api(local).list('/customers?q=934567812')).toEqual([])
+  const [order] = await api(local, local.waiter).list('/orders/active')
   expect(order).toMatchObject({ type: 'delivery', customer_phone: '934567812', customer_id: null })
 })
 
@@ -140,7 +140,7 @@ test('SAL-24 el mesero encuentra al cliente frecuente por nombre y no le vuelve 
     notes: '',
     consent: true,
   })
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   const windowValue = await openTakeaway(page)
   await windowValue.getByRole('radio', { name: 'Delivery' }).click()
   const search = windowValue.getByRole('searchbox', { name: 'Buscar cliente frecuente (opcional)' })
@@ -160,9 +160,9 @@ test('SAL-24 el mesero encuentra al cliente frecuente por nombre y no le vuelve 
   await windowValue.getByRole('button', { name: 'Elegir platos' }).click()
   await sendUnDish(page, /^Lomo saltado/u)
 
-  const [order] = await api(local, local.mesero).lista('/orders/active')
+  const [order] = await api(local, local.waiter).list('/orders/active')
   expect(order).toMatchObject({ type: 'delivery', customer_id: rosa.id, delivery_address: 'Av. Brasil 1200, Magdalena' })
   expect((await readOrder(local, id(order))).customer_name).toBe('Rosa Pérez')
-  const notebook = await api(local).lista('/customers?q=Rosa')
+  const notebook = await api(local).list('/customers?q=Rosa')
   expect(notebook).toHaveLength(1)
 })

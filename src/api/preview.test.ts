@@ -13,7 +13,7 @@ const post = mockPost
 
 jest.mock('@/services/api', () => ({
   api: { get: (...args: unknown[]) => mockGet(...args), post: (...args: unknown[]) => mockPost(...args) },
-  debeReintentar: () => false,
+  shouldRetry: () => false,
 }))
 
 beforeEach(() => {

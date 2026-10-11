@@ -22,7 +22,7 @@ const NOTICE = 'Tu contraseña cambió. Vuelve a iniciar sesión.'
 function openProfile(preview = false) {
   const api = server()
   signInAs(PERMISSIONS_WAITER, { preview })
-  return { api, ...handleMount(<ProfileView />, { path: '/perfil', rutas: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
+  return { api, ...handleMount(<ProfileView />, { path: '/perfil', routes: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
 }
 
 describe('ProfileView', () => {
@@ -50,8 +50,8 @@ describe('ProfileView', () => {
     await changePassword(user)
 
     expect(await screen.findByText('Contraseña actualizada.')).toBeInTheDocument()
-    expect(api.llamadas('post', CHANGEValue)[0]?.body).toEqual({ current_password: CURRENT_SECRET, new_password: NEW_SECRET })
-    expect(api.llamadas('post', ACCESS)).toHaveLength(0)
+    expect(api.calls('post', CHANGEValue)[0]?.body).toEqual({ current_password: CURRENT_SECRET, new_password: NEW_SECRET })
+    expect(api.calls('post', ACCESS)).toHaveLength(0)
     expect(useSession.getState().token).toBe(NEW_TOKEN)
     expect(currentAuthToken()).toBe(NEW_TOKEN)
     expect(screen.getByLabelText(ACTUAL)).toHaveValue('')
@@ -67,7 +67,7 @@ describe('ProfileView', () => {
     expect(router.state.location.pathname).toBe('/acceso')
     expect(useSession.getState().token).toBeNull()
     expect(useSession.getState().passwordChanged).toBe(true)
-    expect(api.llamadas('post', ACCESS)).toHaveLength(0)
+    expect(api.calls('post', ACCESS)).toHaveLength(0)
   })
 
   it('si otra pestaña entró con otra cuenta mientras tanto, no pisa ni cierra esa sesión', async () => {
@@ -79,7 +79,7 @@ describe('ProfileView', () => {
 
     await changePassword(user)
 
-    await waitFor(() => { expect(api.llamadas('post', CHANGEValue)).toHaveLength(1); })
+    await waitFor(() => { expect(api.calls('post', CHANGEValue)).toHaveLength(1); })
     await new Promise((ready) => setTimeout(ready, 50))
     expect(useSession.getState().token).toBe('token-de-otra-cuenta')
     expect(useSession.getState().passwordChanged).toBe(false)
@@ -95,7 +95,7 @@ describe('ProfileView', () => {
 
     expect(await screen.findByText('Las dos contraseñas no coinciden')).toBeInTheDocument()
     expect(screen.getByText('La nueva contraseña tiene que ser distinta de la actual')).toBeInTheDocument()
-    expect(api.llamadas('post', CHANGEValue)).toHaveLength(0)
+    expect(api.calls('post', CHANGEValue)).toHaveLength(0)
   })
 
   it('si la actual está mal, muestra el motivo del servidor', async () => {

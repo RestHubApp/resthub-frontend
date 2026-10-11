@@ -37,9 +37,9 @@ const PANEL = (
   <AuthAside
     title="Tu restaurante, sin libreta"
     items={[
-      { icon: 'pedido', text: 'Toma los pedidos desde el celular, mesa por mesa o para llevar.' },
-      { icon: 'tablero', text: 'La cocina ve qué preparar y la caja sabe qué cobrar.' },
-      { icon: 'indicadores', text: 'Ventas, inventario y lo que más se pide, al día.' },
+      { icon: 'order', text: 'Toma los pedidos desde el celular, mesa por mesa o para llevar.' },
+      { icon: 'board', text: 'La cocina ve qué preparar y la caja sabe qué cobrar.' },
+      { icon: 'indicators', text: 'Ventas, inventario y lo que más se pide, al día.' },
     ]}
     note="Tu cuenta la crea el encargado del restaurante. Si olvidaste tu contraseña, pídele que la restablezca."
   />
@@ -138,7 +138,7 @@ export function LoginView() {
         ) : null}
 
         <Button type="submit" size="lg" className="h-11 w-full" disabled={access.isPending}>
-          <Icon name="entrar" size={18} />
+          <Icon name="signIn" size={18} />
           <span>{access.isPending ? 'Entrando…' : 'Entrar'}</span>
         </Button>
       </form>

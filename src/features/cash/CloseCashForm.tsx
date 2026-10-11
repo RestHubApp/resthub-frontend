@@ -66,7 +66,7 @@ export function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
         <TextField
           id="caja-contado"
           label="Efectivo contado"
-          icon="pago"
+          icon="payment"
           inputMode="decimal"
           autoComplete="off"
           placeholder={centsToApi(expected)}

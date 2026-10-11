@@ -11,8 +11,8 @@ import { prefetchMenu } from './prefetchMenu'
 const ENTRIES = 'Entradas:Ceviche,Causa'
 const CATEGORY = { id: 3, name: 'Postres', position: 2, is_active: true, created_at: '2026-09-26T13:00:00Z' }
 
-function urls(api: { peticiones: readonly { url: string }[] }): string[] {
-  return api.peticiones.map((p) => p.url).sort((a, b) => a.localeCompare(b))
+function urls(api: { requests: readonly { url: string }[] }): string[] {
+  return api.requests.map((p) => p.url).sort((a, b) => a.localeCompare(b))
 }
 
 function names(menu: ReturnType<typeof handleMenu>) {

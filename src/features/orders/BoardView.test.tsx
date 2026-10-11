@@ -34,7 +34,7 @@ function board(orders: OrderResponse[] | ErrorResponse = [IN_TABLE, IN_KITCHEN, 
 }
 
 function column(name: RegExp) {
-  return within(screen.getByRole('region', { name: name }))
+  return within(screen.getByRole('region', { name }))
 }
 
 describe('BoardView', () => {
@@ -76,7 +76,7 @@ describe('BoardView', () => {
     await user.click(column(/^En cocina/u).getByRole('button', { name: 'Marcar listo' }))
 
     expect(await screen.findByText('Pedido #2 listo.')).toBeInTheDocument()
-    expect(api.llamadas('post', '/orders/2/ready')).toHaveLength(1)
+    expect(api.calls('post', '/orders/2/ready')).toHaveLength(1)
   })
 
   it('cobrar y cancelar abren sus ventanas desde el tablero', async () => {

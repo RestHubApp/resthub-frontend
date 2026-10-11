@@ -28,7 +28,7 @@ function visible(item: RestockItem, filter: RestockAction | null, viewWait: bool
 
 /** Reposición inteligente: qué comprar y cuándo, según el consumo y las mermas. */
 export function RestockView() {
-  const { recomendacion: recommendation, actualizar: update } = useRestock()
+  const { recommendation, update } = useRestock()
   const [filter, setFilter] = useState<RestockAction | null>(null)
   const [viewWait, setViewWait] = useState(false)
 
@@ -38,7 +38,7 @@ export function RestockView() {
         description="Qué insumos comprar y cuándo, según el stock, el consumo de las últimas semanas y las mermas."
         actions={
           <Button type="button" size="lg" className="h-10 px-4" disabled={update.isPending} onClick={() => { update.mutate() }}>
-            <Icon name="actualizar" size={16} className={update.isPending ? 'animate-spin' : undefined} />
+            <Icon name="update" size={16} className={update.isPending ? 'animate-spin' : undefined} />
             <span>{update.isPending ? 'Actualizando…' : 'Actualizar recomendaciones'}</span>
           </Button>
         }
@@ -70,7 +70,7 @@ export function RestockView() {
               )}
               {inWait > 0 ? (
                 <Button type="button" variant="outline" className="self-start" onClick={() => { setViewWait(true) }}>
-                  <Icon name="expandir" size={16} />
+                  <Icon name="expand" size={16} />
                   <span>{`Ver también los ${String(inWait)} insumos que pueden esperar`}</span>
                 </Button>
               ) : null}

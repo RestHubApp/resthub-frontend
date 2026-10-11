@@ -64,7 +64,7 @@ export function BoardView() {
             <LiveIndicator status={live} />
             <Button asChild variant="outline" size="lg" className="h-11 px-4">
               <Link to={paths.board.history}>
-                <Icon name="historial" size={18} />
+                <Icon name="history" size={18} />
                 <span>Historial</span>
               </Link>
             </Button>

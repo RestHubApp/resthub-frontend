@@ -61,7 +61,7 @@ export function RestaurantsView() {
         actions={
           <Button asChild size="lg" className="h-11 px-4">
             <Link to={paths.platform.newRestaurant}>
-              <Icon name="agregar" size={18} />
+              <Icon name="add" size={18} />
               <span>Nuevo restaurante</span>
             </Link>
           </Button>

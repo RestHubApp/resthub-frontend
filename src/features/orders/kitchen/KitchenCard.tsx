@@ -59,7 +59,7 @@ export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
         <Button type="button" size="lg" className="h-12 text-base" disabled={ready.isPending} onClick={() => {
           ready.mutate()
         }}>
-          <Icon name="listo" size={18} />
+          <Icon name="ready" size={18} />
           <span>{ready.isPending ? 'Guardando…' : 'Listo'}</span>
         </Button>
       ) : null}

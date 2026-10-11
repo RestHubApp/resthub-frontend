@@ -47,7 +47,7 @@ export function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonPro
       disabled={status.isPending}
       onClick={restaurant.is_active ? undefined : change}
     >
-      <Icon name="encender" size={18} />
+      <Icon name="turnOn" size={18} />
       <span>{restaurant.is_active ? 'Desactivar restaurante' : 'Activar restaurante'}</span>
     </Button>
   )

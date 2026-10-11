@@ -29,12 +29,12 @@ describe('newOrderPath', () => {
     const route = newOrderPath(fromCustomer(customer(), 'delivery'))
     const params = new URL(route, 'http://localhost').searchParams
     expect(Object.fromEntries(params)).toEqual({
-      tipo: 'delivery',
-      cliente: 'Rosa Quispe',
-      clienteId: '40',
-      telefono: '987654321',
-      direccion: 'Jr. Cusco 120',
-      referencia: 'Frente al parque',
+      'tipo': 'delivery',
+      'cliente': 'Rosa Quispe',
+      'clienteId': '40',
+      'telefono': '987654321',
+      'direccion': 'Jr. Cusco 120',
+      'referencia': 'Frente al parque',
     })
   })
 })

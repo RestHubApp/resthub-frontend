@@ -59,7 +59,7 @@ export function EditableItem({ orderId, item, flag }: EditableItemProps) {
               remove.mutate()
               return
             }
-            change.mutate({ quantity: quantity })
+            change.mutate({ quantity })
           }}
         />
       </div>
@@ -67,7 +67,7 @@ export function EditableItem({ orderId, item, flag }: EditableItemProps) {
       <Button type="button" variant="ghost" className="h-11 w-fit px-3" onClick={() => {
         setEditing(true)
       }}>
-        <Icon name="nota" size={16} />
+        <Icon name="note" size={16} />
         <span>{item.notes === '' ? 'Agregar nota' : 'Cambiar nota'}</span>
       </Button>
       {editing ? (

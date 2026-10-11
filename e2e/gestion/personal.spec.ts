@@ -30,7 +30,7 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
     'funcion:personal.cuenta-propia',
   )
   const email = `lucia-${String(Date.now())}-${String(test.info().parallelIndex)}@e2e.resthub.dev`
-  await openAs(page, local.encargado, '/personal')
+  await openAs(page, local.owner, '/personal')
   await expect(page.getByRole('heading', { level: 1, name: 'Personal' })).toBeVisible()
   await expect(page.getByRole('row', { name: /Encargada Prueba \(tú\)/u })).toBeVisible()
 
@@ -42,7 +42,7 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
   await expect(registration.getByText('Escribe el nombre completo')).toBeVisible()
   await expect(registration.getByText(/Escribe un correo válido/u)).toBeVisible()
   await registration.getByLabel('Nombre completo').fill('Lucía Ramos')
-  await registration.getByLabel('Correo').fill(local.mesero.email)
+  await registration.getByLabel('Correo').fill(local.waiter.email)
   await registration.getByLabel('Contraseña inicial').fill(NEW_SECRET)
   await registration.getByRole('button', { name: 'Crear cuenta' }).click()
   await expect(registration.getByRole('alert')).toBeVisible()
@@ -100,12 +100,12 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
 
 test('GES-16 la tabla del personal se pagina y avisa si el servidor falla', async ({ page, local }) => {
   covers('funcion:personal.paginar', 'estado:personal.error')
-  const roles = await api(local).lista('/roles')
+  const roles = await api(local).list('/roles')
   const waiter = Number(roles.find((role) => role.kind === 'waiter')?.id)
   for (let n = 1; n <= 13; n += 1) {
     await newAccount(local, `Ayudante ${String.fromCodePoint(64 + n)}`, waiter)
   }
-  await openAs(page, local.encargado, '/personal')
+  await openAs(page, local.owner, '/personal')
   const pages = page.getByRole('navigation', { name: 'Paginación' })
   await expect(pages).toContainText('Página 1 de 2')
   await expect(page.getByRole('row')).toHaveCount(16)

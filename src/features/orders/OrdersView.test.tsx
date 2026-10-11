@@ -83,7 +83,7 @@ describe('las otras pestañas', () => {
     const { api } = open('/pedidos?vista=mios')
     expect(await screen.findByRole('heading', { name: 'En curso (1)' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Cerrados hoy (1)' })).toBeInTheDocument()
-    const params = api.llamadas('get', '/orders')[0]?.params ?? {}
+    const params = api.calls('get', '/orders')[0]?.params ?? {}
     expect(params).toMatchObject({ waiter_id: 7, limit: 100 })
     expect(params['date_from']).toBe(params['date_to'])
   })

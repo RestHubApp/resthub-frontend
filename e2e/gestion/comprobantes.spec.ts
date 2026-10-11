@@ -11,7 +11,7 @@ test.beforeEach(() => {
   test.slow()
 })
 
-test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que queda simulado sin proveedor y lo imprime', async ({ page, localConCaja: local }) => {
+test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que queda simulado sin proveedor y lo imprime', async ({ page, restaurantWithCashRegister: local }) => {
   covers(
     'ruta:/comprobantes',
     'ruta:/comprobantes/:invoiceId/imprimir',
@@ -22,12 +22,12 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
     'funcion:comprobantes.imprimir',
     'estado:comprobante-impreso.error',
   )
-  const order = await sell(local, { mesa: local.mesa('1'), items: [{ plato: local.plato('Lomo saltado') }, { plato: local.plato('Chicha morada') }] })
+  const order = await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado') }, { dish: local.dish('Chicha morada') }] })
   const salesReceipt = await issueSalesReceipt(local, id(order))
   expect(salesReceipt).toMatchObject({ status: 'simulated', total: '40.00' })
   const code = String(salesReceipt.code)
   await countPrints(page)
-  await openAs(page, local.encargado, '/comprobantes')
+  await openAs(page, local.owner, '/comprobantes')
   await expect(page.getByRole('heading', { level: 1, name: 'Comprobantes' })).toBeVisible()
 
   const row = page.getByRole('listitem').filter({ hasText: code })
@@ -83,14 +83,14 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
   expect(await prints(page)).toBe(0)
 })
 
-test('GES-20 los comprobantes se paginan de a 25 y la lista avisa si el servidor falla', async ({ page, localConCaja: local }) => {
+test('GES-20 los comprobantes se paginan de a 25 y la lista avisa si el servidor falla', async ({ page, restaurantWithCashRegister: local }) => {
   covers('funcion:comprobantes.paginar', 'estado:comprobantes.error')
   const codes: string[] = []
   for (let n = 0; n < 26; n += 1) {
-    const order = await sell(local, { mesa: local.mesa('2'), items: [{ plato: local.plato('Inca Kola 500 ml') }] })
+    const order = await sell(local, { table: local.table('2'), items: [{ dish: local.dish('Inca Kola 500 ml') }] })
     codes.push(String((await issueSalesReceipt(local, id(order))).code))
   }
-  await openAs(page, local.encargado, '/comprobantes')
+  await openAs(page, local.owner, '/comprobantes')
   const issued = page.getByRole('heading', { name: 'Emitidos' }).locator('xpath=../../..')
   const pages = issued.getByRole('navigation', { name: 'Paginación' })
   await expect(pages).toContainText('Página 1 de 2')

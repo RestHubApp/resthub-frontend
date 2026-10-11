@@ -11,9 +11,9 @@ import { join, relative } from 'node:path'
 
 export interface Element {
   readonly id: string
-  readonly tipo: 'ruta' | 'dialogo' | 'confirmacion' | 'hoja' | 'pestanas' | 'desplegable' | 'funcion' | 'rol' | 'estado'
-  readonly descripcion: string
-  readonly origen: string
+  readonly type: 'ruta' | 'dialogo' | 'confirmacion' | 'hoja' | 'pestanas' | 'desplegable' | 'funcion' | 'rol' | 'estado'
+  readonly description: string
+  readonly origin: string
 }
 
 const ROOT = join(import.meta.dirname, '..', '..')
@@ -44,18 +44,18 @@ function routerRoutes(): Element[] {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([path, originValue]) => ({
       id: `ruta:${path}`,
-      tipo: 'ruta',
-      descripcion: path.endsWith('*') ? 'Una ruta que no existe redirige al inicio' : `Pantalla ${path}`,
-      origen: originValue,
+      type: 'ruta',
+      description: path.endsWith('*') ? 'Una ruta que no existe redirige al inicio' : `Pantalla ${path}`,
+      origin: originValue,
     }))
 }
 
 const OVERLAYS = [
-  { etiqueta: 'FormDialog', tipo: 'dialogo' },
-  { etiqueta: 'ConfirmDialog', tipo: 'confirmacion' },
-  { etiqueta: 'AlertDialog', tipo: 'confirmacion' },
-  { etiqueta: 'Sheet', tipo: 'hoja' },
-  { etiqueta: 'Tabs', tipo: 'pestanas' },
+  { label: 'FormDialog', type: 'dialogo' },
+  { label: 'ConfirmDialog', type: 'confirmacion' },
+  { label: 'AlertDialog', type: 'confirmacion' },
+  { label: 'Sheet', type: 'hoja' },
+  { label: 'Tabs', type: 'pestanas' },
 ] as const
 
 function title(fragment: string): string {
@@ -88,22 +88,22 @@ function codeOverlays(): Element[] {
     const source = readFileSync(route, 'utf8')
     const file = relative(SRC, route).replace(/\\/gu, '/').replace(/^features\//u, '').replace(/\.tsx$/u, '')
     const inFile: Element[] = []
-    for (const { etiqueta: label, tipo: type } of OVERLAYS) {
+    for (const { label, type } of OVERLAYS) {
       // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
       for (const match of source.matchAll(new RegExp(`<${label}(?=[\\s>])`, 'gu'))) {
         const fragment = source.slice(match.index, match.index + 900)
-        inFile.push({ id: '', tipo: type, descripcion: title(fragment), origen: `src/${relative(SRC, route)}` })
+        inFile.push({ id: '', type, description: title(fragment), origin: `src/${relative(SRC, route)}` })
       }
     }
     const expandable = [...source.matchAll(/aria-expanded=|<details[\s>]/gu)].length
     for (let i = 0; i < expandable; i += 1) {
-      inFile.push({ id: '', tipo: 'desplegable', descripcion: 'Sección que se abre y se cierra', origen: `src/${relative(SRC, route)}` })
+      inFile.push({ id: '', type: 'desplegable', description: 'Sección que se abre y se cierra', origin: `src/${relative(SRC, route)}` })
     }
     inFile.forEach((element, index) => {
-      const repeated = inFile.filter((other) => other.tipo === element.tipo).length
-      const order = inFile.slice(0, index).filter((other) => other.tipo === element.tipo).length + 1
+      const repeated = inFile.filter((other) => other.type === element.type).length
+      const order = inFile.slice(0, index).filter((other) => other.type === element.type).length + 1
       const suffix = repeated > 1 ? `#${String(order)}` : ''
-      items.push({ ...element, id: `${element.tipo}:${file}${suffix}` })
+      items.push({ ...element, id: `${element.type}:${file}${suffix}` })
     })
   }
   return items.sort((a, b) => a.id.localeCompare(b.id))
@@ -116,12 +116,12 @@ function functionsCurated(): Element[] {
     .sort((a, b) => a.localeCompare(b))
     .flatMap((route) => {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
-      const list = JSON.parse(readFileSync(route, 'utf8')) as { id: string; tipo?: Element['tipo']; descripcion: string }[]
+      const list = JSON.parse(readFileSync(route, 'utf8')) as { id: string; type?: Element['type']; description: string }[]
       return list.map((row) => ({
         id: row.id,
-        tipo: row.tipo ?? 'funcion',
-        descripcion: row.descripcion,
-        origen: `e2e/inventario/funciones/${relative(folder, route)}`,
+        type: row.type ?? 'funcion',
+        description: row.description,
+        origin: `e2e/inventario/funciones/${relative(folder, route)}`,
       }))
     })
 }

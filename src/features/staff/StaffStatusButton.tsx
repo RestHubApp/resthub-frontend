@@ -41,7 +41,7 @@ export function StaffStatusButton({ account, disabled }: StaffStatusButtonProps)
       disabled={disabled || status.isPending}
       onClick={account.is_active ? undefined : change}
     >
-      <Icon name="encender" size={14} />
+      <Icon name="turnOn" size={14} />
       <span>{account.is_active ? 'Desactivar' : 'Activar'}</span>
     </Button>
   )

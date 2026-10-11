@@ -63,11 +63,11 @@ export function CustomerDialog({ open, customer, onClose: alCerrar }: CustomerDi
       size="lg"
     >
       <form noValidate className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit(handleSubmit((values) => save.mutateAsync(values).catch(() => undefined)))}>
-        <TextField id="customer-name" label="Nombre" icon="perfil" maxLength={LIMITS.name} field={register('name')} error={errors.name?.message} />
+        <TextField id="customer-name" label="Nombre" icon="profile" maxLength={LIMITS.name} field={register('name')} error={errors.name?.message} />
         <TextField id="customer-phone" label="Teléfono (opcional)" type="tel" inputMode="tel" maxLength={LIMITS.phone} hint="No se repite: identifica al cliente." field={register('phone')} error={errors.phone?.message} />
         <TextField id="customer-email" label="Correo (opcional)" type="email" maxLength={LIMITS.email} field={register('email')} error={errors.email?.message} />
-        <TextField id="customer-address" label="Dirección (opcional)" icon="ubicacion" maxLength={LIMITS.address} field={register('address')} error={errors.address?.message} />
-        <TextField id="customer-reference" label="Referencia (opcional)" icon="nota" maxLength={LIMITS.reference} field={register('reference')} error={errors.reference?.message} />
+        <TextField id="customer-address" label="Dirección (opcional)" icon="location" maxLength={LIMITS.address} field={register('address')} error={errors.address?.message} />
+        <TextField id="customer-reference" label="Referencia (opcional)" icon="note" maxLength={LIMITS.reference} field={register('reference')} error={errors.reference?.message} />
         <TextareaField id="customer-notes" label="Notas (opcional)" rows={2} placeholder="Alergias, preferencias, cómo pide" maxLength={LIMITS.notes} field={register('notes')} error={errors.notes?.message} />
         <div className="sm:col-span-2">
           <CustomerConsent control={control} customer={customer} errors={errors} />

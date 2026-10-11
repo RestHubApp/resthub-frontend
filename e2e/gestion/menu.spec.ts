@@ -35,7 +35,7 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
     'funcion:menu.activar-plato',
     'funcion:menu.ordenar-platos',
   )
-  await openAs(page, local.encargado, '/menu')
+  await openAs(page, local.owner, '/menu')
   await expect(page.getByRole('heading', { level: 1, name: 'Menú' })).toBeVisible()
   const summary = page.getByRole('status').filter({ hasText: 'Hoy:' })
   await expect(summary).toContainText('Hoy: 5 de 5 platos disponibles')
@@ -44,7 +44,7 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
   const drinks = page.getByRole('region', { name: 'Bebidas' })
   await drinks.getByRole('button', { name: 'Agregar plato' }).click()
   const fresh = page.getByRole('dialog', { name: 'Nuevo plato' })
-  await expect(fresh.getByLabel('Categoría')).toHaveValue(String(local.plato('Chicha morada').categoriaId))
+  await expect(fresh.getByLabel('Categoría')).toHaveValue(String(local.dish('Chicha morada').categoryId))
   await fresh.getByRole('button', { name: 'Crear plato' }).click()
   await expect(fresh.getByText('Escribe el nombre del plato')).toBeVisible()
   await expect(fresh.getByText('Escribe un valor')).toBeVisible()
@@ -130,7 +130,7 @@ test('GES-13 el encargado crea, renombra, ordena, desactiva, activa y elimina ca
     'funcion:menu.activar-categoria',
     'funcion:menu.eliminar-categoria',
   )
-  await openAs(page, local.encargado, '/menu')
+  await openAs(page, local.owner, '/menu')
   await page.getByRole('button', { name: 'Nueva categoría' }).click()
   const fresh = page.getByRole('dialog', { name: 'Nueva categoría' })
   await fresh.getByRole('button', { name: 'Guardar' }).click()

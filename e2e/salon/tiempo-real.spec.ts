@@ -25,12 +25,12 @@ async function otherBrowser(browser: Browser, session: Session, destination: str
 /** Deja una marca en la ventana: si la página se recarga, la marca se pierde. */
 async function markWithoutReload(page: Page): Promise<void> {
   await page.evaluate(() => {
-    ;(window as unknown as { sinRecargar: boolean }).sinRecargar = true
+    ;(window as unknown as { withoutReload: boolean }).withoutReload = true
   })
 }
 
 async function noSeSurcharge(page: Page): Promise<boolean> {
-  return page.evaluate(() => (window as unknown as { sinRecargar?: boolean }).sinRecargar === true)
+  return page.evaluate(() => (window as unknown as { withoutReload?: boolean }).withoutReload === true)
 }
 
 // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
@@ -49,12 +49,12 @@ test('SAL-06 la cocina ve el pedido sin recargar, lo marca listo y el mesero lo 
     'funcion:pedido.marcar-servido',
   )
   // La cocina (rol Cocinero) ya tiene el tablero abierto en su pantalla.
-  const kitchen = await otherBrowser(browser, local.cocina, '/tablero')
+  const kitchen = await otherBrowser(browser, local.kitchen, '/tablero')
   await expect(kitchen.getByRole('status').filter({ hasText: 'En vivo' })).toBeVisible()
   await expect(column(kitchen, 'En cocina')).toContainText('Sin pedidos')
   await markWithoutReload(kitchen)
 
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   await expect(page.getByRole('status').filter({ hasText: 'En vivo' })).toBeVisible()
   await page.getByRole('link', { name: /Mesa 1.*Libre/u }).click()
   await page.getByRole('button', { name: /^Lomo saltado/u }).click()
@@ -99,14 +99,14 @@ test('SAL-07 la pantalla de cocina muestra lo que falta preparar sin precios y e
   local,
 }) => {
   covers('ruta:/cocina', 'funcion:cocina.por-preparar', 'funcion:cocina.marcar-listo', 'estado:cocina.vacio')
-  await openAs(page, local.encargado, '/cocina')
+  await openAs(page, local.owner, '/cocina')
   await expect(page.getByText('Nada pendiente en cocina')).toBeVisible()
   await expect(page.getByText('Nada esperando a salir')).toBeVisible()
   await evidence(page, 'sal-07-1-vacia')
 
   // Llegan dos pedidos mientras la pantalla está abierta.
-  await orderInTable(local, local.mesa('2'), [{ plato: local.plato('Ceviche clásico'), cantidad: 2, notas: 'Sin ají' }])
-  await orderInTable(local, local.mesa('3'), [{ plato: local.plato('Inca Kola 500 ml') }])
+  await orderInTable(local, local.table('2'), [{ dish: local.dish('Ceviche clásico'), quantity: 2, notes: 'Sin ají' }])
+  await orderInTable(local, local.table('3'), [{ dish: local.dish('Inca Kola 500 ml') }])
   const first = page.getByRole('article', { name: 'Pedido 1' })
   await expect(first).toBeVisible()
   await expect(page.getByRole('article', { name: 'Pedido 2' })).toBeVisible()
@@ -121,7 +121,7 @@ test('SAL-07 la pantalla de cocina muestra lo que falta preparar sin precios y e
   await expect(page.getByText('Por preparar (1)')).toBeVisible()
   await expect(page.getByText('Listos para servir (1)')).toBeVisible()
   await expect(page.getByRole('article', { name: 'Pedido 1' }).getByRole('button', { name: 'Listo' })).toHaveCount(0)
-  const active = await api(local).lista('/orders/active')
+  const active = await api(local).list('/orders/active')
   expect(active.map((p) => [p.number, p.status])).toEqual([
     [1, 'ready'],
     [2, 'in_kitchen'],
@@ -130,8 +130,8 @@ test('SAL-07 la pantalla de cocina muestra lo que falta preparar sin precios y e
 
 test('SAL-08 el mesero ve la cocina sin poder marcar listo @movil', async ({ page, local }) => {
   covers('funcion:cocina.solo-mirar')
-  await orderInTable(local, local.mesa('1'), [{ plato: local.plato('Lomo saltado') }])
-  await openAs(page, local.mesero, '/cocina')
+  await orderInTable(local, local.table('1'), [{ dish: local.dish('Lomo saltado') }])
+  await openAs(page, local.waiter, '/cocina')
   const card = page.getByRole('article', { name: 'Pedido 1' })
   await expect(card).toContainText('1×Lomo saltado')
   await expect(card.getByRole('button', { name: 'Listo' })).toHaveCount(0)
@@ -140,13 +140,13 @@ test('SAL-08 el mesero ve la cocina sin poder marcar listo @movil', async ({ pag
 
 test('SAL-09 una nota con alergia se resalta en el tablero, la cocina y el detalle', async ({ page, local }) => {
   covers('funcion:tablero.alergia-resaltada', 'funcion:pedido.alergia-resaltada')
-  const withAllergy = await orderInTable(local, local.mesa('1'), [
-    { plato: local.plato('Ají de gallina'), notas: 'Es alérgica al maní' },
-    { plato: local.plato('Chicha morada'), notas: 'Sin hielo' },
+  const withAllergy = await orderInTable(local, local.table('1'), [
+    { dish: local.dish('Ají de gallina'), notes: 'Es alérgica al maní' },
+    { dish: local.dish('Chicha morada'), notes: 'Sin hielo' },
   ])
-  await orderInTable(local, local.mesa('2'), [{ plato: local.plato('Lomo saltado'), notas: 'Sin cebolla' }])
+  await orderInTable(local, local.table('2'), [{ dish: local.dish('Lomo saltado'), notes: 'Sin cebolla' }])
 
-  await openAs(page, local.encargado, '/tablero')
+  await openAs(page, local.owner, '/tablero')
   const allergic = page.getByRole('article', { name: 'Pedido #1' })
   await expect(allergic.getByText('Con alergia')).toBeVisible()
   await expect(allergic.getByText('Alergia', { exact: true })).toBeVisible()

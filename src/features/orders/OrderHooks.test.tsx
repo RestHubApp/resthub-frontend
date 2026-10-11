@@ -48,9 +48,9 @@ describe('precargas de pedidos', () => {
     signInAs(['orders.take', 'menu.read'])
     prefetchFloor()
     await waitFor(() => {
-      expect(api.llamadas('get', '/menu')).toHaveLength(1)
+      expect(api.calls('get', '/menu')).toHaveLength(1)
     })
-    expect(api.llamadas('get', '/tables')).toHaveLength(0)
+    expect(api.calls('get', '/tables')).toHaveLength(0)
   })
 
   it('cocina y tablero adelantan los pedidos en curso solo con su permiso', async () => {
@@ -58,12 +58,12 @@ describe('precargas de pedidos', () => {
     signInAs(['menu.read'])
     prefetchKitchen()
     prefetchBoard()
-    expect(api.llamadas('get', ACTIVE)).toHaveLength(0)
+    expect(api.calls('get', ACTIVE)).toHaveLength(0)
 
     signInAs(PERMISSIONS_WAITER)
     prefetchKitchen()
     await waitFor(() => {
-      expect(api.llamadas('get', ACTIVE)).toHaveLength(1)
+      expect(api.calls('get', ACTIVE)).toHaveLength(1)
     })
   })
 })

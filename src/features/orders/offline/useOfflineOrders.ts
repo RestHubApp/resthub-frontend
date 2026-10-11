@@ -104,5 +104,5 @@ export function useOfflineOrders() {
     }
   }, [send])
 
-  return { pendientes: pending, enviar: send }
+  return { pending, send }
 }

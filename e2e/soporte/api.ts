@@ -16,10 +16,10 @@ export const SECRET = 'resthub123'
 export const NEW_SECRET = 'resthub-e2e-12345'
 
 export const SEED = {
-  encargado: 'admin@resthub.dev',
-  mesero: 'mesero@resthub.dev',
-  cocina: 'cocina@resthub.dev',
-  plataforma: 'plataforma@resthub.dev',
+  owner: 'admin@resthub.dev',
+  waiter: 'mesero@resthub.dev',
+  kitchen: 'cocina@resthub.dev',
+  platform: 'plataforma@resthub.dev',
 } as const
 
 type Json = Record<string, unknown>
@@ -27,10 +27,10 @@ type Json = Record<string, unknown>
 export interface Session {
   readonly email: string
   readonly password: string
-  readonly nombre: string
+  readonly name: string
   readonly token: string
   /** Lo que la aplicación guarda como cuenta (`sessionOf` de la respuesta de acceso). */
-  readonly cuenta: Json
+  readonly account: Json
 }
 
 export interface SessionPlatform {
@@ -40,19 +40,19 @@ export interface SessionPlatform {
 
 export interface Dish {
   readonly id: number
-  readonly nombre: string
-  readonly precio: string
-  readonly categoriaId: number
+  readonly name: string
+  readonly price: string
+  readonly categoryId: number
 }
 
 export interface Table {
   readonly id: number
-  readonly etiqueta: string
+  readonly label: string
 }
 
 export interface Ingredient {
   readonly id: number
-  readonly nombre: string
+  readonly name: string
 }
 
 let counter = 0
@@ -82,15 +82,15 @@ export class Customer {
     this.token = token
   }
 
-  private cabeceras() {
+  private headers() {
     return { Authorization: `Bearer ${this.token}`, Connection: 'close' }
   }
 
   async get(route: string): Promise<Json> {
-    return body(await this.http.get(`${API}${route}`, { headers: this.cabeceras() }), `GET ${route}`)
+    return body(await this.http.get(`${API}${route}`, { headers: this.headers() }), `GET ${route}`)
   }
 
-  async lista(route: string): Promise<Json[]> {
+  async list(route: string): Promise<Json[]> {
     const data = (await this.get(route)) as unknown
     if (Array.isArray(data)) {
       return data as Json[]
@@ -99,15 +99,15 @@ export class Customer {
   }
 
   async post(route: string, data: unknown = {}): Promise<Json> {
-    return body(await this.http.post(`${API}${route}`, { headers: this.cabeceras(), data }), `POST ${route}`)
+    return body(await this.http.post(`${API}${route}`, { headers: this.headers(), data }), `POST ${route}`)
   }
 
   async put(route: string, data: unknown): Promise<Json> {
-    return body(await this.http.put(`${API}${route}`, { headers: this.cabeceras(), data }), `PUT ${route}`)
+    return body(await this.http.put(`${API}${route}`, { headers: this.headers(), data }), `PUT ${route}`)
   }
 
   async patch(route: string, data: unknown): Promise<Json> {
-    return body(await this.http.patch(`${API}${route}`, { headers: this.cabeceras(), data }), `PATCH ${route}`)
+    return body(await this.http.patch(`${API}${route}`, { headers: this.headers(), data }), `PATCH ${route}`)
   }
 }
 
@@ -137,15 +137,15 @@ export async function signInByApi(http: APIRequestContext, email: string, passwo
   return {
     email,
     password,
-    nombre: String((user as Json).full_name),
+    name: String((user as Json).full_name),
     token,
-    cuenta: { user, restaurant, permissions, preview, terms_version, terms_accepted },
+    account: { user, restaurant, permissions, preview, terms_version, terms_accepted },
   }
 }
 
 export async function signInPlatformByApi(http: APIRequestContext): Promise<SessionPlatform> {
   const data = await body(
-    await http.post(`${API}/platform/auth/login`, { data: { email: SEED.plataforma, password: SECRET } }),
+    await http.post(`${API}/platform/auth/login`, { data: { email: SEED.platform, password: SECRET } }),
     'acceso de plataforma',
   )
   return { token: String(data.access_token), admin: data.admin as Json }
@@ -153,14 +153,14 @@ export async function signInPlatformByApi(http: APIRequestContext): Promise<Sess
 
 /** La carta mínima de cada restaurante de prueba. Los precios incluyen IGV. */
 export const MENU = {
-  fondos: [
-    { nombre: 'Lomo saltado', precio: '32.00' },
-    { nombre: 'Ají de gallina', precio: '24.00' },
-    { nombre: 'Ceviche clásico', precio: '28.00' },
+  funds: [
+    { name: 'Lomo saltado', price: '32.00' },
+    { name: 'Ají de gallina', price: '24.00' },
+    { name: 'Ceviche clásico', price: '28.00' },
   ],
-  bebidas: [
-    { nombre: 'Chicha morada', precio: '8.00' },
-    { nombre: 'Inca Kola 500 ml', precio: '6.00' },
+  drinks: [
+    { name: 'Chicha morada', price: '8.00' },
+    { name: 'Inca Kola 500 ml', price: '6.00' },
   ],
 } as const
 
@@ -169,30 +169,30 @@ export const TABLES = ['1', '2', '3', '4'] as const
 export interface Local {
   readonly id: number
   readonly slug: string
-  readonly nombre: string
-  readonly encargado: Session
-  readonly mesero: Session
-  readonly cocina: Session
-  readonly platos: readonly Dish[]
-  readonly mesas: readonly Table[]
-  readonly insumos: readonly Ingredient[]
+  readonly name: string
+  readonly owner: Session
+  readonly waiter: Session
+  readonly kitchen: Session
+  readonly dishes: readonly Dish[]
+  readonly tables: readonly Table[]
+  readonly ingredients: readonly Ingredient[]
   /** Cliente del API como encargado, para preparar o comprobar datos. */
   readonly api: Customer
   readonly http: APIRequestContext
-  readonly plato: (name: string) => Dish
-  readonly mesa: (label: string) => Table
+  readonly dish: (name: string) => Dish
+  readonly table: (label: string) => Table
 }
 
 async function createMenu(api: Customer): Promise<Dish[]> {
   const dishes: Dish[] = []
   for (const [category, list] of [
-    ['Fondos', MENU.fondos],
-    ['Bebidas', MENU.bebidas],
+    ['Fondos', MENU.funds],
+    ['Bebidas', MENU.drinks],
   ] as const) {
     const cat = await api.post('/menu/categories', { name: category })
     for (const dish of list) {
-      const created = await api.post('/menu/items', { category_id: cat.id, name: dish.nombre, price: dish.precio })
-      dishes.push({ id: Number(created.id), nombre: dish.nombre, precio: dish.precio, categoriaId: Number(cat.id) })
+      const created = await api.post('/menu/items', { category_id: cat.id, name: dish.name, price: dish.price })
+      dishes.push({ id: Number(created.id), name: dish.name, price: dish.price, categoryId: Number(cat.id) })
     }
   }
   return dishes
@@ -200,12 +200,12 @@ async function createMenu(api: Customer): Promise<Dish[]> {
 
 async function createIngredients(api: Customer, lomo: Dish): Promise<Ingredient[]> {
   const data = [
-    { name: 'Lomo de res', unit: 'g', min_stock: '1000', unit_cost: '0.042', compra: '5000' },
-    { name: 'Cebolla roja', unit: 'g', min_stock: '500', unit_cost: '0.003', compra: '3000' },
-    { name: 'Culantro', unit: 'g', min_stock: '200', unit_cost: '0.012', compra: '100' },
+    { name: 'Lomo de res', unit: 'g', min_stock: '1000', unit_cost: '0.042', purchase: '5000' },
+    { name: 'Cebolla roja', unit: 'g', min_stock: '500', unit_cost: '0.003', purchase: '3000' },
+    { name: 'Culantro', unit: 'g', min_stock: '200', unit_cost: '0.012', purchase: '100' },
   ]
   const ingredients: Ingredient[] = []
-  for (const { compra: purchase, ...ingredient } of data) {
+  for (const { purchase, ...ingredient } of data) {
     const created = await api.post('/inventory/ingredients', ingredient)
     await api.post('/inventory/purchases', {
       ingredient_id: created.id,
@@ -213,7 +213,7 @@ async function createIngredients(api: Customer, lomo: Dish): Promise<Ingredient[
       unit_cost: ingredient.unit_cost,
       reason: 'Stock inicial',
     })
-    ingredients.push({ id: Number(created.id), nombre: ingredient.name })
+    ingredients.push({ id: Number(created.id), name: ingredient.name })
   }
   const [lomoRes, cebolla] = ingredients
   await api.put(`/inventory/recipes/${String(lomo.id)}`, {
@@ -226,29 +226,29 @@ async function createIngredients(api: Customer, lomo: Dish): Promise<Ingredient[
 }
 
 async function createStaff(http: APIRequestContext, api: Customer, suffix: string) {
-  const roles = await api.lista('/roles')
+  const roles = await api.list('/roles')
   const roleWaiter = roles.find((role) => role.kind === 'waiter')
   const cook = await api.post('/roles', {
     name: 'Cocinero',
     permissions: ['menu.read', 'orders.read_all', 'orders.manage', 'inventory.read'],
   })
   const accounts = {
-    mesero: { email: `mesero-${suffix}@e2e.resthub.dev`, full_name: 'Mesero Prueba', role_id: roleWaiter?.id },
-    cocina: { email: `cocina-${suffix}@e2e.resthub.dev`, full_name: 'Cocina Prueba', role_id: cook.id },
+    waiter: { email: `mesero-${suffix}@e2e.resthub.dev`, full_name: 'Mesero Prueba', role_id: roleWaiter?.id },
+    kitchen: { email: `cocina-${suffix}@e2e.resthub.dev`, full_name: 'Cocina Prueba', role_id: cook.id },
   }
   for (const account of Object.values(accounts)) {
     await api.post('/staff', { ...account, password: NEW_SECRET })
   }
   return {
-    mesero: await signInByApi(http, accounts.mesero.email, NEW_SECRET),
-    cocina: await signInByApi(http, accounts.cocina.email, NEW_SECRET),
+    waiter: await signInByApi(http, accounts.waiter.email, NEW_SECRET),
+    kitchen: await signInByApi(http, accounts.kitchen.email, NEW_SECRET),
   }
 }
 
 export interface OptionsRestaurant {
   /** Abre la caja con S/ 100 para poder cobrar. */
-  readonly cajaAbierta?: boolean
-  readonly nombre?: string
+  readonly openCashRegister?: boolean
+  readonly name?: string
 }
 
 /** Da de alta un restaurante con su personal, su carta, sus mesas y un poco de inventario. */
@@ -257,10 +257,10 @@ export async function createRestaurant(options: OptionsRestaurant = {}): Promise
   const platform = await signInPlatformByApi(http)
   const suffix = unique()
   const slug = `e2e-${suffix}`
-  const name = options.nombre ?? 'Restaurante E2E'
+  const name = options.name ?? 'Restaurante E2E'
   const emailOwner = `encargado-${suffix}@e2e.resthub.dev`
   const registration = await new Customer(http, platform.token).post('/platform/restaurants', {
-    name: name,
+    name,
     slug,
     timezone: 'America/Lima',
     owner: { full_name: 'Encargada Prueba', email: emailOwner, password: NEW_SECRET },
@@ -270,35 +270,35 @@ export async function createRestaurant(options: OptionsRestaurant = {}): Promise
   const dishes = await createMenu(api)
   const tables: Table[] = []
   for (const label of TABLES) {
-    const table = await api.post('/tables', { label: label })
-    tables.push({ id: Number(table.id), etiqueta: label })
+    const table = await api.post('/tables', { label })
+    tables.push({ id: Number(table.id), label })
   }
   const ingredients = await createIngredients(api, dishes[0])
-  const { mesero: waiter, cocina: kitchen } = await createStaff(http, api, suffix)
-  if (options.cajaAbierta === true) {
+  const { waiter, kitchen } = await createStaff(http, api, suffix)
+  if (options.openCashRegister === true) {
     await api.post('/cash/open', { opening_amount: '100.00', notes: '' })
   }
   return {
     id: Number(registration.id),
     slug,
-    nombre: name,
-    encargado: owner,
-    mesero: waiter,
-    cocina: kitchen,
-    platos: dishes,
-    mesas: tables,
-    insumos: ingredients,
+    name,
+    owner,
+    waiter,
+    kitchen,
+    dishes,
+    tables,
+    ingredients,
     api,
     http,
-    plato(nameDish) {
-      const found = dishes.find((p) => p.nombre === nameDish)
+    dish(nameDish) {
+      const found = dishes.find((p) => p.name === nameDish)
       if (found === undefined) {
         throw new Error(`No hay plato ${nameDish}`)
       }
       return found
     },
-    mesa(label) {
-      const found = tables.find((m) => m.etiqueta === label)
+    table(label) {
+      const found = tables.find((m) => m.label === label)
       if (found === undefined) {
         throw new Error(`No hay mesa ${label}`)
       }
@@ -311,21 +311,21 @@ export async function createRestaurant(options: OptionsRestaurant = {}): Promise
 export async function orderInTable(
   local: Local,
   table: Table,
-  items: readonly { plato: Dish; cantidad?: number; notas?: string }[],
-  who: Session = local.mesero,
+  items: readonly { dish: Dish; quantity?: number; notes?: string }[],
+  who: Session = local.waiter,
 ): Promise<Json> {
   const api = new Customer(local.http, who.token)
   const order = await api.post('/orders', {
     type: 'dine_in',
     table_id: table.id,
     client_request_id: `e2e-${unique()}`,
-    items: items.map(({ plato: dish, cantidad: quantity = 1, notas: notes = '' }) => ({ menu_item_id: dish.id, quantity: quantity, notes: notes })),
+    items: items.map(({ dish, quantity = 1, notes = '' }) => ({ menu_item_id: dish.id, quantity, notes })),
   })
   return api.post(`/orders/${String(order.id)}/send`)
 }
 
 /** Lleva un pedido hasta «servido»: la cocina lo marca listo y el mesero lo sirve. */
 export async function serve(local: Local, orderId: number): Promise<Json> {
-  await new Customer(local.http, local.cocina.token).post(`/orders/${String(orderId)}/ready`)
-  return new Customer(local.http, local.mesero.token).post(`/orders/${String(orderId)}/served`)
+  await new Customer(local.http, local.kitchen.token).post(`/orders/${String(orderId)}/ready`)
+  return new Customer(local.http, local.waiter.token).post(`/orders/${String(orderId)}/served`)
 }

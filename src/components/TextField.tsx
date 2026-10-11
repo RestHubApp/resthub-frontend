@@ -11,11 +11,11 @@ import { Label } from './ui/label'
 
 // El icono que corresponde por el tipo de dato, cuando el campo no pide otro.
 const ICON_BY_TYPE: Readonly<Partial<Record<string, IconName>>> = {
-  email: 'correo',
-  tel: 'telefono',
-  date: 'fecha',
-  time: 'horario',
-  number: 'numero',
+  email: 'email',
+  tel: 'phone',
+  date: 'date',
+  time: 'schedule',
+  number: 'number',
 }
 
 interface TextFieldProps {

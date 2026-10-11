@@ -77,7 +77,7 @@ describe('AiAuditView', () => {
     await user.selectOptions(screen.getByLabelText('Motor'), 'Reglas fijas')
     await user.selectOptions(screen.getByLabelText('Tipo'), 'Todos los tipos')
 
-    const orders = api.llamadas('get', ROUTE).map((p) => p.params)
+    const orders = api.calls('get', ROUTE).map((p) => p.params)
     expect(orders[0]).toEqual({ limit: 20, offset: 0 })
     expect(orders).toContainEqual({ kind: 'order_note', limit: 20, offset: 0 })
     expect(orders.at(-1)).toEqual({ engine: 'rules', limit: 20, offset: 0 })
@@ -87,12 +87,12 @@ describe('AiAuditView', () => {
     const { api, user } = open([decision()], 45)
     await user.click(await screen.findByRole('button', { name: 'Siguiente' }))
     expect(await screen.findByText('Página 2 de 3')).toBeInTheDocument()
-    expect(api.llamadas('get', ROUTE).at(-1)?.params).toEqual({ limit: 20, offset: 20 })
+    expect(api.calls('get', ROUTE).at(-1)?.params).toEqual({ limit: 20, offset: 20 })
 
     await user.selectOptions(screen.getByLabelText('Motor'), 'Jev (IA)')
 
     expect(await screen.findByText('Página 1 de 3')).toBeInTheDocument()
-    expect(api.llamadas('get', ROUTE).at(-1)?.params).toEqual({ engine: 'jev', limit: 20, offset: 0 })
+    expect(api.calls('get', ROUTE).at(-1)?.params).toEqual({ engine: 'jev', limit: 20, offset: 0 })
   })
 
   it('sin decisiones lo dice', async () => {
@@ -133,7 +133,7 @@ describe('AiAuditView: IA externa', () => {
     await user.click(checkbox)
 
     expect(await screen.findByText('La IA externa quedó apagada: deciden las reglas y nada sale del sistema.')).toBeInTheDocument()
-    expect(api.llamadas('patch', RESTAURANT)[0]?.body).toEqual({ external_ai_enabled: false })
+    expect(api.calls('patch', RESTAURANT)[0]?.body).toEqual({ external_ai_enabled: false })
   })
 
   it('quien solo ve el panel no la puede cambiar', async () => {
@@ -143,6 +143,6 @@ describe('AiAuditView: IA externa', () => {
 
     expect(await screen.findByText('0 en total con estos filtros.')).toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'Usar la IA externa' })).not.toBeInTheDocument()
-    expect(api.llamadas('get', RESTAURANT)).toHaveLength(0)
+    expect(api.calls('get', RESTAURANT)).toHaveLength(0)
   })
 })

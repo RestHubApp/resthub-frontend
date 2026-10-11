@@ -43,7 +43,7 @@ export function SandboxResetButton({ exists, onReset }: SandboxResetButtonProps)
       <ConfirmDialog
         trigger={
           <Button type="button" size="lg" variant="danger" className="h-11 px-4" disabled={restart.isPending}>
-            <Icon name="actualizar" size={18} />
+            <Icon name="update" size={18} />
             <span>{restart.isPending ? 'Reiniciando…' : 'Reiniciar local de muestra'}</span>
           </Button>
         }

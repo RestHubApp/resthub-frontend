@@ -58,7 +58,7 @@ export function InventoryView() {
                 open({ kind: 'create' })
               }}
             >
-              <Icon name="agregar" size={16} />
+              <Icon name="add" size={16} />
               <span>Nuevo insumo</span>
             </Button>
           ) : undefined
@@ -75,12 +75,12 @@ export function InventoryView() {
         onChange={irA}
         alertCount={alerts.data?.length}
         panels={{
-          insumos: <IngredientsPanel canManage={canManage} onAction={open} />,
-          movimientos: <MovementsPanel />,
-          alertas: <AlertsPanel canManage={canManage} onAction={open} />,
-          recetas: <RecipesPanel canManage={canManage} />,
-          compras: <PurchaseOrdersPanel canManage={canManage} />,
-          proveedores: <SuppliersPanel canManage={canManage} />,
+          'insumos': <IngredientsPanel canManage={canManage} onAction={open} />,
+          'movimientos': <MovementsPanel />,
+          'alertas': <AlertsPanel canManage={canManage} onAction={open} />,
+          'recetas': <RecipesPanel canManage={canManage} />,
+          'compras': <PurchaseOrdersPanel canManage={canManage} />,
+          'proveedores': <SuppliersPanel canManage={canManage} />,
         }}
       />
       <StockActionDialog

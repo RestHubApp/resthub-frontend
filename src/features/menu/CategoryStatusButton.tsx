@@ -30,7 +30,7 @@ export function CategoryStatusButton({ category }: CategoryStatusButtonProps) {
       disabled={status.isPending}
       onClick={category.is_active ? undefined : change}
     >
-      <Icon name="encender" size={16} />
+      <Icon name="turnOn" size={16} />
       <span>{category.is_active ? 'Desactivar' : 'Activar'}</span>
     </Button>
   )

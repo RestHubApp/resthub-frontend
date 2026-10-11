@@ -72,7 +72,7 @@ describe('InventoryView: resumen y alertas', () => {
   })
 
   it('más de cuatro por reponer se resumen', async () => {
-    const many = ['A', 'B', 'C', 'D', 'E', 'F'].map((name, i) => ingredient({ id: 10 + i, name: name, is_low: true }))
+    const many = ['A', 'B', 'C', 'D', 'E', 'F'].map((name, i) => ingredient({ id: 10 + i, name, is_low: true }))
     open(PERMISSIONS_OWNER, many)
     expect(await screen.findByText('A, B, C, D y 2 más')).toBeInTheDocument()
   })
@@ -118,7 +118,7 @@ describe('InventoryView: tabla de insumos', () => {
     expect(screen.queryByRole('button', { name: 'Nuevo insumo' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Compra de Limón' })).not.toBeInTheDocument()
     expect(screen.queryByText('Agotar solos los platos sin insumos')).not.toBeInTheDocument()
-    expect(api.llamadas('get', RESTAURANT)).toHaveLength(0)
+    expect(api.calls('get', RESTAURANT)).toHaveLength(0)
   })
 
   it('si los insumos no cargan, lo dice', async () => {
@@ -140,7 +140,7 @@ describe('InventoryView: regla de agotar platos', () => {
     await user.click(checkbox)
 
     expect(await screen.findByText('Los platos sin insumos se agotan solos.')).toBeInTheDocument()
-    expect(api.llamadas('patch', RESTAURANT)[0]?.body).toEqual({ auto_out_of_stock: true })
+    expect(api.calls('patch', RESTAURANT)[0]?.body).toEqual({ auto_out_of_stock: true })
   })
 
   it('si el servidor la rechaza, avisa', async () => {

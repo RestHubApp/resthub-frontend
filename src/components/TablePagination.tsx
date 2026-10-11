@@ -25,7 +25,7 @@ export function TablePagination({ actual, total, onChange }: TablePaginationProp
             onChange(actual - 1)
           }}
         >
-          <Icon name="anterior" size={14} />
+          <Icon name="previous" size={14} />
           <span>Anterior</span>
         </Button>
         <Button
@@ -38,7 +38,7 @@ export function TablePagination({ actual, total, onChange }: TablePaginationProp
           }}
         >
           <span>Siguiente</span>
-          <Icon name="siguiente" size={14} />
+          <Icon name="next" size={14} />
         </Button>
       </div>
     </nav>

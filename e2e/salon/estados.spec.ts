@@ -28,10 +28,10 @@ async function retry(page: Page, healthy: () => Promise<void>): Promise<void> {
 
 test('SAL-31 sin mesas activas ni pedidos, cada pestaña del mesero lo dice @movil', async ({ page, local }) => {
   covers('estado:pedidos.mesas.vacio', 'estado:pedidos.llevar.vacio', 'estado:pedidos.mios.vacio')
-  for (const table of local.mesas) {
+  for (const table of local.tables) {
     await api(local).patch(`/tables/${String(table.id)}`, { is_active: false })
   }
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   await expect(page.getByText('No hay mesas activas')).toBeVisible()
   await expect(page.getByText('Los pedidos para llevar siguen funcionando.')).toBeVisible()
   await expect(page.getByRole('link', { name: 'Crear mesas' })).toHaveCount(0)
@@ -44,10 +44,10 @@ test('SAL-31 sin mesas activas ni pedidos, cada pestaña del mesero lo dice @mov
 
 test('SAL-39 sin mesas activas, el encargado tiene el atajo para crearlas', async ({ page, local }) => {
   covers('funcion:pedidos.atajo-crear-mesas')
-  for (const table of local.mesas) {
+  for (const table of local.tables) {
     await api(local).patch(`/tables/${String(table.id)}`, { is_active: false })
   }
-  await openAs(page, local.encargado, '/pedidos')
+  await openAs(page, local.owner, '/pedidos')
   await expect(page.getByText('No hay mesas activas')).toBeVisible()
   await page.getByRole('link', { name: 'Crear mesas' }).click()
   await expect(page).toHaveURL(/\/mesas$/u)
@@ -59,7 +59,7 @@ test('SAL-32 si no cargan las mesas, los pedidos para llevar o los del mesero, s
 }) => {
   covers('estado:pedidos.mesas.error', 'estado:pedidos.llevar.error', 'estado:pedidos.mios.error')
   let healthy = await fail(page, '/tables')
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   await expect(page.getByRole('main').getByText('No se pudieron cargar las mesas.')).toBeVisible()
   await evidence(page, 'sal-32-1-error-mesas')
   await retry(page, healthy)
@@ -81,13 +81,13 @@ test('SAL-32 si no cargan las mesas, los pedidos para llevar o los del mesero, s
 test('SAL-33 si no carga la carta o el pedido, el mesero puede reintentar @movil', async ({ page, local }) => {
   covers('estado:pedido-nuevo.error', 'estado:pedido.error', 'estado:pedido.no-existe')
   const healthy = await fail(page, '/menu')
-  await openAs(page, local.mesero, `/pedidos/nuevo?mesa=${String(local.mesa('1').id)}`)
+  await openAs(page, local.waiter, `/pedidos/nuevo?mesa=${String(local.table('1').id)}`)
   await expect(page.getByText('No se pudo cargar la carta.')).toBeVisible()
   await evidence(page, 'sal-33-1-error-carta')
   await retry(page, healthy)
   await expect(page.getByRole('button', { name: /^Lomo saltado/u })).toBeVisible()
 
-  const order = await orderInTable(local, local.mesa('2'), [{ plato: local.plato('Chicha morada') }])
+  const order = await orderInTable(local, local.table('2'), [{ dish: local.dish('Chicha morada') }])
   const healthyOrder = await fail(page, `/orders/${String(order.id)}`)
   await page.goto(`/pedidos/${String(order.id)}`)
   await expect(page.getByText('No se pudo cargar el pedido.')).toBeVisible()
@@ -104,9 +104,9 @@ test('SAL-33 si no carga la carta o el pedido, el mesero puede reintentar @movil
 
 test('SAL-34 la hoja de impresión que no carga el pedido se puede reintentar', async ({ page, local }) => {
   covers('estado:imprimir.error')
-  const order = await orderInTable(local, local.mesa('3'), [{ plato: local.plato('Lomo saltado') }])
+  const order = await orderInTable(local, local.table('3'), [{ dish: local.dish('Lomo saltado') }])
   const healthy = await fail(page, `/orders/${String(order.id)}`)
-  await openAs(page, local.mesero, `/imprimir/${String(order.id)}/comanda`)
+  await openAs(page, local.waiter, `/imprimir/${String(order.id)}/comanda`)
   await expect(page.getByText('No se pudo cargar el pedido.')).toBeVisible()
   await retry(page, healthy)
   await expect(page.locator('#hoja-impresa')).toContainText('Comanda')
@@ -114,7 +114,7 @@ test('SAL-34 la hoja de impresión que no carga el pedido se puede reintentar', 
 
 test('SAL-35 la cocina y el tablero dicen cuándo no hay pedidos y cuándo no cargan', async ({ page, local }) => {
   covers('estado:tablero.vacio', 'estado:tablero.error', 'estado:cocina.error', 'estado:historial.error')
-  await openAs(page, local.encargado, '/tablero')
+  await openAs(page, local.owner, '/tablero')
   for (const status of ['Abierto', 'En cocina', 'Listo', 'Servido, por cobrar']) {
     await expect(page.getByRole('region', { name: `${status}: 0` })).toContainText('Sin pedidos')
   }

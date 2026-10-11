@@ -100,7 +100,7 @@ export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
           {errorMessage(adjustment.error, 'No se pudo registrar el ajuste.')}
         </FormMessage>
       ) : null}
-      <FormButtons label="Guardar ajuste" icon="conteo" pending={adjustment.isPending} onCancel={onDone} />
+      <FormButtons label="Guardar ajuste" icon="count" pending={adjustment.isPending} onCancel={onDone} />
     </form>
   )
 }

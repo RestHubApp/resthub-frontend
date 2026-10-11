@@ -82,7 +82,7 @@ export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormP
           Cancelar
         </Button>
         <Button type="submit" size="lg" className="h-10 px-4" disabled={save.isPending}>
-          <Icon name="confirmar" size={16} />
+          <Icon name="confirm" size={16} />
           <span>{save.isPending ? 'Guardando…' : 'Guardar'}</span>
         </Button>
       </DialogFormActions>

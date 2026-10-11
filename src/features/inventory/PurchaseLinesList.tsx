@@ -33,7 +33,7 @@ export function PurchaseLinesList({ lines, ingredients, onChange }: PurchaseLine
       <Button type="button" variant="ghost" className="self-start" onClick={() => {
         onChange([...lines, emptyLine()])
       }}>
-        <Icon name="agregar" size={16} />
+        <Icon name="add" size={16} />
         <span>Agregar insumo</span>
       </Button>
     </>

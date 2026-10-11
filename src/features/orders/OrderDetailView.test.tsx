@@ -127,6 +127,6 @@ describe('OrderDetailView: quién puede hacer qué', () => {
     await user.click(await screen.findByRole('button', { name: 'Enviar a cocina' }))
 
     expect(await screen.findByText('Pedido #34 enviado a cocina.')).toBeInTheDocument()
-    expect(api.llamadas('post', '/orders/12/send')).toHaveLength(1)
+    expect(api.calls('post', '/orders/12/send')).toHaveLength(1)
   })
 })

@@ -23,20 +23,20 @@ function summarize(result) {
   const violations = result.violations.map((v) => {
     byImpact[v.impact] += 1
     return {
-      regla: v.id,
-      impacto: v.impact,
-      ayuda: v.help,
+      rule: v.id,
+      impact: v.impact,
+      help: v.help,
       url: v.helpUrl,
-      etiquetas: v.tags.filter((t) => t.startsWith('wcag') || t === 'best-practice'),
-      nodos: v.nodes.length,
-      objetivos: v.nodes.slice(0, 8).map((n) => ({ selector: n.target.join(' '), html: n.html.slice(0, 200), resumen: n.failureSummary?.slice(0, 300) })),
+      labels: v.tags.filter((t) => t.startsWith('wcag') || t === 'best-practice'),
+      nodes: v.nodes.length,
+      targets: v.nodes.slice(0, 8).map((n) => ({ selector: n.target.join(' '), html: n.html.slice(0, 200), summary: n.failureSummary?.slice(0, 300) })),
     }
   })
   return {
-    porImpacto: byImpact,
-    violaciones: violations,
-    reglasAprobadas: result.passes.length,
-    porRevisar: result.incomplete.map((i) => ({ regla: i.id, nodos: i.nodes.length })),
+    byImpact,
+    violations,
+    rulesApproved: result.passes.length,
+    toReview: result.incomplete.map((i) => ({ rule: i.id, nodes: i.nodes.length })),
     version: result.testEngine.version,
   }
 }
@@ -49,14 +49,14 @@ for (const status of filterStatuses()) {
     if (withoutWidget) await context.route(/sienna-accessibility/u, (route) => route.abort())
     try {
       const page = await openStatus(browser, context, status)
-      const result = await new AxeBuilder({ page: page }).withTags(LABELS).analyze()
-      const row = { id: status.id, nombre: status.nombre, clase: status.clase, tipo: status.tipo, vista, url: page.url(), ...summarize(result) }
+      const result = await new AxeBuilder({ page }).withTags(LABELS).analyze()
+      const row = { id: status.id, name: status.name, class: status.class, type: status.type, vista, url: page.url(), ...summarize(result) }
       await writeJson(join(dir, `${handlePassword(status, vista)}.json`), row)
       rows.push(row)
-      const { critical, serious, moderate, minor } = row.porImpacto
-      console.log(`${handlePassword(status, vista).padEnd(40)} crit ${critical} ser ${serious} mod ${moderate} min ${minor}  ${row.violaciones.map((v) => `${v.regla}(${v.nodos})`).join(' ')}`)
+      const { critical, serious, moderate, minor } = row.byImpact
+      console.log(`${handlePassword(status, vista).padEnd(40)} crit ${critical} ser ${serious} mod ${moderate} min ${minor}  ${row.violations.map((v) => `${v.regla}(${v.nodos})`).join(' ')}`)
     } catch (error) {
-      rows.push({ id: status.id, nombre: status.nombre, clase: status.clase, tipo: status.tipo, vista, error: error.message.split('\n')[0] })
+      rows.push({ id: status.id, name: status.name, class: status.class, type: status.type, vista, error: error.message.split('\n')[0] })
       console.log(`${handlePassword(status, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
     }
     await context.close()
@@ -68,10 +68,10 @@ await browser.close()
 const { existsSync } = await import('node:fs')
 const { readJson } = await import('./comun.mjs')
 const routeSummary = join(dir, 'resumen.json')
-const previous = existsSync(routeSummary) && (process.env.A11Y_SOLO || process.env.A11Y_CLASE || process.env.A11Y_VISTAS) ? await readJson(routeSummary) : { filas: [] }
+const previous = existsSync(routeSummary) && (process.env.A11Y_SOLO || process.env.A11Y_CLASE || process.env.A11Y_VISTAS) ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.vista}`))
 const all = [...previous.filas.filter((f) => !fresh.has(`${f.id}--${f.vista}`)), ...rows]
-await writeJson(routeSummary, { fecha: new Date().toISOString(), etiquetas: LABELS, sinWidget: withoutWidget, filas: all })
+await writeJson(routeSummary, { date: new Date().toISOString(), labels: LABELS, withoutWidget, rows: all })
 
 // Reporte HTML legible (se abre y se captura como evidencia).
 const escape = (t) => String(t).replace(/[&<>"]/gu, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])

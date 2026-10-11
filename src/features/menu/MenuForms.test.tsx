@@ -51,7 +51,7 @@ describe('crear en la carta', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
     expect(await screen.findByRole('region', { name: 'Postres' })).toBeInTheDocument()
-    expect(api.llamadas('post', '/menu/categories')[0]?.body).toEqual({ name: 'Postres' })
+    expect(api.calls('post', '/menu/categories')[0]?.body).toEqual({ name: 'Postres' })
   })
 
   it('un plato con opciones viaja con el precio con punto y sus grupos', async () => {
@@ -72,7 +72,7 @@ describe('crear en la carta', () => {
     await user.click(within(window).getByRole('button', CREATE_DISH))
 
     expect(await screen.findByText('Chicha')).toBeInTheDocument()
-    expect(api.llamadas('post', ITEMS)[0]?.body).toEqual({
+    expect(api.calls('post', ITEMS)[0]?.body).toEqual({
       category_id: 2,
       name: 'Chicha',
       description: '',
@@ -96,7 +96,7 @@ describe('crear en la carta', () => {
     await user.click(within(window).getByRole('button', CREATE_DISH))
 
     expect(await within(window).findByRole('alert')).toHaveTextContent('Cada grupo de opciones necesita un nombre')
-    expect(api.llamadas('post', ITEMS)).toHaveLength(0)
+    expect(api.calls('post', ITEMS)).toHaveLength(0)
   })
 
   it('sin nombre, precio ni categoría pide cada dato', async () => {
@@ -108,7 +108,7 @@ describe('crear en la carta', () => {
     expect(await within(window).findByText('Escribe el nombre del plato')).toBeInTheDocument()
     expect(within(window).getByText('Escribe un valor')).toBeInTheDocument()
     expect(within(window).getByText('Elige la categoría')).toBeInTheDocument()
-    expect(api.llamadas('post', ITEMS)).toHaveLength(0)
+    expect(api.calls('post', ITEMS)).toHaveLength(0)
   })
 })
 
@@ -123,7 +123,7 @@ describe('editar la carta', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
     expect(await within(window).findByText('Ya existe un plato con ese nombre.')).toBeInTheDocument()
-    expect(api.llamadas('patch', DISH_10)[0]?.body).toMatchObject({ name: 'Ceviche', price: '30.00' })
+    expect(api.calls('patch', DISH_10)[0]?.body).toMatchObject({ name: 'Ceviche', price: '30.00' })
   })
 
   it('sacar un plato de la carta se confirma antes de enviarse', async () => {
@@ -135,10 +135,10 @@ describe('editar la carta', () => {
     const row = (await screen.findByRole('heading', { name: 'Ceviche' })).closest('li') as HTMLElement
     await user.click(within(row).getByRole('button', { name: 'Desactivar' }))
     const confirm = await screen.findByRole('alertdialog', { name: '¿Sacar Ceviche de la carta?' })
-    expect(api.llamadas('patch', DISH_10)).toHaveLength(0)
+    expect(api.calls('patch', DISH_10)).toHaveLength(0)
     await user.click(within(confirm).getByRole('button', { name: 'Desactivar' }))
 
-    expect(api.llamadas('patch', DISH_10)[0]?.body).toEqual({ is_active: false })
+    expect(api.calls('patch', DISH_10)[0]?.body).toEqual({ is_active: false })
     expect(await screen.findByText('Fuera de la carta')).toBeInTheDocument()
   })
 
@@ -167,7 +167,7 @@ describe('editar la carta', () => {
     await user.click(screen.getByRole('button', { name: 'Desactivar la categoría Entradas' }))
     await user.click(within(await screen.findByRole('alertdialog', { name: '¿Desactivar Entradas?' })).getByRole('button', { name: 'Desactivar' }))
 
-    expect(api.llamadas('patch', CATEGORY_1)[0]?.body).toEqual({ is_active: false })
+    expect(api.calls('patch', CATEGORY_1)[0]?.body).toEqual({ is_active: false })
   })
 
   it('una categoría inactiva se activa con un toque, sin confirmar', async () => {
@@ -181,6 +181,6 @@ describe('editar la carta', () => {
     await user.click(screen.getByRole('button', { name: 'Activar la categoría Entradas' }))
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
-    expect(api.llamadas('patch', CATEGORY_1)[0]?.body).toEqual({ is_active: true })
+    expect(api.calls('patch', CATEGORY_1)[0]?.body).toEqual({ is_active: true })
   })
 })

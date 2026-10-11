@@ -53,7 +53,7 @@ describe('CloseCashForm', () => {
     await closeAndConfirm(user)
 
     expect(await screen.findByText('Caja cerrada. Faltan S/ 4.00.')).toBeInTheDocument()
-    expect(api.llamadas('post', CLOSE_URL)[0]?.body).toEqual({ counted_cash: '196.00', notes: 'Faltó sencillo' })
+    expect(api.calls('post', CLOSE_URL)[0]?.body).toEqual({ counted_cash: '196.00', notes: 'Faltó sencillo' })
     expect(onClosed).toHaveBeenCalledWith(closed)
   })
 
@@ -62,7 +62,7 @@ describe('CloseCashForm', () => {
     await user.click(screen.getByRole('button', CLOSE))
 
     expect(await screen.findByText('Escribe el monto')).toBeInTheDocument()
-    expect(api.llamadas('post', CLOSE_URL)).toHaveLength(0)
+    expect(api.calls('post', CLOSE_URL)).toHaveLength(0)
     expect(onClosed).not.toHaveBeenCalled()
   })
 

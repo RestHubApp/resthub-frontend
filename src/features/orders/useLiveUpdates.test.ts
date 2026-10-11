@@ -12,8 +12,8 @@ import { useLiveUpdates } from './useLiveUpdates'
 interface Connection {
   readonly url: string
   readonly headers: Headers
-  escribir: (text: string) => void
-  cerrar: () => void
+  write: (text: string) => void
+  close: () => void
 }
 
 const connections: Connection[] = []
@@ -31,8 +31,8 @@ function fakeChannel(entry: RequestInfo | URL, options?: RequestInit): Promise<R
   connections.push({
     url: entry instanceof Request ? entry.url : entry.toString(),
     headers: new Headers(options?.headers),
-    escribir: (text) => handler?.enqueue(encoder.encode(text)),
-    cerrar: () => handler?.close(),
+    write: (text) => handler?.enqueue(encoder.encode(text)),
+    close: () => handler?.close(),
   })
   const body = responseStatus === 200 ? flow : null
   return Promise.resolve(new Response(body, { status: responseStatus }))
@@ -44,12 +44,12 @@ function wrapper({ children }: { readonly children: ReactNode }) {
 
 function listen() {
   signInAs()
-  return renderHook(() => useLiveUpdates(), { wrapper: wrapper })
+  return renderHook(() => useLiveUpdates(), { wrapper })
 }
 
 function notice(type: string) {
   act(() => {
-    connections.at(-1)?.escribir(`event: ${type}\ndata: {}\n\n`)
+    connections.at(-1)?.write(`event: ${type}\ndata: {}\n\n`)
   })
 }
 
@@ -109,7 +109,7 @@ describe('useLiveUpdates', () => {
     })
     notice('ready')
     act(() => {
-      connections[0]?.cerrar()
+      connections[0]?.close()
     })
     await waitFor(() => {
       expect(result.current).toBe('offline')
@@ -139,7 +139,7 @@ describe('useLiveUpdates', () => {
   })
 
   it('sin sesión no abre ningún canal', () => {
-    const { result } = renderHook(() => useLiveUpdates(), { wrapper: wrapper })
+    const { result } = renderHook(() => useLiveUpdates(), { wrapper })
     expect(result.current).toBe('connecting')
     expect(connections).toHaveLength(0)
   })

@@ -26,7 +26,7 @@ export function CustomersView() {
     <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
       setEditing({ customer: null })
     }}>
-      <Icon name="agregar" size={18} />
+      <Icon name="add" size={18} />
       <span>Nuevo cliente</span>
     </Button>
   )

@@ -52,7 +52,7 @@ describe('RecipeEditorView', () => {
     await user.click(save)
 
     expect(await screen.findByText('Receta de Ceviche guardada.')).toBeInTheDocument()
-    expect(api.llamadas('put', RECIPE)[0]?.body).toEqual({
+    expect(api.calls('put', RECIPE)[0]?.body).toEqual({
       lines: [
         { ingredient_id: 1, quantity: '250' },
         { ingredient_id: 2, quantity: '100' },
@@ -70,7 +70,7 @@ describe('RecipeEditorView', () => {
     await user.click(screen.getByRole('button', { name: 'Borrar receta' }))
 
     expect(await screen.findByText('Receta de Ceviche borrada.')).toBeInTheDocument()
-    expect(api.llamadas('put', RECIPE)[0]?.body).toEqual({ lines: [] })
+    expect(api.calls('put', RECIPE)[0]?.body).toEqual({ lines: [] })
   })
 
   it('una cantidad en cero no se guarda y un margen negativo se marca', async () => {
@@ -82,7 +82,7 @@ describe('RecipeEditorView', () => {
     await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('Tiene que ser mayor que cero')).toBeInTheDocument()
-    expect(api.llamadas('put', RECIPE)).toHaveLength(0)
+    expect(api.calls('put', RECIPE)).toHaveLength(0)
   })
 
   it('quien solo consulta ve la receta sin poder cambiarla', async () => {

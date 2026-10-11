@@ -12,10 +12,10 @@ interface IngredientRowActionsProps {
 type Kind = Exclude<StockAction['kind'], 'create'>
 
 const ACTIONS: readonly { readonly kind: Kind; readonly label: string; readonly icon: IconName }[] = [
-  { kind: 'purchase', label: 'Compra', icon: 'compra' },
-  { kind: 'waste', label: 'Merma', icon: 'merma' },
-  { kind: 'adjustment', label: 'Ajuste', icon: 'conteo' },
-  { kind: 'edit', label: 'Editar', icon: 'editar' },
+  { kind: 'purchase', label: 'Compra', icon: 'purchase' },
+  { kind: 'waste', label: 'Merma', icon: 'waste' },
+  { kind: 'adjustment', label: 'Ajuste', icon: 'count' },
+  { kind: 'edit', label: 'Editar', icon: 'edit' },
 ]
 
 // El nombre accesible empieza con el texto visible y agrega el insumo: en la

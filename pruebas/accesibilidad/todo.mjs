@@ -10,13 +10,13 @@ import { join } from 'node:path'
 import { ROOT } from './comun.mjs'
 
 const STEPS = {
-  datos: ['datos.mjs'],
+  data: ['datos.mjs'],
   axe: ['axe.mjs'],
-  'axe-sin-widget': ['axe.mjs', { A11Y_SIN_WIDGET: '1', A11Y_CLASE: 'ruta' }],
+  'axe-sin-widget': ['axe.mjs', { A11Y_WITHOUT_WIDGET: '1', A11Y_CLASS: 'ruta' }],
   lighthouse: ['lighthouse.mjs'],
   wave: ['medir-wave.mjs'],
-  teclado: ['teclado.mjs'],
-  resumen: ['resumen.mjs'],
+  keyboard: ['teclado.mjs'],
+  summary: ['resumen.mjs'],
 }
 const orders = process.argv.slice(2)
 const order = orders.length > 0 ? ['datos', ...orders.filter((p) => p !== 'datos'), 'resumen'] : Object.keys(STEPS)

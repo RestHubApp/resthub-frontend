@@ -35,7 +35,7 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
             setAdding(true)
           }}
         >
-          <Icon name="agregar" size={18} />
+          <Icon name="add" size={18} />
           <span>Agregar encargado</span>
         </Button>
       }

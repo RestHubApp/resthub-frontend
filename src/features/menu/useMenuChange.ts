@@ -34,11 +34,11 @@ export function useMenuChange<TVars>({ send, preview, failure }: MenuChange<TVar
       if (previous !== undefined) {
         queryClient.setQueryData<MenuResponse>(MENU_KEY, preview(previous, vars))
       }
-      return { previo: previous }
+      return { previous }
     },
     onError: (error, _vars, context) => {
-      if (context?.previo !== undefined) {
-        queryClient.setQueryData(MENU_KEY, context.previo)
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(MENU_KEY, context.previous)
       }
       push({ tone: 'warning', message: errorMessage(error, failure) })
     },

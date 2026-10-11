@@ -44,7 +44,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
           type="button"
           className={inside ? TAB_ACTIVE : TAB_IDLE}
         >
-          <ShellIcon name={entries.length > 0 ? 'mas' : 'perfil'} size={22} />
+          <ShellIcon name={entries.length > 0 ? 'more' : 'profile'} size={22} />
           <span>{label}</span>
         </button>
       </SheetTrigger>
@@ -67,7 +67,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
             window.setTimeout(openAccessibilityMenu, SHEET_CLOSE_MS)
           }}
         >
-          <ShellIcon name="accesibilidad" size={18} />
+          <ShellIcon name="accessibility" size={18} />
           <span>Accesibilidad</span>
         </Button>
         <SessionActions

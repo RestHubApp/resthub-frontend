@@ -32,7 +32,7 @@ export function CustomerLookup({ onPick }: CustomerLookupProps) {
         Buscar cliente frecuente (opcional)
       </label>
       <div className="relative">
-        <Icon name="buscar" size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+        <Icon name="search" size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
         <Input
           id="takeaway-lookup"
           type="search"

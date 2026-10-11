@@ -21,7 +21,7 @@ import {
 // términos se prueba con el encargado recién creado (PLA-01).
 test.beforeAll(async () => {
   const http = await newHttp()
-  for (const email of [SEED.encargado, SEED.mesero, SEED.cocina]) {
+  for (const email of [SEED.owner, SEED.waiter, SEED.kitchen]) {
     await signInByApi(http, email, SECRET)
   }
   await http.dispose()
@@ -52,7 +52,7 @@ test('ACC-01 el encargado de la semilla entra por el formulario y ve todas las s
   await expect(page).toHaveURL(/\/acceso$/u)
   await expect(page.getByRole('heading', { name: 'Iniciar sesión', level: 1 })).toBeVisible()
   await evidence(page, 'acc-01-formulario')
-  await signInByForm(page, SEED.encargado, SECRET)
+  await signInByForm(page, SEED.owner, SECRET)
   await expect(page).toHaveURL(/\/pedidos$/u)
   await expect.poll(() => sections(page)).toEqual(ALL)
   await expect(page.getByText('Encargado Demo')).toBeVisible()
@@ -62,7 +62,7 @@ test('ACC-01 el encargado de la semilla entra por el formulario y ve todas las s
 test('ACC-02 el mesero de la semilla entra y ve solo Pedidos, Cocina, Reservas y Clientes @movil', async ({ page }) => {
   covers('funcion:acceso.entrar', 'funcion:permisos.navegacion-por-rol', 'rol:mesero')
   await page.goto('/acceso')
-  await signInByForm(page, SEED.mesero, SECRET)
+  await signInByForm(page, SEED.waiter, SECRET)
   await expect(page).toHaveURL(/\/pedidos$/u)
   await expect.poll(() => sections(page)).toEqual(OF_WAITER)
   const nav = navigation(page)
@@ -80,7 +80,7 @@ test('ACC-02 el mesero de la semilla entra y ve solo Pedidos, Cocina, Reservas y
 test('ACC-03 la cuenta de cocina de la semilla entra al tablero y no toma pedidos', async ({ page }) => {
   covers('funcion:acceso.entrar', 'funcion:inicio.redirige-por-rol', 'funcion:permisos.ruta-prohibida', 'rol:cocina')
   await page.goto('/acceso')
-  await signInByForm(page, SEED.cocina, SECRET)
+  await signInByForm(page, SEED.kitchen, SECRET)
   await expect(page).toHaveURL(/\/tablero$/u)
   await expect.poll(() => sections(page)).toEqual(OF_KITCHEN)
   await evidence(page, 'acc-03-navegacion-cocina')
@@ -105,7 +105,7 @@ test('ACC-04 el administrador del sistema entra por su formulario y cierra su se
   await expect(page).toHaveURL(/\/plataforma\/acceso$/u)
   await expect(page.getByRole('heading', { name: 'Administración del sistema', level: 1 })).toBeVisible()
   await evidence(page, 'acc-04-acceso-plataforma')
-  await signInByForm(page, SEED.plataforma, SECRET)
+  await signInByForm(page, SEED.platform, SECRET)
   await expect(page).toHaveURL(/\/plataforma$/u)
   await expect(page.getByRole('heading', { name: 'Restaurantes', level: 1 })).toBeVisible()
   const area = page.getByRole('navigation', { name: 'Administración del sistema' })
@@ -126,12 +126,12 @@ test('ACC-05 una contraseña equivocada muestra el error y no abre sesión @movi
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page.getByText('Escribe un correo válido, como nombre@correo.com')).toBeVisible()
   await expect(page.getByText('Escribe tu contraseña')).toBeVisible()
-  await signInByForm(page, local.mesero.email, 'no-es-la-clave-123')
+  await signInByForm(page, local.waiter.email, 'no-es-la-clave-123')
   await expect(page.getByText(ERROR_CREDENTIALS)).toBeVisible()
   await expect(page).toHaveURL(/\/acceso$/u)
   await evidence(page, 'acc-05-error')
   const password = page.getByLabel('Contraseña', { exact: true })
-  await password.fill(local.mesero.password)
+  await password.fill(local.waiter.password)
   await expect(password).toHaveAttribute('type', 'password')
   await page.getByRole('button', { name: 'Mostrar contraseña' }).click()
   await expect(password).toHaveAttribute('type', 'text')
@@ -143,7 +143,7 @@ test('ACC-05 una contraseña equivocada muestra el error y no abre sesión @movi
 
 test('ACC-06 cerrar sesión lleva al acceso y, al volver a entrar, a la pantalla pedida', async ({ page, local }) => {
   covers('funcion:sesion.cerrar', 'funcion:permisos.sin-sesion', 'funcion:acceso.volver-a-destino', 'funcion:acceso.entrar')
-  await openAs(page, local.encargado, '/tablero')
+  await openAs(page, local.owner, '/tablero')
   await expect(page.getByRole('heading', { name: 'Tablero', level: 1 })).toBeVisible()
   await page.getByRole('button', { name: 'Cerrar sesión' }).click()
   await expect(page).toHaveURL(/\/acceso$/u)
@@ -152,14 +152,14 @@ test('ACC-06 cerrar sesión lleva al acceso y, al volver a entrar, a la pantalla
   await page.goto('/inventario')
   await expect(page).toHaveURL(/\/acceso$/u)
   await evidence(page, 'acc-06-sin-sesion')
-  await signInByForm(page, local.encargado.email, local.encargado.password)
+  await signInByForm(page, local.owner.email, local.owner.password)
   await expect(page).toHaveURL(/\/inventario$/u)
   await expect(page.getByRole('heading', { name: 'Inventario', level: 1 })).toBeVisible()
 })
 
 test('ACC-07 el mesero no ve Inventario ni Caja y esas rutas lo llevan a Pedidos @movil', async ({ page, local }) => {
   covers('funcion:permisos.ruta-prohibida', 'funcion:permisos.navegacion-por-rol', 'rol:mesero')
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   await expect.poll(() => sections(page)).toEqual(OF_WAITER)
   for (const forbidden of ['/inventario', '/caja', '/tablero', '/personal', '/panel']) {
     await page.goto(forbidden)
@@ -170,7 +170,7 @@ test('ACC-07 el mesero no ve Inventario ni Caja y esas rutas lo llevan a Pedidos
 
 test('ACC-08 una ruta que no existe lleva al inicio de la cuenta @movil', async ({ page, local }) => {
   covers('ruta:/*')
-  await openAs(page, local.mesero, '/esto-no-existe')
+  await openAs(page, local.waiter, '/esto-no-existe')
   await expect(page).toHaveURL(/\/pedidos$/u)
   await page.goto('/pedidos/otra/cosa/que/no/existe')
   await expect(page).toHaveURL(/\/pedidos$/u)
@@ -179,10 +179,10 @@ test('ACC-08 una ruta que no existe lleva al inicio de la cuenta @movil', async 
 test('ACC-09 cerrar sesión con pedidos sin enviar avisa y conserva la cola @movil', async ({ page, local }) => {
   covers('confirmacion:shell/SessionActions', 'funcion:sesion.cerrar-con-pendientes', 'funcion:sesion.cerrar')
   await withoutOrdersSending(page)
-  await openAs(page, local.mesero, '/perfil')
-  await enqueueOrders(page, ownerOf(local.mesero), [
-    { mesa: local.mesa('2'), plato: local.plato('Lomo saltado') },
-    { mesa: local.mesa('3'), plato: local.plato('Chicha morada') },
+  await openAs(page, local.waiter, '/perfil')
+  await enqueueOrders(page, ownerOf(local.waiter), [
+    { table: local.table('2'), dish: local.dish('Lomo saltado') },
+    { table: local.table('3'), dish: local.dish('Chicha morada') },
   ])
   await page.reload()
   const inMobile = test.info().project.name === 'movil'
@@ -214,7 +214,7 @@ test('ACC-09 cerrar sesión con pedidos sin enviar avisa y conserva la cola @mov
 
 test('ACC-10 la hoja «Más» del celular abre las otras pantallas, la accesibilidad y el perfil @solo-movil', async ({ page, local }) => {
   covers('hoja:shell/MoreSheet', 'funcion:shell.mas-navegar', 'funcion:shell.mas-accesibilidad', 'funcion:shell.mas-perfil', 'rol:encargado')
-  await openAs(page, local.encargado, '/pedidos')
+  await openAs(page, local.owner, '/pedidos')
   const nav = navigation(page)
   await expect.poll(() => sections(page)).toEqual(ALL.slice(0, 4))
   await nav.getByRole('button', { name: 'Más' }).click()

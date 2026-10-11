@@ -36,7 +36,7 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
     table_id: null,
     notes: '',
   })
-  await openAs(page, local.encargado, '/reservas')
+  await openAs(page, local.owner, '/reservas')
   await expect(page.getByRole('heading', { level: 1, name: 'Reservas' })).toBeVisible()
   await expect(page.getByText('No hay reservas para este día')).toBeVisible()
   await page.getByRole('main').getByLabel('Día', { exact: true }).fill(manana)
@@ -99,7 +99,7 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
   await group.getByRole('button', { name: 'Cancelar' }).click()
   await expect(group).toContainText('Cancelada')
   await evidence(page, 'ges-23-3-estados')
-  const statuses = (await api(local).lista(`/reservations?day=${manana}`)).map((r) => [r.customer_name, r.status])
+  const statuses = (await api(local).list(`/reservations?day=${manana}`)).map((r) => [r.customer_name, r.status])
   expect(Object.fromEntries(statuses)).toEqual({ 'Grupo Vargas': 'cancelled', 'Familia Quispe': 'seated', 'Señor Torres': 'no_show' })
 
   // Otro día, sin reservas.
@@ -112,7 +112,7 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
 })
 
 test('GES-24 la ventana de una reserva nueva abre vacía después de guardar otra', async ({ page, local }) => {
-  await openAs(page, local.encargado, '/reservas')
+  await openAs(page, local.owner, '/reservas')
   await page.getByRole('main').getByLabel('Día', { exact: true }).fill(dayFromToday(1))
   await page.getByRole('button', { name: 'Nueva reserva' }).click()
   const registration = page.getByRole('dialog', { name: 'Nueva reserva' })

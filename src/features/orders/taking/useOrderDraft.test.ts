@@ -93,7 +93,7 @@ describe('cartTotals', () => {
       result.current.setQuantity(PASSWORD, '11', 3)
       result.current.add(PASSWORD, dish({ id: 12, price: '0.20' }))
     })
-    const { platos: dishes, count, total } = cartTotals(result.current.lines)
+    const { dishes, count, total } = cartTotals(result.current.lines)
     expect([dishes, count]).toEqual([4, '4 platos'])
     // Intl separa «S/» del monto con un espacio duro.
     expect(total.replace(/\s/gu, ' ')).toBe('S/ 30.50')

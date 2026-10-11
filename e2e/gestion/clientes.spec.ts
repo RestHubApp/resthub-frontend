@@ -10,14 +10,14 @@ import { api, failureServer, id, soles } from '../soporte/gestion'
 
 /** Un pedido del cliente de principio a fin, cobrado con Yape. */
 async function orderOf(local: Local, customerId: number, type: 'delivery' | 'dine_in'): Promise<number> {
-  const waiter = api(local, local.mesero)
+  const waiter = api(local, local.waiter)
   const data = type === 'delivery'
     ? { type: 'delivery', customer_id: customerId, customer_name: 'Rosa Díaz', customer_phone: '987654321', delivery_address: 'Av. Sol 123' }
-    : { type: 'dine_in', table_id: local.mesa('1').id, customer_id: customerId }
-  const order = await waiter.post('/orders', { ...data, items: [{ menu_item_id: local.plato('Chicha morada').id, quantity: 1, notes: '' }] })
+    : { type: 'dine_in', table_id: local.table('1').id, customer_id: customerId }
+  const order = await waiter.post('/orders', { ...data, items: [{ menu_item_id: local.dish('Chicha morada').id, quantity: 1, notes: '' }] })
   const route = `/orders/${String(id(order))}`
   await waiter.post(`${route}/send`)
-  await api(local, local.cocina).post(`${route}/ready`)
+  await api(local, local.kitchen).post(`${route}/ready`)
   await waiter.post(`${route}/served`)
   await waiter.post(`${route}/charge`, { payment_method: 'yape', tip: '0' })
   return id(order)
@@ -29,7 +29,7 @@ test.beforeEach(() => {
   test.slow()
 })
 
-test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es frecuente y edita sus datos', async ({ page, localConCaja: local }) => {
+test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es frecuente y edita sus datos', async ({ page, restaurantWithCashRegister: local }) => {
   covers(
     'ruta:/clientes',
     'dialogo:customers/CustomerDialog',
@@ -45,7 +45,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
     'estado:clientes.sin-resultados',
     'estado:clientes.error',
   )
-  await openAs(page, local.encargado, '/clientes')
+  await openAs(page, local.owner, '/clientes')
   await expect(page.getByRole('heading', { level: 1, name: 'Clientes' })).toBeVisible()
   await expect(page.getByText('Todavía no hay clientes')).toBeVisible()
 
@@ -82,7 +82,7 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
   await expect(registration).toBeHidden()
 
   // Tres pedidos de delivery lo vuelven frecuente.
-  const customerId = id((await api(local).lista('/customers'))[0])
+  const customerId = id((await api(local).list('/customers'))[0])
   for (let n = 0; n < 3; n += 1) {
     await orderOf(local, customerId, 'delivery')
   }
@@ -124,10 +124,10 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
   await expect(page.getByRole('button', { name: 'Reintentar' })).toBeVisible()
 })
 
-test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', async ({ page, localConCaja: local }) => {
+test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', async ({ page, restaurantWithCashRegister: local }) => {
   const customer = await api(local).post('/customers', { name: 'Julio Paz', phone: '912345678', email: '', address: '', reference: '', notes: '', consent: true })
   await orderOf(local, id(customer), 'dine_in')
-  await openAs(page, local.encargado, '/clientes')
+  await openAs(page, local.owner, '/clientes')
   await page.getByRole('button', { name: /Julio Paz/u }).click()
   const order = page.getByRole('dialog', { name: 'Julio Paz' }).getByRole('link', { name: /#1/u })
   await expect(order).toBeVisible()
@@ -136,7 +136,7 @@ test('GES-22 la ficha del cliente dice el tipo de cada pedido en español', asyn
 })
 
 test('GES-25 la ventana de un cliente nuevo abre vacía después de guardar otro', async ({ page, local }) => {
-  await openAs(page, local.encargado, '/clientes')
+  await openAs(page, local.owner, '/clientes')
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
   const registration = page.getByRole('dialog', { name: 'Nuevo cliente' })
   await registration.getByLabel('Nombre', { exact: true }).fill('Rosa Díaz')
@@ -153,13 +153,13 @@ test('GES-25 la ventana de un cliente nuevo abre vacía después de guardar otro
   await expect(registration.getByLabel('Notas (opcional)')).toHaveValue('')
 })
 
-test('GES-34 el encargado descarga los datos de un cliente y, a su pedido, los borra', async ({ page, localConCaja: local }) => {
+test('GES-34 el encargado descarga los datos de un cliente y, a su pedido, los borra', async ({ page, restaurantWithCashRegister: local }) => {
   covers('confirmacion:customers/CustomerRights', 'funcion:clientes.exportar-datos', 'funcion:clientes.borrar-datos')
   const customer = await api(local).post('/customers', {
     name: 'Rosa Díaz', phone: '987654321', email: '', address: 'Av. Sol 123', reference: '', notes: 'Alérgica al maní', consent: true,
   })
   const orderId = await orderOf(local, id(customer), 'delivery')
-  await openAs(page, local.encargado, '/clientes')
+  await openAs(page, local.owner, '/clientes')
   await page.getByRole('button', { name: /Rosa Díaz/u }).click()
   const card = page.getByRole('dialog', { name: 'Rosa Díaz' })
 

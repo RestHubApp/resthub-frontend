@@ -17,5 +17,5 @@ export function usePagination<T>(items: readonly T[], pageSize: number | undefin
     [items, actual, size],
   )
 
-  return { visibles: visible, actual, total, irA: setPage }
+  return { visible, actual, total, irA: setPage }
 }

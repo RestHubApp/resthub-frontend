@@ -70,7 +70,7 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
       <TextField
         id="purchase-cost"
         label={costLabel(values.cost_mode, price.label)}
-        icon="costo"
+        icon="cost"
         inputMode="decimal"
         autoComplete="off"
         hint={costHint(accounts, price.label)}
@@ -92,7 +92,7 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
           {errorMessage(purchase.error, 'No se pudo registrar la compra.')}
         </FormMessage>
       ) : null}
-      <FormButtons label="Registrar compra" icon="compra" pending={purchase.isPending} onCancel={onDone} />
+      <FormButtons label="Registrar compra" icon="purchase" pending={purchase.isPending} onCancel={onDone} />
     </form>
   )
 }

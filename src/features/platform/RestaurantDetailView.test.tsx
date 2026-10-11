@@ -24,7 +24,7 @@ function openCard(initial: PlatformRestaurantDetail | ErrorResponse = restaurant
   }
   const api = server().on('get', CARD, () => (actual instanceof ErrorResponse ? actual : { ...actual }))
   signInToPlatform()
-  return { api, guardar: save, ...mountPlatform('/plataforma/restaurantes/4') }
+  return { api, save, ...mountPlatform('/plataforma/restaurantes/4') }
 }
 
 describe('RestaurantDetailView', () => {
@@ -38,7 +38,7 @@ describe('RestaurantDetailView', () => {
   })
 
   it('guarda solo el campo que se cambió y muestra lo que devolvió el servidor', async () => {
-    const { api, guardar: save, user } = openCard()
+    const { api, save, user } = openCard()
     api.on('patch', CARD, () => save(restaurantCard({ name: LA_ESQUINA })))
     const name = await screen.findByLabelText('Nombre')
     expect(screen.getByRole('button', SAVE)).toBeDisabled()
@@ -48,23 +48,23 @@ describe('RestaurantDetailView', () => {
     await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('Cambios guardados.')).toBeInTheDocument()
-    expect(api.llamadas('patch', CARD)[0]?.body).toEqual({ name: LA_ESQUINA })
+    expect(api.calls('patch', CARD)[0]?.body).toEqual({ name: LA_ESQUINA })
     expect(screen.getByRole('heading', { name: LA_ESQUINA, level: 1 })).toBeInTheDocument()
   })
 
   it('cambiar la zona horaria manda solo la zona', async () => {
-    const { api, guardar: save, user } = openCard()
+    const { api, save, user } = openCard()
     api.on('patch', CARD, () => save(restaurantCard({ timezone: AMERICA_BOGOTA })))
 
     await user.selectOptions(await screen.findByRole('combobox', { name: 'Zona horaria' }), AMERICA_BOGOTA)
     await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('Cambios guardados.')).toBeInTheDocument()
-    expect(api.llamadas('patch', CARD)[0]?.body).toEqual({ timezone: AMERICA_BOGOTA })
+    expect(api.calls('patch', CARD)[0]?.body).toEqual({ timezone: AMERICA_BOGOTA })
   })
 
   it('desactivar se confirma explicando cuántas cuentas pierden el acceso', async () => {
-    const { api, guardar: save, user } = openCard()
+    const { api, save, user } = openCard()
     api.on('patch', CARD, () => save(restaurantCard({ is_active: false })))
 
     await user.click(await screen.findByRole('button', { name: 'Desactivar restaurante' }))
@@ -73,24 +73,24 @@ describe('RestaurantDetailView', () => {
     await user.click(within(notice).getByRole('button', { name: 'Desactivar' }))
 
     expect(await screen.findByText('Nadie de su personal puede entrar. Sus datos se conservan.')).toBeInTheDocument()
-    expect(api.llamadas('patch', CARD)[0]?.body).toEqual({ is_active: false })
+    expect(api.calls('patch', CARD)[0]?.body).toEqual({ is_active: false })
     expect(screen.getByRole('button', { name: 'Activar restaurante' })).toBeInTheDocument()
   })
 
   it('activar un local desactivado va directo', async () => {
-    const { api, guardar: save, user } = openCard(restaurantCard({ is_active: false }))
+    const { api, save, user } = openCard(restaurantCard({ is_active: false }))
     api.on('patch', CARD, () => save(restaurantCard()))
 
     await user.click(await screen.findByRole('button', { name: 'Activar restaurante' }))
 
     expect(await screen.findByRole('button', { name: 'Desactivar restaurante' })).toBeInTheDocument()
-    expect(api.llamadas('patch', CARD)[0]?.body).toEqual({ is_active: true })
+    expect(api.calls('patch', CARD)[0]?.body).toEqual({ is_active: true })
   })
 })
 
 describe('RestaurantDetailView: encargados y errores', () => {
   it('agrega otro encargado y lo suma a la lista', async () => {
-    const { api, guardar: save, user } = openCard()
+    const { api, save, user } = openCard()
     const marta = { id: 31, full_name: MARTA_RIOS, email: MARTA_ESQUINA_PE, is_active: true }
     api.on('post', `${CARD}/owners`, () => {
       const card = restaurantCard()
@@ -106,7 +106,7 @@ describe('RestaurantDetailView: encargados y errores', () => {
     await user.click(within(window).getByRole('button', { name: ADD_OWNER }))
 
     expect(await screen.findByText(MARTA_RIOS)).toBeInTheDocument()
-    expect(api.llamadas('post', `${CARD}/owners`)[0]?.body).toEqual({
+    expect(api.calls('post', `${CARD}/owners`)[0]?.body).toEqual({
       full_name: MARTA_RIOS,
       email: MARTA_ESQUINA_PE,
       password: SECRET_SAFE_1,
@@ -141,7 +141,7 @@ describe('RestaurantDetailView: encargados y errores', () => {
     mountPlatform('/plataforma/restaurantes/abc')
 
     expect(await screen.findByText('Este restaurante no existe.')).toBeInTheDocument()
-    expect(api.peticiones.filter((p) => p.url.startsWith('/platform/restaurants/'))).toHaveLength(0)
+    expect(api.requests.filter((p) => p.url.startsWith('/platform/restaurants/'))).toHaveLength(0)
   })
 
   it('otro error se puede reintentar', async () => {

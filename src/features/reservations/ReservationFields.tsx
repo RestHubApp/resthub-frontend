@@ -20,13 +20,13 @@ export function ReservationFields({ form, tables }: ReservationFieldsProps) {
 
   return (
     <>
-      <TextField id="reservation-name" label="A nombre de" icon="perfil" maxLength={LIMITS.name} field={register('customer_name')} error={errors.customer_name?.message} />
+      <TextField id="reservation-name" label="A nombre de" icon="profile" maxLength={LIMITS.name} field={register('customer_name')} error={errors.customer_name?.message} />
       <TextField id="reservation-phone" label="Teléfono (opcional)" type="tel" inputMode="tel" maxLength={LIMITS.phone} field={register('phone')} error={errors.phone?.message} />
       <TextField id="reservation-day" label="Día" type="date" field={register('day')} error={errors.day?.message} />
       <TextField id="reservation-time" label="Hora" type="time" step="900" field={register('time')} error={errors.time?.message} />
-      <TextField id="reservation-party" label="Personas" inputMode="numeric" icon="personal" field={register('party_size')} error={errors.party_size?.message} />
+      <TextField id="reservation-party" label="Personas" inputMode="numeric" icon="staff" field={register('party_size')} error={errors.party_size?.message} />
       <TextField id="reservation-duration" label="Duración (minutos)" inputMode="numeric" field={register('duration_minutes')} error={errors.duration_minutes?.message} hint="Cuánto se guarda la mesa." />
-      <SelectField id="reservation-table" label="Mesa (opcional)" icon="mesa" placeholder="Sin mesa asignada" field={register('table_id')} error={errors.table_id?.message}>
+      <SelectField id="reservation-table" label="Mesa (opcional)" icon="table" placeholder="Sin mesa asignada" field={register('table_id')} error={errors.table_id?.message}>
         {tables.map((table) => (
           <NativeSelectOption key={table.id} value={String(table.id)}>
             {tableName(table.label)}

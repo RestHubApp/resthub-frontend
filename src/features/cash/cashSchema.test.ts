@@ -38,13 +38,13 @@ describe('prefetchCash', () => {
     signInAs()
     prefetchCash()
     await queryClient.getQueryCache().find({ queryKey: ['cash', 'current'] })?.promise
-    expect(api.peticiones.map((p) => p.url).sort((a, b) => a.localeCompare(b))).toEqual(['/cash/current', '/cash/sessions'])
+    expect(api.requests.map((p) => p.url).sort((a, b) => a.localeCompare(b))).toEqual(['/cash/current', '/cash/sessions'])
   })
 
   it('sin permiso de caja no pide nada', () => {
     const api = server()
     signInAs(PERMISSIONS_WAITER)
     prefetchCash()
-    expect(api.peticiones).toHaveLength(0)
+    expect(api.requests).toHaveLength(0)
   })
 })

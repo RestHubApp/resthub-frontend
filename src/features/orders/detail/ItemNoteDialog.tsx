@@ -51,7 +51,7 @@ export function ItemNoteDialog({
         <TextField
           id="nota-plato"
           label="Nota para cocina"
-          icon="nota"
+          icon="note"
           placeholder="Sin cebolla, alergia al maní…"
           maxLength={MAX_NOTE}
           autoComplete="off"

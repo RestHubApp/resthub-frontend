@@ -25,7 +25,7 @@ export function PreviewEndedView() {
           }
         >
           <Button type="button" size="lg" className="h-11 px-4" onClick={leavePreview}>
-            <ShellIcon name="salir" size={18} />
+            <ShellIcon name="signOut" size={18} />
             <span>Cerrar la vista previa</span>
           </Button>
         </EmptyState>

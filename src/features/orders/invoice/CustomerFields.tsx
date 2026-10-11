@@ -4,9 +4,9 @@ import { Label } from '@/components/ui/label'
 import { customerComplete } from './invoiceDocument'
 
 interface CustomerValues {
-  readonly numero: string
-  readonly nombre: string
-  readonly direccion: string
+  readonly number: string
+  readonly name: string
+  readonly address: string
 }
 
 interface CustomerFieldsProps {
@@ -30,19 +30,19 @@ export function CustomerFields({ documentType, withAddress, values, onChange }: 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="comprobante-numero">{ruc ? 'RUC' : 'Número de documento'}</Label>
-            <Input id="comprobante-numero" inputMode="numeric" value={values.numero} onChange={(e) => {
-              onChange({ ...values, numero: e.target.value })
+            <Input id="comprobante-numero" inputMode="numeric" value={values.number} onChange={(e) => {
+              onChange({ ...values, number: e.target.value })
             }} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="comprobante-nombre">{ruc ? 'Razón social' : 'Nombre'}</Label>
-            <Input id="comprobante-nombre" value={values.nombre} onChange={(e) => {
-              onChange({ ...values, nombre: e.target.value })
+            <Input id="comprobante-nombre" value={values.name} onChange={(e) => {
+              onChange({ ...values, name: e.target.value })
             }} />
           </div>
         </div>
       )}
-      {customerComplete(documentType, values.numero, values.nombre) ? null : (
+      {customerComplete(documentType, values.number, values.name) ? null : (
         <p className="m-0 text-sm text-muted-foreground">
           {ruc ? 'Escribe el RUC y la razón social' : 'Escribe el número de documento y el nombre'} del cliente para emitir.
         </p>
@@ -50,8 +50,8 @@ export function CustomerFields({ documentType, withAddress, values, onChange }: 
       {withAddress ? (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="comprobante-direccion">Dirección fiscal (opcional)</Label>
-          <Input id="comprobante-direccion" value={values.direccion} onChange={(e) => {
-            onChange({ ...values, direccion: e.target.value })
+          <Input id="comprobante-direccion" value={values.address} onChange={(e) => {
+            onChange({ ...values, address: e.target.value })
           }} />
         </div>
       ) : null}

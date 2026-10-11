@@ -20,7 +20,7 @@ for (const vista of Object.keys(VIEWS)) {
   const deLaVista = statuses.filter((e) => filterViews(e).includes(vista))
   if (deLaVista.length === 0) continue
   const { width, height, ...rest } = VIEWS[vista]
-  const { contexto: context, cerrar: close } = await openBrowserWave({ viewport: { width, height }, ...rest })
+  const { context, close } = await openBrowserWave({ viewport: { width, height }, ...rest })
   for (const status of deLaVista) {
     let page
     let step = 'abrir'
@@ -41,13 +41,13 @@ for (const vista of Object.keys(VIEWS)) {
           limit = setTimeout(() => reject(new Error(`sin respuesta en 120 s (paso: ${step})`)), 120_000)
         }),
       ]).finally(() => clearTimeout(limit))
-      const row = { id: status.id, nombre: status.nombre, clase: status.clase, tipo: status.tipo, vista, url: page.url(), conteos: counts, items: items.map(({ xpaths, ...i }) => ({ ...i, xpaths: xpaths.slice(0, 5) })) }
+      const row = { id: status.id, name: status.name, class: status.class, type: status.type, vista, url: page.url(), counts, items: items.map(({ xpaths, ...i }) => ({ ...i, xpaths: xpaths.slice(0, 5) })) }
       await writeJson(join(dir, `${handlePassword(status, vista)}.json`), row)
       rows.push(row)
       const c = counts
       console.log(`${handlePassword(status, vista).padEnd(40)} err ${c.errors} contr ${c.contrast} alert ${c.alerts} feat ${c.features} str ${c.structure} aria ${c.aria}  ${items.filter((i) => ['error', 'contrast', 'alert'].includes(i.tipo)).map((i) => `${i.id}(${i.cantidad})`).join(' ')}`)
     } catch (error) {
-      rows.push({ id: status.id, nombre: status.nombre, clase: status.clase, tipo: status.tipo, vista, error: error.message.split('\n')[0] })
+      rows.push({ id: status.id, name: status.name, class: status.class, type: status.type, vista, error: error.message.split('\n')[0] })
       console.log(`${handlePassword(status, vista).padEnd(40)} ERROR ${error.message.split('\n')[0]}`)
     }
     await Promise.race([page?.close().catch(() => undefined), new Promise((r) => setTimeout(r, 10_000))])
@@ -60,10 +60,10 @@ await browserSessions.close()
 
 const routeSummary = join(dir, 'resumen.json')
 const partial = process.env.A11Y_SOLO || process.env.A11Y_CLASE || process.env.A11Y_VISTAS
-const previous = existsSync(routeSummary) && partial ? await readJson(routeSummary) : { filas: [] }
+const previous = existsSync(routeSummary) && partial ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.vista}`))
 const all = [...previous.filas.filter((f) => !fresh.has(`${f.id}--${f.vista}`)), ...rows]
-await writeJson(routeSummary, { fecha: new Date().toISOString(), version, filas: all })
+await writeJson(routeSummary, { date: new Date().toISOString(), version, rows: all })
 const sum = (k) => all.reduce((s, f) => s + (f.conteos?.[k] ?? 0), 0)
 await writeFile(join(dir, 'resumen.txt'), `WAVE ${version}: ${all.length} mediciones; errors ${sum('errors')}, contrast ${sum('contrast')}, alerts ${sum('alerts')}\n`)
 console.log(`\nWAVE ${version}: ${all.length} mediciones, ${all.filter((f) => f.error).length} sin abrir; errors ${sum('errors')}, contrast ${sum('contrast')}, alerts ${sum('alerts')}`)

@@ -40,7 +40,7 @@ export function PurchaseLineEditor({ index, line, ingredients, onChange, onRemov
         ))}
       </NativeSelect>
       <Button type="button" variant="ghost" size="sm" aria-label={`Quitar la línea ${String(index + 1)}`} className="sm:order-last" onClick={onRemove}>
-        <Icon name="eliminar" size={16} />
+        <Icon name="delete" size={16} />
       </Button>
       <Input
         id={`${id}-cantidad`}

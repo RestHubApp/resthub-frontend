@@ -12,7 +12,7 @@ function listen(topic: string, enabled = true) {
   const vista = renderHook(() => {
     useServerEvent(topic, (data) => received.push(data), enabled)
   })
-  return { recibidos: received, ...vista }
+  return { received, ...vista }
 }
 
 afterEach(() => {
@@ -26,21 +26,21 @@ describe('useServerEvent', () => {
     listen(ORDERS)
 
     await waitFor(() => {
-      expect(channel.conexiones).toHaveLength(1)
+      expect(channel.connections).toHaveLength(1)
     })
-    expect(channel.conexiones[0]).toEqual({ url: '/api/v1/events', autorizacion: 'Bearer token-secreto' })
+    expect(channel.connections[0]).toEqual({ url: '/api/v1/events', authorization: 'Bearer token-secreto' })
   })
 
   it('entrega solo los avisos de su tema', async () => {
     const channel = noticesChannel()
     setAuthToken('t')
-    const { recibidos: received } = listen(ORDERS)
+    const { received } = listen(ORDERS)
     await waitFor(() => {
-      expect(channel.conexiones).toHaveLength(1)
+      expect(channel.connections).toHaveLength(1)
     })
 
-    channel.emitir('cash', '{"id":1}')
-    channel.emitir(ORDERS, '{"id":2}')
+    channel.issue('cash', '{"id":1}')
+    channel.issue(ORDERS, '{"id":2}')
 
     await waitFor(() => {
       expect(received).toEqual(['{"id":2}'])
@@ -53,7 +53,7 @@ describe('useServerEvent', () => {
     listen(ORDERS)
     setAuthToken('t')
     listen(ORDERS, false)
-    expect(channel.conexiones).toHaveLength(0)
+    expect(channel.connections).toHaveLength(0)
   })
 
   it('si el canal se corta, reintenta a los tres segundos', async () => {
@@ -62,24 +62,24 @@ describe('useServerEvent', () => {
     setAuthToken('t')
     listen(ORDERS)
     await jest.advanceTimersByTimeAsync(0)
-    expect(channel.conexiones).toHaveLength(1)
+    expect(channel.connections).toHaveLength(1)
 
-    channel.cortar()
+    channel.cut()
     await jest.advanceTimersByTimeAsync(2999)
-    expect(channel.conexiones).toHaveLength(1)
+    expect(channel.connections).toHaveLength(1)
     await jest.advanceTimersByTimeAsync(1)
-    expect(channel.conexiones).toHaveLength(2)
+    expect(channel.connections).toHaveLength(2)
   })
 
   it('con 401 no reintenta: la credencial no va a mejorar sola', async () => {
     jest.useFakeTimers()
     const channel = noticesChannel()
-    channel.responderCon(401)
+    channel.respondWith(401)
     setAuthToken('vencido')
     listen(ORDERS)
 
     await jest.advanceTimersByTimeAsync(10_000)
-    expect(channel.conexiones).toHaveLength(1)
+    expect(channel.connections).toHaveLength(1)
   })
 
   it('al desmontarse cierra la conexión y no reintenta', async () => {
@@ -91,6 +91,6 @@ describe('useServerEvent', () => {
 
     unmount()
     await jest.advanceTimersByTimeAsync(10_000)
-    expect(channel.conexiones).toHaveLength(1)
+    expect(channel.connections).toHaveLength(1)
   })
 })

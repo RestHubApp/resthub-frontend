@@ -10,10 +10,10 @@ const soles = (amount: string) => new RegExp(`S/\\s*${amount.replace('.', '\\.')
 
 test('SAL-10 el mesero agrega platos a un pedido listo y vuelve a cocina @movil', async ({ page, local }) => {
   covers('ruta:/pedidos/:orderId/agregar', 'funcion:agregar.agregar-platos')
-  const order = await orderInTable(local, local.mesa('1'), [{ plato: local.plato('Lomo saltado') }])
-  await api(local, local.cocina).post(`/orders/${String(order.id)}/ready`)
+  const order = await orderInTable(local, local.table('1'), [{ dish: local.dish('Lomo saltado') }])
+  await api(local, local.kitchen).post(`/orders/${String(order.id)}/ready`)
 
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   await expect(page.getByRole('heading', { level: 1, name: 'Pedido #1' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Marcar servido' })).toBeVisible()
   await page.getByRole('link', { name: 'Agregar platos' }).click()
@@ -33,21 +33,21 @@ test('SAL-10 el mesero agrega platos a un pedido listo y vuelve a cocina @movil'
   expect(actual).toMatchObject({ status: 'in_kitchen', total: '62.00', item_count: 3 })
 })
 
-test('SAL-11 un pedido pagado no admite más platos', async ({ page, localConCaja: local }) => {
+test('SAL-11 un pedido pagado no admite más platos', async ({ page, restaurantWithCashRegister: local }) => {
   covers('funcion:agregar.pedido-cerrado')
-  const order = await orderPaid(local, local.mesa('1'), [{ plato: local.plato('Chicha morada') }])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}/agregar`)
+  const order = await orderPaid(local, local.table('1'), [{ dish: local.dish('Chicha morada') }])
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}/agregar`)
   await expect(page.getByText('Este pedido ya está pagado: no admite más platos.')).toBeVisible()
   await evidence(page, 'sal-11-1-cerrado')
 })
 
 test('SAL-12 un pedido que no se envió se corrige en el detalle y se envía desde ahí @movil', async ({ page, local }) => {
   covers('dialogo:orders/detail/ItemNoteDialog', 'funcion:pedido.editar-plato', 'funcion:pedido.quitar-plato', 'funcion:pedido.enviar-pendiente')
-  const order = await openOrder(local, local.mesa('2'), [
-    { plato: local.plato('Lomo saltado') },
-    { plato: local.plato('Inca Kola 500 ml') },
+  const order = await openOrder(local, local.table('2'), [
+    { dish: local.dish('Lomo saltado') },
+    { dish: local.dish('Inca Kola 500 ml') },
   ])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   await expect(page.getByText('Todavía no está en cocina')).toBeVisible()
 
   await page.getByRole('button', { name: 'Uno más de Lomo saltado' }).click()
@@ -80,8 +80,8 @@ test('SAL-12 un pedido que no se envió se corrige en el detalle y se envía des
 
 test('SAL-13 el encargado cancela un pedido con su motivo y la mesa queda libre', async ({ page, local }) => {
   covers('dialogo:orders/CancelOrderDialog', 'funcion:pedido.cancelar')
-  const order = await orderInTable(local, local.mesa('3'), [{ plato: local.plato('Ceviche clásico') }])
-  await openAs(page, local.encargado, `/pedidos/${String(order.id)}`)
+  const order = await orderInTable(local, local.table('3'), [{ dish: local.dish('Ceviche clásico') }])
+  await openAs(page, local.owner, `/pedidos/${String(order.id)}`)
   await page.getByRole('button', { name: 'Cancelar pedido' }).click()
   const windowValue = page.getByRole('dialog', { name: '¿Cancelar el pedido #1?' })
   await expect(windowValue).toContainText('Mesa 3. La mesa queda libre')
@@ -106,17 +106,17 @@ test('SAL-13 el encargado cancela un pedido con su motivo y la mesa queda libre'
 
 test('SAL-14 el mesero no ve cómo cancelar un pedido @movil', async ({ page, local }) => {
   covers('funcion:pedido.cancelar-sin-permiso')
-  const order = await orderInTable(local, local.mesa('1'), [{ plato: local.plato('Chicha morada') }])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  const order = await orderInTable(local, local.table('1'), [{ dish: local.dish('Chicha morada') }])
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   await expect(page.getByRole('link', { name: 'Agregar platos' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Cancelar pedido' })).toHaveCount(0)
 })
 
 test('SAL-15 el mesero cambia el pedido de mesa y une otra mesa suya @movil', async ({ page, local }) => {
   covers('dialogo:orders/detail/TablePickerDialog', 'funcion:pedido.cambiar-mesa', 'funcion:pedido.unir-mesa')
-  const first = await orderInTable(local, local.mesa('1'), [{ plato: local.plato('Lomo saltado') }])
-  await orderInTable(local, local.mesa('2'), [{ plato: local.plato('Chicha morada'), cantidad: 2 }])
-  await openAs(page, local.mesero, `/pedidos/${String(first.id)}`)
+  const first = await orderInTable(local, local.table('1'), [{ dish: local.dish('Lomo saltado') }])
+  await orderInTable(local, local.table('2'), [{ dish: local.dish('Chicha morada'), quantity: 2 }])
+  await openAs(page, local.waiter, `/pedidos/${String(first.id)}`)
 
   await page.getByRole('button', { name: 'Cambiar de mesa' }).click()
   const move = page.getByRole('dialog', { name: 'Cambiar de mesa' })
@@ -142,8 +142,8 @@ test('SAL-15 el mesero cambia el pedido de mesa y une otra mesa suya @movil', as
   await expect(join).toBeHidden()
 
   const actual = await readOrder(local, id(first))
-  expect(actual).toMatchObject({ table_id: local.mesa('3').id, total: '48.00' })
-  const tables = await api(local).lista('/tables')
+  expect(actual).toMatchObject({ table_id: local.table('3').id, total: '48.00' })
+  const tables = await api(local).list('/tables')
   const free = tables.filter((m) => m.active_order === null).map((m) => m.label)
   expect(free).toEqual(['1', '2', '4'])
 })
@@ -151,11 +151,11 @@ test('SAL-15 el mesero cambia el pedido de mesa y une otra mesa suya @movil', as
 test('SAL-16 el mesero imprime la comanda sin precios y la precuenta @movil', async ({ page, local }) => {
   covers('ruta:/imprimir/:orderId/:kind', 'funcion:pedido.imprimir-comanda', 'funcion:pedido.imprimir-precuenta', 'funcion:imprimir.reimprimir')
   await countPrints(page)
-  const order = await orderInTable(local, local.mesa('4'), [
-    { plato: local.plato('Lomo saltado'), notas: 'Sin cebolla' },
-    { plato: local.plato('Inca Kola 500 ml'), cantidad: 2 },
+  const order = await orderInTable(local, local.table('4'), [
+    { dish: local.dish('Lomo saltado'), notes: 'Sin cebolla' },
+    { dish: local.dish('Inca Kola 500 ml'), quantity: 2 },
   ])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   await page.getByRole('link', { name: 'Imprimir comanda' }).click()
   const sheet = page.locator('#hoja-impresa')
   await expect(sheet).toContainText('Comanda')
@@ -180,10 +180,10 @@ test('SAL-16 el mesero imprime la comanda sin precios y la precuenta @movil', as
   await evidence(page, 'sal-16-2-precuenta')
 })
 
-test('SAL-36 el encargado lleva un pedido de cocina a cobrado desde el detalle', async ({ page, localConCaja: local }) => {
+test('SAL-36 el encargado lleva un pedido de cocina a cobrado desde el detalle', async ({ page, restaurantWithCashRegister: local }) => {
   covers('funcion:pedido.marcar-listo')
-  const order = await orderInTable(local, local.mesa('1'), [{ plato: local.plato('Ají de gallina') }])
-  await openAs(page, local.encargado, `/pedidos/${String(order.id)}`)
+  const order = await orderInTable(local, local.table('1'), [{ dish: local.dish('Ají de gallina') }])
+  await openAs(page, local.owner, `/pedidos/${String(order.id)}`)
   await page.getByRole('button', { name: 'Marcar listo' }).click()
   await expect(notice(page, 'Pedido #1 listo.')).toBeVisible()
   await page.getByRole('button', { name: 'Marcar servido' }).click()
@@ -197,9 +197,9 @@ test('SAL-36 el encargado lleva un pedido de cocina a cobrado desde el detalle',
 
 test('SAL-37 el mesero sirve un pedido que tomó otro, pero no lo cobra @movil', async ({ page, local }) => {
   covers('funcion:pedido.cobrar-solo-lo-suyo')
-  const order = await orderInTable(local, local.mesa('2'), [{ plato: local.plato('Chicha morada') }], local.encargado)
+  const order = await orderInTable(local, local.table('2'), [{ dish: local.dish('Chicha morada') }], local.owner)
   await api(local).post(`/orders/${String(order.id)}/ready`)
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   await page.getByRole('button', { name: 'Marcar servido' }).click()
   await expect(notice(page, 'Pedido #1 servido, por cobrar.')).toBeVisible()
   await expect(page.getByText('Servido, por cobrar: lo cobra quien lo atendió o el encargado.')).toBeVisible()

@@ -83,7 +83,7 @@ export function IngredientForm({ ingredient, onDone }: IngredientFormProps) {
         <TextField
           id="ingredient-cost"
           label={`Costo por ${priceUnit(unit).label} (S/)`}
-          icon="costo"
+          icon="cost"
           inputMode="decimal"
           autoComplete="off"
           hint="Cada compra lo recalcula con el promedio ponderado."
@@ -99,7 +99,7 @@ export function IngredientForm({ ingredient, onDone }: IngredientFormProps) {
       ) : null}
       <FormButtons
         label={ingredient === undefined ? 'Crear insumo' : 'Guardar'}
-        icon={ingredient === undefined ? 'agregar' : 'confirmar'}
+        icon={ingredient === undefined ? 'add' : 'confirm'}
         pending={change.isPending}
         onCancel={onDone}
       />

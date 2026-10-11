@@ -83,7 +83,7 @@ export function WasteForm({ ingredient, onDone }: WasteFormProps) {
           {errorMessage(waste.error, 'No se pudo registrar la merma.')}
         </FormMessage>
       ) : null}
-      <FormButtons label="Registrar merma" icon="merma" pending={waste.isPending} onCancel={onDone} />
+      <FormButtons label="Registrar merma" icon="waste" pending={waste.isPending} onCancel={onDone} />
     </form>
   )
 }

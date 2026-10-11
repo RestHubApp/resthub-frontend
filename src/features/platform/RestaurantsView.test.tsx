@@ -40,7 +40,7 @@ describe('RestaurantsView', () => {
     await user.type(screen.getByRole('searchbox', { name: SEARCH }), 'pollos')
 
     expect(await screen.findByText('Ningún restaurante coincide con la búsqueda.')).toBeInTheDocument()
-    expect(api.llamadas('get', LIST).at(-1)?.params).toEqual({ limit: 25, offset: 0, search: 'pollos' })
+    expect(api.calls('get', LIST).at(-1)?.params).toEqual({ limit: 25, offset: 0, search: 'pollos' })
   })
 
   it('con más de una página ofrece pasar a la siguiente', async () => {
@@ -50,7 +50,7 @@ describe('RestaurantsView', () => {
     await user.click(screen.getByRole('button', { name: /siguiente/iu }))
 
     await waitFor(() => {
-      expect(api.llamadas('get', LIST).at(-1)?.params).toEqual({ limit: 25, offset: 25 })
+      expect(api.calls('get', LIST).at(-1)?.params).toEqual({ limit: 25, offset: 25 })
     })
   })
 
@@ -92,7 +92,7 @@ describe('NewRestaurantView', () => {
 
     expect(await screen.findByText('Restaurante creado. Su encargado ya puede entrar con su correo.')).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/plataforma/restaurantes/12')
-    expect(api.llamadas('post', LIST)[0]?.body).toEqual({
+    expect(api.calls('post', LIST)[0]?.body).toEqual({
       name: CAFE_NANDU,
       slug: SLUG_CAFE_NANDU,
       timezone: 'America/Lima',
@@ -123,7 +123,7 @@ describe('NewRestaurantView', () => {
 
     expect(await screen.findByText('Ya hay un restaurante con ese identificador.')).toBeInTheDocument()
     expect(router.state.location.pathname).toBe(PLATFORM_NEW_RESTAURANTS)
-    expect(api.llamadas('post', LIST)).toHaveLength(1)
+    expect(api.calls('post', LIST)).toHaveLength(1)
   })
 
   it('valida los datos antes de enviar y cancelar vuelve a la lista', async () => {
@@ -134,7 +134,7 @@ describe('NewRestaurantView', () => {
     await user.click(await screen.findByRole('button', { name: CREATE_RESTAURANT }))
     expect(await screen.findByText('Escribe el nombre del restaurante')).toBeInTheDocument()
     expect(screen.getByText('Escribe el identificador')).toBeInTheDocument()
-    expect(api.llamadas('post', LIST)).toHaveLength(0)
+    expect(api.calls('post', LIST)).toHaveLength(0)
 
     await user.click(screen.getByRole('button', { name: 'Cancelar' }))
     expect(router.state.location.pathname).toBe('/plataforma')

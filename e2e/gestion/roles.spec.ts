@@ -23,7 +23,7 @@ test('GES-17 el encargado crea un rol con permisos, edita el del mesero, ve que 
     'funcion:roles.encargado-fijo',
     'funcion:roles.mesero-sin-renombrar',
   )
-  await openAs(page, local.encargado, '/roles')
+  await openAs(page, local.owner, '/roles')
   await expect(page.getByRole('heading', { level: 1, name: 'Roles y permisos' })).toBeVisible()
   await expect(page.getByText('3 roles')).toBeVisible()
   const role = (name: string) => page.getByRole('main').getByRole('listitem').filter({ has: page.getByText(name, { exact: true }) })
@@ -54,7 +54,7 @@ test('GES-17 el encargado crea un rol con permisos, edita el del mesero, ve que 
   await expect(viewAll).toBeChecked()
   await waiter.getByRole('button', { name: 'Guardar' }).click()
   await expect(notice(page, 'Rol Mesero guardado.')).toBeVisible()
-  const roles = async () => api(local).lista('/roles')
+  const roles = async () => api(local).list('/roles')
   expect((await roles()).find((r) => r.kind === 'waiter')?.permissions).toContain('orders.read_all')
 
   // Un rol propio: Caja.

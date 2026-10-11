@@ -20,7 +20,7 @@ const summary = []
 for (const [file, item] of files) {
   if (!file.endsWith('.js')) continue
   const bytes = await readFile(join(root, 'dist', file))
-  summary.push({ file, kb: +(bytes.length / 1024).toFixed(1), gzipKb: +(gzipSync(bytes).length / 1024).toFixed(1), inicial: load.has(file), origen: item.src ?? '' })
+  summary.push({ file, kb: +(bytes.length / 1024).toFixed(1), gzipKb: +(gzipSync(bytes).length / 1024).toFixed(1), initial: load.has(file), origin: item.src ?? '' })
 }
 summary.sort((a, b) => b.gzipKb - a.gzipKb)
 const lighthouse = {}
@@ -39,7 +39,7 @@ for (const route of ['acceso', 'pedidos', 'pedidos-nuevo', 'roles', 'caja', 'pan
   }
 }
 const output = process.env.A11Y_DIAGNOSTICO ?? join(root, 'pruebas/accesibilidad/reportes/perf-movil-inicial.json')
-const report = { creado: new Date().toISOString(), inicial: [...load], totalInicialGzipKb: +summary.filter((i) => i.inicial).reduce((sum, i) => sum + i.gzipKb, 0).toFixed(1), archivos: summary, lighthouse }
+const report = { created: new Date().toISOString(), initial: [...load], totalInitialGzipKb: +summary.filter((i) => i.initial).reduce((sum, i) => sum + i.gzipKb, 0).toFixed(1), files: summary, lighthouse }
 await writeFile(output, `${JSON.stringify(report, null, 2)}\n`)
-console.log(`Entrada: ${report.totalInicialGzipKb} KiB gzip en ${load.size} chunks; reporte ${output}`)
-for (const item of summary.filter((i) => i.inicial)) console.log(`${item.file}: ${item.gzipKb} KiB gzip`)
+console.log(`Entrada: ${report.totalInitialGzipKb} KiB gzip en ${load.size} chunks; reporte ${output}`)
+for (const item of summary.filter((i) => i.initial)) console.log(`${item.file}: ${item.gzipKb} KiB gzip`)

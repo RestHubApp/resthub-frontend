@@ -12,12 +12,12 @@ const EQUAL = { name: 'Partes iguales' }
 
 // Tras un pago parcial, el pedido baja su saldo; con el último, queda pagado.
 function tras(actual: OrderResponse, amount: string): OrderResponse {
-  const fresh = payment({ id: 50 + actual.payments.length, amount: amount })
+  const fresh = payment({ id: 50 + actual.payments.length, amount })
   const balance = (Number(actual.balance) - Number(amount)).toFixed(2)
   if (balance === '0.00') {
     return paid(actual, fresh)
   }
-  return { ...actual, payments: [...actual.payments, fresh], paid_amount: amount, balance: balance }
+  return { ...actual, payments: [...actual.payments, fresh], paid_amount: amount, balance }
 }
 
 function amountOf(request: Request, actual: OrderResponse): string {
@@ -52,7 +52,7 @@ describe('cobro en partes iguales', () => {
     await user.click(screen.getByRole('button', CONFIRM))
 
     expect(await screen.findByText('Pago registrado. Faltan S/ 25.00.')).toBeInTheDocument()
-    expect(api.llamadas('post', PAYMENTS)[0]?.body).toMatchObject({ amount: '25.00', payment_method: 'card', expected_balance: '50.00' })
+    expect(api.calls('post', PAYMENTS)[0]?.body).toMatchObject({ amount: '25.00', payment_method: 'card', expected_balance: '50.00' })
     expect(await screen.findByText('Paga lo que falta')).toBeInTheDocument()
     expect(within(screen.getByRole('region', { name: 'Pagos registrados' })).getByText('S/ 25.00', { exact: false })).toBeInTheDocument()
   })
@@ -67,7 +67,7 @@ describe('cobro en partes iguales', () => {
     await user.click(screen.getByRole('button', CONFIRM))
 
     await screen.findByRole('dialog', { name: 'Cobro registrado' })
-    expect(api.llamadas('post', PAYMENTS)[0]?.body).not.toHaveProperty('amount')
+    expect(api.calls('post', PAYMENTS)[0]?.body).not.toHaveProperty('amount')
   })
 
   it('entre tres, el redondeo queda para el último', async () => {
@@ -93,7 +93,7 @@ describe('cobro por platos', () => {
     await user.click(screen.getByRole('button', CONFIRM))
 
     expect(await screen.findByText('Pago registrado. Faltan S/ 30.00.')).toBeInTheDocument()
-    expect(api.llamadas('post', PAYMENTS)[0]?.body).toMatchObject({ item_ids: [2], payment_method: 'yape' })
+    expect(api.calls('post', PAYMENTS)[0]?.body).toMatchObject({ item_ids: [2], payment_method: 'yape' })
   })
 
   it('los platos ya pagados no se ofrecen y una cortesía no cuesta', async () => {

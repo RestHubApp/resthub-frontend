@@ -47,7 +47,7 @@ describe('pedidos que esperan señal', () => {
     enqueue('Delivery · Ana', 'b')
     const { api } = open(withoutNetwork)
     expect(await screen.findByText(/2 pedidos esperan señal: Mesa 3, Delivery · Ana\./u)).toBeInTheDocument()
-    expect(api.llamadas('post', ORDERS)).toHaveLength(1)
+    expect(api.calls('post', ORDERS)).toHaveLength(1)
     expect(queuedOrders(OWNER)).toHaveLength(2)
   })
 
@@ -55,8 +55,8 @@ describe('pedidos que esperan señal', () => {
     enqueue('Mesa 3', 'a')
     const { api } = open()
     expect(await screen.findByText(SENT)).toBeInTheDocument()
-    expect(api.llamadas('post', ORDERS)[0]?.body).toMatchObject({ client_request_id: 'a' })
-    expect(api.llamadas('post', SEND)).toHaveLength(1)
+    expect(api.calls('post', ORDERS)[0]?.body).toMatchObject({ client_request_id: 'a' })
+    expect(api.calls('post', SEND)).toHaveLength(1)
     expect(screen.queryByText(/espera señal/u)).not.toBeInTheDocument()
   })
 
@@ -80,7 +80,7 @@ describe('pedidos que esperan señal', () => {
     const { api, user } = open(withoutNetwork)
     await screen.findByText(/1 pedido espera señal/u)
     await user.click(screen.getByRole('button', { name: 'Reintentar' }))
-    expect(api.llamadas('post', ORDERS)).toHaveLength(2)
+    expect(api.calls('post', ORDERS)).toHaveLength(2)
 
     api.on('post', ORDERS, order({ status: 'open' }))
     act(() => {
@@ -96,7 +96,7 @@ describe('pedidos que esperan señal', () => {
       await Promise.resolve()
     })
     expect(screen.queryByText(/espera señal/u)).not.toBeInTheDocument()
-    expect(api.llamadas('post', ORDERS)).toHaveLength(0)
+    expect(api.calls('post', ORDERS)).toHaveLength(0)
     expect(queuedOrders({ userId: 99, restaurantId: 1 })).toHaveLength(1)
   })
 })

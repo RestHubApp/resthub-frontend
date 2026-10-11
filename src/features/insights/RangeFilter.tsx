@@ -52,7 +52,7 @@ export function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
                 }}
                 className={active ? `${OPTION} bg-card font-semibold text-foreground shadow-sm` : `${OPTION} text-muted-foreground hover:text-foreground`}
               >
-                {active ? <Icon name="confirmar" size={14} /> : null}
+                {active ? <Icon name="confirm" size={14} /> : null}
                 {preset.label}
               </button>
             )
@@ -60,7 +60,7 @@ export function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
         </div>
         {period === undefined ? null : (
           <p className="m-0 flex items-center gap-1.5 text-sm text-muted-foreground" aria-live="polite">
-            <Icon name="fecha" size={16} />
+            <Icon name="date" size={16} />
             {periodText(period)}
           </p>
         )}

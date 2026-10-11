@@ -11,7 +11,7 @@ test.beforeEach(() => {
   test.slow()
 })
 
-test('GES-32 un restaurante recién dado de alta muestra cada pantalla vacía con qué hacer', async ({ page, vacio: empty }) => {
+test('GES-32 un restaurante recién dado de alta muestra cada pantalla vacía con qué hacer', async ({ page, empty }) => {
   covers(
     'estado:menu.vacio',
     'estado:mesas.vacio',
@@ -20,7 +20,7 @@ test('GES-32 un restaurante recién dado de alta muestra cada pantalla vacía co
     'estado:comprobantes.vacio',
     'estado:reposicion.vacio',
   )
-  await openAs(page, empty.encargado, '/menu')
+  await openAs(page, empty.owner, '/menu')
   await expect(page.getByText('La carta está vacía')).toBeVisible()
   await expect(page.getByText('Empieza por una categoría, como Entradas o Bebidas')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Nuevo plato' })).toBeDisabled()
@@ -49,7 +49,7 @@ test('GES-33 el menú y las mesas avisan si el servidor falla', async ({ page, l
   covers('estado:menu.error', 'estado:mesas.error')
   await failureServer(page, '/menu')
   await failureServer(page, '/tables')
-  await openAs(page, local.encargado, '/menu')
+  await openAs(page, local.owner, '/menu')
   await expect(page.getByText('No se pudo cargar la carta.')).toBeVisible()
   await page.goto('/mesas')
   await expect(page.getByText('No se pudieron cargar las mesas.')).toBeVisible()

@@ -9,12 +9,12 @@ test('VIS-12 el perfil, el panel de la cuenta y el aviso de pedidos sin enviar a
   deadline(90_000)
   covers('ruta:/perfil', 'hoja:shell/MoreSheet', 'confirmacion:shell/SessionActions')
 
-  await openAs(page, local.mesero, '/perfil')
+  await openAs(page, local.waiter, '/perfil')
   await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible()
   await expect(page.getByText('mesero@e2e.resthub.dev')).toBeVisible()
   await capture(page, 'perfil')
 
-  await orderInQueue(page, { dueno: ownerOf(local.mesero), mesa: local.mesa('3'), plato: local.plato('Lomo saltado') })
+  await orderInQueue(page, { owner: ownerOf(local.waiter), table: local.table('3'), dish: local.dish('Lomo saltado') })
   await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible()
 
   if (esMovil()) {

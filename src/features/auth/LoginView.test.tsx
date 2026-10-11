@@ -36,7 +36,7 @@ describe('LoginView', () => {
     await user.click(screen.getByRole('button', SIGN_IN))
 
     expect(await screen.findByRole('status', { name: 'Ruta actual' })).toHaveTextContent(/^\/$/u)
-    expect(api.llamadas('post', LOGIN)[0]?.body).toEqual({ email: 'mesero@resthub.dev', password: TEST_SECRET })
+    expect(api.calls('post', LOGIN)[0]?.body).toEqual({ email: 'mesero@resthub.dev', password: TEST_SECRET })
     expect(useSession.getState().token).toBe('token-nuevo')
     expect(useSession.getState().account?.permissions).toEqual([...PERMISSIONS_WAITER])
   })
@@ -72,7 +72,7 @@ describe('LoginView', () => {
 
     expect(await screen.findByText('Escribe tu contraseña')).toBeInTheDocument()
     expect(screen.getByLabelText(EMAIL)).toHaveAttribute('aria-invalid', 'true')
-    expect(api.llamadas('post', LOGIN)).toHaveLength(0)
+    expect(api.calls('post', LOGIN)).toHaveLength(0)
   })
 
   it('explica que la sesión venció cuando se volvió al acceso por eso', () => {

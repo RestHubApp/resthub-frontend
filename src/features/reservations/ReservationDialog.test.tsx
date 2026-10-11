@@ -45,7 +45,7 @@ describe('ReservationDialog', () => {
     await user.click(window.getByRole('button', SAVE))
 
     expect(await screen.findByText('Reserva de Carlos guardada.')).toBeInTheDocument()
-    expect(api.llamadas('post', LIST)[0]?.body).toEqual({
+    expect(api.calls('post', LIST)[0]?.body).toEqual({
       customer_name: 'Carlos',
       phone: '',
       party_size: 6,
@@ -69,7 +69,7 @@ describe('ReservationDialog', () => {
     expect(await window.findByText('Escribe a nombre de quién')).toBeInTheDocument()
     expect(window.getByText('Entre 1 y 50')).toBeInTheDocument()
     expect(window.getByText('Escribe los minutos en números')).toBeInTheDocument()
-    expect(api.llamadas('post', LIST)).toHaveLength(0)
+    expect(api.calls('post', LIST)).toHaveLength(0)
   })
 
   it('editar parte de los datos guardados y, sin tocar nada, conserva la mesa y la hora', async () => {
@@ -86,7 +86,7 @@ describe('ReservationDialog', () => {
     await user.click(window.getByRole('button', SAVE))
 
     expect(await screen.findByText('Reserva de Familia Huamán guardada.')).toBeInTheDocument()
-    expect(api.llamadas('put', EDIT_URL)[0]?.body).toMatchObject({
+    expect(api.calls('put', EDIT_URL)[0]?.body).toMatchObject({
       table_id: 2,
       party_size: 4,
       reserved_for: '2026-09-26T01:00:00.000Z',
@@ -106,7 +106,7 @@ describe('ReservationDialog', () => {
     await user.click(window.getByRole('button', SAVE))
 
     expect(await screen.findByText('Reserva de Familia Huamán guardada.')).toBeInTheDocument()
-    expect(api.llamadas('put', EDIT_URL)[0]?.body).toMatchObject({ table_id: null })
+    expect(api.calls('put', EDIT_URL)[0]?.body).toMatchObject({ table_id: null })
   })
 
   it('si la mesa ya está tomada en ese horario, el error queda en la ventana', async () => {

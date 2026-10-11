@@ -30,11 +30,11 @@ function openStaff(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
     .on('get', '/staff', () => ({ items: team.map((account) => ({ ...account })), total: team.length }))
     .on('get', '/roles', ROLES)
   signInAs(permissions)
-  return { api, guardar: save, ...handleMount(<StaffView />, { path: '/personal' }) }
+  return { api, save, ...handleMount(<StaffView />, { path: '/personal' }) }
 }
 
 async function rowOf(name: string | RegExp): Promise<HTMLElement> {
-  return screen.findByRole('row', { name: name })
+  return screen.findByRole('row', { name })
 }
 
 describe('StaffView', () => {
@@ -47,7 +47,7 @@ describe('StaffView', () => {
   })
 
   it('da de alta una cuenta con el mesero elegido por omisión', async () => {
-    const { api, guardar: save, user } = openStaff()
+    const { api, save, user } = openStaff()
     api.on('post', '/staff', (request: Request) => save(member({ id: 10, ...(request.body as object), role_label: 'Mesero' })))
     await rowOf(/Luis Quispe/u)
 
@@ -63,7 +63,7 @@ describe('StaffView', () => {
     await user.click(within(window).getByRole('button', { name: CREATE_ACCOUNT }))
 
     expect(await rowOf(/María Rojas/u)).toBeInTheDocument()
-    expect(api.llamadas('post', '/staff')[0]?.body).toEqual({
+    expect(api.calls('post', '/staff')[0]?.body).toEqual({
       full_name: 'María Rojas',
       email: 'maria@resthub.dev',
       role_id: 2,
@@ -88,7 +88,7 @@ describe('StaffView', () => {
   })
 
   it('la cuenta propia cambia el nombre pero no el rol, ni se desactiva', async () => {
-    const { api, guardar: save, user } = openStaff()
+    const { api, save, user } = openStaff()
     api.on('patch', '/staff/7', (request: Request) => save({ ...handleFirst(TEAM), ...(request.body as object) }))
     const own = await rowOf(/Ana Torres/u)
 
@@ -101,13 +101,13 @@ describe('StaffView', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
     expect(await rowOf(/Ana Torres Luna/u)).toBeInTheDocument()
-    expect(api.llamadas('patch', '/staff/7')[0]?.body).toEqual({ full_name: 'Ana Torres Luna' })
+    expect(api.calls('patch', '/staff/7')[0]?.body).toEqual({ full_name: 'Ana Torres Luna' })
   })
 })
 
 describe('StaffView: cambios sobre otras cuentas', () => {
   it('cambia el rol de otra cuenta', async () => {
-    const { api, guardar: save, user } = openStaff()
+    const { api, save, user } = openStaff()
     api.on('patch', '/staff/8', () => save(member({ role_id: 5, role_label: 'Cocina' })))
 
     await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Editar' }))
@@ -116,7 +116,7 @@ describe('StaffView: cambios sobre otras cuentas', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
     expect(await within(await rowOf(/Luis Quispe/u)).findByText('Cocina')).toBeInTheDocument()
-    expect(api.llamadas('patch', '/staff/8')[0]?.body).toEqual({ full_name: 'Luis Quispe', role_id: 5 })
+    expect(api.calls('patch', '/staff/8')[0]?.body).toEqual({ full_name: 'Luis Quispe', role_id: 5 })
   })
 
   it('restablece la contraseña de otra cuenta y lo avisa', async () => {
@@ -129,11 +129,11 @@ describe('StaffView: cambios sobre otras cuentas', () => {
     await user.click(within(window).getByRole('button', { name: 'Restablecer' }))
 
     expect(await screen.findByText('Contraseña de Luis Quispe restablecida.')).toBeInTheDocument()
-    expect(api.llamadas('post', '/staff/8/password')[0]?.body).toEqual({ new_password: OTHER_TEST_SECRET })
+    expect(api.calls('post', '/staff/8/password')[0]?.body).toEqual({ new_password: OTHER_TEST_SECRET })
   })
 
   it('desactivar se confirma; activar va directo', async () => {
-    const { api, guardar: save, user } = openStaff()
+    const { api, save, user } = openStaff()
     api.on('patch', '/staff/8/status', () => save(member({ is_active: false })))
     api.on('patch', '/staff/9/status', () => save({ ...(TEAM.at(2) ?? handleFirst(TEAM)), is_active: true }))
 
@@ -142,8 +142,8 @@ describe('StaffView: cambios sobre otras cuentas', () => {
     await user.click(within(notice).getByRole('button', { name: 'Desactivar' }))
     await user.click(within(await rowOf(/Rosa Mamani/u)).getByRole('button', { name: 'Activar' }))
 
-    expect(api.llamadas('patch', '/staff/8/status')[0]?.body).toEqual({ is_active: false })
-    expect(api.llamadas('patch', '/staff/9/status')[0]?.body).toEqual({ is_active: true })
+    expect(api.calls('patch', '/staff/8/status')[0]?.body).toEqual({ is_active: false })
+    expect(api.calls('patch', '/staff/9/status')[0]?.body).toEqual({ is_active: true })
     expect(await within(await rowOf(/Rosa Mamani/u)).findByText('Activa')).toBeInTheDocument()
   })
 

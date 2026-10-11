@@ -70,7 +70,7 @@ export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormPro
         <TextField
           id="settings-name"
           label="Nombre"
-          icon="restaurante"
+          icon="restaurant"
           autoComplete="off"
           field={register('name')}
           error={formState.errors.name?.message}
@@ -88,7 +88,7 @@ export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormPro
       {save.isSuccess && !formState.isDirty ? <FormMessage tone="ok">Cambios guardados.</FormMessage> : null}
       <div className="flex justify-end">
         <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending || !formState.isDirty}>
-          <Icon name="confirmar" size={18} />
+          <Icon name="confirm" size={18} />
           <span>{save.isPending ? 'Guardando…' : 'Guardar cambios'}</span>
         </Button>
       </div>

@@ -59,7 +59,7 @@ function columns(canManage: boolean): DataColumn<DishCost>[] {
             className={buttonVariants({ variant: cost.has_recipe ? 'outline' : 'secondary', className: 'h-11 px-3' })}
             aria-label={`${text} de ${cost.menu_item_name}`}
           >
-            <Icon name="receta" size={16} />
+            <Icon name="recipe" size={16} />
             <span>{text}</span>
           </Link>
         )

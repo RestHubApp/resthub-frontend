@@ -30,7 +30,7 @@ async function select(windowValue: Locator, option: string): Promise<void> {
 
 test('SAL-17 el mesero cobra en partes iguales con pago mixto: efectivo con vuelto y Yape con propina @movil', async ({
   page,
-  localConCaja: local,
+  restaurantWithCashRegister: local,
 }) => {
   covers(
     'dialogo:orders/charge/ChargeContent',
@@ -40,11 +40,11 @@ test('SAL-17 el mesero cobra en partes iguales con pago mixto: efectivo con vuel
     'funcion:cobro.propina',
     'funcion:cobro.monto-insuficiente',
   )
-  const order = await orderServed(local, local.mesa('1'), [
-    { plato: local.plato('Lomo saltado'), cantidad: 2 },
-    { plato: local.plato('Inca Kola 500 ml') },
+  const order = await orderServed(local, local.table('1'), [
+    { dish: local.dish('Lomo saltado'), quantity: 2 },
+    { dish: local.dish('Inca Kola 500 ml') },
   ])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   const windowValue = await openCharge(page, 1)
   await expect(windowValue).toContainText(/Total a cobrar\s*S\/\s*70\.00/u)
 
@@ -91,15 +91,15 @@ test('SAL-17 el mesero cobra en partes iguales con pago mixto: efectivo con vuel
 
 test('SAL-18 el mesero cobra por platos: uno paga su lomo con tarjeta y otro el resto en efectivo exacto @movil', async ({
   page,
-  localConCaja: local,
+  restaurantWithCashRegister: local,
 }) => {
   covers('funcion:cobro.por-platos', 'funcion:cobro.monto-exacto')
-  const order = await orderServed(local, local.mesa('2'), [
-    { plato: local.plato('Lomo saltado') },
-    { plato: local.plato('Ceviche clásico') },
-    { plato: local.plato('Chicha morada') },
+  const order = await orderServed(local, local.table('2'), [
+    { dish: local.dish('Lomo saltado') },
+    { dish: local.dish('Ceviche clásico') },
+    { dish: local.dish('Chicha morada') },
   ])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   const windowValue = await openCharge(page, 1)
   await select(windowValue, 'Por platos')
   await expect(windowValue.getByText('Elige al menos un plato')).toBeVisible()
@@ -134,11 +134,11 @@ test('SAL-18 el mesero cobra por platos: uno paga su lomo con tarjeta y otro el 
 
 test('SAL-19 el mesero descuenta hasta su tope, y más allá el servidor lo rechaza @movil', async ({
   page,
-  localConCaja: local,
+  restaurantWithCashRegister: local,
 }) => {
   covers('funcion:cobro.descuento', 'funcion:cobro.descuento-sobre-tope', 'funcion:cobro.quitar-descuento')
-  const order = await orderServed(local, local.mesa('3'), [{ plato: local.plato('Ceviche clásico'), cantidad: 2 }])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  const order = await orderServed(local, local.table('3'), [{ dish: local.dish('Ceviche clásico'), quantity: 2 }])
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   const windowValue = await openCharge(page, 1)
   // Las cortesías son del encargado: el mesero no las ve.
   await expect(windowValue.getByText('Invitar un plato (cortesía)')).toHaveCount(0)
@@ -172,7 +172,7 @@ test('SAL-19 el mesero descuenta hasta su tope, y más allá el servidor lo rech
 
 test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime el ticket', async ({
   page,
-  localConCaja: local,
+  restaurantWithCashRegister: local,
 }) => {
   covers(
     'desplegable:orders/charge/AdjustmentsPanel',
@@ -183,11 +183,11 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
     'funcion:pedido.imprimir-ticket',
   )
   await countPrints(page)
-  const order = await orderServed(local, local.mesa('4'), [
-    { plato: local.plato('Lomo saltado') },
-    { plato: local.plato('Chicha morada') },
+  const order = await orderServed(local, local.table('4'), [
+    { dish: local.dish('Lomo saltado') },
+    { dish: local.dish('Chicha morada') },
   ])
-  await openAs(page, local.encargado, `/pedidos/${String(order.id)}`)
+  await openAs(page, local.owner, `/pedidos/${String(order.id)}`)
   const windowValue = await openCharge(page, 1)
 
   const courtesies = windowValue.getByText('Invitar un plato (cortesía)')
@@ -244,8 +244,8 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
 
 test('SAL-21 sin caja abierta el cobro avisa y no deja confirmar @movil', async ({ page, local }) => {
   covers('estado:cobro.caja-cerrada')
-  const order = await orderServed(local, local.mesa('1'), [{ plato: local.plato('Chicha morada') }])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  const order = await orderServed(local, local.table('1'), [{ dish: local.dish('Chicha morada') }])
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   const windowValue = await openCharge(page, 1)
   await expect(windowValue.getByRole('alert')).toContainText('La caja está cerrada.')
   await expect(windowValue.getByRole('button', { name: 'Confirmar pago' })).toBeDisabled()
@@ -257,10 +257,10 @@ test('SAL-21 sin caja abierta el cobro avisa y no deja confirmar @movil', async 
 
 test('SAL-40 el rechazo de un descuento se anuncia aunque la ventana de cobro esté abierta @movil', async ({
   page,
-  localConCaja: local,
+  restaurantWithCashRegister: local,
 }) => {
-  const order = await orderServed(local, local.mesa('1'), [{ plato: local.plato('Ceviche clásico') }])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  const order = await orderServed(local, local.table('1'), [{ dish: local.dish('Ceviche clásico') }])
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   const windowValue = await openCharge(page, 1)
   await windowValue.getByRole('button', { name: 'Aplicar descuento' }).click()
   await windowValue.getByRole('textbox', { name: 'Descuento %' }).fill('20')

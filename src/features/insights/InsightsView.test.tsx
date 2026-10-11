@@ -26,7 +26,7 @@ describe('InsightsView: rango de fechas', () => {
   it('abre con los últimos 30 días del local y lo dice arriba', async () => {
     const { api } = open()
     expect(await screen.findByText(/Del .* \(30 días\)\./u)).toBeInTheDocument()
-    expect(api.llamadas('get', SUMMARY)[0]?.params).toEqual({ date_from: addDays(today(), -29), date_to: today() })
+    expect(api.calls('get', SUMMARY)[0]?.params).toEqual({ date_from: addDays(today(), -29), date_to: today() })
     expect(screen.getByRole('button', { name: '30 días' })).toHaveAttribute('aria-pressed', 'true')
   })
 
@@ -37,7 +37,7 @@ describe('InsightsView: rango de fechas', () => {
     await user.click(screen.getByRole('button', { name: '7 días' }))
 
     expect(router.state.location.search).toBe('?rango=7d')
-    expect(api.llamadas('get', SUMMARY).at(-1)?.params).toEqual({ date_from: addDays(today(), -6), date_to: today() })
+    expect(api.calls('get', SUMMARY).at(-1)?.params).toEqual({ date_from: addDays(today(), -6), date_to: today() })
   })
 
   it('un rango personalizado se valida antes de aplicarse', async () => {
@@ -58,19 +58,19 @@ describe('InsightsView: rango de fechas', () => {
     await user.click(screen.getByRole('button', { name: 'Aplicar' }))
 
     expect(router.state.location.search).toBe('?rango=personalizado&desde=2026-09-10&hasta=2026-09-15')
-    expect(api.llamadas('get', SUMMARY).at(-1)?.params).toEqual({ date_from: '2026-09-10', date_to: '2026-09-15' })
+    expect(api.calls('get', SUMMARY).at(-1)?.params).toEqual({ date_from: '2026-09-10', date_to: '2026-09-15' })
   })
 
   it('un enlace con un rango personalizado inválido vuelve a los 30 días', async () => {
     const { api } = open('/panel?rango=personalizado&desde=2026-09-20&hasta=2026-09-01')
     await screen.findByText('Ventas')
-    expect(api.llamadas('get', SUMMARY)[0]?.params).toEqual({ date_from: addDays(today(), -29), date_to: today() })
+    expect(api.calls('get', SUMMARY)[0]?.params).toEqual({ date_from: addDays(today(), -29), date_to: today() })
   })
 
   it('un enlace con «Este mes» empieza el día 1', async () => {
     const { api } = open('/panel?rango=mes')
     await screen.findByText('Ventas')
-    expect(api.llamadas('get', SUMMARY)[0]?.params).toEqual({ date_from: `${today().slice(0, 8)}01`, date_to: today() })
+    expect(api.calls('get', SUMMARY)[0]?.params).toEqual({ date_from: `${today().slice(0, 8)}01`, date_to: today() })
   })
 })
 

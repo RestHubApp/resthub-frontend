@@ -35,7 +35,7 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 function marks(ids: readonly number[], options: OrderNoteFlagsOptions = { live: false }) {
-  return renderHook(() => useOrderNoteFlags(ids, options), { wrapper: wrapper })
+  return renderHook(() => useOrderNoteFlags(ids, options), { wrapper })
 }
 
 describe('useOrderNoteFlags', () => {
@@ -64,7 +64,7 @@ describe('useOrderNoteFlags', () => {
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     })
-    expect(api.llamadas('get', NOTES)[0]?.params).toEqual({ order_ids: [1, 2, 3] })
+    expect(api.calls('get', NOTES)[0]?.params).toEqual({ order_ids: [1, 2, 3] })
   })
 
   it('pide clasificar las notas pendientes una sola vez', async () => {
@@ -74,19 +74,19 @@ describe('useOrderNoteFlags', () => {
     marks([1])
 
     await waitFor(() => {
-      expect(api.llamadas('post', CLASSIFY)).toHaveLength(1)
+      expect(api.calls('post', CLASSIFY)).toHaveLength(1)
     })
     await waitFor(() => {
-      expect(api.llamadas('get', NOTES).length).toBeGreaterThanOrEqual(2)
+      expect(api.calls('get', NOTES).length).toBeGreaterThanOrEqual(2)
     })
-    expect(api.llamadas('post', CLASSIFY)).toHaveLength(1)
+    expect(api.calls('post', CLASSIFY)).toHaveLength(1)
   })
 
   it('sin permiso o sin pedidos no pregunta al servidor', () => {
     const api = server()
     const withoutPermission = marks([1], { enabled: false, live: false }).result.current
     marks([])
-    expect(api.peticiones).toHaveLength(0)
+    expect(api.requests).toHaveLength(0)
     expect(withoutPermission.isLoading).toBe(false)
     expect(withoutPermission.flags).toEqual([])
   })

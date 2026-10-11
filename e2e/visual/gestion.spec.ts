@@ -9,7 +9,7 @@ import { inKitchen } from './preparar'
 
 test('VIS-06 el tablero, el historial, la cancelación, el comprobante y la caja del encargado', async ({
   page,
-  localConCaja: restaurantWithCashRegister,
+  restaurantWithCashRegister,
 }) => {
   deadline(150_000)
   covers(
@@ -24,20 +24,20 @@ test('VIS-06 el tablero, el historial, la cancelación, el comprobante y la caja
     'confirmacion:cash/CloseCashButton',
   )
   const local = restaurantWithCashRegister
-  const lomo = local.plato('Lomo saltado')
-  const first = await sell(local, { mesa: local.mesa('1'), items: [{ plato: lomo }, { plato: local.plato('Chicha morada') }] })
+  const lomo = local.dish('Lomo saltado')
+  const first = await sell(local, { table: local.table('1'), items: [{ dish: lomo }, { dish: local.dish('Chicha morada') }] })
   const second = await sell(local, {
-    mesa: local.mesa('2'),
-    items: [{ plato: local.plato('Ceviche clásico'), cantidad: 2 }],
-    metodo: 'yape',
-    propina: '5.00',
+    table: local.table('2'),
+    items: [{ dish: local.dish('Ceviche clásico'), quantity: 2 }],
+    method: 'yape',
+    tip: '5.00',
   })
   const salesReceipt = await issueSalesReceipt(local, id(first))
-  await inKitchen(local, local.mesa('3'), [{ plato: local.plato('Ají de gallina') }])
+  await inKitchen(local, local.table('3'), [{ dish: local.dish('Ají de gallina') }])
   // La hoja de impresión llama a `window.print()`: el diálogo del sistema no deja capturar en Firefox.
   await countPrints(page)
 
-  await openAs(page, local.encargado, '/tablero')
+  await openAs(page, local.owner, '/tablero')
   await expect(page.getByRole('region', { name: 'En cocina: 1' })).toBeVisible()
   await expect(page.getByRole('status').filter({ hasText: 'En vivo' })).toBeVisible()
   await capture(page, 'tablero')
@@ -106,7 +106,7 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
     duration_minutes: 90,
     notes: 'Cumpleaños',
     reserved_for: `${today()}T20:00:00-05:00`,
-    table_id: local.mesa('2').id,
+    table_id: local.table('2').id,
   })
   await api(local).post('/customers', {
     consent: true,
@@ -118,7 +118,7 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
     notes: 'Prefiere la mesa de la ventana',
   })
 
-  await openAs(page, local.encargado, '/reservas')
+  await openAs(page, local.owner, '/reservas')
   await expect(page.getByText('Lucía Paredes')).toBeVisible()
   await capture(page, 'reservas', { mask: [page.getByLabel('Día')] })
 

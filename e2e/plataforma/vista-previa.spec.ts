@@ -47,7 +47,7 @@ async function viewAs(page: Page, context: BrowserContext, as: 'encargado' | 'me
   return tab
 }
 
-test('PLA-11 reiniciar el local de muestra lo archiva y crea otro', async ({ page, plataforma: platform }) => {
+test('PLA-11 reiniciar el local de muestra lo archiva y crea otro', async ({ page, platform }) => {
   covers('confirmacion:platform/SandboxResetButton', 'funcion:plataforma.vista-previa.reiniciar', 'ruta:/plataforma/vista-previa')
   await withSampleRestaurant(async () => {
     await openAsPlatform(page, platform, '/plataforma/vista-previa')
@@ -71,7 +71,7 @@ test('PLA-11 reiniciar el local de muestra lo archiva y crea otro', async ({ pag
   })
 })
 
-test('PLA-12 la vista previa como encargado abre otra pestaña con su franja y todas las secciones', async ({ page, plataforma: platform, context }) => {
+test('PLA-12 la vista previa como encargado abre otra pestaña con su franja y todas las secciones', async ({ page, platform, context }) => {
   covers(
     'funcion:plataforma.vista-previa.como-encargado',
     'rol:vista-previa-encargado',
@@ -109,7 +109,7 @@ test('PLA-12 la vista previa como encargado abre otra pestaña con su franja y t
   })
 })
 
-test('PLA-13 la vista previa como mesero muestra su franja y avisa antes de descartar pedidos sin enviar @movil', async ({ page, plataforma: platform, context }) => {
+test('PLA-13 la vista previa como mesero muestra su franja y avisa antes de descartar pedidos sin enviar @movil', async ({ page, platform, context }) => {
   covers(
     'funcion:plataforma.vista-previa.como-mesero',
     'rol:vista-previa-mesero',
@@ -137,7 +137,7 @@ test('PLA-13 la vista previa como mesero muestra su franja y avisa antes de desc
       return { userId: account.user.id, restaurantId: account.restaurant.id }
     })
     await withoutOrdersSending(preview)
-    await enqueueOrders(preview, account, [{ mesa: { id: 1, etiqueta: '5' }, plato: { id: 1 } }], 'pestana')
+    await enqueueOrders(preview, account, [{ table: { id: 1, label: '5' }, dish: { id: 1 } }], 'pestana')
     await preview.reload()
     await preview.getByRole('button', { name: SIGN_OUT }).click()
     const notice = preview.getByRole('alertdialog', { name: '¿Salir con pedidos sin enviar?' })
@@ -151,7 +151,7 @@ test('PLA-13 la vista previa como mesero muestra su franja y avisa antes de desc
   })
 })
 
-test('PLA-14 el enlace de repuesto abre la vista previa si el navegador bloqueó la pestaña, y sirve una sola vez', async ({ page, plataforma: platform, context }) => {
+test('PLA-14 el enlace de repuesto abre la vista previa si el navegador bloqueó la pestaña, y sirve una sola vez', async ({ page, platform, context }) => {
   covers(
     'funcion:plataforma.vista-previa.enlace-de-repuesto',
     'estado:vista-previa.codigo-invalido',

@@ -52,7 +52,7 @@ describe('PreviewView', () => {
     await user.click(await screen.findByRole('button', { name: 'Ver como mesero' }))
 
     expect(await screen.findByText('Se abrió la vista previa como mesero en otra pestaña.')).toBeInTheDocument()
-    expect(api.llamadas('post', PREVIEW)[0]?.body).toEqual({ as: 'waiter' })
+    expect(api.calls('post', PREVIEW)[0]?.body).toEqual({ as: 'waiter' })
     expect(openTab).toHaveBeenCalledWith('/vista-previa#codigo=abc%20123', '_blank', 'noopener')
     const link = screen.getByRole('link', { name: 'Abrir la vista previa como mesero' })
     expect(link).toHaveAttribute('href', '/vista-previa#codigo=abc%20123')
@@ -83,7 +83,7 @@ describe('PreviewView', () => {
 
     expect(await screen.findByText('Listo: el local de muestra empieza de nuevo.')).toBeInTheDocument()
     expect(screen.getByText('Muestra RestHub 2')).toBeInTheDocument()
-    expect(api.llamadas('post', `${SAMPLE}/reset`)).toHaveLength(1)
+    expect(api.calls('post', `${SAMPLE}/reset`)).toHaveLength(1)
   })
 
   it('si no se puede leer el local de muestra, deja reintentar', async () => {

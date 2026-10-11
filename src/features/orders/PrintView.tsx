@@ -53,7 +53,7 @@ export function PrintView() {
         <Button type="button" onClick={() => {
           window.print()
         }}>
-          <Icon name="enviar" size={16} />
+          <Icon name="send" size={16} />
           <span>Imprimir</span>
         </Button>
       </div>

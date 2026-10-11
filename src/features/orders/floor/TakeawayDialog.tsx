@@ -18,7 +18,7 @@ export function TakeawayDialog() {
       <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
         setOpen(true)
       }}>
-        <Icon name="llevar" size={18} />
+        <Icon name="takeaway" size={18} />
         <span>Para llevar / Delivery</span>
       </Button>
       {open ? (

@@ -12,7 +12,7 @@ test.beforeEach(() => {
   test.slow()
 })
 
-test('GES-26 el encargado revisa los indicadores del período, mira las tablas, ordena el margen y clasifica las mermas', async ({ page, localConCaja: local }) => {
+test('GES-26 el encargado revisa los indicadores del período, mira las tablas, ordena el margen y clasifica las mermas', async ({ page, restaurantWithCashRegister: local }) => {
   covers(
     'ruta:/panel',
     'funcion:panel.indicadores',
@@ -22,17 +22,17 @@ test('GES-26 el encargado revisa los indicadores del período, mira las tablas, 
     'funcion:panel.bajo-minimo',
     'funcion:panel.clasificar-mermas',
   )
-  await sell(local, { mesa: local.mesa('1'), items: [{ plato: local.plato('Lomo saltado'), cantidad: 2 }] })
-  await sell(local, { mesa: local.mesa('2'), items: [{ plato: local.plato('Ceviche clásico') }, { plato: local.plato('Chicha morada') }], metodo: 'yape' })
-  const cancelled = await api(local, local.mesero).post('/orders', {
+  await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado'), quantity: 2 }] })
+  await sell(local, { table: local.table('2'), items: [{ dish: local.dish('Ceviche clásico') }, { dish: local.dish('Chicha morada') }], method: 'yape' })
+  const cancelled = await api(local, local.waiter).post('/orders', {
     type: 'dine_in',
-    table_id: local.mesa('3').id,
-    items: [{ menu_item_id: local.plato('Ají de gallina').id, quantity: 1, notes: '' }],
+    table_id: local.table('3').id,
+    items: [{ menu_item_id: local.dish('Ají de gallina').id, quantity: 1, notes: '' }],
   })
   await api(local).post(`/orders/${String(id(cancelled))}/cancel`, { reason: 'El cliente se fue' })
-  await api(local).post('/inventory/waste', { ingredient_id: local.insumos[1].id, quantity: '100', reason: 'Se venció en la cámara' })
+  await api(local).post('/inventory/waste', { ingredient_id: local.ingredients[1].id, quantity: '100', reason: 'Se venció en la cámara' })
 
-  await openAs(page, local.encargado, '/panel')
+  await openAs(page, local.owner, '/panel')
   await expect(page.getByRole('heading', { level: 1, name: 'Panel BI' })).toBeVisible()
   const range = page.getByRole('group', { name: 'Rango de fechas' })
   await expect(range.getByRole('button', { name: '30 días' })).toHaveAttribute('aria-pressed', 'true')
@@ -89,10 +89,10 @@ test('GES-26 el encargado revisa los indicadores del período, mira las tablas, 
 
 })
 
-test('GES-28 el encargado acota el panel con los rangos de siempre y uno personalizado, y un rango sin ventas lo dice', async ({ page, localConCaja: local }) => {
+test('GES-28 el encargado acota el panel con los rangos de siempre y uno personalizado, y un rango sin ventas lo dice', async ({ page, restaurantWithCashRegister: local }) => {
   covers('funcion:panel.rango-predefinido', 'funcion:panel.rango-personalizado', 'funcion:panel.rango-invalido', 'estado:panel.sin-ventas')
-  await sell(local, { mesa: local.mesa('1'), items: [{ plato: local.plato('Lomo saltado') }] })
-  await openAs(page, local.encargado, '/panel')
+  await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado') }] })
+  await openAs(page, local.owner, '/panel')
   const range = page.getByRole('group', { name: 'Rango de fechas' })
   const kpi = (name: string) => page.getByRole('region', { name: 'Indicadores del período' }).getByText(name, { exact: true }).locator('xpath=..')
   await expect(kpi('Ventas')).toContainText(soles('32.00'))
@@ -127,7 +127,7 @@ test('GES-28 el encargado acota el panel con los rangos de siempre y uno persona
 test('GES-27 cada sección del panel avisa si el servidor falla', async ({ page, local }) => {
   covers('estado:panel.error')
   await failureServer(page, '/insights')
-  await openAs(page, local.encargado, '/panel')
+  await openAs(page, local.owner, '/panel')
   for (const message of [
     'No se pudo cargar el resumen del período.',
     'No se pudieron cargar las ventas por día.',

@@ -15,12 +15,12 @@ const INITIAL_PERSONAS = 2
 
 /** Cómo se divide este pago: el modo, lo que se cobra y los platos elegidos. */
 interface Split {
-  readonly modo: SplitMode
-  readonly parte: number
-  readonly platos: readonly number[]
+  readonly mode: SplitMode
+  readonly part: number
+  readonly dishes: readonly number[]
 }
 
-function payloadFor(order: OrderResponse, values: ChargeValues, { modo: mode, parte: part, platos: dishes }: Split): PaymentRequest {
+function payloadFor(order: OrderResponse, values: ChargeValues, { mode, part, dishes }: Split): PaymentRequest {
   const cash = values.payment_method === 'cash'
   const base: PaymentRequest = {
     payment_method: values.payment_method,
@@ -79,17 +79,17 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
 
   return {
     form,
-    modo: mode,
-    setModo: setMode,
+    mode,
+    setMode,
     personas,
     setPersonas,
-    platos: dishes,
-    setPlatos: setDishes,
-    parte: part,
-    pago: payment,
-    puedeCobrar: !withoutDishes && !payment.isPending,
-    enviar: form.handleSubmit((values) => {
-      payment.mutate(payloadFor(order, values, { modo: mode, parte: part, platos: dishes }))
+    dishes,
+    setDishes,
+    part,
+    payment,
+    canCharge: !withoutDishes && !payment.isPending,
+    send: form.handleSubmit((values) => {
+      payment.mutate(payloadFor(order, values, { mode, part, dishes }))
     }),
   }
 }

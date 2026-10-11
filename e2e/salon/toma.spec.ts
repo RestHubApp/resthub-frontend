@@ -26,7 +26,7 @@ test('SAL-01 el mesero toma el pedido de una mesa en tres pasos y lo envía a co
     'funcion:pedido-nuevo.cambiar-cantidad',
     'funcion:pedido-nuevo.enviar-a-cocina',
   )
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   await expect(page.getByRole('heading', { name: '4 de 4 mesas libres' })).toBeVisible()
   await evidence(page, 'sal-01-1-mesas')
 
@@ -57,9 +57,9 @@ test('SAL-01 el mesero toma el pedido de una mesa en tres pasos y lo envía a co
   await expect(page.getByRole('heading', { name: '3 de 4 mesas libres' })).toBeVisible()
   await evidence(page, 'sal-01-3-enviado')
 
-  const active = await api(local, local.mesero).lista('/orders/active')
+  const active = await api(local, local.waiter).list('/orders/active')
   expect(active).toHaveLength(1)
-  expect(active[0]).toMatchObject({ status: 'in_kitchen', table_id: local.mesa('2').id, total: '40.00' })
+  expect(active[0]).toMatchObject({ status: 'in_kitchen', table_id: local.table('2').id, total: '40.00' })
 })
 
 test('SAL-02 el mesero busca, filtra por categoría y anota en el resumen antes de enviar @movil', async ({ page, local }) => {
@@ -70,7 +70,7 @@ test('SAL-02 el mesero busca, filtra por categoría y anota en el resumen antes 
     'funcion:pedido-nuevo.resumen-y-notas',
     'estado:pedido-nuevo.sin-resultados',
   )
-  await openAs(page, local.mesero, `/pedidos/nuevo?mesa=${String(local.mesa('3').id)}`)
+  await openAs(page, local.waiter, `/pedidos/nuevo?mesa=${String(local.table('3').id)}`)
   const categories = page.getByRole('group', { name: 'Categorías' })
   await categories.getByRole('button', { name: 'Bebidas' }).click()
   await expect(categories.getByRole('button', { name: 'Bebidas' })).toHaveAttribute('aria-pressed', 'true')
@@ -103,7 +103,7 @@ test('SAL-02 el mesero busca, filtra por categoría y anota en el resumen antes 
   await sheet.getByRole('button', { name: 'Enviar a cocina' }).click()
   await expect(notice(page, /enviado a cocina/u)).toBeVisible()
 
-  const [order] = await api(local, local.mesero).lista('/orders/active')
+  const [order] = await api(local, local.waiter).list('/orders/active')
   const lines = order.items as { name: string; quantity: number; notes: string }[]
   expect(lines).toEqual([
     expect.objectContaining({ name: 'Ceviche clásico', quantity: 1, notes: 'Sin cebolla, poco ají' }),
@@ -113,11 +113,11 @@ test('SAL-02 el mesero busca, filtra por categoría y anota en el resumen antes 
 
 test('SAL-03 un plato agotado o sin insumos se ve pero no se puede elegir @movil', async ({ page, local }) => {
   covers('funcion:pedido-nuevo.plato-agotado', 'funcion:pedido-nuevo.plato-sin-insumos')
-  await api(local).patch(`/menu/items/${String(local.plato('Ají de gallina').id)}/availability`, { is_available: false })
+  await api(local).patch(`/menu/items/${String(local.dish('Ají de gallina').id)}/availability`, { is_available: false })
   // Sin lomo de res en el almacén, la receta del Lomo saltado no alcanza.
-  const [lomoRes] = local.insumos
+  const [lomoRes] = local.ingredients
   await api(local).post('/inventory/waste', { ingredient_id: lomoRes.id, quantity: '5000', reason: 'Se malogró' })
-  await openAs(page, local.mesero, `/pedidos/nuevo?mesa=${String(local.mesa('1').id)}`)
+  await openAs(page, local.waiter, `/pedidos/nuevo?mesa=${String(local.table('1').id)}`)
 
   const aji = page.getByRole('button', { name: /^Ají de gallina/u })
   await expect(aji).toBeDisabled()
@@ -129,7 +129,7 @@ test('SAL-03 un plato agotado o sin insumos se ve pero no se puede elegir @movil
   await evidence(page, 'sal-03-1-agotados')
 
   // En vivo: el encargado lo repone y el celular lo vuelve a ofrecer sin recargar.
-  await api(local).patch(`/menu/items/${String(local.plato('Ají de gallina').id)}/availability`, { is_available: true })
+  await api(local).patch(`/menu/items/${String(local.dish('Ají de gallina').id)}/availability`, { is_available: true })
   await expect(aji).toBeEnabled()
   await expect(aji).not.toContainText('Agotado')
 })
@@ -137,7 +137,7 @@ test('SAL-03 un plato agotado o sin insumos se ve pero no se puede elegir @movil
 test('SAL-04 un plato con opciones pide el término y suma los extras al precio @movil', async ({ page, local }) => {
   covers('dialogo:orders/taking/ModifierDialog', 'funcion:pedido-nuevo.opciones-del-plato')
   const bistec = await dishWithOptions(local)
-  await openAs(page, local.mesero, `/pedidos/nuevo?mesa=${String(local.mesa('4').id)}`)
+  await openAs(page, local.waiter, `/pedidos/nuevo?mesa=${String(local.table('4').id)}`)
 
   await page.getByRole('button', { name: /^Bistec a lo pobre/u }).click()
   const windowValue = page.getByRole('dialog', { name: 'Bistec a lo pobre' })
@@ -163,7 +163,7 @@ test('SAL-04 un plato con opciones pide el término y suma los extras al precio 
 
   await page.getByRole('button', { name: 'Enviar a cocina' }).click()
   await expect(notice(page, /enviado a cocina/u)).toBeVisible()
-  const [order] = await api(local, local.mesero).lista('/orders/active')
+  const [order] = await api(local, local.waiter).list('/orders/active')
   expect(order.total).toBe('35.50')
   const [line] = order.items as { menu_item_id: number; modifiers: { option: string; price: string }[] }[]
   expect(line.menu_item_id).toBe(bistec.id)
@@ -173,11 +173,11 @@ test('SAL-04 un plato con opciones pide el término y suma los extras al precio 
 test('SAL-38 la comanda y la precuenta muestran las opciones elegidas del plato @movil', async ({ page, local }) => {
   covers('funcion:pedido.opciones-impresas')
   const bistec = await dishWithOptions(local)
-  const order = await orderInTable(local, local.mesa('4'), [
-    { plato: bistec, opciones: [{ grupo: 'Término', opcion: 'A punto' }, { grupo: 'Extras', opcion: 'Huevo frito' }] },
+  const order = await orderInTable(local, local.table('4'), [
+    { dish: bistec, options: [{ group: 'Término', option: 'A punto' }, { group: 'Extras', option: 'Huevo frito' }] },
   ])
   await countPrints(page)
-  await openAs(page, local.mesero, `/imprimir/${String(id(order))}/comanda`)
+  await openAs(page, local.waiter, `/imprimir/${String(id(order))}/comanda`)
   const sheet = page.locator('#hoja-impresa')
   await expect(sheet).toContainText('1 × Bistec a lo pobre')
   await expect(sheet).toContainText('A punto · Huevo frito')
@@ -191,8 +191,8 @@ test('SAL-38 la comanda y la precuenta muestran las opciones elegidas del plato 
 
 test('SAL-05 una mesa que se ocupó mientras se elegía avisa, y una mesa que no existe también @movil', async ({ page, local }) => {
   covers('funcion:pedido-nuevo.mesa-ocupada', 'estado:pedido-nuevo.mesa-inexistente')
-  const order = await openOrder(local, local.mesa('1'), [{ plato: local.plato('Chicha morada') }])
-  await openAs(page, local.mesero, `/pedidos/nuevo?mesa=${String(local.mesa('1').id)}`)
+  const order = await openOrder(local, local.table('1'), [{ dish: local.dish('Chicha morada') }])
+  await openAs(page, local.waiter, `/pedidos/nuevo?mesa=${String(local.table('1').id)}`)
   await expect(page.getByText(`Esta mesa ya tiene el pedido #${String(order.number)}.`)).toBeVisible()
   await evidence(page, 'sal-05-1-ocupada')
   await page.getByRole('link', { name: 'Ver el pedido' }).click()

@@ -22,11 +22,11 @@ test('GES-31 el mesero ve sus datos y cambia su contraseña pidiendo la actual @
     'funcion:perfil.validar-contrasena',
     'funcion:perfil.contrasena-actual-incorrecta',
   )
-  await openAs(page, local.mesero, '/perfil')
+  await openAs(page, local.waiter, '/perfil')
   await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible()
   const data = (term: string) => page.getByRole('term').filter({ hasText: term }).locator('xpath=following-sibling::dd')
   await expect(data('Nombre')).toHaveText('Mesero Prueba')
-  await expect(data('Correo')).toHaveText(local.mesero.email)
+  await expect(data('Correo')).toHaveText(local.waiter.email)
   await expect(data('Rol')).toHaveText('Mesero')
   await expect(data('Restaurante')).toHaveText('Restaurante E2E')
 
@@ -57,7 +57,7 @@ test('GES-31 el mesero ve sus datos y cambia su contraseña pidiendo la actual @
   await repeated.fill(NEW)
   await change.click()
   await expect(page.getByRole('alert').filter({ hasText: /contraseña/iu })).toBeVisible()
-  expect(await tryAccess(local.http, local.mesero.email, NEW_SECRET)).toBe(200)
+  expect(await tryAccess(local.http, local.waiter.email, NEW_SECRET)).toBe(200)
 
   await page.getByRole('button', { name: 'Mostrar contraseña' }).first().click()
   await expect(actual).toHaveAttribute('type', 'text')
@@ -66,6 +66,6 @@ test('GES-31 el mesero ve sus datos y cambia su contraseña pidiendo la actual @
   await expect(page.getByText('Contraseña actualizada.')).toBeVisible()
   await expect(actual).toHaveValue('')
   await evidence(page, 'ges-31-2-cambiada')
-  expect(await tryAccess(local.http, local.mesero.email, NEW)).toBe(200)
-  expect(await tryAccess(local.http, local.mesero.email, NEW_SECRET)).toBe(401)
+  expect(await tryAccess(local.http, local.waiter.email, NEW)).toBe(200)
+  expect(await tryAccess(local.http, local.waiter.email, NEW_SECRET)).toBe(401)
 })

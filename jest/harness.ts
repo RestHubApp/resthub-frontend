@@ -40,8 +40,8 @@ interface Route {
   readonly method: Method
   readonly path: string | RegExp
   readonly status: number
-  readonly responder: Respond
-  veces: number | null
+  readonly respond: Respond
+  times: number | null
 }
 
 /** Un error del API con el cuerpo de FastAPI (`{ detail }`). */
@@ -97,46 +97,46 @@ function requestOf(config: InternalAxiosRequestConfig): Request {
 
 /** El servidor falso: las rutas se declaran con `on` y las peticiones quedan en `peticiones`. */
 export class FakeServer {
-  readonly peticiones: Request[] = []
-  private readonly rutas: Route[] = []
+  readonly requests: Request[] = []
+  private readonly routes: Route[] = []
 
   /**
    * Declara una respuesta: un valor fijo, una función de la petición o un
    * `RespuestaDeError`. Las últimas declaradas tienen prioridad.
    */
   on(method: Method, path: string | RegExp, response: unknown, status = 200): this {
-    this.agregar({ method, path, status, responder: respondOf(response), veces: null })
+    this.add({ method, path, status, respond: respondOf(response), times: null })
     return this
   }
 
   /** Igual que `on`, pero solo para la próxima petición que coincida. */
   once(method: Method, path: string | RegExp, response: unknown, status = 200): this {
-    this.agregar({ method, path, status, responder: respondOf(response), veces: 1 })
+    this.add({ method, path, status, respond: respondOf(response), times: 1 })
     return this
   }
 
-  private agregar(route: Route): void {
-    this.rutas.unshift(route)
+  private add(route: Route): void {
+    this.routes.unshift(route)
   }
 
   /** Las peticiones con ese método y esa ruta. */
-  llamadas(method: Method, path: string | RegExp): Request[] {
-    return this.peticiones.filter((p) => coincide({ method, path, status: 0, responder: () => null, veces: null }, p))
+  calls(method: Method, path: string | RegExp): Request[] {
+    return this.requests.filter((p) => coincide({ method, path, status: 0, respond: () => null, times: null }, p))
   }
 
-  private tomarRuta(request: Request): Route | undefined {
-    const route = this.rutas.find((r) => (r.veces === null || r.veces > 0) && coincide(r, request))
-    if (route !== undefined && route.veces !== null) {
-      route.veces -= 1
+  private takeRoute(request: Request): Route | undefined {
+    const route = this.routes.find((r) => (r.times === null || r.times > 0) && coincide(r, request))
+    if (route !== undefined && route.times !== null) {
+      route.times -= 1
     }
     return route
   }
 
   readonly adapter: AxiosAdapter = async (config) => {
     const request = requestOf(config)
-    this.peticiones.push(request)
-    const route = this.tomarRuta(request)
-    const value = route ? await route.responder(request) : new ErrorResponse(404, 'No existe (prueba)')
+    this.requests.push(request)
+    const route = this.takeRoute(request)
+    const value = route ? await route.respond(request) : new ErrorResponse(404, 'No existe (prueba)')
     const error = value instanceof ErrorResponse ? value : null
     const status = error?.status ?? route?.status ?? 404
     const data = error ? { detail: error.detail } : value
@@ -225,11 +225,11 @@ interface MountOptions {
   /** La dirección en la que se abre (`/pedidos/12`). */
   readonly en?: string
   /** Otras rutas del router, además de la pantalla. */
-  readonly rutas?: RouteObject[]
+  readonly routes?: RouteObject[]
 }
 
 /** Monta una pantalla dentro de un router en memoria y con el caché de la aplicación. */
-export function handleMount(screen: ReactElement, { path = '/', en = path, rutas: routes = [] }: MountOptions = {}): Mount {
+export function handleMount(screen: ReactElement, { path = '/', en = path, routes = [] }: MountOptions = {}): Mount {
   return mountRoutes([{ path, element: screen }, ...routes], en)
 }
 

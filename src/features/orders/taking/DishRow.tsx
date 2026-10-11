@@ -65,7 +65,7 @@ export function DishRow({ item, quantity, onAdd, onChange }: DishRowProps) {
         ) : null}
         {!outOfStock && !selected ? (
           <span className="flex size-10 items-center justify-center rounded-full bg-secondary text-primary ring-1 ring-primary/25">
-            <Icon name="agregar" size={18} label="Agregar" />
+            <Icon name="add" size={18} label="Agregar" />
           </span>
         ) : null}
       </button>

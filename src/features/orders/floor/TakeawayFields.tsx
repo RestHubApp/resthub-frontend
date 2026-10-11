@@ -19,7 +19,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
         id="takeaway-customer"
         label={delivery ? 'Nombre de quien recibe' : 'Nombre del cliente (opcional)'}
         placeholder="Por ejemplo, Ana"
-        icon="perfil"
+        icon="profile"
         autoComplete="off"
         maxLength={MAX_CUSTOMER}
         hint="Se muestra en el tablero para entregar el pedido correcto."
@@ -43,7 +43,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
             id="takeaway-address"
             label="Dirección de entrega"
             placeholder="Calle, número, distrito"
-            icon="ubicacion"
+            icon="location"
             autoComplete="off"
             maxLength={MAX_ADDRESS}
             field={register('address')}
@@ -53,7 +53,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
             id="takeaway-reference"
             label="Referencia (opcional)"
             placeholder="Por ejemplo, frente al parque"
-            icon="nota"
+            icon="note"
             autoComplete="off"
             maxLength={MAX_REFERENCE}
             field={register('reference')}

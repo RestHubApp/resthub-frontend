@@ -21,7 +21,7 @@ export function LowStockSection() {
       actions={
         <Button asChild variant="outline" size="sm">
           <Link to={paths.insights.restock}>
-            <Icon name="comprar" size={14} />
+            <Icon name="buy" size={14} />
             <span>Ver reposición sugerida</span>
           </Link>
         </Button>

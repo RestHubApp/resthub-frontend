@@ -22,7 +22,7 @@ test('GES-29 el encargado revisa la reposición sugerida, filtra por acción, ve
   )
   const preview = await api(local).get('/insights/restock')
   expect(preview).toMatchObject({ refreshed_at: null, counts: { buy_this_week: 1, wait: 2 } })
-  await openAs(page, local.encargado, '/panel')
+  await openAs(page, local.owner, '/panel')
   await page.getByRole('navigation', { name: 'Secciones del panel' }).getByRole('link', { name: 'Reposición' }).click()
   await expect(page).toHaveURL(/\/panel\/reposicion$/u)
   await expect(page.getByText('Es una vista previa calculada con las reglas fijas.')).toBeVisible()
@@ -82,10 +82,10 @@ test('GES-30 el encargado audita las decisiones de la IA: filtra por tipo y moto
     await owner.post('/inventory/ingredients', { name: `Insumo ${String(n).padStart(2, '0')}`, unit: 'unit', min_stock: '0', unit_cost: '1' })
   }
   await owner.post('/insights/restock/refresh')
-  await owner.post('/inventory/waste', { ingredient_id: local.insumos[1].id, quantity: '100', reason: 'Se venció' })
+  await owner.post('/inventory/waste', { ingredient_id: local.ingredients[1].id, quantity: '100', reason: 'Se venció' })
   await owner.post('/insights/waste/classify')
 
-  await openAs(page, local.encargado, '/panel/ia')
+  await openAs(page, local.owner, '/panel/ia')
   await expect(page.getByRole('link', { name: 'Auditoría de IA' })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByText('22 en total con estos filtros.')).toBeVisible()
   const pages = page.getByRole('navigation', { name: 'Paginación' })

@@ -13,10 +13,10 @@ interface Entry {
 }
 
 const ENTRIES: readonly Entry[] = [
-  { to: paths.platform.home, label: 'Restaurantes', icon: 'restaurante', within: paths.platform.restaurant('') },
-  { to: paths.platform.activity, label: 'Bitácora', icon: 'historial' },
+  { to: paths.platform.home, label: 'Restaurantes', icon: 'restaurant', within: paths.platform.restaurant('') },
+  { to: paths.platform.activity, label: 'Bitácora', icon: 'history' },
   { to: paths.platform.preview, label: 'Vista previa', icon: 'ver' },
-  { to: paths.platform.observability, label: 'Observabilidad', icon: 'observabilidad' },
+  { to: paths.platform.observability, label: 'Observabilidad', icon: 'observability' },
 ]
 
 const BASE =

@@ -50,8 +50,8 @@ describe('parseObsFilters', () => {
 
   it('recorta la búsqueda a los 120 caracteres que acepta el servidor', () => {
     const long = 'x'.repeat(200)
-    expect(parseObsFilters(new URLSearchParams({ buscar: long })).logSearch).toHaveLength(120)
-    expect(parseObsFilters(new URLSearchParams({ peticion: long })).requestId).toHaveLength(128)
+    expect(parseObsFilters(new URLSearchParams({ 'buscar': long })).logSearch).toHaveLength(120)
+    expect(parseObsFilters(new URLSearchParams({ 'peticion': long })).requestId).toHaveLength(128)
   })
 })
 

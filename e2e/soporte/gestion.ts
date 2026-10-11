@@ -46,34 +46,34 @@ export class ApiManagement {
     this.token = token
   }
 
-  private opciones(data?: unknown) {
+  private options(data?: unknown) {
     return { headers: { Authorization: `Bearer ${this.token}`, Connection: 'close' }, data }
   }
 
   async get(route: string): Promise<Json> {
-    return body(await this.http.get(`${API}${route}`, this.opciones()), `GET ${route}`)
+    return body(await this.http.get(`${API}${route}`, this.options()), `GET ${route}`)
   }
 
-  async lista(route: string): Promise<Json[]> {
+  async list(route: string): Promise<Json[]> {
     const data = (await this.get(route)) as unknown
     return Array.isArray(data) ? (data as Json[]) : (((data as Json).items ?? []) as Json[])
   }
 
   async post(route: string, data: unknown = {}): Promise<Json> {
-    return body(await this.http.post(`${API}${route}`, this.opciones(data)), `POST ${route}`)
+    return body(await this.http.post(`${API}${route}`, this.options(data)), `POST ${route}`)
   }
 
   async put(route: string, data: unknown): Promise<Json> {
-    return body(await this.http.put(`${API}${route}`, this.opciones(data)), `PUT ${route}`)
+    return body(await this.http.put(`${API}${route}`, this.options(data)), `PUT ${route}`)
   }
 
   async patch(route: string, data: unknown): Promise<Json> {
-    return body(await this.http.patch(`${API}${route}`, this.opciones(data)), `PATCH ${route}`)
+    return body(await this.http.patch(`${API}${route}`, this.options(data)), `PATCH ${route}`)
   }
 }
 
 /** El API como esa cuenta; sin cuenta, como el encargado. */
-export function api(local: Pick<Local, 'http' | 'encargado'>, who: Session = local.encargado): ApiManagement {
+export function api(local: Pick<Local, 'http' | 'owner'>, who: Session = local.owner): ApiManagement {
   return new ApiManagement(local.http, who.token)
 }
 
@@ -94,10 +94,10 @@ export function id(data: Json): number {
 }
 
 export interface Sale {
-  readonly items: readonly { readonly plato: Dish; readonly cantidad?: number }[]
-  readonly mesa: Table
-  readonly metodo?: 'cash' | 'yape' | 'plin' | 'card' | 'transfer'
-  readonly propina?: string
+  readonly items: readonly { readonly dish: Dish; readonly quantity?: number }[]
+  readonly table: Table
+  readonly method?: 'cash' | 'yape' | 'plin' | 'card' | 'transfer'
+  readonly tip?: string
 }
 
 /**
@@ -106,18 +106,18 @@ export interface Sale {
  * abierta. Devuelve el pedido pagado.
  */
 export async function sell(local: Local, sale: Sale): Promise<Json> {
-  const waiter = api(local, local.mesero)
+  const waiter = api(local, local.waiter)
   const order = await waiter.post('/orders', {
     type: 'dine_in',
-    table_id: sale.mesa.id,
+    table_id: sale.table.id,
     client_request_id: `e2e-${unique()}`,
-    items: sale.items.map(({ plato: dish, cantidad: quantity = 1 }) => ({ menu_item_id: dish.id, quantity: quantity, notes: '' })),
+    items: sale.items.map(({ dish, quantity = 1 }) => ({ menu_item_id: dish.id, quantity, notes: '' })),
   })
   const route = `/orders/${String(id(order))}`
   await waiter.post(`${route}/send`)
-  await api(local, local.cocina).post(`${route}/ready`)
+  await api(local, local.kitchen).post(`${route}/ready`)
   await waiter.post(`${route}/served`)
-  return waiter.post(`${route}/charge`, { payment_method: sale.metodo ?? 'cash', tip: sale.propina ?? '0' })
+  return waiter.post(`${route}/charge`, { payment_method: sale.method ?? 'cash', tip: sale.tip ?? '0' })
 }
 
 /** La boleta simple de un pedido pagado, sin datos del cliente. */
@@ -135,7 +135,7 @@ export async function issueSalesReceipt(local: Local, orderId: number): Promise<
 /** Una cuenta más del personal con ese rol. Devuelve la sesión ya iniciada. */
 export async function newAccount(local: Local, name: string, roleId: number): Promise<Session> {
   const email = `cuenta-${unique()}@e2e.resthub.dev`
-  await api(local).post('/staff', { email: email, full_name: name, role_id: roleId, password: NEW_SECRET })
+  await api(local).post('/staff', { email, full_name: name, role_id: roleId, password: NEW_SECRET })
   return signInByApi(local.http, email, NEW_SECRET)
 }
 
@@ -152,7 +152,7 @@ export async function failureServer(page: Page, route: string): Promise<void> {
 
 /** Un restaurante recién dado de alta: solo su encargado, sin carta, mesas ni inventario. */
 export interface RestaurantEmpty {
-  readonly encargado: Session
+  readonly owner: Session
   readonly http: Http
 }
 
@@ -165,14 +165,14 @@ async function createRestaurantEmpty(): Promise<RestaurantEmpty> {
     name: 'Restaurante Vacío E2E',
     slug: `e2e-vacio-${suffix}`,
     timezone: 'America/Lima',
-    owner: { full_name: 'Encargado Nuevo', email: email, password: NEW_SECRET },
+    owner: { full_name: 'Encargado Nuevo', email, password: NEW_SECRET },
   })
-  return { encargado: await signInByApi(http, email, NEW_SECRET), http }
+  return { owner: await signInByApi(http, email, NEW_SECRET), http }
 }
 
 /** Los accesorios comunes más el restaurante vacío, para los estados vacíos. */
-export const test = base.extend<{ vacio: RestaurantEmpty }>({
-  vacio: async ({}, use) => {
+export const test = base.extend<{ empty: RestaurantEmpty }>({
+  empty: async ({}, use) => {
     const empty = await createRestaurantEmpty()
     await use(empty)
     await empty.http.dispose()
@@ -182,16 +182,16 @@ export const test = base.extend<{ vacio: RestaurantEmpty }>({
 /** Cuenta las veces que la página pide imprimir, sin abrir el diálogo del sistema. */
 export async function countPrints(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const windowValue = window as unknown as { impresiones: number }
-    windowValue.impresiones = 0
+    const windowValue = window as unknown as { prints: number }
+    windowValue.prints = 0
     window.print = () => {
-      windowValue.impresiones += 1
+      windowValue.prints += 1
     }
   })
 }
 
 export async function prints(page: Page): Promise<number> {
-  return page.evaluate(() => (window as unknown as { impresiones: number }).impresiones)
+  return page.evaluate(() => (window as unknown as { prints: number }).prints)
 }
 
 /** El día que cae `dias` después de hoy en Lima (`2026-09-28`). */

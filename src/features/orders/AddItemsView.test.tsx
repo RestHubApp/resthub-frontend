@@ -31,7 +31,7 @@ describe('AddItemsView', () => {
     await user.click(screen.getByRole('button', { name: /agregar al pedido/i }))
 
     expect(await screen.findByText('Platos agregados al pedido #12.')).toBeInTheDocument()
-    expect(lastBody(api.llamadas('post', '/orders/5/items'))).toEqual({
+    expect(lastBody(api.calls('post', '/orders/5/items'))).toEqual({
       items: [{ menu_item_id: 12, quantity: 1, notes: '', modifiers: [] }],
     })
     expect(await screen.findByRole('status', { name: 'Ruta actual' })).toHaveTextContent('/pedidos/5')

@@ -57,7 +57,7 @@ describe('CashHistory', () => {
     await user.click(screen.getByRole('button', { name: 'Siguiente' }))
 
     expect(await screen.findByText(/abrió Turno viejo/u)).toBeInTheDocument()
-    expect(api.llamadas('get', SESSIONS).map((p) => p.params)).toEqual([
+    expect(api.calls('get', SESSIONS).map((p) => p.params)).toEqual([
       { limit: 10, offset: 0 },
       { limit: 10, offset: 10 },
     ])
@@ -70,7 +70,7 @@ describe('CashHistory', () => {
       discounted_orders: 1,
       by_waiter: [{ waiter_id: 8, name: LUIS, payments: 2, sales: '90.00', tips: '6.00' }],
     })
-    const detail = closed(1, { summary: summary, closing_notes: 'Billete falso', difference: '2.00', counted_cash: '202.00' })
+    const detail = closed(1, { summary, closing_notes: 'Billete falso', difference: '2.00', counted_cash: '202.00' })
     const { api, user } = open([closed(1)])
     api.on('get', '/cash/sessions/1', detail)
 

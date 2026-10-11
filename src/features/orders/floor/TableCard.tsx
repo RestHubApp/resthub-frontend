@@ -34,7 +34,7 @@ export function TableCard({ table }: TableCardProps) {
       >
         <span className="font-heading text-xl font-bold">{name}</span>
         <span className="mt-auto flex items-center gap-1.5 text-sm font-medium text-success">
-          <Icon name="agregar" size={16} />
+          <Icon name="add" size={16} />
           Libre
         </span>
       </Link>
@@ -55,7 +55,7 @@ export function TableCard({ table }: TableCardProps) {
       </span>
       {order.status === 'ready' ? (
         <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-success">
-          <Icon name="servir" size={16} />
+          <Icon name="serve" size={16} />
           Falta servirlo
         </span>
       ) : (

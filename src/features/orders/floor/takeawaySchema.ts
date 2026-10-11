@@ -33,7 +33,7 @@ export const takeawaySchema = z
     ]
     for (const [field, message] of missing) {
       if (values[field] === '') {
-        ctx.addIssue({ code: 'custom', path: [field], message: message })
+        ctx.addIssue({ code: 'custom', path: [field], message })
       }
     }
   })
@@ -65,7 +65,7 @@ export function fromCustomer(customer: Customer, mode: TakeawayValues['mode']): 
 
 /** La dirección de la toma del pedido, con lo necesario en la URL. */
 export function newOrderPath(values: TakeawayValues): string {
-  const query = new URLSearchParams({ tipo: values.mode === 'delivery' ? 'delivery' : 'llevar' })
+  const query = new URLSearchParams({ 'tipo': values.mode === 'delivery' ? 'delivery' : 'llevar' })
   query.set('cliente', values.customer_name)
   if (values.customer_id !== null) {
     query.set('clienteId', String(values.customer_id))

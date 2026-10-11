@@ -76,10 +76,10 @@ export function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
                 className="h-11 self-start px-4"
                 aria-label={`Registrar compra de ${ingredient.name}`}
                 onClick={() => {
-                  onAction({ kind: 'purchase', ingredient: ingredient })
+                  onAction({ kind: 'purchase', ingredient })
                 }}
               >
-                <Icon name="compra" size={16} />
+                <Icon name="purchase" size={16} />
                 <span>Registrar compra</span>
               </Button>
             ) : null}

@@ -34,7 +34,7 @@ function fakeStorage() {
     removeItem: (password: string) => {
       data.delete(password)
     },
-    datos: data,
+    data,
   }
 }
 
@@ -48,7 +48,7 @@ async function load() {
 }
 
 function saved(storage: ReturnType<typeof fakeStorage>): unknown {
-  return JSON.parse(storage.datos.get(SECRET) ?? 'null')
+  return JSON.parse(storage.data.get(SECRET) ?? 'null')
 }
 
 beforeEach(() => {
@@ -69,7 +69,7 @@ describe('sesión normal y ciclo de vida', () => {
   it('restaura una sesión válida guardada', async () => {
     const storage = fakeStorage()
     const token = tokenThatExpires(3600)
-    storage.datos.set(SECRET, JSON.stringify({ token, account: account(1) }))
+    storage.data.set(SECRET, JSON.stringify({ token, account: account(1) }))
     stubGlobal('localStorage', storage)
     jest.resetModules()
     const { useSession } = await import('./session')
@@ -79,12 +79,12 @@ describe('sesión normal y ciclo de vida', () => {
   it('marca expirada y limpia storage si la sesión guardada ya venció', async () => {
     const storage = fakeStorage()
     const token = tokenThatExpires(-10)
-    storage.datos.set(SECRET, JSON.stringify({ token, account: account(1) }))
+    storage.data.set(SECRET, JSON.stringify({ token, account: account(1) }))
     stubGlobal('localStorage', storage)
     jest.resetModules()
     const { useSession } = await import('./session')
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: true })
-    expect(storage.datos.has(SECRET)).toBe(false)
+    expect(storage.data.has(SECRET)).toBe(false)
   })
 
   it('iniciar sesión guarda en storage y programa el vencimiento automático', async () => {
@@ -97,7 +97,7 @@ describe('sesión normal y ciclo de vida', () => {
 
     jest.advanceTimersByTime(11_000)
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: true })
-    expect(storage.datos.has(SECRET)).toBe(false)
+    expect(storage.data.has(SECRET)).toBe(false)
   })
 
   it('cerrar sesión limpia la sesión y no marca expired', async () => {
@@ -107,7 +107,7 @@ describe('sesión normal y ciclo de vida', () => {
 
     useSession.getState().signOut()
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
-    expect(storage.datos.has(SECRET)).toBe(false)
+    expect(storage.data.has(SECRET)).toBe(false)
   })
 
   it('refresh actualiza la cuenta en la sesión y en storage', async () => {
@@ -126,7 +126,7 @@ describe('sesión normal y ciclo de vida', () => {
     const { storage, useSession } = await load()
     useSession.getState().refresh(account(2))
     expect(useSession.getState().account).toBeNull()
-    expect(storage.datos.size).toBe(0)
+    expect(storage.data.size).toBe(0)
   })
 })
 
@@ -166,7 +166,7 @@ describe('renovación de la sesión del restaurante', () => {
     useSession.getState().renew(old, tokenThatExpires(7200), account(1))
 
     expect(useSession.getState().token).toBeNull()
-    expect(storage.datos.has(SECRET)).toBe(false)
+    expect(storage.data.has(SECRET)).toBe(false)
   })
 })
 
@@ -181,17 +181,17 @@ function sampleAccount(): CurrentUserResponse {
 // Una pestaña recién abierta en `/vista-previa`, con una sesión real en localStorage.
 async function previewTab(route = '/vista-previa', initial: Record<string, string> = {}) {
   const local = fakeStorage()
-  local.datos.set(SECRET, JSON.stringify({ token: tokenThatExpires(3600), account: account(1) }))
+  local.data.set(SECRET, JSON.stringify({ token: tokenThatExpires(3600), account: account(1) }))
   const tab = fakeStorage()
   for (const [password, value] of Object.entries(initial)) {
-    tab.datos.set(password, value)
+    tab.data.set(password, value)
   }
   stubGlobal('localStorage', local)
   stubGlobal('sessionStorage', tab)
   stubGlobal('location', { pathname: route })
   jest.resetModules()
   const { useSession } = await import('./session')
-  return { local, pestana: tab, useSession }
+  return { local, tab, useSession }
 }
 
 describe('sesión de vista previa', () => {
@@ -201,15 +201,15 @@ describe('sesión de vista previa', () => {
   })
 
   it('se guarda en la pestaña y deja intacta la sesión real', async () => {
-    const { local, pestana: tab, useSession } = await previewTab()
-    const real = local.datos.get(SECRET)
+    const { local, tab, useSession } = await previewTab()
+    const real = local.data.get(SECRET)
     const token = tokenThatExpires(1800)
 
     useSession.getState().startPreview(token, sampleAccount())
 
-    expect(local.datos.get(SECRET)).toBe(real)
-    expect(JSON.parse(tab.datos.get(PREVIEW) ?? 'null')).toEqual({ token, account: sampleAccount() })
-    expect(tab.datos.get(MARK)).toBe('1')
+    expect(local.data.get(SECRET)).toBe(real)
+    expect(JSON.parse(tab.data.get(PREVIEW) ?? 'null')).toEqual({ token, account: sampleAccount() })
+    expect(tab.data.get(MARK)).toBe('1')
   })
 
   it('rechaza una sesión que el servidor no marcó como vista previa', async () => {
@@ -225,7 +225,7 @@ describe('sesión de vista previa', () => {
     expect(() => {
       useSession.getState().startPreview(tokenThatExpires(1800), sampleAccount())
     }).toThrow()
-    expect(storage.datos.size).toBe(0)
+    expect(storage.data.size).toBe(0)
   })
 
   it('al recargar la pestaña vuelve la vista previa, no la sesión real', async () => {
@@ -238,26 +238,26 @@ describe('sesión de vista previa', () => {
   })
 
   it('al vencer se borra su sesión pero la pestaña sigue siendo de vista previa', async () => {
-    const { local, pestana: tab, useSession } = await previewTab()
-    const real = local.datos.get(SECRET)
+    const { local, tab, useSession } = await previewTab()
+    const real = local.data.get(SECRET)
     useSession.getState().startPreview(tokenThatExpires(1800), sampleAccount())
 
     useSession.getState().expire()
 
-    expect(tab.datos.has(PREVIEW)).toBe(false)
-    expect(tab.datos.get(MARK)).toBe('1')
-    expect(local.datos.get(SECRET)).toBe(real)
+    expect(tab.data.has(PREVIEW)).toBe(false)
+    expect(tab.data.get(MARK)).toBe('1')
+    expect(local.data.get(SECRET)).toBe(real)
   })
 
   it('salir borra la sesión y la marca, y no toca localStorage', async () => {
-    const { local, pestana: tab, useSession } = await previewTab()
-    const real = local.datos.get(SECRET)
+    const { local, tab, useSession } = await previewTab()
+    const real = local.data.get(SECRET)
     useSession.getState().startPreview(tokenThatExpires(1800), sampleAccount())
 
     useSession.getState().exitPreview()
 
-    expect(tab.datos.size).toBe(0)
-    expect(local.datos.get(SECRET)).toBe(real)
+    expect(tab.data.size).toBe(0)
+    expect(local.data.get(SECRET)).toBe(real)
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
   })
 
@@ -276,37 +276,37 @@ describe('sesión de vista previa', () => {
 describe('cola de la vista previa', () => {
   it('al vencer o salir se descarta la cola entera de la pestaña', async () => {
     for (const close of ['expire', 'exitPreview'] as const) {
-      const { local, pestana: tab, useSession } = await previewTab()
-      local.datos.set(QUEUE, JSON.stringify([{ userId: 1, restaurantId: 1 }]))
-      const real = local.datos.get(QUEUE)
+      const { local, tab, useSession } = await previewTab()
+      local.data.set(QUEUE, JSON.stringify([{ userId: 1, restaurantId: 1 }]))
+      const real = local.data.get(QUEUE)
       useSession.getState().startPreview(tokenThatExpires(1800), sampleAccount())
       // Pedidos de dos cuentas del local de muestra, como tras entrar como encargado y luego como mesero.
-      tab.datos.set(QUEUE, JSON.stringify([{ userId: 9, restaurantId: 1 }, { userId: 10, restaurantId: 1 }]))
+      tab.data.set(QUEUE, JSON.stringify([{ userId: 9, restaurantId: 1 }, { userId: 10, restaurantId: 1 }]))
 
       useSession.getState()[close]()
 
-      expect(tab.datos.has(QUEUE)).toBe(false)
-      expect(local.datos.get(QUEUE)).toBe(real)
+      expect(tab.data.has(QUEUE)).toBe(false)
+      expect(local.data.get(QUEUE)).toBe(real)
     }
   })
 
   it('al recargarse ya vencida tampoco guarda su cola', async () => {
-    const { pestana: tab } = await previewTab('/pedidos', {
+    const { tab } = await previewTab('/pedidos', {
       [MARK]: '1',
       [PREVIEW]: JSON.stringify({ token: tokenThatExpires(-10), account: sampleAccount() }),
       [QUEUE]: JSON.stringify([{ userId: 9, restaurantId: 1 }]),
     })
-    expect(tab.datos.has(QUEUE)).toBe(false)
+    expect(tab.data.has(QUEUE)).toBe(false)
   })
 
   it('en una pestaña normal cerrar o vencer la sesión no toca la cola', async () => {
     const { storage, useSession } = await load()
     const queue = JSON.stringify([{ userId: 1, restaurantId: 1 }])
-    storage.datos.set(QUEUE, queue)
+    storage.data.set(QUEUE, queue)
     useSession.getState().signIn(tokenThatExpires(3600), account(1))
 
     useSession.getState().expire()
 
-    expect(storage.datos.get(QUEUE)).toBe(queue)
+    expect(storage.data.get(QUEUE)).toBe(queue)
   })
 })

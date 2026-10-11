@@ -64,7 +64,7 @@ export function DiscountForm({ order, onDone }: DiscountFormProps) {
         <TextField
           id="descuento-porcentaje"
           label="Descuento %"
-          icon="descuento"
+          icon="discount"
           inputMode="decimal"
           autoComplete="off"
           placeholder="10"

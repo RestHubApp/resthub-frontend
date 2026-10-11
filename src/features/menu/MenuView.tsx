@@ -15,7 +15,7 @@ import { useMenuOrder } from './useMenuOrder'
 
 /** La carta del restaurante: categorías, platos, precios y lo que hay hoy. */
 export function MenuView() {
-  const { menu, costoPorPlato: costByDish } = useMenuData()
+  const { menu, costByDish } = useMenuData()
   const categories = menu.data?.categories ?? []
   const order = useMenuOrder(categories)
   const [dialog, setDialog] = useState<NewMenuDialog>(null)
@@ -39,9 +39,9 @@ export function MenuView() {
               variant="outline"
               size="lg"
               className="h-11 px-4"
-              onClick={open({ tipo: 'categoria' })}
+              onClick={open({ type: 'categoria' })}
             >
-              <Icon name="agregar" size={16} />
+              <Icon name="add" size={16} />
               <span>Nueva categoría</span>
             </Button>
             <Button
@@ -49,9 +49,9 @@ export function MenuView() {
               size="lg"
               className="h-11 px-4"
               disabled={categories.length === 0}
-              onClick={open({ tipo: 'plato' })}
+              onClick={open({ type: 'plato' })}
             >
-              <Icon name="agregar" size={16} />
+              <Icon name="add" size={16} />
               <span>Nuevo plato</span>
             </Button>
           </>
@@ -87,7 +87,7 @@ export function MenuView() {
           onMoveItem={(itemId, direction) => {
             order.moveItem(category, itemId, direction)
           }}
-          onAddItem={open({ tipo: 'plato', categoryId: category.id })}
+          onAddItem={open({ type: 'plato', categoryId: category.id })}
         />
       ))}
 

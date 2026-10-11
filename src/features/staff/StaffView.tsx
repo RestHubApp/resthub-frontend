@@ -91,7 +91,7 @@ export function StaffView() {
               setCreating(true)
             }}
           >
-            <Icon name="agregar" size={16} />
+            <Icon name="add" size={16} />
             <span>Nueva cuenta</span>
           </Button>
         }

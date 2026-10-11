@@ -28,7 +28,7 @@ function dayInLima(scroll = 0): string {
 
 test('SAL-28 el encargado filtra el tablero por tipo y envía, cobra y cancela desde las tarjetas', async ({
   page,
-  localConCaja: local,
+  restaurantWithCashRegister: local,
 }) => {
   covers(
     'funcion:tablero.filtrar-tipo',
@@ -37,11 +37,11 @@ test('SAL-28 el encargado filtra el tablero por tipo y envía, cobra y cancela d
     'funcion:tablero.cancelar',
     'funcion:tablero.ir-al-pedido',
   )
-  const open = await openOrder(local, local.mesa('1'), [{ plato: local.plato('Chicha morada') }])
-  const takeaway = await orderTakeaway(local, 'Ana', [{ plato: local.plato('Ají de gallina') }])
-  const delivery = await orderDelivery(local, 'Luis', [{ plato: local.plato('Lomo saltado') }])
-  const served = await orderServed(local, local.mesa('2'), [{ plato: local.plato('Ceviche clásico') }])
-  await openAs(page, local.encargado, '/tablero')
+  const open = await openOrder(local, local.table('1'), [{ dish: local.dish('Chicha morada') }])
+  const takeaway = await orderTakeaway(local, 'Ana', [{ dish: local.dish('Ají de gallina') }])
+  const delivery = await orderDelivery(local, 'Luis', [{ dish: local.dish('Lomo saltado') }])
+  const served = await orderServed(local, local.table('2'), [{ dish: local.dish('Ceviche clásico') }])
+  await openAs(page, local.owner, '/tablero')
 
   const filter = page.getByRole('group', { name: 'Filtrar por tipo' })
   await expect(filter.getByRole('button')).toHaveText(['Todos (4)', 'En mesa (2)', 'Para llevar (1)', 'Delivery (1)'])
@@ -95,7 +95,7 @@ test('SAL-28 el encargado filtra el tablero por tipo y envía, cobra y cancela d
 
 test('SAL-29 el historial filtra por fecha, estado, tipo y mesero, y despliega el detalle de cada pedido', async ({
   page,
-  localConCaja: local,
+  restaurantWithCashRegister: local,
 }) => {
   covers(
     'ruta:/tablero/historial',
@@ -107,12 +107,12 @@ test('SAL-29 el historial filtra por fecha, estado, tipo y mesero, y despliega e
     'funcion:historial.ver-detalle',
     'estado:historial.vacio',
   )
-  const paid = await orderPaid(local, local.mesa('1'), [{ plato: local.plato('Lomo saltado') }])
-  const cancelled = await orderTakeaway(local, 'Rosa', [{ plato: local.plato('Chicha morada') }])
+  const paid = await orderPaid(local, local.table('1'), [{ dish: local.dish('Lomo saltado') }])
+  const cancelled = await orderTakeaway(local, 'Rosa', [{ dish: local.dish('Chicha morada') }])
   await api(local).post(`/orders/${String(cancelled.id)}/cancel`, { reason: 'Pedido duplicado' })
-  await orderTakeaway(local, 'Pedro', [{ plato: local.plato('Inca Kola 500 ml') }], local.encargado)
+  await orderTakeaway(local, 'Pedro', [{ dish: local.dish('Inca Kola 500 ml') }], local.owner)
 
-  await openAs(page, local.encargado, '/tablero')
+  await openAs(page, local.owner, '/tablero')
   await page.getByRole('link', { name: 'Historial' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Historial de pedidos' })).toBeVisible()
   await expect(page.getByText('3 en total')).toBeVisible()
@@ -165,11 +165,11 @@ test('SAL-29 el historial filtra por fecha, estado, tipo y mesero, y despliega e
 
 test('SAL-30 el historial pagina de 25 en 25', async ({ page, local }) => {
   covers('funcion:historial.paginar')
-  const customer = api(local, local.mesero)
+  const customer = api(local, local.waiter)
   for (let i = 1; i <= 26; i += 1) {
     await customer.post('/orders', { type: 'takeaway', customer_name: `Cliente ${String(i)}`, items: [] })
   }
-  await openAs(page, local.encargado, '/tablero/historial')
+  await openAs(page, local.owner, '/tablero/historial')
   await expect(page.getByText('26 en total')).toBeVisible()
   const pages = page.getByRole('navigation', { name: 'Paginación' })
   await expect(pages).toContainText('Página 1 de 2')

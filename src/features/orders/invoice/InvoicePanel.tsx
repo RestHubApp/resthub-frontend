@@ -52,7 +52,7 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
         <Button type="button" variant="outline" className="self-start" onClick={() => {
           setIssuing(true)
         }}>
-          <Icon name="receta" size={16} />
+          <Icon name="recipe" size={16} />
           <span>Emitir boleta o factura</span>
         </Button>
         <InvoiceDialog order={order} open={issuing} onClose={() => {
@@ -73,7 +73,7 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
       )}
       <Button asChild variant="ghost" size="sm">
         <Link to={paths.billing.print(issued.id)}>
-          <Icon name="imprimir" size={14} />
+          <Icon name="print" size={14} />
           <span>Imprimir</span>
         </Link>
       </Button>

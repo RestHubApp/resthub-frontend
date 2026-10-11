@@ -46,10 +46,10 @@ export function presetRange(
   today: string,
 ): RangeDates {
   const start: Record<typeof preset, string> = {
-    hoy: today,
+    'hoy': today,
     '7d': addDays(today, -6),
     '30d': addDays(today, -29),
-    mes: `${today.slice(0, 8)}01`,
+    'mes': `${today.slice(0, 8)}01`,
   }
   return { date_from: start[preset], date_to: today }
 }

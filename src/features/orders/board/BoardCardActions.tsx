@@ -56,7 +56,7 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
             onCancel(order)
           }}
         >
-          <Icon name="cancelar" size={16} />
+          <Icon name="cancel" size={16} />
           <span>Cancelar</span>
         </Button>
       ) : null}

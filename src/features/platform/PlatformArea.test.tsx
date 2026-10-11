@@ -53,7 +53,7 @@ describe('acceso al área de plataforma', () => {
     expect(await screen.findByRole('heading', { name: 'Bitácora', level: 1 })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe(PLATFORM_LOG)
     expect(usePlatformSession.getState().token).toBe('token-plataforma')
-    expect(api.llamadas('post', LOGIN)[0]?.body).toEqual({ email: PLATFORM_RESTHUB_DEV, password: TEST_SECRET })
+    expect(api.calls('post', LOGIN)[0]?.body).toEqual({ email: PLATFORM_RESTHUB_DEV, password: TEST_SECRET })
   })
 
   it('tras varios intentos fallidos muestra cuándo volver a intentar', async () => {

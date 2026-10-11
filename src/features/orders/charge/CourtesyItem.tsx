@@ -66,7 +66,7 @@ export function CourtesyItem({ order, item }: CourtesyItemProps) {
                 setReason('')
               }}
             >
-              <Icon name="cortesia" size={14} />
+              <Icon name="courtesy" size={14} />
               <span>Invitar</span>
             </Button>
           )}

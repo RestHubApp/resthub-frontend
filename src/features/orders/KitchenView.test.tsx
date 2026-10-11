@@ -41,7 +41,7 @@ describe('KitchenView', () => {
     const { api } = open()
     const card = await screen.findByRole('article', { name: 'Pedido 12' })
     expect(await within(card).findByText('Con alergia')).toBeInTheDocument()
-    expect(api.llamadas('get', NOTES)[0]?.params).toEqual({ order_ids: [5, 6] })
+    expect(api.calls('get', NOTES)[0]?.params).toEqual({ order_ids: [5, 6] })
   })
 
   it('quien no ve el panel no pregunta por las alergias', async () => {
@@ -49,7 +49,7 @@ describe('KitchenView', () => {
     const card = await screen.findByRole('article', { name: 'Pedido 12' })
     expect(within(card).getByText('alérgico al maní')).toBeInTheDocument()
     expect(within(card).queryByText('Con alergia')).not.toBeInTheDocument()
-    expect(api.llamadas('get', NOTES)).toHaveLength(0)
+    expect(api.calls('get', NOTES)).toHaveLength(0)
   })
 
   it('el encargado marca un pedido listo; el mesero solo mira', async () => {
@@ -58,7 +58,7 @@ describe('KitchenView', () => {
     expect(within(screen.getByRole('article', { name: 'Pedido 13' })).queryByRole('button', { name: 'Listo' })).not.toBeInTheDocument()
     await user.click(within(card).getByRole('button', { name: 'Listo' }))
     expect(await screen.findByText('Pedido #12 listo.')).toBeInTheDocument()
-    expect(api.llamadas('post', '/orders/5/ready')).toHaveLength(1)
+    expect(api.calls('post', '/orders/5/ready')).toHaveLength(1)
   })
 
   it('un mesero no tiene el botón de listo', async () => {

@@ -24,7 +24,7 @@ describe('CancelOrderDialog', () => {
     await user.click(window.getByRole('button', { name: 'Cancelar pedido' }))
 
     expect(await window.findByText('Escribe el motivo')).toBeInTheDocument()
-    expect(api.llamadas('post', CANCEL)).toHaveLength(0)
+    expect(api.calls('post', CANCEL)).toHaveLength(0)
   })
 
   it('con el motivo, cancela, avisa y cierra', async () => {
@@ -34,7 +34,7 @@ describe('CancelOrderDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Cancelar pedido' }))
 
     expect(await screen.findByText('Pedido #34 cancelado.')).toBeInTheDocument()
-    expect(api.llamadas('post', CANCEL)[0]?.body).toEqual({ reason: 'Pedido duplicado' })
+    expect(api.calls('post', CANCEL)[0]?.body).toEqual({ reason: 'Pedido duplicado' })
     expect(onClose).toHaveBeenCalled()
   })
 
@@ -50,7 +50,7 @@ describe('CancelOrderDialog', () => {
     await user.click(await screen.findByRole('button', { name: 'Volver' }))
 
     expect(onClose).toHaveBeenCalledTimes(1)
-    expect(api.llamadas('post', CANCEL)).toHaveLength(0)
+    expect(api.calls('post', CANCEL)).toHaveLength(0)
   })
 
   it('Escape descarta el motivo escrito y cierra', async () => {

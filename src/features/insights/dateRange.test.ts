@@ -70,8 +70,8 @@ describe('prefetchInsights', () => {
     signInAs()
     prefetchInsights()
     await queryClient.getQueryCache().findAll({ queryKey: ['insights', 'summary'] })[0]?.promise
-    expect(api.llamadas('get', '/insights/summary')).toHaveLength(1)
-    const { date_from: from, date_to: until } = api.peticiones[0]?.params as { date_from: string; date_to: string }
+    expect(api.calls('get', '/insights/summary')).toHaveLength(1)
+    const { date_from: from, date_to: until } = api.requests[0]?.params as { date_from: string; date_to: string }
     expect(daysBetween(from, until)).toBe(30)
   })
 
@@ -79,6 +79,6 @@ describe('prefetchInsights', () => {
     const api = server()
     signInAs(PERMISSIONS_WAITER)
     prefetchInsights()
-    expect(api.peticiones).toHaveLength(0)
+    expect(api.requests).toHaveLength(0)
   })
 })

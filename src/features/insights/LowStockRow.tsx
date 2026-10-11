@@ -12,7 +12,7 @@ export function LowStockRow({ item }: { readonly item: LowStockItem }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-medium">{item.name}</span>
         <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
-          <Icon name="critico" size={14} />
+          <Icon name="critical" size={14} />
           Bajo mínimo
         </span>
       </div>

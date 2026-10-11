@@ -13,7 +13,7 @@ function print(taxInvoice: Invoice | ErrorResponse, permissions?: Parameters<typ
   const api = server().on('get', '/billing/invoices/5', taxInvoice).on('get', '/billing/settings', taxSettings())
   signInAs(permissions)
   const { user } = handleMount(<InvoicePrintView />, { path: ROUTE, en: '/comprobantes/5/imprimir' })
-  return { api, imprimirSpy: printSpy, user }
+  return { api, printSpy, user }
 }
 
 afterEach(() => {
@@ -22,7 +22,7 @@ afterEach(() => {
 
 describe('InvoicePrintView', () => {
   it('el encargado ve el emisor con su RUC y la hoja se imprime sola', async () => {
-    const { imprimirSpy: printSpy } = print(invoice())
+    const { printSpy } = print(invoice())
     expect(await screen.findByText('RUC 20123456789')).toBeInTheDocument()
     expect(screen.getByText('La Picantería S.A.C.')).toBeInTheDocument()
     expect(screen.getByText('B001-12')).toBeInTheDocument()
@@ -35,7 +35,7 @@ describe('InvoicePrintView', () => {
     const { api } = print(invoice(), [...PERMISSIONS_WAITER, 'billing.issue'])
     expect(await screen.findByText('B001-12')).toBeInTheDocument()
     expect(screen.queryByText('RUC 20123456789')).not.toBeInTheDocument()
-    expect(api.llamadas('get', '/billing/settings')).toHaveLength(0)
+    expect(api.calls('get', '/billing/settings')).toHaveLength(0)
   })
 
   it('una factura muestra el documento del cliente, el descuento y el IGV', async () => {
@@ -60,14 +60,14 @@ describe('InvoicePrintView', () => {
   })
 
   it('el botón vuelve a imprimir', async () => {
-    const { imprimirSpy: printSpy, user } = print(invoice())
+    const { printSpy, user } = print(invoice())
     await screen.findByText('B001-12')
     await user.click(screen.getByRole('button', { name: 'Imprimir' }))
     expect(printSpy).toHaveBeenCalledTimes(2)
   })
 
   it('si el comprobante no existe lo dice y no imprime', async () => {
-    const { imprimirSpy: printSpy } = print(new ErrorResponse(404, 'Ese comprobante no existe'))
+    const { printSpy } = print(new ErrorResponse(404, 'Ese comprobante no existe'))
     expect(await screen.findByText('Ese comprobante no existe')).toBeInTheDocument()
     expect(printSpy).not.toHaveBeenCalled()
   })

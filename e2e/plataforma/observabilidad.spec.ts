@@ -38,7 +38,7 @@ async function show(page: Page, load: string, title: string): Promise<void> {
 async function ensureLogs(platform: SessionPlatform): Promise<void> {
   const http = await newHttp()
   const api = new Customer(http, platform.token)
-  const count = async () => (await api.lista('/platform/observability/logs?window=24h&limit=100')).length
+  const count = async () => (await api.list('/platform/observability/logs?window=24h&limit=100')).length
   for (let i = await count(); i < PAGE + 5; i += 1) {
     await http.post(`${API_ORIGIN}/api/v1/auth/login`, {
       data: { email: `nadie-${unique()}@e2e.resthub.dev`, password: unique() },
@@ -52,7 +52,7 @@ async function ensureLogs(platform: SessionPlatform): Promise<void> {
 
 test('PLA-16 el panel de observabilidad muestra indicadores y gráficos, cambia de ventana y de restaurante', async ({
   page,
-  plataforma: platform,
+  platform,
   local,
 }) => {
   covers(
@@ -122,7 +122,7 @@ test('PLA-16 el panel de observabilidad muestra indicadores y gráficos, cambia 
   await expect(page.getByRole('button', { name: 'Pausar' })).toBeVisible()
 })
 
-test('PLA-17 los logs y las peticiones se filtran, se paginan y se enlazan por request_id', async ({ page, plataforma: platform }) => {
+test('PLA-17 los logs y las peticiones se filtran, se paginan y se enlazan por request_id', async ({ page, platform }) => {
   covers(
     'funcion:observabilidad.logs-filtrar',
     'funcion:observabilidad.logs-detalle',
@@ -197,7 +197,7 @@ test('PLA-17 los logs y las peticiones se filtran, se paginan y se enlazan por r
 
 test('PLA-18 si una lectura del panel falla, la sección lo dice y «Reintentar» la vuelve a pedir', async ({
   page,
-  plataforma: platform,
+  platform,
 }) => {
   covers('estado:observabilidad.error')
   let fail = true

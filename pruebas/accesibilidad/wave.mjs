@@ -56,7 +56,7 @@ export async function prepareWave() {
     rmSync(dirname(zip), { recursive: true, force: true })
   }
   const { version } = JSON.parse(readFileSync(manifest, 'utf8'))
-  return { ruta: EXTENSION, version }
+  return { route: EXTENSION, version }
 }
 
 /**
@@ -64,7 +64,7 @@ export async function prepareWave() {
  * extensiones no se cargan en contextos incógnito) y se borra al cerrar.
  */
 export async function openBrowserWave({ viewport, isMobile = false, hasTouch = false, deviceScaleFactor = 1 } = {}) {
-  const { ruta: route } = await prepareWave()
+  const { route } = await prepareWave()
   const profile = mkdtempSync(join(tmpdir(), 'wave-perfil-'))
   const context = await chromium.launchPersistentContext(profile, {
     headless: true,
@@ -82,7 +82,7 @@ export async function openBrowserWave({ viewport, isMobile = false, hasTouch = f
     await context.close()
     rmSync(profile, { recursive: true, force: true })
   }
-  return { contexto: context, cerrar: close }
+  return { context, close }
 }
 
 async function serviceWorkerDe(context) {
@@ -146,15 +146,15 @@ export async function analyzeWithWave(page, { timeout = 60_000 } = {}) {
     counts[password] = category.count ?? 0
     for (const item of Object.values(category.items ?? {})) {
       items.push({
-        tipo: type,
+        type,
         id: item.id,
-        descripcion: item.description,
-        cantidad: item.count,
+        description: item.description,
+        quantity: item.count,
         xpaths: item.xpaths ?? [],
       })
     }
   }
-  return { conteos: counts, items }
+  return { counts, items }
 }
 
 /** Captura la página con el panel de WAVE a la vista. */

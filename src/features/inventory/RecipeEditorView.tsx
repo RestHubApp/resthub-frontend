@@ -42,7 +42,7 @@ export function RecipeEditorView() {
         description="Lo que lleva una porción, en la unidad de cada insumo. El costo usa el costo actual de cada insumo."
         actions={
           <Link to={back.to} className={buttonVariants({ variant: 'outline', className: 'h-11 px-4' })}>
-            <Icon name="anterior" size={16} />
+            <Icon name="previous" size={16} />
             <span>{back.label}</span>
           </Link>
         }

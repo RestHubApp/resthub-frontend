@@ -21,7 +21,7 @@ test('GES-06 el encargado arma la receta de un plato con su costo y su margen, y
     'funcion:recetas.volver',
     'funcion:menu.margen-y-receta',
   )
-  await openAs(page, local.encargado, '/inventario?vista=recetas')
+  await openAs(page, local.owner, '/inventario?vista=recetas')
   const panel = page.getByRole('tabpanel', { name: /Recetas/u })
   await expect(panel.getByText(/4 platos no tienen receta: al venderse no descuentan stock\./u)).toBeVisible()
   const lomo = panel.getByRole('row', { name: /Lomo saltado/u })
@@ -65,7 +65,7 @@ test('GES-06 el encargado arma la receta de un plato con su costo y su margen, y
   await expect(notice(page, 'Receta de Ají de gallina guardada.')).toBeVisible()
   await expect(save).toBeDisabled()
 
-  const recipe = await api(local).get(`/inventory/recipes/${String(local.plato('Ají de gallina').id)}`)
+  const recipe = await api(local).get(`/inventory/recipes/${String(local.dish('Ají de gallina').id)}`)
   expect(recipe).toMatchObject({ has_recipe: true, cost: '0.42' })
   expect(recipe.lines).toHaveLength(2)
 
@@ -93,7 +93,7 @@ test('GES-06 el encargado arma la receta de un plato con su costo y su margen, y
 test('GES-07 quien solo puede ver el inventario mira la receta sin editarla y un plato que no existe avisa', async ({ page, local }) => {
   covers('funcion:recetas.solo-lectura', 'estado:receta.error')
   // El rol Cocinero ve el inventario pero no lo administra.
-  await openAs(page, local.cocina, `/inventario/recetas/${String(local.plato('Lomo saltado').id)}`)
+  await openAs(page, local.kitchen, `/inventario/recetas/${String(local.dish('Lomo saltado').id)}`)
   await expect(page.getByRole('heading', { level: 1, name: 'Receta: Lomo saltado' })).toBeVisible()
   await expect(page.getByRole('textbox', { name: 'Lomo de res', exact: true })).toHaveAttribute('readonly', '')
   await expect(page.getByRole('button', { name: 'Guardar receta' })).toBeHidden()

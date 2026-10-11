@@ -26,7 +26,7 @@ function fakeStorage(initial: Record<string, string> = {}) {
     removeItem: (password: string) => {
       data.delete(password)
     },
-    datos: data,
+    data,
   }
 }
 
@@ -58,12 +58,12 @@ describe('sesión de plataforma', () => {
 
     usePlatformSession.getState().signIn(token, ADMIN)
 
-    expect(JSON.parse(storage.datos.get(SECRET) ?? '{}')).toEqual({ token, admin: ADMIN })
-    expect(storage.datos.get(SECRET_RESTAURANT)).toBe(restaurant)
+    expect(JSON.parse(storage.data.get(SECRET) ?? '{}')).toEqual({ token, admin: ADMIN })
+    expect(storage.data.get(SECRET_RESTAURANT)).toBe(restaurant)
 
     usePlatformSession.getState().signOut()
-    expect(storage.datos.has(SECRET)).toBe(false)
-    expect(storage.datos.get(SECRET_RESTAURANT)).toBe(restaurant)
+    expect(storage.data.has(SECRET)).toBe(false)
+    expect(storage.data.get(SECRET_RESTAURANT)).toBe(restaurant)
   })
 
   it('recupera una sesión guardada vigente y descarta una vencida', async () => {
@@ -73,7 +73,7 @@ describe('sesión de plataforma', () => {
 
     const expired = await load({ [SECRET]: JSON.stringify({ token: tokenThatExpires(-10), admin: ADMIN }) })
     expect(expired.usePlatformSession.getState()).toMatchObject({ token: null, admin: null, expired: true })
-    expect(expired.storage.datos.has(SECRET)).toBe(false)
+    expect(expired.storage.data.has(SECRET)).toBe(false)
   })
 
   it('se cierra sola cuando vence el token', async () => {
@@ -142,7 +142,7 @@ describe('renovación de la sesión de plataforma', () => {
     usePlatformSession.getState().renew(old, fresh, ADMIN)
 
     expect(usePlatformSession.getState().token).toBe(fresh)
-    expect(JSON.parse(storage.datos.get(SECRET) ?? '{}')).toEqual({ token: fresh, admin: ADMIN })
+    expect(JSON.parse(storage.data.get(SECRET) ?? '{}')).toEqual({ token: fresh, admin: ADMIN })
   })
 
   it('descarta una renovación que llega después de que la sesión cambió', async () => {
@@ -158,13 +158,13 @@ describe('renovación de la sesión de plataforma', () => {
     usePlatformSession.getState().renew(old, tokenThatExpires(7200), ADMIN)
 
     expect(usePlatformSession.getState()).toMatchObject({ token: otherAccount, admin: OTHER })
-    expect(JSON.parse(storage.datos.get(SECRET) ?? '{}')).toEqual({ token: otherAccount, admin: OTHER })
+    expect(JSON.parse(storage.data.get(SECRET) ?? '{}')).toEqual({ token: otherAccount, admin: OTHER })
 
     // Y sin sesión abierta tampoco revive la que se cerró.
     usePlatformSession.getState().signOut()
     usePlatformSession.getState().renew(otherAccount, tokenThatExpires(7200), OTHER)
     expect(usePlatformSession.getState().token).toBeNull()
-    expect(storage.datos.has(SECRET)).toBe(false)
+    expect(storage.data.has(SECRET)).toBe(false)
   })
 })
 
@@ -189,22 +189,22 @@ describe('en una pestaña de vista previa', () => {
   it('entrar, salir o vencer queda en memoria y no toca la sesión real', async () => {
     const real = tokenThatExpires(3600)
     const { storage, usePlatformSession } = await loadInPreview(real)
-    const saved = storage.datos.get(SECRET)
+    const saved = storage.data.get(SECRET)
 
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
-    expect(storage.datos.get(SECRET)).toBe(saved)
+    expect(storage.data.get(SECRET)).toBe(saved)
 
     usePlatformSession.getState().signOut()
-    expect(storage.datos.get(SECRET)).toBe(saved)
+    expect(storage.data.get(SECRET)).toBe(saved)
 
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
     usePlatformSession.getState().expire()
-    expect(storage.datos.get(SECRET)).toBe(saved)
+    expect(storage.data.get(SECRET)).toBe(saved)
   })
 
   it('un 401 de plataforma ahí no borra la sesión real', async () => {
     const { storage, usePlatformSession, api } = await loadInPreview(tokenThatExpires(3600))
-    const saved = storage.datos.get(SECRET)
+    const saved = storage.data.get(SECRET)
     usePlatformSession.getState().signIn(tokenThatExpires(3600), ADMIN)
     const adapter = (config: InternalAxiosRequestConfig) => {
       const response = { data: {}, status: 401, statusText: 'Unauthorized', headers: {}, config }
@@ -214,6 +214,6 @@ describe('en una pestaña de vista previa', () => {
     await expect(api.get('/platform/restaurants', { adapter })).rejects.toThrow()
 
     expect(usePlatformSession.getState().token).toBeNull()
-    expect(storage.datos.get(SECRET)).toBe(saved)
+    expect(storage.data.get(SECRET)).toBe(saved)
   })
 })

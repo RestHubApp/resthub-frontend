@@ -9,18 +9,18 @@ import { api, id } from '../soporte/gestion'
 type Json = Record<string, unknown>
 
 export interface Line {
-  readonly plato: Dish
-  readonly cantidad?: number
-  readonly notas?: string
+  readonly dish: Dish
+  readonly quantity?: number
+  readonly notes?: string
 }
 
 function items(lines: readonly Line[]) {
-  return lines.map(({ plato: dish, cantidad: quantity = 1, notas: notes = '' }) => ({ menu_item_id: dish.id, quantity: quantity, notes: notes }))
+  return lines.map(({ dish, quantity = 1, notes = '' }) => ({ menu_item_id: dish.id, quantity, notes }))
 }
 
 /** Un pedido en mesa abierto, todavía sin enviar a cocina. */
 export async function open(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
-  return api(local, local.mesero).post('/orders', {
+  return api(local, local.waiter).post('/orders', {
     type: 'dine_in',
     table_id: table.id,
     client_request_id: `e2e-${unique()}`,
@@ -31,19 +31,19 @@ export async function open(local: Local, table: Table, lines: readonly Line[]): 
 /** Un pedido en mesa enviado a cocina. */
 export async function inKitchen(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
   const order = await open(local, table, lines)
-  return api(local, local.mesero).post(`/orders/${String(id(order))}/send`)
+  return api(local, local.waiter).post(`/orders/${String(id(order))}/send`)
 }
 
 /** Un pedido en mesa servido, por cobrar. */
 export async function served(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
   const order = await inKitchen(local, table, lines)
-  await api(local, local.cocina).post(`/orders/${String(id(order))}/ready`)
-  return api(local, local.mesero).post(`/orders/${String(id(order))}/served`)
+  await api(local, local.kitchen).post(`/orders/${String(id(order))}/ready`)
+  return api(local, local.waiter).post(`/orders/${String(id(order))}/served`)
 }
 
 /** Un pedido para llevar enviado a cocina. */
 export async function takeaway(local: Local, customer: string, lines: readonly Line[]): Promise<Json> {
-  const waiter = api(local, local.mesero)
+  const waiter = api(local, local.waiter)
   const order = await waiter.post('/orders', {
     type: 'takeaway',
     customer_name: customer,
@@ -55,7 +55,7 @@ export async function takeaway(local: Local, customer: string, lines: readonly L
 
 /** Un delivery enviado a cocina. */
 export async function delivery(local: Local, customer: string, lines: readonly Line[]): Promise<Json> {
-  const waiter = api(local, local.mesero)
+  const waiter = api(local, local.waiter)
   const order = await waiter.post('/orders', {
     type: 'delivery',
     customer_name: customer,
@@ -71,7 +71,7 @@ export async function delivery(local: Local, customer: string, lines: readonly L
 /** Un plato con un grupo obligatorio (término) y extras opcionales con precio. */
 export async function dishWithOptions(local: Local): Promise<void> {
   await api(local).post('/menu/items', {
-    category_id: local.plato('Lomo saltado').categoriaId,
+    category_id: local.dish('Lomo saltado').categoryId,
     name: 'Bistec a lo pobre',
     price: '30.00',
     modifier_groups: [
@@ -105,13 +105,13 @@ const QUEUE = 'resthub.pedidos-sin-enviar.v2'
  * de vista previa, igual que la cola de la aplicación.
  */
 export interface InQueue {
-  readonly dueno: { readonly userId: number; readonly restaurantId: number }
-  readonly mesa: Pick<Table, 'id' | 'etiqueta'>
-  readonly plato: Pick<Dish, 'id'>
-  readonly almacen?: 'localStorage' | 'sessionStorage'
+  readonly owner: { readonly userId: number; readonly restaurantId: number }
+  readonly table: Pick<Table, 'id' | 'label'>
+  readonly dish: Pick<Dish, 'id'>
+  readonly storage?: 'localStorage' | 'sessionStorage'
 }
 
-export async function orderInQueue(page: Page, { dueno: owner, mesa: table, plato: dish, almacen: storage = 'localStorage' }: InQueue): Promise<void> {
+export async function orderInQueue(page: Page, { owner, table, dish, storage = 'localStorage' }: InQueue): Promise<void> {
   await page.route('**/api/v1/orders', (route, request) =>
     request.method() === 'POST' ? route.abort('internetdisconnected') : route.fallback(),
   )
@@ -124,7 +124,7 @@ export async function orderInQueue(page: Page, { dueno: owner, mesa: table, plat
       items: [{ menu_item_id: dish.id, quantity: 1, notes: '' }],
     },
     queuedAt: '2026-09-26T15:00:00.000Z',
-    label: `Mesa ${table.etiqueta}`,
+    label: `Mesa ${table.label}`,
   }
   await page.evaluate(
     ([password, value, where]) => {
@@ -137,6 +137,6 @@ export async function orderInQueue(page: Page, { dueno: owner, mesa: table, plat
 
 /** La persona y el local de una sesión, como los guarda la cola. */
 export function ownerOf(session: Session): { userId: number; restaurantId: number } {
-  const account = session.cuenta as { user: { id: number }; restaurant: { id: number } }
+  const account = session.account as { user: { id: number }; restaurant: { id: number } }
   return { userId: account.user.id, restaurantId: account.restaurant.id }
 }

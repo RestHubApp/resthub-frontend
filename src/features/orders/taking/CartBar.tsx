@@ -20,7 +20,7 @@ interface CartBarProps {
  * `data-cart-bar` lo usa index.css para subir el boton de accesibilidad.
  */
 export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartBarProps) {
-  const { platos: dishes, count, total } = cartTotals(lines)
+  const { dishes, count, total } = cartTotals(lines)
 
   return (
     <div
@@ -41,7 +41,7 @@ export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartB
           <span className="text-lg font-bold tabular-nums">{total}</span>
         </button>
         <Button type="button" size="lg" className="h-12 px-4 text-base" disabled={dishes === 0 || pending} onClick={onSubmit}>
-          <Icon name="enviar" size={18} />
+          <Icon name="send" size={18} />
           <span>{pending ? 'Enviando…' : submitLabel}</span>
         </Button>
       </div>

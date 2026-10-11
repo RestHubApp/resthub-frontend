@@ -72,7 +72,7 @@ export function TakeawayForm({ onClose }: TakeawayFormProps) {
                 form.setValue('mode', modo.value)
               }}
             >
-              <Icon name={modo.value === 'delivery' ? 'delivery' : 'llevar'} size={16} />
+              <Icon name={modo.value === 'delivery' ? 'delivery' : 'takeaway'} size={16} />
               <span>{modo.label}</span>
             </Button>
           ))}

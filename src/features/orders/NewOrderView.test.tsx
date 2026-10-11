@@ -24,7 +24,7 @@ async function sendUnLomo(mount: ReturnType<typeof open>) {
   await mount.user.click(await screen.findByRole('button', { name: /Lomo saltado/u }))
   await mount.user.click(screen.getByRole('button', { name: /enviar a cocina/i }))
   await screen.findByText('Pedido #12 enviado a cocina.')
-  return lastBody(mount.api.llamadas('post', ORDERS)) as OpenOrderRequest
+  return lastBody(mount.api.calls('post', ORDERS)) as OpenOrderRequest
 }
 
 afterEach(() => {

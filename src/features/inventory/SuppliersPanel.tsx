@@ -31,7 +31,7 @@ export function SuppliersPanel({ canManage }: SuppliersPanelProps) {
           <Button type="button" onClick={() => {
             setEditing(null)
           }}>
-            <Icon name="agregar" size={16} />
+            <Icon name="add" size={16} />
             <span>Nuevo proveedor</span>
           </Button>
         ) : undefined
@@ -57,7 +57,7 @@ export function SuppliersPanel({ canManage }: SuppliersPanelProps) {
               <Button type="button" variant="ghost" size="sm" onClick={() => {
                 setEditing(supplier)
               }}>
-                <Icon name="editar" size={14} />
+                <Icon name="edit" size={14} />
                 <span>Editar</span>
               </Button>
             ) : null}

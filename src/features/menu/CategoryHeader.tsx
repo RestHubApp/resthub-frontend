@@ -59,7 +59,7 @@ export function CategoryHeader({
 
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="secondary" className="h-11 px-3" onClick={onAddItem}>
-          <Icon name="agregar" size={16} />
+          <Icon name="add" size={16} />
           <span>Agregar plato</span>
         </Button>
         <MoveButtons label={`la categoría ${category.name}`} isFirst={isFirst} isLast={isLast} onMove={onMove} />
@@ -72,7 +72,7 @@ export function CategoryHeader({
             setEditing(true)
           }}
         >
-          <Icon name="editar" size={16} />
+          <Icon name="edit" size={16} />
           <span>Editar</span>
         </Button>
         <CategoryStatusButton category={category} />

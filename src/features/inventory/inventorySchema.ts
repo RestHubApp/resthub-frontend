@@ -14,7 +14,7 @@ const MAX_COST = 100_000
 const QUANTITY = /^\d+(?:[.,]\d{1,3})?$/u
 
 /** Una cantidad escrita en la unidad elegida, con hasta tres decimales. */
-function quantityRule({ permiteCero: allowsZero }: { readonly permiteCero: boolean }) {
+function quantityRule({ allowsZero }: { readonly allowsZero: boolean }) {
   return z
     .string()
     .trim()
@@ -24,7 +24,7 @@ function quantityRule({ permiteCero: allowsZero }: { readonly permiteCero: boole
     .refine((value) => parseDecimal(value) <= MAX_QUANTITY, 'Es demasiado. Revisa el dato')
 }
 
-const costRule = decimalRule({ max: MAX_COST, decimales: 3, unidad: 'soles', obligatorio: true })
+const costRule = decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles', required: true })
 
 export const ingredientSchema = z.object({
   name: z
@@ -36,13 +36,13 @@ export const ingredientSchema = z.object({
   // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
   min_stock: z.string().trim().regex(/^(?:\d+(?:[.,]\d{1,3})?)?$/u, 'Escribe un número con hasta 3 decimales'),
   min_stock_unit: z.string(),
-  unit_cost: decimalRule({ max: MAX_COST, decimales: 3, unidad: 'soles' }),
+  unit_cost: decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles' }),
 })
 
 export type IngredientValues = z.infer<typeof ingredientSchema>
 
 export const purchaseSchema = z.object({
-  quantity: quantityRule({ permiteCero: false }),
+  quantity: quantityRule({ allowsZero: false }),
   quantity_unit: z.string(),
   cost_mode: z.enum(['unit', 'total']),
   cost: costRule,
@@ -52,7 +52,7 @@ export const purchaseSchema = z.object({
 export type PurchaseValues = z.infer<typeof purchaseSchema>
 
 export const wasteSchema = z.object({
-  quantity: quantityRule({ permiteCero: false }),
+  quantity: quantityRule({ allowsZero: false }),
   quantity_unit: z.string(),
   reason: textRequired(MAX_REASON, 'Escribe el motivo de la merma'),
 })
@@ -62,7 +62,7 @@ export type WasteValues = z.infer<typeof wasteSchema>
 export const adjustmentSchema = z
   .object({
     mode: z.enum(['count', 'difference']),
-    quantity: quantityRule({ permiteCero: true }),
+    quantity: quantityRule({ allowsZero: true }),
     quantity_unit: z.string(),
     sign: z.enum(['add', 'subtract']),
     reason: textRequired(MAX_REASON, 'Escribe el motivo del ajuste'),
@@ -78,7 +78,7 @@ export const recipeSchema = z.object({
   lines: z.array(
     z.object({
       ingredient_id: z.number(),
-      quantity: quantityRule({ permiteCero: false }),
+      quantity: quantityRule({ allowsZero: false }),
     }),
   ),
 })

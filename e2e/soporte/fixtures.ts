@@ -17,8 +17,8 @@ interface Accessories {
   /** Un restaurante recién dado de alta, solo para esta prueba. */
   local: Local
   /** El mismo, con la caja abierta (S/ 100). */
-  localConCaja: Local
-  plataforma: SessionPlatform
+  restaurantWithCashRegister: Local
+  platform: SessionPlatform
 }
 
 export const test = base.extend<Accessories>({
@@ -33,12 +33,12 @@ export const test = base.extend<Accessories>({
     await use(local)
     await local.http.dispose()
   },
-  localConCaja: async ({}, use) => {
-    const local = await createRestaurant({ cajaAbierta: true })
+  restaurantWithCashRegister: async ({}, use) => {
+    const local = await createRestaurant({ openCashRegister: true })
     await use(local)
     await local.http.dispose()
   },
-  plataforma: async ({}, use) => {
+  platform: async ({}, use) => {
     const http = await newHttp()
     await use(await signInPlatformByApi(http))
     await http.dispose()
@@ -59,7 +59,7 @@ export async function openAs(page: Page, session: Session, destination = '/'): P
     ([password, value]) => {
       localStorage.setItem(password, value)
     },
-    [SESSION, JSON.stringify({ token: session.token, account: session.cuenta })] as const,
+    [SESSION, JSON.stringify({ token: session.token, account: session.account })] as const,
   )
   await page.goto(destination)
 }

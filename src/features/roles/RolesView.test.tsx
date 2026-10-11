@@ -64,7 +64,7 @@ describe('RolesView', () => {
     await user.click(within(window).getByRole('button', SAVE))
 
     expect(await screen.findByText('Rol Caja creado.')).toBeInTheDocument()
-    expect(api.llamadas('post', '/roles')[0]?.body).toEqual({ name: 'Caja', permissions: ['cash.manage'] })
+    expect(api.calls('post', '/roles')[0]?.body).toEqual({ name: 'Caja', permissions: ['cash.manage'] })
     expect(screen.queryByRole('dialog', { name: 'Nuevo rol' })).not.toBeInTheDocument()
   })
 
@@ -90,7 +90,7 @@ describe('RolesView', () => {
     await user.click(within(window).getByRole('button', SAVE))
 
     expect(await within(window).findByText('Escribe el nombre del rol')).toBeInTheDocument()
-    expect(api.llamadas('post', '/roles')).toHaveLength(0)
+    expect(api.calls('post', '/roles')).toHaveLength(0)
   })
 })
 
@@ -107,7 +107,7 @@ describe('RolesView: edición y borrado', () => {
     await user.click(within(window).getByRole('button', SAVE))
 
     expect(await screen.findByText('Rol Mesero guardado.')).toBeInTheDocument()
-    expect(api.llamadas('put', '/roles/2')[0]?.body).toEqual({ name: 'Mesero', permissions: [ORDERS_TAKE] })
+    expect(api.calls('put', '/roles/2')[0]?.body).toEqual({ name: 'Mesero', permissions: [ORDERS_TAKE] })
   })
 
   it('si el servidor rechaza el cambio, lo dice dentro de la ventana', async () => {
@@ -133,7 +133,7 @@ describe('RolesView: edición y borrado', () => {
     await user.click(within(notice).getByRole('button', { name: 'Eliminar' }))
 
     expect(await screen.findByText('Rol Cocina eliminado.')).toBeInTheDocument()
-    expect(api.llamadas('delete', '/roles/5')).toHaveLength(1)
+    expect(api.calls('delete', '/roles/5')).toHaveLength(1)
   })
 
   it('el rol del encargado se abre solo para mirar, sin «Guardar»', async () => {

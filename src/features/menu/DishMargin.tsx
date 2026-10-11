@@ -34,7 +34,7 @@ export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
       <p className="m-0 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
         <span>Sin receta: no se conoce su costo.</span>
         <Link to={destination} state={FROM_MENU} className={LINK} aria-label={`Agregar la receta de ${itemName}`}>
-          <Icon name="receta" size={16} />
+          <Icon name="recipe" size={16} />
           <span>Agregar receta</span>
         </Link>
       </p>
@@ -53,7 +53,7 @@ export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
         {lost ? ' · se vende a pérdida' : ''}
       </span>
       <Link to={destination} state={FROM_MENU} className={LINK} aria-label={`Ver la receta de ${itemName}`}>
-        <Icon name="receta" size={16} />
+        <Icon name="recipe" size={16} />
         <span>Receta</span>
       </Link>
     </p>

@@ -15,7 +15,7 @@ import { orderInQueue } from './preparar'
 
 test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista previa de plataforma', async ({
   page,
-  plataforma: platform,
+  platform,
   local,
 }) => {
   deadline(150_000)
@@ -105,7 +105,7 @@ async function previewSession(page: Page): Promise<{ userId: number; restaurantI
 
 test('VIS-14 la franja de la vista previa como mesero, su salida con pedidos sin enviar y el código vencido', async ({
   page,
-  plataforma: platform,
+  platform,
   request,
 }) => {
   deadline(240_000)
@@ -128,10 +128,10 @@ test('VIS-14 la franja de la vista previa como mesero, su salida con pedidos sin
     await capture(page, 'vista-previa-mesero', { mask: [page.getByRole('main')] })
 
     await orderInQueue(page, {
-      dueno: await previewSession(page),
-      mesa: { id: 0, etiqueta: '3' },
-      plato: { id: 0 },
-      almacen: 'sessionStorage',
+      owner: await previewSession(page),
+      table: { id: 0, label: '3' },
+      dish: { id: 0 },
+      storage: 'sessionStorage',
     })
     await slot.getByRole('button', { name: 'Salir de la vista previa' }).click()
     const signOut = page.getByRole('alertdialog', { name: '¿Salir con pedidos sin enviar?' })

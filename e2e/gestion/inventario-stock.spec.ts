@@ -29,7 +29,7 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
     'estado:movimientos.sin-resultados',
     'estado:inventario.alertas-vacio',
   )
-  await openAs(page, local.encargado, '/inventario')
+  await openAs(page, local.owner, '/inventario')
   await expect(page.getByRole('heading', { level: 1, name: 'Inventario' })).toBeVisible()
   const summary = page.getByRole('status').filter({ hasText: 'por reponer' })
   await expect(summary).toContainText('1 insumo por reponer')
@@ -122,7 +122,7 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
   await expect(book.getByRole('row', { name: /Bolsa sin registrar/u })).toContainText('+150 g')
   await evidence(page, 'ges-04-7-kardex')
 
-  const stock = new Map((await api(local).lista('/inventory/ingredients')).map((i) => [i.name, i.stock]))
+  const stock = new Map((await api(local).list('/inventory/ingredients')).map((i) => [i.name, i.stock]))
   expect(Object.fromEntries(stock)).toMatchObject({ 'Lomo de res': '4950.000', 'Cebolla roja': '2750.000', Culantro: '600.000' })
 })
 
@@ -135,7 +135,7 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
     'funcion:inventario.agotar-sin-insumos',
     'estado:inventario.sin-resultados',
   )
-  await openAs(page, local.encargado, '/inventario')
+  await openAs(page, local.owner, '/inventario')
   await page.getByRole('button', { name: 'Nuevo insumo' }).click()
   const registration = page.getByRole('dialog', { name: 'Nuevo insumo' })
   await registration.getByRole('button', { name: 'Crear insumo' }).click()
@@ -182,9 +182,9 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
   await expect(ingredients.getByText('4 insumos', { exact: true })).toBeVisible()
 
   // Sin lomo en stock, el Lomo saltado se agota solo; con la regla apagada, no.
-  await api(local).post('/inventory/waste', { ingredient_id: local.insumos[0].id, quantity: '5000', reason: 'Se venció' })
+  await api(local).post('/inventory/waste', { ingredient_id: local.ingredients[0].id, quantity: '5000', reason: 'Se venció' })
   const lomoOutOfStock = async () => {
-    const menu = (await api(local, local.mesero).get('/menu')).categories as { items: { name: string; out_of_stock: boolean }[] }[]
+    const menu = (await api(local, local.waiter).get('/menu')).categories as { items: { name: string; out_of_stock: boolean }[] }[]
     return menu.flatMap((c) => c.items).find((p) => p.name === 'Lomo saltado')?.out_of_stock
   }
   expect(await lomoOutOfStock()).toBe(true)

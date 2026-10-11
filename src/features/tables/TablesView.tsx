@@ -56,7 +56,7 @@ export function TablesView() {
           <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
             setEditing(null)
           }}>
-            <Icon name="agregar" size={16} />
+            <Icon name="add" size={16} />
             <span>Nueva mesa</span>
           </Button>
         }

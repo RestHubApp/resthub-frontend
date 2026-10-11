@@ -31,7 +31,7 @@ describe('MenuView: la carta', () => {
     expect(within(entries).getByText('Agotado hoy')).toBeInTheDocument()
     expect(screen.getByText('Hoy: 1 de 2 platos disponibles')).toBeInTheDocument()
     expect(screen.getByText('Agotado hoy: Causa.')).toBeInTheDocument()
-    expect(api.llamadas('get', MENU)[0]?.params).toEqual({ include_inactive: true })
+    expect(api.calls('get', MENU)[0]?.params).toEqual({ include_inactive: true })
   })
 
   it('con acceso al inventario muestra el margen de cada plato y el camino a su receta', async () => {
@@ -54,7 +54,7 @@ describe('MenuView: la carta', () => {
     const { api } = openMenu(handleMenu(), PERMISSIONS_OWNER.filter((p) => p !== 'inventory.read'))
 
     await screen.findByRole('region', { name: 'Entradas' })
-    expect(api.llamadas('get', COSTS)).toHaveLength(0)
+    expect(api.calls('get', COSTS)).toHaveLength(0)
     expect(screen.queryByText(/Margen/u)).not.toBeInTheDocument()
   })
 
@@ -90,7 +90,7 @@ describe('MenuView: disponible hoy', () => {
     await user.click(switchValue)
 
     expect(screen.getByRole('switch', AVAILABLE_CEVICHE)).toHaveAttribute(CHECKED, 'false')
-    expect(api.llamadas('patch', AVAILABILITY)[0]?.body).toEqual({ is_available: false })
+    expect(api.calls('patch', AVAILABILITY)[0]?.body).toEqual({ is_available: false })
     expect(await screen.findByText('Hoy: 0 de 2 platos disponibles')).toBeInTheDocument()
   })
 
@@ -116,7 +116,7 @@ describe('MenuView: orden', () => {
     expect(screen.getByRole('button', { name: 'Subir la categoría Entradas' })).toHaveAttribute('aria-disabled', 'true')
     await user.click(screen.getByRole('button', { name: 'Bajar la categoría Entradas' }))
 
-    expect(api.llamadas('put', '/menu/categories/order')[0]?.body).toEqual({ ids: [2, 1] })
+    expect(api.calls('put', '/menu/categories/order')[0]?.body).toEqual({ ids: [2, 1] })
   })
 
   it('subir un plato envía los platos de su categoría y no hace nada en el borde', async () => {
@@ -124,9 +124,9 @@ describe('MenuView: orden', () => {
     api.on('put', ORDER_DISHES, [])
 
     await user.click(await screen.findByRole('button', { name: 'Subir Ceviche' }))
-    expect(api.llamadas('put', ORDER_DISHES)).toHaveLength(0)
+    expect(api.calls('put', ORDER_DISHES)).toHaveLength(0)
     await user.click(screen.getByRole('button', { name: 'Subir Causa' }))
 
-    expect(api.llamadas('put', ORDER_DISHES)[0]?.body).toEqual({ ids: [11, 10] })
+    expect(api.calls('put', ORDER_DISHES)[0]?.body).toEqual({ ids: [11, 10] })
   })
 })

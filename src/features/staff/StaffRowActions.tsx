@@ -49,7 +49,7 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
           setDialog('editar')
         }}
       >
-        <Icon name="editar" size={14} />
+        <Icon name="edit" size={14} />
         <span>Editar</span>
       </Button>
       {isSelf ? null : (
@@ -61,7 +61,7 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
             setDialog('contrasena')
           }}
         >
-          <Icon name="llave" size={14} />
+          <Icon name="key" size={14} />
           <span>Contraseña</span>
         </Button>
       )}

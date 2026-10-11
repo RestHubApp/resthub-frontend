@@ -30,7 +30,7 @@ export function RefreshControl({ refresh }: RefreshControlProps) {
             setPaused(!paused)
           }}
         >
-          <Icon name={paused ? 'reanudar' : 'pausar'} size={16} />
+          <Icon name={paused ? 'resume' : 'pause'} size={16} />
           <span>{paused ? 'Reanudar' : 'Pausar'}</span>
         </Button>
         <Button
@@ -41,7 +41,7 @@ export function RefreshControl({ refresh }: RefreshControlProps) {
           disabled={reading}
           onClick={() => void queryClient.invalidateQueries({ queryKey: platformObservabilityQueryKey })}
         >
-          <Icon name="actualizar" size={16} className={reading ? 'motion-safe:animate-spin' : undefined} />
+          <Icon name="update" size={16} className={reading ? 'motion-safe:animate-spin' : undefined} />
           <span>{reading ? 'Actualizando…' : 'Actualizar ahora'}</span>
         </Button>
         <p role="status" className="m-0 text-sm text-muted-foreground">

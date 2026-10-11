@@ -21,11 +21,11 @@ function invoiceOf(local: Parameters<typeof api>[0], orderId: unknown) {
 
 test('SAL-25 el mesero emite una boleta a «clientes varios» y queda sin enviar por falta de proveedor @movil', async ({
   page,
-  localConCaja: local,
+  restaurantWithCashRegister: local,
 }) => {
   covers('dialogo:orders/invoice/InvoiceDialog', 'funcion:comprobante.boleta-sin-documento', 'funcion:comprobante.simulado')
-  const order = await orderPaid(local, local.mesa('1'), [{ plato: local.plato('Lomo saltado') }])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  const order = await orderPaid(local, local.table('1'), [{ dish: local.dish('Lomo saltado') }])
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
 
   // Cancelar no emite nada.
   let windowValue = await openInvoice(page, 1)
@@ -58,10 +58,10 @@ test('SAL-25 el mesero emite una boleta a «clientes varios» y queda sin enviar
   expect(Number(issued.igv)).toBeGreaterThan(0)
 })
 
-test('SAL-26 una boleta de más de S/ 700 exige el documento del cliente @movil', async ({ page, localConCaja: local }) => {
+test('SAL-26 una boleta de más de S/ 700 exige el documento del cliente @movil', async ({ page, restaurantWithCashRegister: local }) => {
   covers('funcion:comprobante.boleta-sobre-tope', 'funcion:comprobante.documento-invalido')
-  const order = await orderPaid(local, local.mesa('2'), [{ plato: local.plato('Lomo saltado'), cantidad: 25 }])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  const order = await orderPaid(local, local.table('2'), [{ dish: local.dish('Lomo saltado'), quantity: 25 }])
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   const windowValue = await openInvoice(page, 1)
   await expect(windowValue).toContainText(/Total S\/\s*800\.00/u)
   const documentValue = windowValue.getByRole('combobox', { name: 'Documento del cliente' })
@@ -75,7 +75,7 @@ test('SAL-26 una boleta de más de S/ 700 exige el documento del cliente @movil'
   await issue.click()
   await expect(windowValue.getByText('El número de DNI no es válido.')).toBeVisible()
   await evidence(page, 'sal-26-1-dni-invalido')
-  expect(await api(local).estado(`/billing/orders/${String(order.id)}/invoice`)).toBe(404)
+  expect(await api(local).status(`/billing/orders/${String(order.id)}/invoice`)).toBe(404)
 
   await windowValue.getByRole('textbox', { name: 'Número de documento' }).fill('45678912')
   await issue.click()
@@ -91,13 +91,13 @@ test('SAL-26 una boleta de más de S/ 700 exige el documento del cliente @movil'
   })
 })
 
-test('SAL-27 una factura exige un RUC válido y la razón social @movil', async ({ page, localConCaja: local }) => {
+test('SAL-27 una factura exige un RUC válido y la razón social @movil', async ({ page, restaurantWithCashRegister: local }) => {
   covers('funcion:comprobante.factura', 'funcion:comprobante.factura-ruc-invalido')
-  const order = await orderPaid(local, local.mesa('3'), [
-    { plato: local.plato('Ceviche clásico') },
-    { plato: local.plato('Chicha morada') },
+  const order = await orderPaid(local, local.table('3'), [
+    { dish: local.dish('Ceviche clásico') },
+    { dish: local.dish('Chicha morada') },
   ])
-  await openAs(page, local.mesero, `/pedidos/${String(order.id)}`)
+  await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   const windowValue = await openInvoice(page, 1)
   await windowValue.getByRole('button', { name: 'Factura', exact: true }).click()
   await expect(windowValue.getByRole('combobox', { name: 'Documento del cliente' })).toHaveCount(0)

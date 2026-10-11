@@ -47,7 +47,7 @@ export function PlatformHeader() {
                 className="h-11 gap-2 px-3 text-background hover:bg-background/10 hover:text-background focus-visible:ring-background/60"
                 onClick={handleSignOut}
               >
-                <Icon name="salir" size={18} />
+                <Icon name="signOut" size={18} />
                 <span>Cerrar sesión</span>
               </Button>
             </div>

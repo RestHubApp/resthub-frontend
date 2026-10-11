@@ -61,11 +61,11 @@ describe('tomar un pedido en una mesa', () => {
     await send(user)
 
     expect(await screen.findByText('Pedido #12 enviado a cocina.')).toBeInTheDocument()
-    const body = lastBody(api.llamadas('post', ORDERS)) as OpenOrderRequest
+    const body = lastBody(api.calls('post', ORDERS)) as OpenOrderRequest
     expect(body).toMatchObject({ type: 'dine_in', table_id: 3, customer_name: '' })
     expect(body.items?.map((item) => item.menu_item_id)).toEqual([11, 12])
     expect(body.client_request_id).toEqual(expect.any(String))
-    expect(api.llamadas('post', SEND)).toHaveLength(1)
+    expect(api.calls('post', SEND)).toHaveLength(1)
     expect(await currentRoute()).toHaveTextContent('/pedidos')
   })
 
@@ -81,7 +81,7 @@ describe('tomar un pedido en una mesa', () => {
     await user.click(within(summary).getByRole('button', SEND_TO_KITCHEN))
 
     await screen.findByText('Pedido #12 enviado a cocina.')
-    const body = lastBody(api.llamadas('post', ORDERS)) as OpenOrderRequest
+    const body = lastBody(api.calls('post', ORDERS)) as OpenOrderRequest
     expect(body.items).toEqual([{ menu_item_id: 11, quantity: 2, notes: 'sin cebolla', modifiers: [] }])
   })
 
@@ -104,7 +104,7 @@ describe('tomar un pedido en una mesa', () => {
     expect(await screen.findByText('Sin señal: el pedido de Mesa 3 quedó guardado y se enviará solo.')).toBeInTheDocument()
     const inQueue = queuedOrders(ownerOf(useSession.getState().account))
     expect(inQueue.map((item) => [item.label, item.request.table_id])).toEqual([['Mesa 3', 3]])
-    expect(api.llamadas('post', SEND)).toHaveLength(0)
+    expect(api.calls('post', SEND)).toHaveLength(0)
   })
 
   it('un rechazo del servidor se avisa y el borrador sigue ahí para corregirlo', async () => {

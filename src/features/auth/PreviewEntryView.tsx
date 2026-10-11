@@ -45,7 +45,7 @@ export function PreviewEntryView() {
                 useSession.getState().exitPreview()
               }}
             >
-              <Icon name="anterior" size={18} />
+              <Icon name="previous" size={18} />
               <span>Volver a la administración del sistema</span>
             </a>
           </Button>

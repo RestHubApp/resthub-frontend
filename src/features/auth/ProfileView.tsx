@@ -22,10 +22,10 @@ export function ProfileView() {
   }
 
   const data = [
-    { termino: 'Nombre', dato: account.user.full_name },
-    { termino: 'Correo', dato: account.user.email },
-    { termino: 'Rol', dato: account.user.role_label },
-    { termino: 'Restaurante', dato: account.restaurant.name },
+    { term: 'Nombre', data: account.user.full_name },
+    { term: 'Correo', data: account.user.email },
+    { term: 'Rol', data: account.user.role_label },
+    { term: 'Restaurante', data: account.restaurant.name },
   ]
 
   return (
@@ -35,9 +35,9 @@ export function ProfileView() {
       <SectionCard title="Tus datos">
         <dl className="m-0 grid gap-4 sm:grid-cols-2">
           {data.map((item) => (
-            <div key={item.termino} className="flex flex-col gap-0.5">
-              <dt className={TERM}>{item.termino}</dt>
-              <dd className={DATA}>{item.dato}</dd>
+            <div key={item.term} className="flex flex-col gap-0.5">
+              <dt className={TERM}>{item.term}</dt>
+              <dd className={DATA}>{item.data}</dd>
             </div>
           ))}
         </dl>

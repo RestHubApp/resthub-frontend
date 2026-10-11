@@ -65,13 +65,13 @@ export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
       )}
       <Button asChild variant="outline" size="lg" className={WIDE}>
         <Link to={paths.orders.addItems(order.id)}>
-          <Icon name="agregar" size={18} />
+          <Icon name="add" size={18} />
           <span>Agregar platos</span>
         </Link>
       </Button>
       {canCancel ? (
         <Button type="button" variant="destructive" size="lg" className={WIDE} onClick={onCancel}>
-          <Icon name="cancelar" size={18} />
+          <Icon name="cancel" size={18} />
           <span>Cancelar pedido</span>
         </Button>
       ) : null}

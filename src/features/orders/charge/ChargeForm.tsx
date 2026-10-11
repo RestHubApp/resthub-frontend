@@ -47,7 +47,7 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
   const amount = useWatch({ control, name: 'amount_received' })
   const tip = tipCents(useWatch({ control, name: 'tip' })) ?? 0
   const closed = cashRegister.data?.is_open === false
-  const toCharge = payment.parte + tip
+  const toCharge = payment.part + tip
 
   return (
     <div className="flex flex-col gap-5">
@@ -57,8 +57,8 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
       {/* Fuera del formulario del pago: el descuento tiene el suyo, y un
           formulario dentro de otro no es válido. */}
       <AdjustmentsPanel order={order} />
-      <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(payment.enviar)}>
-        <SplitModePicker value={payment.modo} onChange={payment.setModo} />
+      <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(payment.send)}>
+        <SplitModePicker value={payment.mode} onChange={payment.setMode} />
         <SplitDetails order={order} draft={payment} />
         <PaymentMethodPicker field={register('payment_method')} />
         <TipField
@@ -88,10 +88,10 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
             size="lg"
             variant="success"
             className="h-11 px-5 text-base"
-            disabled={closed || !payment.puedeCobrar}
+            disabled={closed || !payment.canCharge}
           >
-            <Icon name="pago" size={18} />
-            <span>{payment.pago.isPending ? 'Cobrando…' : 'Confirmar pago'}</span>
+            <Icon name="payment" size={18} />
+            <span>{payment.payment.isPending ? 'Cobrando…' : 'Confirmar pago'}</span>
           </Button>
         </DialogFormActions>
       </form>

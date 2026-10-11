@@ -12,12 +12,12 @@ export function FilterActions({ active, onClear }: FilterActionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
       <Button type="submit" size="lg" className="h-11 px-4">
-        <Icon name="buscar" size={16} />
+        <Icon name="search" size={16} />
         <span>Buscar</span>
       </Button>
       {active ? (
         <Button type="button" variant="ghost" size="lg" className="h-11 px-4" onClick={onClear}>
-          <Icon name="cancelar" size={16} />
+          <Icon name="cancel" size={16} />
           <span>Quitar filtros</span>
         </Button>
       ) : null}

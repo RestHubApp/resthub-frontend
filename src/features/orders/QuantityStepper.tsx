@@ -38,7 +38,7 @@ export function QuantityStepper({
           onChange(quantity - 1)
         }}
       >
-        <Icon name={removesDish ? 'eliminar' : 'quitar'} size={18} />
+        <Icon name={removesDish ? 'delete' : 'remove'} size={18} />
       </Button>
       <span className="min-w-8 text-center text-lg font-bold tabular-nums">
         <span className="sr-only">Cantidad: </span>
@@ -54,7 +54,7 @@ export function QuantityStepper({
           onChange(quantity + 1)
         }}
       >
-        <Icon name="agregar" size={18} />
+        <Icon name="add" size={18} />
       </Button>
     </div>
   )

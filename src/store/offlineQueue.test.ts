@@ -36,7 +36,7 @@ function fakeStorage(initial: Record<string, string> = {}) {
     removeItem: (password: string) => {
       data.delete(password)
     },
-    datos: data,
+    data,
   }
 }
 
@@ -55,7 +55,7 @@ async function previewQueue() {
   stubGlobal('localStorage', local)
   stubGlobal('sessionStorage', tab)
   jest.resetModules()
-  return { ...(await import('./offlineQueue')), local, pestana: tab }
+  return { ...(await import('./offlineQueue')), local, tab }
 }
 
 beforeEach(() => {
@@ -107,7 +107,7 @@ describe('queuedOrders', () => {
   it('guarda en la clave v2 y la lee de nuevo al reabrir la app', async () => {
     const first = await queue()
     first.enqueueOrder(order('a', waiter))
-    const saved = first.storage.datos.get(V2) ?? ''
+    const saved = first.storage.data.get(V2) ?? ''
 
     const { queuedOrders } = await queue({ [V2]: saved })
     expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa a'])
@@ -119,7 +119,7 @@ describe('varias pestañas', () => {
     const { enqueueOrder, queuedOrders, storage } = await queue()
     enqueueOrder(order('a', waiter))
     // La otra pestaña leyó la cola antes y le sumó su pedido.
-    storage.datos.set(V2, JSON.stringify([order('a', waiter), order('b', waiter)]))
+    storage.data.set(V2, JSON.stringify([order('a', waiter), order('b', waiter)]))
 
     enqueueOrder(order('c', waiter))
 
@@ -134,7 +134,7 @@ describe('varias pestañas', () => {
     const notice = jest.fn()
     subscribeQueue(notice)
 
-    storage.datos.set(V2, JSON.stringify([order('a', waiter), order('b', waiter)]))
+    storage.data.set(V2, JSON.stringify([order('a', waiter), order('b', waiter)]))
     window.dispatchEvent(Object.assign(new Event('storage'), { key: V2, storageArea: storage }))
 
     expect(notice).toHaveBeenCalled()
@@ -144,14 +144,14 @@ describe('varias pestañas', () => {
 
 describe('en una vista previa', () => {
   it('la cola vive en el sessionStorage de la pestaña y no toca localStorage', async () => {
-    const { enqueueOrder, queuedOrders, local, pestana: tab } = await previewQueue()
-    local.datos.set(V2, JSON.stringify([order('real', waiter)]))
+    const { enqueueOrder, queuedOrders, local, tab } = await previewQueue()
+    local.data.set(V2, JSON.stringify([order('real', waiter)]))
 
     enqueueOrder(order('muestra', waiter))
 
     expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa muestra'])
-    expect(JSON.parse(local.datos.get(V2) ?? '[]')).toEqual([order('real', waiter)])
-    expect(JSON.parse(tab.datos.get(V2) ?? '[]')).toEqual([order('muestra', waiter)])
+    expect(JSON.parse(local.data.get(V2) ?? '[]')).toEqual([order('real', waiter)])
+    expect(JSON.parse(tab.data.get(V2) ?? '[]')).toEqual([order('muestra', waiter)])
   })
 
   it('un cambio en la cola real de otra pestaña no le llega', async () => {
@@ -169,8 +169,8 @@ describe('en una vista previa', () => {
 
 describe('discardPreviewQueue', () => {
   it('en una vista previa vacía la cola entera de la pestaña, de cualquier cuenta', async () => {
-    const { enqueueOrder, discardPreviewQueue, queuedOrders, local, pestana: tab } = await previewQueue()
-    local.datos.set(V2, JSON.stringify([order('real', waiter)]))
+    const { enqueueOrder, discardPreviewQueue, queuedOrders, local, tab } = await previewQueue()
+    local.data.set(V2, JSON.stringify([order('real', waiter)]))
     enqueueOrder(order('a', waiter))
     enqueueOrder(order('b', otherWaiter))
 
@@ -178,8 +178,8 @@ describe('discardPreviewQueue', () => {
 
     expect(queuedOrders(waiter)).toEqual([])
     expect(queuedOrders(otherWaiter)).toEqual([])
-    expect(tab.datos.has(V2)).toBe(false)
-    expect(JSON.parse(local.datos.get(V2) ?? '[]')).toEqual([order('real', waiter)])
+    expect(tab.data.has(V2)).toBe(false)
+    expect(JSON.parse(local.data.get(V2) ?? '[]')).toEqual([order('real', waiter)])
   })
 
   it('en una pestaña normal no toca la cola del navegador', async () => {

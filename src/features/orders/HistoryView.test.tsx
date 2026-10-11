@@ -27,7 +27,7 @@ function history(response: unknown = page([CHARGED]), permissions: readonly Perm
 }
 
 function lastQuery(api: ReturnType<typeof server>) {
-  return api.llamadas('get', ORDERS).at(-1)?.params
+  return api.calls('get', ORDERS).at(-1)?.params
 }
 
 describe('HistoryView', () => {
@@ -71,7 +71,7 @@ describe('HistoryView', () => {
 
     await screen.findByText('#34')
     expect(screen.queryByLabelText('Mesero')).not.toBeInTheDocument()
-    expect(api.llamadas('get', '/staff')).toHaveLength(0)
+    expect(api.calls('get', '/staff')).toHaveLength(0)
   })
 
   it('pagina en el servidor cuando hay más de 25', async () => {

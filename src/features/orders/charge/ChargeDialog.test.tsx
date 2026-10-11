@@ -34,7 +34,7 @@ function charge(initial: OrderResponse = handleOrder(), respond?: OnPay) {
 }
 
 function paymentBody(api: ReturnType<typeof server>) {
-  return api.llamadas('post', PAYMENTS)[0]?.body
+  return api.calls('post', PAYMENTS)[0]?.body
 }
 
 describe('ChargeDialog: todo junto', () => {
@@ -68,7 +68,7 @@ describe('ChargeDialog: todo junto', () => {
     await user.click(screen.getByRole('button', CONFIRM))
 
     expect(await screen.findByText('El monto no cubre lo que se cobra')).toBeInTheDocument()
-    expect(api.llamadas('post', PAYMENTS)).toHaveLength(0)
+    expect(api.calls('post', PAYMENTS)).toHaveLength(0)
   })
 
   it('la propina rápida se suma a lo que se cobra y viaja aparte', async () => {
@@ -102,7 +102,7 @@ describe('ChargeDialog: todo junto', () => {
     await user.click(screen.getByRole('button', CONFIRM))
 
     expect(await screen.findByText('Escribe un monto como 100 o 100.50')).toBeInTheDocument()
-    expect(api.llamadas('post', PAYMENTS)).toHaveLength(0)
+    expect(api.calls('post', PAYMENTS)).toHaveLength(0)
   })
 })
 
@@ -123,7 +123,7 @@ describe('ChargeDialog: sin caja o con error', () => {
 
     expect(await screen.findByText('El saldo cambió: vuelve a revisar la cuenta.')).toBeInTheDocument()
     expect(screen.getByRole('dialog', CHARGING)).toBeInTheDocument()
-    expect(api.llamadas('post', PAYMENTS)).toHaveLength(1)
+    expect(api.calls('post', PAYMENTS)).toHaveLength(1)
   })
 
   it('«Volver» cierra la ventana sin cobrar', async () => {
@@ -132,7 +132,7 @@ describe('ChargeDialog: sin caja o con error', () => {
     await user.click(await screen.findByRole('button', { name: 'Volver' }))
 
     expect(onClose).toHaveBeenCalledTimes(1)
-    expect(api.llamadas('post', PAYMENTS)).toHaveLength(0)
+    expect(api.calls('post', PAYMENTS)).toHaveLength(0)
   })
 
   it('Escape cierra la ventana como «Volver»', async () => {

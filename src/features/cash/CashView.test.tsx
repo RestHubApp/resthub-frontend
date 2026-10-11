@@ -32,7 +32,7 @@ describe('CashView', () => {
     await user.click(screen.getByRole('button', OPEN_CASH_REGISTER))
 
     expect(await screen.findByText('Caja abierta con S/ 150.50. Ya se puede cobrar.')).toBeInTheDocument()
-    expect(api.llamadas('post', OPEN)[0]?.body).toEqual({ opening_amount: '150.50', notes: 'Turno mañana' })
+    expect(api.calls('post', OPEN)[0]?.body).toEqual({ opening_amount: '150.50', notes: 'Turno mañana' })
     expect(await screen.findByRole('heading', { name: 'Turno en curso' })).toBeInTheDocument()
   })
 
@@ -43,7 +43,7 @@ describe('CashView', () => {
     await user.click(screen.getByRole('button', OPEN_CASH_REGISTER))
 
     expect(await screen.findByText('Escribe un monto como 150 o 150.50')).toBeInTheDocument()
-    expect(api.llamadas('post', OPEN)).toHaveLength(0)
+    expect(api.calls('post', OPEN)).toHaveLength(0)
   })
 
   it('con la caja abierta muestra el arqueo por medio de pago', async () => {
@@ -53,7 +53,7 @@ describe('CashView', () => {
       expected_cash: '200.00',
       by_method: [{ method: 'cash', method_label: 'Efectivo', payments: 2, amount: '50.00', tips: '0.00' }],
     })
-    openCashRegister(handleOpenCashRegister(cashRegisterShift({ summary: summary })))
+    openCashRegister(handleOpenCashRegister(cashRegisterShift({ summary })))
 
     const table = await screen.findByRole('table', { name: 'Por medio de pago' })
     expect(within(table).getByRole('rowheader', { name: 'Efectivo' })).toBeInTheDocument()

@@ -35,7 +35,7 @@ describe('descuento del pedido', () => {
     await user.click(screen.getByRole('button', APPLY))
 
     expect(await screen.findByText('Descuento de 7.5 % aplicado.')).toBeInTheDocument()
-    expect(api.llamadas('put', DISCOUNT)[0]?.body).toEqual({ percent: '7.5', reason: 'Cliente frecuente' })
+    expect(api.calls('put', DISCOUNT)[0]?.body).toEqual({ percent: '7.5', reason: 'Cliente frecuente' })
     expect(screen.queryByLabelText(PERCENTAGE)).not.toBeInTheDocument()
   })
 
@@ -45,7 +45,7 @@ describe('descuento del pedido', () => {
     await user.click(screen.getByRole('button', APPLY))
 
     expect(screen.getByText('Sin tope: lo aplicas como encargado.')).toBeInTheDocument()
-    expect(api.llamadas('get', '/restaurant')).toHaveLength(0)
+    expect(api.calls('get', '/restaurant')).toHaveLength(0)
   })
 
   it('valida el porcentaje y el motivo antes de enviar', async () => {
@@ -58,7 +58,7 @@ describe('descuento del pedido', () => {
 
     expect(await screen.findByText('Como máximo 100 %. Revisa el dato')).toBeInTheDocument()
     expect(screen.getByText('Escribe el motivo (al menos 5 caracteres)')).toBeInTheDocument()
-    expect(api.llamadas('put', DISCOUNT)).toHaveLength(0)
+    expect(api.calls('put', DISCOUNT)).toHaveLength(0)
   })
 
   it('si el servidor rechaza el descuento del mesero, muestra por qué', async () => {
@@ -80,7 +80,7 @@ describe('descuento del pedido', () => {
     await user.click(screen.getByRole('button', { name: 'Quitar descuento' }))
 
     expect(await screen.findByText('Descuento quitado.')).toBeInTheDocument()
-    expect(api.llamadas('put', DISCOUNT)[0]?.body).toEqual({ percent: '0', reason: '' })
+    expect(api.calls('put', DISCOUNT)[0]?.body).toEqual({ percent: '0', reason: '' })
   })
 
   it('después del primer pago ya no se puede ajustar la cuenta', () => {
@@ -110,7 +110,7 @@ describe('cortesías', () => {
     await user.click(screen.getByRole('button', { name: 'Confirmar' }))
 
     expect(await screen.findByText(INVITE_DISH)).toBeInTheDocument()
-    expect(api.llamadas('put', COURTESY)[0]?.body).toEqual({ reason: 'Cumpleaños' })
+    expect(api.calls('put', COURTESY)[0]?.body).toEqual({ reason: 'Cumpleaños' })
   })
 
   it('un plato invitado muestra el motivo y se puede volver a cobrar', async () => {
@@ -121,6 +121,6 @@ describe('cortesías', () => {
     expect(screen.getByText('Invita la casa: Error de cocina')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Cobrar' }))
 
-    expect(api.llamadas('delete', COURTESY)).toHaveLength(1)
+    expect(api.calls('delete', COURTESY)).toHaveLength(1)
   })
 })

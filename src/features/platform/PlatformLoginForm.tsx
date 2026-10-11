@@ -74,7 +74,7 @@ export function PlatformLoginForm({ expired, onSignedIn }: PlatformLoginFormProp
         </FormMessage>
       ) : null}
       <Button type="submit" size="lg" className="h-11 w-full" disabled={access.isPending || access.isSuccess}>
-        <Icon name="entrar" size={18} />
+        <Icon name="signIn" size={18} />
         <span>{access.isPending ? 'Entrando…' : 'Entrar'}</span>
       </Button>
     </form>

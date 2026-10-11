@@ -51,14 +51,14 @@ export function TableMoves({ order }: TableMovesProps) {
       <Button type="button" variant="outline" className={BUTTON} onClick={() => {
         setDialog('mover')
       }}>
-        <Icon name="movimientos" size={16} />
+        <Icon name="movements" size={16} />
         <span>Cambiar de mesa</span>
       </Button>
       {order.payments.length === 0 && esMia(order.waiter_id) ? (
         <Button type="button" variant="outline" className={BUTTON} onClick={() => {
           setDialog('unir')
         }}>
-          <Icon name="mesa" size={16} />
+          <Icon name="table" size={16} />
           <span>Unir otra mesa</span>
         </Button>
       ) : null}

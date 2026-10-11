@@ -11,9 +11,9 @@ const stage = process.argv[2] ?? 'despues'
 const dir = await ensureDir(join(REPORTS, 'contraste'))
 const browser = await launch()
 const cases = [
-  { id: 'inventario', selector: '[role="tablist"]', nombre: 'pestanas' },
-  { id: 'pedido-cobrado', selector: 'main .bg-success\\/10, main [class*="text-success"]', nombre: 'exito' },
-  { id: 'pedidos-encargado', selector: 'main [class*="text-warning"]', nombre: 'aviso' },
+  { id: 'inventario', selector: '[role="tablist"]', name: 'pestanas' },
+  { id: 'pedido-cobrado', selector: 'main .bg-success\\/10, main [class*="text-success"]', name: 'exito' },
+  { id: 'pedidos-encargado', selector: 'main [class*="text-warning"]', name: 'aviso' },
 ]
 for (const caseValue of cases) {
   const context = await browser.newContext({ ...contextOf('escritorio'), deviceScaleFactor: 2 })
@@ -21,15 +21,15 @@ for (const caseValue of cases) {
   const element = page.locator(caseValue.selector).first()
   const colors = await element.evaluate((e) => {
     const s = getComputedStyle(e)
-    return { color: s.color, fondo: s.backgroundColor }
+    return { color: s.color, background: s.backgroundColor }
   })
   const cashRegister = await element.boundingBox()
   const margin = 24
   await page.screenshot({
-    path: join(dir, `${caseValue.nombre}-${stage}.png`),
+    path: join(dir, `${caseValue.name}-${stage}.png`),
     clip: { x: Math.max(0, cashRegister.x - margin), y: Math.max(0, cashRegister.y - margin), width: Math.min(900, cashRegister.width + 2 * margin), height: cashRegister.height + 2 * margin },
   })
-  console.log(caseValue.nombre, stage, colors)
+  console.log(caseValue.name, stage, colors)
   await context.close()
 }
 await browser.close()

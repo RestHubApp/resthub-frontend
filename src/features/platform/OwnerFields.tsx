@@ -32,7 +32,7 @@ export function OwnerFields({ idPrefix, fields, errors }: OwnerFieldsProps) {
           id={`${idPrefix}-full-name`}
           label="Nombre completo"
           placeholder="María Quispe Rojas"
-          icon="perfil"
+          icon="profile"
           autoComplete="off"
           sanitize={onlyLetters}
           field={fields.full_name}

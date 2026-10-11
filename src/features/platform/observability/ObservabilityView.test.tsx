@@ -43,7 +43,7 @@ function handleCard(title: string): HTMLElement {
 }
 
 function lastRead(api: ReturnType<typeof openPanel>['api'], route: string) {
-  return api.llamadas('get', route).at(-1)?.params
+  return api.calls('get', route).at(-1)?.params
 }
 
 describe('ObservabilityView', () => {
@@ -117,7 +117,7 @@ describe('ObservabilityView: actualización, rutas y errores', () => {
   it('se puede pausar la actualización automática y releer a mano', async () => {
     const { api, user } = openPanel()
     await screen.findByRole('region', { name: WINDOW_INDICATORS })
-    const reads = api.llamadas('get', SUMMARY).length
+    const reads = api.calls('get', SUMMARY).length
 
     await user.click(screen.getByRole('button', { name: 'Pausar' }))
     expect(screen.getByText('Actualización en pausa')).toBeInTheDocument()
@@ -125,7 +125,7 @@ describe('ObservabilityView: actualización, rutas y errores', () => {
     await user.click(screen.getByRole('button', { name: 'Actualizar ahora' }))
 
     await waitFor(() => {
-      expect(api.llamadas('get', SUMMARY).length).toBeGreaterThan(reads)
+      expect(api.calls('get', SUMMARY).length).toBeGreaterThan(reads)
     })
   })
 

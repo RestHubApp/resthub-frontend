@@ -72,7 +72,7 @@ export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
           Cancelar
         </Button>
         <Button type="submit" size="lg" className="h-10 px-4" disabled={reset.isPending}>
-          <Icon name="llave" size={16} />
+          <Icon name="key" size={16} />
           <span>{reset.isPending ? 'Guardando…' : 'Restablecer'}</span>
         </Button>
       </DialogFormActions>

@@ -34,7 +34,7 @@ export function CashAmountField({
       <TextField
         id="monto-recibido"
         label="Monto recibido"
-        icon="pago"
+        icon="payment"
         inputMode="decimal"
         autoComplete="off"
         placeholder={centsToApi(totalCents)}

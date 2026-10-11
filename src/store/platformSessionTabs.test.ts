@@ -20,10 +20,10 @@ function account(userId: number): CurrentUserResponse {
 }
 
 async function openTab(local: TestStorage) {
-  const { ventana: window } = newTab(local)
+  const { window } = newTab(local)
   const { useSession } = await import('./session')
   const { usePlatformSession } = await import('./platformSession')
-  return { ventana: window, useSession, usePlatformSession }
+  return { window, useSession, usePlatformSession }
 }
 
 beforeEach(() => {
@@ -44,7 +44,7 @@ describe('sesión de plataforma entre pestañas', () => {
     expect(two.usePlatformSession.getState().admin).toEqual(admin(1))
 
     one.usePlatformSession.getState().signOut()
-    notify(two.ventana, local, SECRET_PLATFORM)
+    notify(two.window, local, SECRET_PLATFORM)
 
     expect(two.usePlatformSession.getState()).toMatchObject({ token: null, admin: null, expired: false })
   })
@@ -77,7 +77,7 @@ describe('sesión de plataforma entre pestañas', () => {
     const fresh = tokenThatExpires(7200, 'a2')
 
     one.usePlatformSession.getState().renew(old, fresh, admin(1))
-    notify(two.ventana, local, SECRET_PLATFORM)
+    notify(two.window, local, SECRET_PLATFORM)
 
     expect(two.usePlatformSession.getState()).toMatchObject({ token: fresh, admin: admin(1) })
   })
@@ -91,7 +91,7 @@ describe('sesión de plataforma entre pestañas', () => {
     const two = await openTab(local)
 
     one.usePlatformSession.getState().signOut()
-    notify(two.ventana, local, SECRET_PLATFORM)
+    notify(two.window, local, SECRET_PLATFORM)
 
     expect(two.useSession.getState().token).toBe(token)
     expect(two.usePlatformSession.getState().token).toBeNull()

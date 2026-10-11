@@ -4,9 +4,9 @@ import type { IconName } from '@/components/icons'
 import { formatChange } from '@/services/format'
 
 const TREND_ICONS: Partial<Record<string, IconName>> = {
-  rising: 'tendenciaSube',
-  falling: 'tendenciaBaja',
-  stable: 'tendenciaEstable',
+  rising: 'trendRises',
+  falling: 'trendFalls',
+  stable: 'trendStable',
 }
 
 /** La tendencia del consumo: la última semana contra las cuatro anteriores. */

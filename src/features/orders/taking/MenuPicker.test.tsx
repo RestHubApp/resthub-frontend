@@ -110,7 +110,7 @@ describe('las opciones de un plato', () => {
     await user.click(screen.getByRole('button', { name: /enviar a cocina/i }))
 
     await screen.findByText('Pedido #12 enviado a cocina.')
-    const body = lastBody(api.llamadas('post', '/orders')) as OpenOrderRequest
+    const body = lastBody(api.calls('post', '/orders')) as OpenOrderRequest
     expect(body.items?.[0]?.modifiers).toEqual([{ group: 'Tamaño', option: 'Vaso' }])
   })
 

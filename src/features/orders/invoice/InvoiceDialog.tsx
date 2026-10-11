@@ -79,11 +79,11 @@ export function InvoiceDialog({ order, open, onClose }: InvoiceDialogProps) {
       <CustomerFields
         documentType={type}
         withAddress={kind === 'factura'}
-        values={{ numero: number, nombre: name, direccion: address }}
+        values={{ number, name, address }}
         onChange={(change) => {
-          setNumber(change.numero)
-          setName(change.nombre)
-          setAddress(change.direccion)
+          setNumber(change.number)
+          setName(change.name)
+          setAddress(change.address)
         }}
       />
       {issue.isError ? <FormMessage tone="error">{errorMessage(issue.error, 'No se pudo emitir el comprobante.')}</FormMessage> : null}

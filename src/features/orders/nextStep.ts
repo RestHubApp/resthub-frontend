@@ -18,28 +18,28 @@ export interface NextStep {
 const STEPS: Partial<Record<OrderStatus, NextStep>> = {
   open: {
     label: 'Enviar a cocina',
-    icon: 'enviar',
+    icon: 'send',
     action: 'send',
     permission: PERMISSION.ordersTake,
     waiting: 'Abierto: falta enviarlo a cocina.',
   },
   in_kitchen: {
     label: 'Marcar listo',
-    icon: 'listo',
+    icon: 'ready',
     action: 'ready',
     permission: PERMISSION.ordersManage,
     waiting: 'En cocina: esta pantalla avisa sola cuando esté listo.',
   },
   ready: {
     label: 'Marcar servido',
-    icon: 'servir',
+    icon: 'serve',
     action: 'served',
     permission: PERMISSION.ordersTake,
     waiting: 'Listo: falta servirlo.',
   },
   served: {
     label: 'Cobrar',
-    icon: 'pago',
+    icon: 'payment',
     action: 'charge',
     permission: PERMISSION.ordersCharge,
     waiting: 'Servido, por cobrar: lo cobra quien lo atendió o el encargado.',

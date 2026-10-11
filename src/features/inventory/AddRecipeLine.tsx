@@ -48,7 +48,7 @@ export function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
           selectedSet('')
         }}
       >
-        <Icon name="agregar" size={16} />
+        <Icon name="add" size={16} />
         <span>Agregar</span>
       </Button>
     </div>

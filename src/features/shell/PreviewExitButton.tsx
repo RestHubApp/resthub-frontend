@@ -27,7 +27,7 @@ export function PreviewExitButton({ tone = 'banner' }: PreviewExitButtonProps) {
 
   const button = (onClick?: () => void) => (
     <Button type="button" size={tone === 'page' ? 'lg' : 'default'} className={STYLES[tone]} onClick={onClick}>
-      <ShellIcon name="salir" size={18} />
+      <ShellIcon name="signOut" size={18} />
       <span>Salir de la vista previa</span>
     </Button>
   )

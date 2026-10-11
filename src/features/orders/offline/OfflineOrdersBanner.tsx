@@ -9,7 +9,7 @@ import { useOfflineOrders } from './useOfflineOrders'
  * las pantallas donde el mesero pasa el turno.
  */
 export function OfflineOrdersBanner() {
-  const { pendientes: pending, enviar: send } = useOfflineOrders()
+  const { pending, send } = useOfflineOrders()
   if (pending.length === 0) {
     return null
   }
@@ -17,7 +17,7 @@ export function OfflineOrdersBanner() {
   return (
     <div role="status" className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-warning/10 px-4 py-3 text-sm text-warning">
       <span className="flex items-center gap-2">
-        <Icon name="sinConexion" size={18} />
+        <Icon name="offline" size={18} />
         <span>
           {pending.length === 1 ? '1 pedido espera señal' : `${String(pending.length)} pedidos esperan señal`}:{' '}
           {pending.map((order) => order.label).join(', ')}. Se envían solos al volver la conexión.
@@ -26,7 +26,7 @@ export function OfflineOrdersBanner() {
       <Button type="button" size="sm" variant="outline" onClick={() => {
         void send()
       }}>
-        <Icon name="reintentar" size={14} />
+        <Icon name="retry" size={14} />
         <span>Reintentar</span>
       </Button>
     </div>

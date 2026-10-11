@@ -27,16 +27,16 @@ import { ROUTES } from './inventario.mjs'
 import { ensureDir, BASE_URL, writeJson, filterStatuses, sessionScript, launch, readJson, REPORTS, resolverRoute, session } from './comun.mjs'
 
 const CATEGORIES = ['accessibility', 'performance', 'best-practices', 'seo']
-const PRESETS = { escritorio: desktopConfig, movil: undefined }
+const PRESETS = { desktop: desktopConfig, movil: undefined }
 const presets = (process.env.A11Y_PRESETS ?? 'escritorio,movil').split(',')
 const repeat = Number(process.env.A11Y_REPETIR ?? 1)
 const dir = await ensureDir(join(REPORTS, 'lighthouse'))
 
 // Las sesiones se abren por la interfaz con Playwright, una vez.
 const browserSessions = await launch()
-const statuses = filterStatuses(ROUTES.map((r) => ({ ...r, clase: 'ruta' })))
+const statuses = filterStatuses(ROUTES.map((r) => ({ ...r, class: 'ruta' })))
 const stores = new Map()
-for (const e of statuses) if (e.cuenta && !stores.has(e.cuenta)) stores.set(e.cuenta, await session(browserSessions, e.cuenta))
+for (const e of statuses) if (e.account && !stores.has(e.account)) stores.set(e.account, await session(browserSessions, e.account))
 await browserSessions.close()
 
 // Chromium se lanza a mano con un perfil en el /tmp de Linux. No se usa
@@ -61,17 +61,17 @@ const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)]
 const rows = []
 for (const status of statuses) {
   for (const preset of presets) {
-    const url = `${BASE_URL}${await resolverRoute(status.ruta)}`
+    const url = `${BASE_URL}${await resolverRoute(status.route)}`
     const runs = []
     // A11Y_REANUDAR=1: si la corrida se cortó, lo que ya tiene reporte no se vuelve a medir.
     const previous = join(dir, `${status.id}--${preset}.report.json`)
     if (process.env.A11Y_REANUDAR && existsSync(previous)) {
       const lhr = JSON.parse(readFileSync(previous, 'utf8'))
-      runs.push({ lhr, report: null, carga: Number.NaN })
+      runs.push({ lhr, report: null, load: Number.NaN })
     }
     for (let i = runs.length > 0 ? repeat : 0; i < repeat; i += 1) {
       const page = await browser.newPage()
-      if (status.cuenta) await page.evaluateOnNewDocument(sessionScript(stores.get(status.cuenta)))
+      if (status.account) await page.evaluateOnNewDocument(sessionScript(stores.get(status.account)))
       try {
         const load = loadavg()[0]
         const result = await lighthouse(url, { port: chrome.port, output: ['html', 'json'], logLevel: 'error', onlyCategories: CATEGORIES }, PRESETS[preset], page)
@@ -83,7 +83,7 @@ for (const status of statuses) {
       await page.close()
     }
     if (runs.length === 0) {
-      rows.push({ id: status.id, nombre: status.nombre, preset, error: 'Lighthouse no terminó' })
+      rows.push({ id: status.id, name: status.name, preset, error: 'Lighthouse no terminó' })
       continue
     }
     // Se guarda la corrida con el rendimiento mediano.
@@ -99,27 +99,27 @@ for (const status of statuses) {
     const failed = (c) =>
       lhr.categories[c].auditRefs
         .filter((r) => r.weight > 0 && lhr.audits[r.id].score !== null && lhr.audits[r.id].score < 1)
-        .map((r) => ({ id: r.id, titulo: lhr.audits[r.id].title, puntaje: lhr.audits[r.id].score }))
+        .map((r) => ({ id: r.id, title: lhr.audits[r.id].title, score: lhr.audits[r.id].score }))
     const row = {
       id: status.id,
-      nombre: status.nombre,
+      name: status.name,
       preset,
       url: lhr.finalDisplayedUrl,
       version: lhr.lighthouseVersion,
-      puntajes: Object.fromEntries(CATEGORIES.map((c) => [c, score(c)])),
-      rendimientoCorridas: rend.map((r) => Math.round(r * 100)),
-      metricas: Object.fromEntries(['first-contentful-paint', 'largest-contentful-paint', 'total-blocking-time', 'cumulative-layout-shift', 'speed-index'].map((m) => [m, lhr.audits[m]?.displayValue])),
-      fallidas: Object.fromEntries(['accessibility', 'best-practices', 'seo'].map((c) => [c, failed(c)])),
-      avisos: lhr.runWarnings,
+      scores: Object.fromEntries(CATEGORIES.map((c) => [c, score(c)])),
+      performanceRuns: rend.map((r) => Math.round(r * 100)),
+      metrics: Object.fromEntries(['first-contentful-paint', 'largest-contentful-paint', 'total-blocking-time', 'cumulative-layout-shift', 'speed-index'].map((m) => [m, lhr.audits[m]?.displayValue])),
+      failed: Object.fromEntries(['accessibility', 'best-practices', 'seo'].map((c) => [c, failed(c)])),
+      notices: lhr.runWarnings,
       // Carga de la máquina (promedio de 1 min) al empezar cada corrida y el
       // índice de CPU que midió Lighthouse: con otros agentes corriendo, el
       // rendimiento simulado baja aunque la aplicación no cambie.
-      cargaMaquina: runs.map((c) => (Number.isNaN(c.carga) ? null : Number(c.carga.toFixed(1)))),
+      loadMachine: runs.map((c) => (Number.isNaN(c.carga) ? null : Number(c.carga.toFixed(1)))),
       benchmarkIndex: lhr.environment.benchmarkIndex,
     }
     rows.push(row)
-    const p = row.puntajes
-    console.log(`${`${status.id}--${preset}`.padEnd(40)} a11y ${p.accessibility} perf ${p.performance} bp ${p['best-practices']} seo ${p.seo}  ${[...row.fallidas.accessibility, ...row.fallidas['best-practices'], ...row.fallidas.seo].map((a) => a.id).join(' ')}`)
+    const p = row.scores
+    console.log(`${`${status.id}--${preset}`.padEnd(40)} a11y ${p.accessibility} perf ${p.performance} bp ${p['best-practices']} seo ${p.seo}  ${[...row.failed.accessibility, ...row.failed['best-practices'], ...row.failed.seo].map((a) => a.id).join(' ')}`)
   }
 }
 await browser.disconnect()
@@ -140,8 +140,8 @@ try {
 
 // Resumen combinado con lo que ya había si se midió una parte.
 const routeSummary = join(dir, 'resumen.json')
-const previousValue = existsSync(routeSummary) && (process.env.A11Y_SOLO || process.env.A11Y_PRESETS) ? await readJson(routeSummary) : { filas: [] }
+const previousValue = existsSync(routeSummary) && (process.env.A11Y_SOLO || process.env.A11Y_PRESETS) ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.preset}`))
 const all = [...previousValue.filas.filter((f) => !fresh.has(`${f.id}--${f.preset}`)), ...rows]
-await writeJson(routeSummary, { fecha: new Date().toISOString(), categorias: CATEGORIES, repetir: repeat, filas: all })
+await writeJson(routeSummary, { date: new Date().toISOString(), categories: CATEGORIES, repeat, rows: all })
 console.log(`\nLighthouse: ${rows.length} mediciones`)

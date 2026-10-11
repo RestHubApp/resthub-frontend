@@ -30,7 +30,7 @@ describe('platos de un pedido abierto', () => {
 
     await user.click(screen.getByRole('button', { name: 'Uno más de Lomo saltado' }))
 
-    expect(api.llamadas('patch', DISH)[0]?.body).toEqual({ quantity: 2 })
+    expect(api.calls('patch', DISH)[0]?.body).toEqual({ quantity: 2 })
   })
 
   it('con uno solo, «−» quita el plato y lo avisa', async () => {
@@ -54,7 +54,7 @@ describe('platos de un pedido abierto', () => {
     await user.type(field, 'Término medio')
     await user.click(window.getByRole('button', { name: 'Guardar nota' }))
 
-    expect(api.llamadas('patch', DISH)[0]?.body).toEqual({ notes: 'Término medio' })
+    expect(api.calls('patch', DISH)[0]?.body).toEqual({ notes: 'Término medio' })
     expect(await screen.findByRole('button', { name: 'Cambiar nota' })).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })

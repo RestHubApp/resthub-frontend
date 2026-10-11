@@ -7,7 +7,7 @@ const MAX_PERCENTAGE = 100
 export const MAX_ADJUSTMENT_REASON = 200
 
 export const discountSchema = z.object({
-  percent: decimalRule({ max: MAX_PERCENTAGE, decimales: 2, unidad: '%', obligatorio: true }),
+  percent: decimalRule({ max: MAX_PERCENTAGE, decimals: 2, unit: '%', required: true }),
   reason: textRequired(MAX_ADJUSTMENT_REASON, 'Escribe el motivo'),
 })
 

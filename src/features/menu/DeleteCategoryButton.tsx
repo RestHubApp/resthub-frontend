@@ -35,7 +35,7 @@ export function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
           aria-label={`Eliminar la categoría ${category.name}`}
           disabled={remove.isPending}
         >
-          <Icon name="eliminar" size={16} />
+          <Icon name="delete" size={16} />
           <span>Eliminar</span>
         </Button>
       }

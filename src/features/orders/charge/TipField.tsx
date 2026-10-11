@@ -25,7 +25,7 @@ export function TipField({ field, error, onQuick }: TipFieldProps) {
       <TextField
         id="propina"
         label="Propina (opcional)"
-        icon="propina"
+        icon="tip"
         inputMode="decimal"
         autoComplete="off"
         placeholder="0.00"

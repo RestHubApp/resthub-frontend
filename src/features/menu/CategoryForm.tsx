@@ -68,7 +68,7 @@ export function CategoryForm({ category, onDone }: CategoryFormProps) {
           Cancelar
         </Button>
         <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
-          <Icon name={category === undefined ? 'agregar' : 'confirmar'} size={16} />
+          <Icon name={category === undefined ? 'add' : 'confirm'} size={16} />
           <span>{save.isPending ? 'Guardando…' : 'Guardar'}</span>
         </Button>
       </DialogFormActions>

@@ -19,7 +19,7 @@ test('GES-10 los insumos y el libro de movimientos se paginan', async ({ page, l
       await owner.post('/inventory/purchases', { ingredient_id: ingredient.id, quantity: '5', unit_cost: '1', reason: `Compra ${String(n)}` })
     }
   }
-  await openAs(page, local.encargado, '/inventario')
+  await openAs(page, local.owner, '/inventario')
   const ingredients = page.getByRole('tabpanel', { name: /Insumos/u })
   await expect(ingredients.getByText('31 insumos', { exact: true })).toBeVisible()
   const pages = ingredients.getByRole('navigation', { name: 'Paginación' })
@@ -65,14 +65,14 @@ test('GES-11 cada pestaña del inventario avisa si el servidor falla', async ({ 
   for (const route of ['/inventory/ingredients', '/inventory/movements', '/inventory/alerts', '/inventory/recipes', '/inventory/purchase-orders', '/inventory/suppliers']) {
     await failureServer(page, route)
   }
-  await openAs(page, local.encargado, '/inventario')
+  await openAs(page, local.owner, '/inventario')
   await expect(page.getByText('No se pudieron cargar los insumos.')).toBeVisible()
   const messages = {
-    movimientos: 'No se pudo cargar el libro de movimientos.',
-    alertas: 'No se pudieron cargar las alertas.',
-    recetas: 'No se pudieron cargar las recetas.',
-    compras: 'No se pudieron cargar las órdenes.',
-    proveedores: 'No se pudieron cargar los proveedores.',
+    movements: 'No se pudo cargar el libro de movimientos.',
+    alerts: 'No se pudieron cargar las alertas.',
+    recipes: 'No se pudieron cargar las recetas.',
+    purchases: 'No se pudieron cargar las órdenes.',
+    suppliers: 'No se pudieron cargar los proveedores.',
   }
   for (const [tab, message] of Object.entries(messages)) {
     // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios

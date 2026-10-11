@@ -27,7 +27,7 @@ export function RecipeFooter({ empty, hadRecipe, dirty, pending }: RecipeFooterP
         className="h-11 px-5"
         disabled={pending || !dirty}
       >
-        <Icon name={deletes ? 'eliminar' : 'confirmar'} size={16} />
+        <Icon name={deletes ? 'delete' : 'confirm'} size={16} />
         <span>{pending ? 'Guardando…' : label}</span>
       </Button>
     </div>

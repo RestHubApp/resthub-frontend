@@ -36,7 +36,7 @@ describe('alta y edición de insumos', () => {
     await user.click(within(window).getByRole('button', CREATE))
 
     expect(await screen.findByText('Insumo Pollo creado.')).toBeInTheDocument()
-    expect(api.llamadas('post', INGREDIENTS)[0]?.body).toEqual({ name: 'Pollo', unit: 'g', min_stock: '2500', unit_cost: '0.012' })
+    expect(api.calls('post', INGREDIENTS)[0]?.body).toEqual({ name: 'Pollo', unit: 'g', min_stock: '2500', unit_cost: '0.012' })
   })
 
   it('al elegir unidades, el mínimo y el costo se piden por unidad', async () => {
@@ -52,7 +52,7 @@ describe('alta y edición de insumos', () => {
     await user.click(within(window).getByRole('button', CREATE))
 
     expect(await screen.findByText('Insumo Gaseosa creado.')).toBeInTheDocument()
-    expect(api.llamadas('post', INGREDIENTS)[0]?.body).toEqual({ name: 'Gaseosa', unit: 'unit', min_stock: '24', unit_cost: '0' })
+    expect(api.calls('post', INGREDIENTS)[0]?.body).toEqual({ name: 'Gaseosa', unit: 'unit', min_stock: '24', unit_cost: '0' })
   })
 
   it('editar parte de los datos en kilos, no deja cambiar la unidad y muestra el error del servidor', async () => {
@@ -65,7 +65,7 @@ describe('alta y edición de insumos', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
     expect(await within(window).findByText('Ya hay un insumo con ese nombre.')).toBeInTheDocument()
-    expect(api.llamadas('patch', `${INGREDIENTS}/1`)[0]?.body).toEqual({ name: 'Limón', min_stock: '2000', unit_cost: '0.004' })
+    expect(api.calls('patch', `${INGREDIENTS}/1`)[0]?.body).toEqual({ name: 'Limón', min_stock: '2000', unit_cost: '0.004' })
   })
 
   it('sin nombre no se envía', async () => {
@@ -73,7 +73,7 @@ describe('alta y edición de insumos', () => {
     const window = await action(user, NEW, NEW)
     await user.click(within(window).getByRole('button', CREATE))
     expect(await within(window).findByText('Escribe el nombre del insumo')).toBeInTheDocument()
-    expect(api.llamadas('post', INGREDIENTS)).toHaveLength(0)
+    expect(api.calls('post', INGREDIENTS)).toHaveLength(0)
   })
 })
 
@@ -90,7 +90,7 @@ describe('compras, mermas y ajustes', () => {
     await user.click(within(window).getByRole('button', { name: 'Registrar compra' }))
 
     expect(await screen.findByText('Compra registrada: Limón queda en 10 kg')).toBeInTheDocument()
-    expect(api.llamadas('post', PURCHASES)[0]?.body).toEqual({ ingredient_id: 1, quantity: '5000', unit_cost: '0.004', reason: '' })
+    expect(api.calls('post', PURCHASES)[0]?.body).toEqual({ ingredient_id: 1, quantity: '5000', unit_cost: '0.004', reason: '' })
   })
 
   it('con el total pagado, el costo por gramo sale de dividir', async () => {
@@ -107,7 +107,7 @@ describe('compras, mermas y ajustes', () => {
     await user.click(within(window).getByRole('button', { name: 'Registrar compra' }))
 
     expect(await screen.findByText(/Compra registrada/u)).toBeInTheDocument()
-    expect(api.llamadas('post', PURCHASES)[0]?.body).toMatchObject({ quantity: '500', unit_cost: '0.006' })
+    expect(api.calls('post', PURCHASES)[0]?.body).toMatchObject({ quantity: '500', unit_cost: '0.006' })
   })
 
   it('una merma exige motivo, avisa si deja el stock bajo el mínimo y se envía en gramos', async () => {
@@ -123,7 +123,7 @@ describe('compras, mermas y ajustes', () => {
     await user.type(within(window).getByLabelText('Motivo'), 'Se malogró con el calor')
     await user.click(within(window).getByRole('button', { name: 'Registrar merma' }))
     expect(await screen.findByText('Merma registrada: Limón queda en 1 kg')).toBeInTheDocument()
-    expect(api.llamadas('post', '/inventory/waste')[0]?.body).toEqual({ ingredient_id: 1, quantity: '4000', reason: 'Se malogró con el calor' })
+    expect(api.calls('post', '/inventory/waste')[0]?.body).toEqual({ ingredient_id: 1, quantity: '4000', reason: 'Se malogró con el calor' })
   })
 
   it('un conteo envía lo contado y el servidor calcula la diferencia', async () => {
@@ -136,7 +136,7 @@ describe('compras, mermas y ajustes', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar ajuste' }))
 
     expect(await screen.findByText('Ajuste de −2 kg: Limón queda en 3 kg')).toBeInTheDocument()
-    expect(api.llamadas('post', SETTINGS)[0]?.body).toEqual({ ingredient_id: 1, reason: 'Conteo físico', counted_stock: '3000' })
+    expect(api.calls('post', SETTINGS)[0]?.body).toEqual({ ingredient_id: 1, reason: 'Conteo físico', counted_stock: '3000' })
   })
 
   it('una diferencia que sobra se suma; si falla, el error queda en el formulario', async () => {
@@ -150,6 +150,6 @@ describe('compras, mermas y ajustes', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar ajuste' }))
 
     expect(await within(window).findByText('El motivo es muy corto.')).toBeInTheDocument()
-    expect(api.llamadas('post', SETTINGS)[0]?.body).toEqual({ ingredient_id: 1, reason: 'Conteo físico', quantity: '1000' })
+    expect(api.calls('post', SETTINGS)[0]?.body).toEqual({ ingredient_id: 1, reason: 'Conteo físico', quantity: '1000' })
   })
 })

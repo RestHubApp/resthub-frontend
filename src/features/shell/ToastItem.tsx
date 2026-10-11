@@ -11,8 +11,8 @@ const AUTO_DISMISS_MS = 8_000
 // Un aviso informativo casi siempre confirma algo hecho: lleva la marca de
 // correcto, no la de alerta, que queda para lo que salió mal.
 const ICON_TONE = {
-  info: { name: 'correcto', className: 'text-success' },
-  warning: { name: 'alerta', className: 'text-warning' },
+  info: { name: 'correct', className: 'text-success' },
+  warning: { name: 'alert', className: 'text-warning' },
 } as const
 
 interface ToastItemProps {
@@ -47,7 +47,7 @@ export function ToastItem({ id, tone, message }: ToastItemProps) {
           dismiss(id)
         }}
       >
-        <ShellIcon name="cancelar" size={16} />
+        <ShellIcon name="cancel" size={16} />
       </Button>
     </div>
   )

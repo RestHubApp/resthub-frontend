@@ -29,9 +29,9 @@ function toneFor(change: number, higherIsBetter: boolean): Tone {
 
 function iconFor(change: number) {
   if (change === 0) {
-    return 'tendenciaEstable'
+    return 'trendStable'
   }
-  return change > 0 ? 'tendenciaSube' : 'tendenciaBaja'
+  return change > 0 ? 'trendRises' : 'trendFalls'
 }
 
 /**

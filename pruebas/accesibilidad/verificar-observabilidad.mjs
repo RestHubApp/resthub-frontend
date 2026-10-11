@@ -23,7 +23,7 @@ await page.screenshot({ path: join(REPORTS, 'observabilidad-diferida-despues.png
 await page.goto(`${BASE_URL}/plataforma/observabilidad#logs`)
 await page.getByRole('heading', { name: 'Logs' }).waitFor()
 const hash = await page.getByRole('heading', { name: 'Logs' }).count()
-const result = { inicial: initial, cargada: loaded, hash }
+const result = { initial, loaded, hash }
 await writeFile(join(REPORTS, 'observabilidad-diferida.json'), `${JSON.stringify(result, null, 2)}\n`)
 await context.close()
 await browser.close()

@@ -68,7 +68,7 @@ export function PurchaseOrderDialog({ open, onClose }: PurchaseOrderDialogProps)
         <Button type="button" variant="outline" size="sm" disabled={(suggestions.data ?? []).length === 0} onClick={() => {
           setLines(linesFromSuggestions(suggestions.data ?? []))
         }}>
-          <Icon name="comprar" size={14} />
+          <Icon name="buy" size={14} />
           <span>Cargar sugerencias ({(suggestions.data ?? []).length})</span>
         </Button>
       </div>

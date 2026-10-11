@@ -32,52 +32,52 @@ export class ApiSalon {
     this.token = who.token
   }
 
-  private opciones(data?: unknown) {
+  private options(data?: unknown) {
     return { headers: { Authorization: `Bearer ${this.token}`, Connection: 'close' }, data }
   }
 
   async get(route: string): Promise<Json> {
-    return body(await this.local.http.get(`${API}${route}`, this.opciones()), `GET ${route}`)
+    return body(await this.local.http.get(`${API}${route}`, this.options()), `GET ${route}`)
   }
 
   /** Solo el código de estado, para comprobar un 404 o un rechazo. */
-  async estado(route: string): Promise<number> {
-    return (await this.local.http.get(`${API}${route}`, this.opciones())).status()
+  async status(route: string): Promise<number> {
+    return (await this.local.http.get(`${API}${route}`, this.options())).status()
   }
 
-  async lista(route: string): Promise<Json[]> {
+  async list(route: string): Promise<Json[]> {
     const data = (await this.get(route)) as unknown
     return Array.isArray(data) ? (data as Json[]) : (((data as Json).items ?? []) as Json[])
   }
 
   async post(route: string, data: unknown = {}): Promise<Json> {
-    return body(await this.local.http.post(`${API}${route}`, this.opciones(data)), `POST ${route}`)
+    return body(await this.local.http.post(`${API}${route}`, this.options(data)), `POST ${route}`)
   }
 
   async patch(route: string, data: unknown): Promise<Json> {
-    return body(await this.local.http.patch(`${API}${route}`, this.opciones(data)), `PATCH ${route}`)
+    return body(await this.local.http.patch(`${API}${route}`, this.options(data)), `PATCH ${route}`)
   }
 }
 
 /** El API como esa cuenta; sin cuenta, como el encargado. */
-export function api(local: Local, who: Session = local.encargado): ApiSalon {
+export function api(local: Local, who: Session = local.owner): ApiSalon {
   return new ApiSalon(local, who)
 }
 
 export interface Line {
-  readonly plato: Dish
-  readonly cantidad?: number
-  readonly notas?: string
+  readonly dish: Dish
+  readonly quantity?: number
+  readonly notes?: string
   /** Las opciones elegidas de un plato con `modifier_groups`. */
-  readonly opciones?: readonly { readonly grupo: string; readonly opcion: string }[]
+  readonly options?: readonly { readonly group: string; readonly option: string }[]
 }
 
 function items(lines: readonly Line[]) {
-  return lines.map(({ plato: dish, cantidad: quantity = 1, notas: notes = '', opciones: options = [] }) => ({
+  return lines.map(({ dish, quantity = 1, notes = '', options = [] }) => ({
     menu_item_id: dish.id,
-    quantity: quantity,
-    notes: notes,
-    modifiers: options.map(({ grupo: group, opcion: option }) => ({ group: group, option: option })),
+    quantity,
+    notes,
+    modifiers: options.map(({ group, option }) => ({ group, option })),
   }))
 }
 
@@ -92,7 +92,7 @@ export function id(order: Json): number {
 
 /** Un pedido en mesa abierto que todavía no se envió a cocina. */
 export async function openOrder(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
-  return api(local, local.mesero).post('/orders', {
+  return api(local, local.waiter).post('/orders', {
     type: 'dine_in',
     table_id: table.id,
     client_request_id: `e2e-${unique()}`,
@@ -105,7 +105,7 @@ export async function orderTakeaway(
   local: Local,
   name: string,
   lines: readonly Line[],
-  who: Session = local.mesero,
+  who: Session = local.waiter,
 ): Promise<Json> {
   const takeaway = api(local, who)
   const order = await takeaway.post('/orders', {
@@ -119,7 +119,7 @@ export async function orderTakeaway(
 
 /** Un delivery enviado a cocina. */
 export async function orderDelivery(local: Local, customer: string, lines: readonly Line[]): Promise<Json> {
-  const waiter = api(local, local.mesero)
+  const waiter = api(local, local.waiter)
   const order = await waiter.post('/orders', {
     type: 'delivery',
     customer_name: customer,
@@ -137,7 +137,7 @@ export async function orderInTable(
   local: Local,
   table: Table,
   lines: readonly Line[],
-  who: Session = local.mesero,
+  who: Session = local.waiter,
 ): Promise<Json> {
   const customer = api(local, who)
   const order = await customer.post('/orders', {
@@ -151,8 +151,8 @@ export async function orderInTable(
 
 /** La cocina lo marca listo y el mesero lo sirve. */
 export async function serve(local: Local, orderId: number): Promise<Json> {
-  await api(local, local.cocina).post(`/orders/${String(orderId)}/ready`)
-  return api(local, local.mesero).post(`/orders/${String(orderId)}/served`)
+  await api(local, local.kitchen).post(`/orders/${String(orderId)}/ready`)
+  return api(local, local.waiter).post(`/orders/${String(orderId)}/served`)
 }
 
 /** Un pedido en mesa servido, listo para cobrar. */
@@ -164,7 +164,7 @@ export async function orderServed(local: Local, table: Table, lines: readonly Li
 /** Un pedido servido y pagado en un solo pago con tarjeta (la caja tiene que estar abierta). */
 export async function orderPaid(local: Local, table: Table, lines: readonly Line[]): Promise<Json> {
   const order = await orderServed(local, table, lines)
-  return api(local, local.mesero).post(`/orders/${String(order.id)}/payments`, {
+  return api(local, local.waiter).post(`/orders/${String(order.id)}/payments`, {
     payment_method: 'card',
     tip: '0',
   })
@@ -172,7 +172,7 @@ export async function orderPaid(local: Local, table: Table, lines: readonly Line
 
 /** Un plato con un grupo obligatorio (término) y extras opcionales con precio. */
 export async function dishWithOptions(local: Local): Promise<Dish> {
-  const funds = local.plato('Lomo saltado').categoriaId
+  const funds = local.dish('Lomo saltado').categoryId
   const created = await api(local).post('/menu/items', {
     category_id: funds,
     name: 'Bistec a lo pobre',
@@ -200,7 +200,7 @@ export async function dishWithOptions(local: Local): Promise<Dish> {
       },
     ],
   })
-  return { id: Number(created.id), nombre: 'Bistec a lo pobre', precio: '30.00', categoriaId: funds }
+  return { id: Number(created.id), name: 'Bistec a lo pobre', price: '30.00', categoryId: funds }
 }
 
 /**
@@ -209,16 +209,16 @@ export async function dishWithOptions(local: Local): Promise<Dish> {
  */
 export async function countPrints(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const windowValue = window as unknown as { impresiones: number }
-    windowValue.impresiones = 0
+    const windowValue = window as unknown as { prints: number }
+    windowValue.prints = 0
     window.print = () => {
-      windowValue.impresiones += 1
+      windowValue.prints += 1
     }
   })
 }
 
 export async function prints(page: Page): Promise<number> {
-  return page.evaluate(() => (window as unknown as { impresiones: number }).impresiones)
+  return page.evaluate(() => (window as unknown as { prints: number }).prints)
 }
 
 /** Un pedido por su id, leído del API como encargado. */

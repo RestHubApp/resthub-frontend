@@ -33,7 +33,7 @@ export function ElapsedTime({ order, now }: ElapsedTimeProps) {
 
   return (
     <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${tone}`}>
-      <Icon name={late ? 'alerta' : 'horario'} size={14} />
+      <Icon name={late ? 'alert' : 'schedule'} size={14} />
       <span>
         {late ? 'Demorado · ' : ''}
         {formatMinutes(minutes)}

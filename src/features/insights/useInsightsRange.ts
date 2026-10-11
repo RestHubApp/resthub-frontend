@@ -36,10 +36,10 @@ export function useInsightsRange(timeZone: string): InsightsRange {
     preset,
     params,
     choosePreset: (value) => {
-      setSearch({ rango: value }, { replace: true })
+      setSearch({ 'rango': value }, { replace: true })
     },
     chooseCustom: (from, to) => {
-      setSearch({ rango: 'personalizado', desde: from, hasta: to }, { replace: true })
+      setSearch({ 'rango': 'personalizado', 'desde': from, 'hasta': to }, { replace: true })
     },
   }
 }

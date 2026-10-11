@@ -99,7 +99,7 @@ export function MenuItemForm({
           Cancelar
         </Button>
         <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
-          <Icon name={item === undefined ? 'agregar' : 'confirmar'} size={16} />
+          <Icon name={item === undefined ? 'add' : 'confirm'} size={16} />
           <span>{save.isPending ? 'Guardando…' : label}</span>
         </Button>
       </DialogFormActions>

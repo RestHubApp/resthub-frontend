@@ -52,7 +52,7 @@ export function LowStockSummary({ onShowAlerts }: LowStockSummaryProps) {
     >
       <div className="flex items-start gap-3">
         <Icon
-          name={low.length === 0 ? 'confirmar' : 'aviso'}
+          name={low.length === 0 ? 'confirm' : 'notice'}
           size={22}
           className={cn('mt-0.5 shrink-0', low.length === 0 ? 'text-success' : 'text-warning')}
         />
@@ -67,7 +67,7 @@ export function LowStockSummary({ onShowAlerts }: LowStockSummaryProps) {
       </div>
       {low.length === 0 ? null : (
         <Button type="button" variant="outline" className="h-11 px-4" onClick={onShowAlerts}>
-          <Icon name="aviso" size={16} />
+          <Icon name="notice" size={16} />
           <span>Ver alertas</span>
         </Button>
       )}

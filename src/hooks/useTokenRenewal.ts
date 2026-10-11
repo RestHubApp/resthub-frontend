@@ -10,10 +10,10 @@ const MARGIN_MS = 5 * 60_000
 const INACTIVITY_MS = 30 * 60_000
 const EVENTS = ['pointerdown', 'keydown', 'visibilitychange'] as const
 
-const activity = { ultima: Date.now() }
+const activity = { last: Date.now() }
 
 function markActivity(): void {
-  activity.ultima = Date.now()
+  activity.last = Date.now()
 }
 
 /**
@@ -52,7 +52,7 @@ export function useTokenRenewal(token: string | null, renew: (origin: string) =>
       return
     }
     const handleRenew = async () => {
-      if (Date.now() - activity.ultima > INACTIVITY_MS) {
+      if (Date.now() - activity.last > INACTIVITY_MS) {
         return
       }
       try {

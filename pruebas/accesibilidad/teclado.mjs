@@ -14,13 +14,13 @@ const status = (id) => STATUSES.find((e) => e.id === id)
 function focus(page) {
   return page.evaluate(() => {
     const e = document.activeElement
-    if (!e || e === document.body) return { nombre: '(body)' }
+    if (!e || e === document.body) return { name: '(body)' }
     const style = getComputedStyle(e)
     const ring = style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0
     const shadow = style.boxShadow !== 'none'
     const name = (e.getAttribute('aria-label') || e.innerText || e.getAttribute('title') || e.getAttribute('placeholder') || '').trim().replace(/\s+/gu, ' ').slice(0, 60)
     const r = e.getBoundingClientRect()
-    return { etiqueta: e.tagName.toLowerCase(), rol: e.getAttribute('role'), nombre: name, visible: ring || shadow, dentroDeDialogo: Boolean(e.closest('[role="dialog"],[role="alertdialog"]')), alto: Math.round(r.height), ancho: Math.round(r.width) }
+    return { label: e.tagName.toLowerCase(), role: e.getAttribute('role'), name, visible: ring || shadow, dialogInside: Boolean(e.closest('[role="dialog"],[role="alertdialog"]')), height: Math.round(r.height), width: Math.round(r.width) }
   })
 }
 
@@ -39,13 +39,13 @@ async function traverse(browser, id, vista, tabs) {
     if (i === 0 || i === 3) await page.screenshot({ path: join(dir, `${id}--${vista}--tab${String(i + 1)}.png`) })
   }
   await context.close()
-  return { id, vista, pasos: steps }
+  return { id, vista, steps }
 }
 
 async function dialog(browser, id, trigger, vista) {
   const context = await browser.newContext(contextOf(vista))
   const e = status(id)
-  const page = await openStatus(browser, context, { ...e, clase: 'ruta', espera: undefined, pasos: [] })
+  const page = await openStatus(browser, context, { ...e, class: 'ruta', wait: undefined, steps: [] })
   const button = page.getByRole('button', { name: trigger, exact: true }).first()
   await button.focus()
   await page.keyboard.press('Enter')
@@ -67,24 +67,24 @@ async function dialog(browser, id, trigger, vista) {
   const onClose = await focus(page)
   await context.close()
   return {
-    id, vista, disparador: trigger, alAbrir: onOpen,
-    focoAtrapado: path.every((p) => p.dentroDeDialogo),
-    anilloVisible: path.filter((p) => !p.visible).map((p) => p.nombre),
-    cerradoConEscape: closed,
-    focoDevuelto: onClose.nombre.includes(trigger),
-    alCerrar: onClose,
+    id, vista, trigger, onOpen,
+    focusTrapped: path.every((p) => p.dentroDeDialogo),
+    ringVisible: path.filter((p) => !p.visible).map((p) => p.nombre),
+    closedWithEscape: closed,
+    focusReturned: onClose.nombre.includes(trigger),
+    onClose,
   }
 }
 
 const browserValue = await launch()
 const result = {
-  recorridos: [
+  routes: [
     await traverse(browserValue, 'acceso', 'escritorio', 6),
     await traverse(browserValue, 'pedidos', 'movil', 10),
     await traverse(browserValue, 'pedidos-nuevo', 'movil', 12),
     await traverse(browserValue, 'tablero', 'escritorio', 12),
   ],
-  dialogos: [
+  dialogs: [
     await dialog(browserValue, 'o-cobro', 'Cobrar', 'escritorio'),
     await dialog(browserValue, 'o-nueva-mesa', 'Nueva mesa', 'escritorio'),
     await dialog(browserValue, 'o-llevar', 'Para llevar / Delivery', 'movil'),
@@ -93,9 +93,9 @@ const result = {
 }
 await browserValue.close()
 await writeJson(join(dir, 'teclado.json'), result)
-for (const r of result.recorridos) {
-  console.log(`\n${r.id} (${r.vista}): ${r.pasos.map((p, i) => `${String(i + 1)}. ${p.nombre}${p.visible ? '' : ' [sin anillo]'}`).join(' → ')}`)
+for (const r of result.routes) {
+  console.log(`\n${r.id} (${r.vista}): ${r.steps.map((p, i) => `${String(i + 1)}. ${p.nombre}${p.visible ? '' : ' [sin anillo]'}`).join(' → ')}`)
 }
-for (const d of result.dialogos) {
-  console.log(`\nDiálogo «${d.disparador}» en ${d.id} (${d.vista}): foco inicial en «${d.alAbrir.nombre}», atrapado ${d.focoAtrapado ? 'sí' : 'NO'}, anillo ausente en [${d.anilloVisible.join(', ')}], Escape cierra ${d.cerradoConEscape ? 'sí' : 'NO'}, foco devuelto ${d.focoDevuelto ? 'sí' : 'NO'} («${d.alCerrar.nombre}»)`)
+for (const d of result.dialogs) {
+  console.log(`\nDiálogo «${d.trigger}» en ${d.id} (${d.vista}): foco inicial en «${d.onOpen.nombre}», atrapado ${d.focusTrapped ? 'sí' : 'NO'}, anillo ausente en [${d.ringVisible.join(', ')}], Escape cierra ${d.closedWithEscape ? 'sí' : 'NO'}, foco devuelto ${d.focusReturned ? 'sí' : 'NO'} («${d.onClose.nombre}»)`)
 }

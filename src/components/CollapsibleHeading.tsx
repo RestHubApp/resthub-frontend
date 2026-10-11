@@ -50,7 +50,7 @@ export function CollapsibleHeading({
           <span
             className={`inline-flex shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}
           >
-            <Icon name="siguiente" size={18} />
+            <Icon name="next" size={18} />
           </span>
           <span>{title}</span>
         </button>

@@ -67,7 +67,7 @@ export function MenuItemRow({
             setEditing(true)
           }}
         >
-          <Icon name="editar" size={16} />
+          <Icon name="edit" size={16} />
           <span>Editar</span>
         </Button>
         <MenuItemStatusButton item={item} />

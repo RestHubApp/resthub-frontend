@@ -152,7 +152,7 @@ describe('RequireSession: términos y privacidad', () => {
     await user.click(screen.getByRole('button', { name: 'Acepto los términos' }))
 
     expect(await screen.findByText('Pedidos')).toBeInTheDocument()
-    expect(api.llamadas('post', TERMS)[0]?.body).toEqual({ version: '2026-10' })
+    expect(api.calls('post', TERMS)[0]?.body).toEqual({ version: '2026-10' })
   })
 
   it('si la versión cambió mientras se leía, la relee y la vuelve a pedir', async () => {

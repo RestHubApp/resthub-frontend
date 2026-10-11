@@ -13,5 +13,5 @@ export function useRestock() {
       await queryClient.invalidateQueries({ queryKey: aiDecisionsQueryKey })
     },
   })
-  return { recomendacion: recommendation, actualizar: update }
+  return { recommendation, update }
 }

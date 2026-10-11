@@ -24,13 +24,13 @@ export function RestockNotice({ report }: RestockNoticeProps) {
       </p>
       {saved ? null : (
         <p role="status" className="m-0 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-sm">
-          <Icon name="alerta" size={18} className="mt-0.5 shrink-0" />
+          <Icon name="alert" size={18} className="mt-0.5 shrink-0" />
           Es una vista previa calculada con las reglas fijas. Toca «Actualizar recomendaciones» para decidir y guardar.
         </p>
       )}
       {saved && expired ? (
         <p role="status" className="m-0 flex items-start gap-2 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
-          <Icon name="alerta" size={18} className="mt-0.5 shrink-0" />
+          <Icon name="alert" size={18} className="mt-0.5 shrink-0" />
           Algunas recomendaciones tienen más de un día. Actualízalas antes de comprar.
         </p>
       ) : null}

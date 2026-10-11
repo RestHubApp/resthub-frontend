@@ -81,7 +81,7 @@ export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
         </Button>
         {readOnly ? null : (
           <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending}>
-            <Icon name="confirmar" size={16} />
+            <Icon name="confirm" size={16} />
             <span>{save.isPending ? 'Guardando…' : 'Guardar'}</span>
           </Button>
         )}

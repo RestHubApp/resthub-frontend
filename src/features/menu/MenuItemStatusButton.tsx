@@ -34,7 +34,7 @@ export function MenuItemStatusButton({ item }: MenuItemStatusButtonProps) {
       disabled={status.isPending}
       onClick={item.is_active ? undefined : change}
     >
-      <Icon name="encender" size={16} />
+      <Icon name="turnOn" size={16} />
       <span>{item.is_active ? 'Desactivar' : 'Activar'}</span>
     </Button>
   )

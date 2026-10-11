@@ -39,7 +39,7 @@ test('VIS-08 la carta con sus ventanas de alta, edición y confirmaciones', asyn
   )
   await api(local).post('/menu/categories', { name: 'Postres' })
 
-  await openAs(page, local.encargado, '/menu')
+  await openAs(page, local.owner, '/menu')
   await expect(page.getByRole('region', { name: 'Postres' })).toBeVisible()
   await expect(page.getByText('Hoy: 5 de 5 platos disponibles')).toBeVisible()
   await capture(page, 'menu')
@@ -76,11 +76,11 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
   const order = await api(local).post('/inventory/purchase-orders', {
     supplier_id: id(supplier),
     notes: '',
-    lines: [{ ingredient_id: local.insumos[2].id, quantity: '300', unit_cost: '0.012' }],
+    lines: [{ ingredient_id: local.ingredients[2].id, quantity: '300', unit_cost: '0.012' }],
   })
   await api(local).post(`/inventory/purchase-orders/${String(id(order))}/send`)
 
-  await openAs(page, local.encargado, '/inventario')
+  await openAs(page, local.owner, '/inventario')
   await expect(page.getByText('3 insumos')).toBeVisible()
   await capture(page, 'inventario-insumos')
 
@@ -111,7 +111,7 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
   const oc = purchases.getByRole('listitem').filter({ hasText: 'OC 1 · Mercado Mayorista' })
   await form(page, oc.getByRole('button', { name: 'Recibir' }), 'Recibir la orden 1', 'dialogo-recibir-orden')
 
-  await page.goto(`/inventario/recetas/${String(local.plato('Lomo saltado').id)}`)
+  await page.goto(`/inventario/recetas/${String(local.dish('Lomo saltado').id)}`)
   await expect(page.getByRole('heading', { name: 'Receta: Lomo saltado' })).toBeVisible()
   await expect(page.getByRole('textbox', { name: 'Lomo de res' })).toHaveValue('200')
   await capture(page, 'receta')

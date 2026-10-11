@@ -7,14 +7,14 @@ import { stubGlobal } from './globals'
 
 export function tokenThatExpires(secondsFromNow: number, stamp = ''): string {
   const exp = Math.floor(Date.now() / 1000) + secondsFromNow
-  return `cabecera.${btoa(JSON.stringify({ exp, sello: stamp }))}.firma`
+  return `cabecera.${btoa(JSON.stringify({ exp, stamp }))}.firma`
 }
 
 export interface TestStorage {
   getItem: (password: string) => string | null
   setItem: (password: string, value: string) => void
   removeItem: (password: string) => void
-  readonly datos: Map<string, string>
+  readonly data: Map<string, string>
 }
 
 export function fakeStorage(): TestStorage {
@@ -27,7 +27,7 @@ export function fakeStorage(): TestStorage {
     removeItem: (password) => {
       data.delete(password)
     },
-    datos: data,
+    data,
   }
 }
 
@@ -43,7 +43,7 @@ export function newTab(local: TestStorage, route = '/', tab: TestStorage = fakeS
   stubGlobal('sessionStorage', tab)
   stubGlobal('location', { pathname: route })
   jest.resetModules()
-  return { ventana: window, pestana: tab }
+  return { window, tab }
 }
 
 /**
@@ -56,6 +56,6 @@ export function notify(window: EventTarget, storageArea: unknown, key: string | 
 
 /** Lo guardado en `localStorage` bajo esa clave, ya leído. */
 export function handleSaved(local: TestStorage, password: string): unknown {
-  const raw = local.datos.get(password)
+  const raw = local.data.get(password)
   return raw === undefined ? null : JSON.parse(raw)
 }

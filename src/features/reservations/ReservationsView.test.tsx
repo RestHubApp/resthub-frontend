@@ -45,7 +45,7 @@ describe('ReservationsView: el día', () => {
     fireEvent.change(screen.getByLabelText('Día'), { target: { value: '2031-01-15' } })
 
     expect(await screen.findByText('No hay reservas para este día')).toBeInTheDocument()
-    expect(api.llamadas('get', LIST).at(-1)?.params).toEqual({ day: '2031-01-15' })
+    expect(api.calls('get', LIST).at(-1)?.params).toEqual({ day: '2031-01-15' })
   })
 
   it('una reserva que ya llegó no ofrece acciones', async () => {
@@ -70,7 +70,7 @@ describe('ReservationsView: estado', () => {
     await user.click(await screen.findByRole('button', { name: 'Llegaron' }))
 
     expect(await screen.findByText(`${FAMILY}: Llegaron.`)).toBeInTheDocument()
-    expect(api.llamadas('post', STATUS)[0]?.params).toEqual({ value: 'seated' })
+    expect(api.calls('post', STATUS)[0]?.params).toEqual({ value: 'seated' })
   })
 
   it('si el servidor rechaza el cambio lo avisa', async () => {
@@ -80,6 +80,6 @@ describe('ReservationsView: estado', () => {
     await user.click(await screen.findByRole('button', { name: 'No vinieron' }))
 
     expect(await screen.findByText('La reserva ya se canceló')).toBeInTheDocument()
-    expect(api.llamadas('post', STATUS)[0]?.params).toEqual({ value: 'no_show' })
+    expect(api.calls('post', STATUS)[0]?.params).toEqual({ value: 'no_show' })
   })
 })

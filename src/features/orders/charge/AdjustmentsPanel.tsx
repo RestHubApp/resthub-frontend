@@ -50,7 +50,7 @@ export function AdjustmentsPanel({ order }: AdjustmentsPanelProps) {
               setDiscounting(true)
             }}
           >
-            <Icon name="descuento" size={16} />
+            <Icon name="discount" size={16} />
             <span>
               {withDiscount ? `Cambiar descuento (${formatPercent(order.discount_percent)})` : 'Aplicar descuento'}
             </span>

@@ -27,5 +27,5 @@ export function useMenuData() {
     [costs.data],
   )
 
-  return { menu, costoPorPlato: costByDish, puedeVerCostos: canViewCosts }
+  return { menu, costByDish, canViewCosts }
 }

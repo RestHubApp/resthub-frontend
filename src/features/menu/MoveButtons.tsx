@@ -36,7 +36,7 @@ export function MoveButtons({ label, isFirst, isLast, onMove }: MoveButtonsProps
           }
         }}
       >
-        <Icon name="subir" size={18} />
+        <Icon name="up" size={18} />
       </Button>
       <Button
         type="button"
@@ -51,7 +51,7 @@ export function MoveButtons({ label, isFirst, isLast, onMove }: MoveButtonsProps
           }
         }}
       >
-        <Icon name="bajar" size={18} />
+        <Icon name="down" size={18} />
       </Button>
     </div>
   )

@@ -5,18 +5,18 @@ import { covers } from '../soporte/cobertura'
 import { openAs } from '../soporte/fixtures'
 import { capture, expect, deadline, test } from './captura'
 
-test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', async ({ page, localConCaja: restaurantWithCashRegister }) => {
+test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', async ({ page, restaurantWithCashRegister }) => {
   deadline(120_000)
   covers('ruta:/panel', 'ruta:/panel/reposicion', 'ruta:/panel/ia')
   const local = restaurantWithCashRegister
-  await sell(local, { mesa: local.mesa('1'), items: [{ plato: local.plato('Lomo saltado'), cantidad: 2 }] })
+  await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado'), quantity: 2 }] })
   await sell(local, {
-    mesa: local.mesa('2'),
-    items: [{ plato: local.plato('Ceviche clásico') }, { plato: local.plato('Chicha morada'), cantidad: 2 }],
-    metodo: 'yape',
+    table: local.table('2'),
+    items: [{ dish: local.dish('Ceviche clásico') }, { dish: local.dish('Chicha morada'), quantity: 2 }],
+    method: 'yape',
   })
 
-  await openAs(page, local.encargado, '/panel')
+  await openAs(page, local.owner, '/panel')
   const indicators = page.getByRole('region', { name: 'Indicadores del período' })
   await expect(indicators.getByText('S/ 108.00')).toBeVisible()
   await expect(page.getByRole('table', { name: /Margen por plato/u })).toBeVisible()

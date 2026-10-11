@@ -90,7 +90,7 @@ export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
           Cancelar
         </Button>
         <Button type="submit" size="lg" className="h-10 px-4" disabled={registration.isPending}>
-          <Icon name="agregar" size={16} />
+          <Icon name="add" size={16} />
           <span>{registration.isPending ? 'Creando…' : 'Crear cuenta'}</span>
         </Button>
       </DialogFormActions>

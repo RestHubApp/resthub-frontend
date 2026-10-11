@@ -31,7 +31,7 @@ export function TableAdminRow({ table, isFirst, isLast, moving, onMove, onRename
       </div>
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="ghost" className="h-11 px-3" onClick={onRename}>
-          <Icon name="editar" size={16} />
+          <Icon name="edit" size={16} />
           <span>Renombrar</span>
         </Button>
         <TableStatusButton table={table} />

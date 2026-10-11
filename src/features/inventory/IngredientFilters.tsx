@@ -31,7 +31,7 @@ export function IngredientFilters({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex flex-col gap-2 sm:w-72">
           <Label htmlFor={searchId}>Buscar insumo</Label>
-          <FieldIcon icon="buscar">
+          <FieldIcon icon="search">
             <Input
               id={searchId}
               type="search"

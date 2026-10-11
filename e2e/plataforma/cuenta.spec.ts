@@ -12,10 +12,10 @@ const FILTER = /aws-filter/u
 
 test('ACC-11 el perfil muestra los datos de la cuenta y cambia la contraseña @movil', async ({ page, local }) => {
   covers('ruta:/perfil', 'funcion:perfil.ver-datos', 'funcion:perfil.cambiar-contrasena', 'estado:perfil.contrasena-error')
-  await openAs(page, local.mesero, '/perfil')
+  await openAs(page, local.waiter, '/perfil')
   await expect(page.getByRole('heading', { name: 'Mi perfil', level: 1 })).toBeVisible()
   const data = page.getByRole('definition')
-  await expect(data).toHaveText(['Mesero Prueba', local.mesero.email, 'Mesero', local.nombre])
+  await expect(data).toHaveText(['Mesero Prueba', local.waiter.email, 'Mesero', local.name])
   await evidence(page, 'acc-11-perfil')
 
   const actual = page.getByLabel('Contraseña actual', { exact: true })
@@ -24,7 +24,7 @@ test('ACC-11 el perfil muestra los datos de la cuenta y cambia la contraseña @m
   const change = page.getByRole('button', { name: 'Cambiar contraseña' })
 
   // Las dos nuevas no coinciden: no sale nada al servidor.
-  await actual.fill(local.mesero.password)
+  await actual.fill(local.waiter.password)
   await fresh.fill(NEW)
   await repeated.fill(`${NEW}-x`)
   await change.click()
@@ -36,21 +36,21 @@ test('ACC-11 el perfil muestra los datos de la cuenta y cambia la contraseña @m
   await change.click()
   await expect(page.getByText('La contraseña actual no es correcta.')).toBeVisible()
   await evidence(page, 'acc-11-contrasena-error')
-  await expect(signInByApi(local.http, local.mesero.email, local.mesero.password)).resolves.toMatchObject({ email: local.mesero.email })
+  await expect(signInByApi(local.http, local.waiter.email, local.waiter.password)).resolves.toMatchObject({ email: local.waiter.email })
 
-  await actual.fill(local.mesero.password)
+  await actual.fill(local.waiter.password)
   await change.click()
   await expect(page.getByText('Contraseña actualizada.')).toBeVisible()
   await expect(actual).toBeEmpty()
   await evidence(page, 'acc-11-contrasena-cambiada')
   // Con la nueva entra; con la anterior, ya no.
-  await expect(signInByApi(local.http, local.mesero.email, NEW)).resolves.toMatchObject({ email: local.mesero.email })
-  await expect(signInByApi(local.http, local.mesero.email, local.mesero.password)).rejects.toThrow(/401/u)
+  await expect(signInByApi(local.http, local.waiter.email, NEW)).resolves.toMatchObject({ email: local.waiter.email })
+  await expect(signInByApi(local.http, local.waiter.email, local.waiter.password)).rejects.toThrow(/401/u)
 })
 
 test('ACC-12 «Saltar al contenido» lleva el foco al contenido principal', async ({ page, local }) => {
   covers('funcion:shell.saltar-al-contenido')
-  await openAs(page, local.encargado, '/tablero')
+  await openAs(page, local.owner, '/tablero')
   await expect(page.getByRole('heading', { name: 'Tablero', level: 1 })).toBeVisible()
   await page.keyboard.press('Tab')
   const skip = page.getByRole('link', { name: 'Saltar al contenido' })
@@ -63,7 +63,7 @@ test('ACC-12 «Saltar al contenido» lleva el foco al contenido principal', asyn
 
 test('ACC-13 el menú de accesibilidad se abre, aplica el alto contraste, lo restablece y se cierra', async ({ page, local }) => {
   covers('desplegable:components/AccessibilityWidget', 'funcion:accesibilidad.opcion')
-  await openAs(page, local.encargado, '/tablero')
+  await openAs(page, local.owner, '/tablero')
   const open = page.getByRole('button', { name: OPEN_WIDGET })
   await expect(open).toBeVisible()
   await open.click()
@@ -83,11 +83,11 @@ test('ACC-13 el menú de accesibilidad se abre, aplica el alto contraste, lo res
 })
 
 test('ACC-14 las opciones del menú de accesibilidad se anuncian con el texto que se ve', async ({ page, local }) => {
-  await openAs(page, local.encargado, '/tablero')
+  await openAs(page, local.owner, '/tablero')
   await page.getByRole('button', { name: OPEN_WIDGET }).click()
   await expect(page.getByRole('button', { name: CLOSE_WIDGET })).toBeVisible()
   for (const name of ['Alto contraste', 'Monocromo', 'Fuente para dislexia', 'Cursor grande']) {
-    await expect(page.getByRole('button', { name: name, exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name, exact: true })).toBeVisible()
   }
   await evidence(page, 'acc-14-opciones-en-espanol')
 })

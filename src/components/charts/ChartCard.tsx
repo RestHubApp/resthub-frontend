@@ -48,7 +48,7 @@ export function ChartCard({
               setAsTable((value) => !value)
             }}
           >
-            <Icon name={asTable ? 'grafico' : 'tabla'} size={14} />
+            <Icon name={asTable ? 'chart' : 'grid'} size={14} />
             <span>{asTable ? 'Ver gráfico' : 'Ver tabla'}</span>
           </Button>
         </>

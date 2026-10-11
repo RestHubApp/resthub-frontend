@@ -7,38 +7,38 @@ import { afterEach } from '@jest/globals'
  * conexión abierta queda en `conexiones`; `emitir` escribe un aviso en todas.
  */
 export class FakeChannel {
-  readonly conexiones: { url: string; autorizacion: string | null }[] = []
-  private readonly flujos = new Set<ReadableStreamDefaultController<Uint8Array>>()
+  readonly connections: { url: string; authorization: string | null }[] = []
+  private readonly flows = new Set<ReadableStreamDefaultController<Uint8Array>>()
   private status = 200
 
   /** Las próximas conexiones responden con este estado (p. ej. 401). */
-  responderCon(status: number): void {
+  respondWith(status: number): void {
     this.status = status
   }
 
-  emitir(type: string, data: string): void {
+  issue(type: string, data: string): void {
     const block = new TextEncoder().encode(`event: ${type}\ndata: ${data}\n\n`)
-    for (const flow of this.flujos) {
+    for (const flow of this.flows) {
       flow.enqueue(block)
     }
   }
 
   /** El servidor corta todas las conexiones abiertas. */
-  cortar(): void {
-    for (const flow of this.flujos) {
+  cut(): void {
+    for (const flow of this.flows) {
       flow.close()
     }
-    this.flujos.clear()
+    this.flows.clear()
   }
 
   readonly fetch = (entry: RequestInfo | URL, options?: RequestInit): Promise<Response> => {
     const headers = new Headers(options?.headers)
     const url = entry instanceof Request ? entry.url : entry.toString()
-    this.conexiones.push({ url, autorizacion: headers.get('Authorization') })
+    this.connections.push({ url, authorization: headers.get('Authorization') })
     if (this.status !== 200) {
       return Promise.resolve(new Response(null, { status: this.status }))
     }
-    const flows = this.flujos
+    const flows = this.flows
     const body = new ReadableStream<Uint8Array>({
       start(handler) {
         flows.add(handler)

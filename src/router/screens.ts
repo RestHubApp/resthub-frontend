@@ -45,7 +45,7 @@ export const SCREENS: readonly Screen[] = [
     permission: PERMISSION.ordersTake,
     nav: {
       label: 'Pedidos',
-      icon: 'pedido',
+      icon: 'order',
       description: 'Tomar pedidos por mesa o para llevar, enviarlos a cocina y marcarlos servidos.',
     },
     load: asDefault(() => import('@/features/orders/OrdersView'), 'OrdersView'),
@@ -57,7 +57,7 @@ export const SCREENS: readonly Screen[] = [
   {
     path: routePatterns.board,
     permission: PERMISSION.ordersReadAll,
-    nav: { label: 'Tablero', icon: 'tablero', description: 'Los pedidos del día en vivo, de la cocina al cobro.' },
+    nav: { label: 'Tablero', icon: 'board', description: 'Los pedidos del día en vivo, de la cocina al cobro.' },
     load: asDefault(() => import('@/features/orders/BoardView'), 'BoardView'),
     prefetch: prefetchOf(() => import('@/features/orders/prefetchOrders'), 'prefetchBoard'),
   },
@@ -67,7 +67,7 @@ export const SCREENS: readonly Screen[] = [
     permission: PERMISSION.ordersTake,
     nav: {
       label: 'Cocina',
-      icon: 'cocina',
+      icon: 'kitchen',
       description: 'Lo que falta preparar, en tarjetas grandes para la pantalla de la cocina.',
     },
     load: asDefault(() => import('@/features/orders/KitchenView'), 'KitchenView'),
@@ -77,13 +77,13 @@ export const SCREENS: readonly Screen[] = [
   {
     path: routePatterns.reservations,
     permission: PERMISSION.reservationsRead,
-    nav: { label: 'Reservas', icon: 'reservas', description: 'Las reservas de cada día: a qué hora, cuántos y en qué mesa.' },
+    nav: { label: 'Reservas', icon: 'reservations', description: 'Las reservas de cada día: a qué hora, cuántos y en qué mesa.' },
     load: asDefault(() => import('@/features/reservations/ReservationsView'), 'ReservationsView'),
   },
   {
     path: routePatterns.customers,
     permission: PERMISSION.customersRead,
-    nav: { label: 'Clientes', icon: 'clientes', description: 'Los clientes frecuentes, sus datos de delivery y lo que gastan.' },
+    nav: { label: 'Clientes', icon: 'customers', description: 'Los clientes frecuentes, sus datos de delivery y lo que gastan.' },
     load: asDefault(() => import('@/features/customers/CustomersView'), 'CustomersView'),
   },
   {
@@ -91,7 +91,7 @@ export const SCREENS: readonly Screen[] = [
     permission: PERMISSION.cashManage,
     nav: {
       label: 'Caja',
-      icon: 'caja',
+      icon: 'cashRegister',
       description: 'Abrir y cerrar la caja del turno, con su arqueo y las propinas de cada mesero.',
     },
     load: asDefault(() => import('@/features/cash/CashView'), 'CashView'),
@@ -102,7 +102,7 @@ export const SCREENS: readonly Screen[] = [
     permission: PERMISSION.billingManage,
     nav: {
       label: 'Comprobantes',
-      icon: 'receta',
+      icon: 'recipe',
       description: 'Boletas y facturas electrónicas, los datos fiscales y lo que falta enviar a SUNAT.',
     },
     load: asDefault(() => import('@/features/billing/BillingView'), 'BillingView'),
@@ -111,21 +111,21 @@ export const SCREENS: readonly Screen[] = [
   {
     path: routePatterns.menu,
     permission: PERMISSION.menuManage,
-    nav: { label: 'Menú', icon: 'carta', description: 'Categorías, platos, precios y lo que hay disponible hoy.' },
+    nav: { label: 'Menú', icon: 'menu', description: 'Categorías, platos, precios y lo que hay disponible hoy.' },
     load: asDefault(() => import('@/features/menu/MenuView'), 'MenuView'),
     prefetch: prefetchOf(() => import('@/features/menu/prefetchMenu'), 'prefetchMenu'),
   },
   {
     path: routePatterns.tables,
     permission: PERMISSION.tablesManage,
-    nav: { label: 'Mesas', icon: 'mesa', description: 'Las mesas del salón y cuáles están en uso.' },
+    nav: { label: 'Mesas', icon: 'table', description: 'Las mesas del salón y cuáles están en uso.' },
     load: asDefault(() => import('@/features/tables/TablesView'), 'TablesView'),
     prefetch: prefetchOf(() => import('@/features/tables/prefetchTables'), 'prefetchTables'),
   },
   {
     path: routePatterns.inventory,
     permission: PERMISSION.inventoryRead,
-    nav: { label: 'Inventario', icon: 'inventario', description: 'Insumos, compras, mermas, recetas y alertas de stock bajo.' },
+    nav: { label: 'Inventario', icon: 'inventory', description: 'Insumos, compras, mermas, recetas y alertas de stock bajo.' },
     load: asDefault(() => import('@/features/inventory/InventoryView'), 'InventoryView'),
     prefetch: prefetchOf(() => import('@/features/inventory/prefetchInventory'), 'prefetchInventory'),
   },
@@ -133,7 +133,7 @@ export const SCREENS: readonly Screen[] = [
   {
     path: routePatterns.staff,
     permission: PERMISSION.staffManage,
-    nav: { label: 'Personal', icon: 'personal', description: 'Las cuentas del restaurante y el rol de cada una.' },
+    nav: { label: 'Personal', icon: 'staff', description: 'Las cuentas del restaurante y el rol de cada una.' },
     load: asDefault(() => import('@/features/staff/StaffView'), 'StaffView'),
     prefetch: prefetchOf(() => import('@/features/staff/prefetchStaff'), 'prefetchStaff'),
   },
@@ -153,7 +153,7 @@ export const SCREENS: readonly Screen[] = [
     permission: PERMISSION.insightsRead,
     nav: {
       label: 'Panel BI',
-      icon: 'indicadores',
+      icon: 'indicators',
       description: 'Ventas, platos más vendidos, márgenes y la predicción de demanda.',
     },
     load: asDefault(() => import('@/features/insights/InsightsView'), 'InsightsView'),

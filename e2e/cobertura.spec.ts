@@ -38,16 +38,16 @@ function marked(files: readonly string[]): Map<string, string[]> {
 }
 
 // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios
-const saved = JSON.parse(readFileSync(FILE_INVENTORY, 'utf8')) as { elementos: Element[] }
+const saved = JSON.parse(readFileSync(FILE_INVENTORY, 'utf8')) as { items: Element[] }
 const actual = inventory()
 const all = specs(E2E)
 const e2e = marked(all.filter((file) => !file.includes(join('e2e', 'visual'))))
 const visual = marked(all.filter((file) => file.includes(join('e2e', 'visual'))))
-const VISUAL = new Set<Element['tipo']>(['ruta', 'dialogo', 'confirmacion', 'hoja', 'pestanas'])
+const VISUAL = new Set<Element['type']>(['ruta', 'dialogo', 'confirmacion', 'hoja', 'pestanas'])
 
 test('el inventario de interfaz está al día con el código (pnpm e2e:inventario)', () => {
   const order = (a: string, b: string) => a.localeCompare(b)
-  expect(saved.elementos.map((e) => e.id).sort(order)).toEqual(actual.map((e) => e.id).sort(order))
+  expect(saved.items.map((e) => e.id).sort(order)).toEqual(actual.map((e) => e.id).sort(order))
 })
 
 test('cada ruta, overlay, función y vista por rol tiene una prueba E2E que lo recorre', () => {
@@ -56,7 +56,7 @@ test('cada ruta, overlay, función y vista por rol tiene una prueba E2E que lo r
 })
 
 test('cada ruta y cada overlay tiene su captura de regresión visual', () => {
-  const missing = actual.filter((e) => VISUAL.has(e.tipo) && !visual.has(e.id)).map((e) => e.id)
+  const missing = actual.filter((e) => VISUAL.has(e.type) && !visual.has(e.id)).map((e) => e.id)
   expect(missing, `Sin captura visual: ${missing.join(', ')}`).toEqual([])
 })
 

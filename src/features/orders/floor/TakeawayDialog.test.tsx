@@ -49,7 +49,7 @@ describe('TakeawayDialog', () => {
 
     await screen.findByRole('status', CURRENT_ROUTE)
     expect(destination().pathname).toBe('/pedidos/nuevo')
-    expect(Object.fromEntries(destination().searchParams)).toEqual({ tipo: 'llevar', cliente: 'Luis' })
+    expect(Object.fromEntries(destination().searchParams)).toEqual({ 'tipo': 'llevar', 'cliente': 'Luis' })
   })
 
   it('un delivery pide nombre, teléfono y dirección antes de seguir', async () => {
@@ -62,7 +62,7 @@ describe('TakeawayDialog', () => {
     expect(await within(window).findByText('Escribe el nombre de quien recibe')).toBeInTheDocument()
     expect(within(window).getByText('Escribe un teléfono para coordinar la entrega')).toBeInTheDocument()
     expect(within(window).getByText('Escribe la dirección de entrega')).toBeInTheDocument()
-    expect(mount.api.llamadas('post', CUSTOMERS)).toHaveLength(0)
+    expect(mount.api.calls('post', CUSTOMERS)).toHaveLength(0)
   })
 
   it('un delivery a alguien nuevo lo agrega a la libreta y sigue con su id', async () => {
@@ -76,7 +76,7 @@ describe('TakeawayDialog', () => {
     await mount.user.click(within(window).getByRole('button', SELECT))
 
     await screen.findByRole('status', CURRENT_ROUTE)
-    expect(lastBody(mount.api.llamadas('post', CUSTOMERS))).toMatchObject({ name: 'Ana', phone: '912345678', consent: true })
+    expect(lastBody(mount.api.calls('post', CUSTOMERS))).toMatchObject({ name: 'Ana', phone: '912345678', consent: true })
     expect(destination().searchParams.get('clienteId')).toBe('55')
     expect(destination().searchParams.get('direccion')).toBe(AREQUIPA)
   })
@@ -91,7 +91,7 @@ describe('TakeawayDialog', () => {
     await mount.user.click(within(window).getByRole('button', SELECT))
 
     await screen.findByRole('status', CURRENT_ROUTE)
-    expect(mount.api.llamadas('post', CUSTOMERS)).toHaveLength(0)
+    expect(mount.api.calls('post', CUSTOMERS)).toHaveLength(0)
     expect(destination().searchParams.get('clienteId')).toBeNull()
     expect(destination().searchParams.get('telefono')).toBe('912345678')
   })
@@ -106,7 +106,7 @@ describe('TakeawayDialog', () => {
 
     expect(within(window).getByLabelText(RECEIVES)).toHaveValue('Rosa Quispe')
     expect(within(window).getByLabelText(ADDRESS)).toHaveValue('Jr. Cusco 120')
-    expect(mount.api.llamadas('get', CUSTOMERS).at(-1)?.params).toMatchObject({ q: 'Rosa' })
+    expect(mount.api.calls('get', CUSTOMERS).at(-1)?.params).toMatchObject({ q: 'Rosa' })
   })
 
   it('la búsqueda espera tres letras y avisa si el cliente no está', async () => {
@@ -114,7 +114,7 @@ describe('TakeawayDialog', () => {
     const window = await openWindow(mount)
     const search = within(window).getByLabelText(SEARCH)
     await mount.user.type(search, 'Ro')
-    expect(mount.api.llamadas('get', CUSTOMERS)).toHaveLength(0)
+    expect(mount.api.calls('get', CUSTOMERS)).toHaveLength(0)
     await mount.user.type(search, 'x')
     expect(await within(window).findByText('No está en la libreta: escribe sus datos abajo.')).toBeInTheDocument()
   })

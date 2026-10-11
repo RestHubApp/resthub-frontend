@@ -68,12 +68,12 @@ describe('InsightsView: secciones', () => {
     const { api, user } = open()
     api.on('post', '/insights/waste/classify', { classified: 1, remaining: 1, by_cause: [] })
     expect(await screen.findByText(/5 mermas por S\/ 82.40/u)).toBeInTheDocument()
-    const antes = api.llamadas('get', WASTES).length
+    const antes = api.calls('get', WASTES).length
 
     await user.click(screen.getByRole('button', { name: 'Clasificar mermas pendientes (2)' }))
 
     expect(await screen.findByText('Se clasificaron 1 mermas; quedan 1 sin clasificar.')).toBeInTheDocument()
-    expect(api.llamadas('get', WASTES).length).toBeGreaterThan(antes)
+    expect(api.calls('get', WASTES).length).toBeGreaterThan(antes)
   })
 
   it('si la IA falla al clasificar, lo dice', async () => {

@@ -16,13 +16,13 @@ test('VIS-03 mesas, llevar y delivery, y la toma de pedido con opciones y resume
     'dialogo:orders/taking/ModifierDialog',
     'hoja:orders/taking/CartSheet',
   )
-  const lomo = local.plato('Lomo saltado')
-  await inKitchen(local, local.mesa('2'), [{ plato: lomo, cantidad: 2 }, { plato: local.plato('Chicha morada') }])
-  await takeaway(local, 'Rosa Huamán', [{ plato: local.plato('Ají de gallina') }])
-  await delivery(local, 'Jorge Salas', [{ plato: local.plato('Ceviche clásico') }])
+  const lomo = local.dish('Lomo saltado')
+  await inKitchen(local, local.table('2'), [{ dish: lomo, quantity: 2 }, { dish: local.dish('Chicha morada') }])
+  await takeaway(local, 'Rosa Huamán', [{ dish: local.dish('Ají de gallina') }])
+  await delivery(local, 'Jorge Salas', [{ dish: local.dish('Ceviche clásico') }])
   await dishWithOptions(local)
 
-  await openAs(page, local.mesero, '/pedidos')
+  await openAs(page, local.waiter, '/pedidos')
   await expect(page.getByRole('heading', { name: '3 de 4 mesas libres' })).toBeVisible()
   await expect(page.getByRole('status').filter({ hasText: 'En vivo' })).toBeVisible()
   await capture(page, 'pedidos-mesas')
@@ -85,13 +85,13 @@ test('VIS-04 el detalle del pedido con nota, cambio de mesa y platos agregados',
     'dialogo:orders/detail/TablePickerDialog',
     'ruta:/pedidos/:orderId/agregar',
   )
-  const order = await open(local, local.mesa('1'), [
-    { plato: local.plato('Lomo saltado'), notas: 'Sin cebolla' },
-    { plato: local.plato('Chicha morada'), cantidad: 2 },
+  const order = await open(local, local.table('1'), [
+    { dish: local.dish('Lomo saltado'), notes: 'Sin cebolla' },
+    { dish: local.dish('Chicha morada'), quantity: 2 },
   ])
-  const inProgress = await inKitchen(local, local.mesa('4'), [{ plato: local.plato('Ceviche clásico') }])
+  const inProgress = await inKitchen(local, local.table('4'), [{ dish: local.dish('Ceviche clásico') }])
 
-  await openAs(page, local.mesero, `/pedidos/${String(id(order))}`)
+  await openAs(page, local.waiter, `/pedidos/${String(id(order))}`)
   await expect(page.getByRole('heading', { level: 1, name: 'Pedido #1' })).toBeVisible()
   await expect(page.getByText('Sin cebolla')).toBeVisible()
   await capture(page, 'pedido-abierto')
@@ -117,18 +117,18 @@ test('VIS-04 el detalle del pedido con nota, cambio de mesa y platos agregados',
   await capture(page, 'agregar-platos')
 })
 
-test('VIS-05 el cobro de un pedido servido, la comanda impresa y la cocina', async ({ page, localConCaja: restaurantWithCashRegister }) => {
+test('VIS-05 el cobro de un pedido servido, la comanda impresa y la cocina', async ({ page, restaurantWithCashRegister }) => {
   deadline(120_000)
   covers('dialogo:orders/charge/ChargeContent', 'ruta:/imprimir/:orderId/:kind', 'ruta:/cocina')
   const local = restaurantWithCashRegister
-  const order = await served(local, local.mesa('3'), [
-    { plato: local.plato('Lomo saltado') },
-    { plato: local.plato('Inca Kola 500 ml'), cantidad: 2 },
+  const order = await served(local, local.table('3'), [
+    { dish: local.dish('Lomo saltado') },
+    { dish: local.dish('Inca Kola 500 ml'), quantity: 2 },
   ])
-  await inKitchen(local, local.mesa('1'), [{ plato: local.plato('Ají de gallina'), notas: 'Poco ají' }])
+  await inKitchen(local, local.table('1'), [{ dish: local.dish('Ají de gallina'), notes: 'Poco ají' }])
   await countPrints(page)
 
-  await openAs(page, local.mesero, `/pedidos/${String(id(order))}`)
+  await openAs(page, local.waiter, `/pedidos/${String(id(order))}`)
   await expect(page.getByText('Servido, por cobrar').first()).toBeVisible()
   await capture(page, 'pedido-servido')
 

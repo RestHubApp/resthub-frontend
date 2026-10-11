@@ -9,20 +9,20 @@ describe('usePagination', () => {
   it('parte la lista en páginas del tamaño pedido', () => {
     const { result } = renderHook(() => usePagination(TEN, 4))
     expect(result.current.total).toBe(3)
-    expect(result.current.visibles).toEqual([1, 2, 3, 4])
+    expect(result.current.visible).toEqual([1, 2, 3, 4])
 
     act(() => {
       result.current.irA(2)
     })
     expect(result.current.actual).toBe(2)
-    expect(result.current.visibles).toEqual([9, 10])
+    expect(result.current.visible).toEqual([9, 10])
   })
 
   it('sin tamaño devuelve todo en una sola página, y una lista vacía también tiene una', () => {
-    expect(renderHook(() => usePagination(TEN, undefined)).result.current.visibles).toHaveLength(10)
+    expect(renderHook(() => usePagination(TEN, undefined)).result.current.visible).toHaveLength(10)
     const empty = renderHook(() => usePagination([], 5)).result.current
     expect(empty.total).toBe(1)
-    expect(empty.visibles).toEqual([])
+    expect(empty.visible).toEqual([])
   })
 
   it('si un filtro achica la lista, se queda en la última página que existe', () => {
@@ -34,6 +34,6 @@ describe('usePagination', () => {
     rerender({ items: TEN.slice(0, 5) })
 
     expect(result.current.actual).toBe(1)
-    expect(result.current.visibles).toEqual([5])
+    expect(result.current.visible).toEqual([5])
   })
 })

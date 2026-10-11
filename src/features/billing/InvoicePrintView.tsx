@@ -45,7 +45,7 @@ export function InvoicePrintView() {
       <Button type="button" className="print:hidden" onClick={() => {
         window.print()
       }}>
-        <Icon name="imprimir" size={16} />
+        <Icon name="print" size={16} />
         <span>Imprimir</span>
       </Button>
       <article id="hoja-impresa" className="w-[74mm] bg-white p-3 font-mono text-black shadow-md">

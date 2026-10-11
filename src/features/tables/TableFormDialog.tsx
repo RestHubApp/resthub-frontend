@@ -59,7 +59,7 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
         <TextField
           id="mesa-nombre"
           label="Nombre"
-          icon="mesa"
+          icon="table"
           autoComplete="off"
           maxLength={MAX_LABEL}
           field={register('label')}

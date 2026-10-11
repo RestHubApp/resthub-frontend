@@ -16,7 +16,7 @@ export function QueryError({ error, fallback, onRetry }: QueryErrorProps) {
     <div className="flex flex-col items-start gap-3" data-reintento="">
       <FormMessage tone="error">{errorMessage(error, fallback)}</FormMessage>
       <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onRetry}>
-        <Icon name="reintentar" size={16} />
+        <Icon name="retry" size={16} />
         <span>Reintentar</span>
       </Button>
     </div>

@@ -95,7 +95,7 @@ export function DataTable<TData extends RowData>({
   pageSize,
 }: DataTableProps<TData>) {
   const page = usePagination(data, pageSize)
-  const rows = useMemo(() => [...page.visibles], [page.visibles])
+  const rows = useMemo(() => [...page.visible], [page.visible])
   const columnDefs = useMemo(() => columns.map(toColumnDef), [columns])
   const cellClasses = useMemo(
     () => new Map(columns.map((column) => [column.id, column.className ?? ''])),

@@ -84,7 +84,7 @@ export function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProp
       <SectionCard title="Restaurante">
         <div className="grid items-start gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <TextField id="name" label="Nombre" placeholder="La Esquina de Lucho" icon="restaurante" autoComplete="off" field={name} error={errors.name?.message} />
+            <TextField id="name" label="Nombre" placeholder="La Esquina de Lucho" icon="restaurant" autoComplete="off" field={name} error={errors.name?.message} />
           </div>
           <TextField
             id="slug"
@@ -114,7 +114,7 @@ export function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProp
           Cancelar
         </Button>
         <Button type="submit" size="lg" className="h-11 px-4" disabled={registration.isPending || registration.isSuccess}>
-          <Icon name="agregar" size={18} />
+          <Icon name="add" size={18} />
           <span>{registration.isPending ? 'Creando…' : 'Crear restaurante'}</span>
         </Button>
       </div>

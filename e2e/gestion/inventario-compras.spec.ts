@@ -24,7 +24,7 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
     'estado:proveedores.vacio',
     'estado:compras.vacio',
   )
-  await openAs(page, local.encargado, '/inventario?vista=proveedores')
+  await openAs(page, local.owner, '/inventario?vista=proveedores')
   const suppliers = page.getByRole('tabpanel', { name: /Proveedores/u })
   await expect(suppliers.getByText('Todavía no hay proveedores')).toBeVisible()
   await suppliers.getByRole('button', { name: 'Nuevo proveedor' }).click()
@@ -59,7 +59,7 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
   await expect(create).toBeDisabled()
   await order.getByLabel('Proveedor').selectOption({ label: 'Mercado Mayorista' })
   await order.getByRole('button', { name: 'Cargar sugerencias (1)' }).click()
-  await expect(order.getByLabel('Insumo de la línea 1')).toHaveValue(String(local.insumos[2].id))
+  await expect(order.getByLabel('Insumo de la línea 1')).toHaveValue(String(local.ingredients[2].id))
   await expect(order.getByLabel('Cantidad en g')).toHaveValue('300.000')
   await evidence(page, 'ges-08-2-orden-sugerida')
   await create.click()
@@ -92,14 +92,14 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
   await expect(page.getByText('Stock en orden: nada por debajo del mínimo.')).toBeVisible()
   await page.getByRole('tab', { name: /Movimientos/u }).click()
   await expect(page.getByRole('tabpanel', { name: /Movimientos/u }).getByRole('row', { name: /Culantro/u }).first()).toContainText('+250 g')
-  const culantro = (await api(local).lista('/inventory/ingredients')).find((i) => i.name === 'Culantro')
+  const culantro = (await api(local).list('/inventory/ingredients')).find((i) => i.name === 'Culantro')
   expect(culantro?.stock).toBe('350.000')
 })
 
 test('GES-09 el encargado arma una orden a mano, quita una línea y la cancela', async ({ page, local }) => {
   covers('funcion:compras.orden-a-mano', 'funcion:compras.cancelar')
   await api(local).post('/inventory/suppliers', { name: 'Distribuidora Norte', contact: '', phone: '', notes: '', is_active: true })
-  await openAs(page, local.encargado, '/inventario?vista=compras')
+  await openAs(page, local.owner, '/inventario?vista=compras')
   const purchases = page.getByRole('tabpanel', { name: /Compras/u })
 
   // Cancelar la ventana no crea nada.
@@ -128,6 +128,6 @@ test('GES-09 el encargado arma una orden a mano, quita una línea y la cancela',
   await expect(notice(page, 'Orden 1: cancelada.')).toBeVisible()
   await expect(oc).toContainText('Cancelada')
   await expect(oc.getByRole('button')).toHaveCount(0)
-  const orders = await api(local).lista('/inventory/purchase-orders')
+  const orders = await api(local).list('/inventory/purchase-orders')
   expect(orders[0]).toMatchObject({ status: 'cancelled', estimated_total: '7.00' })
 })

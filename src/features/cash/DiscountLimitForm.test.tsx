@@ -47,7 +47,7 @@ describe('DiscountLimitForm', () => {
     await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('El mesero descuenta hasta 12.5 %.')).toBeInTheDocument()
-    expect(api.llamadas('patch', ROUTE)[0]?.body).toEqual({ max_waiter_discount_percent: '12.5' })
+    expect(api.calls('patch', ROUTE)[0]?.body).toEqual({ max_waiter_discount_percent: '12.5' })
   })
 
   it('un porcentaje mayor a 100 queda marcado y no se puede guardar', async () => {

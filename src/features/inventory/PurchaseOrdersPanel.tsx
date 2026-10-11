@@ -52,7 +52,7 @@ export function PurchaseOrdersPanel({ canManage }: PurchaseOrdersPanelProps) {
         <Button type="button" onClick={() => {
           setCreating(true)
         }}>
-          <Icon name="agregar" size={16} />
+          <Icon name="add" size={16} />
           <span>Nueva orden</span>
         </Button>
       ) : undefined}
@@ -82,14 +82,14 @@ export function PurchaseOrdersPanel({ canManage }: PurchaseOrdersPanelProps) {
                   <Button type="button" size="sm" variant="outline" disabled={change.isPending} onClick={() => {
                     change.mutate({ id: order.id, action: 'send' })
                   }}>
-                    <Icon name="enviar" size={14} />
+                    <Icon name="send" size={14} />
                     <span>Marcar enviada</span>
                   </Button>
                 ) : null}
                 <Button type="button" size="sm" variant="success" onClick={() => {
                   setReceiving(order)
                 }}>
-                  <Icon name="compra" size={14} />
+                  <Icon name="purchase" size={14} />
                   <span>Recibir</span>
                 </Button>
                 <Button type="button" size="sm" variant="ghost" disabled={change.isPending} onClick={() => {

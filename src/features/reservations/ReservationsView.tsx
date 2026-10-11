@@ -52,7 +52,7 @@ export function ReservationsView() {
           <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
             setEditing({ reservation: null })
           }}>
-            <Icon name="agregar" size={18} />
+            <Icon name="add" size={18} />
             <span>Nueva reserva</span>
           </Button>
         ) : undefined}
@@ -80,7 +80,7 @@ export function ReservationsView() {
               canManage={canManage}
               busy={estado.isPending}
               onEdit={() => {
-                setEditing({ reservation: reservation })
+                setEditing({ reservation })
               }}
               onStatus={(status) => {
                 estado.mutate({ id: reservation.id, status })

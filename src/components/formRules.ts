@@ -24,9 +24,9 @@ export function textOptional(max: number) {
 
 interface NumberDecimal {
   readonly max: number
-  readonly decimales: number
-  readonly unidad: string
-  readonly obligatorio?: boolean
+  readonly decimals: number
+  readonly unit: string
+  readonly required?: boolean
 }
 
 /**
@@ -35,7 +35,7 @@ interface NumberDecimal {
  * Vacio vale cuando el campo es opcional. El tope no es arbitrario: un peso de
  * S/ 180000 por un plato no es un plato caro, es un error de tipeo.
  */
-export function decimalRule({ max, decimales: decimals, unidad: unit, obligatorio: required = false }: NumberDecimal) {
+export function decimalRule({ max, decimals, unit, required = false }: NumberDecimal) {
   // eslint-disable-next-line security/detect-non-literal-regexp -- solo interpola un número fijado en el código, nunca texto del usuario
   const format = new RegExp(`^\\d+(?:[.,]\\d{1,${String(decimals)}})?$`, 'u')
   return z

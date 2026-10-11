@@ -41,7 +41,7 @@ describe('CustomersView: lista', () => {
     await user.type(screen.getByLabelText(SEARCH), '999')
 
     expect(await screen.findByText('Nadie coincide con la búsqueda')).toBeInTheDocument()
-    expect(api.llamadas('get', LIST).at(-1)?.params).toEqual({ q: '999', limit: 50 })
+    expect(api.calls('get', LIST).at(-1)?.params).toEqual({ q: '999', limit: 50 })
   })
 
   it('sin clientes todavía lo dice', async () => {
@@ -103,7 +103,7 @@ describe('CustomersView: ficha y edición', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
     expect(await screen.findByText(`${EDITED}: datos guardados.`)).toBeInTheDocument()
-    expect(api.llamadas('put', ROSA)[0]?.body).toMatchObject({ name: EDITED, phone: '987654321' })
+    expect(api.calls('put', ROSA)[0]?.body).toMatchObject({ name: EDITED, phone: '987654321' })
   })
 
   it('un cliente nuevo exige nombre, valida el correo y muestra el rechazo del servidor', async () => {
@@ -124,7 +124,7 @@ describe('CustomersView: ficha y edición', () => {
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
     expect(await within(window).findByText('Ya hay un cliente con ese teléfono')).toBeInTheDocument()
-    expect(api.llamadas('post', LIST)[0]?.body).toEqual({ name: 'Pedro', phone: '', email: '', address: '', reference: '', notes: '', consent: true })
+    expect(api.calls('post', LIST)[0]?.body).toEqual({ name: 'Pedro', phone: '', email: '', address: '', reference: '', notes: '', consent: true })
   })
 
   it('la etiqueta del consentimiento nombra también el <input> oculto de la casilla (WAVE)', async () => {
@@ -161,7 +161,7 @@ describe('CustomersView: derechos ARCO', () => {
     await waitFor(() => {
       expect(drop).toHaveBeenCalledWith('blob:datos')
     })
-    expect(api.llamadas('get', EXPORT)).toHaveLength(1)
+    expect(api.calls('get', EXPORT)).toHaveLength(1)
   })
 
   it('borrar pide confirmación, cierra la ficha y lo avisa', async () => {
@@ -173,11 +173,11 @@ describe('CustomersView: derechos ARCO', () => {
     const card = await screen.findByRole('dialog', { name: ROSA_QUISPE })
     await user.click(within(card).getByRole('button', { name: DELETE_DATA }))
     const confirm = await screen.findByRole('alertdialog', { name: '¿Borrar los datos de Rosa Quispe?' })
-    expect(api.llamadas('post', DELETE)).toHaveLength(0)
+    expect(api.calls('post', DELETE)).toHaveLength(0)
     await user.click(within(confirm).getByRole('button', { name: DELETE_DATA }))
 
     expect(await screen.findByText('Los datos del cliente se borraron.')).toBeInTheDocument()
-    expect(api.llamadas('post', DELETE)).toHaveLength(1)
+    expect(api.calls('post', DELETE)).toHaveLength(1)
     await waitFor(() => {
       expect(screen.queryByRole('dialog', { name: ROSA_QUISPE })).not.toBeInTheDocument()
     })

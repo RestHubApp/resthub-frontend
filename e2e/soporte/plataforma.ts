@@ -80,8 +80,8 @@ export async function sections(page: Page): Promise<string[]> {
 const QUEUE = 'resthub.pedidos-sin-enviar.v2'
 
 export interface OrderInQueue {
-  readonly mesa: Pick<Table, 'id' | 'etiqueta'>
-  readonly plato: Pick<Dish, 'id'>
+  readonly table: Pick<Table, 'id' | 'label'>
+  readonly dish: Pick<Dish, 'id'>
 }
 
 /**
@@ -95,11 +95,11 @@ export async function enqueueOrders(
   orders: readonly OrderInQueue[],
   storage: 'local' | 'pestana' = 'local',
 ): Promise<void> {
-  const queue = orders.map(({ mesa: table, plato: dish }) => ({
+  const queue = orders.map(({ table, dish }) => ({
     userId: account.userId,
     restaurantId: account.restaurantId,
     queuedAt: new Date().toISOString(),
-    label: `Mesa ${table.etiqueta}`,
+    label: `Mesa ${table.label}`,
     request: {
       type: 'dine_in',
       table_id: table.id,
@@ -118,7 +118,7 @@ export async function enqueueOrders(
 
 /** La dueña de los pedidos en cola de una sesión del API. */
 export function ownerOf(session: Session): { userId: number; restaurantId: number } {
-  const { user, restaurant } = session.cuenta as { user: { id: number }; restaurant: { id: number } }
+  const { user, restaurant } = session.account as { user: { id: number }; restaurant: { id: number } }
   return { userId: user.id, restaurantId: restaurant.id }
 }
 
@@ -165,7 +165,7 @@ export async function previewWarnings(howMany: number): Promise<void> {
 function restaurantRegistration(platform: Customer, name: string) {
   const suffix = unique()
   return platform.post('/platform/restaurants', {
-    name: name,
+    name,
     slug: `e2e-pag-${suffix}`,
     timezone: 'America/Lima',
     owner: { full_name: 'Encargada Prueba', email: `pag-${suffix}@e2e.resthub.dev`, password: NEW_SECRET },

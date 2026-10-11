@@ -43,7 +43,7 @@ export function PasswordField({
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <FieldIcon icon="candado">
+      <FieldIcon icon="lock">
         <Input
           id={id}
           type={visible ? 'text' : 'password'}
@@ -67,7 +67,7 @@ export function PasswordField({
               setVisible((actual) => !actual)
             }}
           >
-            <Icon name={visible ? 'ocultar' : 'ver'} size={18} />
+            <Icon name={visible ? 'hide' : 'ver'} size={18} />
           </Button>
         </div>
       </FieldIcon>

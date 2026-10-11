@@ -18,7 +18,7 @@ export function TimeZoneField({ id, field, error, current }: TimeZoneFieldProps)
     <SelectField
       id={id}
       label="Zona horaria"
-      icon="horario"
+      icon="schedule"
       hint="Con ella se cuentan el día, la caja y las horas de los pedidos del local."
       field={field}
       error={error}

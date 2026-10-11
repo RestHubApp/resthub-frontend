@@ -9,10 +9,10 @@ import { capture, captureWindow, expect, deadline, test } from './captura'
 import { inKitchen } from './preparar'
 
 interface WindowValue {
-  readonly boton: Locator
-  readonly rol: 'dialog' | 'alertdialog'
-  readonly titulo: string
-  readonly nombre: string
+  readonly button: Locator
+  readonly role: 'dialog' | 'alertdialog'
+  readonly title: string
+  readonly name: string
 }
 
 /** Abre un formulario en ventana, lo captura y lo cierra con Escape. */
@@ -25,7 +25,7 @@ async function form(page: Page, button: Locator, title: string, name: string): P
 }
 
 /** Abre una ventana, la captura y la cancela. */
-async function handleWindow(page: Page, { boton: button, rol: role, titulo: title, nombre: name }: WindowValue): Promise<void> {
+async function handleWindow(page: Page, { button, role, title, name }: WindowValue): Promise<void> {
   await button.click()
   const open = page.getByRole(role, { name: title })
   await captureWindow(open, name)
@@ -47,11 +47,11 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
     'confirmacion:roles/DeleteRoleButton',
     'dialogo:roles/RoleFormDialog',
   )
-  await inKitchen(local, local.mesa('2'), [{ plato: local.plato('Lomo saltado') }])
+  await inKitchen(local, local.table('2'), [{ dish: local.dish('Lomo saltado') }])
   // Un rol sin cuentas: el que tiene cuentas no se puede eliminar.
   await api(local).post('/roles', { name: 'Cajero', permissions: ['orders.read_all', 'cash.manage'] })
 
-  await openAs(page, local.encargado, '/mesas')
+  await openAs(page, local.owner, '/mesas')
   await expect(page.getByText('4 activas de 4')).toBeVisible()
   await expect(page.getByText(/Ocupada · pedido #1/u)).toBeVisible()
   await capture(page, 'mesas')
@@ -63,10 +63,10 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
   const waiter = page.getByRole('row', { name: /Mesero Prueba/u })
   await expect(waiter).toContainText('mesero@e2e.resthub.dev')
   await capture(page, 'personal')
-  await handleWindow(page, { boton: page.getByRole('button', { name: 'Nueva cuenta' }), rol: 'dialog', titulo: 'Nueva cuenta', nombre: 'dialogo-nueva-cuenta' })
-  await handleWindow(page, { boton: waiter.getByRole('button', { name: 'Editar' }), rol: 'dialog', titulo: 'Editar a Mesero Prueba', nombre: 'dialogo-editar-cuenta' })
-  await handleWindow(page, { boton: waiter.getByRole('button', { name: 'Contraseña' }), rol: 'dialog', titulo: 'Restablecer la contraseña de Mesero Prueba', nombre: 'dialogo-restablecer-contrasena' })
-  await handleWindow(page, { boton: waiter.getByRole('button', { name: 'Desactivar' }), rol: 'alertdialog', titulo: '¿Desactivar a Mesero Prueba?', nombre: 'confirmar-desactivar-cuenta' })
+  await handleWindow(page, { button: page.getByRole('button', { name: 'Nueva cuenta' }), role: 'dialog', title: 'Nueva cuenta', name: 'dialogo-nueva-cuenta' })
+  await handleWindow(page, { button: waiter.getByRole('button', { name: 'Editar' }), role: 'dialog', title: 'Editar a Mesero Prueba', name: 'dialogo-editar-cuenta' })
+  await handleWindow(page, { button: waiter.getByRole('button', { name: 'Contraseña' }), role: 'dialog', title: 'Restablecer la contraseña de Mesero Prueba', name: 'dialogo-restablecer-contrasena' })
+  await handleWindow(page, { button: waiter.getByRole('button', { name: 'Desactivar' }), role: 'alertdialog', title: '¿Desactivar a Mesero Prueba?', name: 'confirmar-desactivar-cuenta' })
 
   await page.goto('/roles')
   await expect(page.getByRole('heading', { level: 1, name: 'Roles' })).toBeVisible()
@@ -77,5 +77,5 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
   await form(page, owner.getByRole('button', { name: 'Ver permisos' }), 'Encargado', 'dialogo-ver-permisos-rol')
   const cashier = page.getByRole('listitem').filter({ hasText: /^Cajero/u })
   await form(page, cashier.getByRole('button', { name: 'Editar' }), 'Editar Cajero', 'dialogo-editar-rol')
-  await handleWindow(page, { boton: page.getByRole('button', { name: 'Eliminar el rol Cajero' }), rol: 'alertdialog', titulo: '¿Eliminar el rol Cajero?', nombre: 'confirmar-eliminar-rol' })
+  await handleWindow(page, { button: page.getByRole('button', { name: 'Eliminar el rol Cajero' }), role: 'alertdialog', title: '¿Eliminar el rol Cajero?', name: 'confirmar-eliminar-rol' })
 })

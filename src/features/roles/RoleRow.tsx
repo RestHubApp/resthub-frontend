@@ -39,7 +39,7 @@ export function RoleRow({ role, groups, access, onOpen }: RoleRowProps) {
           aria-label={editable ? `Editar el rol ${role.name}` : `Ver permisos del rol ${role.name}`}
           onClick={onOpen}
         >
-          <Icon name={editable ? 'editar' : 'ver'} size={16} />
+          <Icon name={editable ? 'edit' : 'ver'} size={16} />
           <span>{editable ? 'Editar' : 'Ver permisos'}</span>
         </Button>
         {editable && role.is_deletable ? <DeleteRoleButton role={role} /> : null}
