@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 
 import { changeOrderItem, removeOrderItem } from '../../../api/orders'
 import type { ChangeItemRequest, OrderItemResponse } from '../../../api/types'
@@ -9,8 +9,10 @@ import ItemNote from '../ItemNote'
 import QuantityStepper from '../QuantityStepper'
 import { MAX_QUANTITY } from '../taking/useOrderDraft'
 import { useOrderAction } from '../useOrderAction'
-import ItemNoteDialog from './ItemNoteDialog'
 import { formatMoney } from '../../../services/format'
+
+// El diálogo trae react-hook-form y zod: se baja la primera vez que se edita una nota.
+const ItemNoteDialog = lazy(() => import('./ItemNoteDialog'))
 
 interface EditableItemProps {
   readonly orderId: number
@@ -67,16 +69,20 @@ export default function EditableItem({ orderId, item, flag }: EditableItemProps)
         <Icon name="nota" size={16} />
         <span>{item.notes === '' ? 'Agregar nota' : 'Cambiar nota'}</span>
       </Button>
-      <ItemNoteDialog
-        open={editando}
-        onOpenChange={setEditando}
-        dish={item.name}
-        notes={item.notes}
-        pending={cambio.isPending}
-        onSave={(notes) => {
-          cambio.mutate({ notes })
-        }}
-      />
+      {editando ? (
+        <Suspense fallback={null}>
+          <ItemNoteDialog
+            open={editando}
+            onOpenChange={setEditando}
+            dish={item.name}
+            notes={item.notes}
+            pending={cambio.isPending}
+            onSave={(notes) => {
+              cambio.mutate({ notes })
+            }}
+          />
+        </Suspense>
+      ) : null}
     </li>
   )
 }

@@ -20,6 +20,15 @@ const TONO = {
   simulated: 'text-muted-foreground',
 } as const
 
+/** El PDF lo da el proveedor: solo se abre si es una dirección https. */
+function esEnlaceSeguro(url: string): boolean {
+  try {
+    return new URL(url).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 /**
  * El comprobante electrónico de un pedido pagado: emitirlo o verlo.
  *
@@ -59,8 +68,8 @@ export default function InvoicePanel({ order }: InvoicePanelProps) {
     <div className="flex flex-wrap items-center gap-3 rounded-lg px-4 py-3 text-sm ring-1 ring-input">
       <span className="font-semibold">{emitido.kind_label} {emitido.code}</span>
       <span className={TONO[emitido.status]}>{emitido.status_label}</span>
-      {emitido.pdf_url === '' ? null : (
-        <a href={emitido.pdf_url} target="_blank" rel="noreferrer" className="text-primary underline">
+      {!esEnlaceSeguro(emitido.pdf_url) ? null : (
+        <a href={emitido.pdf_url} target="_blank" rel="noopener noreferrer" className="text-primary underline">
           PDF
         </a>
       )}

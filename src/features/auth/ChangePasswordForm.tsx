@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { changeOwnPassword } from '../../api/auth'
+import { changeOwnPassword, login, sessionOf } from '../../api/auth'
 import FormMessage from '../../components/FormMessage'
 import Icon from '../../components/Icon'
 import PasswordField from '../../components/PasswordField'
@@ -10,6 +10,7 @@ import { Button } from '../../components/ui/button'
 import { onSubmit } from '../../hooks/formSubmit'
 import { errorMessage } from '../../services/api'
 import { MIN_PASSWORD } from '../../services/fieldRules'
+import { useSession } from '../../store/session'
 import {
   type ChangePasswordForm as Formulario,
   changePasswordSchema,
@@ -34,8 +35,20 @@ export default function ChangePasswordForm() {
         current_password: valores.current_password,
         new_password: valores.new_password,
       }),
-    onSuccess: () => {
+    onSuccess: async (_, valores) => {
       reset(EMPTY_CHANGE_PASSWORD)
+      // Cambiar la contraseña corta las sesiones anteriores, también esta: se
+      // entra de nuevo con la clave nueva para no sacar a la persona de la app.
+      const { token, account, renew } = useSession.getState()
+      if (token === null || account === null) {
+        return
+      }
+      try {
+        const nueva = await login({ email: account.user.email, password: valores.new_password })
+        renew(token, nueva.access_token, sessionOf(nueva))
+      } catch {
+        // Sin renovar, la próxima petición da 401 y el acceso lo explica.
+      }
     },
   })
 

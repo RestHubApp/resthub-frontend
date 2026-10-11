@@ -19,7 +19,10 @@ const iAxe = indice(axe.filas, 'vista')
 const iWave = indice(wave.filas, 'vista')
 const iLh = indice(lh.filas, 'preset')
 
-const META = { lhA11y: 95, lhBp: 95, lhSeoAcceso: 90, lhPerfEscritorio: 90, lhPerfMovil: 80 }
+const META = { lhA11y: 95, lhBp: 95, lhSeoAcceso: 90, lhPerfEscritorio: 90, lhPerfMovil: 80, lhPerfMovilGestion: 70 }
+// El celular es del mesero y de cocina, y de quien aún no entró: 80. El
+// encargado y la plataforma trabajan en laptop; en el celular se les pide 70.
+const CUENTAS_DE_CELULAR = new Set([null, undefined, 'mesero', 'cocina', 'sin-terminos'])
 const filasEstado = []
 const cobertura = { axe: [0, 0], wave: [0, 0], lighthouse: [0, 0] }
 const incumplimientos = []
@@ -42,7 +45,7 @@ for (const e of ESTADOS) {
     if (w?.conteos && (w.conteos.errors > 0 || w.conteos.contrast > 0)) incumplimientos.push(`WAVE ${e.id} ${vista}: ${w.conteos.errors} errors, ${w.conteos.contrast} contrast`)
     if (l?.puntajes) {
       const p = l.puntajes
-      const perfMeta = vista === 'escritorio' ? META.lhPerfEscritorio : META.lhPerfMovil
+      const perfMeta = vista === 'escritorio' ? META.lhPerfEscritorio : CUENTAS_DE_CELULAR.has(e.cuenta) ? META.lhPerfMovil : META.lhPerfMovilGestion
       if (p.accessibility < META.lhA11y) incumplimientos.push(`Lighthouse ${e.id} ${vista}: accessibility ${p.accessibility}`)
       if (p['best-practices'] < META.lhBp) incumplimientos.push(`Lighthouse ${e.id} ${vista}: best-practices ${p['best-practices']}`)
       if (p.performance < perfMeta) incumplimientos.push(`Lighthouse ${e.id} ${vista}: performance ${p.performance} (< ${perfMeta})`)

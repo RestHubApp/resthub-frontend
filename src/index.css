@@ -234,6 +234,19 @@
   * {
     -webkit-tap-highlight-color: transparent;
   }
+
+  /*
+   * Con el dedo, los botones chicos (paginación, cerrar un diálogo, el ojo de
+   * la contraseña) se erran. 44 px es el objetivo táctil recomendado por WCAG
+   * 2.5.5; el hueco alrededor del icono no cambia el diseño del escritorio.
+   */
+  [data-slot='button'][data-size='xs'],
+  [data-slot='button'][data-size='sm'],
+  [data-slot='button'][data-size='icon-xs'],
+  [data-slot='button'][data-size='icon-sm'] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /*

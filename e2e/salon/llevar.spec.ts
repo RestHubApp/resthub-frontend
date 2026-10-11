@@ -23,7 +23,7 @@ async function enviarUnPlato(page: Page, plato: RegExp): Promise<void> {
 
 test('SAL-22 el mesero toma un pedido para llevar y lo encuentra en sus pestañas @movil', async ({ page, local }) => {
   cubre(
-    'dialogo:orders/floor/TakeawayDialog',
+    'dialogo:orders/floor/TakeawayForm',
     'pestanas:orders/OrdersView',
     'funcion:pedidos.para-llevar',
     'funcion:pedidos.pestana-llevar',

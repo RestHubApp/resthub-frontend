@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useParams } from 'react-router'
 
 import { fetchOrder, orderQueryKey } from '../../api/orders'
@@ -7,8 +7,6 @@ import EmptyState from '../../components/EmptyState'
 import { useOrderNoteFlags } from '../../hooks/useOrderNoteFlags'
 import { useCan } from '../../store/session'
 import BackLink from '../../components/BackLink'
-import CancelOrderDialog from './CancelOrderDialog'
-import ChargeDialog from './charge/ChargeDialog'
 import OrderActions from './detail/OrderActions'
 import DeliveryCard from './detail/DeliveryCard'
 import OrderClosedInfo from './detail/OrderClosedInfo'
@@ -20,6 +18,10 @@ import LiveIndicator from './LiveIndicator'
 import { isActive } from './orderLabels'
 import QueryError from './QueryError'
 import { useLiveUpdates } from './useLiveUpdates'
+
+// Los diálogos traen react-hook-form y zod: se bajan al abrirlos, no con el pedido.
+const CancelOrderDialog = lazy(() => import('./CancelOrderDialog'))
+const ChargeDialog = lazy(() => import('./charge/ChargeDialog'))
 
 /**
  * Un pedido: sus platos, su estado y el paso que sigue.
@@ -78,8 +80,10 @@ export default function OrderDetailView() {
       <PrintLinks order={order} />
       <OrderClosedInfo order={order} />
       <OrderItems order={order} flagFor={notas.flagFor} />
-      <ChargeDialog order={dialogo === 'charge' ? order : null} onClose={cerrar} />
-      <CancelOrderDialog order={dialogo === 'cancel' ? order : null} onClose={cerrar} />
+      <Suspense fallback={null}>
+        {dialogo === 'charge' ? <ChargeDialog order={order} onClose={cerrar} /> : null}
+        {dialogo === 'cancel' ? <CancelOrderDialog order={order} onClose={cerrar} /> : null}
+      </Suspense>
     </div>
   )
 }
