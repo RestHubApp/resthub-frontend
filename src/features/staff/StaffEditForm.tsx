@@ -4,12 +4,8 @@ import { useForm } from 'react-hook-form'
 
 import { updateStaff } from '@/api/staff'
 import type { Role, StaffResponse } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
-import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
-import { Button } from '@/components/ui/button'
+import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
 import { StaffFields } from './StaffFields'
 import { saveStaffMember } from './staffList'
 import {
@@ -71,21 +67,12 @@ export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormP
         lockedRoleLabel={isSelf ? account.role_label : undefined}
       />
 
-      {save.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(save.error, 'No se pudieron guardar los cambios.')}
-        </FormMessage>
-      ) : null}
-
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
-          Cancelar
-        </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={save.isPending}>
-          <Icon name="confirm" size={16} />
-          <span>{save.isPending ? 'Guardando…' : 'Guardar'}</span>
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={save}
+        failureText="No se pudieron guardar los cambios."
+        onCancel={onDone}
+        submit={{ label: 'Guardar', pendingLabel: 'Guardando…', icon: 'confirm' }}
+      />
     </form>
   )
 }

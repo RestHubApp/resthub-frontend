@@ -4,13 +4,9 @@ import { useForm } from 'react-hook-form'
 
 import { resetStaffPassword } from '@/api/staff'
 import type { StaffResponse } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
-import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
+import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
-import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
 import { MIN_PASSWORD } from '@/services/fieldRules'
 import { useNotifications } from '@/store/notifications'
 import { type ResetPasswordValues, resetPasswordSchema } from './staffSchema'
@@ -61,21 +57,12 @@ export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
         error={formState.errors.new_password?.message}
       />
 
-      {reset.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(reset.error, 'No se pudo restablecer la contraseña.')}
-        </FormMessage>
-      ) : null}
-
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
-          Cancelar
-        </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={reset.isPending}>
-          <Icon name="key" size={16} />
-          <span>{reset.isPending ? 'Guardando…' : 'Restablecer'}</span>
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={reset}
+        failureText="No se pudo restablecer la contraseña."
+        onCancel={onDone}
+        submit={{ label: 'Restablecer', pendingLabel: 'Guardando…', icon: 'key' }}
+      />
     </form>
   )
 }

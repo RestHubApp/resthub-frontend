@@ -2,7 +2,7 @@
   "path": ["src"],
   "minLines": 5,
   "minTokens": 50,
-  "threshold": 1,
+  "threshold": 0.5,
   "format": ["typescript", "tsx"],
   "ignore": [
     "**/*.test.ts",

@@ -4,13 +4,9 @@ import { useForm } from 'react-hook-form'
 
 import { createStaff } from '@/api/staff'
 import type { Role } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
-import { FormMessage } from '@/components/FormMessage'
-import { Icon } from '@/components/Icon'
+import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
-import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/api'
 import { MIN_PASSWORD } from '@/services/fieldRules'
 import { defaultRoleId } from './roleOptions'
 import { StaffFields } from './StaffFields'
@@ -79,21 +75,12 @@ export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
         error={errors.password?.message}
       />
 
-      {registration.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(registration.error, 'No se pudo crear la cuenta.')}
-        </FormMessage>
-      ) : null}
-
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
-          Cancelar
-        </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={registration.isPending}>
-          <Icon name="add" size={16} />
-          <span>{registration.isPending ? 'Creando…' : 'Crear cuenta'}</span>
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={registration}
+        failureText="No se pudo crear la cuenta."
+        onCancel={onDone}
+        submit={{ label: 'Crear cuenta', pendingLabel: 'Creando…', icon: 'add' }}
+      />
     </form>
   )
 }
