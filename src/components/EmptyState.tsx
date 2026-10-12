@@ -9,7 +9,7 @@ interface EmptyStateProps {
   readonly children?: ReactNode
 }
 
-/** Lo que se ve donde todavia no hay nada, o mientras carga. */
+/** Lo que se ve donde todavia no hay nada. */
 export function EmptyState({ title, description, children }: EmptyStateProps) {
   return (
     <Empty className="gap-3 rounded-xl border border-dashed p-6 md:p-8">

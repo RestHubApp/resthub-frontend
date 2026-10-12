@@ -1,8 +1,7 @@
 import { DialogFormActions } from './DialogFormActions'
-import { FormMessage } from './FormMessage'
+import { ErrorMessage } from './ErrorMessage'
 import { FormSubmitButton, type FooterSubmit } from './FormSubmitButton'
 import { Button } from './ui/button'
-import { mutationErrorText } from '@/hooks/mutationErrorText'
 
 /** Lo que el pie necesita saber de lo que guarda: si está en curso y, si falló, por qué. */
 interface FooterMutation {
@@ -27,10 +26,6 @@ interface FormFooterProps {
   readonly spansColumns?: boolean
 }
 
-function failureOf(mutation: FooterMutation, failureText: string | undefined): string | null {
-  return failureText === undefined ? null : mutationErrorText({ isError: mutation.isError === true, error: mutation.error }, failureText)
-}
-
 /**
  * El pie de los formularios que guardan: el error del envío, si lo hubo, y los
  * botones «Cancelar» y de la acción, con la etiqueta que cambia mientras se
@@ -39,12 +34,12 @@ function failureOf(mutation: FooterMutation, failureText: string | undefined): s
  */
 export function FormFooter({ mutation, failureText, onCancel, cancelLabel = 'Cancelar', submit, spansColumns = false }: FormFooterProps) {
   const wrap = spansColumns ? 'sm:col-span-2' : undefined
-  const failure = failureOf(mutation, failureText)
+  const hasFailure = failureText !== undefined && mutation.isError === true
   return (
     <>
-      {failure === null ? null : (
+      {!hasFailure ? null : (
         <div className={wrap}>
-          <FormMessage tone="error">{failure}</FormMessage>
+          <ErrorMessage error={mutation.error} fallback={failureText} />
         </div>
       )}
       <div className={wrap}>
