@@ -89,9 +89,11 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
   await expect(page.getByText('3 insumos')).toBeVisible()
   await capture(page, 'inventario-insumos')
 
-  await form(page, page.getByRole('button', { name: 'Merma de Cebolla roja' }), 'Registrar merma: Cebolla roja', 'dialogo-merma')
+  await page.getByRole('button', { name: 'Más acciones de Cebolla roja' }).click()
+  await form(page, page.getByRole('menuitem', { name: 'Merma' }), 'Registrar merma: Cebolla roja', 'dialogo-merma')
   await form(page, page.getByRole('button', { name: 'Compra de Culantro' }), 'Registrar compra: Culantro', 'dialogo-compra')
-  await form(page, page.getByRole('button', { name: 'Ajuste de Lomo de res' }), /^Ajust.*Lomo de res$/u, 'dialogo-ajuste')
+  await page.getByRole('button', { name: 'Más acciones de Lomo de res' }).click()
+  await form(page, page.getByRole('menuitem', { name: 'Ajuste' }), /^Ajust.*Lomo de res$/u, 'dialogo-ajuste')
 
   const tabs: readonly (readonly [RegExp, string, string])[] = [
     [/^Movimientos/u, 'Stock inicial', 'inventario-movimientos'],
