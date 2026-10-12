@@ -1,21 +1,21 @@
 import type { HTMLInputTypeAttribute } from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from './FieldError'
-import FieldHint from './FieldHint'
-import FieldIcon from './FieldIcon'
+import { FieldError } from './FieldError'
+import { FieldHint } from './FieldHint'
+import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
 import type { IconName } from './icons'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 
 // El icono que corresponde por el tipo de dato, cuando el campo no pide otro.
-const ICONO_POR_TIPO: Readonly<Partial<Record<string, IconName>>> = {
-  email: 'correo',
-  tel: 'telefono',
-  date: 'fecha',
-  time: 'horario',
-  number: 'numero',
+const ICON_BY_TYPE: Readonly<Partial<Record<string, IconName>>> = {
+  email: 'email',
+  tel: 'phone',
+  date: 'date',
+  time: 'schedule',
+  number: 'number',
 }
 
 interface TextFieldProps {
@@ -26,8 +26,8 @@ interface TextFieldProps {
   readonly type?: HTMLInputTypeAttribute
   /** Icono a la izquierda. Sin él, se usa el del tipo de dato, si lo hay. */
   readonly icon?: IconName
-  readonly error?: string
-  readonly hint?: string
+  readonly error?: string | undefined
+  readonly hint?: string | undefined
   readonly placeholder?: string
   readonly autoComplete?: string
   readonly inputMode?: 'tel' | 'text' | 'email' | 'numeric' | 'decimal'
@@ -42,7 +42,7 @@ interface TextFieldProps {
    * solo acepta digitos, un nombre que no acepta numeros. La regla del esquema
    * sigue validando, porque un valor pegado o autocompletado tambien pasa.
    */
-  readonly sanitize?: (valor: string) => string
+  readonly sanitize?: (value: string) => string
 }
 
 /**
@@ -52,7 +52,7 @@ interface TextFieldProps {
  * Reunirlo aca es lo que los mantiene por debajo del limite de tamano, y hace
  * que cambiar como se ve un error sea editar un archivo.
  */
-export default function TextField({
+export function TextField({
   id,
   label,
   field,
@@ -64,25 +64,24 @@ export default function TextField({
   ...inputProps
 }: TextFieldProps) {
   const ids = fieldIds(id, hint, error)
-  const { onChange, ...registro } = field
+  const { onChange, ...record } = field
 
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <FieldIcon icon={icon ?? ICONO_POR_TIPO[type]}>
+      <FieldIcon icon={icon ?? ICON_BY_TYPE[type]}>
         <Input
           id={id}
           type={type}
-          className="h-10"
           aria-invalid={error !== undefined}
           aria-describedby={ids.describedBy}
           {...inputProps}
-          {...registro}
-          onChange={(evento) => {
+          {...record}
+          onChange={(event) => {
             if (sanitize !== undefined) {
-              evento.target.value = sanitize(evento.target.value)
+              event.target.value = sanitize(event.target.value)
             }
-            void onChange(evento)
+            void onChange(event)
           }}
         />
       </FieldIcon>

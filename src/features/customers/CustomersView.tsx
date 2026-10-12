@@ -1,13 +1,14 @@
 import { useState } from 'react'
 
-import type { Customer } from '../../api/types'
-import Icon from '../../components/Icon'
-import PageHeader from '../../components/PageHeader'
-import { Button } from '../../components/ui/button'
-import { useCan } from '../../store/session'
-import CustomerDialog from './CustomerDialog'
-import CustomerList from './CustomerList'
-import CustomerSheet from './CustomerSheet'
+import { PERMISSION } from '@/api/permissions'
+import type { Customer } from '@/api/types'
+import { Icon } from '@/components/Icon'
+import { PageHeader } from '@/components/PageHeader'
+import { Button } from '@/components/ui/button'
+import { useCan } from '@/store/session'
+import { CustomerDialog } from './CustomerDialog'
+import { CustomerList } from './CustomerList'
+import { CustomerSheet } from './CustomerSheet'
 
 type Editing = { readonly customer: Customer | null } | null
 
@@ -17,15 +18,15 @@ type Editing = { readonly customer: Customer | null } | null
  * Los pedidos de delivery agregan al cliente solos por su teléfono; acá se
  * busca, se corrigen datos y se anotan preferencias.
  */
-export default function CustomersView() {
-  const puedeEditar = useCan('customers.manage')
-  const [abierto, setAbierto] = useState<number | null>(null)
-  const [editando, setEditando] = useState<Editing>(null)
-  const nuevo = (
-    <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
-      setEditando({ customer: null })
+export function CustomersView() {
+  const canEdit = useCan(PERMISSION.customersManage)
+  const [open, openSet] = useState<number | null>(null)
+  const [editing, setEditing] = useState<Editing>(null)
+  const fresh = (
+    <Button type="button" onClick={() => {
+      setEditing({ customer: null })
     }}>
-      <Icon name="agregar" size={18} />
+      <Icon name="add" size={18} />
       <span>Nuevo cliente</span>
     </Button>
   )
@@ -35,22 +36,22 @@ export default function CustomersView() {
       <PageHeader
         title="Clientes"
         description="Los clientes del local, sus visitas y lo que gastan. Frecuente es quien vino tres veces o más."
-        actions={puedeEditar ? nuevo : undefined}
+        actions={canEdit ? fresh : undefined}
       />
-      <CustomerList onOpen={setAbierto} />
+      <CustomerList onOpen={openSet} />
       <CustomerSheet
-        customerId={abierto}
-        canEdit={puedeEditar}
+        customerId={open}
+        canEdit={canEdit}
         onClose={() => {
-          setAbierto(null)
+          openSet(null)
         }}
         onEdit={(customer) => {
-          setAbierto(null)
-          setEditando({ customer })
+          openSet(null)
+          setEditing({ customer })
         }}
       />
-      <CustomerDialog open={editando !== null} customer={editando?.customer ?? null} onClose={() => {
-        setEditando(null)
+      <CustomerDialog open={editing !== null} customer={editing?.customer ?? null} onClose={() => {
+        setEditing(null)
       }} />
     </div>
   )

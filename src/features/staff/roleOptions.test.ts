@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
-import type { PermissionCode, Role } from '../../api/types'
+import type { PermissionCode, Role } from '@/api/types'
 import { canManageAccount, defaultRoleId, roleOptions } from './roleOptions'
 
 function role(id: number, kind: Role['kind'], permissions: PermissionCode[]): Role {
@@ -15,41 +15,41 @@ function role(id: number, kind: Role['kind'], permissions: PermissionCode[]): Ro
   }
 }
 
-const TOMAR = 'orders.take'
-const ENCARGADO = role(1, 'owner', [TOMAR, 'staff.manage', 'cash.manage'])
-const MESERO = role(2, 'waiter', [TOMAR])
-const CAJERO = role(3, 'custom', ['cash.manage'])
-const ROLES = [ENCARGADO, MESERO, CAJERO]
-const SOLO_PERSONAL: PermissionCode[] = [TOMAR, 'staff.manage']
+const TAKE = 'orders.take'
+const OWNER = role(1, 'owner', [TAKE, 'staff.manage', 'cash.manage'])
+const WAITER = role(2, 'waiter', [TAKE])
+const CASHIER = role(3, 'custom', ['cash.manage'])
+const ROLES = [OWNER, WAITER, CASHIER]
+const ONLY_STAFF: PermissionCode[] = [TAKE, 'staff.manage']
 
 describe('roleOptions', () => {
   it('ofrece solo los roles que la cuenta puede dar', () => {
-    expect(roleOptions(ROLES, SOLO_PERSONAL).map((opcion) => opcion.id)).toEqual([2])
+    expect(roleOptions(ROLES, ONLY_STAFF).map((option) => option.id)).toEqual([2])
   })
 
   it('al editar incluye el rol que la cuenta ya tiene', () => {
-    expect(roleOptions(ROLES, SOLO_PERSONAL, 3).map((opcion) => opcion.id)).toEqual([2, 3])
+    expect(roleOptions(ROLES, ONLY_STAFF, 3).map((option) => option.id)).toEqual([2, 3])
   })
 })
 
 describe('defaultRoleId', () => {
   it('elige al mesero si está entre las opciones', () => {
-    expect(defaultRoleId([CAJERO, MESERO])).toBe(2)
+    expect(defaultRoleId([CASHIER, WAITER])).toBe(2)
   })
 
   it('sin mesero elige la primera opción, y sin opciones ninguna', () => {
-    expect(defaultRoleId([CAJERO])).toBe(3)
+    expect(defaultRoleId([CASHIER])).toBe(3)
     expect(defaultRoleId([])).toBeUndefined()
   })
 })
 
 describe('canManageAccount', () => {
   it('no deja tocar una cuenta cuyo rol tiene permisos que faltan', () => {
-    expect(canManageAccount({ role_id: 1 }, ROLES, SOLO_PERSONAL)).toBe(false)
-    expect(canManageAccount({ role_id: 2 }, ROLES, SOLO_PERSONAL)).toBe(true)
+    expect(canManageAccount({ role_id: 1 }, ROLES, ONLY_STAFF)).toBe(false)
+    expect(canManageAccount({ role_id: 2 }, ROLES, ONLY_STAFF)).toBe(true)
   })
 
   it('sin la lista de roles deja decidir al servidor', () => {
-    expect(canManageAccount({ role_id: 1 }, undefined, SOLO_PERSONAL)).toBe(true)
+    expect(canManageAccount({ role_id: 1 }, undefined, ONLY_STAFF)).toBe(true)
   })
 })

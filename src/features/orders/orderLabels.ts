@@ -1,6 +1,6 @@
-import type { OrderResponse, OrderStatus, OrderType, PaymentMethod } from '../../api/types'
-import { tableName } from '../../api/tables'
-import type { StatusTone } from '../../components/StatusBadge'
+import type { OrderResponse, OrderStatus, OrderType, PaymentMethod } from '@/api/types'
+import { tableName } from '@/api/tables'
+import type { StatusTone } from '@/components/StatusBadge'
 
 // El nombre de cada estado es uno solo en toda la aplicacion: la insignia, la
 // columna del tablero, el filtro del historial y los avisos dicen lo mismo.
@@ -52,8 +52,8 @@ export function orderPlace(order: Pick<OrderResponse, 'type' | 'table_label' | '
   if (order.type === 'dine_in') {
     return order.table_label === null ? 'Mesa' : tableName(order.table_label)
   }
-  const tipo = order.type === 'delivery' ? 'Delivery' : 'Para llevar'
-  return order.customer_name === '' ? tipo : `${tipo} · ${order.customer_name}`
+  const type = order.type === 'delivery' ? 'Delivery' : 'Para llevar'
+  return order.customer_name === '' ? type : `${type} · ${order.customer_name}`
 }
 
 /** Teléfono, dirección y referencia de un delivery, sin los vacíos. Nada si no es delivery. */

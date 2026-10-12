@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react'
 
-import { api, currentAuthToken } from '../services/api'
-import { EventStreamError, readEventStream } from '../services/eventStream'
-import { logger } from '../services/logger'
+import { currentAuthToken } from '@/services/apiCredentials'
+import { isDenied } from '@/services/apiError'
+import { apiUrl } from '@/services/apiRouting'
+import { EventStreamError, readEventStream } from '@/services/eventStream'
+import { logger } from '@/services/logger'
 
 const RETRY_MS = 3000
-const UNAUTHORIZED = 401
-const FORBIDDEN = 403
 
 const eventLogger = logger.child({ module: 'realtime' })
 
@@ -34,20 +34,20 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
     const controller = new AbortController()
     let timer: number | undefined
 
-    const reintentar = (error?: unknown) => {
+    const retry = (error?: unknown) => {
       if (controller.signal.aborted) {
         return
       }
-      if (error instanceof EventStreamError && (error.status === UNAUTHORIZED || error.status === FORBIDDEN)) {
+      if (error instanceof EventStreamError && isDenied(error.code)) {
         return
       }
       eventLogger.warn({ err: error, topic }, 'realtime.disconnected')
-      timer = window.setTimeout(conectar, RETRY_MS)
+      timer = window.setTimeout(connect, RETRY_MS)
     }
 
-    function conectar(): void {
+    function connect(): void {
       readEventStream({
-        url: `${api.defaults.baseURL ?? ''}/events`,
+        url: apiUrl('/events'),
         token: token ?? '',
         signal: controller.signal,
         onEvent: (event) => {
@@ -56,11 +56,11 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
           }
         },
       }).then(() => {
-        reintentar()
-      }, reintentar)
+        retry()
+      }, retry)
     }
 
-    conectar()
+    connect()
     return () => {
       controller.abort()
       window.clearTimeout(timer)

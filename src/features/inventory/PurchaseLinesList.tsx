@@ -1,7 +1,7 @@
-import type { Ingredient } from '../../api/types'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import PurchaseLineEditor from './PurchaseLineEditor'
+import type { Ingredient } from '@/api/types'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { PurchaseLineEditor } from './PurchaseLineEditor'
 import { emptyLine, type LineDraft } from './purchaseLines'
 
 interface PurchaseLinesListProps {
@@ -11,21 +11,21 @@ interface PurchaseLinesListProps {
 }
 
 /** Los insumos de la orden, con quitar y agregar. */
-export default function PurchaseLinesList({ lines, ingredients, onChange }: PurchaseLinesListProps) {
+export function PurchaseLinesList({ lines, ingredients, onChange }: PurchaseLinesListProps) {
   return (
     <>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {lines.map((linea, indice) => (
+        {lines.map((line, index) => (
           <PurchaseLineEditor
-            key={linea.key}
-            index={indice}
-            line={linea}
+            key={line.key}
+            index={index}
+            line={line}
             ingredients={ingredients}
-            onChange={(nueva) => {
-              onChange(lines.map((l, i) => (i === indice ? nueva : l)))
+            onChange={(fresh) => {
+              onChange(lines.map((l, i) => (i === index ? fresh : l)))
             }}
             onRemove={() => {
-              onChange(lines.filter((_, i) => i !== indice))
+              onChange(lines.filter((_, i) => i !== index))
             }}
           />
         ))}
@@ -33,7 +33,7 @@ export default function PurchaseLinesList({ lines, ingredients, onChange }: Purc
       <Button type="button" variant="ghost" className="self-start" onClick={() => {
         onChange([...lines, emptyLine()])
       }}>
-        <Icon name="agregar" size={16} />
+        <Icon name="add" size={16} />
         <span>Agregar insumo</span>
       </Button>
     </>

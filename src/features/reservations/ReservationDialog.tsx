@@ -2,16 +2,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { tablesQuery } from '../../api/tables'
-import type { Reservation } from '../../api/types'
-import DialogFormActions from '../../components/DialogFormActions'
-import FormDialog from '../../components/FormDialog'
-import FormMessage from '../../components/FormMessage'
-import { Button } from '../../components/ui/button'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
-import { useTimeZone } from '../../store/session'
-import ReservationFields from './ReservationFields'
+import { tablesQuery } from '@/api/tables'
+import type { Reservation } from '@/api/types'
+import { SaveFormDialog } from '@/components/SaveFormDialog'
+import { useTimeZone } from '@/store/session'
+import { ReservationFields } from './ReservationFields'
 import { reservationDefaults, reservationRequest, reservationSchema, type ReservationValues } from './reservationSchema'
 import { useSaveReservation } from './useReservationMutations'
 
@@ -29,49 +24,34 @@ interface ReservationDialogProps {
  * La mesa es opcional: si se elige, el servidor revisa que no choque con otra
  * reserva de esa mesa en el mismo horario.
  */
-export default function ReservationDialog({ open, reservation, day, onClose }: ReservationDialogProps) {
+export function ReservationDialog({ open, reservation, day, onClose: handleClose }: ReservationDialogProps) {
   const timeZone = useTimeZone()
-  const mesas = useQuery({ ...tablesQuery(false), enabled: open })
+  const tables = useQuery({ ...tablesQuery(false), enabled: open })
   const form = useForm<ReservationValues>({
     resolver: zodResolver(reservationSchema),
     values: reservationDefaults(reservation, day, timeZone),
   })
-  const guardar = useSaveReservation(reservation?.id, onClose)
+  // Al guardar, la ventana se cierra sin pasar por `onOpenChange` y el
+  // formulario conservaba lo escrito: «Nueva reserva» volvía a abrir con el
+  // teléfono, las personas y la mesa de la anterior. Cada vez que se abre,
+  // vuelve a sus valores al cerrarse.
+  const { reset } = form
+  const onClose = () => {
+    reset(reservationDefaults(reservation, day, timeZone))
+    handleClose()
+  }
+  const save = useSaveReservation(reservation?.id, onClose)
 
   return (
-    <FormDialog
+    <SaveFormDialog
       open={open}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
-          guardar.reset()
-          onClose()
-        }
-      }}
       title={reservation === null ? 'Nueva reserva' : `Reserva de ${reservation.customer_name}`}
-      size="lg"
+      onClose={onClose}
+      save={save}
+      failureText="No se pudo guardar la reserva."
+      handleSubmit={form.handleSubmit((values) => save.mutateAsync(reservationRequest(values, timeZone)).catch(() => undefined))}
     >
-      <form
-        noValidate
-        className="grid gap-4 sm:grid-cols-2"
-        onSubmit={onSubmit(form.handleSubmit((values) => guardar.mutateAsync(reservationRequest(values, timeZone)).catch(() => undefined)))}
-      >
-        <ReservationFields form={form} tables={mesas.data ?? []} />
-        {guardar.isError ? (
-          <div className="sm:col-span-2">
-            <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudo guardar la reserva.')}</FormMessage>
-          </div>
-        ) : null}
-        <div className="sm:col-span-2">
-          <DialogFormActions>
-            <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" size="lg" className="h-11 px-4" disabled={guardar.isPending}>
-              {guardar.isPending ? 'Guardando…' : 'Guardar'}
-            </Button>
-          </DialogFormActions>
-        </div>
-      </form>
-    </FormDialog>
+      <ReservationFields form={form} tables={tables.data ?? []} />
+    </SaveFormDialog>
   )
 }

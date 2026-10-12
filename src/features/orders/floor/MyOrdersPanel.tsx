@@ -1,39 +1,35 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { fetchOrders, MAX_ORDERS_PAGE, orderListQueryKey } from '../../../api/orders'
-import EmptyState from '../../../components/EmptyState'
-import ListSkeleton from '../../../components/ListSkeleton'
-import { useSession, useTimeZone } from '../../../store/session'
-import { isActive } from '../orderLabels'
-import QueryError from '../QueryError'
-import OrderList from './OrderList'
-import { todayIn } from '../../../services/format'
+import { MAX_ORDERS_PAGE, ordersQuery } from '@/api/orders'
+import { EmptyState } from '@/components/EmptyState'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { staffOf, useSession, useTimeZone } from '@/store/session'
+import { isActive } from '@/features/orders/orderLabels'
+import { RetryQueryError } from '@/components/RetryQueryError'
+import { OrderList } from './OrderList'
+import { todayIn } from '@/services/format'
 
 /** Lo que tomo el mesero hoy: primero lo que sigue en curso, despues lo cerrado. */
-export default function MyOrdersPanel() {
-  const userId = useSession((state) => state.account?.user.id)
+export function MyOrdersPanel() {
+  const userId = useSession((state) => staffOf(state.account)?.user.id)
   const timeZone = useTimeZone()
-  const hoy = todayIn(timeZone)
-  const params = { waiter_id: userId, date_from: hoy, date_to: hoy, limit: MAX_ORDERS_PAGE }
-  const pedidos = useQuery({
-    queryKey: orderListQueryKey(params),
-    queryFn: () => fetchOrders(params),
-    enabled: userId !== undefined,
-  })
+  const today = todayIn(timeZone)
+  const params = { ...(userId === undefined ? {} : { waiter_id: userId }), date_from: today, date_to: today, limit: MAX_ORDERS_PAGE }
+  const orders = useQuery({ ...ordersQuery(params), enabled: userId !== undefined })
 
-  if (pedidos.isPending) {
+  if (orders.isPending) {
     return <ListSkeleton label="Cargando tus pedidos…" count={3} itemClassName="h-20 rounded-xl" />
   }
-  if (pedidos.isError) {
+  if (orders.isError) {
     return (
-      <QueryError
-        error={pedidos.error}
+      <RetryQueryError
+        error={orders.error}
         fallback="No se pudieron cargar tus pedidos."
-        onRetry={() => void pedidos.refetch()}
+        onRetry={() => void orders.refetch()}
       />
     )
   }
-  if (pedidos.data.items.length === 0) {
+  if (orders.data.items.length === 0) {
     return (
       <EmptyState
         title="Todavía no tomaste pedidos hoy"
@@ -41,13 +37,13 @@ export default function MyOrdersPanel() {
       />
     )
   }
-  const enCurso = pedidos.data.items.filter((order) => isActive(order.status))
-  const cerrados = pedidos.data.items.filter((order) => !isActive(order.status))
+  const inProgress = orders.data.items.filter((order) => isActive(order.status))
+  const closed = orders.data.items.filter((order) => !isActive(order.status))
 
   return (
     <div className="flex flex-col gap-5">
-      <OrderList title="En curso" orders={enCurso} />
-      <OrderList title="Cerrados hoy" orders={cerrados} />
+      <OrderList title="En curso" orders={inProgress} />
+      <OrderList title="Cerrados hoy" orders={closed} />
     </div>
   )
 }

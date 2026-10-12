@@ -1,14 +1,14 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
-import { obsStatusQuery } from '../../../api/observability'
-import type { ObsStatusCount, ObsWindowParams } from '../../../api/types'
-import BarList from '../../../components/charts/BarList'
-import ChartCard from '../../../components/charts/ChartCard'
-import DataGrid from '../../../components/charts/DataGrid'
-import EmptyState from '../../../components/EmptyState'
-import { formatInteger, formatPercent } from '../../../services/format'
+import { obsStatusQuery } from '@/api/observability'
+import type { ObsStatusCount, ObsWindowParams } from '@/api/types'
+import { BarList } from '@/components/charts/BarList'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid } from '@/components/charts/DataGrid'
+import { EmptyState } from '@/components/EmptyState'
+import { formatInteger, formatPercent } from '@/services/format'
 import { statusLabel } from './obsLabels'
-import ObsQueryState from './ObsQueryState'
+import { ObsQueryState } from './ObsQueryState'
 import type { LiveOptions } from './useObsRefresh'
 
 interface StatusSectionProps {
@@ -35,18 +35,18 @@ function columns(total: number) {
  * Cuántas respuestas hubo de cada estado. Las que fallaron (4xx y 5xx) van
  * en color y las correctas en gris: la historia son los errores.
  */
-export default function StatusSection({ params, live }: StatusSectionProps) {
-  const estados = useQuery({ ...obsStatusQuery(params), ...live, placeholderData: keepPreviousData })
+export function StatusSection({ params, live }: StatusSectionProps) {
+  const statuses = useQuery({ ...obsStatusQuery(params), ...live, placeholderData: keepPreviousData })
 
   return (
-    <ObsQueryState query={estados} errorText="No se pudo cargar la distribución por estado." loadingLabel="Cargando los estados…" skeletonClassName="h-64 rounded-xl">
+    <ObsQueryState query={statuses} errorText="No se pudo cargar la distribución por estado." loadingLabel="Cargando los estados…" skeletonClassName="h-64 rounded-xl">
       {(rows) => {
-        const total = rows.reduce((suma, row) => suma + row.count, 0)
+        const total = rows.reduce((sum, row) => sum + row.count, 0)
         return (
           <ChartCard
             title="Respuestas por estado"
             description="En color, las que fallaron (4xx y 5xx); en gris, las correctas y las redirecciones."
-            refreshing={estados.isPlaceholderData}
+            refreshing={statuses.isPlaceholderData}
             chart={
               rows.length === 0 ? (
                 <EmptyState title="No hubo peticiones en esta ventana." />

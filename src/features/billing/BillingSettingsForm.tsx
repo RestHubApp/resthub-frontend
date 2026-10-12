@@ -1,21 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { billingQueryKey, billingSettingsQueryKey, updateBillingSettings } from '../../api/billing'
-import type { BillingSettings } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import TextField from '../../components/TextField'
-import { Button } from '../../components/ui/button'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { billingQueryKey, billingSettingsQueryKey, updateBillingSettings } from '@/api/billing'
+import type { BillingSettings } from '@/api/types'
+import { TextField } from '@/components/TextField'
+import { Button } from '@/components/ui/button'
+import { onSubmit } from '@/hooks/formSubmit'
+import { useNotifications } from '@/store/notifications'
 
 const schema = z.object({
+  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
   ruc: z.string().trim().regex(/^(?:(?:10|15|17|20)\d{9})?$/u, 'El RUC tiene 11 dígitos y empieza en 10 o 20'),
   legal_name: z.string().trim().max(100, 'Usa como máximo 100 caracteres'),
   address: z.string().trim().max(200, 'Usa como máximo 200 caracteres'),
+  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
   igv_rate: z.string().trim().regex(/^\d{1,2}(?:[.,]\d{1,2})?$/u, 'Escribe un porcentaje como 18 o 10.5'),
   boleta_series: z.string().trim().toUpperCase().regex(/^B[A-Z0-9]{3}$/u, 'Cuatro caracteres, empieza con B'),
   factura_series: z.string().trim().toUpperCase().regex(/^F[A-Z0-9]{3}$/u, 'Cuatro caracteres, empieza con F'),
@@ -26,6 +27,8 @@ type Values = z.infer<typeof schema>
 
 interface BillingSettingsFormProps {
   readonly settings: BillingSettings
+  /** Se llama al guardar; la hoja que lo contiene se cierra. */
+  readonly onSaved?: (() => void) | undefined
 }
 
 function valuesOf(settings: BillingSettings): Values {
@@ -48,31 +51,32 @@ function valuesOf(settings: BillingSettings): Values {
  * estaba. Sin RUC, razón social, ruta y token los comprobantes quedan «sin
  * enviar» y se reenvían después.
  */
-export default function BillingSettingsForm({ settings }: BillingSettingsFormProps) {
+export function BillingSettingsForm({ settings, onSaved }: BillingSettingsFormProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   const { register, handleSubmit, formState } = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: valuesOf(settings),
   })
-  const errorDe = (campo: keyof Values): string | undefined => formState.errors[campo]?.message
-  const guardar = useMutation({
-    mutationFn: (valores: Values) =>
+  const errorDe = (field: keyof Values): string | undefined => formState.errors[field]?.message
+  const save = useMutation({
+    mutationFn: (values: Values) =>
       updateBillingSettings({
-        ...valores,
-        igv_rate: valores.igv_rate.replace(',', '.'),
-        provider_token: valores.provider_token === '' ? null : valores.provider_token,
+        ...values,
+        igv_rate: values.igv_rate.replace(',', '.'),
+        provider_token: values.provider_token === '' ? null : values.provider_token,
       }),
-    onSuccess: (guardado) => {
-      queryClient.setQueryData(billingSettingsQueryKey, guardado)
+    onSuccess: (saved) => {
+      queryClient.setQueryData(billingSettingsQueryKey, saved)
       void queryClient.invalidateQueries({ queryKey: billingQueryKey })
       push({ tone: 'info', message: 'Datos fiscales guardados.' })
+      onSaved?.()
     },
   })
 
   return (
-    <form noValidate className="flex flex-col gap-4" onSubmit={onSubmit(handleSubmit((valores) => {
-      guardar.mutate(valores)
+    <form noValidate className="flex flex-col gap-4" onSubmit={onSubmit(handleSubmit((values) => {
+      save.mutate(values)
     }))}>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField id="fiscal-ruc" label="RUC del local" inputMode="numeric" field={register('ruc')} error={errorDe('ruc')} />
@@ -88,9 +92,9 @@ export default function BillingSettingsForm({ settings }: BillingSettingsFormPro
         <TextField id="fiscal-url" label="Ruta del proveedor (Nubefact)" placeholder="https://api.nubefact.com/api/v1/…" field={register('provider_url')} error={errorDe('provider_url')} />
         <TextField id="fiscal-token" label="Token del proveedor" type="password" autoComplete="off" hint={settings.has_provider_token ? 'Cargado. Déjalo vacío para no cambiarlo.' : 'Todavía no cargado.'} field={register('provider_token')} error={errorDe('provider_token')} />
       </div>
-      {guardar.isError ? <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudieron guardar los datos.')}</FormMessage> : null}
-      <Button type="submit" className="self-end" disabled={guardar.isPending}>
-        {guardar.isPending ? 'Guardando…' : 'Guardar datos fiscales'}
+      <ErrorMessage isError={save.isError} error={save.error} fallback="No se pudieron guardar los datos." />
+      <Button type="submit" className="self-end" disabled={save.isPending}>
+        {save.isPending ? 'Guardando…' : 'Guardar datos fiscales'}
       </Button>
     </form>
   )

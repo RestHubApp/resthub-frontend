@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { fetchStaff, MAX_STAFF_PAGE, staffListQueryKey } from '../../../api/staff'
-import { NativeSelectOption } from '../../../components/ui/native-select'
-import { useCan } from '../../../store/session'
-import { STATUS_OPTIONS, TYPE_OPTIONS } from '../orderLabels'
-import DateFilter from './DateFilter'
-import FilterSelect from './FilterSelect'
+import { PERMISSION } from '@/api/permissions'
+import { MAX_STAFF_PAGE, staffQuery } from '@/api/staff'
+import { useCan } from '@/store/session'
+import { STATUS_OPTIONS, TYPE_OPTIONS } from '@/features/orders/orderLabels'
+import { DateFilter } from './DateFilter'
+import { FilterSelect } from '@/components/FilterSelect'
 import type { HistoryFilters } from './historyFilters'
 
 interface HistoryFiltersBarProps {
@@ -13,7 +13,7 @@ interface HistoryFiltersBarProps {
   readonly onChange: (value: HistoryFilters) => void
 }
 
-const PERSONAL = { limit: MAX_STAFF_PAGE, ordering: 'full_name' } as const
+const STAFF = { limit: MAX_STAFF_PAGE, ordering: 'full_name' } as const
 
 /**
  * Fechas, estado, tipo y mesero.
@@ -21,47 +21,53 @@ const PERSONAL = { limit: MAX_STAFF_PAGE, ordering: 'full_name' } as const
  * La lista de meseros sale del personal, que solo lee quien lo administra. Sin
  * ese permiso el filtro no aparece, en vez de mostrarse vacio.
  */
-export default function HistoryFiltersBar({ value, onChange }: HistoryFiltersBarProps) {
-  const verPersonal = useCan('staff.manage')
-  const personal = useQuery({
-    queryKey: staffListQueryKey(PERSONAL),
-    queryFn: () => fetchStaff(PERSONAL),
-    enabled: verPersonal,
-  })
-  const cambiar = (parcial: Partial<HistoryFilters>) => {
-    onChange({ ...value, ...parcial })
+export function HistoryFiltersBar({ value, onChange }: HistoryFiltersBarProps) {
+  const canViewStaff = useCan(PERMISSION.staffManage)
+  const staff = useQuery({ ...staffQuery(STAFF), enabled: canViewStaff })
+  const change = (partial: Partial<HistoryFilters>) => {
+    onChange({ ...value, ...partial })
   }
 
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
       <DateFilter id="historial-desde" label="Desde" value={value.from} onChange={(from) => {
-        cambiar({ from })
+        change({ from })
       }} />
       <DateFilter id="historial-hasta" label="Hasta" value={value.to} onChange={(to) => {
-        cambiar({ to })
+        change({ to })
       }} />
-      <FilterSelect id="historial-estado" label="Estado" anyLabel="Cualquiera" value={value.status} onChange={(status) => {
-        cambiar({ status: STATUS_OPTIONS.find((opcion) => opcion.value === status)?.value ?? '' })
-      }}>
-        {STATUS_OPTIONS.map((opcion) => (
-          <NativeSelectOption key={opcion.value} value={opcion.value}>{opcion.label}</NativeSelectOption>
-        ))}
-      </FilterSelect>
-      <FilterSelect id="historial-tipo" label="Tipo" anyLabel="En mesa y para llevar" value={value.type} onChange={(type) => {
-        cambiar({ type: TYPE_OPTIONS.find((opcion) => opcion.value === type)?.value ?? '' })
-      }}>
-        {TYPE_OPTIONS.map((opcion) => (
-          <NativeSelectOption key={opcion.value} value={opcion.value}>{opcion.label}</NativeSelectOption>
-        ))}
-      </FilterSelect>
-      {verPersonal ? (
-        <FilterSelect id="historial-mesero" label="Mesero" anyLabel="Cualquiera" value={value.waiterId} onChange={(waiterId) => {
-          cambiar({ waiterId })
-        }}>
-          {(personal.data?.items ?? []).map((cuenta) => (
-            <NativeSelectOption key={cuenta.id} value={String(cuenta.id)}>{cuenta.full_name}</NativeSelectOption>
-          ))}
-        </FilterSelect>
+      <FilterSelect
+        id="historial-estado"
+        label="Estado"
+        allLabel="Cualquiera"
+        value={value.status}
+        options={STATUS_OPTIONS}
+        onChange={(status) => {
+          change({ status })
+        }}
+      />
+      <FilterSelect
+        id="historial-tipo"
+        label="Tipo"
+        allLabel="En mesa y para llevar"
+        className="col-span-2 md:col-span-1"
+        value={value.type}
+        options={TYPE_OPTIONS}
+        onChange={(type) => {
+          change({ type })
+        }}
+      />
+      {canViewStaff ? (
+        <FilterSelect
+          id="historial-mesero"
+          label="Mesero"
+          allLabel="Cualquiera"
+          value={value.waiterId}
+          options={(staff.data?.items ?? []).map((account) => ({ value: String(account.id), label: account.full_name }))}
+          onChange={(waiterId) => {
+            change({ waiterId })
+          }}
+        />
       ) : null}
     </div>
   )

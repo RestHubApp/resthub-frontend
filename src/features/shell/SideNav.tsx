@@ -1,29 +1,38 @@
-import type { CurrentUserResponse } from '../../api/types'
-import Brand from './Brand'
+import type { Session } from '@/api/types'
+import { paths } from '@/services/paths'
+import { AccessibilityRow } from './AccessibilityRow'
+import { scopeName, spokenScope } from './accountLabels'
+import { Brand } from '@/components/Brand'
 import type { NavEntry } from './navigation'
-import NavList from './NavList'
-import RestaurantName from './RestaurantName'
-import SessionActions from './SessionActions'
+import { NavList } from './NavList'
+import { QuickAppearanceButton } from './quick/QuickAppearanceButton'
+import { QuickSearchField } from './quick/QuickSearchField'
+import { ScopeName } from './ScopeName'
+import { SessionActions } from './SessionActions'
 
 interface SideNavProps {
   readonly entries: readonly NavEntry[]
-  readonly account: CurrentUserResponse
+  readonly account: Session
 }
 
-/** La barra lateral de escritorio, donde trabaja el encargado. */
-export default function SideNav({ entries, account }: SideNavProps) {
+/** La barra lateral de escritorio, donde trabaja el encargado (y la administración del sistema). */
+export function SideNav({ entries, account }: SideNavProps) {
   return (
+    // `data-side-nav` lo usa `index.css` para ocultar el botón flotante de accesibilidad con sesión.
     // La columna pinta el fondo de punta a punta; adentro, el menú queda fijo al desplazarse.
     <div className="hidden border-r bg-card lg:block">
-      <aside className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-5 p-4">
+      <aside data-side-nav="" className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-3 p-4">
         <div className="px-1 pt-1">
-          <Brand to="/" />
+          <Brand to={paths.home} />
         </div>
-        <RestaurantName name={account.restaurant.name} variant="sidebar" />
-        <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto">
+        <ScopeName name={scopeName(account)} variant="sidebar" spokenLabel={spokenScope(account)} />
+        <QuickSearchField />
+        <nav aria-label="Navegación principal" className="scroll-shadow -mx-1 flex-1 overflow-y-auto px-1">
           <NavList entries={entries} />
         </nav>
-        <SessionActions fullName={account.user.full_name} roleLabel={account.user.role_label} />
+        <QuickAppearanceButton variant="row" />
+        <AccessibilityRow />
+        <SessionActions account={account} />
       </aside>
     </div>
   )

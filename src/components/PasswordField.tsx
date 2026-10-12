@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from './FieldError'
-import FieldHint from './FieldHint'
-import FieldIcon from './FieldIcon'
+import { FieldError } from './FieldError'
+import { FieldHint } from './FieldHint'
+import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
-import Icon from './Icon'
+import { Icon } from './Icon'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -16,7 +16,7 @@ interface PasswordFieldProps {
   /** Lo que devuelve `register(...)` de react-hook-form. */
   readonly field: UseFormRegisterReturn
   readonly autoComplete: 'current-password' | 'new-password'
-  readonly error?: string
+  readonly error?: string | undefined
   readonly hint?: string
   readonly placeholder?: string
 }
@@ -28,7 +28,7 @@ interface PasswordFieldProps {
  * diez caracteres hace que equivocarse cueste. El boton cambia su nombre
  * accesible segun el estado, asi el lector de pantalla anuncia que hara.
  */
-export default function PasswordField({
+export function PasswordField({
   id,
   label,
   field,
@@ -37,17 +37,17 @@ export default function PasswordField({
   hint,
   placeholder,
 }: PasswordFieldProps) {
-  const [visible, setVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
   const ids = fieldIds(id, hint, error)
 
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <FieldIcon icon="candado">
+      <FieldIcon icon="lock">
         <Input
           id={id}
-          type={visible ? 'text' : 'password'}
-          className="h-10 pr-11"
+          type={isVisible ? 'text' : 'password'}
+          className="pr-11"
           autoComplete={autoComplete}
           spellCheck={false}
           placeholder={placeholder}
@@ -62,12 +62,12 @@ export default function PasswordField({
             size="icon-sm"
             className="text-muted-foreground"
             aria-controls={id}
-            aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            aria-label={isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             onClick={() => {
-              setVisible((actual) => !actual)
+              setIsVisible((actual) => !actual)
             }}
           >
-            <Icon name={visible ? 'ocultar' : 'ver'} size={18} />
+            <Icon name={isVisible ? 'hide' : 'view'} size={18} />
           </Button>
         </div>
       </FieldIcon>

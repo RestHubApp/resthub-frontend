@@ -1,5 +1,5 @@
-import { formatCents } from '../../../services/format'
-import QuantityStepper from '../QuantityStepper'
+import { formatCents } from '@/services/format'
+import { QuantityStepper } from '@/features/orders/QuantityStepper'
 
 interface EqualSplitFieldProps {
   /** Cuántas personas faltan pagar, contando a la que paga ahora. */
@@ -11,7 +11,7 @@ interface EqualSplitFieldProps {
 const MAX_PERSONAS = 20
 
 /** Entre cuántas personas se divide lo que falta, y cuánto paga cada una. */
-export default function EqualSplitField({ remaining, partCents, onChange }: EqualSplitFieldProps) {
+export function EqualSplitField({ remaining, partCents, onChange }: EqualSplitFieldProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted px-4 py-3">
       <div className="flex items-center gap-3">
@@ -24,7 +24,7 @@ export default function EqualSplitField({ remaining, partCents, onChange }: Equa
           onChange={onChange}
         />
       </div>
-      <p className="m-0 text-right">
+      <p className="m-0 text-right" data-testid="equal-split-part">
         <span className="block text-xs text-muted-foreground">
           {remaining === 1 ? 'Paga lo que falta' : 'Paga cada una'}
         </span>

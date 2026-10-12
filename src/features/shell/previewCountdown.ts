@@ -1,7 +1,7 @@
-import { formatCountdown } from '../../services/format'
+import { formatCountdown } from '@/services/format'
 
 // Desde cuándo la franja avisa que la vista previa está por vencer.
-const AVISO_MS = 5 * 60_000
+const NOTICE_MS = 5 * 60_000
 
 export interface PreviewTimeLeft {
   /** `Vence en 12:34` o `Venció`. */
@@ -20,9 +20,9 @@ export function previewTimeLeft(expiresAt: number | null, now: number): PreviewT
   if (expiresAt === null) {
     return null
   }
-  const falta = expiresAt - now
-  if (falta <= 0) {
+  const missing = expiresAt - now
+  if (missing <= 0) {
     return { label: 'Venció', soon: true }
   }
-  return { label: `Vence en ${formatCountdown(falta)}`, soon: falta <= AVISO_MS }
+  return { label: `Vence en ${formatCountdown(missing)}`, soon: missing <= NOTICE_MS }
 }

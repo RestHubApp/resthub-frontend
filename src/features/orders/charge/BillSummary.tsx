@@ -1,5 +1,5 @@
-import type { OrderResponse } from '../../../api/types'
-import { formatMoney, formatPercent, toCents } from '../../../services/format'
+import type { OrderResponse } from '@/api/types'
+import { formatMoney, formatPercent, toCents } from '@/services/format'
 
 interface BillSummaryProps {
   readonly order: OrderResponse
@@ -33,16 +33,16 @@ function adjustmentRows(order: OrderResponse): Row[] {
  *
  * Lo que falta va grande: es lo que quien cobra le dice al cliente.
  */
-export default function BillSummary({ order }: BillSummaryProps) {
-  const ajustes = adjustmentRows(order)
+export function BillSummary({ order }: BillSummaryProps) {
+  const settings = adjustmentRows(order)
 
   return (
     <div className="flex flex-col gap-2 rounded-lg bg-secondary px-4 py-3 text-secondary-foreground">
-      {ajustes.length === 0 ? null : (
+      {settings.length === 0 ? null : (
         <dl className="m-0 grid grid-cols-2 gap-y-1 text-sm">
           <dt>Platos</dt>
           <dd className="m-0 text-right tabular-nums">{formatMoney(order.subtotal)}</dd>
-          {ajustes.map((row) => (
+          {settings.map((row) => (
             <div key={row.label} className="contents">
               <dt>{row.label}</dt>
               <dd className="m-0 text-right tabular-nums">{row.value}</dd>
@@ -50,7 +50,7 @@ export default function BillSummary({ order }: BillSummaryProps) {
           ))}
         </dl>
       )}
-      <p className="m-0 flex items-baseline justify-between">
+      <p className="m-0 flex items-baseline justify-between" data-testid="bill-balance">
         <span className="font-medium">{toCents(order.paid_amount) > 0 ? 'Falta cobrar' : 'Total a cobrar'}</span>
         <span className="text-2xl font-bold tabular-nums">{formatMoney(order.balance)}</span>
       </p>

@@ -7,7 +7,7 @@ interface MetricTileProps {
 }
 
 /** Un indicador de la ventana: el número grande y, debajo, de qué sale. */
-export default function MetricTile({ label, value, detail, warning = false }: MetricTileProps) {
+export function MetricTile({ label, value, detail, warning = false }: MetricTileProps) {
   return (
     <div
       className={`flex min-w-0 flex-col gap-1.5 rounded-xl bg-card px-4 py-4 ring-1 ${warning ? 'ring-warning' : 'ring-foreground/10'}`}

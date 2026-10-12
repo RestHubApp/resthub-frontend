@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { tableName, tablesQuery } from '../../../api/tables'
-import type { TableState } from '../../../api/types'
-import EmptyState from '../../../components/EmptyState'
-import FormDialog from '../../../components/FormDialog'
-import { Button } from '../../../components/ui/button'
-import { formatMoney } from '../../../services/format'
+import { tableName, tablesQuery } from '@/api/tables'
+import type { TableState } from '@/api/types'
+import { EmptyState } from '@/components/EmptyState'
+import { FormDialog } from '@/components/FormDialog'
+import { RetryQueryError } from '@/components/RetryQueryError'
+import { Button } from '@/components/ui/button'
+import { formatMoney } from '@/services/format'
 
 interface TablePickerDialogProps {
   readonly open: boolean
@@ -25,7 +26,7 @@ interface TablePickerDialogProps {
  * Sirve para mudar un pedido (mesas libres) y para unir otra mesa a esta
  * (mesas con pedido): lo que cambia es qué mesas se ofrecen.
  */
-export default function TablePickerDialog({
+export function TablePickerDialog({
   open,
   title,
   description,
@@ -35,37 +36,38 @@ export default function TablePickerDialog({
   onPick,
   onClose,
 }: TablePickerDialogProps) {
-  const mesas = useQuery({ ...tablesQuery(false), enabled: open })
-  const opciones = (mesas.data ?? []).filter(filter)
+  const tables = useQuery({ ...tablesQuery(false), enabled: open })
+  const options = (tables.data ?? []).filter(filter)
 
   return (
     <FormDialog
       open={open}
       title={title}
       description={description}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
           onClose()
         }
       }}
     >
-      {mesas.isSuccess && opciones.length === 0 ? <EmptyState title={empty} /> : null}
+      {tables.isError ? <RetryQueryError error={tables.error} fallback="No se pudieron cargar las mesas." onRetry={() => { void tables.refetch() }} /> : null}
+      {tables.isSuccess && options.length === 0 ? <EmptyState title={empty} /> : null}
       <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0 sm:grid-cols-3">
-        {opciones.map((mesa) => (
-          <li key={mesa.id}>
+        {options.map((table) => (
+          <li key={table.id}>
             <Button
               type="button"
               variant="outline"
               className="flex h-auto min-h-14 w-full flex-col gap-0.5 py-2"
               disabled={pending}
               onClick={() => {
-                onPick(mesa)
+                onPick(table)
               }}
             >
-              <span className="font-semibold">{tableName(mesa.label)}</span>
-              {mesa.active_order === null ? null : (
+              <span className="font-semibold">{tableName(table.label)}</span>
+              {table.active_order === null ? null : (
                 <span className="text-xs text-muted-foreground">
-                  #{mesa.active_order.number} · {formatMoney(mesa.active_order.total)}
+                  #{table.active_order.number} · {formatMoney(table.active_order.total)}
                 </span>
               )}
             </Button>

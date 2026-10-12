@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { menuQueryKey } from '../../api/menu'
-import type { MenuResponse } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { menuQueryKey } from '@/api/menu'
+import type { MenuResponse } from '@/api/types'
+import { errorMessage } from '@/services/apiError'
+import { useNotifications } from '@/store/notifications'
 import { MENU_KEY } from './useMenuData'
 
 interface MenuChange<TVars> {
@@ -30,15 +30,15 @@ export function useMenuChange<TVars>({ send, preview, failure }: MenuChange<TVar
     mutationFn: send,
     onMutate: async (vars: TVars) => {
       await queryClient.cancelQueries({ queryKey: MENU_KEY })
-      const previo = queryClient.getQueryData<MenuResponse>(MENU_KEY)
-      if (previo !== undefined) {
-        queryClient.setQueryData<MenuResponse>(MENU_KEY, preview(previo, vars))
+      const previous = queryClient.getQueryData<MenuResponse>(MENU_KEY)
+      if (previous !== undefined) {
+        queryClient.setQueryData<MenuResponse>(MENU_KEY, preview(previous, vars))
       }
-      return { previo }
+      return { previous }
     },
-    onError: (error, _vars, contexto) => {
-      if (contexto?.previo !== undefined) {
-        queryClient.setQueryData(MENU_KEY, contexto.previo)
+    onError: (error, _vars, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(MENU_KEY, context.previous)
       }
       push({ tone: 'warning', message: errorMessage(error, failure) })
     },

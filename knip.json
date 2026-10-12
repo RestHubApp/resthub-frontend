@@ -1,0 +1,36 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "src/**/*.test.{ts,tsx}",
+    "jest/**/*.{ts,cjs}",
+    "e2e/**/*.ts",
+    "src/api/contract/**/*.ts",
+    "checks/**/*.mjs",
+    "e2e/visual/capture.css"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "jest/**",
+    "e2e/**",
+    "scripts/**/*.ts"
+  ],
+  "ignore": [
+    "src/api/schema.d.ts"
+  ],
+  "ignoreDependencies": [
+    "@stryker-mutator/api",
+    "@fontsource-variable/geist",
+    "@fontsource-variable/atkinson-hyperlegible-next",
+    "@fontsource-variable/lexend",
+    "@cspell/dict-css",
+    "@cspell/dict-en_us",
+    "@cspell/dict-html",
+    "@cspell/dict-node",
+    "@cspell/dict-software-terms",
+    "@cspell/dict-typescript"
+  ],
+  "ignoreUnresolved": [
+    "\\./jest/nodeEnvironment\\.cjs"
+  ]
+}

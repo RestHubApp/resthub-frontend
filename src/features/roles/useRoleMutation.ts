@@ -1,17 +1,14 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-import { currentUserQueryKey } from '../../api/auth'
-import { rolesQuery, rolesQueryKey } from '../../api/roles'
-import { staffQueryKey } from '../../api/staff'
-import type { Role } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
-import { useSession } from '../../store/session'
+import { currentUserQueryKey } from '@/api/auth'
+import { rolesQuery, rolesQueryKey } from '@/api/roles'
+import { staffQueryKey } from '@/api/staff'
+import type { Role } from '@/api/types'
+import { staffOf, useSession } from '@/store/session'
+import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 
 interface RoleMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>
   /** El rol que cambia: si es el de quien mira, su menú cambia con él. */
-  readonly roleId?: number
+  readonly roleId?: number | undefined
   readonly failure: string
   readonly success: (result: TResult) => string
   /** Cómo quedan los roles con la respuesta del servidor, sin esperar a releerlos. */
@@ -39,27 +36,18 @@ export function useRoleMutation<TVariables, TResult>({
   onSuccess,
   inlineError = false,
 }: RoleMutationOptions<TVariables, TResult>) {
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-  const propioId = useSession((state) => state.account?.user.role_id)
+  const ownId = useSession((state) => staffOf(state.account)?.user.role_id)
+  const isOwnRole = roleId !== undefined && roleId === ownId
 
-  return useMutation({
+  return useNotifiedMutation({
     mutationFn,
-    onSuccess: (resultado) => {
-      queryClient.setQueryData(rolesQuery().queryKey, (roles) => roles && updateCache(roles, resultado))
-      void queryClient.invalidateQueries({ queryKey: rolesQueryKey })
-      void queryClient.invalidateQueries({ queryKey: staffQueryKey })
-      if (roleId !== undefined && roleId === propioId) {
-        void queryClient.invalidateQueries({ queryKey: currentUserQueryKey })
-      }
-      push({ tone: 'info', message: success(resultado) })
-      onSuccess?.()
+    success,
+    failure: inlineError ? undefined : failure,
+    updateCache: (queryClient, result) => {
+      queryClient.setQueryData(rolesQuery().queryKey, (roles) => roles && updateCache(roles, result))
     },
-    onError: (error) => {
-      void queryClient.invalidateQueries({ queryKey: rolesQueryKey })
-      if (!inlineError) {
-        push({ tone: 'warning', message: errorMessage(error, failure) })
-      }
-    },
+    invalidate: isOwnRole ? [rolesQueryKey, staffQueryKey, currentUserQueryKey] : [rolesQueryKey, staffQueryKey],
+    invalidateOnError: [rolesQueryKey],
+    ...(onSuccess === undefined ? {} : { onSuccess: () => { onSuccess() } }),
   })
 }

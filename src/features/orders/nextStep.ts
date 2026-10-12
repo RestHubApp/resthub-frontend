@@ -1,6 +1,7 @@
-import type { OrderStep } from '../../api/orders'
-import type { OrderResponse, OrderStatus, PermissionCode } from '../../api/types'
-import type { IconName } from '../../components/icons'
+import type { OrderStep } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
+import type { OrderResponse, OrderStatus, PermissionCode } from '@/api/types'
+import type { IconName } from '@/components/icons'
 import { STATUS_LABELS } from './orderLabels'
 
 /** Lo siguiente que se hace con un pedido en cada estado, y quien puede hacerlo. */
@@ -17,30 +18,30 @@ export interface NextStep {
 const STEPS: Partial<Record<OrderStatus, NextStep>> = {
   open: {
     label: 'Enviar a cocina',
-    icon: 'enviar',
+    icon: 'send',
     action: 'send',
-    permission: 'orders.take',
+    permission: PERMISSION.ordersTake,
     waiting: 'Abierto: falta enviarlo a cocina.',
   },
   in_kitchen: {
     label: 'Marcar listo',
-    icon: 'listo',
+    icon: 'ready',
     action: 'ready',
-    permission: 'orders.manage',
+    permission: PERMISSION.ordersManage,
     waiting: 'En cocina: esta pantalla avisa sola cuando esté listo.',
   },
   ready: {
     label: 'Marcar servido',
-    icon: 'servir',
+    icon: 'serve',
     action: 'served',
-    permission: 'orders.take',
+    permission: PERMISSION.ordersTake,
     waiting: 'Listo: falta servirlo.',
   },
   served: {
     label: 'Cobrar',
-    icon: 'pago',
+    icon: 'payment',
     action: 'charge',
-    permission: 'orders.charge',
+    permission: PERMISSION.ordersCharge,
     waiting: 'Servido, por cobrar: lo cobra quien lo atendió o el encargado.',
   },
 }

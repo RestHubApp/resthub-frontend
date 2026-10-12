@@ -1,69 +1,69 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
-import type { PermissionCode, PermissionInfo } from '../../api/types'
+import type { PermissionCode, PermissionInfo } from '@/api/types'
 import { groupPermissions, memberCountLabel, permissionSummary, togglePermission } from './permissionGroups'
 
-const PEDIDOS = 'Pedidos'
-const TOMAR: PermissionCode = 'orders.take'
-const COBRAR: PermissionCode = 'orders.charge'
-const CAJA: PermissionCode = 'cash.manage'
+const ORDERS = 'Pedidos'
+const TAKE: PermissionCode = 'orders.take'
+const CHARGE: PermissionCode = 'orders.charge'
+const CASH_REGISTER: PermissionCode = 'cash.manage'
 
-function permiso(code: PermissionCode, group: string): PermissionInfo {
+function permission(code: PermissionCode, group: string): PermissionInfo {
   return { code, label: code, group }
 }
 
-const CATALOGO: PermissionInfo[] = [
-  permiso(TOMAR, PEDIDOS),
-  permiso(COBRAR, PEDIDOS),
-  permiso(CAJA, 'Caja'),
-  permiso('menu.manage', 'Menú'),
-  permiso('tables.manage', 'Mesas'),
-  permiso('roles.manage', 'Administración'),
+const CATALOG: PermissionInfo[] = [
+  permission(TAKE, ORDERS),
+  permission(CHARGE, ORDERS),
+  permission(CASH_REGISTER, 'Caja'),
+  permission('menu.manage', 'Menú'),
+  permission('tables.manage', 'Mesas'),
+  permission('roles.manage', 'Administración'),
 ]
-const GRUPOS = groupPermissions(CATALOGO)
+const GROUPS = groupPermissions(CATALOG)
 
 describe('groupPermissions', () => {
   it('agrupa en el orden del catálogo', () => {
-    expect(GRUPOS.map((grupo) => grupo.name)).toEqual([PEDIDOS, 'Caja', 'Menú', 'Mesas', 'Administración'])
-    expect(GRUPOS[0]?.permissions.map((actual) => actual.code)).toEqual([TOMAR, COBRAR])
+    expect(GROUPS.map((group) => group.name)).toEqual([ORDERS, 'Caja', 'Menú', 'Mesas', 'Administración'])
+    expect(GROUPS[0]?.permissions.map((actual) => actual.code)).toEqual([TAKE, CHARGE])
   })
 
   it('junta un grupo aunque sus permisos no vengan seguidos', () => {
-    const grupos = groupPermissions([permiso(TOMAR, PEDIDOS), permiso(CAJA, 'Caja'), permiso(COBRAR, PEDIDOS)])
-    expect(grupos.map((grupo) => grupo.permissions.length)).toEqual([2, 1])
+    const groups = groupPermissions([permission(TAKE, ORDERS), permission(CASH_REGISTER, 'Caja'), permission(CHARGE, ORDERS)])
+    expect(groups.map((group) => group.permissions.length)).toEqual([2, 1])
   })
 })
 
 describe('togglePermission', () => {
   it('marca sin repetir y desmarca', () => {
-    expect(togglePermission([TOMAR], TOMAR, true)).toEqual([TOMAR])
-    expect(togglePermission([TOMAR], CAJA, true)).toEqual([TOMAR, CAJA])
-    expect(togglePermission([TOMAR, CAJA], TOMAR, false)).toEqual([CAJA])
+    expect(togglePermission([TAKE], TAKE, true)).toEqual([TAKE])
+    expect(togglePermission([TAKE], CASH_REGISTER, true)).toEqual([TAKE, CASH_REGISTER])
+    expect(togglePermission([TAKE, CASH_REGISTER], TAKE, false)).toEqual([CASH_REGISTER])
   })
 })
 
 describe('permissionSummary', () => {
   it('el encargado tiene todo', () => {
-    expect(permissionSummary({ kind: 'owner', permissions: [] }, GRUPOS)).toBe('Todos los permisos')
+    expect(permissionSummary({ kind: 'owner', permissions: [] }, GROUPS)).toBe('Todos los permisos')
   })
 
   it('cuenta los permisos y nombra sus grupos', () => {
-    expect(permissionSummary({ kind: 'waiter', permissions: [TOMAR] }, GRUPOS)).toBe('1 permiso · Pedidos')
-    expect(permissionSummary({ kind: 'custom', permissions: [TOMAR, COBRAR, CAJA] }, GRUPOS)).toBe(
+    expect(permissionSummary({ kind: 'waiter', permissions: [TAKE] }, GROUPS)).toBe('1 permiso · Pedidos')
+    expect(permissionSummary({ kind: 'custom', permissions: [TAKE, CHARGE, CASH_REGISTER] }, GROUPS)).toBe(
       '3 permisos · Pedidos y Caja',
     )
   })
 
   it('con muchos grupos nombra tres y cuenta el resto', () => {
-    const todos = CATALOGO.map((actual) => actual.code)
-    expect(permissionSummary({ kind: 'custom', permissions: todos }, GRUPOS)).toBe(
+    const all = CATALOG.map((actual) => actual.code)
+    expect(permissionSummary({ kind: 'custom', permissions: all }, GROUPS)).toBe(
       '6 permisos · Pedidos, Caja, Menú y 2 más',
     )
   })
 
   it('sin permisos o sin catálogo', () => {
-    expect(permissionSummary({ kind: 'custom', permissions: [] }, GRUPOS)).toBe('Sin permisos')
-    expect(permissionSummary({ kind: 'custom', permissions: [CAJA] }, [])).toBe('1 permiso')
+    expect(permissionSummary({ kind: 'custom', permissions: [] }, GROUPS)).toBe('Sin permisos')
+    expect(permissionSummary({ kind: 'custom', permissions: [CASH_REGISTER] }, [])).toBe('1 permiso')
   })
 })
 

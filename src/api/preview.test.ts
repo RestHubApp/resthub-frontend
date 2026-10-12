@@ -1,62 +1,71 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it } from '@jest/globals'
 
-const { get, post } = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }))
+import { answerAll, type Sent } from '#jest/answerAll'
 
-vi.mock('../services/api', () => ({ api: { get, post }, debeReintentar: () => false }))
+import { QueryClient } from '@tanstack/react-query'
 
-const { exchangePreviewCode, sessionOf } = await import('./auth')
-const { platformMutationKeys, platformSandboxQuery, resetPlatformSandbox, startPlatformPreview } = await import('./platform')
-const { PLATFORM_QUERY_ROOT } = await import('../services/queryClient')
+import { PLATFORM_QUERY_ROOT } from '@/services/queryClient'
+import { setAuthToken } from '@/services/apiCredentials'
+import { exchangePreviewCode, sessionOf } from './auth'
+import { platformMutationKeys, platformSandboxQuery, resetPlatformSandbox, startPlatformPreview } from './platform'
 
-beforeEach(() => {
-  get.mockReset()
-  post.mockReset()
+const sent: Sent[] = []
+
+// Responde sin red con ese cuerpo y anota lo que salió.
+function respondWith(body: unknown): void {
+  answerAll(200, body, sent)
+}
+
+afterEach(() => {
+  sent.length = 0
+  setAuthToken(null)
 })
 
 describe('API de la vista previa', () => {
   it('lee el local de muestra bajo la raíz de plataforma', async () => {
-    const muestra = { restaurant: null, accounts: [] }
-    get.mockResolvedValue({ data: muestra })
+    const sample = { restaurant: null, accounts: [] }
+    respondWith(sample)
 
-    const queryFn = platformSandboxQuery.queryFn as () => Promise<unknown>
-    await expect(queryFn()).resolves.toBe(muestra)
-    expect(get).toHaveBeenCalledWith('/platform/sandbox')
+    await expect(new QueryClient().query(platformSandboxQuery)).resolves.toEqual(sample)
+    expect(sent).toMatchObject([{ method: 'GET', path: '/api/v1/platform/sandbox' }])
     expect(platformSandboxQuery.queryKey[0]).toBe(PLATFORM_QUERY_ROOT)
   })
 
   it('reinicia el local de muestra con POST sin cuerpo', async () => {
-    post.mockResolvedValue({ data: { restaurant: null, accounts: [] } })
+    respondWith({ restaurant: null, accounts: [] })
     await resetPlatformSandbox()
-    expect(post).toHaveBeenCalledWith('/platform/sandbox/reset')
+    expect(sent).toMatchObject([{ method: 'POST', path: '/api/v1/platform/sandbox/reset', body: '', authorization: null }])
   })
 
   it('pide el código diciendo como quién se entra', async () => {
-    post.mockResolvedValue({ data: { code: 'abc', expires_in: 60 } })
+    respondWith({ code: 'abc', expires_in: 60 })
     await expect(startPlatformPreview({ as: 'waiter' })).resolves.toEqual({ code: 'abc', expires_in: 60 })
-    expect(post).toHaveBeenCalledWith('/platform/preview', { as: 'waiter' })
+    expect(sent).toMatchObject([{ method: 'POST', path: '/api/v1/platform/preview', body: '{"as":"waiter"}' }])
   })
 
-  it('las mutaciones de plataforma salen del caché con la sesión de plataforma', () => {
+  it('las mutaciones de plataforma llevan la raíz de plataforma', () => {
     expect(platformMutationKeys.startPreview[0]).toBe(PLATFORM_QUERY_ROOT)
     expect(platformMutationKeys.resetSandbox[0]).toBe(PLATFORM_QUERY_ROOT)
   })
 
   it('canjea el código en la ruta de restaurante, sin credencial', async () => {
-    post.mockResolvedValue({ data: {} })
+    setAuthToken('sesion-abierta')
+    respondWith({})
     await exchangePreviewCode({ code: 'abc' })
-    expect(post).toHaveBeenCalledWith('/auth/preview', { code: 'abc' }, { withoutCredential: true })
+    expect(sent).toMatchObject([{ method: 'POST', path: '/api/v1/auth/preview', body: '{"code":"abc"}', authorization: null }])
   })
 
   it('la sesión conserva la marca de vista previa', () => {
-    const respuesta = {
+    const response = {
       access_token: 't',
       expires_in: 1800,
       token_type: 'bearer',
+      kind: 'staff',
       user: { id: 1 },
       restaurant: { id: 2 },
       permissions: [],
       preview: true,
     } as unknown as Parameters<typeof sessionOf>[0]
-    expect(sessionOf(respuesta)).toEqual({ user: { id: 1 }, restaurant: { id: 2 }, permissions: [], preview: true })
+    expect(sessionOf(response)).toEqual({ kind: 'staff', user: { id: 1 }, restaurant: { id: 2 }, permissions: [], preview: true })
   })
 })

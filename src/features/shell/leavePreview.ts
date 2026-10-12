@@ -1,8 +1,9 @@
-import { closeTabOrGo } from '../../services/leaveTab'
-import { useSession } from '../../store/session'
+import { closeTabOrGo } from '@/services/leaveTab'
+import { paths } from '@/services/paths'
+import { useSession } from '@/store/session'
 
 /** Adónde vuelve la pestaña si el navegador no la deja cerrar. */
-const VUELTA = '/plataforma/vista-previa'
+const ROUND = paths.platform.preview
 
 /**
  * Sale de la vista previa: borra su sesión y su cola entera (`exitPreview`) y
@@ -14,5 +15,5 @@ const VUELTA = '/plataforma/vista-previa'
  */
 export function leavePreview(): void {
   useSession.getState().exitPreview()
-  closeTabOrGo(VUELTA)
+  closeTabOrGo(ROUND)
 }

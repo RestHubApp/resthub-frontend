@@ -1,6 +1,6 @@
-import Icon from '../../../components/Icon'
-import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
+import { Icon } from '@/components/Icon'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface SearchBoxProps {
   readonly value: string
@@ -8,14 +8,14 @@ interface SearchBoxProps {
 }
 
 /** La busqueda rapida de platos. La etiqueta se oye aunque no se vea. */
-export default function SearchBox({ value, onChange }: SearchBoxProps) {
+export function SearchBox({ value, onChange }: SearchBoxProps) {
   return (
     <div className="relative">
       <Label htmlFor="buscar-plato" className="sr-only">
         Buscar plato
       </Label>
       <Icon
-        name="buscar"
+        name="search"
         size={18}
         className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted-foreground"
       />

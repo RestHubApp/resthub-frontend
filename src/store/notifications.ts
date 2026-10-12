@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export interface Toast {
+interface Toast {
   readonly id: string
   readonly tone: 'info' | 'warning'
   readonly message: string

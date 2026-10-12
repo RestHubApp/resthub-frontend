@@ -1,7 +1,8 @@
-import { salesSummaryQuery } from '../../api/insights'
-import { todayIn } from '../../services/format'
-import { prefetch } from '../../services/queryClient'
-import { can, currentTimeZone } from '../../store/session'
+import { salesSummaryQuery } from '@/api/insights'
+import { PERMISSION } from '@/api/permissions'
+import { todayIn } from '@/services/format'
+import { prefetch } from '@/services/queryClient'
+import { can, currentTimeZone } from '@/store/session'
 import { DEFAULT_PRESET, presetRange } from './dateRange'
 
 /**
@@ -11,7 +12,7 @@ import { DEFAULT_PRESET, presetRange } from './dateRange'
  * adelanta el caso de todos los días, entrar desde el menú.
  */
 export function prefetchInsights(): void {
-  if (!can('insights.read')) {
+  if (!can(PERMISSION.insightsRead)) {
     return
   }
   prefetch(salesSummaryQuery(presetRange(DEFAULT_PRESET, todayIn(currentTimeZone()))))

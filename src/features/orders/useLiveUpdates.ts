@@ -1,44 +1,20 @@
-import { type QueryClient, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-import { currentUserQueryKey } from '../../api/auth'
-import { cashQueryKey } from '../../api/cash'
-import { orderNotesQueryKey } from '../../api/insights'
-import { ordersQueryKey } from '../../api/orders'
-import { tablesQueryKey } from '../../api/tables'
-import { api } from '../../services/api'
-import { EventStreamError, readEventStream } from '../../services/eventStream'
-import { logger } from '../../services/logger'
-import { useSession } from '../../store/session'
+import { isSessionCode } from '@/services/apiError'
+import { apiUrl } from '@/services/apiRouting'
+import { EventStreamError, readEventStream } from '@/services/eventStream'
+import { logger } from '@/services/logger'
+import { useSession } from '@/store/session'
+import { createLiveEventHandler } from './liveEvents'
 
 /** `connecting` al abrir, `live` con el canal activo, `offline` mientras reintenta. */
 export type LiveStatus = 'connecting' | 'live' | 'offline'
 
 // El mismo plazo que anuncia el servidor en el aviso `ready`.
 const RETRY_MS = 3000
-const UNAUTHORIZED = 401
-const MENU_KEY = ['menu'] as const
-
-// Un aviso dice que cambio, nunca los datos: se invalidan las consultas y
-// TanStack Query vuelve a pedir solo las que estan en pantalla.
-const KEYS_BY_TOPIC: Readonly<Record<string, readonly (readonly unknown[])[]>> = {
-  orders: [ordersQueryKey, tablesQueryKey, cashQueryKey],
-  // Se abrió o se cerró la caja: el cobro sabe si puede cobrar.
-  cash: [cashQueryKey],
-  menu: [MENU_KEY],
-  permissions: [currentUserQueryKey],
-  // Solo llega al encargado: se clasificaron las notas de un pedido.
-  insights: [orderNotesQueryKey],
-}
-const EVERYTHING = [ordersQueryKey, tablesQueryKey, MENU_KEY, orderNotesQueryKey, cashQueryKey] as const
 
 const liveLogger = logger.child({ module: 'realtime' })
-
-function invalidate(queryClient: QueryClient, keys: readonly (readonly unknown[])[]): void {
-  for (const queryKey of keys) {
-    void queryClient.invalidateQueries({ queryKey })
-  }
-}
 
 /**
  * Mantiene en vivo los pedidos, las mesas y la carta mientras la pantalla esta abierta.
@@ -53,33 +29,22 @@ export function useLiveUpdates(): LiveStatus {
   const [status, setStatus] = useState<LiveStatus>('connecting')
 
   useEffect(() => {
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- compara con null, no con un secreto: el cliente no verifica credenciales
     if (token === null) {
       return undefined
     }
     const controller = new AbortController()
-    const retry: { timer: number | undefined; connected: boolean } = {
-      timer: undefined,
-      connected: false,
-    }
-
-    const onEvent = (event: { type: string }) => {
-      if (event.type === 'ready') {
-        setStatus('live')
-        if (retry.connected) {
-          invalidate(queryClient, EVERYTHING)
-        }
-        retry.connected = true
-        return
-      }
-      invalidate(queryClient, KEYS_BY_TOPIC[event.type] ?? [])
-    }
+    const retry: { timer: number | undefined } = { timer: undefined }
+    const onEvent = createLiveEventHandler(queryClient, () => {
+      setStatus('live')
+    })
 
     const scheduleRetry = (error?: unknown) => {
       if (controller.signal.aborted) {
         return
       }
       setStatus('offline')
-      if (error instanceof EventStreamError && error.status === UNAUTHORIZED) {
+      if (error instanceof EventStreamError && isSessionCode(error.code)) {
         return
       }
       liveLogger.warn({ err: error }, 'realtime.disconnected')
@@ -88,7 +53,7 @@ export function useLiveUpdates(): LiveStatus {
 
     function connect(): void {
       readEventStream({
-        url: `${api.defaults.baseURL ?? ''}/events`,
+        url: apiUrl('/events'),
         token: token ?? '',
         signal: controller.signal,
         onEvent,

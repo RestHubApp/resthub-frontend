@@ -1,8 +1,8 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import type { Role } from '../../api/types'
-import ReadOnlyField from '../../components/ReadOnlyField'
-import TextField from '../../components/TextField'
+import type { Role } from '@/api/types'
+import { ReadOnlyField } from '@/components/ReadOnlyField'
+import { TextField } from '@/components/TextField'
 import { MAX_ROLE_NAME } from './roleSchema'
 
 interface RoleNameFieldProps {
@@ -10,11 +10,11 @@ interface RoleNameFieldProps {
   readonly role: Role | null
   readonly readOnly: boolean
   readonly field: UseFormRegisterReturn
-  readonly error?: string
+  readonly error?: string | undefined
 }
 
 /** El nombre del rol; el del mesero y el de un rol que solo se mira no se escriben. */
-export default function RoleNameField({ role, readOnly, field, error }: RoleNameFieldProps) {
+export function RoleNameField({ role, readOnly, field, error }: RoleNameFieldProps) {
   if (role !== null && readOnly) {
     return <ReadOnlyField label="Nombre" value={role.name} hint="Este rol no se puede cambiar." />
   }

@@ -1,15 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '../../api/restaurant'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
-import { errorMessage } from '../../services/api'
-import { formatPercent } from '../../services/format'
-import { useNotifications } from '../../store/notifications'
+import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '@/api/restaurant'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { formatPercent } from '@/services/format'
+import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 
-const PORCENTAJE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
+const PERCENTAGE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
 
 /**
  * Hasta cuánto puede descontar un mesero sin llamar al encargado.
@@ -17,34 +17,32 @@ const PORCENTAJE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
  * Es una regla del local, no de un turno: vale hasta que el encargado la
  * cambie. Por encima del tope, y las cortesías, solo el encargado.
  */
-export default function DiscountLimitForm() {
-  const restaurante = useQuery(restaurantQuery)
-  const [valor, setValor] = useState<string | null>(null)
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-  const guardar = useMutation({
+export function DiscountLimitForm() {
+  const restaurant = useQuery(restaurantQuery)
+  const [value, setValue] = useState<string | null>(null)
+  const save = useNotifiedMutation({
     mutationFn: (percent: string) => updateRestaurant({ max_waiter_discount_percent: percent }),
-    onSuccess: (actualizado) => {
-      queryClient.setQueryData(restaurantQueryKey, actualizado)
-      setValor(null)
-      push({ tone: 'info', message: `El mesero descuenta hasta ${formatPercent(actualizado.max_waiter_discount_percent)}.` })
+    success: (updated) => `El mesero descuenta hasta ${formatPercent(updated.max_waiter_discount_percent)}.`,
+    failure: 'No se pudo guardar el tope.',
+    updateCache: (queryClient, updated) => {
+      queryClient.setQueryData(restaurantQueryKey, updated)
     },
-    onError: (error) => {
-      push({ tone: 'warning', message: errorMessage(error, 'No se pudo guardar el tope.') })
+    onSuccess: () => {
+      setValue(null)
     },
   })
-  const actual = restaurante.data?.max_waiter_discount_percent ?? ''
-  const escrito = valor ?? actual
-  const valido = PORCENTAJE.test(escrito.trim())
+  const actual = restaurant.data?.max_waiter_discount_percent ?? ''
+  const written = value ?? actual
+  const isValid = PERCENTAGE.test(written.trim())
 
   return (
     <form
       noValidate
       className="flex flex-wrap items-end gap-3"
-      onSubmit={(evento) => {
-        evento.preventDefault()
-        if (valido) {
-          guardar.mutate(escrito.trim().replace(',', '.'))
+      onSubmit={(event) => {
+        event.preventDefault()
+        if (isValid) {
+          save.mutate(written.trim().replace(',', '.'))
         }
       }}
     >
@@ -54,15 +52,15 @@ export default function DiscountLimitForm() {
           id="tope-descuento"
           inputMode="decimal"
           className="w-32"
-          value={escrito}
-          aria-invalid={!valido}
-          onChange={(evento) => {
-            setValor(evento.target.value)
+          value={written}
+          aria-invalid={!isValid}
+          onChange={(event) => {
+            setValue(event.target.value)
           }}
         />
       </div>
-      <Button type="submit" variant="outline" disabled={!valido || valor === null || guardar.isPending}>
-        {guardar.isPending ? 'Guardando…' : 'Guardar tope'}
+      <Button type="submit" variant="outline" disabled={!isValid || value === null || save.isPending}>
+        {save.isPending ? 'Guardando…' : 'Guardar tope'}
       </Button>
     </form>
   )

@@ -1,33 +1,29 @@
 import type { ReactElement } from 'react'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
-import FormMessage from '../../components/FormMessage'
-import ListSkeleton from '../../components/ListSkeleton'
-import { errorMessage } from '../../services/api'
+import { ListSkeleton } from '@/components/ListSkeleton'
 
-interface ReportStateProps<T> {
+/** Mientras carga: una silueta propia o, por defecto, un bloque del alto de un gráfico con su aviso. */
+type ReportLoading = { readonly skeleton: ReactElement } | { readonly loadingLabel: string }
+
+type ReportStateProps<T> = ReportLoading & {
   readonly data: T | undefined
   readonly error: unknown
   readonly errorText: string
   readonly children: (data: T) => ReactElement
-  /** La silueta mientras carga. Por defecto, un bloque del alto de un gráfico. */
-  readonly skeleton?: ReactElement
 }
 
-const BLOQUE = <ListSkeleton label="Cargando…" count={1} itemClassName="h-48 rounded-xl" />
-
 /** Carga, error o el contenido de un reporte, igual en cada sección. */
-export default function ReportState<T>({
-  data,
-  error,
-  errorText,
-  children,
-  skeleton = BLOQUE,
-}: ReportStateProps<T>): ReactElement {
+export function ReportState<T>(props: ReportStateProps<T>): ReactElement {
+  const { data, error, errorText, children } = props
   if (data !== undefined) {
     return children(data)
   }
   if (error !== null && error !== undefined) {
-    return <FormMessage tone="error">{errorMessage(error, errorText)}</FormMessage>
+    return <ErrorMessage error={error} fallback={errorText} />
   }
-  return skeleton
+  if ('skeleton' in props) {
+    return props.skeleton
+  }
+  return <ListSkeleton label={props.loadingLabel} count={1} itemClassName="h-48 rounded-xl" />
 }

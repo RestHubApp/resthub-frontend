@@ -1,4 +1,4 @@
-import type { MenuCategory, MenuItem, MenuResponse, MenuSection } from '../../api/types'
+import type { MenuCategory, MenuItem, MenuResponse, MenuSection } from '@/api/types'
 import { sortByIds } from './menuOrder'
 
 // Cambios sobre la carta guardada en caché, para que la pantalla responda al
@@ -11,9 +11,9 @@ export function patchItem(
   patch: Partial<MenuItem>,
 ): MenuResponse {
   return {
-    categories: menu.categories.map((categoria) => ({
-      ...categoria,
-      items: categoria.items.map((plato) => (plato.id === itemId ? { ...plato, ...patch } : plato)),
+    categories: menu.categories.map((category) => ({
+      ...category,
+      items: category.items.map((dish) => (dish.id === itemId ? { ...dish, ...patch } : dish)),
     })),
   }
 }
@@ -28,41 +28,41 @@ export function withItemOrder(
   ids: readonly number[],
 ): MenuResponse {
   return {
-    categories: menu.categories.map((categoria) =>
-      categoria.id === categoryId
-        ? { ...categoria, items: sortByIds(categoria.items, ids) }
-        : categoria,
+    categories: menu.categories.map((category) =>
+      category.id === categoryId
+        ? { ...category, items: sortByIds(category.items, ids) }
+        : category,
     ),
   }
 }
 
-function conPlato(categoria: MenuSection, plato: MenuItem): MenuSection {
-  const estaba = categoria.items.some((actual) => actual.id === plato.id)
-  if (categoria.id !== plato.category_id) {
-    return estaba ? { ...categoria, items: categoria.items.filter((actual) => actual.id !== plato.id) } : categoria
+function withDish(category: MenuSection, dish: MenuItem): MenuSection {
+  const was = category.items.some((actual) => actual.id === dish.id)
+  if (category.id !== dish.category_id) {
+    return was ? { ...category, items: category.items.filter((actual) => actual.id !== dish.id) } : category
   }
-  if (estaba) {
-    return { ...categoria, items: categoria.items.map((actual) => (actual.id === plato.id ? plato : actual)) }
+  if (was) {
+    return { ...category, items: category.items.map((actual) => (actual.id === dish.id ? dish : actual)) }
   }
   // Un plato nuevo, o que llega de otra categoría, queda al final de la suya.
-  return { ...categoria, items: [...categoria.items, plato] }
+  return { ...category, items: [...category.items, dish] }
 }
 
 /** La carta con un plato creado o editado, tal como lo devolvió el servidor. */
 export function withItem(menu: MenuResponse, item: MenuItem): MenuResponse {
-  return { categories: menu.categories.map((categoria) => conPlato(categoria, item)) }
+  return { categories: menu.categories.map((category) => withDish(category, item)) }
 }
 
 /** La carta con una categoría creada (al final y sin platos) o renombrada. */
 export function withCategory(menu: MenuResponse, category: MenuCategory): MenuResponse {
-  const estaba = menu.categories.some((actual) => actual.id === category.id)
+  const was = menu.categories.some((actual) => actual.id === category.id)
   return {
-    categories: estaba
+    categories: was
       ? menu.categories.map((actual) => (actual.id === category.id ? { ...actual, ...category } : actual))
       : [...menu.categories, { ...category, items: [] }],
   }
 }
 
 export function withoutCategory(menu: MenuResponse, categoryId: number): MenuResponse {
-  return { categories: menu.categories.filter((categoria) => categoria.id !== categoryId) }
+  return { categories: menu.categories.filter((category) => category.id !== categoryId) }
 }

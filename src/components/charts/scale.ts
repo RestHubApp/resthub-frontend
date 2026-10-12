@@ -4,10 +4,10 @@ const NICE_STEPS = [1, 2, 2.5, 5, 10] as const
 
 /** Un paso redondo (1, 2, 2.5, 5 × 10ⁿ) que parte `max` en unas `count` marcas. */
 function niceStep(max: number, count: number): number {
-  const crudo = max / count
-  const magnitud = 10 ** Math.floor(Math.log10(crudo))
-  const paso = NICE_STEPS.find((candidato) => candidato * magnitud >= crudo) ?? 10
-  return paso * magnitud
+  const raw = max / count
+  const magnitude = 10 ** Math.floor(Math.log10(raw))
+  const step = NICE_STEPS.find((candidate) => candidate * magnitude >= raw) ?? 10
+  return step * magnitude
 }
 
 /** Marcas del eje desde cero hasta un tope redondo que cubre `max`. */
@@ -15,26 +15,37 @@ export function niceTicks(max: number, count = 4): number[] {
   if (max <= 0) {
     return [0, 1]
   }
-  const paso = niceStep(max, count)
-  const tope = Math.ceil(max / paso) * paso
-  const marcas: number[] = []
-  for (let valor = 0; valor <= tope + paso / 2; valor += paso) {
-    marcas.push(Math.round(valor * 100) / 100)
+  const step = niceStep(max, count)
+  const cap = Math.ceil(max / step) * step
+  const marks: number[] = []
+  for (let value = 0; value <= cap + step / 2; value += step) {
+    marks.push(Math.round(value * 100) / 100)
   }
-  return marcas
+  return marks
 }
 
 /** Índices repartidos a lo largo de una serie para rotular el eje sin amontonar. */
-export function spreadIndices(length: number, maxLabels: number): number[] {
+export function spreadIndexes(length: number, maxLabels: number): number[] {
   if (length <= maxLabels) {
-    return Array.from({ length }, (_, indice) => indice)
+    return Array.from({ length }, (_, index) => index)
   }
-  const paso = (length - 1) / (maxLabels - 1)
-  return Array.from({ length: maxLabels }, (_, indice) => Math.round(indice * paso))
+  const step = (length - 1) / (maxLabels - 1)
+  return Array.from({ length: maxLabels }, (_, index) => Math.round(index * step))
+}
+
+interface NearestIndexOptions {
+  /** Posición horizontal del puntero dentro del gráfico. */
+  readonly x: number
+  /** Donde empieza el área de trazado. */
+  readonly left: number
+  /** Distancia horizontal entre dos puntos. */
+  readonly step: number
+  /** Cantidad de puntos de la serie. */
+  readonly length: number
 }
 
 /** El índice del punto más cercano a una posición horizontal. */
-export function nearestIndex(x: number, left: number, step: number, length: number): number {
+export function nearestIndex({ x, left, step, length }: NearestIndexOptions): number {
   if (length <= 1 || step <= 0) {
     return 0
   }

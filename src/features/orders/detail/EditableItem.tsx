@@ -1,21 +1,16 @@
-import { useState } from 'react'
-
-import { changeOrderItem, removeOrderItem } from '../../../api/orders'
-import type { ChangeItemRequest, OrderItemResponse } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import type { OrderNoteFlag } from '../../../hooks/useOrderNoteFlags'
-import { Button } from '../../../components/ui/button'
-import ItemNote from '../ItemNote'
-import QuantityStepper from '../QuantityStepper'
-import { MAX_QUANTITY } from '../taking/useOrderDraft'
-import { useOrderAction } from '../useOrderAction'
-import ItemNoteDialog from './ItemNoteDialog'
-import { formatMoney } from '../../../services/format'
+import type { OrderItemResponse } from '@/api/types'
+import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
+import { ItemNote } from '@/features/orders/ItemNote'
+import { QuantityStepper } from '@/features/orders/QuantityStepper'
+import { MAX_QUANTITY } from '@/features/orders/quantityLimit'
+import { formatMoney } from '@/services/format'
+import { ItemNoteEditor } from './ItemNoteEditor'
+import { useEditableItem } from './useEditableItem'
 
 interface EditableItemProps {
   readonly orderId: number
   readonly item: OrderItemResponse
-  readonly flag?: OrderNoteFlag
+  readonly flag?: OrderNoteFlag | undefined
 }
 
 /**
@@ -24,20 +19,8 @@ interface EditableItemProps {
  * Solo mientras el pedido no llego a cocina; despues, cambiar un plato es algo
  * que se habla con la cocina y el servidor lo rechaza.
  */
-export default function EditableItem({ orderId, item, flag }: EditableItemProps) {
-  const [editando, setEditando] = useState(false)
-  const cambio = useOrderAction({
-    mutationFn: (payload: ChangeItemRequest) => changeOrderItem(orderId, item.id, payload),
-    failure: 'No se pudo cambiar el plato.',
-    onSuccess: () => {
-      setEditando(false)
-    },
-  })
-  const quitar = useOrderAction({
-    mutationFn: () => removeOrderItem(orderId, item.id),
-    success: () => `${item.name} quitado del pedido.`,
-    failure: 'No se pudo quitar el plato.',
-  })
+export function EditableItem({ orderId, item, flag }: EditableItemProps) {
+  const { isEditing, setIsEditing, change, remove } = useEditableItem(orderId, item)
 
   return (
     <li className="flex flex-col gap-2 border-b pb-3 last:border-b-0">
@@ -50,31 +33,24 @@ export default function EditableItem({ orderId, item, flag }: EditableItemProps)
           name={item.name}
           quantity={item.quantity}
           max={MAX_QUANTITY}
-          disabled={cambio.isPending || quitar.isPending}
-          onChange={(cantidad) => {
-            if (cantidad <= 0) {
-              quitar.mutate()
+          disabled={change.isPending || remove.isPending}
+          onChange={(quantity) => {
+            if (quantity <= 0) {
+              remove.mutate()
               return
             }
-            cambio.mutate({ quantity: cantidad })
+            change.mutate({ quantity })
           }}
         />
       </div>
       <ItemNote note={item.notes} flag={flag} />
-      <Button type="button" variant="ghost" className="h-11 w-fit px-3" onClick={() => {
-        setEditando(true)
-      }}>
-        <Icon name="nota" size={16} />
-        <span>{item.notes === '' ? 'Agregar nota' : 'Cambiar nota'}</span>
-      </Button>
-      <ItemNoteDialog
-        open={editando}
-        onOpenChange={setEditando}
-        dish={item.name}
-        notes={item.notes}
-        pending={cambio.isPending}
+      <ItemNoteEditor
+        item={item}
+        isEditing={isEditing}
+        isPending={change.isPending}
+        onEditingChange={setIsEditing}
         onSave={(notes) => {
-          cambio.mutate({ notes })
+          change.mutate({ notes })
         }}
       />
     </li>

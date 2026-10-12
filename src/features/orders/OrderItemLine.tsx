@@ -1,18 +1,18 @@
-import type { OrderItemResponse } from '../../api/types'
-import type { OrderNoteFlag } from '../../hooks/useOrderNoteFlags'
-import ItemNote from './ItemNote'
-import { formatMoney } from '../../services/format'
+import type { OrderItemResponse } from '@/api/types'
+import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
+import { ItemNote } from './ItemNote'
+import { formatMoney } from '@/services/format'
 
 interface OrderItemLineProps {
   readonly item: OrderItemResponse
   /** La cocina no necesita precios; el mesero y la caja, si. */
   readonly showPrice?: boolean
   /** La lectura de su nota, para marcar una alergia. */
-  readonly flag?: OrderNoteFlag
+  readonly flag?: OrderNoteFlag | undefined
 }
 
 /** "2 × Lomo saltado", con su nota resaltada debajo. */
-export default function OrderItemLine({ item, showPrice = false, flag }: OrderItemLineProps) {
+export function OrderItemLine({ item, showPrice = false, flag }: OrderItemLineProps) {
   return (
     <li className="flex flex-col">
       <div className="flex items-baseline gap-2">

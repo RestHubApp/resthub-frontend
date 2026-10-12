@@ -8,14 +8,53 @@ allowBuilds:
   # importaciones sin extensión. Sin su compilación, los límites de arquitectura
   # no resuelven módulos y las reglas quedan inertes.
   unrs-resolver: true
+  # Observador de archivos de jest-haste-map: trae binarios precompilados y
+  # solo lo usa `jest --watch`. Su script de compilación no hace falta.
+  '@parcel/watcher': false
+  # Pact (pruebas de contrato): el binario nativo llega precompilado en
+  # @pact-foundation/pact-core-linux-x64-glibc y su script `install` está vacío.
+  # @scarf/scarf solo envía estadísticas de instalación.
+  '@pact-foundation/pact-core': false
+  '@scarf/scarf': false
+  # msw: su postinstall solo copia el worker del navegador (mockServiceWorker.js);
+  # las pruebas usan msw/node y no lo necesitan.
+  msw: false
 
 minimumReleaseAgeExclude:
   - '@types/node@22.20.2 || 24.13.4'
   - '@types/react-dom@19.3.0'
   - '@types/react@19.3.0'
   - lint-staged@17.5.1
+  - proxy-addr@2.0.8
   - react-dom@19.3.0
   - react@19.3.0
   - scheduler@0.28.0
+  - source-map-js@1.2.2
   - vite@8.3.0
   - zod@4.6.1
+
+# Avisos de seguridad en dependencias transitivas de las herramientas de
+# desarrollo (eslint, jest, workbox, pact, postcss), que no llegan al navegador.
+overrides:
+  # GHSA-qhr7-859c-m2p7 y el de parseCommaParts: cada rama mayor a su versión corregida.
+  brace-expansion@<1.1.20: 1.1.20
+  brace-expansion@>=2.0.0 <2.1.6: 2.1.6
+  brace-expansion@>=4.0.0 <5.0.11: 5.0.11
+  # GHSA-jqcg-44mw-7w3h (crítico): proxy-addr de express, en el servidor falso de
+  # Pact y en el SDK de MCP que trae la CLI de shadcn.
+  proxy-addr@>=1.1.0 <2.0.8: 2.0.8
+  # GHSA-68fv-2mgg-jv7q (alto): source-map-js de postcss, solo al compilar.
+  source-map-js@>=1.0.0 <1.2.2: 1.2.2
+  # GHSA-8r5x-fm3f-whwj y el de la propiedad propia (críticos): handlebars de
+  # eslint-plugin-boundaries, solo al correr el lint.
+  handlebars@>=4.0.0 <4.7.10: 4.7.10
+  # OAuth del SDK de MCP (alto): lo trae la CLI de shadcn, que no corre en la app.
+  '@modelcontextprotocol/sdk@<1.31.0': 1.31.0
+
+auditConfig:
+  ignoreGhsas:
+    # braces <=3.0.3 todavía no tiene versión corregida. Solo lo usan micromatch
+    # y fast-glob dentro de eslint-plugin-boundaries, eslint-plugin-check-file y
+    # la CLI de shadcn, sobre patrones del propio repositorio. Quitar en cuanto
+    # salga la corrección.
+    - GHSA-vfj7-8cjw-p6xm

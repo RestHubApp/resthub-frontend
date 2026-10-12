@@ -1,6 +1,6 @@
-import type { ObsSummary } from '../../../api/types'
-import { formatInteger, formatMilliseconds } from '../../../services/format'
-import MetricTile from './MetricTile'
+import type { ObsSummary } from '@/api/types'
+import { formatInteger, formatMilliseconds } from '@/services/format'
+import { MetricTile } from './MetricTile'
 import { formatErrorRate } from './obsLabels'
 
 function locales(count: number): string {
@@ -8,7 +8,7 @@ function locales(count: number): string {
 }
 
 /** Peticiones, tasa de error, p95, p99, tiempo de base y, si hubo, eventos perdidos. */
-export default function SummaryTiles({ summary }: { readonly summary: ObsSummary }) {
+export function SummaryTiles({ summary }: { readonly summary: ObsSummary }) {
   return (
     <div className={`grid grid-cols-2 gap-3 md:grid-cols-3 ${summary.dropped_events > 0 ? 'lg:grid-cols-6' : 'lg:grid-cols-5'}`}>
       <MetricTile label="Peticiones" value={formatInteger(summary.requests)} detail={locales(summary.active_restaurants)} />

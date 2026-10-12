@@ -11,17 +11,17 @@ export function useElementWidth<T extends HTMLElement>(): [RefObject<T | null>, 
   const [width, setWidth] = useState(0)
 
   useLayoutEffect(() => {
-    const elemento = ref.current
-    if (elemento === null) {
+    const element = ref.current
+    if (element === null) {
       return undefined
     }
-    setWidth(elemento.getBoundingClientRect().width)
-    const observer = new ResizeObserver((entradas) => {
-      for (const entrada of entradas) {
-        setWidth(entrada.contentRect.width)
+    setWidth(element.getBoundingClientRect().width)
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setWidth(entry.contentRect.width)
       }
     })
-    observer.observe(elemento)
+    observer.observe(element)
     return () => {
       observer.disconnect()
     }

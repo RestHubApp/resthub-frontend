@@ -1,8 +1,10 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef } from 'react'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 
-import { classifyOrderNotes, fetchOrderNotes, MAX_ORDER_NOTES_ORDERS, orderNotesQueryKey } from '../api/insights'
-import type { OrderNoteClassification } from '../api/types'
+import { MAX_ORDER_NOTES_ORDERS, orderNotesQuery, orderNotesQueryKey } from '@/api/insights'
+import type { OrderNoteClassification } from '@/api/types'
+import { noteKeyOf } from './orderNoteKey'
+import { useClassifyPendingNotes } from './useClassifyPendingNotes'
 import { useServerEvent } from './useServerEvent'
 
 /** Cómo leyó la IA una nota: de un plato (`order_item_id`) o del pedido entero (`null`). */
@@ -31,10 +33,6 @@ export interface OrderNoteFlags {
   readonly error: unknown
 }
 
-function keyOf(orderId: number, orderItemId: number | null): string {
-  return `${String(orderId)}:${orderItemId === null ? 'pedido' : String(orderItemId)}`
-}
-
 /**
  * Las alergias y restricciones que la IA encontró en las notas de unos
  * pedidos (`GET /insights/order-notes`), al día con el evento SSE `insights`.
@@ -44,15 +42,14 @@ function keyOf(orderId: number, orderItemId: number | null): string {
  * distintivo de alergia.
  */
 export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNoteFlagsOptions = {}): OrderNoteFlags {
-  const { enabled = true, live = true, classifyPending = true } = options
+  const { enabled: isEnabled = true, live: isLive = true, classifyPending: isClassifyPending = true } = options
   const queryClient = useQueryClient()
   const ids = useMemo(() => [...new Set(orderIds)].sort((a, b) => a - b).slice(0, MAX_ORDER_NOTES_ORDERS), [orderIds])
-  const activo = enabled && ids.length > 0
+  const isActive = isEnabled && ids.length > 0
 
-  const notas = useQuery({
-    queryKey: [...orderNotesQueryKey, ids],
-    queryFn: () => fetchOrderNotes(ids),
-    enabled: activo,
+  const notes = useQuery({
+    ...orderNotesQuery(ids),
+    enabled: isActive,
     // Al llegar un pedido nuevo cambia la lista de ids: los distintivos de los
     // que ya estaban siguen a la vista mientras se pregunta por la lista nueva.
     placeholderData: keepPreviousData,
@@ -60,42 +57,25 @@ export function useOrderNoteFlags(orderIds: readonly number[], options: OrderNot
 
   useServerEvent('insights', () => {
     void queryClient.invalidateQueries({ queryKey: orderNotesQueryKey })
-  }, activo && live)
+  }, isActive && isLive)
 
-  const clasificar = useMutation({
-    mutationFn: classifyOrderNotes,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: orderNotesQueryKey }),
-  })
-  const pedidas = useRef(new Set<string>())
-  const datos = notas.data
   // Lo que se conserva de la consulta anterior puede traer pedidos que ya no están.
+  const data = notes.data
   const items = useMemo(() => {
-    const vigentes = new Set(ids)
-    return datos?.items.filter((item) => vigentes.has(item.order_id))
-  }, [datos, ids])
-  useEffect(() => {
-    const nuevas = (items ?? [])
-      .filter((item) => item.status === 'pending')
-      .map((item) => keyOf(item.order_id, item.order_item_id))
-      .filter((clave) => !pedidas.current.has(clave))
-    if (!classifyPending || nuevas.length === 0 || clasificar.isPending) {
-      return
-    }
-    for (const clave of nuevas) {
-      pedidas.current.add(clave)
-    }
-    clasificar.mutate()
-  }, [items, classifyPending, clasificar])
+    const current = new Set(ids)
+    return data?.items.filter((item) => current.has(item.order_id))
+  }, [data, ids])
+  useClassifyPendingNotes(items, isClassifyPending)
 
   return useMemo(() => {
-    const lista = items ?? []
-    const porClave = new Map(lista.map((item) => [keyOf(item.order_id, item.order_item_id), item]))
+    const list = items ?? []
+    const byKey = new Map(list.map((item) => [noteKeyOf(item.order_id, item.order_item_id), item]))
     return {
-      flags: lista,
-      flagFor: (orderId, orderItemId) => porClave.get(keyOf(orderId, orderItemId)),
-      allergyCount: lista.filter((item) => item.mentions_allergy === true).length,
-      isLoading: notas.isPending && activo,
-      error: notas.error,
+      flags: list,
+      flagFor: (orderId, orderItemId) => byKey.get(noteKeyOf(orderId, orderItemId)),
+      allergyCount: list.filter((item) => item.mentions_allergy === true).length,
+      isLoading: notes.isPending && isActive,
+      error: notes.error,
     }
-  }, [items, notas.isPending, notas.error, activo])
+  }, [items, notes.isPending, notes.error, isActive])
 }

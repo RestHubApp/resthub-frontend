@@ -2,15 +2,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { updateStaff } from '../../api/staff'
-import type { Role, StaffResponse } from '../../api/types'
-import DialogFormActions from '../../components/DialogFormActions'
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
-import StaffFields from './StaffFields'
+import { updateStaff } from '@/api/staff'
+import type { Role, StaffResponse } from '@/api/types'
+import { FormFooter } from '@/components/FormFooter'
+import { onSubmit } from '@/hooks/formSubmit'
+import { StaffFields } from './StaffFields'
 import { saveStaffMember } from './staffList'
 import {
   identityOf,
@@ -28,32 +24,32 @@ interface StaffEditFormProps {
   readonly onDone: () => void
 }
 
-export default function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormProps) {
+export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormProps) {
   const queryClient = useQueryClient()
   const { register, handleSubmit, formState } = useForm<StaffIdentityValues>({
     resolver: zodResolver(staffIdentitySchema),
     defaultValues: identityOf(account),
   })
 
-  const guardar = useMutation({
+  const save = useMutation({
     // La cuenta propia no manda el rol: el servidor responde 409 si lo intenta.
-    mutationFn: (valores: StaffIdentityValues) =>
-      updateStaff(account.id, isSelf ? { full_name: valores.full_name } : identityPayload(valores)),
-    onSuccess: (cuenta) => {
-      saveStaffMember(queryClient, cuenta)
+    mutationFn: (values: StaffIdentityValues) =>
+      updateStaff(account.id, isSelf ? { full_name: values.full_name } : identityPayload(values)),
+    onSuccess: (updatedAccount) => {
+      saveStaffMember(queryClient, updatedAccount)
       onDone()
     },
   })
 
-  const errores = formState.errors
+  const errors = formState.errors
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          guardar.mutate(valores)
+        handleSubmit((values) => {
+          save.mutate(values)
         }),
       )}
     >
@@ -63,29 +59,20 @@ export default function StaffEditForm({ account, roles, isSelf, onDone }: StaffE
           role_id: register('role_id'),
         }}
         errors={{
-          full_name: errores.full_name?.message,
-          role_id: errores.role_id?.message,
+          full_name: errors.full_name?.message,
+          role_id: errors.role_id?.message,
         }}
         roles={roles}
         fixedEmail={account.email}
         lockedRoleLabel={isSelf ? account.role_label : undefined}
       />
 
-      {guardar.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(guardar.error, 'No se pudieron guardar los cambios.')}
-        </FormMessage>
-      ) : null}
-
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
-          Cancelar
-        </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={guardar.isPending}>
-          <Icon name="confirmar" size={16} />
-          <span>{guardar.isPending ? 'Guardando…' : 'Guardar'}</span>
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={save}
+        failureText="No se pudieron guardar los cambios."
+        onCancel={onDone}
+        submit={{ label: 'Guardar', pendingLabel: 'Guardando…', icon: 'confirm' }}
+      />
     </form>
   )
 }

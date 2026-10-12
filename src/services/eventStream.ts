@@ -4,18 +4,35 @@
 // cabecera `Authorization`: la alternativa seria poner el token en la URL, y la
 // URL queda escrita en los logs del servidor y de cualquier proxy.
 
-export interface StreamEvent {
+import type { ErrorCode } from '@/api/types'
+
+import { codeOfBody } from './apiError'
+import { anyOf } from './signals'
+
+interface StreamEvent {
   readonly type: string
   readonly data: string
 }
 
 export class EventStreamError extends Error {
   readonly status: number
+  /** El código estable del error del servidor (`{ detail, code }`), si el cuerpo lo traía. */
+  readonly code: ErrorCode | undefined
 
-  constructor(status: number) {
+  constructor(status: number, code?: ErrorCode) {
     super(`El canal de avisos respondio ${String(status)}.`)
     this.name = 'EventStreamError'
     this.status = status
+    this.code = code
+  }
+}
+
+// El cuerpo de un error del canal es el mismo `{ detail, code }` del resto del API.
+async function codeOfResponse(response: Response): Promise<ErrorCode | undefined> {
+  try {
+    return codeOfBody(await response.json())
+  } catch {
+    return undefined
   }
 }
 
@@ -26,16 +43,16 @@ interface ReadEventStreamOptions {
   readonly onEvent: (event: StreamEvent) => void
 }
 
-function despachar(bloque: string, onEvent: (event: StreamEvent) => void): void {
+function dispatch(block: string, onEvent: (event: StreamEvent) => void): void {
   let type = 'message'
   const data: string[] = []
-  for (const linea of bloque.split('\n')) {
+  for (const line of block.split('\n')) {
     // Una linea que empieza con ":" es un comentario: el servidor los usa de
     // ping para que un proxy no corte la conexion por inactividad.
-    if (linea.startsWith('event:')) {
-      type = linea.slice('event:'.length).trim()
-    } else if (linea.startsWith('data:')) {
-      data.push(linea.slice('data:'.length).trimStart())
+    if (line.startsWith('event:')) {
+      type = line.slice('event:'.length).trim()
+    } else if (line.startsWith('data:')) {
+      data.push(line.slice('data:'.length).trimStart())
     }
   }
   if (data.length > 0) {
@@ -55,27 +72,42 @@ export async function readEventStream({
   signal,
   onEvent,
 }: ReadEventStreamOptions): Promise<void> {
-  const response = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
-    cache: 'no-store',
-    signal,
-  })
-  if (!response.ok || response.body === null) {
-    throw new EventStreamError(response.status)
+  // El servidor envía pings cada 15 s. Un proxy/NAT puede dejar el socket
+  // medio abierto: fetch nunca termina y el cliente no intenta reconectar.
+  const idle = new AbortController()
+  const timeout = 35_000
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const renew = () => {
+    clearTimeout(timer)
+    timer = setTimeout(() => { idle.abort() }, timeout)
   }
-
-  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
-  let pendiente = ''
-  let terminado = false
-  while (!terminado) {
-    const { value, done } = await reader.read()
-    terminado = done
-    pendiente += (value ?? '').replaceAll('\r\n', '\n')
-    let corte = pendiente.indexOf('\n\n')
-    while (corte !== -1) {
-      despachar(pendiente.slice(0, corte), onEvent)
-      pendiente = pendiente.slice(corte + 2)
-      corte = pendiente.indexOf('\n\n')
+  renew()
+  try {
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
+      cache: 'no-store',
+      signal: anyOf(signal, idle.signal),
+    })
+    if (!response.ok || response.body === null) {
+      throw new EventStreamError(response.status, await codeOfResponse(response))
     }
+
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
+    let pending = ''
+    let isFinished = false
+    while (!isFinished) {
+      const { value, done: isDone } = await reader.read()
+      isFinished = isDone
+      if (!isDone) renew()
+      pending += (value ?? '').replaceAll('\r\n', '\n')
+      let cutoff = pending.indexOf('\n\n')
+      while (cutoff !== -1) {
+        dispatch(pending.slice(0, cutoff), onEvent)
+        pending = pending.slice(cutoff + 2)
+        cutoff = pending.indexOf('\n\n')
+      }
+    }
+  } finally {
+    clearTimeout(timer)
   }
 }

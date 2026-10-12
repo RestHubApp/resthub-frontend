@@ -1,0 +1,129 @@
+import { describe, expect, it, jest } from '@jest/globals'
+import { screen, waitFor, within } from '@testing-library/react'
+
+import { table, payment, buildOrder } from '#jest/fixtures/charge'
+import { signInAs, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
+import type { ActiveOrderSummary, OrderResponse, PermissionCode } from '@/api/types'
+import { OrderMoreActions } from './OrderMoreActions'
+
+const JOIN = { name: 'Unir otra mesa' }
+const MOVE = { name: 'Cambiar de mesa' }
+const MENU = { name: 'Más acciones del pedido' }
+const HOUR = '2026-09-26T17:00:00Z'
+
+function summary(id: number, waiterId: number): ActiveOrderSummary {
+  return {
+    id,
+    number: id + 100,
+    status: 'served',
+    status_label: 'Servido',
+    total: '40.00',
+    balance: '40.00',
+    item_count: 2,
+    waiter_id: waiterId,
+    waiter_name: waiterId === 7 ? 'Ana Torres' : 'Luis Paz',
+    created_at: HOUR,
+    updated_at: HOUR,
+    status_changed_at: HOUR,
+  }
+}
+
+const FLOOR = [
+  table({ id: 3, label: '3', status: 'occupied', active_order: summary(12, 7) }),
+  table({ id: 4, label: '4' }),
+  table({ id: 5, label: 'Terraza', status: 'occupied', active_order: summary(20, 7) }),
+  table({ id: 6, label: '6', status: 'occupied', active_order: summary(21, 8) }),
+]
+
+function move(permissions: readonly PermissionCode[] = PERMISSIONS_WAITER, order: OrderResponse = buildOrder()) {
+  const api = server().on('get', '/tables', FLOOR)
+  signInAs(permissions)
+  return { api, ...mountScreen(<OrderMoreActions order={order} onCancel={jest.fn()} />) }
+}
+
+async function choose(user: ReturnType<typeof move>['user'], item: { name: string }) {
+  await user.click(screen.getByRole('button', MENU))
+  await user.click(await screen.findByRole('menuitem', item))
+}
+
+describe('OrderMoreActions: mover y unir mesas', () => {
+  it('cambiar de mesa ofrece solo las libres y muda el pedido', async () => {
+    const { api, user } = move()
+    api.on('post', '/orders/12/move', buildOrder({ table_id: 4, table_label: '4' }))
+
+    await choose(user, MOVE)
+    const window = within(await screen.findByRole('dialog', MOVE))
+    await user.click(await window.findByRole('button', { name: 'Mesa 4' }))
+
+    expect(window.queryByRole('button', { name: /Terraza/u })).not.toBeInTheDocument()
+    expect(await screen.findByText('Pedido #34 ahora en Mesa 4.')).toBeInTheDocument()
+    expect(api.calls('post', '/orders/12/move')[0]?.body).toEqual({ table_id: 4 })
+  })
+
+  it('el mesero solo une mesas suyas, y nunca la misma', async () => {
+    const { api, user } = move()
+    api.on('post', '/orders/12/merge', buildOrder())
+
+    await choose(user, JOIN)
+    const window = within(await screen.findByRole('dialog', { name: 'Unir otra mesa a esta' }))
+    const terrace = await window.findByRole('button', { name: /Terraza/u })
+
+    expect(terrace).toHaveTextContent('#120 · S/ 40.00')
+    expect(window.queryByRole('button', { name: /Mesa 6/u })).not.toBeInTheDocument()
+    expect(window.queryByRole('button', { name: /Mesa 3/u })).not.toBeInTheDocument()
+    await user.click(terrace)
+    expect(await screen.findByText('Mesas unidas en el pedido #34.')).toBeInTheDocument()
+    expect(api.calls('post', '/orders/12/merge')[0]?.body).toEqual({ source_order_id: 20 })
+  })
+
+  it('el encargado puede unir mesas de cualquier mesero', async () => {
+    const { user } = move(PERMISSIONS_OWNER)
+
+    await choose(user, JOIN)
+
+    expect(await screen.findByRole('button', { name: /Mesa 6/u })).toBeInTheDocument()
+  })
+
+  it('sin otras mesas propias lo dice', async () => {
+    const { api, user } = move()
+    api.on('get', '/tables', [FLOOR[0]])
+
+    await choose(user, JOIN)
+
+    expect(await screen.findByText('No tienes otras mesas con pedido')).toBeInTheDocument()
+  })
+
+  it('con un pago hecho, o en la mesa de otro mesero, no se ofrece unir', async () => {
+    const { user } = move(PERMISSIONS_WAITER, buildOrder({ payments: [payment()] }))
+    await user.click(screen.getByRole('button', MENU))
+
+    expect(await screen.findByRole('menuitem', MOVE)).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', JOIN)).not.toBeInTheDocument()
+  })
+
+  it('en la mesa de otro mesero se puede cambiar de mesa pero no unir', async () => {
+    const { user } = move(PERMISSIONS_WAITER, buildOrder({ waiter_id: 8 }))
+    await user.click(screen.getByRole('button', MENU))
+
+    expect(await screen.findByRole('menuitem', MOVE)).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', JOIN)).not.toBeInTheDocument()
+  })
+
+  it('cancelar el pedido es la última entrada, en rojo, y solo la ofrece quien puede gestionar', async () => {
+    const onCancel = jest.fn()
+    server().on('get', '/tables', FLOOR)
+    signInAs(PERMISSIONS_OWNER)
+    const { user } = mountScreen(<OrderMoreActions order={buildOrder()} onCancel={onCancel} />)
+
+    await user.click(screen.getByRole('button', MENU))
+    const last = (await screen.findAllByRole('menuitem')).at(-1)
+    expect(last).toHaveTextContent('Cancelar pedido')
+    if (last !== undefined) {
+      await user.click(last)
+    }
+
+    await waitFor(() => {
+      expect(onCancel).toHaveBeenCalledTimes(1)
+    })
+  })
+})

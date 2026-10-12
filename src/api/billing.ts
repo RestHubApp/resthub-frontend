@@ -1,31 +1,35 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api, errorStatus, SLOW_TIMEOUT_MS } from '../services/api'
+import { SLOW_TIMEOUT_MS } from '@/services/api'
+import { hasCode } from '@/services/apiError'
+import { send } from './client'
 import type {
+  BillingCapabilities,
   BillingSettings,
   BillingSettingsRequest,
   Invoice,
   InvoicePage,
   IssueInvoiceRequest,
+  SendInvoiceEmailRequest,
+  SendInvoiceEmailResponse,
 } from './types'
 
 // Comprobantes electrónicos (SUNAT): boletas, facturas y los datos fiscales.
 
 export const billingQueryKey = ['billing'] as const
 export const billingSettingsQueryKey = [...billingQueryKey, 'settings'] as const
-export const invoicesQueryKey = [...billingQueryKey, 'invoices'] as const
+const invoicesQueryKey = [...billingQueryKey, 'invoices'] as const
 
 export function orderInvoiceQueryKey(orderId: number) {
   return [...billingQueryKey, 'order', orderId] as const
 }
 
-export function invoiceQueryKey(invoiceId: number) {
+function invoiceQueryKey(invoiceId: number) {
   return [...billingQueryKey, 'invoice', invoiceId] as const
 }
 
-export async function fetchBillingSettings(): Promise<BillingSettings> {
-  const { data } = await api.get<BillingSettings>('/billing/settings')
-  return data
+async function fetchBillingSettings(): Promise<BillingSettings> {
+  return send((client) => client.GET('/api/v1/billing/settings'))
 }
 
 export const billingSettingsQuery = queryOptions({
@@ -34,31 +38,31 @@ export const billingSettingsQuery = queryOptions({
 })
 
 export async function updateBillingSettings(payload: BillingSettingsRequest): Promise<BillingSettings> {
-  const { data } = await api.put<BillingSettings>('/billing/settings', payload)
-  return data
+  return send((client) => client.PUT('/api/v1/billing/settings', { body: payload }))
 }
 
-export async function fetchInvoices(offset = 0): Promise<InvoicePage> {
-  const { data } = await api.get<InvoicePage>('/billing/invoices', { params: { limit: 25, offset } })
-  return data
+async function fetchInvoices(offset = 0): Promise<InvoicePage> {
+  return send((client) => client.GET('/api/v1/billing/invoices', { params: { query: { limit: 25, offset } } }))
 }
 
 export function invoicesQuery(offset: number) {
   return queryOptions({ queryKey: [...invoicesQueryKey, offset], queryFn: () => fetchInvoices(offset) })
 }
 
-export async function fetchInvoice(invoiceId: number): Promise<Invoice> {
-  const { data } = await api.get<Invoice>(`/billing/invoices/${String(invoiceId)}`)
-  return data
+async function fetchInvoice(invoiceId: number): Promise<Invoice> {
+  return send((client) =>
+    client.GET('/api/v1/billing/invoices/{invoice_id}', { params: { path: { invoice_id: invoiceId } } }),
+  )
 }
 
 /** El comprobante de un pedido, o `null` si todavía no se emitió. */
 export async function fetchOrderInvoice(orderId: number): Promise<Invoice | null> {
   try {
-    const { data } = await api.get<Invoice>(`/billing/orders/${String(orderId)}/invoice`)
-    return data
+    return await send((client) =>
+      client.GET('/api/v1/billing/orders/{order_id}/invoice', { params: { path: { order_id: orderId } } }),
+    )
   } catch (error: unknown) {
-    if (errorStatus(error) === 404) {
+    if (hasCode(error, 'invoice_not_found')) {
       return null
     }
     throw error
@@ -67,13 +71,43 @@ export async function fetchOrderInvoice(orderId: number): Promise<Invoice | null
 
 /** El servidor lo manda al proveedor antes de responder: puede tardar más que una petición común. */
 export async function issueInvoice(payload: IssueInvoiceRequest): Promise<Invoice> {
-  const { data } = await api.post<Invoice>('/billing/invoices', payload, { timeout: SLOW_TIMEOUT_MS })
-  return data
+  return send((client) => client.POST('/api/v1/billing/invoices', { body: payload }), { timeout: SLOW_TIMEOUT_MS })
 }
 
 export async function resendInvoice(invoiceId: number): Promise<Invoice> {
-  const { data } = await api.post<Invoice>(`/billing/invoices/${String(invoiceId)}/resend`, undefined, {
-    timeout: SLOW_TIMEOUT_MS,
-  })
-  return data
+  return send(
+    (client) =>
+      client.POST('/api/v1/billing/invoices/{invoice_id}/resend', { params: { path: { invoice_id: invoiceId } } }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
+}
+
+export function invoiceQuery(invoiceId: number) {
+  return queryOptions({ queryKey: invoiceQueryKey(invoiceId), queryFn: () => fetchInvoice(invoiceId) })
+}
+
+export function orderInvoiceQuery(orderId: number) {
+  return queryOptions({ queryKey: orderInvoiceQueryKey(orderId), queryFn: () => fetchOrderInvoice(orderId) })
+}
+
+/** Qué puede hacer este restaurante con un comprobante ya emitido: enviarlo por correo y respaldarlo. */
+export const billingCapabilitiesQuery = queryOptions({
+  queryKey: [...billingQueryKey, 'capabilities'],
+  queryFn: (): Promise<BillingCapabilities> => send((client) => client.GET('/api/v1/billing/capabilities')),
+  staleTime: 5 * 60_000,
+})
+
+/** Envía el comprobante por correo (Brevo). El servidor devuelve el destino ya enmascarado. */
+export async function sendInvoiceEmail(invoiceId: number, body: SendInvoiceEmailRequest): Promise<SendInvoiceEmailResponse> {
+  return send(
+    (client) => client.POST('/api/v1/billing/invoices/{invoice_id}/email', { params: { path: { invoice_id: invoiceId } }, body }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
+}
+
+/** Pide o reintenta el respaldo del XML y el PDF en Google Drive; responde 202 con el comprobante. */
+export async function archiveInvoice(invoiceId: number): Promise<Invoice> {
+  return send((client) =>
+    client.POST('/api/v1/billing/invoices/{invoice_id}/archive', { params: { path: { invoice_id: invoiceId } } }),
+  )
 }

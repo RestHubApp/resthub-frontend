@@ -1,8 +1,8 @@
-import type { Reservation, ReservationStatus } from '../../api/types'
-import StatusBadge from '../../components/StatusBadge'
-import { Button } from '../../components/ui/button'
-import { formatTime } from '../../services/format'
-import { STATUS_TONE } from './reservationSchema'
+import type { Reservation, ReservationStatus } from '@/api/types'
+import { StatusBadge } from '@/components/StatusBadge'
+import { Button } from '@/components/ui/button'
+import { formatTime } from '@/services/format'
+import { STATUS_TONE } from './reservationLabels'
 
 interface ReservationRowProps {
   readonly reservation: Reservation
@@ -14,21 +14,21 @@ interface ReservationRowProps {
   readonly onStatus: (status: ReservationStatus) => void
 }
 
-const ACCIONES: readonly { status: ReservationStatus; label: string; variant: 'default' | 'outline' | 'ghost' }[] = [
+const ACTIONS: readonly { status: ReservationStatus; label: string; variant: 'default' | 'outline' | 'ghost' }[] = [
   { status: 'seated', label: 'Llegaron', variant: 'default' },
   { status: 'no_show', label: 'No vinieron', variant: 'outline' },
   { status: 'cancelled', label: 'Cancelar', variant: 'ghost' },
 ]
 
 /** Una reserva del día: hora, a nombre de quién, cuántos, mesa y qué hacer. */
-export default function ReservationRow({ reservation, tableLabel, timeZone, canManage, busy, onEdit, onStatus }: ReservationRowProps) {
-  const pendiente = reservation.status === 'booked'
-  const detalle = [
+export function ReservationRow({ reservation, tableLabel, timeZone, canManage, busy, onEdit, onStatus }: ReservationRowProps) {
+  const isPending = reservation.status === 'booked'
+  const detail = [
     `${String(reservation.party_size)} personas`,
     tableLabel ?? 'sin mesa',
     reservation.phone,
     reservation.notes,
-  ].filter((dato) => dato !== '')
+  ].filter((data) => data !== '')
 
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 rounded-lg px-3 py-3 ring-1 ring-input">
@@ -39,16 +39,16 @@ export default function ReservationRow({ reservation, tableLabel, timeZone, canM
             {reservation.customer_name}
             <StatusBadge label={reservation.status_label} tone={STATUS_TONE[reservation.status]} />
           </span>
-          <span className="text-xs text-muted-foreground">{detalle.join(' · ')}</span>
+          <span className="text-xs text-muted-foreground">{detail.join(' · ')}</span>
         </span>
       </span>
-      {canManage && pendiente ? (
+      {canManage && isPending ? (
         <span className="flex flex-wrap gap-2">
-          {ACCIONES.map((accion) => (
-            <Button key={accion.status} type="button" size="sm" variant={accion.variant} disabled={busy} onClick={() => {
-              onStatus(accion.status)
+          {ACTIONS.map((action) => (
+            <Button key={action.status} type="button" size="sm" variant={action.variant} disabled={busy} onClick={() => {
+              onStatus(action.status)
             }}>
-              {accion.label}
+              {action.label}
             </Button>
           ))}
           <Button type="button" size="sm" variant="ghost" onClick={onEdit}>

@@ -8,11 +8,50 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
-@custom-variant dark (&:is(.dark *));
+/* Las fuentes de la interfaz, recortadas a lo que se usa: pesos desde 400 y
+ * Latin-1 (español) con sus puntuaciones. `scripts/subsetFont.sh` las regenera.
+ *
+ * - Geist (19 kB) es la de siempre y la que se precarga.
+ * - Atkinson Hyperlegible Next (25 kB) y Lexend (20 kB) son las alternativas de
+ *   «Apariencia». Un `@font-face` no descarga nada por declararse: el navegador
+ *   baja el archivo solo cuando algún texto usa esa familia, así que quien no la
+ *   elige nunca la baja. */
+@font-face {
+    font-family: 'Geist Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400 900;
+    src: url('./assets/fonts/geist-latin-wght.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Atkinson Hyperlegible Next Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400 800;
+    src: url('./assets/fonts/atkinson-latin-wght.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Lexend Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400 900;
+    src: url('./assets/fonts/lexend-latin-wght.woff2') format('woff2');
+}
+/* Sombra solo en lo que flota: menús, hojas, diálogos y avisos (`shadow-float`)
+ * y la barra fija del carrito (`shadow-bar`). Las tarjetas en reposo no llevan. */
+@theme {
+    --shadow-float: 0 8px 24px -8px rgb(43 37 33 / 0.25);
+    --shadow-bar: 0 -6px 16px -8px rgb(43 37 33 / 0.25);
+}
+/* La variante `dark:` sigue a cualquier tema oscuro (los que terminan en `-dark`),
+ * también en las muestras de la pantalla «Apariencia», que lo declaran sin ser la raíz. */
+@custom-variant dark (&:is([data-theme$='-dark'], [data-theme$='-dark'] *));
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    /* El ancho de lectura del contenido y el texto más chico que se tolera (ejes de gráficos). */
+    --container-app: 1100px;
+    --text-2xs: 0.6875rem;
+    --font-sans: var(--app-font);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -56,27 +95,170 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 /*
- * Paleta de RestHub sobre los tokens de shadcn/ui.
+ * Temas de RestHub sobre los tokens de shadcn/ui.
  *
- * Un terracota de cocina como color de marca, sobre un fondo crema calido.
- * Cada par de texto y fondo cumple WCAG 2.2 AA:
+ * Cada tema es un bloque de tokens bajo `[data-theme='…']`. La pantalla
+ * «Apariencia» (ruta /perfil/apariencia) pone el elegido en `<html>`
+ * (`data-theme`) y, como el selector vale para cualquier elemento, también lo
+ * pone en las muestras de esa pantalla para mostrar cada color sin aplicarlo.
+ * Sin el atributo rige Terracota, el de siempre. Cada bloque define TODOS los
+ * tokens de color: una muestra dentro de otro tema no hereda nada (los temas
+ * oscuros comparten en un bloque los gráficos y los estados).
+ *
+ * El MODO (claro, oscuro o automático) y el COLOR de acento son dos preferencias
+ * distintas, y el alto contraste es un interruptor aparte que se COMBINA con el
+ * color. De las tres sale un solo `data-theme` (`resolveTheme` en
+ * `appearanceRules`): cada color tiene cuatro variantes (clara y oscura, con
+ * contraste normal y alto). El sufijo `-dark` va al final, así `dark:` sigue
+ * funcionando con `[data-theme$='-dark']`.
+ *
+ *   claros   terracotta (por omisión)  olive  slate  wine
+ *   oscuros  terracotta-dark  olive-dark  slate-dark  wine-dark
+ *   claros con alto contraste   terracotta-contrast  olive-contrast  …
+ *   oscuros con alto contraste  terracotta-contrast-dark  olive-contrast-dark  …
+ *
+ * «Automático» no es un bloque: elige el claro o el oscuro del color elegido
+ * según `prefers-color-scheme` (`applyAppearance`).
+ *
+ * Contraste. `src/services/themeContrast.test.ts` lee este archivo y falla si
+ * algún tema baja de estos mínimos (WCAG 2.2 AA en los temas normales y AAA en los
+ * de alto contraste; los de alto contraste piden además 4,5 a 1 en bordes de campo
+ * y anillos de foco, y los normales 3 a 1), y recorre las 48 combinaciones de modo, color,
+ * contraste y modo del dispositivo. Las cifras de abajo son las que da esa prueba.
+ *
+ *   texto y fondo                   mínimo 7 a 1 (texto de cuerpo, tarjeta, menú)
+ *   texto apagado (sobre fondo,     mínimo 4,5 a 1
+ *     tarjeta y `--muted`)
+ *   texto sobre `--primary`        mínimo 4,5 a 1, también con el `hover` del
+ *     y su `hover` (12 % de negro)    botón principal
+ *   `--destructive`, `--success`    mínimo 4,5 a 1 sobre el fondo, la tarjeta y su
+ *     y `--warning` como texto        propio tinte al 10 y 20 % (insignias y botones)
+ *   `--input` y `--ring`            mínimo 3 a 1 sobre el fondo y la tarjeta
+ *   `--chart-1..5`                  mínimo 3 a 1 sobre la tarjeta
+ *
+ * En los temas de alto contraste todos los mínimos de texto y de botón suben a
+ * 7 a 1 (el texto es negro o blanco puro), `--input` y `--ring` a 4,5 a 1, y el
+ * foco suma un contorno de 3 px (al final de los temas).
+ *
+ * Peor par de cada grupo, por tema (razón de contraste, con un decimal):
+ *
+ *   Tema               texto/fondo  apagado  botón  estados  campo  anillo
+ *   Terracota             14,1      5,8     7,3     4,6     3,9    4,8
+ *   Oliva                 13,9      6,1     7,8     4,6     3,8    3,8
+ *   Pizarra               13,9      5,3     8,4     4,6     3,6    4,8
+ *   Vino                  14,4      6,0     9,0     4,6     4,2    5,8
+ *   Terracota contraste   20,2     10,4    11,2     7,6    12,3   10,8
+ *   Oliva contraste       20,2     10,0     9,7     7,6    12,5    9,4
+ *   Pizarra contraste     19,9     10,2    11,4     7,6    12,7   10,8
+ *   Vino contraste        20,0     10,8    12,2     7,6    13,9   11,6
+ *   Terracota oscuro      14,5      6,5     4,8     4,8     3,4    5,9
+ *   Oliva oscuro          14,5      6,8     6,7     4,7     3,9    8,6
+ *   Pizarra oscuro        14,1      6,6     5,5     4,7     4,0    6,7
+ *   Vino oscuro           14,6      6,8     5,0     4,9     3,6    6,2
+ *   Terracota contr. osc. 20,0     11,8     8,4     7,3    16,0   11,2
+ *   Oliva contr. oscuro   19,8     12,0    10,9     7,2    16,9   14,6
+ *   Pizarra contr. osc.   20,1     12,1     8,6     7,4    16,8   11,6
+ *   Vino contr. oscuro    20,0     12,1     7,9     7,3    16,4   10,7
+ *
+ * Detalle de Terracota (el original):
  *
  * - `--primary` #9a3412 con texto blanco da 7,3 a 1, y 6,8 sobre el fondo;
  * - `--muted-foreground` #655a52 da 6,3 a 1 sobre el fondo y 5,8 sobre `--muted`;
- * - `--input` #8c7f76 da 3,9 a 1 sobre blanco, por encima del 3 a 1 que pide
- *   un borde de campo; `--border`, que solo separa, puede ser mas claro;
- * - `--success` #1e7b34 da 5,3 a 1 y `--warning` #8a6100 da 5,5 a 1 con blanco.
+ * - `--input` #857a71 da 4,2 a 1 sobre blanco y 3,9 sobre el fondo, por encima
+ *   del 3 a 1 que pide un borde de campo; `--border` #ddd3c8 (1,4 a 1), que solo
+ *   separa, puede ser mas claro;
+ * - el boton deshabilitado usa `--muted-foreground` sobre `--muted` (5,8 a 1) y el
+ *   `hover` del boton principal oscurece `--primary` un 12 % (#882e10, 8,6 a 1
+ *   con texto blanco), en vez de bajarle la opacidad;
+ * - `--success` #186a2c da 6,7 a 1 y `--warning` #7a5600 da 6,7 a 1 con blanco,
+ *   y los dos pasan de 5 a 1 sobre su propio tinte al 10 % (`bg-success/10`,
+ *   las insignias de «Pagado» o «Bajo mínimo»). Los anteriores (#1e7b34 y
+ *   #8a6100) quedaban en 4,4 y 4,2 sobre ese tinte: axe los marcaba.
  *
  * Los colores de graficos siguen la guia de visualizacion y pasaron el
  * validador de paleta contra `--card` en claro y en oscuro:
  *
  * - `--chart-1..5` es la paleta categorica, en ese orden fijo (terracota,
  *   violeta, verde azulado, azul, magenta). Ningun tono repite un color de
- *   estado: el exito, el aviso y el peligro quedan reservados.
+ *   estado: el exito, el aviso y el peligro quedan reservados. Es la misma en
+ *   todos los temas claros (todos tienen la tarjeta blanca); los temas oscuros tienen la suya.
  * - `--chart-seq-1..5` es la rampa secuencial de un solo tono (terracota) para
- *   magnitudes, como el mapa de calor; `--chart-empty` marca el cero.
+ *   magnitudes, como el mapa de calor; `--chart-empty` marca el cero y sigue el
+ *   tono de cada tema.
  */
 :root {
+    /* La letra de la interfaz. «Apariencia» la cambia con `data-font` en <html>. */
+    --app-font: 'Geist Variable', sans-serif;
+    --radius: 0.625rem;
+    /* Un solo tamaño de control: 44 px (WCAG 2.5.5) para lo que se toca. */
+    --control-h: 2.75rem;
+    --control-h-sm: 2.25rem;
+    --control-h-lg: 3rem;
+}
+
+[data-font='atkinson'] {
+    --app-font: 'Atkinson Hyperlegible Next Variable', sans-serif;
+}
+
+[data-font='lexend'] {
+    --app-font: 'Lexend Variable', sans-serif;
+}
+
+/*
+ * El tamaño del texto escala la raíz: todo lo que se mide en rem (texto,
+ * controles, márgenes, el menú lateral) crece junto. Las consultas de ancho
+ * (`lg:`) no se mueven: los navegadores las miden con el tamaño de fábrica.
+ */
+:root[data-text-size='large'] {
+    font-size: 112.5%;
+}
+
+:root[data-text-size='larger'] {
+    font-size: 125%;
+}
+
+:root[data-text-size='largest'] {
+    font-size: 150%;
+}
+
+/*
+ * Densidad compacta: solo con puntero fino (ratón o panel táctil). Los controles
+ * bajan de 44 a 36 px y el menú lateral se aprieta; con el dedo (`pointer: coarse`)
+ * el atributo no hace nada y todo mide 44 px (WCAG 2.5.5).
+ */
+@media (pointer: fine) {
+    :root[data-density='compact'] {
+        --control-h: var(--control-h-sm);
+        --control-h-lg: var(--control-h);
+    }
+}
+
+/* Lo que comparten los temas claros: los colores de los gráficos y el esquema. */
+:root,
+[data-theme='terracotta'],
+[data-theme='terracotta-contrast'],
+[data-theme='olive-contrast'],
+[data-theme='slate-contrast'],
+[data-theme='wine-contrast'],
+[data-theme='olive'],
+[data-theme='slate'],
+[data-theme='wine'] {
+    --chart-1: #c2410c;
+    --chart-2: #6b4fc8;
+    --chart-3: #0e8a6a;
+    --chart-4: #2a6fcf;
+    --chart-5: #b8457f;
+    --chart-seq-1: #f2a27c;
+    --chart-seq-2: #e07a4b;
+    --chart-seq-3: #c2410c;
+    --chart-seq-4: #973110;
+    --chart-seq-5: #6b230c;
+    --chart-area: rgb(194 65 12 / 0.1);
+    color-scheme: light;
+}
+
+:root,
+[data-theme='terracotta'] {
     --background: #faf7f2;
     --foreground: #2b2521;
     --card: #ffffff;
@@ -92,65 +274,292 @@
     --accent: #fbece4;
     --accent-foreground: #7c2d12;
     --destructive: #b91c1c;
-    --success: #1e7b34;
+    --success: #186a2c;
     --success-foreground: #ffffff;
-    --warning: #8a6100;
-    --border: #e7dfd6;
-    --input: #8c7f76;
+    --warning: #7a5600;
+    --border: #ddd3c8;
+    --input: #857a71;
     --ring: #c2410c;
-    --chart-1: #c2410c;
-    --chart-2: #6b4fc8;
-    --chart-3: #0e8a6a;
-    --chart-4: #2a6fcf;
-    --chart-5: #b8457f;
-    --chart-seq-1: #f2a27c;
-    --chart-seq-2: #e07a4b;
-    --chart-seq-3: #c2410c;
-    --chart-seq-4: #973110;
-    --chart-seq-5: #6b230c;
     --chart-empty: #f3eee8;
     --chart-grid: #ede6de;
     --chart-axis: #d6ccc2;
-    --chart-area: rgb(194 65 12 / 0.1);
-    --radius: 0.625rem;
     --sidebar: #ffffff;
     --sidebar-foreground: #2b2521;
     --sidebar-primary: #9a3412;
     --sidebar-primary-foreground: #ffffff;
     --sidebar-accent: #fbece4;
     --sidebar-accent-foreground: #7c2d12;
-    --sidebar-border: #e7dfd6;
+    --sidebar-border: #ddd3c8;
     --sidebar-ring: #c2410c;
 }
 
+/* Terracota con alto contraste: texto negro, terracota profundo y bordes firmes. */
+[data-theme='terracotta-contrast'] {
+    --background: #fffaf5;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #6e2000;
+    --primary-foreground: #ffffff;
+    --secondary: #fde3d3;
+    --secondary-foreground: #5c1a00;
+    --muted: #f1ebe4;
+    --muted-foreground: #3a3430;
+    --accent: #fde3d3;
+    --accent-foreground: #5c1a00;
+    --border: #6b5a4d;
+    --input: #3d3025;
+    --ring: #6e2000;
+    --chart-empty: #f1ebe4;
+    --chart-grid: #d9cdc2;
+    --chart-axis: #7a6c60;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: #6e2000;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #fde3d3;
+    --sidebar-accent-foreground: #5c1a00;
+    --sidebar-border: #6b5a4d;
+    --sidebar-ring: #6e2000;
+}
+
+/* Oliva con alto contraste: texto negro, oliva profundo y bordes firmes. */
+[data-theme='olive-contrast'] {
+    --background: #fafbf3;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #294d00;
+    --primary-foreground: #ffffff;
+    --secondary: #e1efc0;
+    --secondary-foreground: #1f3d00;
+    --muted: #e9ebe0;
+    --muted-foreground: #34382a;
+    --accent: #e1efc0;
+    --accent-foreground: #1f3d00;
+    --border: #5a6048;
+    --input: #2f3322;
+    --ring: #294d00;
+    --chart-empty: #e9ebe0;
+    --chart-grid: #cfd3bd;
+    --chart-axis: #6f7560;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: #294d00;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e1efc0;
+    --sidebar-accent-foreground: #1f3d00;
+    --sidebar-border: #5a6048;
+    --sidebar-ring: #294d00;
+}
+
+/* Pizarra con alto contraste: texto negro, pizarra profundo y bordes firmes. */
+[data-theme='slate-contrast'] {
+    --background: #f6f9fd;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #0d3a6b;
+    --primary-foreground: #ffffff;
+    --secondary: #d6e6f8;
+    --secondary-foreground: #082c52;
+    --muted: #e6ebf1;
+    --muted-foreground: #2c3643;
+    --accent: #d6e6f8;
+    --accent-foreground: #082c52;
+    --border: #4f5d70;
+    --input: #243040;
+    --ring: #0d3a6b;
+    --chart-empty: #e6ebf1;
+    --chart-grid: #ccd6e2;
+    --chart-axis: #667588;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: #0d3a6b;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #d6e6f8;
+    --sidebar-accent-foreground: #082c52;
+    --sidebar-border: #4f5d70;
+    --sidebar-ring: #0d3a6b;
+}
+
+/* Vino con alto contraste: texto negro, vino profundo y bordes firmes. */
+[data-theme='wine-contrast'] {
+    --background: #fff8f9;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #6b0f2a;
+    --primary-foreground: #ffffff;
+    --secondary: #f8d9e1;
+    --secondary-foreground: #520a1f;
+    --muted: #f0e8ea;
+    --muted-foreground: #3d2d32;
+    --accent: #f8d9e1;
+    --accent-foreground: #520a1f;
+    --border: #6b5058;
+    --input: #3a2229;
+    --ring: #6b0f2a;
+    --chart-empty: #f0e8ea;
+    --chart-grid: #dcc9cf;
+    --chart-axis: #7a6068;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: #6b0f2a;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f8d9e1;
+    --sidebar-accent-foreground: #520a1f;
+    --sidebar-border: #6b5058;
+    --sidebar-ring: #6b0f2a;
+}
+
+/* Alto contraste (claro): estados a 7 a 1 aun sobre su tinte al 20 %. */
+[data-theme='terracotta-contrast'],
+[data-theme='olive-contrast'],
+[data-theme='slate-contrast'],
+[data-theme='wine-contrast'] {
+    --destructive: #7a0000;
+    --success: #084512;
+    --success-foreground: #ffffff;
+    --warning: #4a3200;
+}
+
+/* Oliva: crema verdosa con un verde oliva de cocina. */
+[data-theme='olive'] {
+    --background: #f6f6ee;
+    --foreground: #24281c;
+    --card: #ffffff;
+    --card-foreground: #24281c;
+    --popover: #ffffff;
+    --popover-foreground: #24281c;
+    --primary: #3f5a17;
+    --primary-foreground: #ffffff;
+    --secondary: #e6edd2;
+    --secondary-foreground: #34480f;
+    --muted: #eceee1;
+    --muted-foreground: #555a48;
+    --accent: #e6edd2;
+    --accent-foreground: #34480f;
+    --destructive: #b91c1c;
+    --success: #186a2c;
+    --success-foreground: #ffffff;
+    --warning: #7a5600;
+    --border: #d6d9c6;
+    --input: #7a8064;
+    --ring: #5f8a1f;
+    --chart-empty: #eceee1;
+    --chart-grid: #e6e8d8;
+    --chart-axis: #cfd2bd;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #24281c;
+    --sidebar-primary: #3f5a17;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e6edd2;
+    --sidebar-accent-foreground: #34480f;
+    --sidebar-border: #d6d9c6;
+    --sidebar-ring: #5f8a1f;
+}
+
+/* Pizarra: gris azulado frío con un azul de pizarra. */
+[data-theme='slate'] {
+    --background: #f3f6fa;
+    --foreground: #1d2733;
+    --card: #ffffff;
+    --card-foreground: #1d2733;
+    --popover: #ffffff;
+    --popover-foreground: #1d2733;
+    --primary: #1f4f82;
+    --primary-foreground: #ffffff;
+    --secondary: #e3ecf6;
+    --secondary-foreground: #173a61;
+    --muted: #e9eef4;
+    --muted-foreground: #546273;
+    --accent: #e3ecf6;
+    --accent-foreground: #173a61;
+    --destructive: #b91c1c;
+    --success: #186a2c;
+    --success-foreground: #ffffff;
+    --warning: #7a5600;
+    --border: #d3dce7;
+    --input: #74839a;
+    --ring: #2f6fb3;
+    --chart-empty: #e9eef4;
+    --chart-grid: #e1e8f0;
+    --chart-axis: #c9d3df;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #1d2733;
+    --sidebar-primary: #1f4f82;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e3ecf6;
+    --sidebar-accent-foreground: #173a61;
+    --sidebar-border: #d3dce7;
+    --sidebar-ring: #2f6fb3;
+}
+
+/* Vino: blanco rosado con un burdeos profundo. */
+[data-theme='wine'] {
+    --background: #fbf5f5;
+    --foreground: #2e2024;
+    --card: #ffffff;
+    --card-foreground: #2e2024;
+    --popover: #ffffff;
+    --popover-foreground: #2e2024;
+    --primary: #8a1f3d;
+    --primary-foreground: #ffffff;
+    --secondary: #f6e3e8;
+    --secondary-foreground: #6b1730;
+    --muted: #f3eaec;
+    --muted-foreground: #675459;
+    --accent: #f6e3e8;
+    --accent-foreground: #6b1730;
+    --destructive: #b91c1c;
+    --success: #186a2c;
+    --success-foreground: #ffffff;
+    --warning: #7a5600;
+    --border: #e3d0d5;
+    --input: #86707a;
+    --ring: #b3294f;
+    --chart-empty: #f3eaec;
+    --chart-grid: #eddde0;
+    --chart-axis: #dcc8cd;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #2e2024;
+    --sidebar-primary: #8a1f3d;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f6e3e8;
+    --sidebar-accent-foreground: #6b1730;
+    --sidebar-border: #e3d0d5;
+    --sidebar-ring: #b3294f;
+}
+
 /*
- * Tema oscuro. Se activa con la clase `dark` en <html>; ninguna pantalla la
- * pone todavia. Cada color se eligio para la superficie oscura (no es una
- * inversion automatica) y cumple AA: el texto da 14,5 a 1 sobre `--card`, el
- * texto apagado 7,2 a 1, y los graficos pasaron el validador contra #201b18.
+ * Los temas oscuros. Cada color se eligió para la superficie oscura (no es una
+ * inversión automática) y cada acento tiene el suyo: Terracota (el de siempre),
+ * Oliva, Pizarra y Vino, con alto contraste o sin él. Los gráficos y los colores de estado
+ * (peligro, éxito, aviso) son los mismos en todos los normales (los de alto contraste traen los suyos) y pasaron el validador de paleta
+ * contra la tarjeta oscura. `color-scheme: dark` oscurece también los controles
+ * nativos y las barras de desplazamiento.
  */
-.dark {
-    --background: #171311;
-    --foreground: #f2ece6;
-    --card: #201b18;
-    --card-foreground: #f2ece6;
-    --popover: #26201c;
-    --popover-foreground: #f2ece6;
-    --primary: #e0703f;
-    --primary-foreground: #1a1310;
-    --secondary: #3a261c;
-    --secondary-foreground: #f6c4a8;
-    --muted: #2a2420;
-    --muted-foreground: #b3a79d;
-    --accent: #3a261c;
-    --accent-foreground: #f6c4a8;
-    --destructive: #f06a6a;
+[data-theme='terracotta-dark'],
+[data-theme='olive-dark'],
+[data-theme='slate-dark'],
+[data-theme='wine-dark'],
+[data-theme='terracotta-contrast-dark'],
+[data-theme='olive-contrast-dark'],
+[data-theme='slate-contrast-dark'],
+[data-theme='wine-contrast-dark'] {
+    --destructive: #f68080;
     --success: #4cb86a;
     --success-foreground: #0f1a12;
     --warning: #d9a02b;
-    --border: #3a322d;
-    --input: #7a6d64;
-    --ring: #e0703f;
     --chart-1: #e0703f;
     --chart-2: #9582ea;
     --chart-3: #1f9e7b;
@@ -161,19 +570,284 @@
     --chart-seq-3: #d4622d;
     --chart-seq-4: #ec8551;
     --chart-seq-5: #f9b08a;
+    --chart-area: rgb(224 112 63 / 0.12);
+    color-scheme: dark;
+}
+
+[data-theme='terracotta-dark'] {
+    --background: #171311;
+    --foreground: #f2ece6;
+    --card: #201b18;
+    --card-foreground: #f2ece6;
+    --popover: #26201c;
+    --popover-foreground: #f2ece6;
+    --primary: #e8794a;
+    --primary-foreground: #120d0a;
+    --secondary: #3a261c;
+    --secondary-foreground: #f6c4a8;
+    --muted: #2a2420;
+    --muted-foreground: #b3a79d;
+    --accent: #3a261c;
+    --accent-foreground: #f6c4a8;
+    --border: #3a322d;
+    --input: #7a6d64;
+    --ring: #e8794a;
     --chart-empty: #2c2622;
     --chart-grid: #2f2824;
     --chart-axis: #4a403a;
-    --chart-area: rgb(224 112 63 / 0.12);
     --sidebar: #1d1815;
     --sidebar-foreground: #f2ece6;
-    --sidebar-primary: #e0703f;
-    --sidebar-primary-foreground: #1a1310;
+    --sidebar-primary: #e8794a;
+    --sidebar-primary-foreground: #120d0a;
     --sidebar-accent: #3a261c;
     --sidebar-accent-foreground: #f6c4a8;
     --sidebar-border: #3a322d;
-    --sidebar-ring: #e0703f;
-    color-scheme: dark;
+    --sidebar-ring: #e8794a;
+}
+
+/* Oliva oscuro: verde muy oscuro con un verde hoja claro. */
+[data-theme='olive-dark'] {
+    --background: #131610;
+    --foreground: #eef0e4;
+    --card: #1b1f16;
+    --card-foreground: #eef0e4;
+    --popover: #21261b;
+    --popover-foreground: #eef0e4;
+    --primary: #a3c653;
+    --primary-foreground: #10150a;
+    --secondary: #2b3519;
+    --secondary-foreground: #d2e5a4;
+    --muted: #252a1d;
+    --muted-foreground: #adb39b;
+    --accent: #2b3519;
+    --accent-foreground: #d2e5a4;
+    --border: #343a2a;
+    --input: #767e63;
+    --ring: #a3c653;
+    --chart-empty: #272c1f;
+    --chart-grid: #2b3022;
+    --chart-axis: #444b38;
+    --sidebar: #181b13;
+    --sidebar-foreground: #eef0e4;
+    --sidebar-primary: #a3c653;
+    --sidebar-primary-foreground: #10150a;
+    --sidebar-accent: #2b3519;
+    --sidebar-accent-foreground: #d2e5a4;
+    --sidebar-border: #343a2a;
+    --sidebar-ring: #a3c653;
+}
+
+/* Pizarra oscuro: azul noche con un azul cielo. */
+[data-theme='slate-dark'] {
+    --background: #11161c;
+    --foreground: #e6edf5;
+    --card: #181f27;
+    --card-foreground: #e6edf5;
+    --popover: #1e2630;
+    --popover-foreground: #e6edf5;
+    --primary: #6fa8e8;
+    --primary-foreground: #0b1118;
+    --secondary: #1e3047;
+    --secondary-foreground: #bcd6f4;
+    --muted: #212a34;
+    --muted-foreground: #a3b0bf;
+    --accent: #1e3047;
+    --accent-foreground: #bcd6f4;
+    --border: #2f3a48;
+    --input: #6f7e91;
+    --ring: #6fa8e8;
+    --chart-empty: #232c36;
+    --chart-grid: #28323d;
+    --chart-axis: #3f4c5c;
+    --sidebar: #151b22;
+    --sidebar-foreground: #e6edf5;
+    --sidebar-primary: #6fa8e8;
+    --sidebar-primary-foreground: #0b1118;
+    --sidebar-accent: #1e3047;
+    --sidebar-accent-foreground: #bcd6f4;
+    --sidebar-border: #2f3a48;
+    --sidebar-ring: #6fa8e8;
+}
+
+/* Vino oscuro: burdeos casi negro con un rosa vino claro. */
+[data-theme='wine-dark'] {
+    --background: #171114;
+    --foreground: #f3e9ec;
+    --card: #20181c;
+    --card-foreground: #f3e9ec;
+    --popover: #271d22;
+    --popover-foreground: #f3e9ec;
+    --primary: #e8788f;
+    --primary-foreground: #19090e;
+    --secondary: #3b202a;
+    --secondary-foreground: #f6bfcc;
+    --muted: #2a2024;
+    --muted-foreground: #b8a6ac;
+    --accent: #3b202a;
+    --accent-foreground: #f6bfcc;
+    --border: #3d2e34;
+    --input: #806c74;
+    --ring: #e8788f;
+    --chart-empty: #2c2327;
+    --chart-grid: #30262b;
+    --chart-axis: #4b3d43;
+    --sidebar: #1c1418;
+    --sidebar-foreground: #f3e9ec;
+    --sidebar-primary: #e8788f;
+    --sidebar-primary-foreground: #19090e;
+    --sidebar-accent: #3b202a;
+    --sidebar-accent-foreground: #f6bfcc;
+    --sidebar-border: #3d2e34;
+    --sidebar-ring: #e8788f;
+}
+
+/* Terracota oscuro con alto contraste: texto blanco, terracota claro y bordes firmes. */
+[data-theme='terracotta-contrast-dark'] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #0c0805;
+    --card-foreground: #ffffff;
+    --popover: #120b07;
+    --popover-foreground: #ffffff;
+    --primary: #ffb08a;
+    --primary-foreground: #000000;
+    --secondary: #2e1405;
+    --secondary-foreground: #ffd0b8;
+    --muted: #1f1814;
+    --muted-foreground: #dcd2c9;
+    --accent: #2e1405;
+    --accent-foreground: #ffd0b8;
+    --border: #b8a89b;
+    --input: #f0e4da;
+    --ring: #ffb08a;
+    --chart-empty: #1f1814;
+    --chart-grid: #3a302a;
+    --chart-axis: #9a8a7e;
+    --sidebar: #0c0805;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #ffb08a;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #2e1405;
+    --sidebar-accent-foreground: #ffd0b8;
+    --sidebar-border: #b8a89b;
+    --sidebar-ring: #ffb08a;
+}
+
+/* Oliva oscuro con alto contraste: texto blanco, oliva claro y bordes firmes. */
+[data-theme='olive-contrast-dark'] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #090b05;
+    --card-foreground: #ffffff;
+    --popover: #0f1209;
+    --popover-foreground: #ffffff;
+    --primary: #c4ec6a;
+    --primary-foreground: #000000;
+    --secondary: #1f2e00;
+    --secondary-foreground: #e0f5a8;
+    --muted: #1a1d14;
+    --muted-foreground: #d6dac8;
+    --accent: #1f2e00;
+    --accent-foreground: #e0f5a8;
+    --border: #aab38f;
+    --input: #eaf0d8;
+    --ring: #c4ec6a;
+    --chart-empty: #1a1d14;
+    --chart-grid: #343a28;
+    --chart-axis: #8a9275;
+    --sidebar: #090b05;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #c4ec6a;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #1f2e00;
+    --sidebar-accent-foreground: #e0f5a8;
+    --sidebar-border: #aab38f;
+    --sidebar-ring: #c4ec6a;
+}
+
+/* Pizarra oscuro con alto contraste: texto blanco, pizarra claro y bordes firmes. */
+[data-theme='slate-contrast-dark'] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #05080c;
+    --card-foreground: #ffffff;
+    --popover: #0a1017;
+    --popover-foreground: #ffffff;
+    --primary: #9cc8ff;
+    --primary-foreground: #000000;
+    --secondary: #0f2a4a;
+    --secondary-foreground: #d3e6ff;
+    --muted: #151b22;
+    --muted-foreground: #cfd9e5;
+    --accent: #0f2a4a;
+    --accent-foreground: #d3e6ff;
+    --border: #9fb0c6;
+    --input: #e3ecf7;
+    --ring: #9cc8ff;
+    --chart-empty: #151b22;
+    --chart-grid: #2c3644;
+    --chart-axis: #8696ab;
+    --sidebar: #05080c;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #9cc8ff;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #0f2a4a;
+    --sidebar-accent-foreground: #d3e6ff;
+    --sidebar-border: #9fb0c6;
+    --sidebar-ring: #9cc8ff;
+}
+
+/* Vino oscuro con alto contraste: texto blanco, vino claro y bordes firmes. */
+[data-theme='wine-contrast-dark'] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #0b0709;
+    --card-foreground: #ffffff;
+    --popover: #120b0e;
+    --popover-foreground: #ffffff;
+    --primary: #ffa3b8;
+    --primary-foreground: #000000;
+    --secondary: #4a0f22;
+    --secondary-foreground: #ffd1dc;
+    --muted: #1d1418;
+    --muted-foreground: #e0cfd4;
+    --accent: #4a0f22;
+    --accent-foreground: #ffd1dc;
+    --border: #c0a4ad;
+    --input: #f5e4e9;
+    --ring: #ffa3b8;
+    --chart-empty: #1d1418;
+    --chart-grid: #3a2a30;
+    --chart-axis: #9a808a;
+    --sidebar: #0b0709;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #ffa3b8;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #4a0f22;
+    --sidebar-accent-foreground: #ffd1dc;
+    --sidebar-border: #c0a4ad;
+    --sidebar-ring: #ffa3b8;
+}
+
+/* Alto contraste (oscuro): estados a 7 a 1 aun sobre su tinte al 20 %. */
+[data-theme='terracotta-contrast-dark'],
+[data-theme='olive-contrast-dark'],
+[data-theme='slate-contrast-dark'],
+[data-theme='wine-contrast-dark'] {
+    --destructive: #ffa3a3;
+    --success: #7ee69a;
+    --success-foreground: #000000;
+    --warning: #f5c04a;
+}
+
+/*
+ * Con alto contraste el foco se dibuja con un contorno sólido de 3 px, además del
+ * anillo de cada componente (que va al 50 %): así se ve a 7 a 1 o más y no mueve
+ * el diseño, porque el contorno no ocupa lugar.
+ */
+[data-theme*='-contrast'] :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
 }
 
 @layer base {
@@ -222,27 +896,122 @@
   * {
     -webkit-tap-highlight-color: transparent;
   }
-}
 
-/*
- * El boton del widget de accesibilidad vive fijo en la esquina inferior
- * derecha. En el celular, con sesion, esa esquina es de la barra de
- * navegacion y de los botones "+" de los platos al tomar un pedido: el boton
- * flotante se oculta y el menu del widget se abre desde "Más". El widget fija
- * su posicion con estilos en linea, por eso hace falta `!important`.
- */
-@media (width < 64rem) {
-  html:has([data-bottom-nav]) .asw-menu-btn {
-    display: none !important;
+  /*
+   * Con el dedo, los botones chicos (paginación, cerrar un diálogo, el ojo de
+   * la contraseña) se erran. 44 px es el objetivo táctil recomendado por WCAG
+   * 2.5.5; el hueco alrededor del icono no cambia el diseño del escritorio.
+   */
+  [data-slot='button'][data-size='xs'],
+  [data-slot='button'][data-size='sm'],
+  [data-slot='button'][data-size='icon-xs'],
+  [data-slot='button'][data-size='icon-sm'] {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
 /*
- * En la laptop, mientras se toma un pedido la barra del carrito queda fija al
- * pie: el boton de accesibilidad sube por encima para no tapar "Enviar a cocina".
+ * El boton de accesibilidad de reserva (AccessibilityWidget.tsx, solo sin sesion) y el del
+ * widget Sienna una vez cargado, comparten la paleta de la marca (`--primary`,
+ * texto blanco: 7,3 a 1), 44 px y la esquina inferior derecha sin halo.
+ *
+ * El widget pinta su boton con una hoja que inyecta en el documento; se la
+ * gana por especificidad (`html .asw-...`) y con sus propias variables
+ * (`--asw-primary`, `--asw-btn-size`...), asi que no hacen falta estilos en
+ * linea ni tocar la CSP. El mismo `--asw-primary` tine el menu del widget.
  */
-@media (width >= 64rem) {
-  html:has([data-cart-bar]) .asw-menu-btn {
-    bottom: 6rem !important;
+html .asw-widget,
+html .asw-menu {
+  --asw-primary: var(--primary);
+}
+
+html .asw-menu-btn {
+  --asw-btn-size: 44px;
+  --asw-btn-size-mobile: 44px;
+  --asw-icon-size: 24px;
+  --asw-icon-size-mobile: 24px;
+  --asw-left: auto;
+  --asw-right: 1rem;
+  --asw-bottom: 1rem;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: var(--shadow-float);
+}
+
+html .asw-menu-btn:focus-visible,
+.a11y-launcher:focus-visible {
+  outline: 3px solid var(--ring) !important;
+  outline-offset: 2px;
+}
+
+.a11y-launcher {
+  position: fixed;
+  z-index: 500000;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-float);
+  cursor: pointer;
+}
+
+/*
+ * Con sesion no hay boton flotante de accesibilidad en ningun tamano: el menu
+ * del widget se abre desde la fila «Accesibilidad» de la barra lateral y desde
+ * «Cuenta» o «Más» en el celular (`openAccessibilityMenu`, que hace clic en este
+ * boton aunque este oculto). Sin sesion (acceso, privacidad) no hay barra y el
+ * boton se queda en la esquina. El widget fija su posicion con estilos en
+ * linea, por eso hace falta `!important`.
+ */
+html:has([data-side-nav], [data-bottom-nav]) .asw-menu-btn {
+  display: none !important;
+}
+
+/*
+ * El tamaño del texto es uno solo y vive en «Apariencia» (y en «Apariencia
+ * rápida»). El widget Sienna trae el suyo, que se sumaba al de RestHub: se
+ * oculta ese control y quedan sus demás ajustes (espaciado, contraste, lectura).
+ */
+html .asw-menu .asw-adjust-font {
+  display: none !important;
+}
+
+/*
+ * Con los colores forzados de Windows (alto contraste del sistema) las sombras y
+ * los anillos hechos con `box-shadow` desaparecen: la opción elegida y la que
+ * tiene el foco se marcan con un contorno, que el sistema sí respeta.
+ */
+@media (forced-colors: active) {
+  label:has(input[type='radio']:checked) {
+    outline: 3px solid Highlight;
   }
+
+  label:has(input[type='radio']:focus-visible) {
+    outline: 3px double CanvasText;
+    outline-offset: 2px;
+  }
+}
+
+/*
+ * Pista de desplazamiento para una lista que no cabe (el menu lateral en una
+ * laptop baja): una sombra suave en el borde por el que aun hay contenido, que
+ * desaparece al llegar al extremo. Sin JavaScript: los degradados `local` se
+ * mueven con el contenido y tapan la sombra fija.
+ */
+.scroll-shadow {
+  background:
+    linear-gradient(var(--card) 30%, transparent) 0 0 / 100% 2rem no-repeat local,
+    linear-gradient(transparent, var(--card) 70%) 0 100% / 100% 2rem no-repeat local,
+    radial-gradient(farthest-side at 50% 0, rgb(43 37 33 / 0.22), transparent) 0 0 / 100% 0.75rem no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgb(43 37 33 / 0.22), transparent) 0 100% / 100% 0.75rem no-repeat scroll;
+  background-color: var(--card);
 }

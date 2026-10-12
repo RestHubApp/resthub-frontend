@@ -1,5 +1,5 @@
-import { Input } from '../../../components/ui/input'
-import { Label } from '../../../components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface FilterTextFieldProps {
   readonly id: string
@@ -16,7 +16,7 @@ interface FilterTextFieldProps {
  * Un filtro de texto que se aplica al enviar el formulario, no con cada letra:
  * cada búsqueda es una lectura del servidor.
  */
-export default function FilterTextField({
+export function FilterTextField({
   id,
   name,
   label,
@@ -33,7 +33,6 @@ export default function FilterTextField({
         id={id}
         name={name}
         type={type}
-        className="h-11"
         value={value}
         onChange={(event) => {
           onChange(event.target.value)

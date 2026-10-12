@@ -1,11 +1,10 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import type { Role } from '../../api/types'
-import ReadOnlyField from '../../components/ReadOnlyField'
-import SelectField from '../../components/SelectField'
-import TextField from '../../components/TextField'
-import { NativeSelectOption } from '../../components/ui/native-select'
-import { soloLetras } from '../../services/fieldRules'
+import type { Role } from '@/api/types'
+import { TextField } from '@/components/TextField'
+import { onlyLetters } from '@/services/fieldRules'
+import { StaffEmailField } from './StaffEmailField'
+import { StaffRoleField } from './StaffRoleField'
 
 interface StaffFieldsProps {
   /** Lo que devuelve `register(...)` para cada campo. */
@@ -16,20 +15,20 @@ interface StaffFieldsProps {
     readonly email?: UseFormRegisterReturn
   }
   readonly errors: {
-    readonly full_name?: string
-    readonly email?: string
-    readonly role_id?: string
+    readonly full_name?: string | undefined
+    readonly email?: string | undefined
+    readonly role_id?: string | undefined
   }
   /** Los roles que quien mira puede dar. */
   readonly roles: readonly Role[]
   /** El correo de una cuenta que ya existe. */
-  readonly fixedEmail?: string
+  readonly fixedEmail?: string | undefined
   /**
    * El rol de la cuenta propia, que no se puede cambiar: quien se quita el
    * permiso de administrar el personal se queda sin esta pantalla. Con valor,
    * se muestra en vez de la lista.
    */
-  readonly lockedRoleLabel?: string
+  readonly lockedRoleLabel?: string | undefined
 }
 
 /**
@@ -39,7 +38,7 @@ interface StaffFieldsProps {
  * alta, que ademas pide la contraseña, y la edicion, que no, comparten los
  * campos sin compartir el tipo de su formulario.
  */
-export default function StaffFields({
+export function StaffFields({
   fields,
   errors,
   roles,
@@ -53,55 +52,15 @@ export default function StaffFields({
           id="full_name"
           label="Nombre completo"
           placeholder="María Quispe Rojas"
-          icon="perfil"
+          icon="profile"
           autoComplete="off"
-          sanitize={soloLetras}
+          sanitize={onlyLetters}
           field={fields.full_name}
           error={errors.full_name}
         />
       </div>
-      {fields.email === undefined ? (
-        <ReadOnlyField
-          label="Correo"
-          value={fixedEmail ?? ''}
-          hint="Es con lo que entra a RestHub: no se cambia."
-        />
-      ) : (
-        <TextField
-          id="email"
-          label="Correo"
-          placeholder="nombre@correo.com"
-          type="email"
-          inputMode="email"
-          autoComplete="off"
-          spellCheck={false}
-          hint="Con este correo entra a RestHub."
-          field={fields.email}
-          error={errors.email}
-        />
-      )}
-      {lockedRoleLabel !== undefined ? (
-        <ReadOnlyField
-          label="Rol"
-          value={lockedRoleLabel}
-          hint="No puedes cambiar el rol de tu propia cuenta."
-        />
-      ) : (
-        <SelectField
-          id="role_id"
-          label="Rol"
-          icon="tipoDeCuenta"
-          hint="Solo aparecen los roles con permisos que tu cuenta también tiene."
-          field={fields.role_id}
-          error={errors.role_id}
-        >
-          {roles.map((role) => (
-            <NativeSelectOption key={role.id} value={String(role.id)}>
-              {role.name}
-            </NativeSelectOption>
-          ))}
-        </SelectField>
-      )}
+      <StaffEmailField field={fields.email} error={errors.email} fixedEmail={fixedEmail} />
+      <StaffRoleField field={fields.role_id} error={errors.role_id} roles={roles} lockedRoleLabel={lockedRoleLabel} />
     </div>
   )
 }

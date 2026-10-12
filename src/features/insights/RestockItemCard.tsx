@@ -1,10 +1,10 @@
-import type { RestockItem } from '../../api/types'
-import ActionBadge from './ActionBadge'
-import EngineBadge from './EngineBadge'
-import Metric from './Metric'
-import TrendText from './TrendText'
-import UrgencyMeter from './UrgencyMeter'
-import { formatConfidence, formatDays, formatPercent, formatQuantity } from '../../services/format'
+import type { RestockItem } from '@/api/types'
+import { ActionBadge } from './ActionBadge'
+import { EngineBadge } from './EngineBadge'
+import { Metric } from './Metric'
+import { TrendText } from './TrendText'
+import { UrgencyMeter } from './UrgencyMeter'
+import { formatConfidence, formatDays, formatPercent, formatQuantity } from '@/services/format'
 
 interface RestockItemCardProps {
   readonly item: RestockItem
@@ -15,12 +15,12 @@ interface RestockItemCardProps {
  * urgencia y confianza, y quién lo decidió. Los números que la sostienen van
  * abajo para que el encargado pueda no estar de acuerdo.
  */
-export default function RestockItemCard({ item }: RestockItemCardProps) {
+export function RestockItemCard({ item }: RestockItemCardProps) {
   return (
     <li className="flex flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="m-0 text-base font-semibold">{item.name}</h3>
+          <h2 className="m-0 text-base font-semibold">{item.name}</h2>
           <EngineBadge engine={item.engine} fallbackReason={item.fallback_reason} fallbackLabel={item.fallback_label} />
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs">

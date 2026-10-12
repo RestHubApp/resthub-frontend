@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { MAX_PASSWORD, MIN_PASSWORD } from './fieldLimits'
+
 // Reglas de los datos de una persona, compartidas por el acceso, el perfil y
 // el alta de personal.
 //
@@ -7,68 +9,67 @@ import { z } from 'zod'
 // sigue viviendo en el servidor: avisa mientras la persona escribe y no
 // despues de un viaje.
 
-export const MIN_PASSWORD = 10
-export const MAX_PASSWORD = 128
-export const MAX_NOMBRE_COMPLETO = 120
-export const MAX_TELEFONO = 20
+export const MAX_COMPLETE_NAME = 120
 
 // Letras de cualquier idioma, con tildes y enie, separadas por un espacio, un
 // guion o un apostrofo: "María José", "Pérez-Luna", "O'Brien".
-const PALABRAS = /^\p{L}+(?:[ '-]\p{L}+)*$/u
-const TELEFONO = /^\+?\d+(?: \d+)*$/u
-const MIN_DIGITOS_TELEFONO = 7
-const MAX_DIGITOS_TELEFONO = 15
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
+const WORDS = /^\p{L}+(?:[ '-]\p{L}+)*$/u
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
+const PHONE = /^\+?\d+(?: \d+)*$/u
+const MIN_DIGITS_PHONE = 7
+const MAX_DIGITS_PHONE = 15
 
 /** Quita lo que no puede ir en un nombre mientras la persona escribe. */
-export function soloLetras(valor: string): string {
-  return valor.replace(/[^\p{L} '-]/gu, '')
+export function onlyLetters(value: string): string {
+  return value.replaceAll(/[^\p{L} '-]/gu, '')
 }
 
 /** Deja solo los digitos. */
-export function soloDigitos(valor: string): string {
-  return valor.replace(/\D/gu, '')
+export function onlyDigits(value: string): string {
+  return value.replaceAll(/\D/gu, '')
 }
 
 /** Deja digitos, espacios y el `+` del codigo de pais. */
-export function soloTelefono(valor: string): string {
-  return valor.replace(/[^\d +]/gu, '')
+export function onlyPhone(value: string): string {
+  return value.replaceAll(/[^\d +]/gu, '')
 }
 
-function contarDigitos(valor: string): number {
-  return soloDigitos(valor).length
+function countDigits(value: string): number {
+  return onlyDigits(value).length
 }
 
-function telefonoValido(valor: string): boolean {
-  if (valor === '') {
+function phoneValid(value: string): boolean {
+  if (value === '') {
     return true
   }
-  const digitos = contarDigitos(valor)
+  const digits = countDigits(value)
   return (
-    TELEFONO.test(valor) && digitos >= MIN_DIGITOS_TELEFONO && digitos <= MAX_DIGITOS_TELEFONO
+    PHONE.test(value) && digits >= MIN_DIGITS_PHONE && digits <= MAX_DIGITS_PHONE
   )
 }
 
 /** `posesivo` es "tu" cuando la persona escribe lo suyo y "el" cuando carga a otra. */
-export function nombreRule(dato: string, max: number, posesivo: 'tu' | 'el' = 'tu'): z.ZodString {
-  const sujeto = `${posesivo === 'tu' ? 'Tu' : 'El'} ${dato}`
+export function nameRule(data: string, max: number, possessive: 'tu' | 'el' = 'tu'): z.ZodString {
+  const subject = `${possessive === 'tu' ? 'Tu' : 'El'} ${data}`
   return z
     .string()
     .trim()
-    .min(1, `Escribe ${posesivo} ${dato}`)
+    .min(1, `Escribe ${possessive} ${data}`)
     .max(max, `Usa como máximo ${String(max)} caracteres`)
-    .regex(PALABRAS, `${sujeto} solo puede llevar letras, espacios, guiones o apóstrofos`)
+    .regex(WORDS, `${subject} solo puede llevar letras, espacios, guiones o apóstrofos`)
 }
 
-export const correoRule = z
+export const emailRule = z
   .string()
   .trim()
   .toLowerCase()
   .pipe(z.email('Escribe un correo válido, como nombre@correo.com'))
 
-export const telefonoRule = z
+export const phoneRule = z
   .string()
   .trim()
-  .refine(telefonoValido, 'Escribe un teléfono de 7 a 15 dígitos, como 987 654 321')
+  .refine(phoneValid, 'Escribe un teléfono de 7 a 15 dígitos, como 987 654 321')
 
 export const passwordRule = z
   .string()

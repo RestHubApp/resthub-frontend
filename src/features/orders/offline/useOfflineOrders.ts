@@ -1,41 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
 
-import { advanceOrder, openOrder, ordersQueryKey } from '../../../api/orders'
-import { tablesQueryKey } from '../../../api/tables'
-import { errorMessage, errorStatus } from '../../../services/api'
-import { useNotifications } from '../../../store/notifications'
-import { belongsTo, ownerOf, type QueuedOrder, queuedOrders, removeQueued, useQueuedOrders } from '../../../store/offlineQueue'
-import { useSession } from '../../../store/session'
+import { ordersQueryKey } from '@/api/orders'
+import { tablesQueryKey } from '@/api/tables'
+import { useNotifications } from '@/store/notifications'
+import { belongsTo, ownerOf, queuedOrders, useQueuedOrders } from '@/store/offlineQueue'
+import { staffOf, useSession, useStaffAccount } from '@/store/session'
+import { deliverQueued } from './deliverQueued'
 
-const CONFLICT = 409
-const UNAUTHORIZED = 401
 // Mientras haya pedidos esperando, se reintenta cada medio minuto por si el
 // navegador no avisa que volvió la señal (pasa en algunos celulares).
 const RETRY_MS = 30_000
-
-// El servidor no llegó a atender: el proxy delante responde por él.
-const SERVER_UNREACHABLE = new Set([502, 503, 504])
-
-/**
- * Sin respuesta del servidor: no hay señal, se cortó o el servidor no está.
- * Vale reintentar, porque el pedido lleva su id y no se duplica.
- */
-export function isOffline(error: unknown): boolean {
-  const status = errorStatus(error)
-  return status === undefined || SERVER_UNREACHABLE.has(status)
-}
-
-/** Abre el pedido y lo manda a cocina; si ya estaba en cocina, el 409 vale como hecho. */
-async function sendQueued(pedido: QueuedOrder): Promise<number> {
-  const abierto = await openOrder(pedido.request)
-  await advanceOrder(abierto.id, 'send').catch((error: unknown) => {
-    if (errorStatus(error) !== CONFLICT) {
-      throw error
-    }
-  })
-  return abierto.number
-}
 
 /**
  * Los pedidos tomados sin señal y el envío automático al volver la conexión.
@@ -45,64 +20,48 @@ async function sendQueued(pedido: QueuedOrder): Promise<number> {
  * rechazo de verdad (plato agotado, mesa ocupada) se avisa y sale de la cola.
  */
 export function useOfflineOrders() {
-  const pendientes = useQueuedOrders(useSession((state) => state.account))
+  const pending = useQueuedOrders(useStaffAccount())
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const enviando = useRef(false)
+  const sending = useRef(false)
 
-  const enviar = useCallback(async () => {
-    const owner = ownerOf(useSession.getState().account)
-    if (enviando.current || queuedOrders(owner).length === 0) {
+  const send = useCallback(async () => {
+    const owner = ownerOf(staffOf(useSession.getState().account))
+    if (sending.current || queuedOrders(owner).length === 0) {
       return
     }
-    enviando.current = true
+    sending.current = true
     try {
-      for (const pedido of queuedOrders(owner)) {
+      for (const order of queuedOrders(owner)) {
         // Si la sesión se cerró o cambió de cuenta a mitad de la cola, el
         // token ya no es el de quien tomó el pedido.
-        if (!belongsTo(pedido, ownerOf(useSession.getState().account))) {
+        if (!belongsTo(order, ownerOf(staffOf(useSession.getState().account)))) {
           break
         }
-        const siguio = await sendQueued(pedido).then(
-          (numero) => {
-            removeQueued(pedido.request.client_request_id ?? '')
-            push({ tone: 'info', message: `${pedido.label}: pedido #${String(numero)} enviado a cocina.` })
-            return true
-          },
-          (error: unknown) => {
-            // Sin señal se corta y se reintenta después, igual que con la sesión
-            // vencida: vuelve a salir cuando esa cuenta entre. Un rechazo sale de la cola.
-            if (isOffline(error) || errorStatus(error) === UNAUTHORIZED) {
-              return false
-            }
-            removeQueued(pedido.request.client_request_id ?? '')
-            push({ tone: 'warning', message: `${pedido.label}: ${errorMessage(error, 'no se pudo enviar.')}` })
-            return true
-          },
-        )
-        if (!siguio) {
+        const wasFollowed = await deliverQueued(order, push)
+        if (!wasFollowed) {
           break
         }
       }
     } finally {
-      enviando.current = false
+      sending.current = false
       void queryClient.invalidateQueries({ queryKey: ordersQueryKey })
       void queryClient.invalidateQueries({ queryKey: tablesQueryKey })
     }
   }, [push, queryClient])
 
   useEffect(() => {
-    void enviar()
-    const alVolver = () => {
-      void enviar()
+    void send()
+    const onBack = () => {
+      void send()
     }
-    window.addEventListener('online', alVolver)
-    const timer = window.setInterval(alVolver, RETRY_MS)
+    window.addEventListener('online', onBack)
+    const timer = window.setInterval(onBack, RETRY_MS)
     return () => {
-      window.removeEventListener('online', alVolver)
+      window.removeEventListener('online', onBack)
       window.clearInterval(timer)
     }
-  }, [enviar])
+  }, [send])
 
-  return { pendientes, enviar }
+  return { pending, send }
 }

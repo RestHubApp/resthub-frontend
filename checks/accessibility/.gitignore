@@ -1,0 +1,5 @@
+# Salidas de las mediciones: se versiona solo el resumen.
+reportes/*
+!reportes/resumen.md
+# La extensión WAVE se descarga de la Chrome Web Store al correr (wave.mjs).
+.wave-ext/

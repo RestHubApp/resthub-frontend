@@ -12,10 +12,10 @@ bajo `/api/v1`. La documentación del producto vive en Notion.
 - shadcn/ui sobre Radix y Tailwind CSS 4; iconos de Lucide.
 - React Router en modo librería, TanStack Query y TanStack Table.
 - React Hook Form + Zod para formularios, Zustand para el estado de cliente.
-- Axios como cliente HTTP, con tipos generados por openapi-typescript.
+- `openapi-fetch` como cliente HTTP, tipado de punta a punta con los tipos que genera openapi-typescript.
 - PWA instalable con vite-plugin-pwa; sin señal, el mesero puede tomar pedidos nuevos (ver abajo).
 - ESLint estricto (typescript-eslint, sonarjs, límites de arquitectura), Husky y lint-staged.
-- Vitest para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones).
+- Jest 30 con React Testing Library para las reglas puras (cuentas del cobro, opciones, compras, horas, sesiones) y las pantallas.
 - pnpm 12 (fijado en `packageManager`).
 
 ## Cómo correrlo
@@ -31,24 +31,85 @@ pnpm dev                     # http://localhost:5173
 `pnpm dev` reenvía `/api` a `http://localhost:8000`, así que el backend tiene que
 estar corriendo para que las pantallas tengan datos. Con la semilla de desarrollo
 del backend se entra con `admin@resthub.dev` o `mesero@resthub.dev` y la
-contraseña `resthub123`; al área de administración del sistema
-(`/plataforma/acceso`), con `plataforma@resthub.dev` y la misma contraseña.
+contraseña `resthub123`; a la administración del sistema se entra por el mismo
+acceso (`/acceso`), con `plataforma@resthub.dev` y la misma contraseña: el
+servidor decide qué cuenta es y la interfaz solo muestra lo que sus permisos
+dejan.
 
 | Comando | Qué hace |
 |---|---|
 | `pnpm dev` | Servidor de desarrollo |
 | `pnpm lint` | ESLint sobre todo el proyecto |
 | `pnpm typecheck` | Verificación de tipos |
-| `pnpm test` | Pruebas unitarias con Vitest (`*.test.ts` junto al código) |
+| `pnpm test` | Pruebas unitarias y de componentes con Jest (`*.test.ts(x)` junto al código) |
+| `pnpm test:coverage` | Las mismas pruebas con cobertura sobre todo `src` (informe HTML en `coverage/lcov-report/`) |
+| `pnpm test:contract` | Pruebas de contrato del consumidor con Pact (`src/api/contract/*.pact.ts`): escriben `pacts/`, que el backend verifica |
+| `pnpm test:mutation` | Pruebas de mutación con Stryker sobre la lógica de negocio (informe en `reports/mutation/index.html`; no corre en el CI) |
 | `pnpm build` | Tipos y compilación de producción en `dist/` |
 | `pnpm preview` | Sirve la compilación de producción |
 | `pnpm generate:api` | Regenera `src/api/schema.d.ts` desde el OpenAPI del backend |
+| `pnpm run doctor` | React Doctor (corrección, rendimiento, seguridad y accesibilidad de React) con `--no-score`; falla ante cualquier hallazgo. Se escribe `pnpm run doctor` porque `pnpm doctor` es un comando de pnpm. Exclusiones y motivos en `doctor.config.jsonc` |
+| `pnpm carbon` | Huella de carbono de la primera visita de cada ruta, en modo estático (tamaño comprimido según el manifest de Vite); falla si una ruta baja de A+ |
+| `pnpm carbon:browser` | Lo mismo midiendo con Chromium los bytes que viajan (el del CI) |
+| `pnpm test:e2e` | Pruebas E2E con Playwright contra el backend de develop (job `e2e` del CI). Ver `e2e/README.md` |
+| `pnpm test:visual:ci` | Regresión visual de Chromium (escritorio y celular); el CI la corre en la imagen de Playwright (job `visual`) |
+| `pnpm test:visual` | Regresión visual en los tres navegadores; Firefox y WebKit solo en local |
+| `pnpm test:visual:update` | Regenera las líneas base de Chromium dentro de la imagen de Playwright (docker o podman). Ver `e2e/README.md` |
+| `pnpm a11y [axe] [keyboard] …` | Revisión de accesibilidad de cada ruta y modal con la sesión de cada rol (`checks/accessibility/`). Con `A11Y_STRICT=1` falla ante violaciones serious o critical de axe; el job `con-sesion` del CI corre `pnpm a11y axe keyboard` así |
+
+### Pruebas
+
+Jest corre sin Vite: Babel compila TypeScript y JSX, y `jest.config.js` resuelve
+lo que en la aplicación resuelve Vite (`import.meta.env`, el alias `@/`, los
+estilos y los módulos virtuales de la PWA). La infraestructura de las pruebas
+está en `jest/`.
+
+- Las pruebas importan `describe`, `it`, `expect` y `jest` de `@jest/globals`.
+- El entorno por defecto es jsdom, para las pruebas de componentes con React
+  Testing Library (`render`, `screen`, `userEvent`) y los matchers de jest-dom.
+- Las pruebas de pantallas usan el arnés `#jest/harness`: `montar(<Vista />)`
+  la abre con un router en memoria y el caché de la aplicación, `entrarComo()`
+  abre una sesión con los permisos dados y `servidor().on('get', '/ruta', datos)`
+  responde el API (`llamadas()` dice qué se envió; los parámetros de la consulta llegan como texto).
+  El canal de avisos (SSE) falso está en `#jest/channel` y los datos de prueba
+  en `jest/fixtures/`.
+- La red de las pruebas es MSW (`jest/mswServer.ts`, `setupServer` de `msw/node`,
+  encendido en `jest/setupDom.ts` con `onUnhandledRequest: 'error'` y reseteado
+  tras cada prueba): se ejercita el cliente real (`openapi-fetch`,
+  `src/services/api.ts`) y solo la red es falsa. El arnés, `answerAll` y el
+  canal de avisos son manejadores de MSW. Para una respuesta tipada con el
+  contrato, `apiHttp` de `#jest/apiHttp` (`openapi-msw`): la ruta y el cuerpo
+  deben existir en `schema.d.ts`. ESLint prohíbe `jest.mock` de `@/api/*` y de
+  `@/services/api` en las pruebas (`MOCKS_OF_API_ALLOWED` en `eslint.config.js`
+  guarda las excepciones por archivo, con su motivo; hoy no hay).
+  Detalles de entorno: `jest.config.js` usa `customExportConditions: ['']` para
+  que `msw/node` resuelva su versión de Node; `jest/jsdomEnvironment.cjs` copia
+  `fetch` y las clases de la API fetch de Node; las dependencias ESM de MSW
+  se transforman con Babel (`onlyEsm`). Con temporizadores falsos de Jest, no se
+  falsean `setImmediate`, `nextTick` ni `queueMicrotask`
+  (`jest.useFakeTimers({ doNotFake: [...] })`) o MSW responde 500.
+- Los errores del servidor son `{ detail, code }`. `ApiError.code` es el
+  `ErrorCode` del esquema y toda decisión (reintentar, cerrar sesión, «mesa
+  ocupada», conflicto de nombre…) usa `hasCode`, `isSessionEnded` o
+  `isUnreachable` de `services/apiError`; el `detail` solo se muestra
+  (`errorMessage`). ESLint prohíbe comparar el texto del error.
+- Las pruebas que simulan una pestaña sin DOM (reemplazan `window`, `location`
+  o el almacenamiento) declaran `@jest-environment ./jest/nodeEnvironment.cjs`
+  y usan `stubGlobal` y `unstubAllGlobals` de `#jest/globals`.
+- Si cambia `jest/importMetaEnv.cjs`, hay que vaciar la caché con
+  `pnpm exec jest --clearCache`: Jest no la invalida sola.
+
+La mutación (`stryker.config.mjs`) muta `services`, `store` y las utilidades
+puras de `features` (no los componentes, los hooks `use*.ts` ni las precargas),
+con tres procesos y en modo incremental. Falla por debajo de 70 %
+(`thresholds.break`). Tarda del orden de una hora la primera vez, por eso no
+está en el CI.
 
 ### Variables de entorno
 
 | Variable | Uso |
 |---|---|
-| `VITE_API_URL` | Origen del backend en producción, sin `/api/v1` (por ejemplo `https://api.resthub.pe`). Vacía en desarrollo. |
+| `VITE_API_URL` | Origen del backend en producción, sin `/api/v1` (por ejemplo `https://api.resthub.pe`). Vacía en desarrollo. Al compilar con ella, la CSP limita `connect-src` a la propia aplicación y a ese origen. **Defínela en Vercel** o `connect-src` queda abierto a cualquier https. |
 | `VITE_LOG_LEVEL` | Nivel mínimo de los logs del navegador. Por defecto `debug` en desarrollo y `warn` en producción. |
 
 ## Tipos del API
@@ -59,7 +120,7 @@ para que el frontend compile sin el backend a mano.
 
 ```bash
 pnpm generate:api                                      # contra el backend local
-VITE_API_URL=https://api.resthub.pe pnpm generate:api  # contra otro backend
+VITE_API_URL=https://api.resthub.pe pnpm generate:api  # contra otro backend con DEBUG=true (con DEBUG=false el esquema no se publica)
 ```
 
 El script lee la variable de la terminal, no de `.env.local`. Después de
@@ -81,18 +142,73 @@ src/
   hooks/        hooks compartidos sin dominio
   router/       rutas y guardas por permiso
   services/     cliente HTTP, logger, caché de consultas, reglas de campos
-  store/        estado de cliente con Zustand (sesión, sesión de plataforma, avisos)
+  store/        estado de cliente con Zustand (la sesión, del personal o de plataforma, y los avisos)
   main.tsx      raíz de composición
+scripts/        herramientas de línea de comandos (huella de carbono, fuente recortada)
 ```
 
 La dirección de dependencia la hace cumplir ESLint (`eslint-plugin-boundaries`):
 el router conoce a las características, las características no se importan
 entre sí, y las capas compartidas no conocen el dominio. Las pantallas no
-llaman a Axios: pasan por `src/services/api.ts` y por las funciones de `src/api/`.
+llaman a `openapi-fetch` ni a `fetch`: pasan por `src/services/api.ts` y por las funciones de `src/api/`.
 
 La navegación sale de `src/features/shell/navigation.ts`: cada entrada declara
 el permiso de `GET /auth/me` que la muestra. En pantallas anchas va en una barra
 lateral; en el celular, en una barra inferior al alcance del pulgar.
+
+## Huella de carbono y peso de la primera visita
+
+Una persona nueva paga con sus datos y el planeta lo que baja en la primera
+visita. La meta es la nota **A+** de [websitecarbon.com](https://www.websitecarbon.com/)
+(Sustainable Web Design v4, hasta 0,040 g de CO2e, unos 270 kB transferidos) en
+el acceso, el resto de las rutas públicas y la pantalla principal del mesero
+(Pedidos). `scripts/carbon.ts` lo comprueba y el CI falla si una ruta baja de A+:
+
+```bash
+pnpm carbon                # modo estático: compila a dist-carbon/ y suma el tamaño
+                           # comprimido (brotli) de lo que carga cada ruta según el
+                           # manifest de Vite, más lo que descarga el service worker.
+                           # Es una cota inferior: no ve lo que el código pide después
+pnpm carbon:browser        # modo navegador (el del CI): sirve la compilación con
+                           # `vite preview` y mide con Chromium los bytes que viajan
+                           # (cuerpo comprimido y cabeceras), esperando 10 s tras `load`
+pnpm carbon --verbose      # lista los archivos que más pesan de cada ruta
+```
+
+Cada visita es de un contexto nuevo (sin caché). La del mesero entra con una
+sesión de prueba y el API responde datos vacíos: sus bytes no se cuentan. Si
+Chromium no arranca en WSL (falta `libnspr4`), `pnpm carbon` no lo necesita; para
+el modo navegador se pueden extraer las librerías sin `sudo` como se explica en
+`e2e/README.md` (`apt-get download libnspr4 libnss3 libasound2t64`,
+`dpkg-deb -x` y `LD_LIBRARY_PATH`).
+
+Lo que mantiene la primera visita liviana:
+
+- **El acceso no carga Zod ni React Hook Form.** Su validación es de
+  `services/credentialRules.ts` y la usa el acceso, que es uno solo; el
+  resto de formularios siguen con Zod.
+- **El widget de accesibilidad (Sienna, 20 kB) se baja al tocar su botón.** La
+  página dibuja un botón propio, igual al del widget, que lo importa y abre su
+  menú (`components/AccessibilityWidget.tsx`).
+- **La fuente es la Geist de 400 a 900 en Latin-1** (19 kB, no 29 kB):
+  `bash scripts/subsetFont.sh` la regenera desde `@fontsource-variable/geist`.
+- **El archivo inicial es uno solo** (`shell` en `vite.config.ts`): cada archivo
+  de más es una petición con ~1 kB de cabeceras de seguridad.
+- **El service worker precachea solo el armazón** (lo que enlaza `index.html`:
+  8 archivos, no los 123 de antes (casi todas las pantallas y bibliotecas)). Cada pantalla se
+  guarda la primera vez que se abre (`runtimeCaching`, con `clientsClaim` para
+  que lo haga desde la primera sesión) y, para no romper el modo sin señal, al
+  entrar con sesión y tres segundos después de que el service worker está
+  listo se bajan las pantallas que el mesero necesita sin conexión
+  (`offline: true` en `router/screens/ordersScreens.ts`,
+  `features/shell/useOfflineWarmup.ts`; los archivos que la página ya había
+  bajado antes de que el service worker tomara el control los guarda
+  `services/screenCache.ts`). Ese paquete sin señal (Pedidos, pedido nuevo,
+  detalle y agregar platos: ~65 kB con cabeceras, `pnpm carbon` lo imprime) se
+  baja una vez por celular y solo con sesión; el modo navegador de `pnpm carbon`
+  bloquea el service worker y no lo cuenta en la nota. Recargar la app sin
+  señal sigue funcionando; lo que ya no pasa es pagar, en la primera visita al
+  acceso, las pantallas de administración que nunca se abrirán.
 
 ## Formatos, zona horaria y carga
 
@@ -101,16 +217,16 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
   propio `Intl.NumberFormat`.
 - "Hoy" y las horas son las del restaurante (`restaurant.timezone` de
   `GET /auth/me`, con `useTimeZone()`), no las del navegador de quien mira.
-- El acceso y la toma de pedidos del mesero van en el archivo inicial; las
-  pantallas del encargado (tablero, historial, menú, mesas, inventario,
-  personal, roles, perfil y panel) se descargan al abrirlas (`lazy` en
-  `src/router/index.tsx`).
-- Con la sesión abierta, el armazón baja en ratos libres
-  (`requestIdleCallback`) los archivos de las pantallas que la cuenta puede
-  abrir. Al pasar el puntero, enfocar o tocar un enlace del menú, adelanta
-  además la consulta principal de esa pantalla. Las rutas y la precarga salen
-  de la misma lista de `import()` del router; cada consulta se define una vez
-  con `queryOptions` en `src/api/` y la usan la vista y la precarga.
+- Todas las pantallas, incluso acceso y pedidos, se descargan al abrirlas
+  (`lazy` en `src/router/screens.ts` y `src/router/routes.tsx`): el archivo inicial no trae formularios
+  de Zod y React Hook Form ni la toma de pedidos. Si el archivo de una pantalla
+  no llega, `router/RouteError.tsx` la reemplaza por un aviso con «Recargar».
+- La precarga comienza con intención de navegación: al pasar el puntero,
+  enfocar o tocar un enlace del menú se adelanta el código y la consulta de
+  esa pantalla. No se descargan en segundo plano todas las pantallas al
+  entrar, para dejar CPU y red al primer render. Las rutas y la precarga
+  salen de la misma lista de `import()` del router; cada consulta se define
+  una vez con `queryOptions` en `src/api/` y la usan la vista y la precarga.
 - Después de guardar, las pantallas ponen en el caché lo que devolvió el
   servidor y releen de fondo, sin esperar ese segundo viaje para mostrar el
   cambio. Mientras carga una lista se ve su silueta, no un «Cargando…».
@@ -139,34 +255,50 @@ lateral; en el celular, en una barra inferior al alcance del pulgar.
 ## Administración del sistema (`/plataforma`)
 
 El equipo de RestHub no pertenece a ningún restaurante: da de alta locales y
-su primer encargado, y los activa o desactiva. Todo vive en
-`features/platform`, con su propio armazón (una franja oscura que dice
-«Administración del sistema», para no confundirlo con un local) y se descarga
-aparte: el celular del mesero nunca baja este código.
+su primer encargado, y los activa o desactiva. Usa **la misma aplicación** que
+el personal de un local: el mismo acceso (`/acceso`), el mismo armazón (menú
+lateral en la laptop y barra inferior en el celular), la misma guarda de
+rutas y el mismo registro de pantallas. Lo único que cambia es qué se muestra,
+según los permisos de la cuenta. Las pantallas viven en `features/platform` y
+se declaran en `src/router/screens/platformScreens.ts`, cada una con su
+permiso `platform.*` y su entrada de menú; se descargan aparte, así que el
+celular del mesero nunca baja este código.
 
-| Ruta | Pantalla |
-|---|---|
-| `/plataforma/acceso` | Acceso propio (correo y contraseña). El acceso normal lleva un enlace discreto «Administración del sistema». |
-| `/plataforma` | Restaurantes, los más nuevos primero, con búsqueda por nombre o identificador y paginación del servidor (25 por página). |
-| `/plataforma/restaurantes/nuevo` | Alta del restaurante (nombre, identificador, zona horaria) y de su primer encargado. |
-| `/plataforma/restaurantes/:id` | Ficha: nombre y zona horaria editables, activar o desactivar, encargados y «Agregar encargado». |
-| `/plataforma/bitacora` | Bitácora de lo que hizo cada administrador. |
-| `/plataforma/vista-previa` | El local de muestra y «Ver como encargado» / «Ver como mesero» (ver abajo). |
-| `/plataforma/observabilidad` | Panel de observabilidad: tráfico, errores, latencias, rutas y logs del backend (ver abajo). |
+| Ruta | Permiso | Pantalla |
+|---|---|---|
+| `/plataforma/acceso` | | Ya no hay otro acceso: redirige a `/acceso`. |
+| `/plataforma` | `platform.restaurants.read` | Restaurantes, los más nuevos primero, con búsqueda por nombre o identificador y paginación del servidor (25 por página). Es el inicio de una cuenta de plataforma. |
+| `/plataforma/restaurantes/nuevo` | `platform.restaurants.manage` | Alta del restaurante (nombre, identificador, zona horaria) y de su primer encargado. |
+| `/plataforma/restaurantes/:id` | `platform.restaurants.read` | Ficha: nombre y zona horaria editables, activar o desactivar, encargados y «Agregar encargado». |
+| `/plataforma/bitacora` | `platform.activity.read` | Bitácora de lo que hizo cada administrador. |
+| `/plataforma/vista-previa` | `platform.preview.open` | El local de muestra y «Ver como encargado» / «Ver como mesero» (ver abajo). |
+| `/plataforma/observabilidad` | `platform.observability.read` | Panel de observabilidad: tráfico, errores, latencias, rutas y logs del backend (ver abajo). |
 
-- **Otra sesión, no otro rol.** `store/platformSession.ts` guarda su token en
-  `resthub.platform-session.v1`, aparte de `resthub.session.v2`. El cliente
-  HTTP (`services/api.ts`) elige la credencial por la dirección final de la
-  petición: a `/api/v1/platform/*` va solo el token de plataforma, al resto
-  del API solo el de restaurante y a otro origen ninguno, y un 401
-  cierra solo la sesión dueña de esa ruta. Abrir, cerrar o dejar vencer una no
-  toca la otra; cerrar la de restaurante vacía el caché salvo las consultas y
-  mutaciones `['platform', …]`, y cerrar la de plataforma vacía solo esas. Las
-  mutaciones que llevan una contraseña (acceso, alta, nuevo encargado) salen
-  del caché en cuanto nadie mira su resultado (`gcTime: 0`).
-- Vence y se renueva como la del restaurante (`hooks/useTokenRenewal.ts`,
-  `POST /platform/auth/refresh` cinco minutos antes). Sin sesión, la guarda
-  lleva a `/plataforma/acceso`, que explica si venció.
+- **Una sola sesión.** `store/session.ts` guarda la respuesta de `POST
+  /auth/login` tal como viene, discriminada por `kind`: `staff` (usuario,
+  restaurante, permisos del local, términos) o `platform` (administrador y sus
+  permisos `platform.*`), en `resthub.session.v2`. Un navegador tiene una sola
+  cuenta abierta; entrar con otra reemplaza la anterior. Lo que es del
+  restaurante (aceptar los términos, la cola sin señal y su precarga, el canal
+  de avisos, el nombre del local, la zona horaria, cambiar la contraseña) corre
+  solo con `kind === 'staff'` (`useStaffAccount`). Las sesiones guardadas antes
+  de `kind` se leen como del personal. El catálogo `platform.*` es aparte del de
+  un restaurante (`PLATFORM_PERMISSION` en `api/permissions.ts`): un encargado
+  nunca los recibe.
+- **Una sola guarda.** `RequireSession permission=…` mira el permiso de cada
+  pantalla; sin sesión lleva a `/acceso` y sin permiso al inicio de la cuenta,
+  que es la primera pantalla que sus permisos abren (para plataforma,
+  Restaurantes). El menú muestra solo lo permitido (`entriesFor`). El
+  encabezado dice el nombre del restaurante para el personal y
+  «Administración del sistema» para plataforma.
+- El cliente HTTP manda el token de la sesión abierta a todo el API y a ningún
+  otro origen; cuáles rutas acepta cada clase de cuenta lo decide el servidor
+  (un token de plataforma no sirve en el restaurante ni al revés). Un 401
+  cierra la sesión y cerrarla vacía el caché y las mutaciones enteros. Las
+  mutaciones que llevan una contraseña (alta, nuevo encargado) salen del
+  caché en cuanto nadie mira su resultado (`gcTime: 0`).
+- Vence y se renueva igual para las dos clases (`hooks/useTokenRenewal.ts`,
+  `POST /auth/refresh` cinco minutos antes) y se relee con `GET /auth/me`.
 - **Identificador (slug):** se sugiere del nombre (minúsculas, sin tildes,
   guiones) y sigue al nombre hasta que alguien lo edita; se valida como el
   backend, `^[a-z0-9]+(-[a-z0-9]+)*$`, hasta 60 caracteres. No se cambia
@@ -227,7 +359,7 @@ vista previa se usa de verdad (tomar pedidos, cobrar, encolar sin señal).
 **Dónde se guarda.** La pestaña elige su almacenamiento una sola vez, al
 cargarse (`services/tabStorage.ts`):
 
-| Pestaña | Sesión de restaurante | Cola sin señal |
+| Pestaña | Sesión | Cola sin señal |
 |---|---|---|
 | Normal | `localStorage`, `resthub.session.v2` | `localStorage`, `resthub.pedidos-sin-enviar.v2` |
 | Vista previa | `sessionStorage`, `resthub.vista-previa.sesion.v1` | `sessionStorage`, misma clave de la cola |
@@ -236,15 +368,16 @@ cargarse (`services/tabStorage.ts`):
   `resthub.vista-previa.pestana.v1` en su `sessionStorage` (se marca al abrir
   la sesión y se desmarca solo al salir a propósito, así una vista previa
   vencida no vuelve a leer la sesión real al recargar).
-- Una pestaña de vista previa nunca lee ni escribe `resthub.session.v2` ni la
-  sesión de plataforma: la sesión real del navegador y la de plataforma siguen
-  intactas en las demás pestañas, y un 401 del canje no cierra ninguna. Sin
+- Una pestaña de vista previa nunca lee ni escribe `resthub.session.v2`: la
+  sesión real del navegador (la de plataforma, por ejemplo, desde donde se
+  abrió «Ver como…») sigue intacta en las demás pestañas, y un 401 del canje
+  no cierra ninguna. Sin
   `sessionStorage` la vista previa vive en memoria; nunca cae en
   `localStorage`.
-- Ahí la sesión de plataforma queda vacía y solo en memoria, y `/plataforma`
-  no muestra el área: dice «Estás en una vista previa» y ofrece «Salir de la
-  vista previa» (`features/shell/PreviewPlatformGate.tsx`). Así un 401 o un
-  «Salir» en esa pestaña no cierran la sesión real del administrador.
+- Ahí la sesión es la del personal del local de muestra, así que las pantallas
+  de `/plataforma` no se abren (la guarda no encuentra sus permisos y lleva al
+  inicio): un «Salir» o un 401 en esa pestaña no cierran la sesión real del
+  administrador.
 - Cerrar la pestaña termina la vista previa y descarta su cola. Salir o que
   venza la sesión vacía la cola entera de la pestaña (`discardPreviewQueue`),
   de cualquier cuenta del local de muestra: es solo de esa pestaña y ya no
@@ -262,7 +395,8 @@ cargarse (`services/tabStorage.ts`):
 ### Panel de observabilidad
 
 `/plataforma/observabilidad` muestra cómo anda la aplicación con lo que el
-backend guarda de sí mismo (`/platform/observability/*`, token de plataforma;
+backend guarda de sí mismo (`/platform/observability/*`, con el permiso
+`platform.observability.read`;
 sin servicios externos). Vive en `features/platform/observability` y se
 descarga aparte, como el resto del área.
 
@@ -301,7 +435,7 @@ descarga aparte, como el resto del área.
   (`document.visibilityState`, `hooks/usePageVisibility.ts`); al volver a la
   pestaña se relee lo vencido. «Pausar» la detiene del todo y «Actualizar
   ahora» relee el panel entero. Las claves cuelgan de `['platform',
-  'observability', …]`: cerrar la sesión de plataforma las saca del caché.
+  'observability', …]`: cerrar la sesión las saca del caché.
 
 ## Comprobantes electrónicos
 

@@ -1,14 +1,12 @@
-import PageHeader from '../../../components/PageHeader'
-import LatencySection from './LatencySection'
-import LogsSection from './LogsSection'
+import { PageHeader } from '@/components/PageHeader'
+import { useHashFocus } from '@/hooks/useHashFocus'
+import { DeferredPanels } from './DeferredPanels'
+import { LatencySection } from './LatencySection'
 import { windowParams } from './obsFilters'
-import ObsToolbar from './ObsToolbar'
-import RequestsSection from './RequestsSection'
-import RoutesSection from './RoutesSection'
-import StatusSection from './StatusSection'
-import SummarySection from './SummarySection'
-import TrafficSection from './TrafficSection'
-import { useHashFocus } from './useHashFocus'
+import { ObsToolbar } from './ObsToolbar'
+import { StatusSection } from './StatusSection'
+import { SummarySection } from './SummarySection'
+import { TrafficSection } from './TrafficSection'
 import { useObsFilters } from './useObsFilters'
 import { useObsRefresh } from './useObsRefresh'
 
@@ -19,7 +17,7 @@ import { useObsRefresh } from './useObsRefresh'
  * Se relee cada 30 s mientras la pestaña está a la vista; los filtros van en
  * la dirección, así un enlace lleva al mismo panel.
  */
-export default function ObservabilityView() {
+export function ObservabilityView() {
   const { filters, update } = useObsFilters()
   const refresh = useObsRefresh()
   const { live } = refresh
@@ -39,9 +37,7 @@ export default function ObservabilityView() {
         <LatencySection params={params} live={live} />
         <StatusSection params={params} live={live} />
       </div>
-      <RoutesSection filters={filters} live={live} />
-      <LogsSection filters={filters} onChange={update} live={live} />
-      <RequestsSection filters={filters} onChange={update} live={live} />
+      <DeferredPanels filters={filters} onChange={update} live={live} />
     </div>
   )
 }

@@ -1,5 +1,5 @@
-import type { OrderResponse } from '../../../api/types'
-import OrderListItem from './OrderListItem'
+import type { OrderResponse } from '@/api/types'
+import { OrderListItem } from './OrderListItem'
 
 interface OrderListProps {
   readonly title: string
@@ -7,7 +7,7 @@ interface OrderListProps {
 }
 
 /** Una lista titulada de pedidos. Vacia, no se muestra. */
-export default function OrderList({ title, orders }: OrderListProps) {
+export function OrderList({ title, orders }: OrderListProps) {
   if (orders.length === 0) {
     return null
   }

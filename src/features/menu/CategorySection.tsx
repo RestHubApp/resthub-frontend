@@ -1,9 +1,9 @@
 import { useId } from 'react'
 
-import type { DishCost, MenuSection } from '../../api/types'
-import { Card } from '../../components/ui/card'
-import CategoryHeader from './CategoryHeader'
-import MenuItemRow from './MenuItemRow'
+import type { DishCost, MenuSection } from '@/api/types'
+import { Card } from '@/components/ui/card'
+import { CategoryHeader } from './CategoryHeader'
+import { MenuItemRow } from './MenuItemRow'
 import type { Direction } from './menuOrder'
 
 interface CategorySectionProps {
@@ -18,7 +18,7 @@ interface CategorySectionProps {
 }
 
 /** Una categoría de la carta con sus platos, en el orden en que los ve el mesero. */
-export default function CategorySection({
+export function CategorySection({
   category,
   categories,
   costs,
@@ -29,11 +29,11 @@ export default function CategorySection({
   onAddItem,
 }: CategorySectionProps) {
   const headingId = useId()
-  const ultimo = category.items.length - 1
+  const last = category.items.length - 1
 
   return (
     <section aria-labelledby={headingId}>
-      <Card className="gap-0 py-4 shadow-sm">
+      <Card className="gap-0 py-4">
         <CategoryHeader
           category={category}
           headingId={headingId}
@@ -48,16 +48,17 @@ export default function CategorySection({
           </p>
         ) : (
           <ul className="m-0 list-none divide-y p-0">
-            {category.items.map((plato, indice) => (
+            {category.items.map((dish, index) => (
               <MenuItemRow
-                key={plato.id}
-                item={plato}
-                cost={costs.get(plato.id)}
+                key={dish.id}
+                item={dish}
+                cost={costs.get(dish.id)}
+                category={category}
                 categories={categories}
-                isFirst={indice === 0}
-                isLast={indice === ultimo}
+                isFirst={index === 0}
+                isLast={index === last}
                 onMove={(direction) => {
-                  onMoveItem(plato.id, direction)
+                  onMoveItem(dish.id, direction)
                 }}
               />
             ))}

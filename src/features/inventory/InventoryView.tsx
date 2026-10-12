@@ -1,93 +1,69 @@
 import { useCallback, useState } from 'react'
-import { useSearchParams } from 'react-router'
 
-import Icon from '../../components/Icon'
-import PageHeader from '../../components/PageHeader'
-import { Button } from '../../components/ui/button'
-import { useCan } from '../../store/session'
-import AlertsPanel from './AlertsPanel'
-import IngredientsPanel from './IngredientsPanel'
-import { type InventorySection, SECTIONS } from './inventorySections'
-import InventoryTabs from './InventoryTabs'
-import LowStockSummary from './LowStockSummary'
-import MovementsPanel from './MovementsPanel'
-import PurchaseOrdersPanel from './PurchaseOrdersPanel'
-import RecipesPanel from './RecipesPanel'
-import StockRulesCard from './StockRulesCard'
-import SuppliersPanel from './SuppliersPanel'
-import StockActionDialog, { type StockAction } from './StockActionDialog'
-import { useLowStock } from './useLowStock'
-
-function seccionDe(valor: string | null): InventorySection {
-  return SECTIONS.find((seccion) => seccion.value === valor)?.value ?? 'insumos'
-}
+import { PERMISSION } from '@/api/permissions'
+import { PageHeader } from '@/components/PageHeader'
+import { useScreenAction } from '@/hooks/useScreenAction'
+import { useCan } from '@/store/session'
+import { InventoryHeaderActions } from './InventoryHeaderActions'
+import { InventoryPanels } from './InventoryPanels'
+import { StockActionDialog, type StockAction } from './StockActionDialog'
+import { StockRulesSheet } from './StockRulesSheet'
+import { useInventorySection } from './useInventorySection'
 
 /**
- * El inventario: insumos, su libro, las alertas y las recetas.
+ * El inventario: insumos, su libro, recetas, compras y proveedores.
  *
  * La pestaña abierta vive en la dirección (`?vista=recetas`): volver desde el
- * editor de una receta deja a la persona donde estaba, y un enlace puede
- * llevar directo a las alertas.
+ * editor de una receta deja a la persona donde estaba. Lo que hay que reponer
+ * se ve en la pestaña de insumos, con el filtro «Solo bajo mínimo». Las reglas
+ * de stock, que casi no se tocan, van en una hoja.
  */
-export default function InventoryView() {
-  const canManage = useCan('inventory.manage')
-  const [params, setParams] = useSearchParams()
-  const seccion = seccionDe(params.get('vista'))
-  const alertas = useLowStock()
-  const [accion, setAccion] = useState<StockAction | null>(null)
-  const abrir = useCallback((nueva: StockAction) => {
-    setAccion(nueva)
+export function InventoryView() {
+  const canManage = useCan(PERMISSION.inventoryManage)
+  const [section, setSection] = useInventorySection()
+  const [action, setAction] = useState<StockAction | null>(null)
+  const [isRulesOpen, setIsRulesOpen] = useState(false)
+  const open = useCallback((fresh: StockAction) => {
+    setAction(fresh)
   }, [])
-  const irA = (nueva: InventorySection) => {
-    setParams(nueva === 'insumos' ? {} : { vista: nueva }, { replace: true })
-  }
+  const rules = useScreenAction('reglas-de-stock')
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Inventario"
-        description="El stock sale del libro de movimientos: compras, mermas, ajustes y lo que consumen los pedidos servidos."
+        description="Lo que tienes en cocina y cuándo reponerlo: compras, mermas, ajustes y lo que consumen los pedidos servidos."
         actions={
           canManage ? (
-            <Button
-              type="button"
-              size="lg"
-              className="h-11 px-4"
-              onClick={() => {
-                abrir({ kind: 'create' })
+            <InventoryHeaderActions
+              onRules={() => {
+                setIsRulesOpen(true)
               }}
-            >
-              <Icon name="agregar" size={16} />
-              <span>Nuevo insumo</span>
-            </Button>
+              onNewIngredient={() => {
+                open({ kind: 'create' })
+              }}
+            />
           ) : undefined
         }
       />
-      {canManage ? <StockRulesCard /> : null}
-      <LowStockSummary
-        onShowAlerts={() => {
-          irA('alertas')
-        }}
-      />
-      <InventoryTabs
-        value={seccion}
-        onChange={irA}
-        alertCount={alertas.data?.length}
-        panels={{
-          insumos: <IngredientsPanel canManage={canManage} onAction={abrir} />,
-          movimientos: <MovementsPanel />,
-          alertas: <AlertsPanel canManage={canManage} onAction={abrir} />,
-          recetas: <RecipesPanel canManage={canManage} />,
-          compras: <PurchaseOrdersPanel canManage={canManage} />,
-          proveedores: <SuppliersPanel canManage={canManage} />,
-        }}
-      />
+      <InventoryPanels section={section} onSectionChange={setSection} canManage={canManage} onAction={open} />
       <StockActionDialog
-        action={accion}
+        action={action}
         onClose={() => {
-          setAccion(null)
+          setAction(null)
         }}
       />
+      {canManage ? (
+        <StockRulesSheet
+          open={isRulesOpen || rules.isRequested}
+          onOpenChange={(isOpen) => {
+            setIsRulesOpen(isOpen)
+            if (!isOpen) {
+              rules.clear()
+            }
+          }}
+        />
+      ) : null}
     </div>
   )
 }

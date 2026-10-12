@@ -1,8 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-import { inventoryQueryKey } from '../../api/inventory'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { inventoryQueryKey } from '@/api/inventory'
+import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 
 interface PurchasingMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>
@@ -23,18 +20,11 @@ export function usePurchasingMutation<TVariables, TResult>({
   failure,
   onSuccess,
 }: PurchasingMutationOptions<TVariables, TResult>) {
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-
-  return useMutation({
+  return useNotifiedMutation({
     mutationFn,
-    onSuccess: (result) => {
-      void queryClient.invalidateQueries({ queryKey: inventoryQueryKey })
-      push({ tone: 'info', message: success(result) })
-      onSuccess?.(result)
-    },
-    onError: (error) => {
-      push({ tone: 'warning', message: errorMessage(error, failure) })
-    },
+    success,
+    failure,
+    invalidate: [inventoryQueryKey],
+    ...(onSuccess === undefined ? {} : { onSuccess }),
   })
 }

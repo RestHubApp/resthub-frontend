@@ -1,15 +1,15 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import type { Ingredient } from '../../api/types'
-import SelectField from '../../components/SelectField'
-import { NativeSelectOption } from '../../components/ui/native-select'
+import type { Ingredient } from '@/api/types'
+import { SelectField } from '@/components/SelectField'
+import { NativeSelectOption } from '@/components/ui/native-select'
 import { UNIT_OPTIONS } from './units'
 
 interface IngredientUnitFieldProps {
   /** El insumo que se edita: su unidad se muestra y no se cambia. */
   readonly ingredient: Ingredient | undefined
   readonly field: UseFormRegisterReturn
-  readonly error?: string
+  readonly error?: string | undefined
 }
 
 /**
@@ -18,7 +18,7 @@ interface IngredientUnitFieldProps {
  * Se elige al crearlo y después no cambia: el libro de movimientos entero
  * está escrito en esa unidad.
  */
-export default function IngredientUnitField({ ingredient, field, error }: IngredientUnitFieldProps) {
+export function IngredientUnitField({ ingredient, field, error }: IngredientUnitFieldProps) {
   if (ingredient !== undefined) {
     return (
       <p className="m-0 text-sm text-muted-foreground">
@@ -35,9 +35,9 @@ export default function IngredientUnitField({ ingredient, field, error }: Ingred
       field={field}
       error={error}
     >
-      {UNIT_OPTIONS.map((opcion) => (
-        <NativeSelectOption key={opcion.value} value={opcion.value}>
-          {opcion.label}
+      {UNIT_OPTIONS.map((option) => (
+        <NativeSelectOption key={option.value} value={option.value}>
+          {option.label}
         </NativeSelectOption>
       ))}
     </SelectField>

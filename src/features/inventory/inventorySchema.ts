@@ -1,58 +1,60 @@
 import { z } from 'zod'
 
-import { decimalRule, textoObligatorio, textoOpcional } from '../../components/formRules'
+import { decimalRule, textRequired, textOptional } from '@/components/formRules'
 import { parseDecimal } from './units'
 
 // Los limites repiten los del backend: avisan mientras se escribe.
-const MAX_NOMBRE = 80
-const MAX_MOTIVO = 200
+const MAX_NAME = 80
+const MAX_REASON = 200
 // Topes contra errores de tipeo, en la unidad que se escribe (kg, L o unid.).
-const MAX_CANTIDAD = 100_000
-const MAX_COSTO = 100_000
+const MAX_QUANTITY = 100_000
+const MAX_COST = 100_000
 
-const CANTIDAD = /^\d+(?:[.,]\d{1,3})?$/u
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
+const QUANTITY = /^\d+(?:[.,]\d{1,3})?$/u
 
 /** Una cantidad escrita en la unidad elegida, con hasta tres decimales. */
-function cantidadRule({ permiteCero }: { readonly permiteCero: boolean }) {
+function quantityRule({ allowsZero }: { readonly allowsZero: boolean }) {
   return z
     .string()
     .trim()
     .min(1, 'Escribe la cantidad')
-    .regex(CANTIDAD, 'Escribe un número con hasta 3 decimales')
-    .refine((valor) => permiteCero || parseDecimal(valor) > 0, 'Tiene que ser mayor que cero')
-    .refine((valor) => parseDecimal(valor) <= MAX_CANTIDAD, 'Es demasiado. Revisa el dato')
+    .regex(QUANTITY, 'Escribe un número con hasta 3 decimales')
+    .refine((value) => allowsZero || parseDecimal(value) > 0, 'Tiene que ser mayor que cero')
+    .refine((value) => parseDecimal(value) <= MAX_QUANTITY, 'Es demasiado. Revisa el dato')
 }
 
-const costoRule = decimalRule({ max: MAX_COSTO, decimales: 3, unidad: 'soles', obligatorio: true })
+const costRule = decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles', required: true })
 
 export const ingredientSchema = z.object({
   name: z
     .string()
     .trim()
     .min(1, 'Escribe el nombre del insumo')
-    .max(MAX_NOMBRE, `Usa como máximo ${String(MAX_NOMBRE)} caracteres`),
+    .max(MAX_NAME, `Usa como máximo ${String(MAX_NAME)} caracteres`),
   unit: z.enum(['g', 'ml', 'unit'], 'Elige cómo se mide'),
+  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
   min_stock: z.string().trim().regex(/^(?:\d+(?:[.,]\d{1,3})?)?$/u, 'Escribe un número con hasta 3 decimales'),
   min_stock_unit: z.string(),
-  unit_cost: decimalRule({ max: MAX_COSTO, decimales: 3, unidad: 'soles' }),
+  unit_cost: decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles' }),
 })
 
 export type IngredientValues = z.infer<typeof ingredientSchema>
 
 export const purchaseSchema = z.object({
-  quantity: cantidadRule({ permiteCero: false }),
+  quantity: quantityRule({ allowsZero: false }),
   quantity_unit: z.string(),
   cost_mode: z.enum(['unit', 'total']),
-  cost: costoRule,
-  reason: textoOpcional(MAX_MOTIVO),
+  cost: costRule,
+  reason: textOptional(MAX_REASON),
 })
 
 export type PurchaseValues = z.infer<typeof purchaseSchema>
 
 export const wasteSchema = z.object({
-  quantity: cantidadRule({ permiteCero: false }),
+  quantity: quantityRule({ allowsZero: false }),
   quantity_unit: z.string(),
-  reason: textoObligatorio(MAX_MOTIVO, 'Escribe el motivo de la merma'),
+  reason: textRequired(MAX_REASON, 'Escribe el motivo de la merma'),
 })
 
 export type WasteValues = z.infer<typeof wasteSchema>
@@ -60,12 +62,12 @@ export type WasteValues = z.infer<typeof wasteSchema>
 export const adjustmentSchema = z
   .object({
     mode: z.enum(['count', 'difference']),
-    quantity: cantidadRule({ permiteCero: true }),
+    quantity: quantityRule({ allowsZero: true }),
     quantity_unit: z.string(),
     sign: z.enum(['add', 'subtract']),
-    reason: textoObligatorio(MAX_MOTIVO, 'Escribe el motivo del ajuste'),
+    reason: textRequired(MAX_REASON, 'Escribe el motivo del ajuste'),
   })
-  .refine((valores) => valores.mode === 'count' || parseDecimal(valores.quantity) > 0, {
+  .refine((values) => values.mode === 'count' || parseDecimal(values.quantity) > 0, {
     path: ['quantity'],
     message: 'Una diferencia tiene que ser mayor que cero',
   })
@@ -76,7 +78,7 @@ export const recipeSchema = z.object({
   lines: z.array(
     z.object({
       ingredient_id: z.number(),
-      quantity: cantidadRule({ permiteCero: false }),
+      quantity: quantityRule({ allowsZero: false }),
     }),
   ),
 })

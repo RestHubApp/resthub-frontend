@@ -1,9 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-import { tablesQuery, tablesQueryKey } from '../../api/tables'
-import type { TableState } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { tablesQuery, tablesQueryKey } from '@/api/tables'
+import type { TableState } from '@/api/types'
+import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 
 interface TableMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>
@@ -29,26 +26,18 @@ export function useTableMutation<TVariables, TResult>({
   updateCache,
   inlineError = false,
 }: TableMutationOptions<TVariables, TResult>) {
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-
-  return useMutation({
+  return useNotifiedMutation({
     mutationFn,
-    onSuccess: (resultado) => {
-      if (updateCache !== undefined) {
-        queryClient.setQueryData(tablesQuery(true).queryKey, (mesas) => mesas && updateCache(mesas, resultado))
-      }
-      void queryClient.invalidateQueries({ queryKey: tablesQueryKey })
-      if (success !== undefined) {
-        push({ tone: 'info', message: success })
-      }
-      onSuccess?.()
-    },
-    onError: (error) => {
-      if (inlineError) {
-        return
-      }
-      push({ tone: 'warning', message: errorMessage(error, failure) })
-    },
+    failure: inlineError ? undefined : failure,
+    ...(success === undefined ? {} : { success: () => success }),
+    ...(updateCache === undefined
+      ? {}
+      : {
+          updateCache: (queryClient, result: TResult) => {
+            queryClient.setQueryData(tablesQuery(true).queryKey, (tables) => tables && updateCache(tables, result))
+          },
+        }),
+    invalidate: [tablesQueryKey],
+    ...(onSuccess === undefined ? {} : { onSuccess: () => { onSuccess() } }),
   })
 }

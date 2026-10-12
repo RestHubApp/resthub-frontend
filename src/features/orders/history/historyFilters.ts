@@ -1,4 +1,4 @@
-import type { OrderListParams, OrderStatus, OrderType } from '../../../api/types'
+import type { OrderListParams, OrderStatus, OrderType } from '@/api/types'
 
 export interface HistoryFilters {
   readonly from: string

@@ -1,20 +1,20 @@
 import { useSearchParams } from 'react-router'
 
-import PageHeader from '../../components/PageHeader'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
-import MyOrdersPanel from './floor/MyOrdersPanel'
-import TableGrid from './floor/TableGrid'
-import TakeawayDialog from './floor/TakeawayDialog'
-import TakeawayPanel from './floor/TakeawayPanel'
-import LiveIndicator from './LiveIndicator'
-import OfflineOrdersBanner from './offline/OfflineOrdersBanner'
+import { PageHeader } from '@/components/PageHeader'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { MyOrdersPanel } from './floor/MyOrdersPanel'
+import { TableGrid } from './floor/TableGrid'
+import { TakeawayDialog } from './floor/TakeawayDialog'
+import { TakeawayPanel } from './floor/TakeawayPanel'
+import { LiveIndicator } from './LiveIndicator'
+import { OfflineOrdersBanner } from './offline/OfflineOrdersBanner'
 import { useLiveUpdates } from './useLiveUpdates'
 
-const VISTAS = ['mesas', 'llevar', 'mios'] as const
-type Vista = (typeof VISTAS)[number]
+const VIEWS = ['mesas', 'llevar', 'mios'] as const
+type View = (typeof VIEWS)[number]
 
-function vistaDe(valor: string | null): Vista {
-  return VISTAS.find((vista) => vista === valor) ?? 'mesas'
+function viewOf(value: string | null): View {
+  return VIEWS.find((view) => view === value) ?? 'mesas'
 }
 
 const TRIGGER = 'min-h-10 text-sm data-active:font-semibold'
@@ -25,10 +25,10 @@ const TRIGGER = 'min-h-10 text-sm data-active:font-semibold'
  * La pestana va en la URL para que volver atras desde un pedido deje al
  * mesero donde estaba. La pantalla se actualiza sola con los avisos del servidor.
  */
-export default function OrdersView() {
+export function OrdersView() {
   const live = useLiveUpdates()
   const [params, setParams] = useSearchParams()
-  const vista = vistaDe(params.get('vista'))
+  const view = viewOf(params.get('vista'))
 
   return (
     <div className="flex flex-col gap-5">
@@ -44,9 +44,9 @@ export default function OrdersView() {
       />
       <OfflineOrdersBanner />
       <Tabs
-        value={vista}
-        onValueChange={(valor) => {
-          setParams({ vista: valor }, { replace: true })
+        value={view}
+        onValueChange={(value) => {
+          setParams({ 'vista': value }, { replace: true })
         }}
         className="gap-4"
       >

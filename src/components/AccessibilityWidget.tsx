@@ -1,24 +1,36 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
-const ETIQUETA_ESPANOL = 'Abrir menú de accesibilidad'
-const ETIQUETA_CERRAR = 'Cerrar menú de accesibilidad'
-const ARIA_LABEL = 'aria-label'
-const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
+import { Icon } from './Icon'
+import { openAccessibilityMenu } from './accessibilityMenu'
+import { ATTRIBUTES_LABEL, patchMenuButton, pinWidgetMenu } from './accessibilityWidgetPatches'
+
+const WIDGET_BUTTON = '.asw-menu-btn'
+
+interface AccessibilityWidgetProps {
+  /** Dibuja el botón flotante de reserva; con sesión se apaga y el menú se abre desde la navegación. */
+  readonly showLauncher?: boolean
+}
 
 /**
  * Widget de accesibilidad Sienna (MIT, github.com/bennyluk/Sienna-Accessibility-Widget).
  *
  * El paquete se auto-inicializa como side-effect al importarse y corre en el
  * navegador del visitante, sin cuenta ni variable de entorno a diferencia de
- * UserWay. Se importa recién al montar, en su propio archivo: son 65 kB que
- * la primera pantalla del celular no necesita para dibujarse. En el celular
- * con sesión el botón flotante se oculta (tapaba el "+" de los platos) y el
- * menú se abre desde "Más" (ver accessibilityMenu.ts). Sí hace una llamada externa: publica el locale de cada idioma y la
- * fuente de lectura en cdn.jsdelivr.net y los descarga de ahí (el tarball los
- * trae, pero el paquete arma las URL contra el CDN). Aceptamos ese CDN; si
- * está bloqueado, el widget cae al inglés. Al definir una CSP hay que permitir
- * `connect-src` y `font-src https://cdn.jsdelivr.net` y `style-src
- * 'unsafe-inline'` (inyecta su hoja de estilos en el documento).
+ * UserWay. Son 65 kB (20 kB por la red) que casi nadie usa, así que no se baja
+ * hasta que alguien lo pide: la página dibuja un botón propio, igual al del
+ * widget (`.a11y-launcher` en index.css), y al tocarlo se importa el paquete,
+ * que dibuja el suyo, y se abre su menú (ver accessibilityMenu.ts). En cuanto
+ * existe el botón del widget, el nuestro se retira. Con sesión no hay botón
+ * flotante (`showLauncher` apagado, y index.css oculta el del widget): el menú
+ * se abre desde «Accesibilidad» en la barra lateral y desde «Cuenta» o «Más»
+ * en el celular.
+ *
+ * El paquete arma las URL de su idioma y de la fuente de lectura contra
+ * cdn.jsdelivr.net; `vite.config.ts`
+ * (`siennaAutoalojado`) las reescribe a `/sienna/` y publica esos archivos con
+ * la aplicación, así que no hay tercero en ejecución ni hace falta abrirle la
+ * CSP. Solo está el español: en otro idioma el widget cae al inglés. Sí pide
+ * `style-src 'unsafe-inline'` (inyecta su hoja de estilos en el documento).
  *
  * Localización del botón:
  * En sienna-accessibility@2.2.333, la función Oe() crea el botón flotante
@@ -30,57 +42,32 @@ const ATRIBUTOS_ETIQUETA = [ARIA_LABEL, 'title'] as const
  * 'Abrir menú de accesibilidad' tanto al montarse como ante cualquier
  * mutación del DOM.
  */
-export default function AccessibilityWidget() {
-  useEffect(() => {
-    void import('sienna-accessibility')
-  }, [])
+export function AccessibilityWidget({ showLauncher = true }: AccessibilityWidgetProps) {
+  // El widget ya dibujó su botón (se cargó desde «Más» o antes de montar esto): el de reserva sobra.
+  const [isLoaded, setIsLoaded] = useState(() => document.querySelector(WIDGET_BUTTON) !== null)
 
   useEffect(() => {
-    function parchearBoton(boton: Element) {
-      // Solo escribe si cambió: así el propio parche no vuelve a disparar el observer.
-      for (const atributo of ATRIBUTOS_ETIQUETA) {
-        if (boton.getAttribute(atributo) !== ETIQUETA_ESPANOL) {
-          boton.setAttribute(atributo, ETIQUETA_ESPANOL)
-        }
-      }
+    const existing = document.querySelector(WIDGET_BUTTON)
+    if (existing) {
+      patchMenuButton(existing)
     }
 
-    const existente = document.querySelector('.asw-menu-btn')
-    if (existente) {
-      parchearBoton(existente)
-    }
-
-    // El widget crea su menú la primera vez que se abre, visible pero sin
-    // `display` en línea, y su botón de cerrar alterna ese valor: el primer
-    // toque en la X lo pasaba a "block" y el menú seguía abierto. Se deja
-    // escrito para que el primer cierre funcione. Su X, además, se anuncia en
-    // inglés ("Close").
-    function fijarMenu(menu: HTMLElement | null) {
-      const capa = menu?.parentElement
-      if (capa?.style.display === '') {
-        capa.style.display = 'block'
-      }
-      const cerrar = menu?.querySelector('.asw-menu-close')
-      if (cerrar && cerrar.getAttribute(ARIA_LABEL) !== ETIQUETA_CERRAR) {
-        cerrar.setAttribute(ARIA_LABEL, ETIQUETA_CERRAR)
-      }
-    }
-
-    // El widget se importa después de montar y agrega su botón y su menú al
+    // El widget se importa al tocar el botón y agrega su botón y su menú al
     // final de <body>: se observa <body> y no un contenedor que aún no existe.
     const observer = new MutationObserver(() => {
-      const boton = document.querySelector('.asw-menu-btn')
-      if (boton) {
-        parchearBoton(boton)
+      const button = document.querySelector(WIDGET_BUTTON)
+      if (button) {
+        patchMenuButton(button)
+        setIsLoaded(true)
       }
-      fijarMenu(document.querySelector<HTMLElement>('.asw-menu'))
+      pinWidgetMenu(document.querySelector<HTMLElement>('.asw-menu'))
     })
 
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: [...ATRIBUTOS_ETIQUETA],
+      attributeFilter: [...ATTRIBUTES_LABEL],
     })
 
     return () => {
@@ -88,5 +75,20 @@ export default function AccessibilityWidget() {
     }
   }, [])
 
-  return null
+  if (isLoaded || !showLauncher) {
+    return null
+  }
+  return (
+    <button
+      type="button"
+      data-a11y-launcher=""
+      className="a11y-launcher"
+      title="Abrir menú de accesibilidad"
+      aria-label="Abrir menú de accesibilidad"
+      aria-expanded="false"
+      onClick={openAccessibilityMenu}
+    >
+      <Icon name="accessibility" size={24} />
+    </button>
+  )
 }

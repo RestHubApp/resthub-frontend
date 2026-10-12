@@ -1,10 +1,12 @@
-import { advanceOrder, type OrderStep } from '../../../api/orders'
-import type { OrderResponse } from '../../../api/types'
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
-import { useCan } from '../../../store/session'
-import { nextStepFor, stepDoneMessage } from '../nextStep'
-import { useOrderAction } from '../useOrderAction'
+import { advanceOrder, type OrderStep } from '@/api/orders'
+import { PERMISSION } from '@/api/permissions'
+import type { OrderResponse } from '@/api/types'
+import { ActionsMenu } from '@/components/ActionsMenu'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { useCan } from '@/store/session'
+import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
+import { useOrderAction } from '@/features/orders/useOrderAction'
 
 interface BoardCardActionsProps {
   readonly order: OrderResponse
@@ -12,52 +14,53 @@ interface BoardCardActionsProps {
   readonly onCancel: (order: OrderResponse) => void
 }
 
-/** El paso siguiente del pedido y, aparte, cancelar. */
-export default function BoardCardActions({ order, onCharge, onCancel }: BoardCardActionsProps) {
-  const paso = nextStepFor(order.status)
-  const puede = useCan(paso?.permission ?? 'orders.take')
-  const puedeCancelar = useCan('orders.manage')
-  const avanzar = useOrderAction({
+/**
+ * El paso siguiente del pedido a la vista, que se toca cien veces por turno, y
+ * cancelar tras «⋯»: así un dedo apurado no cae sobre una acción destructiva.
+ */
+export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActionsProps) {
+  const step = nextStepFor(order.status)
+  const can = useCan(step?.permission ?? PERMISSION.ordersTake)
+  const canCancel = useCan(PERMISSION.ordersManage)
+  const advance = useOrderAction({
     mutationFn: (step: OrderStep) => advanceOrder(order.id, step),
     success: stepDoneMessage,
     failure: 'No se pudo actualizar el pedido.',
   })
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {paso !== undefined && puede ? (
+    <div className="flex items-center gap-2">
+      {step !== undefined && can ? (
         <Button
           type="button"
-          size="lg"
-          variant={paso.action === 'charge' ? 'success' : 'default'}
-          className="h-11 flex-1 px-3"
-          disabled={avanzar.isPending}
+          className="flex-1 px-3"
+          disabled={advance.isPending}
           onClick={() => {
-            if (paso.action === 'charge') {
+            if (step.action === 'charge') {
               onCharge(order)
               return
             }
-            avanzar.mutate(paso.action)
+            advance.mutate(step.action)
           }}
         >
-          <Icon name={paso.icon} size={16} />
-          <span>{paso.label}</span>
+          <Icon name={step.icon} size={16} />
+          <span>{step.label}</span>
         </Button>
       ) : null}
-      {puedeCancelar ? (
-        <Button
-          type="button"
-          size="lg"
-          variant="ghost"
-          className="h-11 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          aria-label={`Cancelar pedido #${String(order.number)}`}
-          onClick={() => {
-            onCancel(order)
-          }}
-        >
-          <Icon name="cancelar" size={16} />
-          <span>Cancelar</span>
-        </Button>
+      {canCancel ? (
+        <ActionsMenu
+          label={`Más acciones del pedido #${String(order.number)}`}
+          items={[
+            {
+              label: 'Cancelar pedido',
+              icon: 'cancel',
+              isDestructive: true,
+              onSelect: () => {
+                onCancel(order)
+              },
+            },
+          ]}
+        />
       ) : null}
     </div>
   )

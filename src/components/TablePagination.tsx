@@ -1,15 +1,15 @@
-import Icon from './Icon'
+import { Icon } from './Icon'
 import { Button } from './ui/button'
 
 interface TablePaginationProps {
   /** Página actual, desde cero. */
   readonly actual: number
   readonly total: number
-  readonly onChange: (pagina: number) => void
+  readonly onChange: (page: number) => void
 }
 
 /** Anterior y siguiente, con la página en la que se está anunciada al cambiar. */
-export default function TablePagination({ actual, total, onChange }: TablePaginationProps) {
+export function TablePagination({ actual, total, onChange }: TablePaginationProps) {
   return (
     <nav aria-label="Paginación" className="flex flex-wrap items-center justify-between gap-3">
       <p className="m-0 text-sm text-muted-foreground" aria-live="polite">
@@ -25,7 +25,7 @@ export default function TablePagination({ actual, total, onChange }: TablePagina
             onChange(actual - 1)
           }}
         >
-          <Icon name="anterior" size={14} />
+          <Icon name="previous" size={14} />
           <span>Anterior</span>
         </Button>
         <Button
@@ -38,7 +38,7 @@ export default function TablePagination({ actual, total, onChange }: TablePagina
           }}
         >
           <span>Siguiente</span>
-          <Icon name="siguiente" size={14} />
+          <Icon name="next" size={14} />
         </Button>
       </div>
     </nav>

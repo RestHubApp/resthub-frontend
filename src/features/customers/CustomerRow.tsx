@@ -1,18 +1,18 @@
-import type { Customer } from '../../api/types'
-import StatusBadge from '../../components/StatusBadge'
-import { formatMoney } from '../../services/format'
+import type { Customer } from '@/api/types'
+import { StatusBadge } from '@/components/StatusBadge'
+import { formatMoney } from '@/services/format'
 
 interface CustomerRowProps {
   readonly customer: Customer
   readonly onOpen: () => void
 }
 
-function visitas(count: number): string {
+function visits(count: number): string {
   return count === 1 ? '1 visita' : `${String(count)} visitas`
 }
 
 /** Un cliente en la lista: nombre, contacto, visitas y gasto. */
-export default function CustomerRow({ customer, onOpen }: CustomerRowProps) {
+export function CustomerRow({ customer, onOpen }: CustomerRowProps) {
   return (
     <li>
       <button
@@ -28,7 +28,7 @@ export default function CustomerRow({ customer, onOpen }: CustomerRowProps) {
           <span className="text-xs text-muted-foreground">{customer.phone === '' ? 'Sin teléfono' : customer.phone}</span>
         </span>
         <span className="text-sm text-muted-foreground tabular-nums">
-          {visitas(customer.visits)} · {formatMoney(customer.spent)}
+          {visits(customer.visits)} · {formatMoney(customer.spent)}
         </span>
       </button>
     </li>

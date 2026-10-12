@@ -1,6 +1,6 @@
-import AllergyBadge from '../../components/AllergyBadge'
-import Icon from '../../components/Icon'
-import type { OrderNoteFlag } from '../../hooks/useOrderNoteFlags'
+import { AllergyBadge } from '@/components/AllergyBadge'
+import { Icon } from '@/components/Icon'
+import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 
 interface ItemNoteProps {
   readonly note: string
@@ -8,7 +8,7 @@ interface ItemNoteProps {
    * Cómo leyó la nota la clasificación (`flagFor` de `useOrderNoteFlags`).
    * Si menciona una alergia, la nota pasa a rojo y lleva el distintivo.
    */
-  readonly flag?: OrderNoteFlag
+  readonly flag?: OrderNoteFlag | undefined
   /** Texto antes de la nota: "Nota del pedido". Sin él, la nota es de un plato. */
   readonly label?: string
 }
@@ -21,20 +21,20 @@ interface ItemNoteProps {
  * que la cocina la vea de un vistazo; si es una alergia, además con la
  * palabra "Alergia", no solo en rojo.
  */
-export default function ItemNote({ note, flag, label }: ItemNoteProps) {
+export function ItemNote({ note, flag, label }: ItemNoteProps) {
   if (note === '') {
     return null
   }
-  const allergy = flag?.mentions_allergy === true
+  const hasAllergy = flag?.mentions_allergy === true
   // Con alergia, el distintivo va arriba y la nota debajo, a lo ancho:
   // en una tarjeta angosta, al lado del distintivo quedaba en una columna.
-  const tone = allergy
+  const tone = hasAllergy
     ? 'flex-col bg-destructive/10 text-destructive ring-destructive/30'
     : 'bg-warning/10 text-warning ring-warning/30'
 
   return (
     <p className={`m-0 mt-1 flex items-start gap-1.5 rounded-md px-2 py-1 text-sm font-semibold ring-1 ${tone}`}>
-      {allergy ? <AllergyBadge flag={flag} withNote={false} /> : <Icon name="nota" size={16} className="mt-0.5 shrink-0" />}
+      {hasAllergy ? <AllergyBadge flag={flag} withNote={false} /> : <Icon name="note" size={16} className="mt-0.5 shrink-0" />}
       <span className="min-w-0 flex-1 break-words">
         {label === undefined ? <span className="sr-only">Nota: </span> : <span className="text-foreground">{label}: </span>}
         {note}

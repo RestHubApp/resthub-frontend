@@ -1,0 +1,2764 @@
+{
+  "total": 458,
+  "byType": {
+    "ruta": 38,
+    "confirmacion": 11,
+    "desplegable": 8,
+    "dialogo": 26,
+    "hoja": 9,
+    "pestanas": 4,
+    "funcion": 281,
+    "estado": 75,
+    "rol": 6
+  },
+  "items": [
+    {
+      "id": "ruta:/",
+      "type": "ruta",
+      "description": "Pantalla /",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/*",
+      "type": "ruta",
+      "description": "Una ruta que no existe redirige al inicio",
+      "origin": "src/router/routes.tsx"
+    },
+    {
+      "id": "ruta:/acceso",
+      "type": "ruta",
+      "description": "Pantalla /acceso",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/bitacora",
+      "type": "ruta",
+      "description": "Pantalla /bitacora",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/caja",
+      "type": "ruta",
+      "description": "Pantalla /caja",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/clientes",
+      "type": "ruta",
+      "description": "Pantalla /clientes",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/cocina",
+      "type": "ruta",
+      "description": "Pantalla /cocina",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/comprobantes",
+      "type": "ruta",
+      "description": "Pantalla /comprobantes",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/comprobantes/:invoiceId/imprimir",
+      "type": "ruta",
+      "description": "Pantalla /comprobantes/:invoiceId/imprimir",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/imprimir/:orderId/:kind",
+      "type": "ruta",
+      "description": "Pantalla /imprimir/:orderId/:kind",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/inventario",
+      "type": "ruta",
+      "description": "Pantalla /inventario",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/inventario/recetas/:menuItemId",
+      "type": "ruta",
+      "description": "Pantalla /inventario/recetas/:menuItemId",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/menu",
+      "type": "ruta",
+      "description": "Pantalla /menu",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/mesas",
+      "type": "ruta",
+      "description": "Pantalla /mesas",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/panel",
+      "type": "ruta",
+      "description": "Pantalla /panel",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/panel/ia",
+      "type": "ruta",
+      "description": "Pantalla /panel/ia",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/panel/reposicion",
+      "type": "ruta",
+      "description": "Pantalla /panel/reposicion",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/pedidos",
+      "type": "ruta",
+      "description": "Pantalla /pedidos",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/pedidos/:orderId",
+      "type": "ruta",
+      "description": "Pantalla /pedidos/:orderId",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/pedidos/:orderId/agregar",
+      "type": "ruta",
+      "description": "Pantalla /pedidos/:orderId/agregar",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/pedidos/nuevo",
+      "type": "ruta",
+      "description": "Pantalla /pedidos/nuevo",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/perfil",
+      "type": "ruta",
+      "description": "Pantalla /perfil",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/perfil/apariencia",
+      "type": "ruta",
+      "description": "Pantalla /perfil/apariencia",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/personal",
+      "type": "ruta",
+      "description": "Pantalla /personal",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/plataforma",
+      "type": "ruta",
+      "description": "Pantalla /plataforma",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/plataforma/acceso",
+      "type": "ruta",
+      "description": "Pantalla /plataforma/acceso",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/plataforma/bitacora",
+      "type": "ruta",
+      "description": "Pantalla /plataforma/bitacora",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/plataforma/observabilidad",
+      "type": "ruta",
+      "description": "Pantalla /plataforma/observabilidad",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/plataforma/restaurantes/:restaurantId",
+      "type": "ruta",
+      "description": "Pantalla /plataforma/restaurantes/:restaurantId",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/plataforma/restaurantes/nuevo",
+      "type": "ruta",
+      "description": "Pantalla /plataforma/restaurantes/nuevo",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/plataforma/vista-previa",
+      "type": "ruta",
+      "description": "Pantalla /plataforma/vista-previa",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/privacidad",
+      "type": "ruta",
+      "description": "Pantalla /privacidad",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/reservas",
+      "type": "ruta",
+      "description": "Pantalla /reservas",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/roles",
+      "type": "ruta",
+      "description": "Pantalla /roles",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/tablero",
+      "type": "ruta",
+      "description": "Pantalla /tablero",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/tablero/historial",
+      "type": "ruta",
+      "description": "Pantalla /tablero/historial",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/terminos",
+      "type": "ruta",
+      "description": "Pantalla /terminos",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/vista-previa",
+      "type": "ruta",
+      "description": "Pantalla /vista-previa",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "confirmacion:cash/CloseCashButton",
+      "type": "confirmacion",
+      "description": "",
+      "origin": "src/features/cash/CloseCashButton.tsx"
+    },
+    {
+      "id": "confirmacion:customers/CustomerRights",
+      "type": "confirmacion",
+      "description": "`¿Borrar los datos de ${customer.name}?`",
+      "origin": "src/features/customers/CustomerRights.tsx"
+    },
+    {
+      "id": "confirmacion:menu/CategoryDialogs#1",
+      "type": "confirmacion",
+      "description": "`¿Desactivar ${category.name}?`",
+      "origin": "src/features/menu/CategoryDialogs.tsx"
+    },
+    {
+      "id": "confirmacion:menu/CategoryDialogs#2",
+      "type": "confirmacion",
+      "description": "`¿Eliminar ${category.name}?`",
+      "origin": "src/features/menu/CategoryDialogs.tsx"
+    },
+    {
+      "id": "confirmacion:platform/RestaurantStatusButton",
+      "type": "confirmacion",
+      "description": "`¿Desactivar ${restaurant.name}?`",
+      "origin": "src/features/platform/RestaurantStatusButton.tsx"
+    },
+    {
+      "id": "confirmacion:platform/SandboxResetButton",
+      "type": "confirmacion",
+      "description": "¿Reiniciar el local de muestra?",
+      "origin": "src/features/platform/SandboxResetButton.tsx"
+    },
+    {
+      "id": "confirmacion:roles/DeleteRoleButton",
+      "type": "confirmacion",
+      "description": "`¿Eliminar el rol ${role.name}?`",
+      "origin": "src/features/roles/DeleteRoleButton.tsx"
+    },
+    {
+      "id": "confirmacion:shell/PreviewExitButton",
+      "type": "confirmacion",
+      "description": "¿Salir con pedidos sin enviar?",
+      "origin": "src/features/shell/PreviewExitButton.tsx"
+    },
+    {
+      "id": "confirmacion:shell/quick/QuickPaletteHost",
+      "type": "confirmacion",
+      "description": "notice.title",
+      "origin": "src/features/shell/quick/QuickPaletteHost.tsx"
+    },
+    {
+      "id": "confirmacion:shell/SessionActions",
+      "type": "confirmacion",
+      "description": "notice.title",
+      "origin": "src/features/shell/SessionActions.tsx"
+    },
+    {
+      "id": "confirmacion:staff/StaffRowDialogs",
+      "type": "confirmacion",
+      "description": "`¿Desactivar a ${account.full_name}?`",
+      "origin": "src/features/staff/StaffRowDialogs.tsx"
+    },
+    {
+      "id": "desplegable:components/AccessibilityWidget",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/components/AccessibilityWidget.tsx"
+    },
+    {
+      "id": "desplegable:components/CollapsibleHeading",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/components/CollapsibleHeading.tsx"
+    },
+    {
+      "id": "desplegable:components/MoreOptions",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/components/MoreOptions.tsx"
+    },
+    {
+      "id": "desplegable:insights/AiDecisionTable",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/features/insights/AiDecisionTable.tsx"
+    },
+    {
+      "id": "desplegable:orders/charge/CourtesyList",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/features/orders/charge/CourtesyList.tsx"
+    },
+    {
+      "id": "desplegable:orders/history/HistoryColumns",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/features/orders/history/HistoryColumns.tsx"
+    },
+    {
+      "id": "desplegable:platform/observability/ExpandButton",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/features/platform/observability/ExpandButton.tsx"
+    },
+    {
+      "id": "dialogo:auth/ChangePasswordDialog",
+      "type": "dialogo",
+      "description": "Cambiar contraseña",
+      "origin": "src/features/auth/ChangePasswordDialog.tsx"
+    },
+    {
+      "id": "dialogo:cash/CashClosedPrompt",
+      "type": "dialogo",
+      "description": "Abrir caja",
+      "origin": "src/features/cash/CashClosedPrompt.tsx"
+    },
+    {
+      "id": "dialogo:cash/CashSessionDialog",
+      "type": "dialogo",
+      "description": "`Turno de caja ${String(sessionId)}`",
+      "origin": "src/features/cash/CashSessionDialog.tsx"
+    },
+    {
+      "id": "dialogo:customers/CustomerDialog",
+      "type": "dialogo",
+      "description": "customer === null ? 'Nuevo cliente' : `Editar a ${customer.name}`",
+      "origin": "src/features/customers/CustomerDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/PurchaseOrderDialog",
+      "type": "dialogo",
+      "description": "Nueva orden de compra",
+      "origin": "src/features/inventory/PurchaseOrderDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/ReceiveOrderDialog",
+      "type": "dialogo",
+      "description": "`Recibir la orden ${String(order.number)}`",
+      "origin": "src/features/inventory/ReceiveOrderDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/StockActionDialog",
+      "type": "dialogo",
+      "description": "action === null ? '' : title(action)",
+      "origin": "src/features/inventory/StockActionDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/SupplierDialog",
+      "type": "dialogo",
+      "description": "supplier === null ? 'Nuevo proveedor' : `Editar ${supplier.name}`",
+      "origin": "src/features/inventory/SupplierDialog.tsx"
+    },
+    {
+      "id": "dialogo:menu/CategoryDialogs",
+      "type": "dialogo",
+      "description": "`Editar ${category.name}`",
+      "origin": "src/features/menu/CategoryDialogs.tsx"
+    },
+    {
+      "id": "dialogo:menu/NewMenuDialogs#1",
+      "type": "dialogo",
+      "description": "Nueva categoría",
+      "origin": "src/features/menu/NewMenuDialogs.tsx"
+    },
+    {
+      "id": "dialogo:menu/NewMenuDialogs#2",
+      "type": "dialogo",
+      "description": "Nuevo plato",
+      "origin": "src/features/menu/NewMenuDialogs.tsx"
+    },
+    {
+      "id": "dialogo:orders/CancelOrderDialog",
+      "type": "dialogo",
+      "description": "`¿Cancelar el pedido #${String(order.number)}?`",
+      "origin": "src/features/orders/CancelOrderDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/charge/ChargeContent",
+      "type": "dialogo",
+      "description": "charged === null ? `Cobrar pedido #${String(actual.number)}` : 'Cobro registrado'",
+      "origin": "src/features/orders/charge/ChargeContent.tsx"
+    },
+    {
+      "id": "dialogo:orders/detail/ItemNoteDialog",
+      "type": "dialogo",
+      "description": "`Nota de ${dish}`",
+      "origin": "src/features/orders/detail/ItemNoteDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/detail/TablePickerDialog",
+      "type": "dialogo",
+      "description": "title",
+      "origin": "src/features/orders/detail/TablePickerDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/floor/TakeawayForm",
+      "type": "dialogo",
+      "description": "Pedido para llevar o delivery",
+      "origin": "src/features/orders/floor/TakeawayForm.tsx"
+    },
+    {
+      "id": "dialogo:orders/invoice/InvoiceDialog",
+      "type": "dialogo",
+      "description": "`Comprobante del pedido #${String(order.number)}`",
+      "origin": "src/features/orders/invoice/InvoiceDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/invoice/InvoiceEmailDialog",
+      "type": "dialogo",
+      "description": "Enviar por correo",
+      "origin": "src/features/orders/invoice/InvoiceEmailDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/taking/ModifierDialog",
+      "type": "dialogo",
+      "description": "item.name",
+      "origin": "src/features/orders/taking/ModifierDialog.tsx"
+    },
+    {
+      "id": "dialogo:platform/OwnersSection",
+      "type": "dialogo",
+      "description": "Agregar encargado",
+      "origin": "src/features/platform/OwnersSection.tsx"
+    },
+    {
+      "id": "dialogo:reservations/ReservationDialog",
+      "type": "dialogo",
+      "description": "reservation === null ? 'Nueva reserva' : `Reserva de ${reservation.customer_name}`",
+      "origin": "src/features/reservations/ReservationDialog.tsx"
+    },
+    {
+      "id": "dialogo:shell/quick/QuickPalette",
+      "type": "dialogo",
+      "description": "TITLE",
+      "origin": "src/features/shell/quick/QuickPalette.tsx"
+    },
+    {
+      "id": "dialogo:staff/StaffCreateDialog",
+      "type": "dialogo",
+      "description": "Nueva cuenta",
+      "origin": "src/features/staff/StaffCreateDialog.tsx"
+    },
+    {
+      "id": "dialogo:staff/StaffRowDialogs#1",
+      "type": "dialogo",
+      "description": "`Editar a ${account.full_name}`",
+      "origin": "src/features/staff/StaffRowDialogs.tsx"
+    },
+    {
+      "id": "dialogo:staff/StaffRowDialogs#2",
+      "type": "dialogo",
+      "description": "`Restablecer la contraseña de ${account.full_name}`",
+      "origin": "src/features/staff/StaffRowDialogs.tsx"
+    },
+    {
+      "id": "dialogo:tables/TableFormDialog",
+      "type": "dialogo",
+      "description": "table === null ? 'Nueva mesa' : `Renombrar ${tableName(table.label)}`",
+      "origin": "src/features/tables/TableFormDialog.tsx"
+    },
+    {
+      "id": "hoja:billing/BillingView",
+      "type": "hoja",
+      "description": "Datos fiscales",
+      "origin": "src/features/billing/BillingView.tsx"
+    },
+    {
+      "id": "hoja:customers/CustomerSheet",
+      "type": "hoja",
+      "description": "",
+      "origin": "src/features/customers/CustomerSheet.tsx"
+    },
+    {
+      "id": "hoja:insights/MarginsBody",
+      "type": "hoja",
+      "description": "Margen por plato",
+      "origin": "src/features/insights/MarginsBody.tsx"
+    },
+    {
+      "id": "hoja:inventory/StockRulesSheet",
+      "type": "hoja",
+      "description": "Reglas de stock",
+      "origin": "src/features/inventory/StockRulesSheet.tsx"
+    },
+    {
+      "id": "hoja:menu/DishSheet",
+      "type": "hoja",
+      "description": "mode === 'edit' ? `Editar ${item.name}` : item.name",
+      "origin": "src/features/menu/DishSheet.tsx"
+    },
+    {
+      "id": "hoja:orders/taking/CartSheet",
+      "type": "hoja",
+      "description": "{title}",
+      "origin": "src/features/orders/taking/CartSheet.tsx"
+    },
+    {
+      "id": "hoja:roles/RoleFormDialog",
+      "type": "hoja",
+      "description": "title(role, access)",
+      "origin": "src/features/roles/RoleFormDialog.tsx"
+    },
+    {
+      "id": "hoja:shell/MoreSheet",
+      "type": "hoja",
+      "description": "{label}",
+      "origin": "src/features/shell/MoreSheet.tsx"
+    },
+    {
+      "id": "hoja:shell/quick/QuickAppearanceButton",
+      "type": "hoja",
+      "description": "{LABEL}",
+      "origin": "src/features/shell/quick/QuickAppearanceButton.tsx"
+    },
+    {
+      "id": "pestanas:insights/InsightsTabs",
+      "type": "pestanas",
+      "description": "",
+      "origin": "src/features/insights/InsightsTabs.tsx"
+    },
+    {
+      "id": "pestanas:inventory/InventoryTabs",
+      "type": "pestanas",
+      "description": "",
+      "origin": "src/features/inventory/InventoryTabs.tsx"
+    },
+    {
+      "id": "pestanas:orders/OrdersView",
+      "type": "pestanas",
+      "description": "",
+      "origin": "src/features/orders/OrdersView.tsx"
+    },
+    {
+      "id": "pestanas:shell/appearance/AppearanceView",
+      "type": "pestanas",
+      "description": "",
+      "origin": "src/features/shell/appearance/AppearanceView.tsx"
+    },
+    {
+      "id": "funcion:pedidos.ver-mesas",
+      "type": "funcion",
+      "description": "Pedidos › Mesas: ver cuántas mesas están libres y el estado, número, total y mesero de cada mesa ocupada",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.en-vivo",
+      "type": "funcion",
+      "description": "Pedidos: el indicador «En vivo» y la pantalla que cambia sola cuando la cocina marca listo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.pestana-llevar",
+      "type": "funcion",
+      "description": "Pedidos › Llevar y delivery: lista de los pedidos para llevar y delivery en curso",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.pestana-mis-pedidos",
+      "type": "funcion",
+      "description": "Pedidos › Mis pedidos: lo que tomó el mesero hoy y volver a la misma pestaña desde el pedido",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.para-llevar",
+      "type": "funcion",
+      "description": "Pedidos › Para llevar / Delivery: pedido para recoger en el local, con nombre opcional; cancelar la ventana",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.delivery",
+      "type": "funcion",
+      "description": "Pedidos › Delivery: exige nombre, teléfono y dirección antes de elegir platos",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.buscar-cliente-frecuente",
+      "type": "funcion",
+      "description": "Pedidos › Delivery: buscar al cliente frecuente por nombre o teléfono y llenar sus datos",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.cliente-nuevo-a-libreta",
+      "type": "funcion",
+      "description": "Pedidos › Delivery: un cliente que no estaba se agrega a la libreta y queda ligado al pedido",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.delivery-sin-consentimiento",
+      "type": "funcion",
+      "description": "Pedidos › Delivery: sin el consentimiento del cliente el pedido sale igual y el cliente no queda en la libreta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedidos.cliente-no-encontrado",
+      "type": "estado",
+      "description": "Pedidos › Delivery: la búsqueda sin coincidencias pide escribir los datos",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedidos.mesas.vacio",
+      "type": "estado",
+      "description": "Pedidos › Mesas: sin mesas activas (con el atajo «Crear mesas» para el encargado)",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedidos.atajo-crear-mesas",
+      "type": "funcion",
+      "description": "Pedidos › Mesas: sin mesas activas, el encargado ve el atajo «Crear mesas» que lleva a /mesas",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedidos.mesas.error",
+      "type": "estado",
+      "description": "Pedidos › Mesas: las mesas no cargan y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedidos.llevar.vacio",
+      "type": "estado",
+      "description": "Pedidos › Llevar y delivery: sin pedidos en curso",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedidos.llevar.error",
+      "type": "estado",
+      "description": "Pedidos › Llevar y delivery: los pedidos no cargan y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedidos.mios.vacio",
+      "type": "estado",
+      "description": "Pedidos › Mis pedidos: el mesero todavía no tomó pedidos hoy",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedidos.mios.error",
+      "type": "estado",
+      "description": "Pedidos › Mis pedidos: la lista no carga y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.agregar-plato",
+      "type": "funcion",
+      "description": "Pedido nuevo: tocar un plato lo suma al pedido y la barra muestra platos y total",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.cambiar-cantidad",
+      "type": "funcion",
+      "description": "Pedido nuevo: el más y el menos de un plato elegido",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.buscar-plato",
+      "type": "funcion",
+      "description": "Pedido nuevo: buscar un plato por nombre",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.filtrar-categoria",
+      "type": "funcion",
+      "description": "Pedido nuevo: filtrar la carta por categoría y volver a «Toda la carta»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.resumen-y-notas",
+      "type": "funcion",
+      "description": "Pedido nuevo › Resumen: cantidades y nota para cocina de cada plato, seguir eligiendo y enviar desde el resumen",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.enviar-a-cocina",
+      "type": "funcion",
+      "description": "Pedido nuevo: «Enviar a cocina» crea el pedido, lo manda y ocupa la mesa",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.plato-agotado",
+      "type": "funcion",
+      "description": "Pedido nuevo: un plato agotado hoy se ve «Agotado» y no se puede elegir; al reponerlo vuelve en vivo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.plato-sin-insumos",
+      "type": "funcion",
+      "description": "Pedido nuevo: un plato cuya receta no alcanza se ve «Sin insumos» y no se puede elegir",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.opciones-del-plato",
+      "type": "funcion",
+      "description": "Pedido nuevo › Opciones: grupo obligatorio, extras con precio y máximo de elecciones antes de sumar el plato",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido-nuevo.mesa-ocupada",
+      "type": "funcion",
+      "description": "Pedido nuevo: aviso de que la mesa ya tiene un pedido, con el enlace a ese pedido",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedido-nuevo.mesa-inexistente",
+      "type": "estado",
+      "description": "Pedido nuevo: la mesa no existe o está desactivada",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedido-nuevo.sin-resultados",
+      "type": "estado",
+      "description": "Pedido nuevo: ningún plato coincide con la búsqueda",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedido-nuevo.error",
+      "type": "estado",
+      "description": "Pedido nuevo: la carta no carga y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.enviar-pendiente",
+      "type": "funcion",
+      "description": "Detalle: un pedido abierto que no se envió se manda a cocina desde el detalle",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.editar-plato",
+      "type": "funcion",
+      "description": "Detalle de un pedido abierto: cambiar la cantidad de un plato",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.quitar-plato",
+      "type": "funcion",
+      "description": "Detalle de un pedido abierto: quitar un plato",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.marcar-listo",
+      "type": "funcion",
+      "description": "Detalle: el encargado marca listo un pedido en cocina",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.marcar-servido",
+      "type": "funcion",
+      "description": "Detalle: el mesero marca servido un pedido listo y aparece «Cobrar»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.cobrar-solo-lo-suyo",
+      "type": "funcion",
+      "description": "Detalle: el mesero no ve «Cobrar» en un pedido que tomó otro",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.cancelar",
+      "type": "funcion",
+      "description": "Detalle: el encargado cancela con motivo obligatorio; la mesa queda libre y se ve el motivo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.cancelar-sin-permiso",
+      "type": "funcion",
+      "description": "Detalle: el mesero no ve «Cancelar pedido»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.cambiar-mesa",
+      "type": "funcion",
+      "description": "Detalle: cambiar el pedido a una mesa libre",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.unir-mesa",
+      "type": "funcion",
+      "description": "Detalle: unir otra mesa del mesero a este pedido; sin otras mesas lo dice",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.imprimir-comanda",
+      "type": "funcion",
+      "description": "Detalle › Imprimir comanda: hoja de cocina sin precios, con notas y opciones",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.imprimir-precuenta",
+      "type": "funcion",
+      "description": "Detalle › Imprimir precuenta: la cuenta antes de pagar, con el total",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.imprimir-ticket",
+      "type": "funcion",
+      "description": "Detalle › Imprimir ticket: el ticket pagado con cortesías, descuento, pagos y vuelto",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.opciones-impresas",
+      "type": "funcion",
+      "description": "Comanda y precuenta: las opciones elegidas de un plato aparecen impresas y suman al total",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.datos-delivery",
+      "type": "funcion",
+      "description": "Detalle de un delivery: dirección, referencia y el teléfono para llamar",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.alergia-resaltada",
+      "type": "funcion",
+      "description": "Detalle: «Con alergia» en el encabezado cuando una nota menciona una alergia (visto por el encargado)",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedido.error",
+      "type": "estado",
+      "description": "Detalle: el pedido no carga y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:pedido.no-existe",
+      "type": "estado",
+      "description": "Detalle: el pedido no existe (o es de otro local) y se vuelve a Pedidos",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:agregar.agregar-platos",
+      "type": "funcion",
+      "description": "Agregar platos a un pedido enviado; si estaba listo o servido vuelve a cocina",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:agregar.pedido-cerrado",
+      "type": "funcion",
+      "description": "Agregar platos: un pedido pagado o cancelado avisa que no admite más platos",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.todo-junto",
+      "type": "funcion",
+      "description": "Cobro: toda la cuenta junta en efectivo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.partes-iguales",
+      "type": "funcion",
+      "description": "Cobro: dividir en partes iguales; tras cada pago queda la siguiente persona con el saldo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.por-platos",
+      "type": "funcion",
+      "description": "Cobro: cada persona paga sus platos; los ya pagados no se ofrecen",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.pago-mixto",
+      "type": "funcion",
+      "description": "Cobro: la cuenta se cierra con medios distintos (efectivo y Yape) y queda «Mixto»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.vuelto",
+      "type": "funcion",
+      "description": "Cobro en efectivo: montos rápidos y vuelto en vivo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.monto-exacto",
+      "type": "funcion",
+      "description": "Cobro en efectivo: el atajo «Monto exacto»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.monto-insuficiente",
+      "type": "funcion",
+      "description": "Cobro en efectivo: un monto menor a lo que se cobra se rechaza",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.propina",
+      "type": "funcion",
+      "description": "Cobro: propina con los atajos, aparte de la venta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.descuento",
+      "type": "funcion",
+      "description": "Cobro › Descuento: el mesero aplica un porcentaje con motivo dentro de su tope",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.descuento-sobre-tope",
+      "type": "funcion",
+      "description": "Cobro › Descuento: sobre el tope del mesero el servidor lo rechaza y se avisa",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.descuento-sin-tope",
+      "type": "funcion",
+      "description": "Cobro › Descuento: el encargado descuenta sin tope y puede cambiarlo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.quitar-descuento",
+      "type": "funcion",
+      "description": "Cobro › Descuento: quitar el descuento aplicado",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.cortesia",
+      "type": "funcion",
+      "description": "Cobro › Invitar un plato: el encargado invita un plato con motivo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cobro.quitar-cortesia",
+      "type": "funcion",
+      "description": "Cobro › Invitar un plato: volver a cobrar un plato invitado",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:cobro.caja-cerrada",
+      "type": "estado",
+      "description": "Cobro: con la caja cerrada avisa y no deja confirmar",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:comprobante.boleta-sin-documento",
+      "type": "funcion",
+      "description": "Comprobante: boleta a «clientes varios» hasta S/ 700 (el DNI es opcional)",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:comprobante.boleta-sobre-tope",
+      "type": "funcion",
+      "description": "Comprobante: una boleta de más de S/ 700 exige DNI, CE o RUC",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:comprobante.documento-invalido",
+      "type": "funcion",
+      "description": "Comprobante: un DNI inválido se rechaza con el mensaje del servidor",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:comprobante.factura",
+      "type": "funcion",
+      "description": "Comprobante: factura con RUC, razón social y dirección fiscal",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:comprobante.factura-ruc-invalido",
+      "type": "funcion",
+      "description": "Comprobante: una factura con RUC inválido se rechaza",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:comprobante.simulado",
+      "type": "funcion",
+      "description": "Comprobante: sin proveedor configurado queda «Sin enviar (sin proveedor)» y ya no se ofrece emitir otro",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cocina.por-preparar",
+      "type": "funcion",
+      "description": "Cocina: los pedidos por preparar llegan solos, sin precios, con cantidades y notas",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cocina.marcar-listo",
+      "type": "funcion",
+      "description": "Cocina: quien tiene permiso marca «Listo» y el pedido pasa a «Listos para servir»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cocina.solo-mirar",
+      "type": "funcion",
+      "description": "Cocina: el mesero ve la pantalla sin el botón «Listo»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:cocina.vacio",
+      "type": "estado",
+      "description": "Cocina: nada pendiente y nada esperando a salir",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:cocina.error",
+      "type": "estado",
+      "description": "Cocina: los pedidos no cargan y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:imprimir.reimprimir",
+      "type": "funcion",
+      "description": "Hoja de impresión: se imprime sola al abrir y el botón «Imprimir» saca otra copia",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:imprimir.error",
+      "type": "estado",
+      "description": "Hoja de impresión: el pedido no carga y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:tablero.tiempo-real",
+      "type": "funcion",
+      "description": "Tablero: un pedido nuevo aparece en otro navegador sin recargar, con «Nuevo»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:tablero.filtrar-tipo",
+      "type": "funcion",
+      "description": "Tablero: filtrar por en mesa, para llevar y delivery, con la cuenta de cada uno",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:tablero.enviar-a-cocina",
+      "type": "funcion",
+      "description": "Tablero: enviar a cocina un pedido abierto desde su tarjeta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:tablero.marcar-listo",
+      "type": "funcion",
+      "description": "Tablero: la cocina (rol Cocinero) marca listo desde la tarjeta y no ve «Cobrar»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:tablero.cobrar",
+      "type": "funcion",
+      "description": "Tablero: cobrar un pedido servido desde su tarjeta; el recibo sigue a la vista",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:tablero.cancelar",
+      "type": "funcion",
+      "description": "Tablero: cancelar un pedido desde su tarjeta con motivo",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:tablero.ir-al-pedido",
+      "type": "funcion",
+      "description": "Tablero: el número de la tarjeta lleva al detalle del pedido",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:tablero.alergia-resaltada",
+      "type": "funcion",
+      "description": "Tablero y cocina: una nota con alergia lleva «Con alergia» y el distintivo «Alergia» (regla por palabras clave)",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:tablero.vacio",
+      "type": "estado",
+      "description": "Tablero: cada columna sin pedidos",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:tablero.error",
+      "type": "estado",
+      "description": "Tablero: los pedidos no cargan y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:historial.filtrar-fecha",
+      "type": "funcion",
+      "description": "Historial: filtrar por fecha desde y hasta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:historial.filtrar-estado",
+      "type": "funcion",
+      "description": "Historial: filtrar por estado",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:historial.filtrar-tipo",
+      "type": "funcion",
+      "description": "Historial: filtrar por tipo de pedido",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:historial.filtrar-mesero",
+      "type": "funcion",
+      "description": "Historial: filtrar por mesero",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:historial.ver-detalle",
+      "type": "funcion",
+      "description": "Historial: desplegar y ocultar el detalle de una fila (platos, pago o motivo de cancelación)",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:historial.paginar",
+      "type": "funcion",
+      "description": "Historial: páginas de 25 con anterior y siguiente",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:historial.vacio",
+      "type": "estado",
+      "description": "Historial: ningún pedido coincide con los filtros",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "estado:historial.error",
+      "type": "estado",
+      "description": "Historial: la lista no carga y se reintenta",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:caja.abrir",
+      "type": "funcion",
+      "description": "Abrir la caja con el efectivo inicial y una nota",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.validar-monto",
+      "type": "funcion",
+      "description": "El monto inicial vacío o con letras se rechaza con su mensaje",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.arqueo-en-curso",
+      "type": "funcion",
+      "description": "El arqueo del turno en curso: ventas, pedidos, propinas, efectivo esperado, por medio y por mesero, al día con los cobros",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.diferencia-en-vivo",
+      "type": "funcion",
+      "description": "Al contar el efectivo se ve si sobra, falta o cuadra antes de cerrar",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.cerrar",
+      "type": "funcion",
+      "description": "Cerrar la caja con el efectivo contado y una nota",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.aviso-pedidos-sin-cobrar",
+      "type": "funcion",
+      "description": "Al cerrar con pedidos abiertos se avisa que pasan al turno siguiente",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.sin-caja-no-se-cobra",
+      "type": "funcion",
+      "description": "Con la caja cerrada el servidor rechaza los cobros",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.historial",
+      "type": "funcion",
+      "description": "Los turnos cerrados aparecen en el historial con su esperado y su diferencia",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.ver-turno",
+      "type": "funcion",
+      "description": "Abrir un turno cerrado muestra su arqueo firmado, el contado, la diferencia y la nota",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.historial-paginar",
+      "type": "funcion",
+      "description": "El historial de turnos se pagina de a 10",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:caja.tope-descuento",
+      "type": "funcion",
+      "description": "Cambiar el descuento máximo del mesero (con validación del porcentaje)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:caja.historial-vacio",
+      "type": "estado",
+      "description": "Sin turnos cerrados, el historial lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:caja.error",
+      "type": "estado",
+      "description": "Si falla el servidor, la caja muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:caja.historial-error",
+      "type": "estado",
+      "description": "Si falla el servidor, el historial de turnos muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.nuevo-insumo",
+      "type": "funcion",
+      "description": "Dar de alta un insumo con su unidad, mínimo y costo (con validación)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.editar-insumo",
+      "type": "funcion",
+      "description": "Editar el mínimo y el costo de un insumo; la unidad no cambia",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.compra",
+      "type": "funcion",
+      "description": "Registrar una compra por costo unitario o por total pagado, con la vista previa del stock",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.compra-desde-alerta",
+      "type": "funcion",
+      "description": "Registrar la compra de un insumo bajo mínimo desde su fila",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.merma",
+      "type": "funcion",
+      "description": "Registrar una merma con su motivo obligatorio",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.ajuste-conteo",
+      "type": "funcion",
+      "description": "Ajustar el stock escribiendo lo contado",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.ajuste-diferencia",
+      "type": "funcion",
+      "description": "Ajustar el stock con la diferencia que sobra o falta",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.cancelar-accion",
+      "type": "funcion",
+      "description": "Cancelar la ventana de una acción sin registrar nada",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.buscar",
+      "type": "funcion",
+      "description": "Buscar insumos por nombre, sin importar mayúsculas",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.solo-bajo-minimo",
+      "type": "funcion",
+      "description": "Filtrar solo los insumos bajo el mínimo; la cuenta de los que faltan está junto al filtro",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.paginar",
+      "type": "funcion",
+      "description": "La tabla de insumos se pagina de a 30",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.alerta-desaparece-al-reponer",
+      "type": "funcion",
+      "description": "Al reponer, el insumo sale de «Solo bajo mínimo» y deja de contarse como por reponer",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.agotar-sin-insumos",
+      "type": "funcion",
+      "description": "Encender o apagar, en la hoja «Reglas de stock», la regla que agota solos los platos sin insumos",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:inventario.sin-resultados",
+      "type": "estado",
+      "description": "Una búsqueda sin coincidencias lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:inventario.vacio",
+      "type": "estado",
+      "description": "Sin insumos, la tabla lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:recetas.vacio",
+      "type": "estado",
+      "description": "Sin platos en la carta, la pestaña Recetas lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:inventario.error",
+      "type": "estado",
+      "description": "Si falla el servidor, la tabla de insumos muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:movimientos.kardex",
+      "type": "funcion",
+      "description": "El libro de movimientos muestra cada entrada y salida con su motivo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:movimientos.filtrar-insumo",
+      "type": "funcion",
+      "description": "Filtrar el libro por insumo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:movimientos.filtrar-tipo",
+      "type": "funcion",
+      "description": "Filtrar el libro por tipo de movimiento",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:movimientos.paginar",
+      "type": "funcion",
+      "description": "El libro de movimientos se pagina de a 20",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:movimientos.sin-resultados",
+      "type": "estado",
+      "description": "Sin movimientos para los filtros, lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:movimientos.error",
+      "type": "estado",
+      "description": "Si falla el servidor, el libro muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:recetas.costos-por-plato",
+      "type": "funcion",
+      "description": "La pestaña Recetas muestra costo, margen y porcentaje de cada plato",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:recetas.crear",
+      "type": "funcion",
+      "description": "Armar la receta de un plato agregando insumos y cantidades",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:recetas.costo-en-vivo",
+      "type": "funcion",
+      "description": "El costo por porción y el margen se recalculan mientras se escribe",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:recetas.quitar-insumo",
+      "type": "funcion",
+      "description": "Quitar un insumo de la receta",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:recetas.borrar",
+      "type": "funcion",
+      "description": "Borrar la receta dejándola sin insumos",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:recetas.volver",
+      "type": "funcion",
+      "description": "Volver a las recetas o al menú según desde dónde se abrió",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:recetas.solo-lectura",
+      "type": "funcion",
+      "description": "Quien solo ve el inventario mira la receta sin poder cambiarla",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:recetas.error",
+      "type": "estado",
+      "description": "Si falla el servidor, la pestaña Recetas muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:receta.error",
+      "type": "estado",
+      "description": "La receta de un plato que no existe muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:proveedores.crear",
+      "type": "funcion",
+      "description": "Dar de alta un proveedor con contacto, teléfono y nota",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:proveedores.editar",
+      "type": "funcion",
+      "description": "Editar un proveedor",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:proveedores.vacio",
+      "type": "estado",
+      "description": "Sin proveedores, la pestaña lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:proveedores.error",
+      "type": "estado",
+      "description": "Si falla el servidor, los proveedores muestran el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:compras.orden-desde-sugerencias",
+      "type": "funcion",
+      "description": "Armar una orden de compra cargando las sugerencias de reposición",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:compras.orden-a-mano",
+      "type": "funcion",
+      "description": "Armar una orden de compra a mano, agregando y quitando líneas",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:compras.enviar",
+      "type": "funcion",
+      "description": "Marcar enviada una orden de compra",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:compras.recibir",
+      "type": "funcion",
+      "description": "Recibir una orden corrigiendo cantidad y costo real; entra al stock",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:compras.cancelar",
+      "type": "funcion",
+      "description": "Cancelar una orden de compra",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:compras.vacio",
+      "type": "estado",
+      "description": "Sin órdenes de compra, la pestaña lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:compras.error",
+      "type": "estado",
+      "description": "Si falla el servidor, las órdenes muestran el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.nueva-categoria",
+      "type": "funcion",
+      "description": "Crear una categoría (con validación del nombre)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.editar-categoria",
+      "type": "funcion",
+      "description": "Renombrar una categoría",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.desactivar-categoria",
+      "type": "funcion",
+      "description": "Desactivar una categoría con confirmación",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.activar-categoria",
+      "type": "funcion",
+      "description": "Volver a activar una categoría",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.eliminar-categoria",
+      "type": "funcion",
+      "description": "Eliminar una categoría vacía con confirmación",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.ordenar-categorias",
+      "type": "funcion",
+      "description": "Subir y bajar una categoría",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.nuevo-plato",
+      "type": "funcion",
+      "description": "Crear un plato con precio y categoría (con validación)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.agregar-plato-en-categoria",
+      "type": "funcion",
+      "description": "Agregar un plato desde su categoría, con la categoría ya elegida",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.opciones-del-plato",
+      "type": "funcion",
+      "description": "Definir grupos de opciones y extras del plato",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.editar-plato",
+      "type": "funcion",
+      "description": "Editar nombre, precio y descripción de un plato",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.disponible-hoy",
+      "type": "funcion",
+      "description": "Marcar un plato como agotado o disponible hoy",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.desactivar-plato",
+      "type": "funcion",
+      "description": "Sacar un plato de la carta con confirmación",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.activar-plato",
+      "type": "funcion",
+      "description": "Devolver un plato a la carta",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.ordenar-platos",
+      "type": "funcion",
+      "description": "Subir y bajar un plato dentro de su categoría",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:menu.margen-y-receta",
+      "type": "funcion",
+      "description": "El plato muestra su costo y margen, y lleva a su receta",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:menu.vacio",
+      "type": "estado",
+      "description": "Sin categorías, la carta vacía lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:menu.error",
+      "type": "estado",
+      "description": "Si falla el servidor, el menú muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mesas.crear",
+      "type": "funcion",
+      "description": "Crear una mesa (con validación del nombre)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mesas.renombrar",
+      "type": "funcion",
+      "description": "Renombrar una mesa",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mesas.ordenar",
+      "type": "funcion",
+      "description": "Subir y bajar una mesa en el orden del salón",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mesas.desactivar",
+      "type": "funcion",
+      "description": "Desactivar una mesa libre",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mesas.activar",
+      "type": "funcion",
+      "description": "Volver a activar una mesa",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mesas.ocupada-no-se-desactiva",
+      "type": "funcion",
+      "description": "Una mesa con un pedido en curso no se puede desactivar",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:mesas.vacio",
+      "type": "estado",
+      "description": "Sin mesas, la pantalla lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:mesas.error",
+      "type": "estado",
+      "description": "Si falla el servidor, las mesas muestran el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.crear",
+      "type": "funcion",
+      "description": "Crear una cuenta con nombre, correo, rol y contraseña inicial (con validación)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.correo-repetido",
+      "type": "funcion",
+      "description": "Un correo ya usado se rechaza al crear la cuenta",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.editar",
+      "type": "funcion",
+      "description": "Cambiar el nombre y el rol de una cuenta",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.restablecer-contrasena",
+      "type": "funcion",
+      "description": "Restablecer la contraseña de otra cuenta",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.desactivar",
+      "type": "funcion",
+      "description": "Desactivar una cuenta con confirmación; ya no puede entrar",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.activar",
+      "type": "funcion",
+      "description": "Volver a activar una cuenta",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.cuenta-propia",
+      "type": "funcion",
+      "description": "La cuenta propia no cambia su rol ni se desactiva",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.roles-que-puede-dar",
+      "type": "funcion",
+      "description": "Solo se ofrecen los roles con permisos que la cuenta tiene",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.paginar",
+      "type": "funcion",
+      "description": "La tabla del personal se pagina de a 15",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:personal.error",
+      "type": "estado",
+      "description": "Si falla el servidor, el personal muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:roles.crear",
+      "type": "funcion",
+      "description": "Crear un rol con nombre y permisos",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:roles.editar-permisos",
+      "type": "funcion",
+      "description": "Cambiar los permisos de un rol",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:roles.eliminar",
+      "type": "funcion",
+      "description": "Eliminar un rol que nadie tiene, con confirmación",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:roles.no-se-borra-con-personas",
+      "type": "funcion",
+      "description": "Un rol con personas no ofrece eliminarse",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:roles.encargado-fijo",
+      "type": "funcion",
+      "description": "El rol del encargado solo se mira",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:roles.mesero-sin-renombrar",
+      "type": "funcion",
+      "description": "El rol del mesero cambia sus permisos pero no su nombre",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:roles.permisos-que-no-tiene",
+      "type": "funcion",
+      "description": "Quien arma roles no puede dar permisos que no tiene",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:roles.error",
+      "type": "estado",
+      "description": "Si falla el servidor, los roles muestran el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.datos-fiscales",
+      "type": "funcion",
+      "description": "Guardar RUC, razón social, dirección, IGV y series",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.validar-datos-fiscales",
+      "type": "funcion",
+      "description": "Un RUC o una serie inválidos se rechazan con su mensaje",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.lista",
+      "type": "funcion",
+      "description": "Los comprobantes emitidos con número, monto, cliente y estado ante SUNAT",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.reenviar",
+      "type": "funcion",
+      "description": "Reenviar un comprobante sin enviar; sin proveedor queda simulado",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.imprimir",
+      "type": "funcion",
+      "description": "Imprimir la representación del comprobante con los datos del emisor",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.paginar",
+      "type": "funcion",
+      "description": "Los comprobantes se paginan de a 25",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:comprobantes.vacio",
+      "type": "estado",
+      "description": "Sin comprobantes, la lista lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:comprobantes.error",
+      "type": "estado",
+      "description": "Si falla el servidor, la lista de comprobantes muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:comprobante-impreso.error",
+      "type": "estado",
+      "description": "Un comprobante que no existe no se imprime y muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.crear",
+      "type": "funcion",
+      "description": "Dar de alta un cliente (con validación)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.consentimiento",
+      "type": "funcion",
+      "description": "Clientes › el alta exige el consentimiento del cliente para tratar sus datos (Ley N.º 29733)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.exportar-datos",
+      "type": "funcion",
+      "description": "Clientes › derecho de acceso: el encargado descarga lo que se guarda del cliente",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.borrar-datos",
+      "type": "funcion",
+      "description": "Clientes › derecho de cancelación: el encargado borra los datos del cliente de la ficha, sus pedidos y sus reservas",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.telefono-repetido",
+      "type": "funcion",
+      "description": "Un teléfono que ya es de otro cliente se rechaza",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.buscar",
+      "type": "funcion",
+      "description": "Buscar clientes por nombre o teléfono",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.ver-ficha",
+      "type": "funcion",
+      "description": "La ficha del cliente con visitas, gasto, ticket promedio y últimos pedidos",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.frecuente",
+      "type": "funcion",
+      "description": "Desde tres visitas el cliente se marca frecuente",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.editar",
+      "type": "funcion",
+      "description": "Editar los datos del cliente desde su ficha",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:clientes.vacio",
+      "type": "estado",
+      "description": "Sin clientes, la libreta lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:clientes.sin-resultados",
+      "type": "estado",
+      "description": "Una búsqueda sin coincidencias lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:clientes.error",
+      "type": "estado",
+      "description": "Si falla el servidor, la libreta muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reservas.crear",
+      "type": "funcion",
+      "description": "Tomar una reserva con mesa, día, hora, personas y duración (con validación)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reservas.cruce-de-mesa",
+      "type": "funcion",
+      "description": "Dos reservas de la misma mesa a la misma hora se rechazan",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reservas.editar",
+      "type": "funcion",
+      "description": "Corregir una reserva",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reservas.llegaron",
+      "type": "funcion",
+      "description": "Marcar que el grupo llegó",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reservas.no-vinieron",
+      "type": "funcion",
+      "description": "Marcar que no vinieron",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reservas.cancelar",
+      "type": "funcion",
+      "description": "Cancelar una reserva",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reservas.cambiar-dia",
+      "type": "funcion",
+      "description": "Ver las reservas de otro día",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:reservas.vacio",
+      "type": "estado",
+      "description": "Sin reservas para el día, lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:reservas.error",
+      "type": "estado",
+      "description": "Si falla el servidor, las reservas muestran el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.indicadores",
+      "type": "funcion",
+      "description": "Ventas, pedidos pagados, ticket promedio y cancelados del período",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.secciones",
+      "type": "funcion",
+      "description": "Ventas por día, mapa por hora, platos más vendidos, medios de pago, meseros y mermas",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.rango-predefinido",
+      "type": "funcion",
+      "description": "Elegir hoy, 7 días, 30 días o este mes",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.rango-personalizado",
+      "type": "funcion",
+      "description": "Elegir un rango personalizado de fechas",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.rango-invalido",
+      "type": "funcion",
+      "description": "Un rango personalizado inválido se rechaza con su mensaje",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.ver-tabla",
+      "type": "funcion",
+      "description": "Cambiar un gráfico por su tabla y volver",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.ordenar-margenes",
+      "type": "funcion",
+      "description": "Ordenar la tabla de margen por plato tocando una cabecera",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.bajo-minimo",
+      "type": "funcion",
+      "description": "Los insumos bajo el mínimo en el panel, con el enlace a la reposición",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:panel.clasificar-mermas",
+      "type": "funcion",
+      "description": "Clasificar las mermas pendientes (por reglas, sin clave de IA)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:panel.sin-ventas",
+      "type": "estado",
+      "description": "Sin ventas en el rango, cada sección lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:panel.error",
+      "type": "estado",
+      "description": "Si falla el servidor, cada sección del panel muestra su error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reposicion.recomendaciones",
+      "type": "funcion",
+      "description": "Qué comprar y cuándo por insumo, con explicación, urgencia y motor",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reposicion.actualizar",
+      "type": "funcion",
+      "description": "Actualizar las recomendaciones (decide el motor por reglas sin clave de IA)",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reposicion.filtrar-accion",
+      "type": "funcion",
+      "description": "Filtrar por acción tocando una tarjeta del resumen",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:reposicion.ver-en-espera",
+      "type": "funcion",
+      "description": "Mostrar también los insumos que pueden esperar",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:reposicion.vacio",
+      "type": "estado",
+      "description": "Sin insumos, la reposición lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:reposicion.error",
+      "type": "estado",
+      "description": "Si falla el servidor, la reposición muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:ia.decisiones",
+      "type": "funcion",
+      "description": "La bitácora de decisiones con fecha, tipo, asunto, decisión, motor y confianza",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:ia.filtrar-tipo",
+      "type": "funcion",
+      "description": "Filtrar las decisiones por tipo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:ia.filtrar-motor",
+      "type": "funcion",
+      "description": "Filtrar las decisiones por motor",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:ia.ver-json",
+      "type": "funcion",
+      "description": "Ver y ocultar la entrada y la salida de una decisión",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:ia.paginar",
+      "type": "funcion",
+      "description": "Las decisiones se paginan de a 20",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:ia.vacio",
+      "type": "estado",
+      "description": "Sin decisiones para los filtros, lo dice",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:ia.error",
+      "type": "estado",
+      "description": "Si falla el servidor, la auditoría muestra el error",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:perfil.ver-datos",
+      "type": "funcion",
+      "description": "Ver nombre, correo, rol y restaurante de la cuenta propia",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:perfil.cambiar-contrasena",
+      "type": "funcion",
+      "description": "Cambiar la contraseña propia; la nueva sirve para entrar y la vieja no",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:perfil.validar-contrasena",
+      "type": "funcion",
+      "description": "Contraseñas que no coinciden, cortas o iguales a la actual se rechazan",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:perfil.contrasena-actual-incorrecta",
+      "type": "funcion",
+      "description": "Con la contraseña actual equivocada no se cambia nada",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.cambiar-tema",
+      "type": "funcion",
+      "description": "Elegir el modo (claro, oscuro o automático), el color y el alto contraste: se aplica al instante y se queda al recargar",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.cambiar-letra",
+      "type": "funcion",
+      "description": "Elegir la letra y el tamaño del texto de toda la aplicación",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.ordenar-menu",
+      "type": "funcion",
+      "description": "Subir, bajar o arrastrar las pantallas del menú; solo salen las que la cuenta puede abrir",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.barra-inferior",
+      "type": "funcion",
+      "description": "Elegir las cuatro pantallas de la barra de abajo del celular; el resto queda en «Más»",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.restablecer",
+      "type": "funcion",
+      "description": "Restablecer toda la apariencia, menú incluido, a lo de siempre",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:bitacora.ver",
+      "type": "funcion",
+      "description": "El encargado ve en la bitácora quién hizo qué y cuándo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:bitacora.filtrar-accesos",
+      "type": "funcion",
+      "description": "Filtrar la bitácora por «Accesos a datos de clientes»",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:bitacora.filtrar-sesiones",
+      "type": "funcion",
+      "description": "Filtrar la bitácora por «Entradas y salidas» para ver cuándo entra y sale el personal",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:bitacora.filtrar-persona",
+      "type": "funcion",
+      "description": "Filtrar la bitácora por una persona del personal",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.ver-movimientos",
+      "type": "funcion",
+      "description": "Desde Personal, «Ver movimientos» abre la bitácora de esa persona",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.ver-completo",
+      "type": "funcion",
+      "description": "Con el contacto enmascarado, «Ver completo» lo muestra y queda en la bitácora",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.enviar-correo",
+      "type": "funcion",
+      "description": "Enviar el comprobante emitido por correo desde su ventana, si el restaurante tiene el correo activo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:pedidos.sin-conexion-encolar",
+      "type": "funcion",
+      "description": "Sin señal, un pedido nuevo queda en la cola del celular con un aviso visible (HU37)",
+      "origin": "e2e/inventory/functions/offline.json"
+    },
+    {
+      "id": "funcion:pedidos.sin-conexion-reenviar",
+      "type": "funcion",
+      "description": "Al volver la señal, la cola se envía sola a cocina (HU37)",
+      "origin": "e2e/inventory/functions/offline.json"
+    },
+    {
+      "id": "funcion:pedidos.sin-conexion-sin-duplicar",
+      "type": "funcion",
+      "description": "Un pedido que llegó al servidor pero cuya respuesta se perdió no se duplica al reintentar, y «Reintentar» lo envía (HU37)",
+      "origin": "e2e/inventory/functions/offline.json"
+    },
+    {
+      "id": "estado:pedidos.cola-sin-senal",
+      "type": "estado",
+      "description": "Aviso «N pedidos esperan señal» en Pedidos",
+      "origin": "e2e/inventory/functions/offline.json"
+    },
+    {
+      "id": "rol:encargado",
+      "type": "rol",
+      "description": "Vista del encargado: todas las secciones del local en la navegación",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "rol:mesero",
+      "type": "rol",
+      "description": "Vista del mesero: Pedidos, Cocina, Reservas y Clientes; sin Tablero, Caja ni Inventario",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "rol:cocina",
+      "type": "rol",
+      "description": "Vista del rol Cocinero: Tablero e Inventario; sin Pedidos ni Caja",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "rol:plataforma",
+      "type": "rol",
+      "description": "Vista del administrador del sistema: Restaurantes, Bitácora, Vista previa y Observabilidad",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "rol:vista-previa-encargado",
+      "type": "rol",
+      "description": "Vista previa como encargado del local de muestra, con su franja",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "rol:vista-previa-mesero",
+      "type": "rol",
+      "description": "Vista previa como mesero del local de muestra, con su franja",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:acceso.entrar",
+      "type": "funcion",
+      "description": "Iniciar sesión con correo y contraseña por el formulario",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:acceso.validar",
+      "type": "funcion",
+      "description": "El formulario de acceso avisa del correo inválido y de la contraseña vacía sin enviar",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:acceso.error",
+      "type": "estado",
+      "description": "Contraseña equivocada: mensaje de error y sin sesión",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:acceso.restaurante-desactivado",
+      "type": "estado",
+      "description": "El personal de un restaurante desactivado no puede entrar",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:acceso.volver-a-destino",
+      "type": "funcion",
+      "description": "Tras entrar, se vuelve a la pantalla que se quiso abrir sin sesión",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:acceso.mostrar-contrasena",
+      "type": "funcion",
+      "description": "Mostrar y ocultar la contraseña escrita",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:sesion.cerrar",
+      "type": "funcion",
+      "description": "Cerrar sesión desde la barra lateral o la hoja «Cuenta»",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:sesion.cerrar-con-pendientes",
+      "type": "funcion",
+      "description": "Cerrar sesión con pedidos sin enviar: se avisa, se puede cancelar y la cola se conserva",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.abrir",
+      "type": "funcion",
+      "description": "Abrir la paleta «Buscar o ir a…» con Ctrl/Cmd+K o con el botón de la lupa y cerrarla con Escape",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.ir-a-pantalla",
+      "type": "funcion",
+      "description": "Buscar una pantalla sin tildes ni mayúsculas en la paleta y abrirla",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.lanzar-accion",
+      "type": "funcion",
+      "description": "Una acción de la paleta navega a la pantalla y esta abre su diálogo vacío",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.accion-desconocida",
+      "type": "funcion",
+      "description": "Un valor raro en ?accion= no abre nada",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.accion-no-aplica",
+      "type": "funcion",
+      "description": "?accion=abrir-caja con la caja abierta no abre nada y se borra de la dirección",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.cambiar-modo",
+      "type": "funcion",
+      "description": "Cambiar el modo claro, oscuro o automático desde la paleta",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.apariencia-rapida",
+      "type": "funcion",
+      "description": "Apariencia rápida: modo, tamaño del texto y alto contraste desde el encabezado o la barra lateral",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.por-rol",
+      "type": "funcion",
+      "description": "La paleta muestra solo las pantallas y acciones que los permisos de la cuenta abren",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.cerrar-sesion",
+      "type": "funcion",
+      "description": "Cerrar sesión desde la paleta; con pedidos sin enviar se avisa antes",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:permisos.navegacion-por-rol",
+      "type": "funcion",
+      "description": "La navegación muestra solo las secciones que permite el rol",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:permisos.ruta-prohibida",
+      "type": "funcion",
+      "description": "Una ruta sin permiso (/inventario, /caja) lleva al inicio de la cuenta",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:permisos.sin-sesion",
+      "type": "funcion",
+      "description": "Una pantalla privada sin sesión lleva al acceso",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:inicio.redirige-por-rol",
+      "type": "funcion",
+      "description": "La raíz lleva a la primera pantalla de cada cuenta",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:shell.saltar-al-contenido",
+      "type": "funcion",
+      "description": "El enlace «Saltar al contenido» lleva el foco al contenido principal",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:shell.mas-navegar",
+      "type": "funcion",
+      "description": "Hoja «Más» del celular: abrir una pantalla que no entró en la barra",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:shell.mas-accesibilidad",
+      "type": "funcion",
+      "description": "Hoja «Más» del celular: abrir el menú de accesibilidad",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:shell.mas-perfil",
+      "type": "funcion",
+      "description": "Hoja «Cuenta» del celular: ir al perfil propio",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "desplegable:components/AccessibilityWidget",
+      "type": "desplegable",
+      "description": "Menú del widget de accesibilidad: abrir, activar una opción, restablecer y cerrar",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:accesibilidad.opcion",
+      "type": "funcion",
+      "description": "Activar una opción del widget (alto contraste) y restablecerla",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:perfil.ver-datos",
+      "type": "funcion",
+      "description": "Mi perfil muestra nombre, correo, rol y restaurante",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:perfil.cambiar-contrasena",
+      "type": "funcion",
+      "description": "Cambiar la contraseña propia y entrar con la nueva",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:perfil.contrasena-error",
+      "type": "estado",
+      "description": "Contraseña actual equivocada o nuevas que no coinciden: no se cambia",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:vista-previa.canjear",
+      "type": "funcion",
+      "description": "La pestaña nueva canjea el código y entra al local de muestra",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:vista-previa.codigo-invalido",
+      "type": "estado",
+      "description": "Código inválido o ya usado: no se abre la vista previa",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:vista-previa.sin-codigo",
+      "type": "estado",
+      "description": "La dirección no trae código de vista previa",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:vista-previa.sin-conexion",
+      "type": "estado",
+      "description": "Sin conexión al canjear el código",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:vista-previa.volver-a-plataforma",
+      "type": "funcion",
+      "description": "«Volver a la administración del sistema» desde un canje fallido",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:vista-previa.salir",
+      "type": "funcion",
+      "description": "«Salir de la vista previa» cierra la pestaña",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:vista-previa.salir-con-pendientes",
+      "type": "funcion",
+      "description": "Salir de la vista previa con pedidos sin enviar: se avisa y se descartan",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:vista-previa.plataforma-bloqueada",
+      "type": "funcion",
+      "description": "En una pestaña de vista previa, /plataforma no se abre: la guarda por permiso lleva al inicio",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:vista-previa.terminada",
+      "type": "estado",
+      "description": "Pestaña de vista previa sin sesión: aviso y «Cerrar la vista previa»",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:vista-previa.sin-cerrar-sesion",
+      "type": "funcion",
+      "description": "En la vista previa no se ofrece «Cerrar sesión» ni cambiar la contraseña",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.entrar",
+      "type": "funcion",
+      "description": "El administrador del sistema entra por el mismo acceso que el personal y ve solo sus pantallas",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.acceso-error",
+      "type": "estado",
+      "description": "Credenciales equivocadas en el acceso único (cuenta de plataforma)",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.cerrar-sesion",
+      "type": "funcion",
+      "description": "Cerrar la sesión de plataforma",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.sin-sesion",
+      "type": "funcion",
+      "description": "Una pantalla de plataforma sin sesión lleva al acceso de todos y vuelve después de entrar",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.sesion-separada",
+      "type": "funcion",
+      "description": "Una cuenta del personal no abre pantallas de plataforma ni una de plataforma las del restaurante (guarda por permiso)",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.buscar",
+      "type": "funcion",
+      "description": "Buscar restaurantes por nombre o identificador",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.paginar",
+      "type": "funcion",
+      "description": "Paginación de la lista de restaurantes",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.restaurantes.vacio",
+      "type": "estado",
+      "description": "Ningún restaurante coincide con la búsqueda",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.restaurantes.error",
+      "type": "estado",
+      "description": "La lista de restaurantes no carga: error y «Reintentar»",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.crear",
+      "type": "funcion",
+      "description": "Dar de alta un restaurante con su primer encargado, que luego entra",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.identificador-sugerido",
+      "type": "funcion",
+      "description": "El identificador sigue al nombre mientras no se edite",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.validar-alta",
+      "type": "funcion",
+      "description": "El alta avisa de los campos que faltan o no valen",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.restaurantes.alta-error",
+      "type": "estado",
+      "description": "El servidor rechaza el alta: identificador ya usado",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurantes.cancelar-alta",
+      "type": "funcion",
+      "description": "Cancelar el alta vuelve a la lista",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurante.editar",
+      "type": "funcion",
+      "description": "Editar el nombre y la zona horaria de un restaurante",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurante.desactivar",
+      "type": "funcion",
+      "description": "Desactivar un restaurante (con confirmación) corta el acceso de su personal",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurante.activar",
+      "type": "funcion",
+      "description": "Activar un restaurante devuelve el acceso",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.restaurante.agregar-encargado",
+      "type": "funcion",
+      "description": "Agregar otro encargado desde la ficha, que luego entra",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.restaurante.encargado-error",
+      "type": "estado",
+      "description": "Agregar un encargado con un correo ya usado: error del servidor",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.restaurante.no-existe",
+      "type": "estado",
+      "description": "La ficha de un restaurante que no existe",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.restaurante.error",
+      "type": "estado",
+      "description": "La ficha no carga: error y «Reintentar»",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.bitacora.ver",
+      "type": "funcion",
+      "description": "La bitácora lista lo que hizo cada administrador",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.bitacora.paginar",
+      "type": "funcion",
+      "description": "Paginación de la bitácora",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.bitacora.error",
+      "type": "estado",
+      "description": "La bitácora no carga: error y «Reintentar»",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.vista-previa.reiniciar",
+      "type": "funcion",
+      "description": "Reiniciar el local de muestra (con confirmación)",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.vista-previa.como-encargado",
+      "type": "funcion",
+      "description": "«Ver como encargado» abre una pestaña nueva con la vista previa",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.vista-previa.como-mesero",
+      "type": "funcion",
+      "description": "«Ver como mesero» abre una pestaña nueva con la vista previa",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:plataforma.vista-previa.enlace-de-repuesto",
+      "type": "funcion",
+      "description": "El enlace de repuesto del aviso abre la vista previa y se quita",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.vista-previa.sin-muestra",
+      "type": "estado",
+      "description": "Todavía no hay local de muestra",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:plataforma.vista-previa.error",
+      "type": "estado",
+      "description": "El local de muestra no carga: error y «Reintentar»",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.ventana",
+      "type": "funcion",
+      "description": "Elegir la ventana (1 h, 6 h, 24 h, 7 d)",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.restaurante",
+      "type": "funcion",
+      "description": "Filtrar el panel por un restaurante",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.indicadores",
+      "type": "funcion",
+      "description": "Los indicadores de la ventana (peticiones, errores, latencias)",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.ver-tabla",
+      "type": "funcion",
+      "description": "Cambiar cada gráfico a su vista de tabla y volver",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.rutas-ordenar",
+      "type": "funcion",
+      "description": "Ordenar las rutas por peticiones, errores o p95",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.ruta-a-peticiones",
+      "type": "funcion",
+      "description": "Una ruta lleva a sus peticiones",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.logs-filtrar",
+      "type": "funcion",
+      "description": "Filtrar los logs por nivel, texto y request_id, y quitar los filtros",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.logs-detalle",
+      "type": "funcion",
+      "description": "«Ver detalle» de un log y su enlace a las peticiones",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.logs-cargar-mas",
+      "type": "funcion",
+      "description": "«Cargar más» logs",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.peticiones-filtrar",
+      "type": "funcion",
+      "description": "Filtrar las peticiones por estado, ruta y request_id, y quitar los filtros",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.peticiones-cargar-mas",
+      "type": "funcion",
+      "description": "«Cargar más» peticiones",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.peticion-a-logs",
+      "type": "funcion",
+      "description": "El request_id de una petición lleva a sus logs",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.pausar",
+      "type": "funcion",
+      "description": "Pausar y reanudar la actualización automática",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:observabilidad.actualizar",
+      "type": "funcion",
+      "description": "«Actualizar ahora» relee el panel",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:observabilidad.vacio",
+      "type": "estado",
+      "description": "Sin logs ni peticiones con esos filtros",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "estado:observabilidad.error",
+      "type": "estado",
+      "description": "Una lectura del panel falla: error y «Reintentar»",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:acceso.consentimientos-separados",
+      "type": "funcion",
+      "description": "Antes de empezar: dos casillas separadas sin marcar, cada una con su enlace a la privacidad; el botón se habilita solo con ambas",
+      "origin": "e2e/inventory/functions/platform.json"
+    }
+  ]
+}

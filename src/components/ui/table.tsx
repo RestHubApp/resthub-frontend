@@ -3,12 +3,17 @@
 import * as React from "react"
 import { cn } from "cn"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({ className, label, ...props }: React.ComponentProps<"table"> & { label: string }) {
   return (
-    // Enfocable: en pantallas angostas la tabla se desplaza de costado, y sin
-    // foco quien usa teclado no podría hacerlo.
+    // Región desplazable y enfocable: en pantallas angostas la tabla se
+    // desplaza de costado, y sin foco quien usa teclado no podría hacerlo
+    // (WCAG 2.1.1). El rol `region` es el que admite jsx-a11y para un
+    // contenedor con tabIndex, y necesita nombre propio (axe `landmark-unique`):
+    // `label` dice de qué es la tabla.
     <div
       data-slot="table-container"
+      role="region"
+      aria-label={label}
       tabIndex={0}
       className="relative w-full overflow-x-auto rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
@@ -36,19 +41,6 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
     <tbody
       data-slot="table-body"
       className={cn("[&_tr:last-child]:border-0", className)}
-      {...props}
-    />
-  )
-}
-
-function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
-  return (
-    <tfoot
-      data-slot="table-footer"
-      className={cn(
-        "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-        className
-      )}
       {...props}
     />
   )
@@ -93,26 +85,11 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   )
 }
 
-function TableCaption({
-  className,
-  ...props
-}: React.ComponentProps<"caption">) {
-  return (
-    <caption
-      data-slot="table-caption"
-      className={cn("mt-4 text-sm text-muted-foreground", className)}
-      {...props}
-    />
-  )
-}
-
 export {
   Table,
   TableHeader,
   TableBody,
-  TableFooter,
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
 }

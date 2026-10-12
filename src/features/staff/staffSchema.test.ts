@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import { createPayload, createStaffSchema, emptyCreateStaff, identityPayload } from './staffSchema'
 
-const ALTA = {
+const REGISTRATION = {
   full_name: 'María Quispe',
   email: 'maria@correo.com',
   role_id: '4',
@@ -11,13 +11,13 @@ const ALTA = {
 
 describe('createStaffSchema', () => {
   it('pide elegir un rol', () => {
-    const resultado = createStaffSchema.safeParse({ ...ALTA, role_id: '' })
-    expect(resultado.success).toBe(false)
-    expect(resultado.error?.issues[0]?.message).toBe('Elige el rol')
+    const result = createStaffSchema.safeParse({ ...REGISTRATION, role_id: '' })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues[0]?.message).toBe('Elige el rol')
   })
 
   it('acepta un alta completa', () => {
-    expect(createStaffSchema.safeParse(ALTA).success).toBe(true)
+    expect(createStaffSchema.safeParse(REGISTRATION).success).toBe(true)
   })
 })
 
@@ -30,7 +30,7 @@ describe('emptyCreateStaff', () => {
 
 describe('payloads', () => {
   it('el alta manda el rol como número', () => {
-    expect(createPayload(ALTA)).toEqual({ ...ALTA, role_id: 4 })
+    expect(createPayload(REGISTRATION)).toEqual({ ...REGISTRATION, role_id: 4 })
   })
 
   it('la edición manda el rol como número', () => {

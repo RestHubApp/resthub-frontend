@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { dishCostsQueryKey, replaceRecipe } from '../../api/inventory'
-import type { Recipe } from '../../api/types'
-import { useNotifications } from '../../store/notifications'
+import { dishCostsQueryKey, replaceRecipe } from '@/api/inventory'
+import type { Recipe } from '@/api/types'
+import { useNotifications } from '@/store/notifications'
 import type { RecipeValues } from './inventorySchema'
 import { recipePayload } from './recipeMath'
 
@@ -17,12 +17,12 @@ export function useSaveRecipe(menuItemId: number, onSaved: (recipe: Recipe) => v
   const push = useNotifications((state) => state.push)
 
   return useMutation({
-    mutationFn: (valores: RecipeValues) => replaceRecipe(menuItemId, recipePayload(valores)),
-    onSuccess: async (nueva) => {
-      onSaved(nueva)
+    mutationFn: (values: RecipeValues) => replaceRecipe(menuItemId, recipePayload(values)),
+    onSuccess: async (fresh) => {
+      onSaved(fresh)
       await queryClient.invalidateQueries({ queryKey: dishCostsQueryKey })
-      const accion = nueva.has_recipe ? 'guardada' : 'borrada'
-      push({ tone: 'info', message: `Receta de ${nueva.menu_item_name} ${accion}.` })
+      const action = fresh.has_recipe ? 'guardada' : 'borrada'
+      push({ tone: 'info', message: `Receta de ${fresh.menu_item_name} ${action}.` })
     },
   })
 }

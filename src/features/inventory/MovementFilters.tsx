@@ -1,8 +1,8 @@
 import { useId } from 'react'
 
-import type { Ingredient } from '../../api/types'
-import { Label } from '../../components/ui/label'
-import { NativeSelect, NativeSelectOption } from '../../components/ui/native-select'
+import type { Ingredient } from '@/api/types'
+import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { KIND_OPTIONS } from './movementKinds'
 
 interface MovementFiltersProps {
@@ -14,50 +14,50 @@ interface MovementFiltersProps {
 }
 
 /** Filtrar el libro por insumo y por tipo de movimiento. */
-export default function MovementFilters({
+export function MovementFilters({
   ingredients,
   ingredientId,
   onIngredient,
   kind,
   onKind,
 }: MovementFiltersProps) {
-  const insumoId = useId()
-  const tipoId = useId()
+  const ingredientFieldId = useId()
+  const typeId = useId()
 
   return (
     <div className="grid gap-3 sm:grid-cols-[minmax(0,18rem)_minmax(0,12rem)]">
       <div className="flex flex-col gap-2">
-        <Label htmlFor={insumoId}>Insumo</Label>
+        <Label htmlFor={ingredientFieldId}>Insumo</Label>
         <NativeSelect
-          id={insumoId}
-          className="w-full [&_select]:h-11"
+          id={ingredientFieldId}
+          className="w-full"
           value={ingredientId}
-          onChange={(evento) => {
-            onIngredient(evento.target.value)
+          onChange={(event) => {
+            onIngredient(event.target.value)
           }}
         >
           <NativeSelectOption value="">Todos los insumos</NativeSelectOption>
-          {ingredients.map((insumo) => (
-            <NativeSelectOption key={insumo.id} value={String(insumo.id)}>
-              {insumo.name}
+          {ingredients.map((ingredient) => (
+            <NativeSelectOption key={ingredient.id} value={String(ingredient.id)}>
+              {ingredient.name}
             </NativeSelectOption>
           ))}
         </NativeSelect>
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor={tipoId}>Tipo</Label>
+        <Label htmlFor={typeId}>Tipo</Label>
         <NativeSelect
-          id={tipoId}
-          className="w-full [&_select]:h-11"
+          id={typeId}
+          className="w-full"
           value={kind}
-          onChange={(evento) => {
-            onKind(evento.target.value)
+          onChange={(event) => {
+            onKind(event.target.value)
           }}
         >
           <NativeSelectOption value="">Todos los tipos</NativeSelectOption>
-          {KIND_OPTIONS.map((opcion) => (
-            <NativeSelectOption key={opcion.value} value={opcion.value}>
-              {opcion.label}
+          {KIND_OPTIONS.map((option) => (
+            <NativeSelectOption key={option.value} value={option.value}>
+              {option.label}
             </NativeSelectOption>
           ))}
         </NativeSelect>

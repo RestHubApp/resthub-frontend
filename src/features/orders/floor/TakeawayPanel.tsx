@@ -1,29 +1,29 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { activeOrdersQuery } from '../../../api/orders'
-import EmptyState from '../../../components/EmptyState'
-import ListSkeleton from '../../../components/ListSkeleton'
-import QueryError from '../QueryError'
-import OrderList from './OrderList'
+import { activeOrdersQuery } from '@/api/orders'
+import { EmptyState } from '@/components/EmptyState'
+import { ListSkeleton } from '@/components/ListSkeleton'
+import { RetryQueryError } from '@/components/RetryQueryError'
+import { OrderList } from './OrderList'
 
 /** Los pedidos para llevar que todavia no se cobran, de todos los meseros. */
-export default function TakeawayPanel() {
-  const activos = useQuery(activeOrdersQuery)
+export function TakeawayPanel() {
+  const active = useQuery(activeOrdersQuery)
 
-  if (activos.isPending) {
+  if (active.isPending) {
     return <ListSkeleton label="Cargando pedidos…" count={3} itemClassName="h-20 rounded-xl" />
   }
-  if (activos.isError) {
+  if (active.isError) {
     return (
-      <QueryError
-        error={activos.error}
+      <RetryQueryError
+        error={active.error}
         fallback="No se pudieron cargar los pedidos."
-        onRetry={() => void activos.refetch()}
+        onRetry={() => void active.refetch()}
       />
     )
   }
-  const paraLlevar = activos.data.filter((order) => order.type !== 'dine_in')
-  if (paraLlevar.length === 0) {
+  const takeaway = active.data.filter((order) => order.type !== 'dine_in')
+  if (takeaway.length === 0) {
     return (
       <EmptyState
         title="No hay pedidos para llevar ni delivery en curso"
@@ -31,5 +31,5 @@ export default function TakeawayPanel() {
       />
     )
   }
-  return <OrderList title="En curso" orders={paraLlevar} />
+  return <OrderList title="En curso" orders={takeaway} />
 }

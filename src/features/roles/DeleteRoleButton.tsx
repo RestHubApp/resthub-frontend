@@ -1,9 +1,9 @@
-import { deleteRole } from '../../api/roles'
-import type { Role } from '../../api/types'
-import ConfirmDialog from '../../components/ConfirmDialog'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { removeFromList } from '../../services/cacheList'
+import { deleteRole } from '@/api/roles'
+import type { Role } from '@/api/types'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { removeFromList } from '@/services/cacheList'
 import { useRoleMutation } from './useRoleMutation'
 
 interface DeleteRoleButtonProps {
@@ -16,8 +16,8 @@ interface DeleteRoleButtonProps {
  * Solo se ofrece sin personas: si alguien lo recibió mientras tanto, el
  * servidor responde 409 y el aviso lo explica.
  */
-export default function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
-  const borrar = useRoleMutation({
+export function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
+  const remove = useRoleMutation({
     mutationFn: () => deleteRole(role.id),
     failure: `No se pudo eliminar el rol ${role.name}.`,
     success: () => `Rol ${role.name} eliminado.`,
@@ -30,11 +30,11 @@ export default function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
         <Button
           type="button"
           variant="destructive"
-          className="h-11 px-3"
+          className="px-3"
           aria-label={`Eliminar el rol ${role.name}`}
-          disabled={borrar.isPending}
+          disabled={remove.isPending}
         >
-          <Icon name="eliminar" size={16} />
+          <Icon name="delete" size={16} />
           <span>Eliminar</span>
         </Button>
       }
@@ -42,7 +42,7 @@ export default function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
       description="Nadie lo tiene y se borra para siempre."
       confirmLabel="Eliminar"
       onConfirm={() => {
-        borrar.mutate()
+        remove.mutate()
       }}
     />
   )

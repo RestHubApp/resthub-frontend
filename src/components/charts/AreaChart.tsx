@@ -1,8 +1,9 @@
 import type { PointerEvent } from 'react'
 
-import AreaAxes from './AreaAxes'
+import { AreaAxes } from './AreaAxes'
 import { AREA_MARGIN, areaGeometry, type SeriesPoint } from './areaGeometry'
-import ChartTooltip, { type TooltipRow } from './ChartTooltip'
+import { AreaSeriesMarks } from './AreaSeriesMarks'
+import { ChartTooltip, type TooltipRow } from './ChartTooltip'
 import { nearestIndex } from './scale'
 import { useChartCursor } from './useChartCursor'
 import { useElementWidth } from './useElementWidth'
@@ -18,17 +19,22 @@ interface AreaChartProps {
   readonly overlay?: AreaOverlay
 }
 
-export interface AreaOverlay {
+interface AreaOverlay {
   /** Un valor por punto de `points`, en el mismo orden. */
   readonly values: readonly number[]
   readonly color: string
 }
 
 const HEIGHT = 260
-const SERIES = 'var(--chart-1)'
 const PIXELS_PER_LABEL = 84
 // Sin segunda serie, su línea queda vacía.
 const NO_OVERLAY: AreaOverlay = { values: [], color: 'none' }
+
+/** El punto más cercano al puntero dentro del SVG. */
+function pointerIndex(event: PointerEvent<SVGSVGElement>, step: number, length: number): number {
+  const box = event.currentTarget.getBoundingClientRect()
+  return nearestIndex({ x: event.clientX - box.left, left: AREA_MARGIN.left, step, length })
+}
 
 /**
  * Una serie en el tiempo: línea de 2 px sobre un lavado del 10 %, y a veces
@@ -38,17 +44,15 @@ const NO_OVERLAY: AreaOverlay = { values: [], color: 'none' }
  * punto más cercano, así nadie tiene que apuntar a una línea de 2 px. Solo el
  * máximo lleva rótulo; el resto está en el eje, la lectura y la tabla.
  */
-export default function AreaChart({ points, label, formatValue, formatTick, describe, overlay = NO_OVERLAY }: AreaChartProps) {
+export function AreaChart({ points, label, formatValue, formatTick, describe, overlay = NO_OVERLAY }: AreaChartProps) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const cursor = useChartCursor(points.length)
-  const geometry = areaGeometry(points, width, HEIGHT, overlay.values)
-  const { x, y, plotTop, plotBottom, maxIndex } = geometry
-  const maximo = points[maxIndex]
-  const activo = cursor.active === null ? undefined : points[cursor.active]
+  const geometry = areaGeometry(points, { width, height: HEIGHT }, overlay.values)
+  const maxXLabels = Math.max(2, Math.floor(width / PIXELS_PER_LABEL))
+  const active = cursor.active === null ? undefined : points[cursor.active]
 
   const onPointerMove = (event: PointerEvent<SVGSVGElement>) => {
-    const caja = event.currentTarget.getBoundingClientRect()
-    cursor.setActive(nearestIndex(event.clientX - caja.left, AREA_MARGIN.left, geometry.step, points.length))
+    cursor.setActive(pointerIndex(event, geometry.step, points.length))
   }
 
   return (
@@ -67,42 +71,22 @@ export default function AreaChart({ points, label, formatValue, formatTick, desc
           onFocus={cursor.onFocus}
           onBlur={cursor.onBlur}
         >
-          <AreaAxes
+          <AreaAxes geometry={geometry} points={points} formatTick={formatTick} maxXLabels={maxXLabels} />
+          <AreaSeriesMarks
             geometry={geometry}
             points={points}
-            formatTick={formatTick}
-            maxXLabels={Math.max(2, Math.floor(width / PIXELS_PER_LABEL))}
+            overlayColor={overlay.color}
+            formatValue={formatValue}
+            activeIndex={cursor.active}
           />
-          <path d={geometry.areaPath} fill="var(--chart-area)" />
-          <path d={geometry.linePath} fill="none" stroke={SERIES} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-          <path d={geometry.overlayPath} fill="none" stroke={overlay.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-          {points.length === 0 || maximo.value <= 0 ? null : (
-            <g aria-hidden>
-              <circle cx={x(maxIndex)} cy={y(maximo.value)} r={4} fill={SERIES} stroke="var(--card)" strokeWidth={2} />
-              <text
-                x={Math.min(Math.max(x(maxIndex), geometry.plotLeft + 48), geometry.plotRight - 48)}
-                y={y(maximo.value) - 10}
-                textAnchor="middle"
-                className="fill-foreground text-[11px] font-medium tabular-nums"
-              >
-                {`Máx. ${formatValue(maximo.value)}`}
-              </text>
-            </g>
-          )}
-          {activo === undefined || cursor.active === null ? null : (
-            <g aria-hidden>
-              <line x1={x(cursor.active)} x2={x(cursor.active)} y1={plotTop} y2={plotBottom} stroke="var(--muted-foreground)" strokeWidth={1} />
-              <circle cx={x(cursor.active)} cy={y(activo.value)} r={5} fill={SERIES} stroke="var(--card)" strokeWidth={2} />
-            </g>
-          )}
         </svg>
       ) : (
         <div style={{ height: HEIGHT }} />
       )}
-      {activo === undefined || cursor.active === null ? null : (
+      {active === undefined || cursor.active === null ? null : (
         <ChartTooltip
-          x={x(cursor.active)}
-          y={y(activo.value)}
+          x={geometry.x(cursor.active)}
+          y={geometry.y(active.value)}
           containerWidth={width}
           {...describe(cursor.active)}
         />

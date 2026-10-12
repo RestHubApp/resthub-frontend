@@ -1,0 +1,138 @@
+// Regresión visual de la carta y del inventario, con cada ventana y cada
+// confirmación que se abre desde ellos.
+import type { Locator, Page } from '@playwright/test'
+
+import type { PurchaseOrder, Supplier } from '../../src/api/types'
+import { defined } from '../support/defined'
+import { api, id } from '../support/management'
+import { covers } from '../support/coverage'
+import { openAs } from '../support/fixtures'
+import { capture, captureWindow, expect, deadline, test } from './capture'
+
+/** Abre una confirmación, la captura y la cancela. */
+async function confirmation(page: Page, button: Locator, title: string, name: string): Promise<void> {
+  await button.click()
+  const dialog = page.getByRole('alertdialog', { name: title })
+  await captureWindow(dialog, name)
+  await dialog.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(dialog).toBeHidden()
+}
+
+/** Abre un formulario en ventana, lo captura y lo cierra con Escape. */
+async function form(page: Page, button: Locator, title: string | RegExp, name: string): Promise<void> {
+  await button.click()
+  const dialog = page.getByRole('dialog', { name: title })
+  await captureWindow(dialog, name)
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+}
+
+/** La ficha de un plato en su hoja, su edición y la confirmación de sacarlo, dentro de la misma hoja. */
+async function dishRecord(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Ver la ficha de Lomo saltado' }).click()
+  const record = page.getByRole('dialog', { name: 'Lomo saltado' })
+  await captureWindow(record, 'hoja-plato')
+  await record.getByRole('button', { name: 'Desactivar' }).click()
+  await expect(record.getByRole('group', { name: '¿Sacar Lomo saltado de la carta?' })).toBeVisible()
+  await captureWindow(record, 'hoja-sacar-plato')
+  await record.getByRole('button', { name: 'Volver' }).click()
+  await record.getByRole('button', { name: 'Editar plato' }).click()
+  const edit = page.getByRole('dialog', { name: 'Editar Lomo saltado' })
+  await captureWindow(edit, 'hoja-editar-plato')
+  await page.keyboard.press('Escape')
+  await expect(edit).toBeHidden()
+}
+
+test('VIS-08 la carta con sus ventanas de alta, edición y confirmaciones', async ({ page, local }) => {
+  deadline(120_000)
+  covers(
+    'ruta:/menu',
+    'dialogo:menu/NewMenuDialogs#1',
+    'dialogo:menu/NewMenuDialogs#2',
+    'dialogo:menu/CategoryDialogs',
+    'hoja:menu/DishSheet',
+    'confirmacion:menu/CategoryDialogs#1',
+    'confirmacion:menu/CategoryDialogs#2',
+  )
+  await api(local).post('/menu/categories', { name: 'Postres' })
+
+  await openAs(page, local.owner, '/menu')
+  await expect(page.getByRole('region', { name: 'Postres' })).toBeVisible()
+  await expect(page.getByText('Hoy: 5 de 5 platos disponibles')).toBeVisible()
+  await capture(page, 'menu')
+
+  await form(page, page.getByRole('button', { name: 'Nueva categoría' }), 'Nueva categoría', 'dialogo-nueva-categoria')
+  await form(page, page.getByRole('button', { name: 'Nuevo plato' }), 'Nuevo plato', 'dialogo-nuevo-plato')
+  await form(page, page.getByRole('button', { name: 'Editar la categoría Fondos' }), 'Editar Fondos', 'dialogo-editar-categoria')
+  await dishRecord(page)
+
+  await page.getByRole('button', { name: 'Más acciones de la categoría Fondos' }).click()
+  await confirmation(page, page.getByRole('menu', { name: 'Más acciones de la categoría Fondos' }).getByRole('menuitem', { name: 'Desactivar' }), '¿Desactivar Fondos?', 'confirmar-desactivar-categoria')
+  await page.getByRole('button', { name: 'Más acciones de la categoría Postres' }).click()
+  await confirmation(page, page.getByRole('menu', { name: 'Más acciones de la categoría Postres' }).getByRole('menuitem', { name: 'Eliminar' }), '¿Eliminar Postres?', 'confirmar-eliminar-categoria')
+})
+
+test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plato', async ({ page, local }) => {
+  deadline(150_000)
+  covers(
+    'ruta:/inventario',
+    'pestanas:inventory/InventoryTabs',
+    'dialogo:inventory/StockActionDialog',
+    'hoja:inventory/StockRulesSheet',
+    'dialogo:inventory/SupplierDialog',
+    'dialogo:inventory/PurchaseOrderDialog',
+    'dialogo:inventory/ReceiveOrderDialog',
+    'ruta:/inventario/recetas/:menuItemId',
+  )
+  const supplier = await api(local).post<Supplier>('/inventory/suppliers', {
+    name: 'Mercado Mayorista',
+    contact: 'Don Julio',
+    phone: '987654321',
+    notes: 'Entrega martes y viernes',
+    is_active: true,
+  })
+  const order = await api(local).post<PurchaseOrder>('/inventory/purchase-orders', {
+    supplier_id: id(supplier),
+    notes: '',
+    lines: [{ ingredient_id: defined(local.ingredients[2]).id, quantity: '300', unit_cost: '0.012' }],
+  })
+  await api(local).post(`/inventory/purchase-orders/${String(id(order))}/send`)
+
+  await openAs(page, local.owner, '/inventario')
+  await expect(page.getByText('3 insumos')).toBeVisible()
+  await capture(page, 'inventario-insumos')
+
+  await form(page, page.getByRole('button', { name: 'Reglas de stock' }), 'Reglas de stock', 'hoja-reglas-de-stock')
+  await page.getByRole('button', { name: 'Más acciones de Cebolla roja' }).click()
+  await form(page, page.getByRole('menu', { name: 'Más acciones de Cebolla roja' }).getByRole('menuitem', { name: 'Merma' }), 'Registrar merma: Cebolla roja', 'dialogo-merma')
+  await form(page, page.getByRole('button', { name: 'Compra de Culantro' }), 'Registrar compra: Culantro', 'dialogo-compra')
+  await page.getByRole('button', { name: 'Más acciones de Lomo de res' }).click()
+  await form(page, page.getByRole('menu', { name: 'Más acciones de Lomo de res' }).getByRole('menuitem', { name: 'Ajuste' }), /^Ajust.*Lomo de res$/u, 'dialogo-ajuste')
+
+  const tabs: readonly (readonly [RegExp, string, string])[] = [
+    [/^Movimientos/u, 'Stock inicial', 'inventario-movimientos'],
+    [/^Recetas/u, 'Lomo saltado', 'inventario-recetas'],
+    [/^Compras/u, 'OC 1 · Mercado Mayorista', 'inventario-compras'],
+    [/^Proveedores/u, 'Mercado Mayorista', 'inventario-proveedores'],
+  ]
+  for (const [tab, text, name] of tabs) {
+    await page.getByRole('tab', { name: tab }).click()
+    const panel = page.getByRole('tabpanel', { name: tab })
+    await expect(panel.getByText(text).first()).toBeVisible()
+    await capture(page, name)
+  }
+
+  const suppliers = page.getByRole('tabpanel', { name: /^Proveedores/u })
+  await form(page, suppliers.getByRole('button', { name: 'Nuevo proveedor' }), 'Nuevo proveedor', 'dialogo-proveedor')
+
+  await page.getByRole('tab', { name: /^Compras/u }).click()
+  const purchases = page.getByRole('tabpanel', { name: /^Compras/u })
+  await form(page, purchases.getByRole('button', { name: 'Nueva orden' }), 'Nueva orden de compra', 'dialogo-orden-de-compra')
+  const oc = purchases.getByRole('listitem').filter({ hasText: 'OC 1 · Mercado Mayorista' })
+  await form(page, oc.getByRole('button', { name: 'Recibir' }), 'Recibir la orden 1', 'dialogo-recibir-orden')
+
+  await page.goto(`/inventario/recetas/${String(local.dish('Lomo saltado').id)}`)
+  await expect(page.getByRole('heading', { name: 'Receta: Lomo saltado' })).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Lomo de res' })).toHaveValue('200')
+  await capture(page, 'receta')
+})

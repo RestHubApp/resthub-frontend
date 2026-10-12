@@ -1,42 +1,68 @@
-import { api } from '../services/api'
+import { queryOptions } from '@tanstack/react-query'
+
+import { send } from './client'
 import type {
+  AcceptTermsRequest,
   AccessTokenResponse,
   ChangeOwnPasswordRequest,
-  CurrentUserResponse,
+  StaffSession,
   LoginRequest,
   PreviewExchangeRequest,
+  Session,
+  StaffAccessTokenResponse,
 } from './types'
 
 export const currentUserQueryKey = ['auth', 'me'] as const
 
 /**
- * La sesion que trae una respuesta con token: la cuenta, su restaurante, sus
- * permisos y si es una vista previa. Es lo mismo que devuelve `GET /auth/me`.
+ * La sesión que trae una respuesta con token del personal: la cuenta, su
+ * restaurante, sus permisos y si es una vista previa. Es lo mismo que devuelve
+ * `GET /auth/me` para una cuenta del personal.
  */
-export function sessionOf(response: AccessTokenResponse): CurrentUserResponse {
-  const { user, restaurant, permissions, preview } = response
-  return { user, restaurant, permissions, preview }
+export function staffSessionOf(response: StaffAccessTokenResponse): StaffSession {
+  const { user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted } = response
+  return { kind: 'staff', user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted }
 }
 
-/** El token y, en la misma respuesta, la cuenta, su restaurante y sus permisos. */
+/**
+ * La sesión que trae una respuesta con token, sea de una cuenta del personal o
+ * de la administración del sistema (`kind`).
+ */
+export function sessionOf(response: AccessTokenResponse): Session {
+  if (response.kind === 'staff') {
+    return staffSessionOf(response)
+  }
+  const { admin, permissions, preview: isPreview } = response
+  return { kind: 'platform', admin, permissions, preview: isPreview }
+}
+
+/** El token y, en la misma respuesta, la sesión: la del personal o la de la administración del sistema. */
 export async function login(payload: LoginRequest): Promise<AccessTokenResponse> {
-  const { data } = await api.post<AccessTokenResponse>('/auth/login', payload)
-  return data
+  return send((client) => client.POST('/api/v1/auth/login', { body: payload }))
 }
 
-/** Un token nuevo para la sesion actual, pedido antes de que venza el que hay. */
+/** Un token nuevo para la sesion actual (de cualquiera de las dos clases), pedido antes de que venza el que hay. */
 export async function renewSession(): Promise<AccessTokenResponse> {
-  const { data } = await api.post<AccessTokenResponse>('/auth/refresh')
-  return data
+  return send((client) => client.POST('/api/v1/auth/refresh'))
 }
 
-export async function fetchCurrentUser(): Promise<CurrentUserResponse> {
-  const { data } = await api.get<CurrentUserResponse>('/auth/me')
-  return data
+/** La sesión al día (del personal o de plataforma). `background`: si falla, no avisa en el armazón (ver `useAccountRefresh`). */
+export async function fetchCurrentUser({ background = false } = {}): Promise<Session> {
+  return send((client) => client.GET('/api/v1/auth/me'), { background })
 }
 
-export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<void> {
-  await api.post('/auth/me/password', payload)
+/** Acepta, por separado, los términos y el tratamiento de datos leídos; devuelve la sesión al día. */
+export async function acceptTerms(versions: AcceptTermsRequest): Promise<StaffSession> {
+  return send((client) => client.POST('/api/v1/auth/me/terms', { body: versions }))
+}
+
+/**
+ * Cambia la contraseña propia. El servidor corta todos los tokens anteriores,
+ * el de esta petición incluido, y devuelve el único válido con la sesión (la
+ * misma forma que el acceso).
+ */
+export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<StaffAccessTokenResponse> {
+  return send((client) => client.POST('/api/v1/auth/me/password', { body: payload }))
 }
 
 /**
@@ -47,10 +73,35 @@ export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Prom
  * enlace nuevo en su barra) tampoco manda esa, asi el 401 de un codigo
  * invalido, vencido o ya usado no cierra la vista previa que sigue abierta.
  *
- * `login` y el acceso de plataforma no lo necesitan: sus formularios solo se
- * muestran sin sesion abierta, asi que salen sin token.
+ * `login` no lo necesita: su formulario solo se muestra sin sesion abierta,
+ * asi que sale sin token.
  */
-export async function exchangePreviewCode(payload: PreviewExchangeRequest): Promise<AccessTokenResponse> {
-  const { data } = await api.post<AccessTokenResponse>('/auth/preview', payload, { withoutCredential: true })
-  return data
+export async function exchangePreviewCode(payload: PreviewExchangeRequest): Promise<StaffAccessTokenResponse> {
+  return send((client) => client.POST('/api/v1/auth/preview', { body: payload }), { withoutCredential: true })
 }
+
+/** Cuánto se espera, como máximo, el aviso de salida: cerrar la sesión no depende de él. */
+const SIGN_OUT_NOTICE_TIMEOUT_MS = 3000
+
+/**
+ * Avisa al servidor que esta cuenta sale, para dejarlo en la bitácora. Lleva el
+ * `token` que se está por descartar y nunca rechaza: sin red o con un error, la
+ * salida sigue igual (el servidor no invalida el token).
+ */
+export async function reportSignOut(token: string): Promise<void> {
+  try {
+    await send((client) => client.POST('/api/v1/auth/logout'), {
+      credential: token,
+      background: true,
+      timeout: SIGN_OUT_NOTICE_TIMEOUT_MS,
+    })
+  } catch {
+    // El aviso es de cortesía: no hay nada que hacer si no llegó.
+  }
+}
+
+/** La cuenta en curso, releida en segundo plano: un fallo no muestra aviso. */
+export const currentUserQuery = queryOptions({
+  queryKey: currentUserQueryKey,
+  queryFn: () => fetchCurrentUser({ background: true }),
+})

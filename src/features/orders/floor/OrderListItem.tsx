@@ -1,21 +1,22 @@
 import { Link } from 'react-router'
 
-import type { OrderResponse } from '../../../api/types'
-import { orderPlace } from '../orderLabels'
-import OrderStatusBadge from '../OrderStatusBadge'
-import { formatMoney, formatTime } from '../../../services/format'
-import { useTimeZone } from '../../../store/session'
+import type { OrderResponse } from '@/api/types'
+import { orderPlace } from '@/features/orders/orderLabels'
+import { OrderStatusBadge } from '@/features/orders/OrderStatusBadge'
+import { formatMoney, formatTime } from '@/services/format'
+import { paths } from '@/services/paths'
+import { useTimeZone } from '@/store/session'
 
 interface OrderListItemProps {
   readonly order: OrderResponse
 }
 
 /** Un pedido en una lista del mesero: numero, lugar, estado y total. */
-export default function OrderListItem({ order }: OrderListItemProps) {
+export function OrderListItem({ order }: OrderListItemProps) {
   const timeZone = useTimeZone()
   return (
     <Link
-      to={`/pedidos/${String(order.id)}`}
+      to={paths.orders.detail(order.id)}
       className="flex min-h-16 items-center gap-3 rounded-xl bg-card px-4 py-3 ring-1 ring-foreground/10 outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <span className="min-w-12 font-heading text-lg font-bold tabular-nums">#{order.number}</span>

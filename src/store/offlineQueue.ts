@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
-import type { CurrentUserResponse, OpenOrderRequest } from '../api/types'
-import { tabStorage } from '../services/tabStorage'
+import type { StaffSession, OpenOrderRequest } from '@/api/types'
+import { tabStorage } from '@/services/tabStorage'
 
 // Los pedidos que el mesero tomó sin señal, a la espera de enviarse.
 //
@@ -20,7 +20,7 @@ import { tabStorage } from '../services/tabStorage'
 //
 // La versión va en la clave: la v1 no decía de quién era cada pedido y no se lee.
 const STORAGE_KEY = 'resthub.pedidos-sin-enviar.v2'
-const ALMACEN = tabStorage.storage
+const STORAGE = tabStorage.storage
 
 /** La cuenta dueña de un pedido en cola: la persona y el local donde lo tomó. */
 export interface QueueOwner {
@@ -41,14 +41,14 @@ const listeners = new Set<Listener>()
 const EMPTY: readonly QueuedOrder[] = []
 const cache: { value: readonly QueuedOrder[] | null } = { value: null }
 // `useSyncExternalStore` necesita la misma lista mientras la cola no cambie.
-const vista: { base: readonly QueuedOrder[] | null; owner: string; value: readonly QueuedOrder[] } = {
+const view: { base: readonly QueuedOrder[] | null; owner: string; value: readonly QueuedOrder[] } = {
   base: null,
   owner: '',
   value: EMPTY,
 }
 
 /** La dueña de lo que se toma con esta sesión, o `null` sin sesión. */
-export function ownerOf(account: CurrentUserResponse | null): QueueOwner | null {
+export function ownerOf(account: StaffSession | null): QueueOwner | null {
   return account === null ? null : { userId: account.user.id, restaurantId: account.restaurant.id }
 }
 
@@ -61,7 +61,7 @@ function read(): readonly QueuedOrder[] {
     return cache.value
   }
   try {
-    const raw = ALMACEN?.getItem(STORAGE_KEY) ?? null
+    const raw = STORAGE?.getItem(STORAGE_KEY) ?? null
     const parsed: unknown = raw === null ? null : JSON.parse(raw)
     cache.value = Array.isArray(parsed) ? (parsed as QueuedOrder[]) : EMPTY
   } catch {
@@ -88,9 +88,9 @@ function write(queue: readonly QueuedOrder[]): void {
   cache.value = queue
   try {
     if (queue.length === 0) {
-      ALMACEN?.removeItem(STORAGE_KEY)
+      STORAGE?.removeItem(STORAGE_KEY)
     } else {
-      ALMACEN?.setItem(STORAGE_KEY, JSON.stringify(queue))
+      STORAGE?.setItem(STORAGE_KEY, JSON.stringify(queue))
     }
   } catch {
     // Sin almacenamiento la cola dura lo que la pestaña: es lo mejor posible.
@@ -103,7 +103,7 @@ function write(queue: readonly QueuedOrder[]): void {
 // cola real, vista desde una vista previa) no es de esta cola.
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event: StorageEvent) => {
-    if (event.storageArea !== null && event.storageArea !== ALMACEN) {
+    if (event.storageArea !== null && event.storageArea !== STORAGE) {
       return
     }
     if (event.key === STORAGE_KEY || event.key === null) {
@@ -119,13 +119,13 @@ export function queuedOrders(owner: QueueOwner | null): readonly QueuedOrder[] {
     return EMPTY
   }
   const base = read()
-  const clave = `${String(owner.userId)}:${String(owner.restaurantId)}`
-  if (vista.base !== base || vista.owner !== clave) {
-    vista.base = base
-    vista.owner = clave
-    vista.value = base.filter((order) => belongsTo(order, owner))
+  const password = `${String(owner.userId)}:${String(owner.restaurantId)}`
+  if (view.base !== base || view.owner !== password) {
+    view.base = base
+    view.owner = password
+    view.value = base.filter((order) => belongsTo(order, owner))
   }
-  return vista.value
+  return view.value
 }
 
 export function enqueueOrder(order: QueuedOrder): void {
@@ -160,7 +160,7 @@ export function subscribeQueue(listener: Listener): () => void {
 }
 
 /** Los pedidos en cola de la cuenta, al día con cada cambio de la cola. */
-export function useQueuedOrders(account: CurrentUserResponse | null): readonly QueuedOrder[] {
+export function useQueuedOrders(account: StaffSession | null): readonly QueuedOrder[] {
   const owner = ownerOf(account)
   const snapshot = () => queuedOrders(owner)
   // La misma lectura sirve al generar la pantalla fuera del navegador (las pruebas).

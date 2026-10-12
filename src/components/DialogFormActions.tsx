@@ -11,7 +11,7 @@ interface DialogFormActionsProps {
  * alcance del pulgar; desde tablet quedan a la derecha, con la principal al
  * final. Por eso cada formulario pone primero "Cancelar" y después la acción.
  */
-export default function DialogFormActions({ children }: DialogFormActionsProps) {
+export function DialogFormActions({ children }: DialogFormActionsProps) {
   return (
     <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">{children}</div>
   )

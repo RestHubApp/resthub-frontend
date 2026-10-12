@@ -1,33 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-
-import {
-  PASSWORD_MUTATION_GC_TIME,
-  platformActivityQueryKey,
-  platformMutationKeys,
-  platformSandboxQueryKey,
-  startPlatformPreview,
-} from '../../api/platform'
-import type { PreviewAs } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { errorMessage, errorStatus } from '../../services/api'
-import { openPreviewTab, PREVIEW_AS_LABELS, previewUrl } from './previewLink'
-import PreviewOpenedNotice from './PreviewOpenedNotice'
-import SandboxResetButton from './SandboxResetButton'
+import type { PreviewAs } from '@/api/types'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { hasCode } from '@/services/apiError'
+import { PREVIEW_AS_LABELS } from './previewLink'
+import { PreviewOpenedNotice } from './PreviewOpenedNotice'
+import { SandboxResetButton } from './SandboxResetButton'
+import { usePreviewLauncher } from './usePreviewLauncher'
 
 // El local de muestra no tiene una cuenta activa de ese tipo: el servidor
 // sugiere reiniciarlo.
-const CONFLICT = 409
-const MS_POR_SEGUNDO = 1000
-const COMO: readonly PreviewAs[] = ['owner', 'waiter']
-
-interface Opened {
-  readonly as: PreviewAs
-  readonly url: string
-  readonly expiresInMs: number
-}
+const AS: readonly PreviewAs[] = ['owner', 'waiter']
 
 /**
  * «Ver como encargado» y «Ver como mesero».
@@ -36,77 +19,36 @@ interface Opened {
  * local de muestra con su propia sesión. El código va en el caché de
  * mutaciones solo mientras alguien mira (`gcTime: 0`), como una contraseña.
  */
-export default function PreviewLauncher() {
-  const queryClient = useQueryClient()
-  const [abierta, setAbierta] = useState<Opened | null>(null)
-  const inicio = useMutation({
-    mutationKey: platformMutationKeys.startPreview,
-    mutationFn: (as: PreviewAs) => startPlatformPreview({ as }),
-    gcTime: PASSWORD_MUTATION_GC_TIME,
-    onSuccess: ({ code, expires_in: segundos }, as) => {
-      const url = previewUrl(code)
-      openPreviewTab(url)
-      setAbierta({ as, url, expiresInMs: segundos * MS_POR_SEGUNDO })
-      // La primera vista previa crea el local de muestra; y queda en la bitácora.
-      void queryClient.invalidateQueries({ queryKey: platformSandboxQueryKey })
-      void queryClient.invalidateQueries({ queryKey: platformActivityQueryKey })
-    },
-  })
-
-  // Vencido el código, el enlace de repuesto ya no sirve y se quita.
-  useEffect(() => {
-    if (abierta === null) {
-      return
-    }
-    const timer = window.setTimeout(() => {
-      setAbierta(null)
-    }, abierta.expiresInMs)
-    return () => {
-      window.clearTimeout(timer)
-    }
-  }, [abierta])
-
-  const abrir = (as: PreviewAs) => {
-    setAbierta(null)
-    inicio.mutate(as)
-  }
+export function PreviewLauncher() {
+  const { start, open, handleOpen, close } = usePreviewLauncher()
 
   return (
     <div className="flex flex-col items-start gap-4">
       <div className="flex w-full flex-wrap gap-3">
-        {COMO.map((as) => (
+        {AS.map((as) => (
           <Button
             key={as}
             type="button"
-            size="lg"
-            className="h-11 w-full px-4 sm:w-auto"
-            disabled={inicio.isPending}
+            className="w-full sm:w-auto"
+            disabled={start.isPending}
             onClick={() => {
-              abrir(as)
+              handleOpen(as)
             }}
           >
-            <Icon name="ver" size={18} />
-            <span>{inicio.isPending && inicio.variables === as ? 'Abriendo…' : `Ver como ${PREVIEW_AS_LABELS[as]}`}</span>
+            <Icon name="view" size={18} />
+            <span>{start.isPending && start.variables === as ? 'Abriendo…' : `Ver como ${PREVIEW_AS_LABELS[as]}`}</span>
           </Button>
         ))}
       </div>
-      {abierta === null ? null : (
-        <PreviewOpenedNotice
-          label={PREVIEW_AS_LABELS[abierta.as]}
-          url={abierta.url}
-          onUsed={() => {
-            setAbierta(null)
-          }}
-        />
-      )}
-      {inicio.isError ? (
-        <FormMessage tone="error">{errorMessage(inicio.error, 'No se pudo abrir la vista previa.')}</FormMessage>
+      {open === null ? null : <PreviewOpenedNotice label={PREVIEW_AS_LABELS[open.as]} url={open.url} onUsed={close} />}
+      {start.isError ? (
+        <ErrorMessage error={start.error} fallback="No se pudo abrir la vista previa." />
       ) : null}
-      {errorStatus(inicio.error) === CONFLICT ? (
+      {hasCode(start.error, 'sandbox_account_unavailable') ? (
         <SandboxResetButton
           exists
           onReset={() => {
-            inicio.reset()
+            start.reset()
           }}
         />
       ) : null}

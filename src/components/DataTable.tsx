@@ -1,20 +1,14 @@
-import {
-  type ColumnDef,
-  createExpandedRowModel,
-  flexRender,
-  type Row,
-  type RowData,
-  rowExpandingFeature,
-  tableFeatures,
-  useTable,
-} from '@tanstack/react-table'
-import { Fragment, type ReactNode, useMemo } from 'react'
+import { type ColumnDef, type Row, type RowData, useTable } from '@tanstack/react-table'
+import { type ReactNode, useMemo } from 'react'
 
-import { usePagination } from '../hooks/usePagination'
-import DataTableSkeleton from './DataTableSkeleton'
-import EmptyState from './EmptyState'
-import TablePagination from './TablePagination'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { usePagination } from '@/hooks/usePagination'
+import { features } from './dataTableModel'
+import { DataTableHeader } from './DataTableHeader'
+import { DataTableRow } from './DataTableRow'
+import { DataTableSkeleton } from './DataTableSkeleton'
+import { EmptyState } from './EmptyState'
+import { TablePagination } from './TablePagination'
+import { Table, TableBody } from './ui/table'
 
 /** Lo que una celda sabe de su fila, ademas del dato. */
 export interface DataRowContext {
@@ -37,14 +31,7 @@ export interface DataColumn<TData extends RowData> {
   readonly className?: string
 }
 
-// Filas de la silueta: las que caben a la vista, no una página entera.
-const FILAS_CARGANDO = 6
-
-const features = tableFeatures({
-  rowExpandingFeature,
-  expandedRowModel: createExpandedRowModel(),
-})
-
+/** Lo que una celda sabe de su fila. */
 function rowContext<TData extends RowData>(row: Row<typeof features, TData>): DataRowContext {
   return {
     isExpanded: row.getIsExpanded(),
@@ -54,6 +41,7 @@ function rowContext<TData extends RowData>(row: Row<typeof features, TData>): Da
   }
 }
 
+/** Traduce una columna propia a la de TanStack. */
 function toColumnDef<TData extends RowData>(
   column: DataColumn<TData>,
 ): ColumnDef<typeof features, TData> {
@@ -64,7 +52,13 @@ function toColumnDef<TData extends RowData>(
   }
 }
 
+
+// Filas de la silueta: las que caben a la vista, no una página entera.
+const ROWS_LOADING = 6
+
 interface DataTableProps<TData extends RowData> {
+  /** De qué es la tabla: nombra su región desplazable. */
+  readonly label: string
   readonly columns: readonly DataColumn<TData>[]
   readonly data: readonly TData[]
   readonly isLoading: boolean
@@ -85,7 +79,8 @@ interface DataTableProps<TData extends RowData> {
  * exime a las tablas de datos del reflujo, y apilarla le quita las cabeceras
  * al lector de pantalla.
  */
-export default function DataTable<TData extends RowData>({
+export function DataTable<TData extends RowData>({
+  label,
   columns,
   data,
   isLoading,
@@ -94,8 +89,8 @@ export default function DataTable<TData extends RowData>({
   renderExpanded,
   pageSize,
 }: DataTableProps<TData>) {
-  const pagina = usePagination(data, pageSize)
-  const rows = useMemo(() => [...pagina.visibles], [pagina.visibles])
+  const page = usePagination(data, pageSize)
+  const rows = useMemo(() => [...page.visible], [page.visible])
   const columnDefs = useMemo(() => columns.map(toColumnDef), [columns])
   const cellClasses = useMemo(
     () => new Map(columns.map((column) => [column.id, column.className ?? ''])),
@@ -111,7 +106,7 @@ export default function DataTable<TData extends RowData>({
   })
 
   if (isLoading) {
-    return <DataTableSkeleton headers={columns.map((column) => column.header)} rows={Math.min(pageSize ?? FILAS_CARGANDO, FILAS_CARGANDO)} />
+    return <DataTableSkeleton label={label} headers={columns.map((column) => column.header)} rows={Math.min(pageSize ?? ROWS_LOADING, ROWS_LOADING)} />
   }
   if (data.length === 0) {
     return <EmptyState title={emptyMessage} />
@@ -120,48 +115,17 @@ export default function DataTable<TData extends RowData>({
   return (
     <div className="flex flex-col gap-3">
     <div className="rounded-xl bg-card ring-1 ring-foreground/10">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="px-3">
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+      <Table label={label}>
+        <DataTableHeader table={table} cellClasses={cellClasses} />
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <Fragment key={row.id}>
-              <TableRow data-state={row.getIsExpanded() ? 'open' : undefined}>
-                {row.getAllCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className={`px-3 py-2.5 ${cellClasses.get(cell.column.id) ?? ''}`}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-              {row.getIsExpanded() && renderExpanded !== undefined ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell
-                    colSpan={row.getAllCells().length}
-                    className="bg-muted/40 p-4 whitespace-normal"
-                  >
-                    {renderExpanded(row.original)}
-                  </TableCell>
-                </TableRow>
-              ) : null}
-            </Fragment>
+            <DataTableRow key={row.id} row={row} cellClasses={cellClasses} renderExpanded={renderExpanded} />
           ))}
         </TableBody>
       </Table>
     </div>
-    {pagina.total > 1 ? (
-      <TablePagination actual={pagina.actual} total={pagina.total} onChange={pagina.irA} />
+    {page.total > 1 ? (
+      <TablePagination actual={page.actual} total={page.total} onChange={page.irA} />
     ) : null}
     </div>
   )

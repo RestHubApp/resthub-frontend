@@ -1,4 +1,4 @@
-import type { ObsRouteSort, ObsRouteStats } from '../../../api/types'
+import type { ObsRouteSort, ObsRouteStats } from '@/api/types'
 
 export interface RouteSortOption {
   readonly value: ObsRouteSort
@@ -6,7 +6,7 @@ export interface RouteSortOption {
 }
 
 /** Las columnas por las que se ordena la tabla de rutas, siempre de mayor a menor. */
-export const ROUTE_SORTS: readonly RouteSortOption[] = [
+export const ROUTE_SORTS: readonly [RouteSortOption, RouteSortOption, RouteSortOption] = [
   { value: 'requests', label: 'Peticiones' },
   { value: 'p95', label: 'p95' },
   { value: 'errors', label: 'Errores 5xx' },
@@ -32,10 +32,10 @@ const METRIC: Readonly<Record<ObsRouteSort, (route: ObsRouteStats) => number>> =
  * pueden ser otras: las 20 más lentas no son las 20 más usadas.
  */
 export function sortRoutes(routes: readonly ObsRouteStats[], sort: ObsRouteSort): ObsRouteStats[] {
-  const metrica = METRIC[sort]
+  const metric = METRIC[sort]
   return [...routes].sort(
     (a, b) =>
-      metrica(b) - metrica(a) ||
+      metric(b) - metric(a) ||
       b.requests - a.requests ||
       a.route.localeCompare(b.route) ||
       a.method.localeCompare(b.method),

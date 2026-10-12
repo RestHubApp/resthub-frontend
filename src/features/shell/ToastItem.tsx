@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { useNotifications } from '../../store/notifications'
+import { Button } from '@/components/ui/button'
+import { useNotifications } from '@/store/notifications'
+import { ShellIcon } from './ShellIcon'
 
 const AUTO_DISMISS_MS = 8_000
 
@@ -11,8 +11,8 @@ const AUTO_DISMISS_MS = 8_000
 // Un aviso informativo casi siempre confirma algo hecho: lleva la marca de
 // correcto, no la de alerta, que queda para lo que salió mal.
 const ICON_TONE = {
-  info: { name: 'correcto', className: 'text-success' },
-  warning: { name: 'alerta', className: 'text-warning' },
+  info: { name: 'correct', className: 'text-success' },
+  warning: { name: 'alert', className: 'text-warning' },
 } as const
 
 interface ToastItemProps {
@@ -21,21 +21,21 @@ interface ToastItemProps {
   readonly message: string
 }
 
-export default function ToastItem({ id, tone, message }: ToastItemProps) {
+export function ToastItem({ id, tone, message }: ToastItemProps) {
   const dismiss = useNotifications((state) => state.dismiss)
 
   useEffect(() => {
-    const temporizador = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       dismiss(id)
     }, AUTO_DISMISS_MS)
     return () => {
-      window.clearTimeout(temporizador)
+      window.clearTimeout(timer)
     }
   }, [id, dismiss])
 
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-card p-3 text-sm text-card-foreground shadow-lg ring-1 ring-foreground/10">
-      <Icon name={ICON_TONE[tone].name} size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone].className}`} />
+    <div className="flex items-start gap-3 rounded-xl bg-card p-3 text-sm text-card-foreground shadow-float ring-1 ring-foreground/10">
+      <ShellIcon name={ICON_TONE[tone].name} size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone].className}`} />
       <p className="m-0 flex-1">{message}</p>
       <Button
         type="button"
@@ -47,7 +47,7 @@ export default function ToastItem({ id, tone, message }: ToastItemProps) {
           dismiss(id)
         }}
       >
-        <Icon name="cancelar" size={16} />
+        <ShellIcon name="cancel" size={16} />
       </Button>
     </div>
   )

@@ -1,4 +1,4 @@
-import StatusBadge, { type StatusTone } from '../../../components/StatusBadge'
+import { StatusBadge, type StatusTone } from '@/components/StatusBadge'
 
 const SERVER_ERROR = 500
 const CLIENT_ERROR = 400
@@ -15,6 +15,6 @@ function tone(status: number): StatusTone | undefined {
 }
 
 /** El estado HTTP de una respuesta: el número siempre escrito, el color acompaña. */
-export default function HttpStatusBadge({ status }: { readonly status: number }) {
+export function HttpStatusBadge({ status }: { readonly status: number }) {
   return <StatusBadge label={String(status)} tone={tone(status)} />
 }

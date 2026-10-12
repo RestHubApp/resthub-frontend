@@ -1,21 +1,21 @@
 import { z } from 'zod'
 
-import type { MenuItem } from '../../api/types'
-import { decimalParaApi, decimalRule, textoOpcional } from '../../components/formRules'
+import type { MenuItem } from '@/api/types'
+import { decimalForApi, decimalRule, textOptional } from '@/components/formRules'
 
 // Los limites repiten los del backend: avisan mientras se escribe.
-const MAX_CATEGORIA = 60
-const MAX_PLATO = 120
-const MAX_DESCRIPCION = 300
+const MAX_CATEGORY = 60
+const MAX_DISH = 120
+const MAX_DESCRIPTION = 300
 // Un precio de cinco cifras en un restaurante familiar es un error de tipeo.
-const MAX_PRECIO = 9999
+const MAX_PRICE = 9999
 
 export const categorySchema = z.object({
   name: z
     .string()
     .trim()
     .min(1, 'Escribe el nombre de la categoría')
-    .max(MAX_CATEGORIA, `Usa como máximo ${String(MAX_CATEGORIA)} caracteres`),
+    .max(MAX_CATEGORY, `Usa como máximo ${String(MAX_CATEGORY)} caracteres`),
 })
 
 export type CategoryValues = z.infer<typeof categorySchema>
@@ -26,9 +26,9 @@ export const menuItemSchema = z.object({
     .string()
     .trim()
     .min(1, 'Escribe el nombre del plato')
-    .max(MAX_PLATO, `Usa como máximo ${String(MAX_PLATO)} caracteres`),
-  description: textoOpcional(MAX_DESCRIPCION),
-  price: decimalRule({ max: MAX_PRECIO, decimales: 2, unidad: 'soles', obligatorio: true }),
+    .max(MAX_DISH, `Usa como máximo ${String(MAX_DISH)} caracteres`),
+  description: textOptional(MAX_DESCRIPTION),
+  price: decimalRule({ max: MAX_PRICE, decimals: 2, unit: 'soles', required: true }),
 })
 
 export type MenuItemValues = z.infer<typeof menuItemSchema>
@@ -57,6 +57,6 @@ export function menuItemPayload(values: MenuItemValues) {
     category_id: Number(values.category_id),
     name: values.name,
     description: values.description,
-    price: decimalParaApi(values.price) ?? '0',
+    price: decimalForApi(values.price) ?? '0',
   }
 }

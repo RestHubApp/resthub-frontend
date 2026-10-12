@@ -1,9 +1,10 @@
 import { useId } from 'react'
 
-import FieldIcon from '../../components/FieldIcon'
-import { Checkbox } from '../../components/ui/checkbox'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
+import { FieldIcon } from '@/components/FieldIcon'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { IngredientCount } from './IngredientCount'
 
 interface IngredientFiltersProps {
   readonly search: string
@@ -12,56 +13,57 @@ interface IngredientFiltersProps {
   readonly onOnlyLow: (value: boolean) => void
   readonly shown: number
   readonly total: number
+  /** Cuántos insumos están bajo su mínimo (negativos incluidos). */
+  readonly lowCount: number
 }
 
 /** Buscar por nombre y quedarse con lo que hay que reponer. */
-export default function IngredientFilters({
+export function IngredientFilters({
   search,
   onSearch,
   onlyLow,
   onOnlyLow,
   shown,
   total,
+  lowCount,
 }: IngredientFiltersProps) {
-  const buscarId = useId()
-  const bajosId = useId()
+  const searchId = useId()
+  const lowId = useId()
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex flex-col gap-2 sm:w-72">
-          <Label htmlFor={buscarId}>Buscar insumo</Label>
-          <FieldIcon icon="buscar">
+          <Label htmlFor={searchId}>Buscar insumo</Label>
+          <FieldIcon icon="search">
             <Input
-              id={buscarId}
+              id={searchId}
               type="search"
-              className="h-11"
               placeholder="Limón, pollo, aceite…"
               autoComplete="off"
               value={search}
-              onChange={(evento) => {
-                onSearch(evento.target.value)
+              onChange={(event) => {
+                onSearch(event.target.value)
               }}
             />
           </FieldIcon>
         </div>
         <div className="flex min-h-11 items-center gap-2.5">
           <Checkbox
-            id={bajosId}
+            id={lowId}
+            aria-labelledby={`${lowId}-texto`}
             className="size-5"
             checked={onlyLow}
-            onCheckedChange={(valor) => {
-              onOnlyLow(valor === true)
+            onCheckedChange={(value) => {
+              onOnlyLow(value === true)
             }}
           />
-          <Label htmlFor={bajosId} className="cursor-pointer">
+          <Label id={`${lowId}-texto`} htmlFor={lowId} className="cursor-pointer">
             Solo bajo mínimo
           </Label>
         </div>
       </div>
-      <p className="m-0 text-sm text-muted-foreground" aria-live="polite">
-        {shown === total ? `${String(total)} insumos` : `${String(shown)} de ${String(total)} insumos`}
-      </p>
+      <IngredientCount shown={shown} total={total} lowCount={lowCount} />
     </div>
   )
 }

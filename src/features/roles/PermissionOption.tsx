@@ -1,8 +1,8 @@
 import { useId } from 'react'
 
-import type { PermissionInfo } from '../../api/types'
-import { Checkbox } from '../../components/ui/checkbox'
-import { Label } from '../../components/ui/label'
+import type { PermissionInfo } from '@/api/types'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 interface PermissionOptionProps {
   readonly permission: PermissionInfo
@@ -15,7 +15,7 @@ interface PermissionOptionProps {
 }
 
 /** Un permiso del catálogo, con su casilla y, si no se puede dar, por qué. */
-export default function PermissionOption({
+export function PermissionOption({
   permission,
   checked,
   missing,
@@ -23,32 +23,39 @@ export default function PermissionOption({
   onCheckedChange,
 }: PermissionOptionProps) {
   const id = useId()
-  const notaId = `${id}-nota`
-  const explicar = missing && !readOnly
-  const apagado = missing || readOnly
+  const noteId = `${id}-nota`
+  const nameId = `${id}-nombre`
+  const shouldExplain = missing && !readOnly
+  const isOff = missing || readOnly
 
   return (
-    <li className="flex min-h-11 items-center gap-3 py-1">
-      <Checkbox
-        id={id}
-        className="size-5"
-        checked={checked}
-        disabled={apagado}
-        aria-describedby={explicar ? notaId : undefined}
-        onCheckedChange={(valor) => {
-          onCheckedChange(valor === true)
-        }}
-      />
-      <div className="flex min-w-0 flex-col gap-1">
-        <Label htmlFor={id} className={`leading-snug ${apagado ? '' : 'cursor-pointer'}`}>
-          {permission.label}
-        </Label>
-        {explicar ? (
-          <span id={notaId} className="text-xs text-muted-foreground">
-            Tu cuenta no tiene este permiso, así que no puedes darlo.
+    <li className="py-1">
+      {/* La etiqueta envuelve la casilla: así nombra también el <input> oculto
+          que Radix agrega dentro de un formulario. El botón se nombra con
+          aria-labelledby, que es lo que leen todos los validadores. */}
+      <Label className={`flex min-h-11 items-center gap-3 font-normal ${isOff ? '' : 'cursor-pointer'}`}>
+        <Checkbox
+          id={id}
+          className="size-5"
+          checked={checked}
+          disabled={isOff}
+          aria-labelledby={nameId}
+          aria-describedby={shouldExplain ? noteId : undefined}
+          onCheckedChange={(value) => {
+            onCheckedChange(value === true)
+          }}
+        />
+        <span className="flex min-w-0 flex-col gap-1">
+          <span id={nameId} className="leading-snug font-medium">
+            {permission.label}
           </span>
-        ) : null}
-      </div>
+          {shouldExplain ? (
+            <span id={noteId} className="text-xs text-muted-foreground">
+              Tu cuenta no tiene este permiso, así que no puedes darlo.
+            </span>
+          ) : null}
+        </span>
+      </Label>
     </li>
   )
 }

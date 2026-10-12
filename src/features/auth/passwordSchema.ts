@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { passwordRule } from '../../services/fieldRules'
+import { passwordRule } from '@/services/fieldRules'
 
 export const changePasswordSchema = z
   .object({
@@ -8,11 +8,11 @@ export const changePasswordSchema = z
     new_password: passwordRule,
     confirm_password: z.string(),
   })
-  .refine((valores) => valores.new_password === valores.confirm_password, {
+  .refine((values) => values.new_password === values.confirm_password, {
     message: 'Las dos contraseñas no coinciden',
     path: ['confirm_password'],
   })
-  .refine((valores) => valores.new_password !== valores.current_password, {
+  .refine((values) => values.new_password !== values.current_password, {
     message: 'La nueva contraseña tiene que ser distinta de la actual',
     path: ['new_password'],
   })

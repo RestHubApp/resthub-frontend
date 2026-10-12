@@ -1,14 +1,50 @@
 import { redirect } from 'react-router'
 
-import { exchangePreviewCode, sessionOf } from '../../api/auth'
-import { errorStatus } from '../../services/api'
-import { logger } from '../../services/logger'
-import { isPreviewTab, previewEntryUrl, takeEntryFragment } from '../../services/tabStorage'
-import { useSession } from '../../store/session'
+import { exchangePreviewCode, staffSessionOf } from '@/api/auth'
+import { logger } from '@/services/logger'
+import { paths } from '@/services/paths'
+import { isPreviewTab, previewEntryUrl, takeEntryFragment } from '@/services/tabStorage'
+import { useSession } from '@/store/session'
 import { failureOf, previewCodeFrom, type PreviewEntryFailure, withoutHash } from './previewCode'
 
 /** Lo que ve la pantalla de canje: por qué falló, o que la pestaña se está recargando. */
 export type PreviewEntryResult = PreviewEntryFailure | 'reloading'
+
+/**
+ * Saca el código de la dirección y deja la barra limpia.
+ *
+ * El código se sacó de la barra al cargar la página (`tabStorage`). Si esta
+ * pestaña de vista previa llegó acá navegando, puede seguir en la dirección.
+ */
+function takeCode(): string | null {
+  const fragment = takeEntryFragment() ?? window.location.hash
+  if (window.location.hash !== '') {
+    window.history.replaceState(window.history.state, '', withoutHash(window.location))
+  }
+  return previewCodeFrom(fragment)
+}
+
+/** Sin código: quien ya está en una vista previa sigue al inicio; los demás ven el aviso. */
+function withoutCode(): PreviewEntryResult | Response {
+  return useSession.getState().account?.preview === true ? redirect(paths.home) : 'missing'
+}
+
+/** Canjea el código y abre la sesión de vista previa, o devuelve por qué falló. */
+async function exchange(code: string): Promise<PreviewEntryResult | Response> {
+  try {
+    const response = await exchangePreviewCode({ code: code })
+    if (!response.preview) {
+      logger.error('auth.preview_not_marked')
+      return 'failed'
+    }
+    useSession.getState().startPreview(response.access_token, staffSessionOf(response))
+    return redirect(paths.home)
+  } catch (error) {
+    const reason = failureOf(error)
+    logger.warn({ reason: reason }, 'auth.preview_exchange_failed')
+    return reason
+  }
+}
 
 /**
  * Canjea el código de vista previa y entra a la aplicación con esa sesión.
@@ -32,29 +68,6 @@ export async function previewEntryLoader(): Promise<PreviewEntryResult | Respons
     return 'reloading'
   }
 
-  // El código se sacó de la barra al cargar la página (`tabStorage`). Si esta
-  // pestaña de vista previa llegó acá navegando, puede seguir en la dirección.
-  const fragmento = takeEntryFragment() ?? window.location.hash
-  if (window.location.hash !== '') {
-    window.history.replaceState(window.history.state, '', withoutHash(window.location))
-  }
-  const codigo = previewCodeFrom(fragmento)
-
-  if (codigo === null) {
-    return useSession.getState().account?.preview === true ? redirect('/') : 'missing'
-  }
-
-  try {
-    const respuesta = await exchangePreviewCode({ code: codigo })
-    if (!respuesta.preview) {
-      logger.error('auth.preview_not_marked')
-      return 'failed'
-    }
-    useSession.getState().startPreview(respuesta.access_token, sessionOf(respuesta))
-    return redirect('/')
-  } catch (error) {
-    const motivo = failureOf(errorStatus(error))
-    logger.warn({ reason: motivo }, 'auth.preview_exchange_failed')
-    return motivo
-  }
+  const code = takeCode()
+  return code === null ? withoutCode() : exchange(code)
 }

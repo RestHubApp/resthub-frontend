@@ -1,35 +1,13 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
-import { type FieldErrors, useForm } from 'react-hook-form'
-
-import { createPlatformRestaurant, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } from '../../api/platform'
-import type { PlatformRestaurantDetail } from '../../api/types'
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import SectionCard from '../../components/SectionCard'
-import TextField from '../../components/TextField'
-import { Button } from '../../components/ui/button'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
-import OwnerFields from './OwnerFields'
-import {
-  createRestaurantPayload,
-  createRestaurantSchema,
-  type CreateRestaurantValues,
-  EMPTY_RESTAURANT,
-} from './platformSchema'
-import { saveRestaurant } from './restaurantCache'
-import { followSlug, MAX_SLUG, sanitizeSlugInput } from './slug'
-import TimeZoneField from './TimeZoneField'
-
-function ownerErrors(errors: FieldErrors<CreateRestaurantValues>['owner']) {
-  return {
-    full_name: errors?.full_name?.message,
-    email: errors?.email?.message,
-    password: errors?.password?.message,
-  }
-}
+import type { PlatformRestaurantDetail } from '@/api/types'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { Icon } from '@/components/Icon'
+import { SectionCard } from '@/components/SectionCard'
+import { TextField } from '@/components/TextField'
+import { Button } from '@/components/ui/button'
+import { OwnerFields } from './OwnerFields'
+import { MAX_SLUG, sanitizeSlugInput } from './slug'
+import { TimeZoneField } from './TimeZoneField'
+import { ownerErrors, useNewRestaurantForm } from './useNewRestaurantForm'
 
 interface NewRestaurantFormProps {
   readonly onCreated: (restaurant: PlatformRestaurantDetail) => void
@@ -43,48 +21,15 @@ interface NewRestaurantFormProps {
  * respeta. El servidor crea el local, sus roles base y la cuenta en una sola
  * operación: si el identificador o el correo ya existen, no queda nada a medias.
  */
-export default function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProps) {
-  const queryClient = useQueryClient()
-  const { register, handleSubmit, formState, getValues, setValue } = useForm<CreateRestaurantValues>({
-    resolver: zodResolver(createRestaurantSchema),
-    defaultValues: EMPTY_RESTAURANT,
-  })
-  // El nombre con el que se sugirió el identificador que está en el campo.
-  const [nombreAnterior, setNombreAnterior] = useState('')
-  const alta = useMutation({
-    mutationKey: platformMutationKeys.createRestaurant,
-    mutationFn: (valores: CreateRestaurantValues) => createPlatformRestaurant(createRestaurantPayload(valores)),
-    gcTime: PASSWORD_MUTATION_GC_TIME,
-    onSuccess: (restaurante) => {
-      saveRestaurant(queryClient, restaurante)
-      onCreated(restaurante)
-    },
-  })
-  const errores = formState.errors
-  const nombre = register('name', {
-    onChange: (evento: { target: { value: string } }) => {
-      const siguiente = evento.target.value
-      setValue('slug', followSlug(nombreAnterior, siguiente, getValues('slug')), {
-        shouldValidate: formState.isSubmitted,
-      })
-      setNombreAnterior(siguiente)
-    },
-  })
+export function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProps) {
+  const { register, errors, name, registration, submit } = useNewRestaurantForm(onCreated)
 
   return (
-    <form
-      noValidate
-      className="flex flex-col gap-6"
-      onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          alta.mutate(valores)
-        }),
-      )}
-    >
+    <form noValidate className="flex flex-col gap-6" onSubmit={submit}>
       <SectionCard title="Restaurante">
         <div className="grid items-start gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <TextField id="name" label="Nombre" placeholder="La Esquina de Lucho" icon="restaurante" autoComplete="off" field={nombre} error={errores.name?.message} />
+            <TextField id="name" label="Nombre" placeholder="La Esquina de Lucho" icon="restaurant" autoComplete="off" field={name} error={errors.name?.message} />
           </div>
           <TextField
             id="slug"
@@ -96,26 +41,26 @@ export default function NewRestaurantForm({ onCreated, onCancel }: NewRestaurant
             hint="Sale del nombre; puedes cambiarlo. Minúsculas, números y guiones. No se cambia después."
             sanitize={sanitizeSlugInput}
             field={register('slug')}
-            error={errores.slug?.message}
+            error={errors.slug?.message}
           />
-          <TimeZoneField id="timezone" field={register('timezone')} error={errores.timezone?.message} />
+          <TimeZoneField id="timezone" field={register('timezone')} error={errors.timezone?.message} />
         </div>
       </SectionCard>
       <SectionCard title="Primer encargado" description="La cuenta con todos los permisos del local. Después puede crear al resto del personal.">
         <OwnerFields
           idPrefix="owner"
           fields={{ full_name: register('owner.full_name'), email: register('owner.email'), password: register('owner.password') }}
-          errors={ownerErrors(errores.owner)}
+          errors={ownerErrors(errors.owner)}
         />
       </SectionCard>
-      {alta.isError ? <FormMessage tone="error">{errorMessage(alta.error, 'No se pudo crear el restaurante.')}</FormMessage> : null}
+      <ErrorMessage isError={registration.isError} error={registration.error} fallback="No se pudo crear el restaurante." />
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" size="lg" className="h-11 px-4" disabled={alta.isPending || alta.isSuccess}>
-          <Icon name="agregar" size={18} />
-          <span>{alta.isPending ? 'Creando…' : 'Crear restaurante'}</span>
+        <Button type="submit" disabled={registration.isPending || registration.isSuccess}>
+          <Icon name="add" size={18} />
+          <span>{registration.isPending ? 'Creando…' : 'Crear restaurante'}</span>
         </Button>
       </div>
     </form>

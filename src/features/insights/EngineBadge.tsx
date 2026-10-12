@@ -1,5 +1,5 @@
-import type { AiDecision, DecisionEngine } from '../../api/types'
-import Icon from '../../components/Icon'
+import type { AiDecision, DecisionEngine } from '@/api/types'
+import { Icon } from '@/components/Icon'
 
 interface EngineBadgeProps {
   readonly engine: DecisionEngine
@@ -15,6 +15,7 @@ const FALLBACKS: Record<FallbackReason, string> = {
   not_configured: 'sin configurar',
   unavailable: 'no disponible',
   low_confidence: 'confianza baja',
+  disabled: 'IA externa apagada',
 }
 
 const ENGINES: Record<DecisionEngine, { readonly name: string; readonly title: string }> = {
@@ -23,7 +24,7 @@ const ENGINES: Record<DecisionEngine, { readonly name: string; readonly title: s
 }
 
 /** Qué motor tomó la decisión y, si fueron las reglas, por qué. */
-export default function EngineBadge({ engine, fallbackReason, fallbackLabel }: EngineBadgeProps) {
+export function EngineBadge({ engine, fallbackReason, fallbackLabel }: EngineBadgeProps) {
   const motor = ENGINES[engine]
   return (
     <span className="inline-flex flex-wrap items-center gap-1.5 text-xs">
@@ -31,7 +32,7 @@ export default function EngineBadge({ engine, fallbackReason, fallbackLabel }: E
         title={motor.title}
         className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium text-foreground"
       >
-        <Icon name={engine === 'jev' ? 'ia' : 'reglas'} size={14} />
+        <Icon name={engine === 'jev' ? 'ai' : 'rules'} size={14} />
         {motor.name}
       </span>
       {fallbackReason === null || fallbackReason === undefined ? null : (

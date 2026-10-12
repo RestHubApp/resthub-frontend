@@ -1,0 +1,41 @@
+# Palabras permitidas en identificadores que no son inglés (una por línea).
+# Las revisa @cspell/eslint-plugin (ver eslint.config.js).
+
+# Siglas legales y de la API (nombres de campos y valores del contrato).
+ruc
+igv
+sunat
+dni
+nubefact
+boleta
+factura
+
+# Marcas y servicios.
+resthub
+yape
+plin
+
+# Nombres de platos e insumos de los datos de prueba.
+lomo
+arroz
+chicha
+ceviche
+causa
+culantro
+limon
+cebolla
+aceite
+bistec
+tomate
+
+# Nombres propios de los datos de prueba (restaurantes y personas).
+esquina
+quispe
+nandu
+marta
+rosa
+
+# Términos técnicos que el diccionario no trae.
+xpaths
+serviceworker
+unstub

@@ -1,4 +1,4 @@
-import type { PermissionCode, PermissionInfo, Role, RoleKind } from '../../api/types'
+import type { PermissionCode, PermissionInfo, Role, RoleKind } from '@/api/types'
 
 export interface PermissionGroup {
   readonly name: string
@@ -13,20 +13,20 @@ export const KIND_LABELS: Record<RoleKind, string> = {
 }
 
 // En el resumen de un rol se nombran a lo sumo estos grupos; el resto se cuenta.
-const GRUPOS_EN_RESUMEN = 3
+const GROUPS_IN_SUMMARY = 3
 
 /** El catálogo por grupo, en el orden en que lo manda el servidor. */
 export function groupPermissions(catalog: readonly PermissionInfo[]): PermissionGroup[] {
-  const grupos = new Map<string, PermissionInfo[]>()
-  for (const permiso of catalog) {
-    const grupo = grupos.get(permiso.group)
-    if (grupo === undefined) {
-      grupos.set(permiso.group, [permiso])
+  const groups = new Map<string, PermissionInfo[]>()
+  for (const permission of catalog) {
+    const group = groups.get(permission.group)
+    if (group === undefined) {
+      groups.set(permission.group, [permission])
     } else {
-      grupo.push(permiso)
+      group.push(permission)
     }
   }
-  return Array.from(grupos, ([name, permissions]) => ({ name, permissions }))
+  return Array.from(groups, ([name, permissions]) => ({ name, permissions }))
 }
 
 /** Marca o desmarca un permiso sin repetirlo. */
@@ -35,19 +35,19 @@ export function togglePermission(
   code: PermissionCode,
   checked: boolean,
 ): PermissionCode[] {
-  const resto = selected.filter((actual) => actual !== code)
-  return checked ? [...resto, code] : resto
+  const rest = selected.filter((actual) => actual !== code)
+  return checked ? [...rest, code] : rest
 }
 
-function enumerar(nombres: readonly string[]): string {
-  if (nombres.length <= 1) {
-    return nombres.join('')
+function enumerate(names: readonly string[]): string {
+  if (names.length <= 1) {
+    return names.join('')
   }
-  if (nombres.length > GRUPOS_EN_RESUMEN) {
-    const extra = nombres.length - GRUPOS_EN_RESUMEN
-    return `${nombres.slice(0, GRUPOS_EN_RESUMEN).join(', ')} y ${String(extra)} más`
+  if (names.length > GROUPS_IN_SUMMARY) {
+    const extra = names.length - GROUPS_IN_SUMMARY
+    return `${names.slice(0, GROUPS_IN_SUMMARY).join(', ')} y ${String(extra)} más`
   }
-  return `${nombres.slice(0, -1).join(', ')} y ${nombres.at(-1) ?? ''}`
+  return `${names.slice(0, -1).join(', ')} y ${names.at(-1) ?? ''}`
 }
 
 /**
@@ -62,15 +62,16 @@ export function permissionSummary(
   if (role.kind === 'owner') {
     return 'Todos los permisos'
   }
-  const cantidad = role.permissions.length
-  if (cantidad === 0) {
+  const quantity = role.permissions.length
+  if (quantity === 0) {
     return 'Sin permisos'
   }
-  const conteo = cantidad === 1 ? '1 permiso' : `${String(cantidad)} permisos`
-  const nombres = groups
-    .filter((grupo) => grupo.permissions.some((permiso) => role.permissions.includes(permiso.code)))
-    .map((grupo) => grupo.name)
-  return nombres.length === 0 ? conteo : `${conteo} · ${enumerar(nombres)}`
+  const count = quantity === 1 ? '1 permiso' : `${String(quantity)} permisos`
+  const owned = new Set(role.permissions)
+  const names = groups
+    .filter((group) => group.permissions.some((permission) => owned.has(permission.code)))
+    .map((group) => group.name)
+  return names.length === 0 ? count : `${count} · ${enumerate(names)}`
 }
 
 /** Cuántas personas tienen el rol. */

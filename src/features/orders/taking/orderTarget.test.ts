@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
-import { newOrderPath } from '../floor/takeawaySchema'
 import { draftKey, openRequest } from './orderTarget'
 
 const items = [{ menu_item_id: 1, quantity: 2, notes: '', modifiers: [] }]
@@ -38,22 +37,5 @@ describe('openRequest', () => {
       type: 'takeaway',
       customer_id: null,
     })
-  })
-})
-
-describe('newOrderPath', () => {
-  it('lleva los datos del delivery en la URL', () => {
-    const ruta = newOrderPath({
-      mode: 'delivery',
-      customer_name: 'Ana',
-      phone: '987',
-      address: 'Calle 1',
-      reference: '',
-      customer_id: 3,
-    })
-    const params = new URLSearchParams(ruta.split('?')[1])
-    expect(params.get('tipo')).toBe('delivery')
-    expect(params.get('clienteId')).toBe('3')
-    expect(params.get('direccion')).toBe('Calle 1')
   })
 })

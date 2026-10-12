@@ -1,6 +1,6 @@
-import type { SeriesPoint } from '../../../components/charts/areaGeometry'
-import type { ObsAccountKind, ObsLogLevel, ObsTimePoint } from '../../../api/types'
-import { formatClock, formatPercent, formatShortDateTime } from '../../../services/format'
+import type { SeriesPoint } from '@/components/charts/areaGeometry'
+import type { ObsAccountKind, ObsLogLevel, ObsTimePoint } from '@/api/types'
+import { formatClock, formatPercent, formatShortDateTime } from '@/services/format'
 
 const SECONDS_PER_HOUR = 3600
 const SECONDS_PER_MINUTE = 60
@@ -18,8 +18,8 @@ export function bucketAxisLabel(start: string, bucketSeconds: number, timeZone: 
 
 /** El cubo entero, para la lectura y la tabla: `25 set., 14:00 – 14:15`. */
 export function bucketTitle(start: string, bucketSeconds: number, timeZone: string): string {
-  const fin = new Date(new Date(start).getTime() + bucketSeconds * MS_PER_SECOND).toISOString()
-  return `${formatShortDateTime(start, timeZone)} – ${formatClock(fin, timeZone)}`
+  const end = new Date(new Date(start).getTime() + bucketSeconds * MS_PER_SECOND).toISOString()
+  return `${formatShortDateTime(start, timeZone)} – ${formatClock(end, timeZone)}`
 }
 
 /** El ancho de un cubo: `15 min`, `2 h`. */
@@ -29,12 +29,17 @@ export function formatBucket(seconds: number): string {
     : `${String(Math.max(1, Math.round(seconds / SECONDS_PER_MINUTE)))} min`
 }
 
+/** Cómo se arma una serie: el ancho del cubo, la zona horaria y qué valor toma cada punto. */
+export interface SeriesOptions {
+  readonly bucketSeconds: number
+  readonly timeZone: string
+  readonly value: (point: ObsTimePoint) => number
+}
+
 /** Una serie del gráfico de área, un punto por cubo, con su rótulo del eje. */
 export function toSeries(
   points: readonly ObsTimePoint[],
-  bucketSeconds: number,
-  timeZone: string,
-  value: (point: ObsTimePoint) => number,
+  { bucketSeconds, timeZone, value }: SeriesOptions,
 ): SeriesPoint[] {
   return points.map((point) => ({
     key: point.t,
@@ -58,8 +63,8 @@ const STATUS_CLASSES: Readonly<Record<number, string>> = {
 
 /** `404 · error del cliente`: el código y qué clase de respuesta es. */
 export function statusLabel(status: number): string {
-  const clase = STATUS_CLASSES[Math.floor(status / PERCENT)] ?? 'otra'
-  return `${String(status)} · ${clase}`
+  const kind = STATUS_CLASSES[Math.floor(status / PERCENT)] ?? 'otra'
+  return `${String(status)} · ${kind}`
 }
 
 export const LEVEL_LABELS: Readonly<Record<ObsLogLevel, string>> = {

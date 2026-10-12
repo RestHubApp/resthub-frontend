@@ -1,8 +1,8 @@
 import { cn } from 'cn'
 import { type ReactNode, useId, useState } from 'react'
 
-import CollapsibleHeading from './CollapsibleHeading'
-import SectionHeading from './SectionHeading'
+import { CollapsibleHeading } from './CollapsibleHeading'
+import { SectionHeading } from './SectionHeading'
 import { Card, CardContent, CardHeader } from './ui/card'
 
 interface SectionCardProps {
@@ -23,7 +23,7 @@ interface SectionCardProps {
 }
 
 // Enfocable y con nombre: quien usa teclado tambien puede desplazar el contenido.
-function propsDeDesplazamiento(scrollable: boolean, title: string) {
+function scrollProps(scrollable: boolean, title: string) {
   if (!scrollable) {
     return { className: 'flex flex-col gap-4 px-5' }
   }
@@ -39,7 +39,7 @@ function propsDeDesplazamiento(scrollable: boolean, title: string) {
 }
 
 /** Un bloque de una pantalla: titulo, descripcion y contenido en una tarjeta. */
-export default function SectionCard({
+export function SectionCard({
   title,
   description,
   actions,
@@ -49,21 +49,21 @@ export default function SectionCard({
   defaultOpen = true,
   scrollable = false,
 }: SectionCardProps) {
-  const [abierto, setAbierto] = useState(defaultOpen)
-  const contenidoId = useId()
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+  const contentId = useId()
 
   return (
-    <Card className="gap-4 py-5 shadow-sm">
+    <Card data-testid={`section-${title}`} className="gap-4 py-5">
       <CardHeader className="flex flex-wrap items-start justify-between gap-3 px-5">
         {collapsible ? (
           <CollapsibleHeading
             title={title}
             as={as}
             description={description}
-            open={abierto}
-            controls={contenidoId}
+            open={isOpen}
+            controls={contentId}
             onToggle={() => {
-              setAbierto((valor) => !valor)
+              setIsOpen((value) => !value)
             }}
           />
         ) : (
@@ -74,9 +74,9 @@ export default function SectionCard({
         {actions === undefined ? null : <div className="flex flex-wrap gap-2">{actions}</div>}
       </CardHeader>
       <CardContent
-        id={contenidoId}
-        hidden={collapsible && !abierto}
-        {...propsDeDesplazamiento(scrollable, title)}
+        id={contentId}
+        hidden={collapsible && !isOpen}
+        {...scrollProps(scrollable, title)}
       >
         {children}
       </CardContent>

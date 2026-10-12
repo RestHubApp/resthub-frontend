@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
-import { dishCostsQuery } from '../../api/inventory'
-import { menuQuery } from '../../api/menu'
-import type { DishCost } from '../../api/types'
-import { useCan } from '../../store/session'
+import { dishCostsQuery } from '@/api/inventory'
+import { menuQuery } from '@/api/menu'
+import { PERMISSION } from '@/api/permissions'
+import type { DishCost } from '@/api/types'
+import { useCan } from '@/store/session'
 
 /** La carta completa, con lo desactivado: esta pantalla es la de quien la administra. */
 export const MENU_QUERY = menuQuery(true)
@@ -17,14 +18,14 @@ export const MENU_KEY = MENU_QUERY.queryKey
  * carta se muestra igual, solo que sin márgenes.
  */
 export function useMenuData() {
-  const puedeVerCostos = useCan('inventory.read')
+  const canViewCosts = useCan(PERMISSION.inventoryRead)
   const menu = useQuery(MENU_QUERY)
-  const costos = useQuery({ ...dishCostsQuery, enabled: puedeVerCostos })
+  const costs = useQuery({ ...dishCostsQuery, enabled: canViewCosts })
 
-  const costoPorPlato = useMemo(
-    () => new Map<number, DishCost>((costos.data ?? []).map((costo) => [costo.menu_item_id, costo])),
-    [costos.data],
+  const costByDish = useMemo(
+    () => new Map<number, DishCost>((costs.data ?? []).map((cost) => [cost.menu_item_id, cost])),
+    [costs.data],
   )
 
-  return { menu, costoPorPlato, puedeVerCostos }
+  return { menu, costByDish, canViewCosts }
 }

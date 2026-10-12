@@ -1,7 +1,7 @@
-import type { PermissionCode } from '../../api/types'
+import type { PermissionCode } from '@/api/types'
 import type { PermissionGroup } from './permissionGroups'
 import { togglePermission } from './permissionGroups'
-import PermissionOption from './PermissionOption'
+import { PermissionOption } from './PermissionOption'
 
 interface PermissionPickerProps {
   readonly groups: readonly PermissionGroup[]
@@ -13,13 +13,15 @@ interface PermissionPickerProps {
 }
 
 /** Los permisos del rol, en casillas agrupadas como las ordena el servidor. */
-export default function PermissionPicker({
+export function PermissionPicker({
   groups,
   selected,
   onChange,
   granted,
   readOnly,
 }: PermissionPickerProps) {
+  const marked = new Set(selected)
+  const available = new Set(granted)
   return (
     <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0">
       <legend className="mb-1 text-sm font-medium">Permisos</legend>
@@ -29,19 +31,19 @@ export default function PermissionPicker({
         </p>
       )}
       <div className="grid gap-3 sm:grid-cols-2">
-        {groups.map((grupo) => (
-          <fieldset key={grupo.name} className="m-0 min-w-0 rounded-lg border px-3 pt-1 pb-2">
-            <legend className="px-1 text-sm font-semibold">{grupo.name}</legend>
+        {groups.map((group) => (
+          <fieldset key={group.name} className="m-0 min-w-0 rounded-lg border px-3 pt-1 pb-2">
+            <legend className="px-1 text-sm font-semibold">{group.name}</legend>
             <ul className="m-0 flex list-none flex-col p-0">
-              {grupo.permissions.map((permiso) => (
+              {group.permissions.map((permission) => (
                 <PermissionOption
-                  key={permiso.code}
-                  permission={permiso}
-                  checked={selected.includes(permiso.code)}
-                  missing={!granted.includes(permiso.code)}
+                  key={permission.code}
+                  permission={permission}
+                  checked={marked.has(permission.code)}
+                  missing={!available.has(permission.code)}
                   readOnly={readOnly}
-                  onCheckedChange={(marcado) => {
-                    onChange(togglePermission(selected, permiso.code, marcado))
+                  onCheckedChange={(marked) => {
+                    onChange(togglePermission(selected, permission.code, marked))
                   }}
                 />
               ))}

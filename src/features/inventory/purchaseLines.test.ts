@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
-import type { PurchaseSuggestion } from '../../api/types'
+import type { PurchaseSuggestion } from '@/api/types'
 import { type LineDraft, linesForApi, linesFromSuggestions } from './purchaseLines'
 
 function line(ingredientId: string, quantity: string, unitCost = ''): LineDraft {
@@ -27,8 +27,8 @@ describe('linesForApi', () => {
 
 describe('linesFromSuggestions', () => {
   it('trae la cantidad y el costo sugeridos', () => {
-    const sugerencia = { ingredient_id: 7, quantity: '12.000', unit_cost: '3.50' } as PurchaseSuggestion
-    const [linea] = linesFromSuggestions([sugerencia])
-    expect(linea).toMatchObject({ ingredientId: '7', quantity: '12.000', unitCost: '3.50' })
+    const suggestion = { ingredient_id: 7, quantity: '12.000', unit_cost: '3.50' } as PurchaseSuggestion
+    const [firstLine] = linesFromSuggestions([suggestion])
+    expect(firstLine).toMatchObject({ ingredientId: '7', quantity: '12.000', unitCost: '3.50' })
   })
 })

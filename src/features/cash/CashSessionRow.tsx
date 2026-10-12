@@ -1,6 +1,6 @@
-import type { CashSession } from '../../api/types'
-import { formatDateTime, formatMoney, toCents } from '../../services/format'
-import { useTimeZone } from '../../store/session'
+import type { CashSession } from '@/api/types'
+import { formatDateTime, formatMoney, toCents } from '@/services/format'
+import { useTimeZone } from '@/store/session'
 
 interface CashSessionRowProps {
   readonly session: CashSession
@@ -16,9 +16,9 @@ function differenceTone(cents: number): string {
 }
 
 /** Un turno en el historial: cuándo, quién, y si cuadró. */
-export default function CashSessionRow({ session, onOpen }: CashSessionRowProps) {
+export function CashSessionRow({ session, onOpen }: CashSessionRowProps) {
   const timeZone = useTimeZone()
-  const diferencia = session.difference === null ? null : toCents(session.difference)
+  const difference = session.difference === null ? null : toCents(session.difference)
 
   return (
     <li>
@@ -39,9 +39,9 @@ export default function CashSessionRow({ session, onOpen }: CashSessionRowProps)
           <span className="tabular-nums">
             {session.expected_cash === null ? 'En curso' : `Esperado ${formatMoney(session.expected_cash)}`}
           </span>
-          {diferencia === null ? null : (
-            <span className={`font-semibold tabular-nums ${differenceTone(diferencia)}`}>
-              {diferencia === 0 ? 'Cuadró' : `Diferencia ${formatMoney(session.difference ?? '0')}`}
+          {difference === null ? null : (
+            <span className={`font-semibold tabular-nums ${differenceTone(difference)}`}>
+              {difference === 0 ? 'Cuadró' : `Diferencia ${formatMoney(session.difference ?? '0')}`}
             </span>
           )}
         </span>

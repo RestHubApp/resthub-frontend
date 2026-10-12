@@ -1,6 +1,7 @@
-import type { RestockAction } from '../../api/types'
-import Icon from '../../components/Icon'
-import { ACTION_LABELS, ACTION_ORDER, ACTION_STYLES, TONE_BADGE } from './restockActions'
+import type { RestockAction } from '@/api/types'
+import { Icon } from '@/components/Icon'
+import { Badge } from '@/components/ui/badge'
+import { ACTION_LABELS, ACTION_ORDER, ACTION_STYLES } from './restockActions'
 
 interface RestockSummaryProps {
   readonly counts: Readonly<Partial<Record<string, number>>>
@@ -12,28 +13,28 @@ interface RestockSummaryProps {
  * Cuántos insumos caen en cada acción. Cada tarjeta es también un filtro:
  * tocarla deja solo esos insumos en la lista; tocarla de nuevo, todos.
  */
-export default function RestockSummary({ counts, selected, onSelect }: RestockSummaryProps) {
+export function RestockSummary({ counts, selected, onSelect }: RestockSummaryProps) {
   return (
     <section aria-label="Resumen por acción" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {ACTION_ORDER.map((action) => {
-        const estilo = ACTION_STYLES[action]
-        const activo = selected === action
+        const style = ACTION_STYLES[action]
+        const isActive = selected === action
         return (
           <button
             key={action}
             type="button"
-            aria-pressed={activo}
+            aria-pressed={isActive}
             onClick={() => {
-              onSelect(activo ? null : action)
+              onSelect(isActive ? null : action)
             }}
-            className={`flex flex-col items-start gap-2 rounded-xl bg-card p-4 text-left ring-1 outline-none transition-shadow focus-visible:ring-3 focus-visible:ring-ring/50 ${activo ? 'ring-2 ring-foreground' : 'ring-foreground/10 hover:ring-foreground/30'}`}
+            className={`flex flex-col items-start gap-2 rounded-xl bg-card p-4 text-left ring-1 outline-none transition-shadow focus-visible:ring-3 focus-visible:ring-ring/50 ${isActive ? 'ring-2 ring-foreground' : 'ring-foreground/10 hover:ring-foreground/30'}`}
           >
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${TONE_BADGE[estilo.tone]}`}>
-              <Icon name={estilo.icon} size={14} />
+            <Badge variant={style.variant} className="font-semibold">
+              <Icon name={style.icon} size={14} />
               {ACTION_LABELS[action]}
-            </span>
+            </Badge>
             <span className="text-3xl leading-none font-semibold">{counts[action] ?? 0}</span>
-            <span className="text-xs text-muted-foreground">{activo ? 'Mostrando solo estos' : 'insumos'}</span>
+            <span className="text-xs text-muted-foreground">{isActive ? 'Mostrando solo estos' : 'insumos'}</span>
           </button>
         )
       })}

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import { COMMON_TIME_ZONES, isValidTimeZone, timeZoneLabel, timeZoneOptions } from './timeZones'
 
@@ -8,9 +8,9 @@ const TOKIO = 'Asia/Tokyo'
 describe('COMMON_TIME_ZONES', () => {
   it('empieza por Lima y todas son zonas válidas, sin repetir', () => {
     expect(COMMON_TIME_ZONES[0]?.value).toBe(LIMA)
-    const valores = COMMON_TIME_ZONES.map((zona) => zona.value)
-    expect(new Set(valores).size).toBe(valores.length)
-    expect(valores.every(isValidTimeZone)).toBe(true)
+    const values = COMMON_TIME_ZONES.map((zone) => zone.value)
+    expect(new Set(values).size).toBe(values.length)
+    expect(values.every(isValidTimeZone)).toBe(true)
   })
 })
 
@@ -28,8 +28,8 @@ describe('isValidTimeZone', () => {
   })
 
   it('rechaza zonas inventadas, mal escritas, desfases sueltos o demasiado largas', () => {
-    for (const mala of ['America/Atlantida', 'america/lima', 'utc', 'Lima', '+05:00', '', `America/${'A'.repeat(64)}`]) {
-      expect(isValidTimeZone(mala)).toBe(false)
+    for (const bad of ['America/Atlantida', 'america/lima', 'utc', 'Lima', '+05:00', '', `America/${'A'.repeat(64)}`]) {
+      expect(isValidTimeZone(bad)).toBe(false)
     }
   })
 })

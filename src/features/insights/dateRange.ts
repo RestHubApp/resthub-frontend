@@ -7,7 +7,8 @@ export interface RangeDates {
   readonly date_to: string
 }
 
-export type RangePreset = 'hoy' | '7d' | '30d' | 'mes' | 'personalizado'
+export type FixedPreset = 'hoy' | '7d' | '30d' | 'mes'
+export type RangePreset = FixedPreset | 'personalizado'
 
 export const RANGE_PRESETS: readonly { readonly value: RangePreset; readonly label: string }[] = [
   { value: 'hoy', label: 'Hoy' },
@@ -17,7 +18,7 @@ export const RANGE_PRESETS: readonly { readonly value: RangePreset; readonly lab
   { value: 'personalizado', label: 'Personalizado' },
 ]
 
-export const DEFAULT_PRESET: Exclude<RangePreset, 'personalizado'> = '30d'
+export const DEFAULT_PRESET: FixedPreset = '30d'
 
 /** El tope de dias que acepta el servidor en un reporte. */
 export const MAX_RANGE_DAYS = 366
@@ -29,29 +30,29 @@ export function isRangePreset(value: string | null): value is RangePreset {
 }
 
 export function addDays(isoDate: string, days: number): string {
-  const fecha = new Date(`${isoDate}T00:00:00Z`)
-  return new Date(fecha.getTime() + days * DAY_MS).toISOString().slice(0, 10)
+  const date = new Date(`${isoDate}T00:00:00Z`)
+  return new Date(date.getTime() + days * DAY_MS).toISOString().slice(0, 10)
 }
 
 /** Dias entre dos fechas, contando ambas. */
 export function daysBetween(from: string, to: string): number {
-  const desde = new Date(`${from}T00:00:00Z`).getTime()
-  const hasta = new Date(`${to}T00:00:00Z`).getTime()
-  return Math.round((hasta - desde) / DAY_MS) + 1
+  const fromTime = new Date(`${from}T00:00:00Z`).getTime()
+  const until = new Date(`${to}T00:00:00Z`).getTime()
+  return Math.round((until - fromTime) / DAY_MS) + 1
 }
 
 /** Las fechas de un rango predefinido, terminando hoy. */
 export function presetRange(
-  preset: Exclude<RangePreset, 'personalizado'>,
+  preset: FixedPreset,
   today: string,
 ): RangeDates {
-  const inicio: Record<typeof preset, string> = {
-    hoy: today,
+  const start: Record<typeof preset, string> = {
+    'hoy': today,
     '7d': addDays(today, -6),
     '30d': addDays(today, -29),
-    mes: `${today.slice(0, 8)}01`,
+    'mes': `${today.slice(0, 8)}01`,
   }
-  return { date_from: inicio[preset], date_to: today }
+  return { date_from: start[preset], date_to: today }
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u

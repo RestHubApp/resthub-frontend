@@ -1,21 +1,16 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
+import { send } from './client'
 import type { PermissionCode, PermissionInfo, Role, RoleRequest } from './types'
 
 // Los roles del restaurante y el catálogo de permisos con que se arman.
 
 export const rolesQueryKey = ['roles'] as const
-export const permissionsQueryKey = ['permissions'] as const
-
-function rolePath(roleId: number): string {
-  return `/roles/${String(roleId)}`
-}
+const permissionsQueryKey = ['permissions'] as const
 
 /** Encargado, mesero y los personalizados por nombre, en ese orden. */
-export async function fetchRoles(): Promise<Role[]> {
-  const { data } = await api.get<Role[]>('/roles')
-  return data
+async function fetchRoles(): Promise<Role[]> {
+  return send((client) => client.GET('/api/v1/roles'))
 }
 
 /** La consulta de los roles, la misma para Personal, Roles y la precarga. */
@@ -24,9 +19,8 @@ export function rolesQuery() {
 }
 
 /** Cada permiso con su nombre en la interfaz y su grupo, ya ordenados. */
-export async function fetchPermissions(): Promise<PermissionInfo[]> {
-  const { data } = await api.get<PermissionInfo[]>('/permissions')
-  return data
+async function fetchPermissions(): Promise<PermissionInfo[]> {
+  return send((client) => client.GET('/api/v1/permissions'))
 }
 
 export function permissionsQuery() {
@@ -35,17 +29,17 @@ export function permissionsQuery() {
 }
 
 export async function createRole(payload: RoleRequest): Promise<Role> {
-  const { data } = await api.post<Role>('/roles', payload)
-  return data
+  return send((client) => client.POST('/api/v1/roles', { body: payload }))
 }
 
 export async function updateRole(roleId: number, payload: RoleRequest): Promise<Role> {
-  const { data } = await api.put<Role>(rolePath(roleId), payload)
-  return data
+  return send((client) =>
+    client.PUT('/api/v1/roles/{role_id}', { params: { path: { role_id: roleId } }, body: payload }),
+  )
 }
 
 export async function deleteRole(roleId: number): Promise<void> {
-  await api.delete(rolePath(roleId))
+  await send((client) => client.DELETE('/api/v1/roles/{role_id}', { params: { path: { role_id: roleId } } }))
 }
 
 /**
@@ -58,5 +52,6 @@ export function canAssignRole(
   role: Pick<Role, 'permissions'>,
   granted: readonly PermissionCode[],
 ): boolean {
-  return role.permissions.every((permission) => granted.includes(permission))
+  const owned = new Set(granted)
+  return role.permissions.every((permission) => owned.has(permission))
 }

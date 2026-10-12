@@ -8,7 +8,7 @@ interface SectionHeadingProps {
 }
 
 /** El titulo de una seccion dentro de una pantalla. */
-export default function SectionHeading({ children, as = 'h2', description }: SectionHeadingProps) {
+export function SectionHeading({ children, as = 'h2', description }: SectionHeadingProps) {
   const Heading = as
   return (
     <div className="flex flex-col gap-1">

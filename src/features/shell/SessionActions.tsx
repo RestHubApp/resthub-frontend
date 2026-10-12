@@ -1,14 +1,16 @@
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 
-import ConfirmDialog from '../../components/ConfirmDialog'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import { useQueuedOrders } from '../../store/offlineQueue'
-import { usePreview, useSession } from '../../store/session'
+import type { Session } from '@/api/types'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { accountLabels } from './accountLabels'
+import { ShellIcon } from './ShellIcon'
+import { Button } from '@/components/ui/button'
+import { paths } from '@/services/paths'
+import { usePreview } from '@/store/session'
+import { pendingOrdersNotice, useSignOut } from './useSignOut'
 
 interface SessionActionsProps {
-  readonly fullName: string
-  readonly roleLabel: string
+  readonly account: Session
   readonly onNavigate?: () => void
 }
 
@@ -18,58 +20,52 @@ interface SessionActionsProps {
  * En una vista previa no hay «Cerrar sesión»: se sale desde la franja de
  * arriba, que ademas descarta la sesion de la pestana.
  */
-export default function SessionActions({ fullName, roleLabel, onNavigate }: SessionActionsProps) {
-  const signOut = useSession((state) => state.signOut)
-  const preview = usePreview()
-  const pendientes = useQueuedOrders(useSession((state) => state.account))
-  const navigate = useNavigate()
+export function SessionActions({ account, onNavigate }: SessionActionsProps) {
+  const { fullName, roleLabel } = accountLabels(account)
+  const isPreview = usePreview()
+  const { pending, signOut } = useSignOut()
 
-  const cerrarSesion = () => {
+  const handleSignOut = () => {
     onNavigate?.()
-    // Se vacia la sesion y se va al acceso en el mismo evento: React aplica
-    // los dos cambios juntos, asi que ninguna pantalla privada llega a
-    // dibujarse sin cuenta.
     signOut()
-    void navigate('/acceso', { replace: true })
   }
 
-  const cuantos =
-    pendientes.length === 1 ? 'Un pedido tuyo espera' : `${String(pendientes.length)} pedidos tuyos esperan`
-  const salir = (onClick?: () => void) => (
-    <Button type="button" variant="ghost" className="h-11 justify-start gap-3 px-3" onClick={onClick}>
-      <Icon name="salir" size={18} />
+  const signOutMenuItem = (onClick?: () => void) => (
+    <Button type="button" variant="ghost" className="justify-start gap-3 px-3" onClick={onClick}>
+      <ShellIcon name="signOut" size={18} />
       <span>Cerrar sesión</span>
     </Button>
   )
 
-  const salida =
-    pendientes.length === 0 ? (
-      salir(cerrarSesion)
+  const notice = pendingOrdersNotice(pending)
+  const output =
+    pending.length === 0 ? (
+      signOutMenuItem(handleSignOut)
     ) : (
       // Los pedidos no se borran, pero no salen hasta que esta cuenta vuelva
       // a entrar: quien cierra la sesion tiene que saberlo.
       <ConfirmDialog
-        trigger={salir()}
-        title="¿Cerrar sesión con pedidos sin enviar?"
-        description={`${cuantos} señal: ${pendientes.map((pedido) => pedido.label).join(', ')}. Quedan guardados en este celular y se envían cuando vuelvas a entrar con tu cuenta.`}
+        trigger={signOutMenuItem()}
+        title={notice.title}
+        description={notice.description}
         confirmLabel="Cerrar sesión"
         confirmVariant="default"
-        onConfirm={cerrarSesion}
+        onConfirm={handleSignOut}
       />
     )
 
   return (
     <div className="flex flex-col gap-1 border-t pt-3">
       <Button asChild variant="ghost" className="h-auto min-h-11 justify-start gap-3 px-3 py-2">
-        <Link to="/perfil" onClick={onNavigate}>
-          <Icon name="perfil" size={18} />
+        <Link to={paths.profile} onClick={onNavigate}>
+          <ShellIcon name="profile" size={18} />
           <span className="flex min-w-0 flex-col items-start leading-tight">
             <span className="max-w-full truncate">{fullName}</span>
             <span className="text-xs font-normal text-muted-foreground">{roleLabel}</span>
           </span>
         </Link>
       </Button>
-      {preview ? null : salida}
+      {isPreview ? null : output}
     </div>
   )
 }

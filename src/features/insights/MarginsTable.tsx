@@ -10,11 +10,12 @@ import {
 } from '@tanstack/react-table'
 import { useState } from 'react'
 
-import type { DishMargin } from '../../api/types'
-import Icon from '../../components/Icon'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
-import MarginBar from './MarginBar'
-import { formatInteger, formatMoney, toNumber } from '../../services/format'
+import type { DishMargin } from '@/api/types'
+import { Icon } from '@/components/Icon'
+import { Badge } from '@/components/ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { MarginBar } from './MarginBar'
+import { formatInteger, formatMoney, toNumber } from '@/services/format'
 
 const features = tableFeatures({
   rowSortingFeature,
@@ -43,10 +44,10 @@ const columns = helper.columns([
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {row.original.category}
           {row.original.recipe_cost === null ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 font-medium text-warning">
-              <Icon name="alerta" size={12} />
+            <Badge variant="warning">
+              <Icon name="alert" size={12} />
               Sin receta
-            </span>
+            </Badge>
           ) : null}
         </span>
       </span>
@@ -64,7 +65,7 @@ const columns = helper.columns([
   helper.accessor((row) => amount(row.gross_margin), { id: 'bruto', header: 'Ganancia bruta', ...NUMERIC, cell: ({ row }) => money(row.original.gross_margin) }),
 ])
 
-const SORT_ICON = { asc: 'ordenAscendente', desc: 'ordenDescendente', none: 'ordenar' } as const
+const SORT_ICON = { asc: 'orderAscending', desc: 'orderDescending', none: 'sort' } as const
 const ARIA_SORT = { asc: 'ascending', desc: 'descending', none: 'none' } as const
 
 interface MarginsTableProps {
@@ -75,28 +76,29 @@ interface MarginsTableProps {
  * Margen por plato: precio menos el costo de su receta. Se ordena tocando una
  * cabecera. Un plato sin receta no tiene costo: se marca y queda al final.
  */
-export default function MarginsTable({ dishes }: MarginsTableProps) {
+export function MarginsTable({ dishes }: MarginsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'bruto', desc: true }])
   const table = useTable({ features, columns, data: dishes, state: { sorting }, onSortingChange: setSorting })
 
   return (
     <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
-      <Table>
+      <Table label="Margen por plato">
         <caption className="sr-only">Margen por plato, ordenable por columna</caption>
         <TableHeader>
           {table.getHeaderGroups().map((group) => (
             <TableRow key={group.id}>
               {group.headers.map((header, index) => {
-                const orden = header.column.getIsSorted() || 'none'
+                const sorted = header.column.getIsSorted()
+                const order = sorted === false ? 'none' : sorted
                 return (
-                  <TableHead key={header.id} aria-sort={ARIA_SORT[orden]} className={`px-3 ${index > 0 ? 'text-right' : ''}`}>
+                  <TableHead key={header.id} aria-sort={ARIA_SORT[order]} className={`px-3 ${index > 0 ? 'text-right' : ''}`}>
                     <button
                       type="button"
                       onClick={header.column.getToggleSortingHandler()}
                       className="inline-flex items-center gap-1 rounded-sm font-medium outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
                       <table.FlexRender header={header} />
-                      <Icon name={SORT_ICON[orden]} size={14} className={orden === 'none' ? 'opacity-50' : undefined} />
+                      <Icon name={SORT_ICON[order]} size={14} className={order === 'none' ? 'opacity-50' : undefined} />
                     </button>
                   </TableHead>
                 )

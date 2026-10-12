@@ -1,26 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { createStaff } from '../../api/staff'
-import type { Role } from '../../api/types'
-import DialogFormActions from '../../components/DialogFormActions'
-import FormMessage from '../../components/FormMessage'
-import Icon from '../../components/Icon'
-import PasswordField from '../../components/PasswordField'
-import { Button } from '../../components/ui/button'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
-import { MIN_PASSWORD } from '../../services/fieldRules'
+import type { Role } from '@/api/types'
+import { FormFooter } from '@/components/FormFooter'
+import { PasswordField } from '@/components/PasswordField'
+import { onSubmit } from '@/hooks/formSubmit'
+import { MIN_PASSWORD } from '@/services/fieldLimits'
 import { defaultRoleId } from './roleOptions'
-import StaffFields from './StaffFields'
-import { saveStaffMember } from './staffList'
+import { StaffFields } from './StaffFields'
 import {
-  createPayload,
   type CreateStaffValues,
   createStaffSchema,
   emptyCreateStaff,
 } from './staffSchema'
+import { useCreateStaff } from './useCreateStaff'
 
 interface StaffCreateFormProps {
   /** Los roles que quien mira puede dar. */
@@ -29,30 +22,24 @@ interface StaffCreateFormProps {
   readonly onDone: () => void
 }
 
-export default function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
-  const queryClient = useQueryClient()
+/** El formulario para dar de alta una cuenta del personal con su contraseña inicial. */
+export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
   const { register, handleSubmit, formState } = useForm<CreateStaffValues>({
     resolver: zodResolver(createStaffSchema),
     defaultValues: emptyCreateStaff(defaultRoleId(roles)),
   })
 
-  const alta = useMutation({
-    mutationFn: (valores: CreateStaffValues) => createStaff(createPayload(valores)),
-    onSuccess: (cuenta) => {
-      saveStaffMember(queryClient, cuenta)
-      onDone()
-    },
-  })
+  const registration = useCreateStaff(onDone)
 
-  const errores = formState.errors
+  const errors = formState.errors
 
   return (
     <form
       noValidate
       className="flex flex-col gap-5"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          alta.mutate(valores)
+        handleSubmit((values) => {
+          registration.mutate(values)
         }),
       )}
     >
@@ -63,9 +50,9 @@ export default function StaffCreateForm({ roles, onDone }: StaffCreateFormProps)
           role_id: register('role_id'),
         }}
         errors={{
-          full_name: errores.full_name?.message,
-          email: errores.email?.message,
-          role_id: errores.role_id?.message,
+          full_name: errors.full_name?.message,
+          email: errors.email?.message,
+          role_id: errors.role_id?.message,
         }}
         roles={roles}
       />
@@ -76,24 +63,15 @@ export default function StaffCreateForm({ roles, onDone }: StaffCreateFormProps)
         autoComplete="new-password"
         hint="Díctasela a la persona y pídele que la cambie en Mi perfil."
         field={register('password')}
-        error={errores.password?.message}
+        error={errors.password?.message}
       />
 
-      {alta.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(alta.error, 'No se pudo crear la cuenta.')}
-        </FormMessage>
-      ) : null}
-
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-10 px-4" onClick={onDone}>
-          Cancelar
-        </Button>
-        <Button type="submit" size="lg" className="h-10 px-4" disabled={alta.isPending}>
-          <Icon name="agregar" size={16} />
-          <span>{alta.isPending ? 'Creando…' : 'Crear cuenta'}</span>
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={registration}
+        failureText="No se pudo crear la cuenta."
+        onCancel={onDone}
+        submit={{ label: 'Crear cuenta', pendingLabel: 'Creando…', icon: 'add' }}
+      />
     </form>
   )
 }

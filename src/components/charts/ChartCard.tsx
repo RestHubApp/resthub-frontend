@@ -1,8 +1,8 @@
 import { type ReactNode, useState } from 'react'
 
-import Icon from '../Icon'
-import SectionCard from '../SectionCard'
-import { Button } from '../ui/button'
+import { Icon } from '@/components/Icon'
+import { SectionCard } from '@/components/SectionCard'
+import { Button } from '@/components/ui/button'
 
 interface ChartCardProps {
   readonly title: string
@@ -22,7 +22,7 @@ interface ChartCardProps {
  * El cambio a tabla es para quien no ve el color o usa un lector de pantalla,
  * y también para quien quiere copiar los números.
  */
-export default function ChartCard({
+export function ChartCard({
   title,
   description,
   chart,
@@ -30,7 +30,7 @@ export default function ChartCard({
   refreshing = false,
   actions,
 }: ChartCardProps) {
-  const [comoTabla, setComoTabla] = useState(false)
+  const [isTableView, setIsTableView] = useState(false)
 
   return (
     <SectionCard
@@ -43,13 +43,13 @@ export default function ChartCard({
             type="button"
             variant="outline"
             size="sm"
-            aria-pressed={comoTabla}
+            aria-pressed={isTableView}
             onClick={() => {
-              setComoTabla((valor) => !valor)
+              setIsTableView((value) => !value)
             }}
           >
-            <Icon name={comoTabla ? 'grafico' : 'tabla'} size={14} />
-            <span>{comoTabla ? 'Ver gráfico' : 'Ver tabla'}</span>
+            <Icon name={isTableView ? 'chart' : 'grid'} size={14} />
+            <span>{isTableView ? 'Ver gráfico' : 'Ver tabla'}</span>
           </Button>
         </>
       }
@@ -58,7 +58,7 @@ export default function ChartCard({
         aria-busy={refreshing}
         className={`transition-opacity ${refreshing ? 'opacity-50' : 'opacity-100'}`}
       >
-        {comoTabla ? table : chart}
+        {isTableView ? table : chart}
       </div>
     </SectionCard>
   )

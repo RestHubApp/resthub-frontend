@@ -2,18 +2,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
-import { customersQueryKey, saveCustomer } from '../../api/customers'
-import type { Customer } from '../../api/types'
-import DialogFormActions from '../../components/DialogFormActions'
-import FormDialog from '../../components/FormDialog'
-import FormMessage from '../../components/FormMessage'
-import TextareaField from '../../components/TextareaField'
-import TextField from '../../components/TextField'
-import { Button } from '../../components/ui/button'
-import { onSubmit } from '../../hooks/formSubmit'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
-import { customerDefaults, customerRequest, customerSchema, type CustomerValues, LIMITES } from './customerSchema'
+import { customersQueryKey, saveCustomer } from '@/api/customers'
+import type { Customer } from '@/api/types'
+import { SaveFormDialog } from '@/components/SaveFormDialog'
+import { TextareaField } from '@/components/TextareaField'
+import { TextField } from '@/components/TextField'
+import { useNotifications } from '@/store/notifications'
+import { CustomerConsent } from './CustomerConsent'
+import { customerDefaults, customerRequest, customerSchema, type CustomerValues, LIMITS } from './customerSchema'
 
 interface CustomerDialogProps {
   readonly open: boolean
@@ -23,14 +19,23 @@ interface CustomerDialogProps {
 }
 
 /** Alta o edición de un cliente de la libreta. */
-export default function CustomerDialog({ open, customer, onClose }: CustomerDialogProps) {
+export function CustomerDialog({ open, customer, onClose: handleClose }: CustomerDialogProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const { register, handleSubmit, formState } = useForm<CustomerValues>({
-    resolver: zodResolver(customerSchema),
+  // El alta exige el consentimiento; un cliente guardado antes de pedirlo
+  // puede darlo al editarse; uno que ya lo dio no lo vuelve a dar.
+  const { register, handleSubmit, formState, reset, control } = useForm<CustomerValues>({
+    resolver: zodResolver(customerSchema(customer === null)),
     values: customerDefaults(customer),
   })
-  const guardar = useMutation({
+  // Al guardar, la ventana se cierra sin pasar por `onOpenChange` y el
+  // formulario conservaba lo escrito: «Nuevo cliente» volvía a abrir con los
+  // datos del anterior. Al cerrarse, el formulario vuelve a sus valores.
+  const onClose = () => {
+    reset(customerDefaults(customer))
+    handleClose()
+  }
+  const save = useMutation({
     mutationFn: (values: CustomerValues) => saveCustomer(customerRequest(values), customer?.id),
     onSuccess: async (saved) => {
       await queryClient.invalidateQueries({ queryKey: customersQueryKey })
@@ -41,40 +46,23 @@ export default function CustomerDialog({ open, customer, onClose }: CustomerDial
   const errors = formState.errors
 
   return (
-    <FormDialog
+    <SaveFormDialog
       open={open}
-      onOpenChange={(abierto) => {
-        if (!abierto) {
-          guardar.reset()
-          onClose()
-        }
-      }}
       title={customer === null ? 'Nuevo cliente' : `Editar a ${customer.name}`}
-      size="lg"
+      onClose={onClose}
+      save={save}
+      failureText="No se pudo guardar el cliente."
+      handleSubmit={handleSubmit((values) => save.mutateAsync(values).catch(() => undefined))}
     >
-      <form noValidate className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit(handleSubmit((values) => guardar.mutateAsync(values).catch(() => undefined)))}>
-        <TextField id="customer-name" label="Nombre" icon="perfil" maxLength={LIMITES.name} field={register('name')} error={errors.name?.message} />
-        <TextField id="customer-phone" label="Teléfono (opcional)" type="tel" inputMode="tel" maxLength={LIMITES.phone} hint="No se repite: identifica al cliente." field={register('phone')} error={errors.phone?.message} />
-        <TextField id="customer-email" label="Correo (opcional)" type="email" maxLength={LIMITES.email} field={register('email')} error={errors.email?.message} />
-        <TextField id="customer-address" label="Dirección (opcional)" icon="ubicacion" maxLength={LIMITES.address} field={register('address')} error={errors.address?.message} />
-        <TextField id="customer-reference" label="Referencia (opcional)" icon="nota" maxLength={LIMITES.reference} field={register('reference')} error={errors.reference?.message} />
-        <TextareaField id="customer-notes" label="Notas (opcional)" rows={2} placeholder="Alergias, preferencias, cómo pide" maxLength={LIMITES.notes} field={register('notes')} error={errors.notes?.message} />
-        {guardar.isError ? (
-          <div className="sm:col-span-2">
-            <FormMessage tone="error">{errorMessage(guardar.error, 'No se pudo guardar el cliente.')}</FormMessage>
-          </div>
-        ) : null}
-        <div className="sm:col-span-2">
-          <DialogFormActions>
-            <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" size="lg" className="h-11 px-4" disabled={guardar.isPending}>
-              {guardar.isPending ? 'Guardando…' : 'Guardar'}
-            </Button>
-          </DialogFormActions>
-        </div>
-      </form>
-    </FormDialog>
+      <TextField id="customer-name" label="Nombre" icon="profile" maxLength={LIMITS.name} field={register('name')} error={errors.name?.message} />
+      <TextField id="customer-phone" label="Teléfono (opcional)" type="tel" inputMode="tel" maxLength={LIMITS.phone} hint="No se repite: identifica al cliente." field={register('phone')} error={errors.phone?.message} />
+      <TextField id="customer-email" label="Correo (opcional)" type="email" maxLength={LIMITS.email} field={register('email')} error={errors.email?.message} />
+      <TextField id="customer-address" label="Dirección (opcional)" icon="location" maxLength={LIMITS.address} field={register('address')} error={errors.address?.message} />
+      <TextField id="customer-reference" label="Referencia (opcional)" icon="note" maxLength={LIMITS.reference} field={register('reference')} error={errors.reference?.message} />
+      <TextareaField id="customer-notes" label="Notas (opcional)" rows={2} placeholder="Alergias, preferencias, cómo pide" maxLength={LIMITS.notes} field={register('notes')} error={errors.notes?.message} />
+      <div className="sm:col-span-2">
+        <CustomerConsent control={control} customer={customer} errors={errors} />
+      </div>
+    </SaveFormDialog>
   )
 }

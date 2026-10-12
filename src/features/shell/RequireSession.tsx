@@ -1,11 +1,13 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 
-import type { PermissionCode } from '../../api/types'
-import { hasPermission, useSession } from '../../store/session'
+import type { AnyPermissionCode } from '@/api/types'
+import { paths } from '@/services/paths'
+import { hasPermission, useSession } from '@/store/session'
+import { TermsGate } from './TermsGate'
 
 interface RequireSessionProps {
   /** Permiso que exige la ruta. Sin el, basta con estar autenticado. */
-  readonly permission?: PermissionCode
+  readonly permission?: AnyPermissionCode | undefined
 }
 
 /**
@@ -14,17 +16,25 @@ interface RequireSessionProps {
  * Es una comodidad de la interfaz, no una medida de seguridad: quien llegue
  * igual a la pantalla se encuentra con que el API le responde 401 o 403. La
  * autorizacion de verdad vive en el servidor. Sin el permiso, la guarda lleva
- * al inicio, que elige la primera pantalla que la cuenta si puede abrir.
+ * al inicio, que elige la primera pantalla que la cuenta si puede abrir. Es la
+ * misma guarda para el personal y para la administración del sistema: lo que
+ * cambia es el permiso (`platform.*` o los del restaurante).
  */
-export default function RequireSession({ permission }: RequireSessionProps) {
+export function RequireSession({ permission }: RequireSessionProps) {
   const account = useSession((state) => state.account)
   const location = useLocation()
 
   if (account === null) {
-    return <Navigate to="/acceso" replace state={{ from: location.pathname }} />
+    return <Navigate to={paths.login} replace state={{ from: location.pathname }} />
+  }
+  // Ley N.º 29733: sin aceptar los términos vigentes no se trabaja. Una vista
+  // previa no los acepta: quien mira no es el dueño de la cuenta.
+  // La administración del sistema no trabaja con datos de clientes: no los acepta.
+  if (account.kind === 'staff' && (!account.terms_accepted || !account.privacy_accepted) && !account.preview) {
+    return <TermsGate account={account} />
   }
   if (permission !== undefined && !hasPermission(account, permission)) {
-    return <Navigate to="/" replace />
+    return <Navigate to={paths.home} replace />
   }
   return <Outlet />
 }

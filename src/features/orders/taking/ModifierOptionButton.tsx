@@ -1,5 +1,5 @@
-import { Button } from '../../../components/ui/button'
-import { formatMoney, toCents } from '../../../services/format'
+import { Button } from '@/components/ui/button'
+import { formatMoney, toCents } from '@/services/format'
 
 interface ModifierOptionButtonProps {
   readonly name: string
@@ -9,7 +9,7 @@ interface ModifierOptionButtonProps {
 }
 
 /** Una opción del plato como ficha: marcada o no, con lo que suma al precio. */
-export default function ModifierOptionButton({ name, price, selected, onToggle }: ModifierOptionButtonProps) {
+export function ModifierOptionButton({ name, price, selected, onToggle }: ModifierOptionButtonProps) {
   return (
     <Button
       type="button"

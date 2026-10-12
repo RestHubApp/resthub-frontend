@@ -1,12 +1,12 @@
 import { z } from 'zod'
 
-import type { CreateStaffRequest, StaffResponse, UpdateStaffRequest } from '../../api/types'
+import type { CreateStaffRequest, StaffResponse, UpdateStaffRequest } from '@/api/types'
 import {
-  correoRule,
-  MAX_NOMBRE_COMPLETO,
-  nombreRule,
+  emailRule,
+  MAX_COMPLETE_NAME,
+  nameRule,
   passwordRule,
-} from '../../services/fieldRules'
+} from '@/services/fieldRules'
 
 // La lista nativa entrega texto: el rol pasa a numero recien al enviarlo.
 const roleRule = z.string().regex(/^\d+$/u, 'Elige el rol')
@@ -14,14 +14,14 @@ const roleRule = z.string().regex(/^\d+$/u, 'Elige el rol')
 // El correo no esta aca: se fija al crear la cuenta y el servidor no deja
 // cambiarlo, porque es con lo que la persona entra.
 export const staffIdentitySchema = z.object({
-  full_name: nombreRule('nombre completo', MAX_NOMBRE_COMPLETO, 'el'),
+  full_name: nameRule('nombre completo', MAX_COMPLETE_NAME, 'el'),
   role_id: roleRule,
 })
 
 export type StaffIdentityValues = z.infer<typeof staffIdentitySchema>
 
 export const createStaffSchema = staffIdentitySchema.extend({
-  email: correoRule,
+  email: emailRule,
   password: passwordRule,
 })
 

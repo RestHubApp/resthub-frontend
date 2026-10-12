@@ -1,8 +1,8 @@
-import type { OrderMenuSection } from '../../../api/types'
+import type { OrderMenuSection } from '@/api/types'
 
 // "aji" encuentra "Ají de gallina": sin tildes ni mayusculas.
 function normalize(text: string): string {
-  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim()
+  return text.normalize('NFD').replaceAll(/\p{Diacritic}/gu, '').toLowerCase().trim()
 }
 
 /**

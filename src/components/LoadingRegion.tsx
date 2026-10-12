@@ -15,7 +15,7 @@ interface LoadingRegionProps {
  * Reserva el lugar para que la pantalla no salte cuando llegan los datos, y
  * anuncia la carga con texto: la silueta sola no le dice nada a quien no ve.
  */
-export default function LoadingRegion({ label, children, className }: LoadingRegionProps) {
+export function LoadingRegion({ label, children, className }: LoadingRegionProps) {
   return (
     <div role="status" aria-busy="true" aria-live="polite">
       <span className="sr-only">{label}</span>

@@ -1,5 +1,5 @@
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import { cartTotals } from './cartTotals'
 import type { DraftLine } from './useOrderDraft'
 
@@ -19,29 +19,29 @@ interface CartBarProps {
  * quien usa lector de pantalla oye que el plato se agrego.
  * `data-cart-bar` lo usa index.css para subir el boton de accesibilidad.
  */
-export default function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartBarProps) {
-  const { platos, count, total } = cartTotals(lines)
+export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartBarProps) {
+  const { dishes, count, total } = cartTotals(lines)
 
   return (
     <div
       data-cart-bar=""
-      className="fixed inset-x-0 bottom-[calc(4.0625rem+env(safe-area-inset-bottom))] z-30 border-t bg-card px-4 py-2.5 shadow-[0_-6px_16px_-8px_rgb(43_37_33/0.25)] lg:bottom-0 lg:left-60"
+      className="fixed inset-x-0 bottom-[calc(4.0625rem+env(safe-area-inset-bottom))] z-30 border-t bg-card px-4 py-2.5 shadow-bar lg:bottom-0 lg:left-60"
     >
-      <div className="mx-auto flex max-w-[1100px] items-center gap-3">
+      <div className="mx-auto flex max-w-app items-center gap-3">
         <button
           type="button"
           aria-haspopup="dialog"
-          disabled={platos === 0}
+          disabled={dishes === 0}
           onClick={onOpen}
           className="flex min-h-12 flex-1 flex-col justify-center rounded-lg px-2 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default"
         >
           <span aria-live="polite" className="text-sm text-muted-foreground">
-            {platos === 0 ? 'Toca un plato' : `${count} · Ver y anotar`}
+            {dishes === 0 ? 'Toca un plato' : `${count} · Ver y anotar`}
           </span>
           <span className="text-lg font-bold tabular-nums">{total}</span>
         </button>
-        <Button type="button" size="lg" className="h-12 px-4 text-base" disabled={platos === 0 || pending} onClick={onSubmit}>
-          <Icon name="enviar" size={18} />
+        <Button type="button" size="lg" className="px-4" disabled={dishes === 0 || pending} onClick={onSubmit}>
+          <Icon name="send" size={18} />
           <span>{pending ? 'Enviando…' : submitLabel}</span>
         </Button>
       </div>

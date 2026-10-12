@@ -1,8 +1,9 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import PasswordField from '../../components/PasswordField'
-import TextField from '../../components/TextField'
-import { MIN_PASSWORD, soloLetras } from '../../services/fieldRules'
+import { PasswordField } from '@/components/PasswordField'
+import { TextField } from '@/components/TextField'
+import { MIN_PASSWORD } from '@/services/fieldLimits'
+import { onlyLetters } from '@/services/fieldRules'
 
 interface OwnerFieldsProps {
   /** Distingue los `id` cuando hay más de un formulario en la pantalla. */
@@ -13,9 +14,9 @@ interface OwnerFieldsProps {
     readonly password: UseFormRegisterReturn
   }
   readonly errors: {
-    readonly full_name?: string
-    readonly email?: string
-    readonly password?: string
+    readonly full_name?: string | undefined
+    readonly email?: string | undefined
+    readonly password?: string | undefined
   }
 }
 
@@ -24,7 +25,7 @@ interface OwnerFieldsProps {
  * otro más desde la ficha. Recibe los campos ya registrados, así el alta
  * (`owner.full_name`) y «Agregar encargado» (`full_name`) los comparten.
  */
-export default function OwnerFields({ idPrefix, fields, errors }: OwnerFieldsProps) {
+export function OwnerFields({ idPrefix, fields, errors }: OwnerFieldsProps) {
   return (
     <div className="grid items-start gap-5 sm:grid-cols-2">
       <div className="sm:col-span-2">
@@ -32,9 +33,9 @@ export default function OwnerFields({ idPrefix, fields, errors }: OwnerFieldsPro
           id={`${idPrefix}-full-name`}
           label="Nombre completo"
           placeholder="María Quispe Rojas"
-          icon="perfil"
+          icon="profile"
           autoComplete="off"
-          sanitize={soloLetras}
+          sanitize={onlyLetters}
           field={fields.full_name}
           error={errors.full_name}
         />

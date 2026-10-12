@@ -1,10 +1,10 @@
-import { fetchWaiterPerformance, insightsReportQuery } from '../../api/insights'
-import type { InsightsRangeParams, WaiterPerformance } from '../../api/types'
-import DataTable, { type DataColumn } from '../../components/DataTable'
-import SectionCard from '../../components/SectionCard'
-import ReportState from './ReportState'
+import { fetchWaiterPerformance, insightsReportQuery } from '@/api/insights'
+import type { InsightsRangeParams, WaiterPerformance } from '@/api/types'
+import { DataTable, type DataColumn } from '@/components/DataTable'
+import { SectionCard } from '@/components/SectionCard'
+import { ReportState } from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
-import { formatInteger, formatMoney } from '../../services/format'
+import { formatInteger, formatMoney } from '@/services/format'
 
 interface WaitersSectionProps {
   readonly range: InsightsRangeParams
@@ -21,15 +21,16 @@ const COLUMNS: DataColumn<WaiterPerformance>[] = [
 ]
 
 /** Cuánto vendió cada mesero en el período, de mayor a menor. */
-export default function WaitersSection({ range }: WaitersSectionProps) {
+export function WaitersSection({ range }: WaitersSectionProps) {
   const report = useInsightsReport(insightsReportQuery('waiters', range, fetchWaiterPerformance))
 
   return (
     <SectionCard title="Rendimiento por mesero" description="Pedidos que tomó cada uno y se cobraron en el período.">
       <div className={`transition-opacity ${report.refreshing ? 'opacity-50' : ''}`}>
-        <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el rendimiento por mesero.">
+        <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el rendimiento por mesero." loadingLabel="Cargando el rendimiento por mesero…">
           {({ waiters }) => (
             <DataTable
+              label="Rendimiento por mesero"
               columns={COLUMNS}
               data={waiters}
               isLoading={false}

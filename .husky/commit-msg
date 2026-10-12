@@ -19,3 +19,10 @@ if grep -Eiq '^[[:space:]]*co-authored-by:' "$1"; then
   echo "Commit rechazado: RestHub no permite lineas Co-authored-by." >&2
   exit 1
 fi
+
+# Tampoco se admiten marcas de herramientas de IA: ni la línea «Generated
+# with», ni el emoji de robot, ni un Co-authored-by de Claude o Anthropic.
+if ! sh "$(dirname "$0")/attribution.sh" < "$1"; then
+  echo "Commit rechazado: RestHub no permite atribución a una herramienta de IA." >&2
+  exit 1
+fi

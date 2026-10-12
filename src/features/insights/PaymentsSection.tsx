@@ -1,12 +1,12 @@
-import { fetchPaymentMix, insightsReportQuery } from '../../api/insights'
-import type { InsightsRangeParams, PaymentShare } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import BarList from '../../components/charts/BarList'
-import ChartCard from '../../components/charts/ChartCard'
-import DataGrid from '../../components/charts/DataGrid'
-import ReportState from './ReportState'
+import { fetchPaymentMix, insightsReportQuery } from '@/api/insights'
+import type { InsightsRangeParams, PaymentShare } from '@/api/types'
+import { EmptyState } from '@/components/EmptyState'
+import { BarList } from '@/components/charts/BarList'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid } from '@/components/charts/DataGrid'
+import { ReportState } from './ReportState'
 import { useInsightsReport } from './useInsightsReport'
-import { formatInteger, formatMoney, formatPercent, toNumber } from '../../services/format'
+import { formatInteger, formatMoney, formatPercent, toNumber } from '@/services/format'
 
 interface PaymentsSectionProps {
   readonly range: InsightsRangeParams
@@ -23,11 +23,11 @@ const COLUMNS = [
  * Ingresos por medio de pago. Barras y no torta: Yape y efectivo suelen estar
  * cerca, y una torta no deja comparar ángulos parecidos.
  */
-export default function PaymentsSection({ range }: PaymentsSectionProps) {
+export function PaymentsSection({ range }: PaymentsSectionProps) {
   const report = useInsightsReport(insightsReportQuery('payments', range, fetchPaymentMix))
 
   return (
-    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar los medios de pago.">
+    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar los medios de pago." loadingLabel="Cargando los medios de pago…">
       {({ methods, total }) => (
         <ChartCard
           title="Ingresos por medio de pago"

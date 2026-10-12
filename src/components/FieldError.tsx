@@ -1,7 +1,7 @@
 interface FieldErrorProps {
   /** Para que el campo lo anuncie con `aria-describedby`. */
   readonly id?: string
-  readonly message?: string
+  readonly message?: string | undefined
 }
 
 /**
@@ -10,7 +10,7 @@ interface FieldErrorProps {
  * Existe para que cada formulario no repita el mismo ternario por campo: eran
  * cinco condicionales por pantalla, y la regla de complejidad los contaba.
  */
-export default function FieldError({ id, message }: FieldErrorProps) {
+export function FieldError({ id, message }: FieldErrorProps) {
   if (message === undefined) {
     return null
   }

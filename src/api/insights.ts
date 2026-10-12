@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api, SLOW_TIMEOUT_MS } from '../services/api'
+import { SLOW_TIMEOUT_MS } from '@/services/api'
+import { send } from './client'
 import type {
   AiDecisionPage,
   AiDecisionParams,
@@ -22,10 +23,10 @@ import type {
 // Indicadores del negocio y decisiones de la IA. Son solo del encargado
 // (`insights.read`): un mesero recibe 403.
 
-export const insightsQueryKey = ['insights'] as const
+const insightsQueryKey = ['insights'] as const
 
 /** Las consultas de un reporte con rango de fechas. Cambiar el rango es otra consulta. */
-export function insightsReportKey(report: string, range: InsightsRangeParams) {
+function insightsReportKey(report: string, range: InsightsRangeParams) {
   return [...insightsQueryKey, report, range] as const
 }
 
@@ -38,17 +39,18 @@ export function insightsReportQuery<T>(
   return queryOptions({ queryKey: insightsReportKey(report, range), queryFn: () => fetcher(range) })
 }
 
-export const restockQueryKey = [...insightsQueryKey, 'restock'] as const
+const restockQueryKey = [...insightsQueryKey, 'restock'] as const
 export const aiDecisionsQueryKey = [...insightsQueryKey, 'ai-decisions'] as const
 export const orderNotesQueryKey = [...insightsQueryKey, 'order-notes'] as const
+const lowStockQueryKey = [...insightsQueryKey, 'low-stock'] as const
 
-async function report<T>(path: string, range: InsightsRangeParams, extra = {}): Promise<T> {
-  const { data } = await api.get<T>(`/insights${path}`, { params: { ...range, ...extra } })
-  return data
+/** La raiz de las claves de un reporte del panel, para invalidarlos todos a la vez. */
+export function insightsReportRootKey(report: string) {
+  return [...insightsQueryKey, report] as const
 }
 
 export function fetchSalesSummary(range: InsightsRangeParams): Promise<SalesSummary> {
-  return report('/summary', range)
+  return send((client) => client.GET('/api/v1/insights/summary', { params: { query: range } }))
 }
 
 /** El resumen del período, lo primero que muestra el panel. */
@@ -57,76 +59,90 @@ export function salesSummaryQuery(range: InsightsRangeParams) {
 }
 
 export function fetchDailySales(range: InsightsRangeParams): Promise<DailySales> {
-  return report('/sales/daily', range)
+  return send((client) => client.GET('/api/v1/insights/sales/daily', { params: { query: range } }))
 }
 
 export function fetchHourlySales(range: InsightsRangeParams): Promise<HourlySales> {
-  return report('/sales/hourly', range)
+  return send((client) => client.GET('/api/v1/insights/sales/hourly', { params: { query: range } }))
 }
 
 export function fetchPaymentMix(range: InsightsRangeParams): Promise<PaymentMix> {
-  return report('/payments', range)
+  return send((client) => client.GET('/api/v1/insights/payments', { params: { query: range } }))
 }
 
 export function fetchWaiterPerformance(range: InsightsRangeParams): Promise<WaiterPerformanceList> {
-  return report('/waiters', range)
+  return send((client) => client.GET('/api/v1/insights/waiters', { params: { query: range } }))
 }
 
 export function fetchTopDishes(range: InsightsRangeParams, limit = 10): Promise<TopDishes> {
-  return report('/dishes/top', range, { limit })
+  return send((client) => client.GET('/api/v1/insights/dishes/top', { params: { query: { ...range, limit } } }))
 }
 
 export function fetchDishMargins(range: InsightsRangeParams): Promise<DishMargins> {
-  return report('/dishes/margins', range)
+  return send((client) => client.GET('/api/v1/insights/dishes/margins', { params: { query: range } }))
 }
 
 export function fetchWasteReport(range: InsightsRangeParams): Promise<WasteReport> {
-  return report('/waste', range)
+  return send((client) => client.GET('/api/v1/insights/waste', { params: { query: range } }))
 }
 
 /** Los insumos bajo su mínimo ahora mismo. No depende del rango. */
-export async function fetchLowStock(): Promise<LowStockItem[]> {
-  const { data } = await api.get<LowStockItem[]>('/insights/low-stock')
-  return data
+async function fetchLowStock(): Promise<LowStockItem[]> {
+  return send((client) => client.GET('/api/v1/insights/low-stock'))
 }
 
 /** Clasifica con la IA el motivo de las mermas que aún no lo tienen. */
 export async function classifyWaste(): Promise<ClassifyWasteResult> {
-  const { data } = await api.post<ClassifyWasteResult>('/insights/waste/classify', undefined, { timeout: SLOW_TIMEOUT_MS })
-  return data
+  return send((client) => client.POST('/api/v1/insights/waste/classify'), { timeout: SLOW_TIMEOUT_MS })
 }
 
 /** La última recomendación guardada, o una vista previa por reglas si nunca se pidió. */
-export async function fetchRestock(): Promise<RestockReport> {
-  const { data } = await api.get<RestockReport>('/insights/restock')
-  return data
+async function fetchRestock(): Promise<RestockReport> {
+  return send((client) => client.GET('/api/v1/insights/restock'))
 }
 
 /** Decide de nuevo cada insumo y lo guarda. Con Jev puede tardar varios segundos. */
 export async function refreshRestock(): Promise<RestockReport> {
-  const { data } = await api.post<RestockReport>('/insights/restock/refresh', undefined, { timeout: SLOW_TIMEOUT_MS })
-  return data
+  return send((client) => client.POST('/api/v1/insights/restock/refresh'), { timeout: SLOW_TIMEOUT_MS })
 }
 
-export async function fetchAiDecisions(params: AiDecisionParams): Promise<AiDecisionPage> {
-  const { data } = await api.get<AiDecisionPage>('/insights/ai-decisions', { params })
-  return data
+async function fetchAiDecisions(params: AiDecisionParams): Promise<AiDecisionPage> {
+  return send((client) => client.GET('/api/v1/insights/ai-decisions', { params: { query: params } }))
 }
 
 /** El tope de pedidos por consulta que acepta el servidor. */
 export const MAX_ORDER_NOTES_ORDERS = 100
 
 /** Cómo leyó la IA las notas de esos pedidos: alergia, preferencia, prioridad u otro. */
-export async function fetchOrderNotes(orderIds: readonly number[]): Promise<OrderNotesReport> {
-  // FastAPI espera la lista como `order_ids=1&order_ids=2`, sin corchetes.
-  const { data } = await api.get<OrderNotesReport>('/insights/order-notes', {
-    params: { order_ids: orderIds.slice(0, MAX_ORDER_NOTES_ORDERS) },
-    paramsSerializer: { indexes: null },
-  })
-  return data
+async function fetchOrderNotes(orderIds: readonly number[]): Promise<OrderNotesReport> {
+  // FastAPI espera la lista como `order_ids=1&order_ids=2`, sin corchetes: la
+  // forma por defecto del cliente.
+  return send((client) =>
+    client.GET('/api/v1/insights/order-notes', {
+      params: { query: { order_ids: orderIds.slice(0, MAX_ORDER_NOTES_ORDERS) } },
+    }),
+  )
 }
 
 /** Clasifica las notas pendientes del restaurante (lo normal es que ocurra al enviar a cocina). */
 export async function classifyOrderNotes(): Promise<void> {
-  await api.post('/insights/order-notes/classify', undefined, { timeout: SLOW_TIMEOUT_MS })
+  await send((client) => client.POST('/api/v1/insights/order-notes/classify'), { timeout: SLOW_TIMEOUT_MS })
+}
+
+export const lowStockQuery = queryOptions({ queryKey: lowStockQueryKey, queryFn: fetchLowStock })
+
+export const restockQuery = queryOptions({ queryKey: restockQueryKey, queryFn: fetchRestock })
+
+export function aiDecisionsQuery(params: AiDecisionParams) {
+  return queryOptions({
+    queryKey: [...aiDecisionsQueryKey, params],
+    queryFn: () => fetchAiDecisions(params),
+  })
+}
+
+export function orderNotesQuery(orderIds: readonly number[]) {
+  return queryOptions({
+    queryKey: [...orderNotesQueryKey, orderIds],
+    queryFn: () => fetchOrderNotes(orderIds),
+  })
 }

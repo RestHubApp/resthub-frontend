@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import FieldError from './FieldError'
-import FieldHint from './FieldHint'
-import FieldIcon from './FieldIcon'
+import { FieldError } from './FieldError'
+import { FieldHint } from './FieldHint'
+import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
 import type { IconName } from './icons'
 import { Label } from './ui/label'
@@ -15,7 +15,7 @@ interface SelectFieldProps {
   /** Lo que devuelve `register(...)` de react-hook-form. */
   readonly field: UseFormRegisterReturn
   readonly icon?: IconName
-  readonly error?: string
+  readonly error?: string | undefined
   readonly hint?: string
   /** Texto de la opcion vacia. Sin el, la lista no ofrece "ninguna". */
   readonly placeholder?: string
@@ -29,7 +29,7 @@ interface SelectFieldProps {
  * react-hook-form igual que un campo de texto, y en el celular abre la lista
  * del sistema, que es la que la persona ya sabe usar.
  */
-export default function SelectField({
+export function SelectField({
   id,
   label,
   field,
@@ -47,7 +47,7 @@ export default function SelectField({
       <FieldIcon icon={icon}>
         <NativeSelect
           id={id}
-          className="w-full [&_select]:h-10"
+          className="w-full"
           aria-invalid={error !== undefined}
           aria-describedby={ids.describedBy}
           {...field}

@@ -1,4 +1,4 @@
-import { DEFAULT_TIME_ZONE } from '../../services/format'
+import { DEFAULT_TIME_ZONE } from '@/services/format'
 
 /**
  * La zona de las horas del área de plataforma.

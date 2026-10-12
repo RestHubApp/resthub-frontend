@@ -8,12 +8,26 @@ import { RouterProvider } from 'react-router/dom'
 // Primero: al cargarse elige el almacenamiento de la pestaña y saca de la barra
 // el código de vista previa, antes de que el router lea la dirección.
 import './services/tabStorage'
-import router from './router'
+// Pone el tema, la letra y el tamaño de la cuenta en <html> antes de que React
+// pinte: así la página no sale con un tema y salta a otro.
+import '@/store/appearance'
+import { router } from '@/router/routes'
 import { logger, logUncaughtErrors } from './services/logger'
 import { queryClient } from './services/queryClient'
 import './index.css'
 
 logUncaughtErrors()
+
+// Con backend en otro origen, se inicia DNS/TLS mientras React monta la
+// pantalla. No se emite un preconnect vacío en desarrollo (API mismo origen).
+const apiOrigin = import.meta.env.VITE_API_URL
+if (apiOrigin !== undefined && apiOrigin !== '' && new URL(apiOrigin).origin !== location.origin) {
+  const preconnect = document.createElement('link')
+  preconnect.rel = 'preconnect'
+  preconnect.href = new URL(apiOrigin).origin
+  preconnect.crossOrigin = 'anonymous'
+  document.head.append(preconnect)
+}
 
 const container = document.getElementById('root')
 

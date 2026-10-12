@@ -11,7 +11,7 @@ interface ReadOnlyFieldProps {
  * tocarlo, el lector de pantalla lo anuncia como "no disponible" sin decir por
  * que, y react-hook-form no envia su valor.
  */
-export default function ReadOnlyField({ label, value, hint }: ReadOnlyFieldProps) {
+export function ReadOnlyField({ label, value, hint }: ReadOnlyFieldProps) {
   return (
     <div className="flex flex-col gap-2">
       <p className="m-0 text-sm font-medium">{label}</p>

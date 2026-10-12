@@ -1,13 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { cashSessionQueryKey, fetchCashSession } from '../../api/cash'
-import type { CashSession } from '../../api/types'
-import EmptyState from '../../components/EmptyState'
-import FormDialog from '../../components/FormDialog'
-import FormMessage from '../../components/FormMessage'
-import { errorMessage } from '../../services/api'
-import { formatMoney } from '../../services/format'
-import CashSummaryView from './CashSummaryView'
+import { cashSessionQuery } from '@/api/cash'
+import type { CashSession } from '@/api/types'
+import { FormDialog } from '@/components/FormDialog'
+import { formatMoney } from '@/services/format'
+import { CashSessionContent } from './CashSessionContent'
 
 interface CashSessionDialogProps {
   /** El turno a mostrar; `null` cierra la ventana. */
@@ -16,41 +13,33 @@ interface CashSessionDialogProps {
 }
 
 function countedLabel(session: CashSession | undefined): string | undefined {
-  const contado = session?.counted_cash ?? null
-  if (contado === null) {
+  const cash = session?.counted_cash ?? null
+  if (cash === null) {
     return undefined
   }
-  return `Contado ${formatMoney(contado)} · diferencia ${formatMoney(session?.difference ?? '0')}`
+  return `Contado ${formatMoney(cash)} · diferencia ${formatMoney(session?.difference ?? '0')}`
 }
 
 /** El arqueo firmado de un turno ya cerrado. */
-export default function CashSessionDialog({ sessionId, onClose }: CashSessionDialogProps) {
-  const turno = useQuery({
-    queryKey: cashSessionQueryKey(sessionId ?? 0),
-    queryFn: () => fetchCashSession(sessionId ?? 0),
-    enabled: sessionId !== null,
-  })
+export function CashSessionDialog({ sessionId, onClose }: CashSessionDialogProps) {
+  const shift = useQuery({ ...cashSessionQuery(sessionId ?? 0), enabled: sessionId !== null })
   if (sessionId === null) {
     return null
   }
-  const datos = turno.data
 
   return (
     <FormDialog
       open
       size="lg"
-      onOpenChange={(abierto) => {
-        if (!abierto) {
+      onOpenChange={(open) => {
+        if (!open) {
           onClose()
         }
       }}
       title={`Turno de caja ${String(sessionId)}`}
-      description={countedLabel(datos)}
+      description={countedLabel(shift.data)}
     >
-      {turno.isPending ? <EmptyState title="Cargando el arqueo…" /> : null}
-      {turno.isError ? <FormMessage tone="error">{errorMessage(turno.error, 'No se pudo cargar el turno.')}</FormMessage> : null}
-      {datos?.summary ? <CashSummaryView session={datos} summary={datos.summary} /> : null}
-      {datos?.closing_notes ? <p className="m-0 text-sm">Nota: {datos.closing_notes}</p> : null}
+      <CashSessionContent shift={shift} />
     </FormDialog>
   )
 }

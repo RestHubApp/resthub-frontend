@@ -1,11 +1,11 @@
-import type { OrderResponse } from '../../../api/types'
-import OrderStatusBadge from '../OrderStatusBadge'
-import { formatMoney, formatTime } from '../../../services/format'
-import { useTimeZone } from '../../../store/session'
-import AllergyAlert from '../AllergyAlert'
-import ItemNote from '../ItemNote'
-import { allergyIn, type FlagFor } from '../noteFlags'
-import { dishCount, orderPlace } from '../orderLabels'
+import type { OrderResponse } from '@/api/types'
+import { OrderStatusBadge } from '@/features/orders/OrderStatusBadge'
+import { formatMoney, formatTime } from '@/services/format'
+import { useTimeZone } from '@/store/session'
+import { AllergyAlert } from '@/features/orders/AllergyAlert'
+import { ItemNote } from '@/features/orders/ItemNote'
+import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
+import { dishCount, orderPlace } from '@/features/orders/orderLabels'
 
 interface OrderHeaderProps {
   readonly order: OrderResponse
@@ -13,12 +13,12 @@ interface OrderHeaderProps {
 }
 
 /** Numero, lugar, estado, mesero y total: lo que se lee primero de un pedido. */
-export default function OrderHeader({ order, flagFor }: OrderHeaderProps) {
+export function OrderHeader({ order, flagFor }: OrderHeaderProps) {
   const timeZone = useTimeZone()
   return (
     <header className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-primary sm:text-3xl">
+        <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-foreground sm:text-3xl">
           Pedido #{order.number}
         </h1>
         <OrderStatusBadge status={order.status} />

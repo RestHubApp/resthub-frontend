@@ -1,98 +1,112 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+/**
+ * @jest-environment ./jest/nodeEnvironment.cjs
+ */
+// Simula una pestaña sin DOM (location, window y almacenamiento de prueba),
+// como corría con Vitest: en jsdom, `window.location` no se puede reemplazar.
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
+import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
-import type * as Auth from '../../api/auth'
+import { HttpResponse, http } from 'msw'
 
-const { exchangePreviewCode } = vi.hoisted(() => ({ exchangePreviewCode: vi.fn() }))
+import { mswServer } from '#jest/mswServer'
 
-vi.mock('../../api/auth', async (importOriginal) => ({
-  ...(await importOriginal<typeof Auth>()),
-  exchangePreviewCode,
-}))
+// Cada canje que llega al servidor: el cuerpo que salió.
+const exchanges: unknown[] = []
 
-function memoria(inicial: Record<string, string> = {}) {
-  const datos = new Map(Object.entries(inicial))
+function previewServerCuts(): void {
+  mswServer.use(
+    http.post('*/api/v1/auth/preview', async ({ request }) => {
+      exchanges.push(await request.json())
+      return HttpResponse.error()
+    }),
+  )
+}
+
+function memory(initial: Record<string, string> = {}) {
+  const data = new Map(Object.entries(initial))
   return {
-    getItem: (clave: string) => datos.get(clave) ?? null,
-    setItem: (clave: string, valor: string) => {
-      datos.set(clave, valor)
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      data.set(key, value)
     },
-    removeItem: (clave: string) => {
-      datos.delete(clave)
+    removeItem: (key: string) => {
+      data.delete(key)
     },
-    datos,
+    data,
   }
 }
 
-interface Carga {
+interface Load {
   /** La dirección con que se cargó la página: decide si la pestaña es de vista previa. */
-  readonly cargadaEn: string
+  readonly loadedIn: string
   /** Adónde se llegó navegando dentro de la aplicación antes de correr el `loader`. */
-  readonly navegoA?: string
+  readonly browsedTo?: string
 }
 
 // Cada prueba es una página recién cargada: la pestaña elige su almacenamiento al importar.
-async function pagina({ cargadaEn, navegoA }: Carga) {
-  const location = { pathname: '', search: '', hash: '', replace: vi.fn(), reload: vi.fn() }
+async function page({ loadedIn, browsedTo }: Load) {
+  const location = { origin: 'http://localhost', pathname: '', search: '', hash: '', replace: jest.fn(), reload: jest.fn() }
   const ir = (url: string) => {
     const { pathname, search, hash } = new URL(url, 'http://localhost')
     Object.assign(location, { pathname, search, hash })
   }
   // Como el navegador: reescribir el historial cambia la dirección sin cargar la página.
-  const history = { state: null, replaceState: vi.fn((_: unknown, __: string, url: string) => {
+  const history = { state: null, replaceState: jest.fn((_: unknown, _title: string, url: string) => {
       ir(url)
     }),
   }
-  ir(cargadaEn)
-  vi.stubGlobal('location', location)
-  vi.stubGlobal('history', history)
-  vi.stubGlobal('window', { location, history, addEventListener: vi.fn() })
-  vi.stubGlobal('localStorage', memoria())
-  vi.stubGlobal('sessionStorage', memoria())
-  vi.resetModules()
-  exchangePreviewCode.mockReset()
+  ir(loadedIn)
+  stubGlobal('location', location)
+  stubGlobal('history', history)
+  stubGlobal('window', { location, history, addEventListener: jest.fn() })
+  stubGlobal('localStorage', memory())
+  stubGlobal('sessionStorage', memory())
+  jest.resetModules()
+  exchanges.length = 0
   const modulo = await import('./previewEntry')
-  if (navegoA !== undefined) {
-    ir(navegoA)
+  if (browsedTo !== undefined) {
+    ir(browsedTo)
   }
   return { ...modulo, location, history }
 }
 
 afterEach(() => {
-  vi.unstubAllGlobals()
+  unstubAllGlobals()
 })
 
 describe('previewEntryLoader', () => {
   it('si se llegó navegando desde una pestaña normal, carga una vez la ruta de canje de la aplicación', async () => {
-    const { previewEntryLoader, location } = await pagina({ cargadaEn: '/pedidos', navegoA: '/Vista-Previa#codigo=abc' })
+    const { previewEntryLoader, location } = await page({ loadedIn: '/pedidos', browsedTo: '/Vista-Previa#codigo=abc' })
 
     expect(await previewEntryLoader()).toBe('reloading')
 
     expect(location.reload).not.toHaveBeenCalled()
-    expect(location.replace).toHaveBeenCalledExactlyOnceWith('/vista-previa#codigo=abc')
-    expect(exchangePreviewCode).not.toHaveBeenCalled()
+    expect(location.replace).toHaveBeenCalledTimes(1)
+    expect(location.replace).toHaveBeenCalledWith('/vista-previa#codigo=abc')
+    expect(exchanges).toEqual([])
   })
 
   it('una pestaña cargada en la ruta escrita con mayúsculas o escapes canjea sin recargar', async () => {
-    for (const ruta of ['/Vista-Previa', '/vista%2Dprevia/']) {
-      const { previewEntryLoader, location } = await pagina({ cargadaEn: `${ruta}#codigo=abc` })
-      exchangePreviewCode.mockRejectedValue(new Error('sin red'))
+    for (const route of ['/Vista-Previa', '/vista%2Dprevia/']) {
+      const { previewEntryLoader, location } = await page({ loadedIn: `${route}#codigo=abc` })
+      previewServerCuts()
 
       expect(await previewEntryLoader()).toBe('offline')
 
       expect(location.reload).not.toHaveBeenCalled()
       expect(location.replace).not.toHaveBeenCalled()
-      expect(exchangePreviewCode).toHaveBeenCalledExactlyOnceWith({ code: 'abc' })
+      expect(exchanges).toEqual([{ code: 'abc' }])
     }
   })
 
   it('el código ya salió de la barra al cargar la página y el canje lo toma de la memoria', async () => {
-    const { previewEntryLoader, location } = await pagina({ cargadaEn: '/vista-previa#codigo=abc' })
+    const { previewEntryLoader, location } = await page({ loadedIn: '/vista-previa#codigo=abc' })
     // Antes de bajar la pantalla de canje: si su archivo no llegara, el código ya no está.
     expect(location.hash).toBe('')
-    exchangePreviewCode.mockRejectedValue(new Error('sin red'))
+    previewServerCuts()
 
     await previewEntryLoader()
 
-    expect(exchangePreviewCode).toHaveBeenCalledExactlyOnceWith({ code: 'abc' })
+    expect(exchanges).toEqual([{ code: 'abc' }])
   })
 })

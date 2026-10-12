@@ -1,10 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-import { dishCostsQueryKey } from '../../api/inventory'
-import { menuQueryKey } from '../../api/menu'
-import type { MenuResponse } from '../../api/types'
-import { errorMessage } from '../../services/api'
-import { useNotifications } from '../../store/notifications'
+import { dishCostsQueryKey } from '@/api/inventory'
+import { menuQueryKey } from '@/api/menu'
+import type { MenuResponse } from '@/api/types'
+import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 import { MENU_KEY } from './useMenuData'
 
 interface MenuAction<TResult> {
@@ -23,23 +20,17 @@ interface MenuAction<TResult> {
  * ejemplo), el aviso muestra su explicación tal cual.
  */
 export function useMenuAction<TResult>({ send, updateCache, failure, success }: MenuAction<TResult>) {
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-
-  return useMutation({
+  return useNotifiedMutation({
     mutationFn: send,
-    onSuccess: (resultado) => {
-      if (updateCache !== undefined) {
-        queryClient.setQueryData(MENU_KEY, (menu) => menu && updateCache(menu, resultado))
-      }
-      void queryClient.invalidateQueries({ queryKey: menuQueryKey })
-      void queryClient.invalidateQueries({ queryKey: dishCostsQueryKey })
-      if (success !== undefined) {
-        push({ tone: 'info', message: success })
-      }
-    },
-    onError: (error) => {
-      push({ tone: 'warning', message: errorMessage(error, failure) })
-    },
+    failure,
+    ...(success === undefined ? {} : { success: () => success }),
+    ...(updateCache === undefined
+      ? {}
+      : {
+          updateCache: (queryClient, result: TResult) => {
+            queryClient.setQueryData(MENU_KEY, (menu) => menu && updateCache(menu, result))
+          },
+        }),
+    invalidate: [menuQueryKey, dishCostsQueryKey],
   })
 }

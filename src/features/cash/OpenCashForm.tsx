@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-import { openCash } from '../../api/cash'
-import type { OpenCashRequest } from '../../api/types'
-import Icon from '../../components/Icon'
-import TextField from '../../components/TextField'
-import { Button } from '../../components/ui/button'
-import { onSubmit } from '../../hooks/formSubmit'
-import { formatMoney } from '../../services/format'
+import { openCash } from '@/api/cash'
+import type { OpenCashRequest } from '@/api/types'
+import { Icon } from '@/components/Icon'
+import { TextField } from '@/components/TextField'
+import { Button } from '@/components/ui/button'
+import { onSubmit } from '@/hooks/formSubmit'
+import { formatMoney } from '@/services/format'
 import { cashAmountForApi, MAX_CASH_NOTES, openCashSchema, type OpenCashValues } from './cashSchema'
 import { useCashMutation } from './useCashMutation'
 
@@ -16,12 +16,12 @@ import { useCashMutation } from './useCashMutation'
  *
  * Sin caja abierta nadie puede cobrar, así que es lo primero del día.
  */
-export default function OpenCashForm() {
+export function OpenCashForm() {
   const { register, handleSubmit, formState } = useForm<OpenCashValues>({
     resolver: zodResolver(openCashSchema),
     defaultValues: { opening_amount: '', notes: '' },
   })
-  const abrir = useCashMutation({
+  const open = useCashMutation({
     mutationFn: (payload: OpenCashRequest) => openCash(payload),
     success: (session) => `Caja abierta con ${formatMoney(session.opening_amount)}. Ya se puede cobrar.`,
     failure: 'No se pudo abrir la caja.',
@@ -32,8 +32,8 @@ export default function OpenCashForm() {
       noValidate
       className="flex flex-col gap-4"
       onSubmit={onSubmit(
-        handleSubmit((valores) => {
-          abrir.mutate({ opening_amount: cashAmountForApi(valores.opening_amount), notes: valores.notes })
+        handleSubmit((values) => {
+          open.mutate({ opening_amount: cashAmountForApi(values.opening_amount), notes: values.notes })
         }),
       )}
     >
@@ -41,11 +41,11 @@ export default function OpenCashForm() {
         <TextField
           id="caja-inicial"
           label="Efectivo inicial"
-          icon="pago"
+          icon="payment"
           inputMode="decimal"
           autoComplete="off"
           placeholder="150.00"
-          hint="El sencillo con que arranca el cajón."
+          hint="El sencillo con que arranca la caja."
           field={register('opening_amount')}
           error={formState.errors.opening_amount?.message}
         />
@@ -59,9 +59,9 @@ export default function OpenCashForm() {
         />
       </div>
       <div className="flex justify-end">
-        <Button type="submit" size="lg" variant="success" className="h-11 px-5" disabled={abrir.isPending}>
-          <Icon name="caja" size={18} />
-          <span>{abrir.isPending ? 'Abriendo…' : 'Abrir caja'}</span>
+        <Button type="submit" className="px-5" disabled={open.isPending}>
+          <Icon name="cashRegister" size={18} />
+          <span>{open.isPending ? 'Abriendo…' : 'Abrir caja'}</span>
         </Button>
       </div>
     </form>

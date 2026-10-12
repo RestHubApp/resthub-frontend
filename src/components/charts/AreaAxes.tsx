@@ -1,5 +1,5 @@
 import { type AreaGeometry, type SeriesPoint } from './areaGeometry'
-import { spreadIndices } from './scale'
+import { spreadIndexes } from './scale'
 
 interface AreaAxesProps {
   readonly geometry: AreaGeometry
@@ -9,7 +9,7 @@ interface AreaAxesProps {
   readonly maxXLabels: number
 }
 
-const TICK_TEXT = 'fill-muted-foreground text-[11px] tabular-nums'
+const TICK_TEXT = 'fill-muted-foreground text-2xs tabular-nums'
 
 // Las fechas de los extremos se alinean hacia adentro para no salirse del SVG.
 function anchorFor(index: number, length: number): 'start' | 'middle' | 'end' {
@@ -20,7 +20,7 @@ function anchorFor(index: number, length: number): 'start' | 'middle' | 'end' {
 }
 
 /** La grilla horizontal, las marcas del eje de valores y las fechas de abajo. */
-export default function AreaAxes({ geometry, points, formatTick, maxXLabels }: AreaAxesProps) {
+export function AreaAxes({ geometry, points, formatTick, maxXLabels }: AreaAxesProps) {
   const { ticks, plotLeft, plotRight, plotBottom, x, y } = geometry
 
   return (
@@ -41,7 +41,7 @@ export default function AreaAxes({ geometry, points, formatTick, maxXLabels }: A
           </text>
         </g>
       ))}
-      {spreadIndices(points.length, maxXLabels).map((index) => (
+      {spreadIndexes(points.length, maxXLabels).map((index) => (
         <text
           key={points[index]?.key}
           x={x(index)}

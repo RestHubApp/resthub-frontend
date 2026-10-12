@@ -1,16 +1,16 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import TextField from '../../../components/TextField'
-import { Button } from '../../../components/ui/button'
-import { formatCents } from '../../../services/format'
+import { TextField } from '@/components/TextField'
+import { Button } from '@/components/ui/button'
+import { formatCents } from '@/services/format'
 
 interface TipFieldProps {
   readonly field: UseFormRegisterReturn
-  readonly error?: string
+  readonly error?: string | undefined
   readonly onQuick: (amount: string) => void
 }
 
-const ATAJOS = [2, 5, 10] as const
+const SHORTCUTS = [2, 5, 10] as const
 const CENTS = 100
 
 /**
@@ -19,13 +19,13 @@ const CENTS = 100
  * Importa en especial con Yape o tarjeta: entra a la cuenta del local y el
  * cierre de caja dice cuánto hay que darle a cada mesero.
  */
-export default function TipField({ field, error, onQuick }: TipFieldProps) {
+export function TipField({ field, error, onQuick }: TipFieldProps) {
   return (
     <div className="flex flex-col gap-2">
       <TextField
         id="propina"
         label="Propina (opcional)"
-        icon="propina"
+        icon="tip"
         inputMode="decimal"
         autoComplete="off"
         placeholder="0.00"
@@ -34,16 +34,16 @@ export default function TipField({ field, error, onQuick }: TipFieldProps) {
         error={error}
       />
       <div role="group" aria-label="Propinas rápidas" className="grid grid-cols-4 gap-2">
-        <Button type="button" variant="outline" className="h-10" onClick={() => {
+        <Button type="button" variant="outline" onClick={() => {
           onQuick('')
         }}>
           Sin propina
         </Button>
-        {ATAJOS.map((monto) => (
-          <Button key={monto} type="button" variant="outline" className="h-10" onClick={() => {
-            onQuick(String(monto))
+        {SHORTCUTS.map((amount) => (
+          <Button key={amount} type="button" variant="outline" onClick={() => {
+            onQuick(String(amount))
           }}>
-            {formatCents(monto * CENTS)}
+            {formatCents(amount * CENTS)}
           </Button>
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from '@jest/globals'
 
 import { followSlug, isValidSlug, MAX_SLUG, sanitizeSlugInput, suggestSlug } from './slug'
 
@@ -13,9 +13,9 @@ describe('suggestSlug', () => {
 
   it('no deja guiones en los extremos ni pasa del largo máximo', () => {
     expect(suggestSlug('¡¡Sabor!!')).toBe('sabor')
-    const largo = suggestSlug(`${'a'.repeat(MAX_SLUG - 1)} bb`)
-    expect(largo.length).toBeLessThanOrEqual(MAX_SLUG)
-    expect(largo.endsWith('-')).toBe(false)
+    const long = suggestSlug(`${'a'.repeat(MAX_SLUG - 1)} bb`)
+    expect(long.length).toBeLessThanOrEqual(MAX_SLUG)
+    expect(long.endsWith('-')).toBe(false)
   })
 
   it('lo que sugiere siempre es válido, salvo que el nombre no tenga letras ni números', () => {
@@ -31,8 +31,8 @@ describe('isValidSlug', () => {
   })
 
   it('rechaza mayúsculas, tildes, espacios y guiones en los extremos o dobles', () => {
-    for (const malo of ['La-Esquina', 'café', 'la esquina', '-esquina', 'esquina-', 'la--esquina', '']) {
-      expect(isValidSlug(malo)).toBe(false)
+    for (const bad of ['La-Esquina', 'café', 'la esquina', '-esquina', 'esquina-', 'la--esquina', '']) {
+      expect(isValidSlug(bad)).toBe(false)
     }
     expect(isValidSlug('a'.repeat(MAX_SLUG + 1))).toBe(false)
   })

@@ -4,10 +4,11 @@
 // sigue siendo quien decide.
 
 export const MAX_SLUG = 60
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
 
-function sinTildes(valor: string): string {
-  return valor.normalize('NFD').replace(/\p{M}/gu, '')
+function withoutAccents(value: string): string {
+  return value.normalize('NFD').replaceAll(/\p{M}/gu, '')
 }
 
 /**
@@ -17,9 +18,9 @@ function sinTildes(valor: string): string {
  * los extremos sobra a lo más uno.
  */
 export function suggestSlug(name: string): string {
-  return sinTildes(name)
+  return withoutAccents(name)
     .toLowerCase()
-    .replace(/[^a-z0-9]+/gu, '-')
+    .replaceAll(/[^a-z0-9]+/gu, '-')
     .replace(/^-/u, '')
     .slice(0, MAX_SLUG)
     .replace(/-$/u, '')
@@ -32,11 +33,11 @@ export function suggestSlug(name: string): string {
  * palabra siguiente; la regla del formulario lo rechaza si queda así.
  */
 export function sanitizeSlugInput(value: string): string {
-  return sinTildes(value)
+  return withoutAccents(value)
     .toLowerCase()
-    .replace(/\s+/gu, '-')
-    .replace(/[^a-z0-9-]/gu, '')
-    .replace(/-{2,}/gu, '-')
+    .replaceAll(/\s+/gu, '-')
+    .replaceAll(/[^a-z0-9-]/gu, '')
+    .replaceAll(/-{2,}/gu, '-')
 }
 
 export function isValidSlug(value: string): boolean {
@@ -51,6 +52,6 @@ export function isValidSlug(value: string): boolean {
  * respeta.
  */
 export function followSlug(previousName: string, nextName: string, currentSlug: string): string {
-  const siguiendo = currentSlug === '' || currentSlug === suggestSlug(previousName)
-  return siguiendo ? suggestSlug(nextName) : currentSlug
+  const isFollowing = currentSlug === '' || currentSlug === suggestSlug(previousName)
+  return isFollowing ? suggestSlug(nextName) : currentSlug
 }

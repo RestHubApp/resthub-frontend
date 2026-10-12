@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { aiDecisionsQueryKey, classifyWaste, insightsQueryKey } from '../../api/insights'
+import { aiDecisionsQueryKey, classifyWaste, insightsReportRootKey } from '@/api/insights'
 
 export const WASTE_REPORT = 'waste'
 
@@ -11,7 +11,7 @@ export function useClassifyWaste() {
     mutationFn: classifyWaste,
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: [...insightsQueryKey, WASTE_REPORT] }),
+        queryClient.invalidateQueries({ queryKey: insightsReportRootKey(WASTE_REPORT) }),
         queryClient.invalidateQueries({ queryKey: aiDecisionsQueryKey }),
       ])
     },

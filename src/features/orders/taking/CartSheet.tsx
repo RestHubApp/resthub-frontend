@@ -1,7 +1,7 @@
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from '../../../components/ui/sheet'
-import CartLine from './CartLine'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { CartLineList } from './CartLineList'
 import { cartTotals } from './cartTotals'
 import type { DraftLine } from './useOrderDraft'
 
@@ -23,7 +23,7 @@ interface CartSheetProps {
  * Sube desde abajo, como el resto de lo que se abre en el celular, y deja el
  * boton de enviar al alcance del pulgar al pie.
  */
-export default function CartSheet({
+export function CartSheet({
   open,
   onOpenChange,
   title,
@@ -46,36 +46,19 @@ export default function CartSheet({
         <SheetDescription className="m-0">
           Revisa las cantidades y anota lo que la cocina tiene que saber.
         </SheetDescription>
-        {lines.length === 0 ? (
-          <p className="m-0 py-6 text-center text-muted-foreground">Todavía no elegiste platos.</p>
-        ) : (
-          <ul className="m-0 flex list-none flex-col gap-4 p-0">
-            {lines.map((line) => (
-              <CartLine
-                key={line.lineKey}
-                line={line}
-                onQuantity={(cantidad) => {
-                  onQuantity(line.lineKey, cantidad)
-                }}
-                onNotes={(nota) => {
-                  onNotes(line.lineKey, nota)
-                }}
-              />
-            ))}
-          </ul>
-        )}
+        <CartLineList lines={lines} onQuantity={onQuantity} onNotes={onNotes} />
         <div className="flex items-baseline justify-between border-t pt-3">
           <span className="text-muted-foreground">{count}</span>
           <span className="text-xl font-bold tabular-nums">{total}</span>
         </div>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button type="button" variant="outline" size="lg" className="h-12 px-4" onClick={() => {
+          <Button type="button" variant="outline" size="lg" className="px-4" onClick={() => {
             onOpenChange(false)
           }}>
             Seguir eligiendo
           </Button>
-          <Button type="button" size="lg" className="h-12 px-5 text-base" disabled={lines.length === 0 || pending} onClick={onSubmit}>
-            <Icon name="enviar" size={18} />
+          <Button type="button" size="lg" disabled={lines.length === 0 || pending} onClick={onSubmit}>
+            <Icon name="send" size={18} />
             <span>{pending ? 'Enviando…' : submitLabel}</span>
           </Button>
         </div>

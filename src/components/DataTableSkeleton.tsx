@@ -1,18 +1,19 @@
-import LoadingRegion from './LoadingRegion'
+import { LoadingRegion } from './LoadingRegion'
 import { Skeleton } from './ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 
 interface DataTableSkeletonProps {
+  readonly label: string
   /** Las cabeceras reales: se leen desde el primer momento y fijan el ancho de las columnas. */
   readonly headers: readonly string[]
   readonly rows: number
 }
 
 /** La tabla con sus cabeceras y filas vacías mientras llegan los datos. */
-export default function DataTableSkeleton({ headers, rows }: DataTableSkeletonProps) {
+export function DataTableSkeleton({ label, headers, rows }: DataTableSkeletonProps) {
   return (
-    <LoadingRegion label="Cargando…" className="rounded-xl bg-card ring-1 ring-foreground/10">
-      <Table>
+    <LoadingRegion label={`Cargando ${label.toLowerCase()}…`} className="rounded-xl bg-card ring-1 ring-foreground/10">
+      <Table label={label}>
         <TableHeader>
           <TableRow>
             {headers.map((header) => (
@@ -23,8 +24,8 @@ export default function DataTableSkeleton({ headers, rows }: DataTableSkeletonPr
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: rows }, (_, fila) => (
-            <TableRow key={fila} className="hover:bg-transparent">
+          {Array.from({ length: rows }, (_, row) => (
+            <TableRow key={row} className="hover:bg-transparent">
               {headers.map((header) => (
                 <TableCell key={header} className="px-3 py-3">
                   <Skeleton className="h-4 w-full max-w-32" />

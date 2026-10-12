@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
+import { send } from './client'
 import type {
   CashSession,
   CashSessionPage,
@@ -14,11 +14,11 @@ import type {
 export const cashQueryKey = ['cash'] as const
 export const currentCashQueryKey = [...cashQueryKey, 'current'] as const
 
-export function cashSessionsQueryKey(offset: number) {
+function cashSessionsQueryKey(offset: number) {
   return [...cashQueryKey, 'sessions', offset] as const
 }
 
-export function cashSessionQueryKey(sessionId: number) {
+function cashSessionQueryKey(sessionId: number) {
   return [...cashQueryKey, 'session', sessionId] as const
 }
 
@@ -27,8 +27,7 @@ export function cashSessionQueryKey(sessionId: number) {
  * mesero, solo si la caja está abierta.
  */
 export async function fetchCurrentCash(): Promise<CurrentCash> {
-  const { data } = await api.get<CurrentCash>('/cash/current')
-  return data
+  return send((client) => client.GET('/api/v1/cash/current'))
 }
 
 export const currentCashQuery = queryOptions({
@@ -38,11 +37,8 @@ export const currentCashQuery = queryOptions({
 
 export const CASH_PAGE_SIZE = 10
 
-export async function fetchCashSessions(offset: number): Promise<CashSessionPage> {
-  const { data } = await api.get<CashSessionPage>('/cash/sessions', {
-    params: { limit: CASH_PAGE_SIZE, offset },
-  })
-  return data
+async function fetchCashSessions(offset: number): Promise<CashSessionPage> {
+  return send((client) => client.GET('/api/v1/cash/sessions', { params: { query: { limit: CASH_PAGE_SIZE, offset } } }))
 }
 
 export function cashSessionsQuery(offset: number) {
@@ -52,17 +48,20 @@ export function cashSessionsQuery(offset: number) {
   })
 }
 
-export async function fetchCashSession(sessionId: number): Promise<CashSession> {
-  const { data } = await api.get<CashSession>(`/cash/sessions/${String(sessionId)}`)
-  return data
+async function fetchCashSession(sessionId: number): Promise<CashSession> {
+  return send((client) =>
+    client.GET('/api/v1/cash/sessions/{session_id}', { params: { path: { session_id: sessionId } } }),
+  )
 }
 
 export async function openCash(payload: OpenCashRequest): Promise<CashSession> {
-  const { data } = await api.post<CashSession>('/cash/open', payload)
-  return data
+  return send((client) => client.POST('/api/v1/cash/open', { body: payload }))
 }
 
 export async function closeCash(payload: CloseCashRequest): Promise<CashSession> {
-  const { data } = await api.post<CashSession>('/cash/close', payload)
-  return data
+  return send((client) => client.POST('/api/v1/cash/close', { body: payload }))
+}
+
+export function cashSessionQuery(sessionId: number) {
+  return queryOptions({ queryKey: cashSessionQueryKey(sessionId), queryFn: () => fetchCashSession(sessionId) })
 }

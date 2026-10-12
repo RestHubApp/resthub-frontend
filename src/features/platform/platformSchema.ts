@@ -4,33 +4,20 @@ import type {
   CreatePlatformRestaurantRequest,
   PlatformRestaurantDetail,
   UpdatePlatformRestaurantRequest,
-} from '../../api/types'
-import { DEFAULT_TIME_ZONE } from '../../services/format'
+} from '@/api/types'
+import { DEFAULT_TIME_ZONE } from '@/services/format'
 import {
-  correoRule,
-  MAX_NOMBRE_COMPLETO,
-  MAX_PASSWORD,
-  nombreRule,
+  emailRule,
+  MAX_COMPLETE_NAME,
+  nameRule,
   passwordRule,
-} from '../../services/fieldRules'
+} from '@/services/fieldRules'
 import { MAX_SLUG, SLUG_PATTERN } from './slug'
 import { isValidTimeZone } from './timeZones'
 
 // Los límites repiten los del backend: avisan mientras se escribe, y el
 // servidor vuelve a comprobarlos.
-export const MAX_RESTAURANT_NAME = 120
-
-export const platformLoginSchema = z.object({
-  email: correoRule,
-  // Al entrar no se exige el mínimo: el servidor ya dice si no coincide. El
-  // máximo sí, porque el servidor rechaza una más larga antes de mirarla.
-  password: z
-    .string()
-    .min(1, 'Escribe tu contraseña')
-    .max(MAX_PASSWORD, `Usa como máximo ${String(MAX_PASSWORD)} caracteres`),
-})
-
-export type PlatformLoginValues = z.infer<typeof platformLoginSchema>
+const MAX_RESTAURANT_NAME = 120
 
 const restaurantNameRule = z
   .string()
@@ -38,7 +25,7 @@ const restaurantNameRule = z
   .min(1, 'Escribe el nombre del restaurante')
   .max(MAX_RESTAURANT_NAME, `Usa como máximo ${String(MAX_RESTAURANT_NAME)} caracteres`)
 
-export const slugRule = z
+const slugRule = z
   .string()
   .trim()
   .min(1, 'Escribe el identificador')
@@ -50,17 +37,17 @@ export const slugRule = z
  * no se vuelve a validar, así una zona guardada que este navegador no conoce
  * no impide cambiarle el nombre.
  */
-export function timeZoneRule(sinCambio?: string) {
+function timeZoneRule(withoutChange?: string) {
   return z
     .string()
     .min(1, 'Elige la zona horaria')
-    .refine((zona) => zona === sinCambio || isValidTimeZone(zona), 'Elige una zona horaria de la lista')
+    .refine((zone) => zone === withoutChange || isValidTimeZone(zone), 'Elige una zona horaria de la lista')
 }
 
 /** Un encargado: la primera cuenta del restaurante o una más. */
 export const ownerSchema = z.object({
-  full_name: nombreRule('nombre completo', MAX_NOMBRE_COMPLETO, 'el'),
-  email: correoRule,
+  full_name: nameRule('nombre completo', MAX_COMPLETE_NAME, 'el'),
+  email: emailRule,
   password: passwordRule,
 })
 
@@ -120,12 +107,12 @@ export function settingsPayload(
   edited: EditedSettings,
   current: PlatformRestaurantDetail,
 ): UpdatePlatformRestaurantRequest {
-  const cambios: UpdatePlatformRestaurantRequest = {}
+  const changes: UpdatePlatformRestaurantRequest = {}
   if (edited.name === true && values.name !== current.name) {
-    cambios.name = values.name
+    changes.name = values.name
   }
   if (edited.timezone === true && values.timezone !== current.timezone) {
-    cambios.timezone = values.timezone
+    changes.timezone = values.timezone
   }
-  return cambios
+  return changes
 }

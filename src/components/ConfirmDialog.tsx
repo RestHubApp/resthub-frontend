@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { useReturnFocus } from './useReturnFocus'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,8 +14,11 @@ import {
 } from './ui/alert-dialog'
 
 interface ConfirmDialogProps {
-  /** El boton que abre la confirmacion. */
-  readonly trigger: ReactNode
+  /** El boton que abre la confirmacion; sin el, el dialogo se controla con `open`. */
+  readonly trigger?: ReactNode
+  /** Abre o cierra la confirmacion desde afuera (p. ej. desde un menu «⋯»). */
+  readonly open?: boolean | undefined
+  readonly onOpenChange?: ((open: boolean) => void) | undefined
   readonly title: string
   readonly description: ReactNode
   readonly confirmLabel: string
@@ -29,18 +33,28 @@ interface ConfirmDialogProps {
  * Reemplaza a `window.confirm`, que no toma el tema, no se puede leer bien en
  * todos los lectores de pantalla y en algunos navegadores se puede silenciar.
  */
-export default function ConfirmDialog({
+export function ConfirmDialog({
   trigger,
+  open,
+  onOpenChange,
   title,
   description,
   confirmLabel,
   confirmVariant = 'destructive',
   onConfirm,
 }: ConfirmDialogProps) {
+  // Radix solo devuelve el foco a su propio disparador; abierta desde un menú
+  // «⋯» o desde estado, la ventana recuerda quién lo tenía (ver `useReturnFocus`).
+  const returnFocus = useReturnFocus()
+  const controlled = {
+    ...(open === undefined ? {} : { open }),
+    ...(onOpenChange === undefined ? {} : { onOpenChange }),
+  }
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent>
+    <AlertDialog {...controlled}>
+      {trigger === undefined ? null : <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
+      <AlertDialogContent {...returnFocus}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

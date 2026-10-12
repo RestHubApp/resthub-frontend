@@ -1,11 +1,11 @@
-import type { ObsTimePoint, ObsWindowParams } from '../../../api/types'
-import ChartCard from '../../../components/charts/ChartCard'
-import DataGrid, { type GridColumn } from '../../../components/charts/DataGrid'
-import { formatInteger, formatMilliseconds } from '../../../services/format'
-import { PLATFORM_TIME_ZONE } from '../platformTime'
+import type { ObsTimePoint, ObsWindowParams } from '@/api/types'
+import { ChartCard } from '@/components/charts/ChartCard'
+import { DataGrid, type GridColumn } from '@/components/charts/DataGrid'
+import { formatInteger, formatMilliseconds } from '@/services/format'
+import { PLATFORM_TIME_ZONE } from '@/features/platform/platformTime'
 import { bucketTitle, formatBucket } from './obsLabels'
-import ObsQueryState from './ObsQueryState'
-import TrafficChart from './TrafficChart'
+import { ObsQueryState } from './ObsQueryState'
+import { TrafficChart } from './TrafficChart'
 import type { LiveOptions } from './useObsRefresh'
 import { useTimeseries } from './useTimeseries'
 
@@ -24,16 +24,16 @@ function columns(bucketSeconds: number): GridColumn<ObsTimePoint>[] {
 }
 
 /** Peticiones y errores 5xx a lo largo de la ventana. */
-export default function TrafficSection({ params, live }: TrafficSectionProps) {
-  const serie = useTimeseries(params, live)
+export function TrafficSection({ params, live }: TrafficSectionProps) {
+  const series = useTimeseries(params, live)
 
   return (
-    <ObsQueryState query={serie} errorText="No se pudo cargar el tráfico." loadingLabel="Cargando el tráfico…" skeletonClassName="h-80 rounded-xl">
+    <ObsQueryState query={series} errorText="No se pudo cargar el tráfico." loadingLabel="Cargando el tráfico…" skeletonClassName="h-80 rounded-xl">
       {(data) => (
         <ChartCard
           title="Tráfico"
           description={`Peticiones y errores del servidor por cubo de ${formatBucket(data.bucket_seconds)}. Un cubo sin tráfico cuenta como cero.`}
-          refreshing={serie.isPlaceholderData}
+          refreshing={series.isPlaceholderData}
           chart={<TrafficChart series={data} />}
           table={
             <DataGrid caption="Tráfico por cubo" columns={columns(data.bucket_seconds)} rows={data.points} rowKey={(p) => p.t} />

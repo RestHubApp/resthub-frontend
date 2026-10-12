@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-import { currentUserQueryKey, fetchCurrentUser } from '../../api/auth'
-import { useSession } from '../../store/session'
+import { currentUserQuery } from '@/api/auth'
+import { useSession } from '@/store/session'
 
 // El nombre del restaurante o los permisos cambian muy de vez en cuando: basta
 // con leerlos al abrir la aplicacion y cada tanto mientras sigue abierta.
@@ -20,17 +20,21 @@ export function useAccountRefresh(): void {
   const token = useSession((state) => state.token)
   const refresh = useSession((state) => state.refresh)
 
-  const cuenta = useQuery({
-    queryKey: currentUserQueryKey,
-    queryFn: () => fetchCurrentUser(),
+  const account = useQuery({
+    ...currentUserQuery,
     enabled: token !== null,
     staleTime: REFRESH_MS,
     refetchInterval: REFRESH_MS,
+    // Es de fondo: si falla, la cuenta guardada sigue sirviendo y se vuelve a
+    // pedir sola. No muestra el aviso del armazón (ver useFailedQueries), que
+    // obligaba a reintentar dos veces tras un corte: una por la pantalla y
+    // otra por esta lectura.
+    meta: { background: true },
   })
 
   useEffect(() => {
-    if (cuenta.data !== undefined) {
-      refresh(cuenta.data)
+    if (account.data !== undefined) {
+      refresh(account.data)
     }
-  }, [cuenta.data, refresh])
+  }, [account.data, refresh])
 }

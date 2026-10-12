@@ -1,5 +1,5 @@
-import Icon from '../../../components/Icon'
-import { Button } from '../../../components/ui/button'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 
 interface FilterActionsProps {
   /** Si hay algún filtro aplicado; sin ninguno no se ofrece quitarlos. */
@@ -8,16 +8,16 @@ interface FilterActionsProps {
 }
 
 /** «Buscar» envía el formulario de filtros; «Quitar filtros» vuelve a la lista entera. */
-export default function FilterActions({ active, onClear }: FilterActionsProps) {
+export function FilterActions({ active, onClear }: FilterActionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      <Button type="submit" size="lg" className="h-11 px-4">
-        <Icon name="buscar" size={16} />
+      <Button type="submit">
+        <Icon name="search" size={16} />
         <span>Buscar</span>
       </Button>
       {active ? (
-        <Button type="button" variant="ghost" size="lg" className="h-11 px-4" onClick={onClear}>
-          <Icon name="cancelar" size={16} />
+        <Button type="button" variant="ghost" onClick={onClear}>
+          <Icon name="cancel" size={16} />
           <span>Quitar filtros</span>
         </Button>
       ) : null}

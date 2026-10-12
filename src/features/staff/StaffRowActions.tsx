@@ -1,13 +1,43 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 
-import type { StaffResponse } from '../../api/types'
-import FormDialog from '../../components/FormDialog'
-import Icon from '../../components/Icon'
-import { Button } from '../../components/ui/button'
-import RoleOptionsGate from './RoleOptionsGate'
-import StaffEditForm from './StaffEditForm'
-import StaffPasswordForm from './StaffPasswordForm'
-import StaffStatusButton from './StaffStatusButton'
+import type { StaffResponse } from '@/api/types'
+import { ActionsMenu, type ActionsMenuItem } from '@/components/ActionsMenu'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { PERMISSION } from '@/api/permissions'
+import { paths } from '@/services/paths'
+import { useCan } from '@/store/session'
+import { type StaffDialog, StaffRowDialogs } from './StaffRowDialogs'
+import { useStaffStatus } from './useStaffStatus'
+
+interface MenuItemsOptions {
+  readonly account: StaffResponse
+  readonly isSelf: boolean
+  readonly open: (dialog: StaffDialog) => void
+  readonly activate: () => void
+  /** Quien mira puede abrir la bitácora: se ofrece «Ver movimientos». */
+  readonly canSeeActivity: boolean
+  readonly seeActivity: () => void
+}
+
+/** «Ver movimientos» para todas; contraseña y activar o desactivar no existen para la cuenta propia. */
+function menuItems({ account, isSelf, open, activate, canSeeActivity, seeActivity }: MenuItemsOptions): ActionsMenuItem[] {
+  const movements: ActionsMenuItem[] = canSeeActivity
+    ? [{ label: 'Ver movimientos', icon: 'schedule', onSelect: seeActivity }]
+    : []
+  if (isSelf) {
+    return movements
+  }
+  return [
+    ...movements,
+    { label: 'Contraseña', icon: 'key', onSelect: () => { open('contrasena') } },
+    account.is_active
+      ? { label: 'Desactivar', icon: 'turnOn', onSelect: () => { open('desactivar') }, isDestructive: true }
+      : { label: 'Activar', icon: 'turnOn', onSelect: activate },
+  ]
+}
 
 interface StaffRowActionsProps {
   readonly account: StaffResponse
@@ -17,18 +47,46 @@ interface StaffRowActionsProps {
   readonly manageable: boolean
 }
 
-type Dialogo = 'editar' | 'contrasena' | null
+interface MenuOptions {
+  readonly account: StaffResponse
+  readonly isSelf: boolean
+  readonly open: (dialog: StaffDialog) => void
+  readonly status: ReturnType<typeof useStaffStatus>
+}
 
-/** Lo que se hace con una cuenta del personal desde el listado. */
-export default function StaffRowActions({ account, isSelf, manageable }: StaffRowActionsProps) {
-  const [dialogo, setDialogo] = useState<Dialogo>(null)
-  const cerrar = () => {
-    setDialogo(null)
-  }
-  const alCambiar = (abierto: boolean) => {
-    if (!abierto) {
-      cerrar()
-    }
+/** Los ítems del menú «⋯» de la fila: «Ver movimientos» solo para quien puede abrir la bitácora. */
+function useMenuItems({ account, isSelf, open, status }: MenuOptions): ActionsMenuItem[] {
+  const navigate = useNavigate()
+  const canSeeActivity = useCan(PERMISSION.activityRead)
+  return menuItems({
+    account,
+    isSelf,
+    open,
+    activate: () => {
+      status.mutate()
+    },
+    canSeeActivity,
+    seeActivity: () => {
+      void navigate(paths.activityLogOfPerson(account.id))
+    },
+  })
+}
+
+/**
+ * Lo que se hace con una cuenta del personal desde el listado: «Editar» a la
+ * vista y el resto (contraseña, activar o desactivar) tras el menú «⋯», para
+ * que la fila entre en el celular sin recortar botones.
+ *
+ * Desactivar se confirma, porque la persona deja de poder entrar en ese mismo
+ * momento, quiza a mitad de un turno. Activar no quita nada y va directo. La
+ * cuenta propia no se desactiva: quien lo hace se queda afuera.
+ */
+export function StaffRowActions({ account, isSelf, manageable }: StaffRowActionsProps) {
+  const [dialog, setDialog] = useState<StaffDialog>(null)
+  const status = useStaffStatus(account)
+  const items = useMenuItems({ account, isSelf, open: setDialog, status })
+  const close = () => {
+    setDialog(null)
   }
 
   if (!manageable) {
@@ -40,46 +98,31 @@ export default function StaffRowActions({ account, isSelf, manageable }: StaffRo
   }
 
   return (
-    <div className="flex flex-wrap items-start gap-1.5 whitespace-normal">
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        onClick={() => {
-          setDialogo('editar')
-        }}
-      >
-        <Icon name="editar" size={14} />
-        <span>Editar</span>
-      </Button>
-      {isSelf ? null : (
+    <div className="flex flex-col items-start gap-1.5 whitespace-normal">
+      <div className="flex items-center gap-1.5">
         <Button
           type="button"
           size="sm"
           variant="outline"
           onClick={() => {
-            setDialogo('contrasena')
+            setDialog('editar')
           }}
         >
-          <Icon name="llave" size={14} />
-          <span>Contraseña</span>
+          <Icon name="edit" size={14} />
+          <span>Editar</span>
         </Button>
-      )}
-      <StaffStatusButton account={account} disabled={isSelf} />
-
-      <FormDialog open={dialogo === 'editar'} onOpenChange={alCambiar} title={`Editar a ${account.full_name}`}>
-        <RoleOptionsGate currentRoleId={account.role_id}>
-          {(opciones) => <StaffEditForm account={account} roles={opciones} isSelf={isSelf} onDone={cerrar} />}
-        </RoleOptionsGate>
-      </FormDialog>
-      <FormDialog
-        open={dialogo === 'contrasena'}
-        onOpenChange={alCambiar}
-        title={`Restablecer la contraseña de ${account.full_name}`}
-        description="Tu propia contraseña se cambia en Mi perfil."
-      >
-        <StaffPasswordForm account={account} onDone={cerrar} />
-      </FormDialog>
+        {items.length === 0 ? null : <ActionsMenu label={`Más acciones de ${account.full_name}`} items={items} />}
+      </div>
+      {status.isError ? <ErrorMessage error={status.error} fallback="No se pudo actualizar la cuenta." /> : null}
+      <StaffRowDialogs
+        account={account}
+        isSelf={isSelf}
+        dialog={dialog}
+        onClose={close}
+        onDeactivate={() => {
+          status.mutate()
+        }}
+      />
     </div>
   )
 }

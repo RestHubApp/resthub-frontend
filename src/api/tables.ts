@@ -1,13 +1,13 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { api } from '../services/api'
+import { send } from './client'
 import type { CreateTableRequest, TableResponse, TableState, UpdateTableRequest } from './types'
 
 // Las mesas del salon: su estado para el mesero y su administracion.
 
 export const tablesQueryKey = ['tables'] as const
 
-export function tablesListQueryKey(includeInactive: boolean) {
+function tablesListQueryKey(includeInactive: boolean) {
   return [...tablesQueryKey, { includeInactive }] as const
 }
 
@@ -21,16 +21,11 @@ export function tableName(label: string): string {
   return /^\d+$/u.test(label) ? `Mesa ${label}` : label
 }
 
-function tablePath(tableId: number): string {
-  return `/tables/${String(tableId)}`
-}
-
 /** Cada mesa con su estado y, si esta ocupada, un resumen de su pedido. */
 export async function fetchTables(includeInactive = false): Promise<TableState[]> {
-  const { data } = await api.get<TableState[]>('/tables', {
-    params: includeInactive ? { include_inactive: true } : undefined,
-  })
-  return data
+  return send((client) =>
+    client.GET('/api/v1/tables', { params: { query: includeInactive ? { include_inactive: true } : {} } }),
+  )
 }
 
 /** La consulta de las mesas, la misma para la pantalla y para precargarla. */
@@ -42,20 +37,19 @@ export function tablesQuery(includeInactive: boolean) {
 }
 
 export async function createTable(payload: CreateTableRequest): Promise<TableResponse> {
-  const { data } = await api.post<TableResponse>('/tables', payload)
-  return data
+  return send((client) => client.POST('/api/v1/tables', { body: payload }))
 }
 
 export async function updateTable(
   tableId: number,
   payload: UpdateTableRequest,
 ): Promise<TableResponse> {
-  const { data } = await api.patch<TableResponse>(tablePath(tableId), payload)
-  return data
+  return send((client) =>
+    client.PATCH('/api/v1/tables/{table_id}', { params: { path: { table_id: tableId } }, body: payload }),
+  )
 }
 
 /** El orden nuevo de todas las mesas, activas o no. */
 export async function reorderTables(ids: number[]): Promise<TableResponse[]> {
-  const { data } = await api.put<TableResponse[]>('/tables/order', { ids })
-  return data
+  return send((client) => client.PUT('/api/v1/tables/order', { body: { ids } }))
 }

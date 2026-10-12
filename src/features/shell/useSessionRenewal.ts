@@ -1,6 +1,6 @@
-import { renewSession, sessionOf } from '../../api/auth'
-import { useTokenRenewal } from '../../hooks/useTokenRenewal'
-import { usePreview, useSession } from '../../store/session'
+import { renewSession, sessionOf } from '@/api/auth'
+import { useTokenRenewal } from '@/hooks/useTokenRenewal'
+import { usePreview, useSession } from '@/store/session'
 
 /**
  * Renueva el token del restaurante antes de que venza mientras la aplicación
@@ -13,10 +13,10 @@ import { usePreview, useSession } from '../../store/session'
 export function useSessionRenewal(): void {
   const token = useSession((state) => state.token)
   const renew = useSession((state) => state.renew)
-  const preview = usePreview()
+  const isPreview = usePreview()
 
-  useTokenRenewal(preview ? null : token, async (origen) => {
-    const nuevo = await renewSession()
-    renew(origen, nuevo.access_token, sessionOf(nuevo))
+  useTokenRenewal(isPreview ? null : token, async (origin) => {
+    const fresh = await renewSession()
+    renew(origin, fresh.access_token, sessionOf(fresh))
   })
 }

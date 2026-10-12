@@ -1,7 +1,7 @@
 // El vencimiento de un token, comun a la sesion de restaurante y a la del
 // administrador del sistema.
 
-const MS_POR_SEGUNDO = 1000
+const MS_BY_SECOND = 1000
 
 /**
  * Cuando vence el token, en milisegundos, o `null` si no se puede leer.
@@ -11,19 +11,19 @@ const MS_POR_SEGUNDO = 1000
  */
 export function tokenExpiresAt(token: string): number | null {
   try {
-    const carga = token.split('.')[1] ?? ''
-    const datos = JSON.parse(atob(carga.replaceAll('-', '+').replaceAll('_', '/'))) as {
+    const load = token.split('.')[1] ?? ''
+    const data = JSON.parse(atob(load.replaceAll('-', '+').replaceAll('_', '/'))) as {
       exp?: unknown
     }
-    return typeof datos.exp === 'number' ? datos.exp * MS_POR_SEGUNDO : null
+    return typeof data.exp === 'number' ? data.exp * MS_BY_SECOND : null
   } catch {
     return null
   }
 }
 
 export function isTokenExpired(token: string, now: number = Date.now()): boolean {
-  const vencimiento = tokenExpiresAt(token)
-  return vencimiento !== null && vencimiento <= now
+  const expiry = tokenExpiresAt(token)
+  return expiry !== null && expiry <= now
 }
 
 /**
@@ -36,10 +36,10 @@ export function expiryTimer(onExpire: () => void): (token: string | null) => voi
   let id: ReturnType<typeof setTimeout> | undefined
   return (token) => {
     clearTimeout(id)
-    const vencimiento = token === null ? null : tokenExpiresAt(token)
-    if (vencimiento === null) {
+    const expiry = token === null ? null : tokenExpiresAt(token)
+    if (expiry === null) {
       return
     }
-    id = setTimeout(onExpire, Math.max(vencimiento - Date.now(), 0))
+    id = setTimeout(onExpire, Math.max(expiry - Date.now(), 0))
   }
 }
