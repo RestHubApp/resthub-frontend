@@ -48,7 +48,10 @@ export function TableCard({ table }: TableCardProps) {
     >
       <span className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
         <span className="font-heading text-xl font-bold whitespace-nowrap">{name}</span>
-        <OrderStatusBadge status={order.status} />
+        {/* Con el texto grande «Servido, por cobrar» no cabe en una línea: la insignia baja de línea en vez de salirse de la tarjeta. */}
+        <span className="min-w-0 max-w-full [&>*]:h-auto [&>*]:max-w-full [&>*]:whitespace-normal [&>*]:text-left">
+          <OrderStatusBadge status={order.status} />
+        </span>
       </span>
       <span className="text-sm font-semibold tabular-nums">
         #{order.number} · {formatMoney(order.total)}

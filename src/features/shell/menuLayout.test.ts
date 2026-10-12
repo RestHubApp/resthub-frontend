@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 
 import { BOTTOM_BAR_SLOTS, DEFAULT_MENU } from '@/services/appearanceRules'
-import { layoutMenu, moveEntry, orderEntries, toggleBottom } from './menuLayout'
+import { layoutMenu, orderEntries, reorderWithin, toggleBottom } from './menuLayout'
 import { entriesFor } from './navigation'
 import type { ShellScreen } from './shellScreens'
 
@@ -46,11 +46,11 @@ describe('orderEntries', () => {
 })
 
 describe('layoutMenu', () => {
-  it('por omisión la barra de abajo son las primeras cuatro y el resto va en «Más»', () => {
+  it('por omisión la barra de abajo sale de lo que la cuenta puede abrir (aquí, caja incluida) y el resto va en «Más»', () => {
     const layout = layoutMenu(ALL, DEFAULT_MENU)
 
-    expect(paths(layout.bar)).toEqual([ORDERS, BOARD, KITCHEN, '/reservas'])
-    expect(paths(layout.rest)).toEqual(['/clientes', CASH])
+    expect(paths(layout.bar)).toEqual([ORDERS, BOARD, KITCHEN, CASH])
+    expect(paths(layout.rest)).toEqual(['/reservas', '/clientes'])
   })
 
   it('con barra elegida respeta el orden del menú y no pasa de cuatro', () => {
@@ -73,23 +73,36 @@ describe('layoutMenu', () => {
   })
 })
 
-describe('moveEntry', () => {
-  it('sube y baja una posición, conservando la barra de abajo', () => {
-    const layout = layoutMenu(ALL, DEFAULT_MENU)
+describe('reorderWithin', () => {
+  const layout = layoutMenu(ALL, { order: [], bottom: [ORDERS, BOARD, KITCHEN, '/reservas'] })
 
-    const down = moveEntry(layout, 0, 1)
-    expect(down.order.slice(0, 3)).toEqual([BOARD, ORDERS, KITCHEN])
-    expect(down.bottom).toEqual([ORDERS, BOARD, KITCHEN, '/reservas'])
+  it('mueve una entrada dentro de la barra y las de «Más» no se tocan', () => {
+    const next = reorderWithin(layout, { group: 'bar', from: 0, to: 2 })
 
-    const up = moveEntry(layout, 5, -1)
-    expect(up.order.slice(-2)).toEqual([CASH, '/clientes'])
+    expect(next?.order).toEqual([BOARD, KITCHEN, ORDERS, '/reservas', '/clientes', CASH])
+    expect(next?.bottom).toEqual([ORDERS, BOARD, KITCHEN, '/reservas'])
   })
 
-  it('en los extremos no cambia el orden', () => {
-    const layout = layoutMenu(ALL, DEFAULT_MENU)
+  it('mueve una entrada dentro de «Más» conservando los lugares de la barra', () => {
+    const next = reorderWithin(layout, { group: 'rest', from: 1, to: 0 })
 
-    expect(moveEntry(layout, 0, -1).order).toEqual([...PATHS])
-    expect(moveEntry(layout, 5, 1).order).toEqual([...PATHS])
+    expect(next?.order).toEqual([ORDERS, BOARD, KITCHEN, '/reservas', CASH, '/clientes'])
+  })
+
+  it('si los dos grupos están mezclados en el orden, cada uno conserva sus lugares', () => {
+    const mixed = layoutMenu(ALL, { order: [CASH, ORDERS, '/clientes', BOARD], bottom: [ORDERS, BOARD, '/reservas', KITCHEN] })
+
+    expect(paths(mixed.ordered).slice(0, 4)).toEqual([CASH, ORDERS, '/clientes', BOARD])
+    const next = reorderWithin(mixed, { group: 'bar', from: 0, to: 1 })
+
+    expect(next?.order.slice(0, 4)).toEqual([CASH, BOARD, '/clientes', ORDERS])
+  })
+
+  it('subir la primera, bajar la última o soltarla donde estaba no cambia nada', () => {
+    expect(reorderWithin(layout, { group: 'bar', from: 0, to: 0 })).toBeNull()
+    expect(reorderWithin(layout, { group: 'bar', from: 0, to: -1 })).toBeNull()
+    expect(reorderWithin(layout, { group: 'rest', from: 1, to: 2 })).toBeNull()
+    expect(reorderWithin(layout, { group: 'bar', from: 9, to: 0 })).toBeNull()
   })
 })
 
@@ -97,17 +110,17 @@ describe('toggleBottom', () => {
   it('saca una entrada de la barra y la deja en «Más»', () => {
     const next = toggleBottom(layoutMenu(ALL, DEFAULT_MENU), BOARD)
 
-    expect(next.bottom).toEqual([ORDERS, KITCHEN, '/reservas'])
+    expect(next.bottom).toEqual([ORDERS, KITCHEN, CASH])
     expect(paths(layoutMenu(ALL, next).rest)).toContain(BOARD)
   })
 
   it('pone una entrada en la barra si hay lugar', () => {
     const emptied = toggleBottom(layoutMenu(ALL, DEFAULT_MENU), BOARD)
 
-    expect(toggleBottom(layoutMenu(ALL, emptied), CASH).bottom).toEqual([ORDERS, KITCHEN, '/reservas', CASH])
+    expect(toggleBottom(layoutMenu(ALL, emptied), '/reservas').bottom).toEqual([ORDERS, KITCHEN, CASH, '/reservas'])
   })
 
   it('con la barra llena no deja entrar otra', () => {
-    expect(toggleBottom(layoutMenu(ALL, DEFAULT_MENU), CASH).bottom).toEqual([ORDERS, BOARD, KITCHEN, '/reservas'])
+    expect(toggleBottom(layoutMenu(ALL, DEFAULT_MENU), '/clientes').bottom).toEqual([ORDERS, BOARD, KITCHEN, CASH])
   })
 })
