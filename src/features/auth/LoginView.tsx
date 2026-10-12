@@ -1,31 +1,10 @@
-import { Link, Navigate, useLocation } from 'react-router'
+import { Navigate, useLocation } from 'react-router'
 
 import { paths } from '@/services/paths'
 import { isPreviewTab } from '@/services/tabStorage'
-import { AuthAside } from './AuthAside'
-import { AuthCard } from './AuthCard'
 import { LoginForm } from './LoginForm'
-
-const PANEL = (
-  <AuthAside
-    title="Tu restaurante, sin libreta"
-    items={[
-      { icon: 'order', text: 'Toma los pedidos desde el celular, mesa por mesa o para llevar.' },
-      { icon: 'board', text: 'La cocina ve qué preparar y la caja sabe qué cobrar.' },
-      { icon: 'indicators', text: 'Ventas, inventario y lo que más se pide, al día.' },
-    ]}
-    note="Tu cuenta la crea el encargado del restaurante. Si olvidaste tu contraseña, pídele que la restablezca."
-  />
-)
-
-const FOOTER = (
-  <Link
-    to={paths.privacy}
-    className="inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
-  >
-    Privacidad
-  </Link>
-)
+import { LoginHeading } from './LoginHeading'
+import { LoginLayout } from './LoginLayout'
 
 /**
  * A dónde ir después de entrar.
@@ -54,8 +33,12 @@ export function LoginView() {
   }
 
   return (
-    <AuthCard title="Iniciar sesión" aside={PANEL} footer={FOOTER}>
+    <LoginLayout>
+      <LoginHeading />
       <LoginForm destination={destination} />
-    </AuthCard>
+      <p className="m-0 text-sm leading-relaxed text-muted-foreground">
+        Tu cuenta la crea el encargado del restaurante. Si olvidaste tu contraseña, pídele que la restablezca.
+      </p>
+    </LoginLayout>
   )
 }
