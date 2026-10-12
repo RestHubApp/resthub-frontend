@@ -1,9 +1,8 @@
 import type { OrderResponse } from '@/api/types'
 import { AllergyAlert } from '@/features/orders/AllergyAlert'
 import { ElapsedTime } from '@/features/orders/ElapsedTime'
-import { ItemNote } from '@/features/orders/ItemNote'
 import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
-import { OrderItemLine } from '@/features/orders/OrderItemLine'
+import { OrderItemList } from '@/features/orders/OrderItemList'
 import { orderPlace } from '@/features/orders/orderLabels'
 import { KitchenReadyButton } from './KitchenReadyButton'
 
@@ -37,12 +36,7 @@ export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
           {hasAllergy ? <AllergyAlert /> : null}
         </div>
       </header>
-      <ul className="m-0 flex list-none flex-col gap-2 border-t px-0 pt-3 pb-0 text-base">
-        {order.items.map((item) => (
-          <OrderItemLine key={item.id} item={item} flag={flagFor(order.id, item.id)} />
-        ))}
-      </ul>
-      <ItemNote note={order.notes} flag={flagFor(order.id, null)} label="Nota del pedido" />
+      <OrderItemList order={order} flagFor={flagFor} size="large" />
       <KitchenReadyButton order={order} />
     </article>
   )

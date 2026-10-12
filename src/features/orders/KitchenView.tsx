@@ -1,8 +1,6 @@
-import { EmptyState } from '@/components/EmptyState'
 import { PageHeader } from '@/components/PageHeader'
-import { SectionCard } from '@/components/SectionCard'
 import { BoardSkeleton } from './board/BoardSkeleton'
-import { KitchenCard } from './kitchen/KitchenCard'
+import { KitchenSection } from './kitchen/KitchenSection'
 import { LiveIndicator } from './LiveIndicator'
 import { RetryQueryError } from '@/components/RetryQueryError'
 import { useActiveOrders } from './useActiveOrders'
@@ -41,22 +39,24 @@ export function KitchenView() {
           (CLS de 0,58 en el celular). */}
       {active.isPending ? null : (
         <>
-          <SectionCard title={`Por preparar (${String(inKitchen.length)})`}>
-            {active.isSuccess && inKitchen.length === 0 ? <EmptyState title="Nada pendiente en cocina" /> : null}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {inKitchen.map((order) => (
-                <KitchenCard key={order.id} order={order} now={now} flagFor={flagFor} />
-              ))}
-            </div>
-          </SectionCard>
-          <SectionCard title={`Listos para servir (${String(ready.length)})`} collapsible>
-            {active.isSuccess && ready.length === 0 ? <EmptyState title="Nada esperando a salir" /> : null}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {ready.map((order) => (
-                <KitchenCard key={order.id} order={order} now={now} flagFor={flagFor} />
-              ))}
-            </div>
-          </SectionCard>
+          <KitchenSection
+            title="Por preparar"
+            orders={inKitchen}
+            emptyTitle="Nada pendiente en cocina"
+            isLoaded={active.isSuccess}
+            now={now}
+            flagFor={flagFor}
+          />
+          <KitchenSection
+            title="Listos para servir"
+            orders={ready}
+            emptyTitle="Nada esperando a salir"
+            isLoaded={active.isSuccess}
+            now={now}
+            flagFor={flagFor}
+            isCollapsible
+            isHiddenWhenEmptyOnPhone
+          />
         </>
       )}
     </div>
