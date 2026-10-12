@@ -8,8 +8,6 @@ interface InventoryTabsProps {
   readonly value: InventorySection
   readonly onChange: (value: InventorySection) => void
   readonly panels: Record<InventorySection, ReactNode>
-  /** Cuántas alertas hay, para mostrarlo en la pestaña. */
-  readonly alertCount: number | undefined
 }
 
 /**
@@ -18,7 +16,7 @@ interface InventoryTabsProps {
  * En el celular la fila se desplaza de costado en vez de apretar los
  * nombres. Cada pestaña mide lo que un dedo necesita.
  */
-export function InventoryTabs({ value, onChange, panels, alertCount }: InventoryTabsProps) {
+export function InventoryTabs({ value, onChange, panels }: InventoryTabsProps) {
   return (
     <Tabs
       value={value}
@@ -33,11 +31,6 @@ export function InventoryTabs({ value, onChange, panels, alertCount }: Inventory
             <TabsTrigger key={section.value} value={section.value} className="h-11 flex-none px-3.5">
               <Icon name={section.icon} size={16} />
               <span>{section.label}</span>
-              {section.value === 'alertas' && alertCount !== undefined && alertCount > 0 ? (
-                <span className="rounded-full bg-warning px-1.5 text-xs font-semibold text-white">
-                  {alertCount}
-                </span>
-              ) : null}
             </TabsTrigger>
           ))}
         </TabsList>

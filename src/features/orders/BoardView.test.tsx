@@ -85,7 +85,8 @@ describe('BoardView', () => {
     await user.click(await screen.findByRole('button', { name: 'Cobrar' }))
     expect(await screen.findByRole('dialog', { name: 'Cobrar pedido #34' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Volver' }))
-    await user.click(screen.getByRole('button', { name: 'Cancelar pedido #1' }))
+    await user.click(screen.getByRole('button', { name: 'Más acciones del pedido #1' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Cancelar pedido' }))
 
     expect(await screen.findByRole('dialog', { name: '¿Cancelar el pedido #1?' })).toBeInTheDocument()
   })
@@ -95,7 +96,7 @@ describe('BoardView', () => {
 
     await screen.findByRole('region', { name: 'En cocina: 1' })
     expect(screen.queryByRole('button', { name: 'Marcar listo' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Cancelar pedido/u })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Más acciones del pedido/u })).not.toBeInTheDocument()
   })
 
   it('si no se pueden leer los pedidos lo dice', async () => {

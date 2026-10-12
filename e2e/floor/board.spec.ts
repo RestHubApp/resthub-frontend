@@ -65,7 +65,9 @@ test('SAL-28 el encargado filtra el tablero por tipo y envía, cobra y cancela d
   await expect(column(page, 'Abierto')).toContainText('Sin pedidos')
 
   // Cancelar el delivery desde la tarjeta.
-  await page.getByRole('button', { name: `Cancelar pedido #${String(delivery.number)}` }).click()
+  const moreActions = `Más acciones del pedido #${String(delivery.number)}`
+  await page.getByRole('button', { name: moreActions }).click()
+  await page.getByRole('menu', { name: moreActions }).getByRole('menuitem', { name: 'Cancelar pedido' }).click()
   const cancel = page.getByRole('dialog', { name: `¿Cancelar el pedido #${String(delivery.number)}?` })
   await expect(cancel).toContainText('Delivery · Luis. El pedido pasa al historial como cancelado.')
   await cancel.getByRole('textbox', { name: 'Motivo' }).fill('No contestó el teléfono')

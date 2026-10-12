@@ -45,7 +45,7 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
     'confirmacion:staff/StaffRowDialogs',
     'ruta:/roles',
     'confirmacion:roles/DeleteRoleButton',
-    'dialogo:roles/RoleFormDialog',
+    'hoja:roles/RoleFormDialog',
   )
   await inKitchen(local, local.table('2'), [{ dish: local.dish('Lomo saltado') }])
   // Un rol sin cuentas: el que tiene cuentas no se puede eliminar.
@@ -57,7 +57,8 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
   await capture(page, 'mesas')
   await form(page, page.getByRole('button', { name: 'Nueva mesa' }), 'Nueva mesa', 'dialogo-nueva-mesa')
   const table1 = page.getByRole('listitem').filter({ hasText: 'Mesa 1' })
-  await form(page, table1.getByRole('button', { name: 'Renombrar' }), 'Renombrar Mesa 1', 'dialogo-renombrar-mesa')
+  await table1.getByRole('button', { name: 'Más acciones de Mesa 1' }).click()
+  await form(page, page.getByRole('menu', { name: 'Más acciones de Mesa 1' }).getByRole('menuitem', { name: 'Renombrar' }), 'Renombrar Mesa 1', 'dialogo-renombrar-mesa')
 
   await page.goto('/personal')
   const waiter = page.getByRole('row', { name: /Mesero Prueba/u })

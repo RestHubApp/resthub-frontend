@@ -7,12 +7,18 @@ import { ownerOf, orderInQueue } from './prepare'
 
 test('VIS-12 el perfil, el panel de la cuenta y el aviso de pedidos sin enviar al salir', async ({ page, local }) => {
   deadline(90_000)
-  covers('ruta:/perfil', 'hoja:shell/MoreSheet', 'confirmacion:shell/SessionActions')
+  covers('ruta:/perfil', 'dialogo:auth/ChangePasswordDialog', 'hoja:shell/MoreSheet', 'confirmacion:shell/SessionActions')
 
   await openAs(page, local.waiter, '/perfil')
   await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible()
   await expect(page.getByText('mesero@e2e.resthub.dev')).toBeVisible()
   await capture(page, 'perfil')
+
+  await page.getByRole('button', { name: 'Cambiar contraseña' }).click()
+  const password = page.getByRole('dialog', { name: 'Cambiar contraseña' })
+  await captureWindow(password, 'dialogo-cambiar-contrasena')
+  await page.keyboard.press('Escape')
+  await expect(password).toBeHidden()
 
   await orderInQueue(page, { owner: ownerOf(local.waiter), table: local.table('3'), dish: local.dish('Lomo saltado') })
   await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible()

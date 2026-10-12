@@ -21,8 +21,7 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
   covers(
     'ruta:/menu',
     'dialogo:menu/NewMenuDialogs#2',
-    'dialogo:menu/MenuItemDialogs',
-    'confirmacion:menu/MenuItemDialogs',
+    'hoja:menu/DishSheet',
     'funcion:menu.nuevo-plato',
     'funcion:menu.agregar-plato-en-categoria',
     'funcion:menu.opciones-del-plato',
@@ -58,14 +57,16 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
   await fresh.getByRole('button', { name: 'Crear plato' }).click()
   await expect(fresh).toBeHidden()
   await expect(drinks.getByRole('heading', { name: 'Limonada frozen' })).toBeVisible()
-  await expect(drinks.getByText('Con hierbabuena.')).toBeVisible()
   await expect(summary).toContainText('Hoy: 6 de 6 platos disponibles')
   const created = (await menu(local)).flatMap((c) => c.items).find((p) => p.name === 'Limonada frozen')
   expect(created).toMatchObject({ price: '9.50', is_available: true })
   expect(defined(created).modifier_groups).toMatchObject([{ name: 'Tamaño', min_choices: 1, options: [{ name: 'Vaso' }, { name: 'Jarra', price: '15.50' }] }])
 
   // Editar: el precio y las opciones que ya tenía.
-  await page.getByRole('button', { name: 'Editar Limonada frozen' }).click()
+  await page.getByRole('button', { name: 'Ver la ficha de Limonada frozen' }).click()
+  const record = page.getByRole('dialog', { name: 'Limonada frozen' })
+  await expect(record).toContainText('Con hierbabuena.')
+  await record.getByRole('button', { name: 'Editar plato' }).click()
   const edit = page.getByRole('dialog', { name: 'Editar Limonada frozen' })
   await expect(edit.getByLabel('Grupo', { exact: true })).toHaveValue('Tamaño')
   await edit.getByLabel('Precio (S/)').fill('10')
@@ -88,28 +89,33 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
 
   // Sacar de la carta se confirma; volver a la carta, no.
   const aji = page.getByRole('listitem').filter({ hasText: 'Ají de gallina' })
-  await aji.getByRole('button', { name: 'Más acciones de Ají de gallina' }).click()
-  await page.getByRole('menu', { name: 'Más acciones de Ají de gallina' }).getByRole('menuitem', { name: 'Desactivar' }).click()
-  const confirm = page.getByRole('alertdialog', { name: '¿Sacar Ají de gallina de la carta?' })
-  await confirm.getByRole('button', { name: 'Cancelar' }).click()
+  const ajiRecord = page.getByRole('dialog', { name: 'Ají de gallina' })
+  await aji.getByRole('button', { name: 'Ver la ficha de Ají de gallina' }).click()
+  await ajiRecord.getByRole('button', { name: 'Desactivar' }).click()
+  const confirm = ajiRecord.getByRole('group', { name: '¿Sacar Ají de gallina de la carta?' })
+  await confirm.getByRole('button', { name: 'Volver' }).click()
   await expect(confirm).toBeHidden()
   await expect(aji.getByText('Fuera de la carta')).toBeHidden()
-  await aji.getByRole('button', { name: 'Más acciones de Ají de gallina' }).click()
-  await page.getByRole('menu', { name: 'Más acciones de Ají de gallina' }).getByRole('menuitem', { name: 'Desactivar' }).click()
+  await ajiRecord.getByRole('button', { name: 'Desactivar' }).click()
   await evidence(page, 'ges-12-3-confirmar-desactivar')
   await confirm.getByRole('button', { name: 'Desactivar' }).click()
+  await expect(ajiRecord).toBeHidden()
   await expect(aji.getByText('Fuera de la carta')).toBeVisible()
   await expect(aji.getByRole('switch')).toHaveCount(0)
   await expect(summary).toContainText('Hoy: 5 de 5 platos disponibles')
-  await aji.getByRole('button', { name: 'Más acciones de Ají de gallina' }).click()
-  await page.getByRole('menu', { name: 'Más acciones de Ají de gallina' }).getByRole('menuitem', { name: 'Activar' }).click()
+  await aji.getByRole('button', { name: 'Ver la ficha de Ají de gallina' }).click()
+  await ajiRecord.getByRole('button', { name: 'Activar' }).click()
+  await expect(ajiRecord).toBeHidden()
   await expect(aji.getByText('Fuera de la carta')).toBeHidden()
 
   // El orden es el que ve el mesero.
   const funds = page.getByRole('region', { name: 'Fondos' })
-  await funds.getByRole('button', { name: 'Más acciones de Lomo saltado' }).click()
-  await expect(page.getByRole('menu', { name: 'Más acciones de Lomo saltado' }).getByRole('menuitem', { name: 'Subir' })).toHaveAttribute('aria-disabled', 'true')
-  await page.getByRole('menu', { name: 'Más acciones de Lomo saltado' }).getByRole('menuitem', { name: 'Bajar' }).click()
+  await funds.getByRole('button', { name: 'Ver la ficha de Lomo saltado' }).click()
+  const lomoRecord = page.getByRole('dialog', { name: 'Lomo saltado' })
+  await expect(lomoRecord.getByRole('button', { name: 'Subir' })).toBeDisabled()
+  await lomoRecord.getByRole('button', { name: 'Bajar' }).click()
+  await page.keyboard.press('Escape')
+  await expect(lomoRecord).toBeHidden()
   await expect(funds.getByRole('heading', { level: 3 }).first()).toHaveText('Ají de gallina')
   await expect.poll(async () => (await menu(local)).find((c) => c.name === 'Fondos')?.items.map((p) => p.name)).toEqual([
     'Ají de gallina',

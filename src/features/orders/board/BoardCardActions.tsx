@@ -1,6 +1,7 @@
 import { advanceOrder, type OrderStep } from '@/api/orders'
 import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
+import { ActionsMenu } from '@/components/ActionsMenu'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
@@ -13,7 +14,10 @@ interface BoardCardActionsProps {
   readonly onCancel: (order: OrderResponse) => void
 }
 
-/** El paso siguiente del pedido y, aparte, cancelar. */
+/**
+ * El paso siguiente del pedido a la vista, que se toca cien veces por turno, y
+ * cancelar tras «⋯»: así un dedo apurado no cae sobre una acción destructiva.
+ */
 export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActionsProps) {
   const step = nextStepFor(order.status)
   const can = useCan(step?.permission ?? PERMISSION.ordersTake)
@@ -25,7 +29,7 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
   })
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex items-center gap-2">
       {step !== undefined && can ? (
         <Button
           type="button"
@@ -44,18 +48,19 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
         </Button>
       ) : null}
       {canCancel ? (
-        <Button
-          type="button"
-          variant="ghost"
-          className="px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          aria-label={`Cancelar pedido #${String(order.number)}`}
-          onClick={() => {
-            onCancel(order)
-          }}
-        >
-          <Icon name="cancel" size={16} />
-          <span>Cancelar</span>
-        </Button>
+        <ActionsMenu
+          label={`Más acciones del pedido #${String(order.number)}`}
+          items={[
+            {
+              label: 'Cancelar pedido',
+              icon: 'cancel',
+              isDestructive: true,
+              onSelect: () => {
+                onCancel(order)
+              },
+            },
+          ]}
+        />
       ) : null}
     </div>
   )

@@ -99,7 +99,7 @@ test('PLA-12 la vista previa como encargado abre otra pestaña con su franja y t
     await evidence(preview, 'pla-12-encargado')
     await preview.goto('/perfil')
     await expect(preview.getByRole('heading', { name: 'Mi perfil', level: 1 })).toBeVisible()
-    await expect(preview.getByRole('heading', { name: 'Cambiar contraseña' })).toHaveCount(0)
+    await expect(preview.getByRole('button', { name: 'Cambiar contraseña' })).toHaveCount(0)
     // La pestaña de vista previa tiene la sesión del local de muestra: no tiene los
     // permisos de la administración del sistema y su guarda la lleva al inicio.
     await preview.goto('/plataforma')

@@ -12,10 +12,10 @@ const TAKE_ORDERS = 'Tomar pedidos'
 const KITCHEN = role()
 const SAVE = { name: 'Guardar' }
 
-function openRoles(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, roles: Role[] = [ROLE_OWNER, ROLE_WAITER, KITCHEN]) {
+function openRoles(permissions: readonly PermissionCode[] = PERMISSIONS_OWNER, roles: Role[] = [ROLE_OWNER, ROLE_WAITER, KITCHEN], at = '/roles') {
   const api = server().on('get', '/roles', roles).on('get', '/permissions', CATALOG)
   signInAs(permissions)
-  return { api, ...mountScreen(<RolesView />, { path: '/roles' }) }
+  return { api, ...mountScreen(<RolesView />, { path: '/roles', en: at }) }
 }
 
 function row(name: string): HTMLElement {
@@ -31,6 +31,11 @@ describe('RolesView', () => {
     expect(within(row('Encargado')).getByText(/Todos los permisos/u)).toBeInTheDocument()
     expect(within(row('Mesero')).getByText(/3 personas/u)).toBeInTheDocument()
     expect(within(row('Cocina')).getByText(/Nadie lo tiene/u)).toBeInTheDocument()
+  })
+
+  it('se abre «Nuevo rol» desde la dirección con ?accion=nuevo-rol', async () => {
+    openRoles(PERMISSIONS_OWNER, undefined, '/roles?accion=nuevo-rol')
+    expect(await screen.findByRole('dialog', { name: 'Nuevo rol' })).toBeInTheDocument()
   })
 
   it('el rol del encargado solo se mira y el personalizado vacío se puede borrar', async () => {

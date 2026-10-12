@@ -53,6 +53,7 @@ export function CategorySection({
                 key={dish.id}
                 item={dish}
                 cost={costs.get(dish.id)}
+                category={category}
                 categories={categories}
                 isFirst={index === 0}
                 isLast={index === last}

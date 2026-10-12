@@ -9,8 +9,7 @@ function sectionOf(value: string | null): InventorySection {
 /**
  * La pestaña abierta del inventario, guardada en la dirección (`?vista=recetas`).
  *
- * Volver desde el editor de una receta deja a la persona donde estaba, y un
- * enlace puede llevar directo a las alertas.
+ * Volver desde el editor de una receta deja a la persona donde estaba.
  */
 export function useInventorySection() {
   const [params, setParams] = useSearchParams()

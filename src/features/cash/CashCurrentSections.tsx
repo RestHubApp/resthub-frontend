@@ -2,9 +2,9 @@ import type { CurrentCash } from '@/api/types'
 import { SectionCard } from '@/components/SectionCard'
 import { formatDateTime, formatMoney } from '@/services/format'
 import { useTimeZone } from '@/store/session'
+import { CashClosedPrompt } from './CashClosedPrompt'
 import { CashSummaryView } from './CashSummaryView'
 import { CloseCashForm } from './CloseCashForm'
-import { OpenCashForm } from './OpenCashForm'
 
 interface CashCurrentSectionsProps {
   /** La caja actual; `undefined` mientras carga. */
@@ -19,11 +19,7 @@ export function CashCurrentSections({ current, onClosed }: CashCurrentSectionsPr
 
   return (
     <>
-      {current?.is_open === false ? (
-        <SectionCard title="Abrir caja" description="Sin caja abierta, nadie puede cobrar.">
-          <OpenCashForm />
-        </SectionCard>
-      ) : null}
+      {current?.is_open === false ? <CashClosedPrompt /> : null}
       {shift?.summary ? (
         <>
           <SectionCard

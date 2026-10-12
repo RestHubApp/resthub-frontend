@@ -78,6 +78,18 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
   `href=`, `navigate(`, `redirect(`, `appUrl(`, `<Navigate` o `path:`/`from:`
   fuera de ese módulo. Las claves nuevas van en inglés; el valor es la URL que
   ve el usuario. Las pruebas (Jest y Playwright) sí pueden usar la URL literal.
+- **Diálogos que abre la dirección** (`src/hooks/screenActions.ts`): `?accion=<id>` abre
+  el diálogo de acción frecuente de una pantalla (`/caja?accion=abrir-caja`). La
+  lista es cerrada, con id, pantalla, etiqueta y permiso de cada una; una
+  pantalla la escucha con `useScreenAction('<id>')`, que solo dice si se pidió
+  (`isRequested`) y borra el parámetro al cerrar (`clear`). El parámetro nunca
+  ejecuta una acción ni lleva datos: abre el mismo diálogo vacío de su botón. Un
+  diálogo nuevo de acción frecuente es una entrada ahí.
+- **Hojas y ventanas**: el detalle o la configuración secundaria de algo que se
+  consulta junto a una lista va en `components/DetailSheet` (a la derecha en la
+  laptop, desde abajo en el celular); una tarea corta de uno a tres campos, en
+  `FormDialog`. Nunca un diálogo o una hoja sobre otro: si hace falta confirmar,
+  cambia el contenido de la misma hoja.
 - **Permisos** (`src/api/permissions.ts`): los códigos los define el backend
   (`PermissionCode`); la interfaz los nombra con `PERMISSION.ordersCharge`. No se
   escribe `'orders.charge'` en `useCan(`, `can(`, `hasPermission(` ni en una

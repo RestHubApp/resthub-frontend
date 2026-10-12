@@ -88,6 +88,7 @@ import {
   ShoppingBag,
   ShoppingBasket,
   ShoppingCart,
+  SlidersHorizontal,
   Sparkles,
   Split,
   StickyNote,
@@ -147,6 +148,7 @@ export const ICONS = {
   unfold: ChevronsUpDown,
   key: KeyRound,
   turnOn: Power,
+  settings: SlidersHorizontal,
 
   // Estado.
   alert: CircleAlert,

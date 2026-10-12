@@ -72,7 +72,7 @@
   },
   {
     "id": "funcion:inventario.compra-desde-alerta",
-    "description": "Registrar la compra desde la tarjeta de la alerta"
+    "description": "Registrar la compra de un insumo bajo mínimo desde su fila"
   },
   {
     "id": "funcion:inventario.merma",
@@ -96,33 +96,24 @@
   },
   {
     "id": "funcion:inventario.solo-bajo-minimo",
-    "description": "Filtrar solo los insumos bajo el mínimo"
+    "description": "Filtrar solo los insumos bajo el mínimo; la cuenta de los que faltan está junto al filtro"
   },
   {
     "id": "funcion:inventario.paginar",
     "description": "La tabla de insumos se pagina de a 30"
   },
   {
-    "id": "funcion:inventario.ver-alertas",
-    "description": "El resumen de stock bajo lleva a la pestaña de alertas"
-  },
-  {
     "id": "funcion:inventario.alerta-desaparece-al-reponer",
-    "description": "Al reponer, la alerta y el aviso de stock bajo desaparecen solos"
+    "description": "Al reponer, el insumo sale de «Solo bajo mínimo» y deja de contarse como por reponer"
   },
   {
     "id": "funcion:inventario.agotar-sin-insumos",
-    "description": "Encender o apagar la regla que agota solos los platos sin insumos"
+    "description": "Encender o apagar, en la hoja «Reglas de stock», la regla que agota solos los platos sin insumos"
   },
   {
     "id": "estado:inventario.sin-resultados",
     "type": "estado",
     "description": "Una búsqueda sin coincidencias lo dice"
-  },
-  {
-    "id": "estado:inventario.alertas-vacio",
-    "type": "estado",
-    "description": "Sin nada bajo el mínimo, las alertas dicen «Nada por reponer»"
   },
   {
     "id": "estado:inventario.vacio",
@@ -138,11 +129,6 @@
     "id": "estado:inventario.error",
     "type": "estado",
     "description": "Si falla el servidor, la tabla de insumos muestra el error"
-  },
-  {
-    "id": "estado:inventario.alertas-error",
-    "type": "estado",
-    "description": "Si falla el servidor, las alertas muestran el error"
   },
   {
     "id": "funcion:movimientos.kardex",

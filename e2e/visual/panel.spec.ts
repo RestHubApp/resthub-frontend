@@ -1,13 +1,13 @@
 // Regresión visual del panel BI: indicadores con ventas del día, reposición
 // sugerida y la auditoría de la IA.
-import { sell } from '../support/management'
+import { api, sell } from '../support/management'
 import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
-import { capture, expect, deadline, test } from './capture'
+import { capture, captureWindow, expect, deadline, test } from './capture'
 
 test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', async ({ page, restaurantWithCashRegister }) => {
   deadline(120_000)
-  covers('ruta:/panel', 'ruta:/panel/reposicion', 'ruta:/panel/ia')
+  covers('ruta:/panel', 'pestanas:insights/InsightsTabs', 'hoja:insights/MarginsBody', 'ruta:/panel/reposicion', 'ruta:/panel/ia')
   const local = restaurantWithCashRegister
   await sell(local, { table: local.table('1'), items: [{ dish: local.dish('Lomo saltado'), quantity: 2 }] })
   await sell(local, {
@@ -15,6 +15,10 @@ test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', a
     items: [{ dish: local.dish('Ceviche clásico') }, { dish: local.dish('Chicha morada'), quantity: 2 }],
     method: 'yape',
   })
+  // Con más de diez platos, el margen muestra los extremos y la tabla completa va en una hoja.
+  for (let n = 1; n <= 6; n += 1) {
+    await api(local).post('/menu/items', { category_id: local.dish('Chicha morada').categoryId, name: `Plato extra ${String(n)}`, price: '10.00' })
+  }
 
   await openAs(page, local.owner, '/panel')
   const indicators = page.getByRole('region', { name: 'Indicadores del período' })
@@ -31,6 +35,11 @@ test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', a
       page.getByText(/^Hora pico:/u),
     ],
   })
+
+  await page.getByRole('button', { name: 'Ver los 11 platos' }).click()
+  await captureWindow(page.getByRole('dialog', { name: 'Margen por plato' }), 'hoja-margen-por-plato')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog', { name: 'Margen por plato' })).toBeHidden()
 
   const sections = page.getByRole('navigation', { name: 'Secciones del panel' })
   await sections.getByRole('link', { name: 'Reposición' }).click()

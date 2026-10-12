@@ -23,24 +23,21 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
     'funcion:inventario.ajuste-diferencia',
     'funcion:inventario.compra',
     'funcion:inventario.compra-desde-alerta',
-    'funcion:inventario.ver-alertas',
     'funcion:inventario.alerta-desaparece-al-reponer',
     'funcion:movimientos.kardex',
     'funcion:movimientos.filtrar-insumo',
     'funcion:movimientos.filtrar-tipo',
     'estado:movimientos.sin-resultados',
-    'estado:inventario.alertas-vacio',
   )
   await openAs(page, local.owner, '/inventario')
   await expect(page.getByRole('heading', { level: 1, name: 'Inventario' })).toBeVisible()
-  const summary = page.getByRole('status').filter({ hasText: 'por reponer' })
-  await expect(summary).toContainText('1 insumo por reponer')
-  await expect(summary).toContainText('Culantro')
-  await expect(page.getByRole('tab', { name: /Alertas/u })).toContainText('1')
+  // Lo que hay que reponer se cuenta junto a los filtros; ya no hay banner ni pestaña de alertas.
+  const ingredients = page.getByRole('tabpanel', { name: /Insumos/u })
+  await expect(ingredients.getByText(', 1 por reponer')).toBeVisible()
+  await expect(page.getByRole('tab', { name: /Alertas/u })).toHaveCount(0)
   await evidence(page, 'ges-04-1-inventario')
 
   // Merma: se pide el motivo y se ve cómo queda el stock antes de guardar.
-  const ingredients = page.getByRole('tabpanel', { name: /Insumos/u })
   await ingredients.getByRole('button', { name: 'Más acciones de Cebolla roja' }).click()
   await page.getByRole('menu', { name: 'Más acciones de Cebolla roja' }).getByRole('menuitem', { name: 'Merma' }).click()
   const waste = page.getByRole('dialog', { name: 'Registrar merma: Cebolla roja' })
@@ -79,17 +76,14 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
   await adjustment.getByRole('button', { name: 'Guardar ajuste' }).click()
   await expect(notice(page, 'Ajuste de +150 g: Lomo de res queda en 4.95 kg')).toBeVisible()
 
-  // La alerta lleva a la compra; al reponer, desaparece sola.
-  await page.getByRole('button', { name: 'Ver alertas' }).click()
-  await expect(page).toHaveURL(/vista=alertas/u)
-  const alerts = page.getByRole('tabpanel', { name: /Alertas/u })
-  const card = alerts.getByRole('listitem').filter({ hasText: 'Culantro' })
-  await expect(card).toContainText('Hay 100 g')
-  await expect(card).toContainText('Mínimo 200 g')
-  await expect(card).toContainText('Faltan 100 g')
-  await expect(card).toContainText('Bajo mínimo')
+  // «Solo bajo mínimo» deja lo que falta, con la compra en su fila; al reponer, sale solo.
+  await ingredients.getByLabel('Solo bajo mínimo').check()
+  const low = ingredients.getByRole('row', { name: /Culantro/u })
+  await expect(low).toContainText('100 g')
+  await expect(low).toContainText('200 g')
+  await expect(low).toContainText('Bajo mínimo')
   await evidence(page, 'ges-04-4-alerta')
-  await card.getByRole('button', { name: 'Registrar compra de Culantro' }).click()
+  await low.getByRole('button', { name: 'Compra de Culantro' }).click()
   const purchase = page.getByRole('dialog', { name: 'Registrar compra: Culantro' })
   await purchase.getByLabel('Cantidad comprada', { exact: true }).fill('0.5')
   await expect(purchase.getByLabel('Costo por kg (S/)')).toHaveValue('12')
@@ -102,9 +96,8 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
   await evidence(page, 'ges-04-5-compra')
   await purchase.getByRole('button', { name: 'Registrar compra' }).click()
   await expect(notice(page, 'Compra registrada: Culantro queda en 600 g')).toBeVisible()
-  await expect(alerts.getByText('Nada por reponer')).toBeVisible()
-  await expect(page.getByText('Stock en orden: nada por debajo del mínimo.')).toBeVisible()
-  await expect(page.getByRole('tab', { name: /Alertas/u })).toHaveText('Alertas')
+  await expect(ingredients.getByText('Ningún insumo coincide con la búsqueda.')).toBeVisible()
+  await expect(ingredients.getByText(', 1 por reponer')).toHaveCount(0)
   await evidence(page, 'ges-04-6-sin-alertas')
 
   // El kardex: cada movimiento, con quién y por qué, filtrable.
@@ -133,6 +126,7 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
 
 test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos, y decide si los platos sin insumos se agotan solos', async ({ page, local }) => {
   covers(
+    'hoja:inventory/StockRulesSheet',
     'funcion:inventario.nuevo-insumo',
     'funcion:inventario.editar-insumo',
     'funcion:inventario.buscar',
@@ -157,7 +151,7 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
   await expect(limon).toContainText('Bajo mínimo')
   await expect(limon).toContainText('2 kg')
   await expect(limon).toContainText(/S\/\s*4\.20 por kg/u)
-  await expect(page.getByText('2 insumos por reponer')).toBeVisible()
+  await expect(ingredients.getByText(', 2 por reponer')).toBeVisible()
 
   // Editar: la unidad no se cambia; el mínimo sí.
   await ingredients.getByRole('button', { name: 'Más acciones de Limón' }).click()
@@ -169,7 +163,7 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
   await edit.getByRole('button', { name: 'Guardar' }).click()
   await expect(notice(page, 'Cambios guardados.')).toBeVisible()
   await expect(limon).toContainText('Suficiente')
-  await expect(page.getByText('1 insumo por reponer')).toBeVisible()
+  await expect(ingredients.getByText(', 1 por reponer')).toBeVisible()
 
   // Buscar y quedarse con lo que hay que reponer.
   const search = ingredients.getByLabel('Buscar insumo')
@@ -194,7 +188,10 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
     return menu.flatMap((c) => c.items).find((p) => p.name === 'Lomo saltado')?.out_of_stock
   }
   expect(await lomoOutOfStock()).toBe(true)
-  const rule = page.getByRole('checkbox', { name: /Marcar «Sin insumos» automáticamente/u })
+  // La regla vive en una hoja, que se abre desde la cabecera.
+  await page.getByRole('button', { name: 'Reglas de stock' }).click()
+  const rules = page.getByRole('dialog', { name: 'Reglas de stock' })
+  const rule = rules.getByRole('checkbox', { name: /Marcar «Sin insumos» automáticamente/u })
   await expect(rule).toBeChecked()
   await rule.click()
   await expect(notice(page, 'Los platos ya no se agotan por el stock.')).toBeVisible()

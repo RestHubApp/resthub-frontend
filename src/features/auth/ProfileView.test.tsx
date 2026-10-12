@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { buildAccount, signInAs, mountScreen, PERMISSIONS_WAITER, firstOf, ErrorResponse, server } from '#jest/harness'
 import { currentAuthToken } from '@/services/apiCredentials'
@@ -19,10 +19,10 @@ const ACCESS = '/auth/login'
 const NEW_TOKEN = 'token-nuevo'
 const NOTICE = 'Tu contraseña cambió. Vuelve a iniciar sesión.'
 
-function openProfile(preview = false) {
+function openProfile(preview = false, at = '/perfil') {
   const api = server()
   signInAs(PERMISSIONS_WAITER, { preview })
-  return { api, ...mountScreen(<ProfileView />, { path: '/perfil', routes: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
+  return { api, ...mountScreen(<ProfileView />, { path: '/perfil', en: at, routes: [{ path: '/acceso', element: <SessionExpiredNotice /> }] }) }
 }
 
 describe('ProfileView', () => {
@@ -37,10 +37,11 @@ describe('ProfileView', () => {
   })
 
   async function changePassword(user: ReturnType<typeof openProfile>['user']) {
+    await user.click(screen.getByRole('button', CHANGE))
     await user.type(screen.getByLabelText(ACTUAL), CURRENT_SECRET)
     await user.type(screen.getByLabelText(NEW), NEW_SECRET)
     await user.type(screen.getByLabelText(REPEAT), NEW_SECRET)
-    await user.click(screen.getByRole('button', CHANGE))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', CHANGE))
   }
 
   it('cambia la contraseña y sigue con el token nuevo, sin un segundo acceso', async () => {
@@ -88,10 +89,11 @@ describe('ProfileView', () => {
   it('no envía si las dos contraseñas nuevas no coinciden o repiten la actual', async () => {
     const { api, user } = openProfile()
 
+    await user.click(screen.getByRole('button', CHANGE))
     await user.type(screen.getByLabelText(ACTUAL), NEW_SECRET)
     await user.type(screen.getByLabelText(NEW), NEW_SECRET)
     await user.type(screen.getByLabelText(REPEAT), 'otra-clave-larga')
-    await user.click(screen.getByRole('button', CHANGE))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', CHANGE))
 
     expect(await screen.findByText('Las dos contraseñas no coinciden')).toBeInTheDocument()
     expect(screen.getByText('La nueva contraseña tiene que ser distinta de la actual')).toBeInTheDocument()
@@ -102,10 +104,11 @@ describe('ProfileView', () => {
     const { api, user } = openProfile()
     api.on('post', CHANGE_PASSWORD_URL, new ErrorResponse(400, 'La contraseña actual no coincide.'))
 
+    await user.click(screen.getByRole('button', CHANGE))
     await user.type(screen.getByLabelText(ACTUAL), 'equivocada1')
     await user.type(screen.getByLabelText(NEW), NEW_SECRET)
     await user.type(screen.getByLabelText(REPEAT), NEW_SECRET)
-    await user.click(screen.getByRole('button', CHANGE))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', CHANGE))
 
     expect(await screen.findByText('La contraseña actual no coincide.')).toBeInTheDocument()
   })
@@ -117,8 +120,22 @@ describe('ProfileView', () => {
     expect(screen.getByText('Ana Torres')).toBeInTheDocument()
   })
 
+})
+
+describe('ProfileView: ventana de contraseña', () => {
+  it('el formulario no ocupa el perfil hasta que se pide', () => {
+    openProfile()
+    expect(screen.queryByLabelText(ACTUAL)).not.toBeInTheDocument()
+  })
+
+  it('se abre sola desde la dirección con ?accion=cambiar-contrasena', async () => {
+    openProfile(false, '/perfil?accion=cambiar-contrasena')
+    expect(await screen.findByLabelText(ACTUAL)).toBeInTheDocument()
+  })
+
   it('el botón del ojo deja ver lo que se escribe', async () => {
     const { user } = openProfile()
+    await user.click(screen.getByRole('button', CHANGE))
     const field = screen.getByLabelText(ACTUAL)
     expect(field).toHaveAttribute('type', 'password')
 

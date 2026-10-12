@@ -32,7 +32,6 @@ test('GES-32 un restaurante recién dado de alta muestra cada pantalla vacía co
 
   await page.goto('/inventario')
   await expect(page.getByText('Todavía no hay insumos.')).toBeVisible()
-  await expect(page.getByText('Stock en orden: nada por debajo del mínimo.')).toBeVisible()
   await page.getByRole('tab', { name: /Recetas/u }).click()
   await expect(page.getByText('Todavía no hay platos en la carta.')).toBeVisible()
 

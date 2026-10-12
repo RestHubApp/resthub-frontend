@@ -7,17 +7,37 @@ import { CashView } from './CashView'
 
 const PAGE_EMPTY = { items: [], total: 0, limit: 10, offset: 0 }
 const ACTUAL = '/cash/current'
+const SESSIONS = '/cash/sessions'
 const OPEN = '/cash/open'
+const SCREEN = '/caja'
 const INITIAL = 'Efectivo inicial'
 const OPEN_CASH_REGISTER = { name: 'Abrir caja' }
 
 function openCashRegister(actual = CLOSED_CASH_REGISTER) {
-  const api = server().on('get', ACTUAL, actual).on('get', '/cash/sessions', PAGE_EMPTY)
+  const api = server().on('get', ACTUAL, actual).on('get', SESSIONS, PAGE_EMPTY)
   signInAs()
-  return { api, ...mountScreen(<CashView />, { path: '/caja' }) }
+  return { api, ...mountScreen(<CashView />, { path: SCREEN }) }
+}
+
+async function openDialog(user: ReturnType<typeof openCashRegister>['user']) {
+  await user.click(await screen.findByRole('button', OPEN_CASH_REGISTER))
+  return screen.findByLabelText(INITIAL)
 }
 
 describe('CashView', () => {
+  it('con la caja cerrada muestra un solo botón y el formulario no ocupa la pantalla', async () => {
+    openCashRegister()
+    expect(await screen.findByText('La caja está cerrada')).toBeInTheDocument()
+    expect(screen.queryByLabelText(INITIAL)).not.toBeInTheDocument()
+  })
+
+  it('se abre sola desde la dirección con ?accion=abrir-caja', async () => {
+    server().on('get', ACTUAL, CLOSED_CASH_REGISTER).on('get', SESSIONS, PAGE_EMPTY)
+    signInAs()
+    mountScreen(<CashView />, { path: SCREEN, en: `${SCREEN}?accion=abrir-caja` })
+    expect(await screen.findByRole('dialog', OPEN_CASH_REGISTER)).toBeInTheDocument()
+  })
+
   it('sin caja abierta ofrece abrirla y envía el monto con punto decimal', async () => {
     const { api, user } = openCashRegister()
     // Como el servidor: después de abrir, la caja actual es el turno nuevo.
@@ -27,9 +47,9 @@ describe('CashView', () => {
       return shift
     })
 
-    await user.type(await screen.findByLabelText(INITIAL), '150,50')
+    await user.type(await openDialog(user), '150,50')
     await user.type(screen.getByLabelText('Nota (opcional)'), 'Turno mañana')
-    await user.click(screen.getByRole('button', OPEN_CASH_REGISTER))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', OPEN_CASH_REGISTER))
 
     expect(await screen.findByText('Caja abierta con S/ 150.50. Ya se puede cobrar.')).toBeInTheDocument()
     expect(api.calls('post', OPEN)[0]?.body).toEqual({ opening_amount: '150.50', notes: 'Turno mañana' })
@@ -39,8 +59,8 @@ describe('CashView', () => {
   it('un monto mal escrito no llega al servidor', async () => {
     const { api, user } = openCashRegister()
 
-    await user.type(await screen.findByLabelText(INITIAL), '15.505')
-    await user.click(screen.getByRole('button', OPEN_CASH_REGISTER))
+    await user.type(await openDialog(user), '15.505')
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', OPEN_CASH_REGISTER))
 
     expect(await screen.findByText('Escribe un monto como 150 o 150.50')).toBeInTheDocument()
     expect(api.calls('post', OPEN)).toHaveLength(0)
@@ -62,7 +82,7 @@ describe('CashView', () => {
   })
 
   it('si el servidor falla, lo dice en vez de mostrar la caja vacía', async () => {
-    server().on('get', ACTUAL, new ErrorResponse(500, 'Base caída')).on('get', '/cash/sessions', PAGE_EMPTY)
+    server().on('get', ACTUAL, new ErrorResponse(500, 'Base caída')).on('get', SESSIONS, PAGE_EMPTY)
     signInAs()
     mountScreen(<CashView />)
 

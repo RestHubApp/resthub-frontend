@@ -13,12 +13,18 @@ const ORDER_DISHES = '/menu/categories/1/items/order'
 const CHECKED = 'aria-checked'
 const AVAILABLE_CEVICHE = { name: 'Disponible hoy: Ceviche' }
 
-function openMenu(initial: MenuResponse = buildMenu(), permissions = PERMISSIONS_OWNER) {
+/** Abre la ficha de un plato tocando su fila. */
+async function openRecord(user: ReturnType<typeof openMenu>['user'], dish: string) {
+  await user.click(await screen.findByRole('button', { name: `Ver la ficha de ${dish}` }))
+  return screen.findByRole('dialog', { name: dish })
+}
+
+function openMenu(initial: MenuResponse = buildMenu(), permissions = PERMISSIONS_OWNER, at = '/menu') {
   const api = server()
     .on('get', MENU, initial)
     .on('get', COSTS, [dishCost(), dishCost({ menu_item_id: 11, menu_item_name: 'Causa', has_recipe: false, cost: null, margin: null, margin_percent: null })])
   signInAs(permissions)
-  return { api, ...mountScreen(<MenuView />, { path: '/menu' }) }
+  return { api, ...mountScreen(<MenuView />, { path: '/menu', en: at }) }
 }
 
 describe('MenuView: la carta', () => {
@@ -34,20 +40,35 @@ describe('MenuView: la carta', () => {
     expect(api.calls('get', MENU)[0]?.params).toEqual({ include_inactive: 'true' })
   })
 
-  it('con acceso al inventario muestra el margen de cada plato y el camino a su receta', async () => {
-    openMenu()
+  it('cada plato es una línea sin costo ni margen; la ficha trae el margen y el camino a su receta', async () => {
+    const { user } = openMenu()
 
-    expect(await screen.findByText(/Costo S\/ 12\.00 · Margen/u)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Ver la receta de Ceviche' })).toHaveAttribute('href', '/inventario/recetas/10')
-    expect(screen.getByRole('link', { name: 'Agregar la receta de Causa' })).toBeInTheDocument()
+    const entries = await screen.findByRole('region', { name: 'Entradas' })
+    expect(within(entries).queryByText(/Costo/u)).not.toBeInTheDocument()
+    expect(within(entries).queryByRole('link')).not.toBeInTheDocument()
+
+    const record = await openRecord(user, 'Ceviche')
+    expect(within(record).getByText('Costo S/ 12.00 · Margen', { exact: false })).toBeInTheDocument()
+    expect(within(record).getByRole('link', { name: 'Ver la receta de Ceviche' })).toHaveAttribute('href', '/inventario/recetas/10')
+  })
+
+  it('un plato sin receta ofrece agregarla desde su ficha', async () => {
+    const { user } = openMenu()
+    const record = await openRecord(user, 'Causa')
+    expect(within(record).getByRole('link', { name: 'Agregar la receta de Causa' })).toBeInTheDocument()
   })
 
   it('marca el plato que se vende a pérdida', async () => {
     server().on('get', MENU, buildMenu()).on('get', COSTS, [dishCost({ cost: '35.00', margin: '-5.00', margin_percent: '-16.7' })])
     signInAs()
-    mountScreen(<MenuView />)
+    const { user } = mountScreen(<MenuView />)
 
-    expect(await screen.findByText(/se vende a pérdida/u)).toBeInTheDocument()
+    expect(await within(await openRecord(user, 'Ceviche')).findByText(/se vende a pérdida/u)).toBeInTheDocument()
+  })
+
+  it('se abren «Nuevo plato» y «Nueva categoría» desde la dirección con ?accion=', async () => {
+    openMenu(buildMenu(), PERMISSIONS_OWNER, '/menu?accion=nuevo-plato')
+    expect(await screen.findByRole('dialog', { name: 'Nuevo plato' })).toBeInTheDocument()
   })
 
   it('sin permiso de inventario no pide los costos ni muestra márgenes', async () => {
@@ -124,11 +145,9 @@ describe('MenuView: orden', () => {
     const { api, user } = openMenu()
     api.on('put', ORDER_DISHES, [])
 
-    await user.click(await screen.findByRole('button', { name: 'Más acciones de Ceviche' }))
-    expect(await screen.findByRole('menuitem', { name: 'Subir' })).toHaveAttribute('aria-disabled', 'true')
+    expect(within(await openRecord(user, 'Ceviche')).getByRole('button', { name: 'Subir' })).toBeDisabled()
     await user.keyboard('{Escape}')
-    await user.click(screen.getByRole('button', { name: 'Más acciones de Causa' }))
-    await user.click(await screen.findByRole('menuitem', { name: 'Subir' }))
+    await user.click(within(await openRecord(user, 'Causa')).getByRole('button', { name: 'Subir' }))
 
     expect(api.calls('put', ORDER_DISHES)[0]?.body).toEqual({ ids: [11, 10] })
   })

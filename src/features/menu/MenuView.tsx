@@ -1,12 +1,11 @@
-import { useState } from 'react'
-
 import { PageHeader } from '@/components/PageHeader'
 import { CategorySection } from './CategorySection'
 import { MenuHeaderActions } from './MenuHeaderActions'
 import { MenuStatus } from './MenuStatus'
-import { NewMenuDialogs, type NewMenuDialog } from './NewMenuDialogs'
+import { NewMenuDialogs } from './NewMenuDialogs'
 import { TodaySummary } from './TodaySummary'
 import { useMenuData } from './useMenuData'
+import { useMenuDialog } from './useMenuDialog'
 import { useMenuOrder } from './useMenuOrder'
 
 /** La carta del restaurante: categorías, platos, precios y lo que hay hoy. */
@@ -14,13 +13,7 @@ export function MenuView() {
   const { menu, costByDish } = useMenuData()
   const categories = menu.data?.categories ?? []
   const order = useMenuOrder(categories)
-  const [dialog, setDialog] = useState<NewMenuDialog>(null)
-  const close = () => {
-    setDialog(null)
-  }
-  const open = (fresh: NewMenuDialog) => () => {
-    setDialog(fresh)
-  }
+  const { dialog, open, close } = useMenuDialog()
   const last = categories.length - 1
 
   return (
