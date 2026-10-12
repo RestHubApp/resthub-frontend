@@ -93,7 +93,11 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
 
   // La cuenta propia: el rol no se cambia y no se desactiva ni restablece acá.
   const own = page.getByRole('row', { name: /Encargada Prueba \(tú\)/u })
-  await expect(own.getByRole('button', { name: /Más acciones/u })).toHaveCount(0)
+  await own.getByRole('button', { name: /Más acciones/u }).click()
+  await expect(page.getByRole('menuitem', { name: 'Ver movimientos' })).toBeVisible()
+  await expect(page.getByRole('menuitem', { name: 'Desactivar' })).toHaveCount(0)
+  await expect(page.getByRole('menuitem', { name: 'Contraseña' })).toHaveCount(0)
+  await page.keyboard.press('Escape')
   await own.getByRole('button', { name: 'Editar' }).click()
   const mia = page.getByRole('dialog', { name: 'Editar a Encargada Prueba' })
   await expect(mia.getByText('No puedes cambiar el rol de tu propia cuenta.')).toBeVisible()

@@ -48,10 +48,11 @@ test('GES-39 el mesero cierra sesión y el encargado ve cuándo salió, filtrand
   covers('ruta:/bitacora', 'funcion:bitacora.ver', 'funcion:bitacora.filtrar-sesiones', 'funcion:bitacora.filtrar-persona', 'funcion:personal.ver-movimientos')
   await openAs(page, local.waiter, '/perfil')
   await page.getByRole('button', { name: 'Buscar o ir a…' }).click()
+  // El aviso de salida es de segundo plano: se espera a que el servidor lo reciba antes de cambiar de cuenta.
+  const logout = page.waitForResponse((response) => response.url().endsWith('/auth/logout'))
   await page.getByRole('dialog', { name: 'Buscar o ir a…' }).getByRole('option', { name: /^Cerrar sesión/u }).click()
   await expect(page).toHaveURL(/\/acceso$/u)
-  // El aviso de salida es de segundo plano: se espera a que el servidor lo reciba antes de cambiar de cuenta.
-  await page.waitForResponse((response) => response.url().endsWith('/auth/logout'))
+  expect((await logout).status()).toBe(204)
 
   await page.evaluate(() => {
     localStorage.clear()
