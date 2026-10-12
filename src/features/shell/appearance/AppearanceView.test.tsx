@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, signInAs, TEST_SCREENS } from '#jest/harness'
 import type { PermissionCode } from '@/api/types'
@@ -43,6 +43,10 @@ function pathOf(label: string): string | undefined {
 async function chooseFromMenu(user: ReturnType<typeof openAppearance>['user'], label: string, action: string) {
   await user.click(screen.getByRole('button', { name: `Acciones de ${label}` }))
   await user.click(await screen.findByRole('menuitem', { name: action }))
+  // La acción corre cuando el menú ya se cerró y devolvió el foco.
+  await waitFor(() => {
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  })
 }
 
 const ORIGINAL_MATCH_MEDIA = Object.getOwnPropertyDescriptor(window, 'matchMedia')

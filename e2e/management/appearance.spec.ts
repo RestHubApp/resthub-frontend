@@ -98,6 +98,7 @@ test('GES-36 el encargado reordena el menú y elige la barra de abajo del celula
   // Bajar la primera de la barra la pasa al segundo lugar, y el menú de la página la sigue.
   await actions(first).click()
   await page.getByRole('menuitem', { name: 'Bajar' }).click()
+  await expect(page.getByRole('menu')).toBeHidden()
   await expect.poll(() => namesIn(bar)).toEqual([second, first, ...factoryBar.slice(2)])
   await expect(page.getByRole('main').getByRole('status').filter({ hasText: 'lugar' })).toHaveText(`${first}: lugar 2 de 4 en la barra de abajo.`)
   await expect(actions(first)).toBeFocused()
@@ -106,6 +107,7 @@ test('GES-36 el encargado reordena el menú y elige la barra de abajo del celula
   // Subirla otra vez. La barra está llena: no deja poner otra hasta quitar una.
   await actions(first).click()
   await page.getByRole('menuitem', { name: 'Subir' }).click()
+  await expect(page.getByRole('menu')).toBeHidden()
   await expect.poll(() => namesIn(bar)).toEqual(factoryBar)
   const [outside = ''] = factoryMore
   await actions(outside).click()
@@ -116,9 +118,11 @@ test('GES-36 el encargado reordena el menú y elige la barra de abajo del celula
   const third = factoryBar[2] ?? ''
   await actions(third).click()
   await page.getByRole('menuitem', { name: 'Quitar de la barra de abajo' }).click()
+  await expect(page.getByRole('menu')).toBeHidden()
   await expect(page.getByRole('list', { name: /3 de 4/u })).toBeVisible()
   await actions(outside).click()
   await page.getByRole('menuitem', { name: 'Poner en la barra de abajo' }).click()
+  await expect(page.getByRole('menu')).toBeHidden()
   await expect(page.getByRole('list', { name: /4 de 4/u })).toBeVisible()
   const chosen = await namesIn(bar)
   expect(chosen).toContain(outside)

@@ -14,6 +14,17 @@ interface MenuRowActionsProps {
   readonly onToggleBar: (path: string) => void
 }
 
+/**
+ * La acción espera a que el menú se cierre y devuelva el foco a su botón: si la
+ * fila cambia de lugar antes, el navegador suelta el foco a media animación (es
+ * lo mismo que hace `ActionsMenu`).
+ */
+function afterClosing(action: () => void): () => void {
+  return () => {
+    window.setTimeout(action, 0)
+  }
+}
+
 /** El «⋯» de una pantalla del menú: Subir, Bajar y poner o sacar de la barra de abajo (la barra admite cuatro). */
 export function MenuRowActions({ entry, index, count, isInBar, isBarFull, onStep, onToggleBar }: MenuRowActionsProps) {
   return (
@@ -26,27 +37,27 @@ export function MenuRowActions({ entry, index, count, isInBar, isBarFull, onStep
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           disabled={index === 0}
-          onSelect={() => {
-            onStep(index, -1)
-          }}
+          onSelect={afterClosing(() => {
+              onStep(index, -1)
+            })}
         >
           <Icon name="up" size={16} />
           <span>Subir</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={index === count - 1}
-          onSelect={() => {
-            onStep(index, 1)
-          }}
+          onSelect={afterClosing(() => {
+              onStep(index, 1)
+            })}
         >
           <Icon name="down" size={16} />
           <span>Bajar</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={!isInBar && isBarFull}
-          onSelect={() => {
-            onToggleBar(entry.to)
-          }}
+          onSelect={afterClosing(() => {
+              onToggleBar(entry.to)
+            })}
         >
           <span>{isInBar ? 'Quitar de la barra de abajo' : 'Poner en la barra de abajo'}</span>
         </DropdownMenuItem>
