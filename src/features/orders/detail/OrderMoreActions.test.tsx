@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { table, payment, buildOrder } from '#jest/fixtures/charge'
 import { signInAs, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
@@ -122,6 +122,8 @@ describe('OrderMoreActions: mover y unir mesas', () => {
       await user.click(last)
     }
 
-    expect(onCancel).toHaveBeenCalledTimes(1)
+    await waitFor(() => {
+      expect(onCancel).toHaveBeenCalledTimes(1)
+    })
   })
 })

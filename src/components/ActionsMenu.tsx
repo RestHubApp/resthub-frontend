@@ -65,7 +65,12 @@ function renderEntry(item: ActionsMenuItem) {
       key={item.label}
       variant={item.isDestructive === true ? 'destructive' : 'default'}
       disabled={item.isDisabled === true}
-      onSelect={item.onSelect}
+      onSelect={() => {
+        // La acción espera a que el menú se cierre y devuelva el foco a su
+        // botón: así una ventana que abre la acción recuerda ese botón y le
+        // devuelve el foco al cerrarse.
+        window.setTimeout(item.onSelect, 0)
+      }}
     >
       {item.icon === undefined ? null : <Icon name={item.icon} size={16} />}
       <span>{item.label}</span>
