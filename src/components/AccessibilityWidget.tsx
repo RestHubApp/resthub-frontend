@@ -82,7 +82,7 @@ export function AccessibilityWidget() {
       aria-expanded="false"
       onClick={openAccessibilityMenu}
     >
-      <Icon name="accessibility" size={30} />
+      <Icon name="accessibility" size={24} />
     </button>
   )
 }

@@ -18,6 +18,12 @@
     font-weight: 400 900;
     src: url('./assets/fonts/geist-latin-wght.woff2') format('woff2');
 }
+/* Sombra solo en lo que flota: menús, hojas, diálogos y avisos (`shadow-float`)
+ * y la barra fija del carrito (`shadow-bar`). Las tarjetas en reposo no llevan. */
+@theme {
+    --shadow-float: 0 8px 24px -8px rgb(43 37 33 / 0.25);
+    --shadow-bar: 0 -6px 16px -8px rgb(43 37 33 / 0.25);
+}
 @custom-variant dark (&:is(.dark *));
 @theme inline {
     --font-heading: var(--font-sans);
@@ -72,8 +78,12 @@
  *
  * - `--primary` #9a3412 con texto blanco da 7,3 a 1, y 6,8 sobre el fondo;
  * - `--muted-foreground` #655a52 da 6,3 a 1 sobre el fondo y 5,8 sobre `--muted`;
- * - `--input` #8c7f76 da 3,9 a 1 sobre blanco, por encima del 3 a 1 que pide
- *   un borde de campo; `--border`, que solo separa, puede ser mas claro;
+ * - `--input` #857a71 da 4,2 a 1 sobre blanco y 3,9 sobre el fondo, por encima
+ *   del 3 a 1 que pide un borde de campo; `--border` #ddd3c8 (1,4 a 1), que solo
+ *   separa, puede ser mas claro;
+ * - el boton deshabilitado usa `--muted-foreground` sobre `--muted` (5,8 a 1) y el
+ *   `hover` del boton principal oscurece `--primary` un 12 % (#882e10, 8,6 a 1
+ *   con texto blanco), en vez de bajarle la opacidad;
  * - `--success` #186a2c da 6,7 a 1 y `--warning` #7a5600 da 6,7 a 1 con blanco,
  *   y los dos pasan de 5 a 1 sobre su propio tinte al 10 % (`bg-success/10`,
  *   las insignias de «Pagado» o «Bajo mínimo»). Los anteriores (#1e7b34 y
@@ -107,8 +117,8 @@
     --success: #186a2c;
     --success-foreground: #ffffff;
     --warning: #7a5600;
-    --border: #e7dfd6;
-    --input: #8c7f76;
+    --border: #ddd3c8;
+    --input: #857a71;
     --ring: #c2410c;
     --chart-1: #c2410c;
     --chart-2: #6b4fc8;
@@ -125,13 +135,17 @@
     --chart-axis: #d6ccc2;
     --chart-area: rgb(194 65 12 / 0.1);
     --radius: 0.625rem;
+    /* Un solo tamaño de control: 44 px (WCAG 2.5.5) para lo que se toca. */
+    --control-h: 2.75rem;
+    --control-h-sm: 2.25rem;
+    --control-h-lg: 3rem;
     --sidebar: #ffffff;
     --sidebar-foreground: #2b2521;
     --sidebar-primary: #9a3412;
     --sidebar-primary-foreground: #ffffff;
     --sidebar-accent: #fbece4;
     --sidebar-accent-foreground: #7c2d12;
-    --sidebar-border: #e7dfd6;
+    --sidebar-border: #ddd3c8;
     --sidebar-ring: #c2410c;
 }
 
@@ -250,37 +264,56 @@
 }
 
 /*
- * El boton de reserva del widget de accesibilidad (AccessibilityWidget.tsx):
- * el widget pesa 20 kB por la red y no se baja hasta que alguien lo pide. Este
- * boton se ve igual que el suyo (mismo tamano, color, borde y esquina) y lo
- * reemplaza al tocarlo.
+ * El boton de accesibilidad, el de reserva (AccessibilityWidget.tsx) y el del
+ * widget Sienna una vez cargado, comparten la paleta de la marca (`--primary`,
+ * texto blanco: 7,3 a 1), 44 px y la esquina inferior derecha sin halo.
+ *
+ * El widget pinta su boton con una hoja que inyecta en el documento; se la
+ * gana por especificidad (`html .asw-...`) y con sus propias variables
+ * (`--asw-primary`, `--asw-btn-size`...), asi que no hacen falta estilos en
+ * linea ni tocar la CSP. El mismo `--asw-primary` tine el menu del widget.
  */
+html .asw-widget,
+html .asw-menu {
+  --asw-primary: var(--primary);
+}
+
+html .asw-menu-btn {
+  --asw-btn-size: 44px;
+  --asw-btn-size-mobile: 44px;
+  --asw-icon-size: 24px;
+  --asw-icon-size-mobile: 24px;
+  --asw-left: auto;
+  --asw-right: 1rem;
+  --asw-bottom: 1rem;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: var(--shadow-float);
+}
+
+html .asw-menu-btn:focus-visible,
+.a11y-launcher:focus-visible {
+  outline: 3px solid var(--ring) !important;
+  outline-offset: 2px;
+}
+
 .a11y-launcher {
-  --a11y-primary: #0848ca;
   position: fixed;
   z-index: 500000;
-  right: 30px;
-  bottom: 30px;
+  right: 1rem;
+  bottom: 1rem;
   display: flex;
-  width: 58px;
-  height: 58px;
+  width: 44px;
+  height: 44px;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 3px solid white;
+  border: 0;
   border-radius: 50%;
-  outline: 5px solid var(--a11y-primary);
-  background: var(--a11y-primary);
-  color: white;
-  box-shadow: 0 5px 15px #252c6126, 0 2px 4px #5d649433;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-float);
   cursor: pointer;
-}
-
-@media (width <= 768px) {
-  .a11y-launcher {
-    width: 42px;
-    height: 42px;
-  }
 }
 
 /*
@@ -306,4 +339,19 @@
   html:has([data-cart-bar]) .a11y-launcher {
     bottom: 6rem !important;
   }
+}
+
+/*
+ * Pista de desplazamiento para una lista que no cabe (el menu lateral en una
+ * laptop baja): una sombra suave en el borde por el que aun hay contenido, que
+ * desaparece al llegar al extremo. Sin JavaScript: los degradados `local` se
+ * mueven con el contenido y tapan la sombra fija.
+ */
+.scroll-shadow {
+  background:
+    linear-gradient(var(--card) 30%, transparent) 0 0 / 100% 2rem no-repeat local,
+    linear-gradient(transparent, var(--card) 70%) 0 100% / 100% 2rem no-repeat local,
+    radial-gradient(farthest-side at 50% 0, rgb(43 37 33 / 0.22), transparent) 0 0 / 100% 0.75rem no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgb(43 37 33 / 0.22), transparent) 0 100% / 100% 0.75rem no-repeat scroll;
+  background-color: var(--card);
 }
