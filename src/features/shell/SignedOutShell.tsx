@@ -10,8 +10,9 @@ import { SkipLink } from './SkipLink'
  * El armazón sin sesión.
  *
  * El acceso ocupa toda la pantalla y trae su propia marca junto al formulario;
- * las demás pantallas públicas (la privacidad) llevan la marca arriba y el pie
- * al final; en el acceso el pie va dentro de la columna del formulario.
+ * las demás pantallas públicas (la privacidad) llevan la marca arriba. El pie
+ * es el mismo en todas: una franja del ancho completo, al final de la página
+ * (en el acceso, debajo de las dos columnas).
  */
 export function SignedOutShell() {
   const isLogin = useLocation().pathname === paths.login
@@ -32,11 +33,7 @@ export function SignedOutShell() {
       >
         <Outlet />
       </main>
-      {isLogin ? null : (
-        <div className="mx-auto w-full max-w-3xl px-4 pb-16 sm:px-6">
-          <PublicFooter privacyTo={paths.privacy} rightsTo={paths.privacyRights} />
-        </div>
-      )}
+      <PublicFooter privacyTo={paths.privacy} rightsTo={paths.privacyRights} />
     </div>
   )
 }
