@@ -1,17 +1,21 @@
 import { describe, expect, it } from '@jest/globals'
 
 import {
-  APPEARANCE_VERSION,
+  ACCENTS,
   type Appearance,
   BOTTOM_BAR_SLOTS,
   DEFAULT_APPEARANCE,
+  isDarkMode,
+  MODES,
   parseAppearance,
   resolveTheme,
   serializeAppearance,
+  stepTextSize,
+  THEMES,
 } from './appearanceRules'
 
-function stored(changes: Record<string, unknown>): string {
-  return JSON.stringify({ version: APPEARANCE_VERSION, ...changes })
+function stored(changes: Record<string, unknown>, version = 2): string {
+  return JSON.stringify({ version, ...changes })
 }
 
 describe('parseAppearance', () => {
@@ -19,20 +23,24 @@ describe('parseAppearance', () => {
     expect(parseAppearance(null)).toEqual(DEFAULT_APPEARANCE)
   })
 
-  it('un JSON roto, un valor que no es objeto o una versión distinta dan las de fábrica', () => {
+  it('un JSON roto, un valor que no es objeto o una versión desconocida dan las de fábrica', () => {
     expect(parseAppearance('{no es json')).toEqual(DEFAULT_APPEARANCE)
     expect(parseAppearance('"tema"')).toEqual(DEFAULT_APPEARANCE)
     expect(parseAppearance('[1, 2]')).toEqual(DEFAULT_APPEARANCE)
     expect(parseAppearance('null')).toEqual(DEFAULT_APPEARANCE)
-    expect(parseAppearance(JSON.stringify({ version: 99, theme: 'night' }))).toEqual(DEFAULT_APPEARANCE)
-    expect(parseAppearance(JSON.stringify({ theme: 'night' }))).toEqual(DEFAULT_APPEARANCE)
+    expect(parseAppearance(stored({ mode: 'dark' }, 99))).toEqual(DEFAULT_APPEARANCE)
+    expect(parseAppearance(stored({ mode: 'dark' }, 3))).toEqual(DEFAULT_APPEARANCE)
+    expect(parseAppearance(JSON.stringify({ mode: 'dark' }))).toEqual(DEFAULT_APPEARANCE)
   })
 
   it('lee lo que ella misma guardó', () => {
     const appearance: Appearance = {
-      theme: 'wine',
+      mode: 'system',
+      accent: 'wine',
+      contrast: 'high',
       font: 'lexend',
-      textSize: 'larger',
+      textSize: 'largest',
+      density: 'compact',
       menu: { order: ['/cocina', '/pedidos'], bottom: ['/cocina'] },
     }
 
@@ -40,13 +48,11 @@ describe('parseAppearance', () => {
   })
 
   it('cada preferencia inválida vuelve a la de fábrica sin tirar las demás', () => {
-    const parsed = parseAppearance(stored({ theme: 'neón', font: 'lexend', textSize: 99, menu: 'raro' }))
+    const parsed = parseAppearance(
+      stored({ mode: 'neón', accent: 'fucsia', contrast: 'máximo', font: 'lexend', textSize: 99, density: 'enorme', menu: 'raro' }),
+    )
 
     expect(parsed).toEqual({ ...DEFAULT_APPEARANCE, font: 'lexend' })
-  })
-
-  it('acepta «Según el sistema»', () => {
-    expect(parseAppearance(stored({ theme: 'system' })).theme).toBe('system')
   })
 
   it('de las listas del menú solo conserva rutas, sin repetir', () => {
@@ -70,14 +76,99 @@ describe('parseAppearance', () => {
   })
 })
 
-describe('resolveTheme', () => {
-  it('un tema elegido se pinta tal cual, sea cual sea el modo del aparato', () => {
-    expect(resolveTheme('olive', true)).toBe('olive')
-    expect(resolveTheme('night', false)).toBe('night')
+describe('migración de lo guardado en la versión 1', () => {
+  const legacy = (changes: Record<string, unknown>) => parseAppearance(stored(changes, 1))
+
+  it.each([
+    ['terracotta', { mode: 'light', accent: 'terracotta', contrast: 'normal' }],
+    ['olive', { mode: 'light', accent: 'olive', contrast: 'normal' }],
+    ['slate', { mode: 'light', accent: 'slate', contrast: 'normal' }],
+    ['wine', { mode: 'light', accent: 'wine', contrast: 'normal' }],
+    ['night', { mode: 'dark', accent: 'terracotta', contrast: 'normal' }],
+    ['system', { mode: 'system', accent: 'terracotta', contrast: 'normal' }],
+    ['contrast', { mode: 'light', accent: 'terracotta', contrast: 'high' }],
+  ])('el tema %s pasa a modo, color y contraste', (theme, expected) => {
+    expect(legacy({ theme })).toMatchObject(expected)
   })
 
-  it('«Según el sistema» elige Noche si el aparato está en oscuro y Terracota si no', () => {
-    expect(resolveTheme('system', true)).toBe('night')
-    expect(resolveTheme('system', false)).toBe('terracotta')
+  it('conserva la letra, el tamaño del texto y el menú, y pone la densidad de fábrica', () => {
+    const migrated = legacy({
+      theme: 'wine',
+      font: 'atkinson',
+      textSize: 'larger',
+      menu: { order: ['/cocina'], bottom: ['/cocina'] },
+    })
+
+    expect(migrated).toEqual({
+      ...DEFAULT_APPEARANCE,
+      accent: 'wine',
+      font: 'atkinson',
+      textSize: 'larger',
+      menu: { order: ['/cocina'], bottom: ['/cocina'] },
+    })
+  })
+
+  it('un tema que ya no existe o un v1 a medias vuelve a lo de fábrica sin perder lo demás', () => {
+    expect(legacy({ theme: 'neón', font: 'lexend' })).toEqual({ ...DEFAULT_APPEARANCE, font: 'lexend' })
+    expect(legacy({})).toEqual(DEFAULT_APPEARANCE)
+  })
+
+  it('un v1 con campos de la v2 (mezcla rara) ignora los nuevos', () => {
+    expect(legacy({ theme: 'night', mode: 'light', accent: 'wine' })).toMatchObject({ mode: 'dark', accent: 'terracotta' })
+  })
+
+  it('lo migrado se vuelve a guardar en la forma nueva', () => {
+    const rewritten: unknown = JSON.parse(serializeAppearance(legacy({ theme: 'night' })))
+
+    expect(rewritten).toMatchObject({ version: 2, mode: 'dark', accent: 'terracotta', contrast: 'normal' })
+    expect(rewritten).not.toHaveProperty('theme')
   })
 })
+
+describe('resolveTheme', () => {
+  const plain = { contrast: 'normal' } as const
+
+  it('claro y oscuro eligen la variante del color elegido, sin importar el dispositivo', () => {
+    expect(resolveTheme({ ...plain, mode: 'light', accent: 'olive' }, true)).toBe('olive')
+    expect(resolveTheme({ ...plain, mode: 'dark', accent: 'olive' }, false)).toBe('olive-dark')
+  })
+
+  it('«Automático» sigue el modo del dispositivo y conserva el color elegido', () => {
+    expect(resolveTheme({ ...plain, mode: 'system', accent: 'wine' }, true)).toBe('wine-dark')
+    expect(resolveTheme({ ...plain, mode: 'system', accent: 'wine' }, false)).toBe('wine')
+  })
+
+  it('el alto contraste manda sobre el color y respeta el modo', () => {
+    expect(resolveTheme({ mode: 'light', accent: 'slate', contrast: 'high' }, false)).toBe('contrast')
+    expect(resolveTheme({ mode: 'dark', accent: 'slate', contrast: 'high' }, false)).toBe('contrast-dark')
+    expect(resolveTheme({ mode: 'system', accent: 'slate', contrast: 'high' }, true)).toBe('contrast-dark')
+  })
+
+  it('toda combinación de modo y color cae en un tema que existe, con o sin alto contraste', () => {
+    const ids = new Set<string>(THEMES.map((theme) => theme.id))
+    for (const { id: mode } of MODES) {
+      for (const { id: accent } of ACCENTS) {
+        expect(ids.has(resolveTheme({ mode, accent, contrast: 'normal' }, true))).toBe(true)
+        expect(ids.has(resolveTheme({ mode, accent, contrast: 'high' }, false))).toBe(true)
+      }
+    }
+  })
+
+  it('isDarkMode: «Automático» pregunta al dispositivo y los otros no', () => {
+    expect(isDarkMode('system', true)).toBe(true)
+    expect(isDarkMode('system', false)).toBe(false)
+    expect(isDarkMode('light', true)).toBe(false)
+    expect(isDarkMode('dark', false)).toBe(true)
+  })
+})
+
+describe('stepTextSize', () => {
+  it('sube y baja de a un paso y se detiene en los extremos', () => {
+    expect(stepTextSize('normal', 1)).toBe('large')
+    expect(stepTextSize('larger', 1)).toBe('largest')
+    expect(stepTextSize('largest', 1)).toBe('largest')
+    expect(stepTextSize('large', -1)).toBe('normal')
+    expect(stepTextSize('normal', -1)).toBe('normal')
+  })
+})
+

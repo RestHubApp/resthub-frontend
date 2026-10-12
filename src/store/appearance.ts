@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { type Appearance, DEFAULT_APPEARANCE, SYSTEM_THEME } from '@/services/appearanceRules'
+import { type Appearance, DEFAULT_APPEARANCE } from '@/services/appearanceRules'
 import { appearanceKey, readAppearance, writeAppearance } from '@/services/appearanceStorage'
 import { applyAppearance, watchSystemTheme } from '@/services/applyAppearance'
 import { useSession } from './session'
@@ -33,7 +33,7 @@ function persist(appearance: Appearance): void {
 /**
  * Las preferencias de apariencia de la cuenta con sesión.
  *
- * Se leen del aparato al cargar la página y cada vez que cambia la cuenta (otra
+ * Se leen del dispositivo al cargar la página y cada vez que cambia la cuenta (otra
  * persona entra en el mismo celular, o se cierra la sesión), y se aplican a
  * <html>. Se importa desde `main.tsx` antes de montar React, así la página sale
  * con su tema desde el primer pintado.
@@ -66,10 +66,10 @@ useSession.subscribe((state) => {
   applyAppearance(appearance)
 })
 
-// «Según el sistema» sigue al aparato mientras la página está abierta.
+// El modo automático sigue al dispositivo mientras la página está abierta.
 watchSystemTheme(() => {
   const { appearance } = useAppearance.getState()
-  if (appearance.theme === SYSTEM_THEME) {
+  if (appearance.mode === 'system') {
     applyAppearance(appearance)
   }
 })
