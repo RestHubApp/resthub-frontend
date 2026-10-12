@@ -11,6 +11,7 @@ export const routePatterns = {
   login: '/acceso',
   privacy: '/privacidad',
   profile: '/perfil',
+  appearance: '/perfil/apariencia',
   previewEntry: '/vista-previa',
   orders: '/pedidos',
   newOrder: '/pedidos/nuevo',
@@ -66,6 +67,7 @@ export const paths = {
   login: routePatterns.login,
   privacy: routePatterns.privacy,
   profile: routePatterns.profile,
+  appearance: routePatterns.appearance,
   previewEntry: routePatterns.previewEntry,
   orders: {
     list: routePatterns.orders,

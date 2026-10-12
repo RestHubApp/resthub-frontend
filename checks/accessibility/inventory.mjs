@@ -24,7 +24,7 @@ const DIALOG = '[role="dialog"], [role="alertdialog"]'
 const TAB = '[role="tabpanel"][data-state="active"]'
 const PRINTED = '#hoja-impresa, article'
 
-/** Las 36 rutas del router, más las variantes por rol. */
+/** Las 37 rutas del router, más las variantes por rol. */
 export const ROUTES = [
   // Sin sesión.
   { id: 'acceso', name: 'Acceso', route: '/acceso', pattern: '/acceso', account: null },
@@ -41,6 +41,7 @@ export const ROUTES = [
   { id: 'pedido-agregar', name: 'Agregar platos a un pedido', route: '/pedidos/:orderInKitchen/agregar', pattern: '/pedidos/:orderId/agregar', account: 'waiter' },
   { id: 'kitchen', name: 'Cocina', route: '/cocina', pattern: '/cocina', account: 'waiter' },
   { id: 'perfil', name: 'Mi perfil', route: '/perfil', pattern: '/perfil', account: 'waiter' },
+  { id: 'apariencia', name: 'Apariencia: tema, letra y menú', route: '/perfil/apariencia', pattern: '/perfil/apariencia', account: 'owner' },
   { id: 'imprimir-comanda', name: 'Imprimir comanda', route: '/imprimir/:orderInKitchen/comanda', pattern: '/imprimir/:orderId/:kind', account: 'waiter', wait: PRINTED },
   { id: 'imprimir-cuenta', name: 'Imprimir precuenta', route: '/imprimir/:orderToCharge/cuenta', pattern: '/imprimir/:orderId/:kind', account: 'waiter', wait: PRINTED },
 
@@ -189,7 +190,7 @@ export const STATUSES = [
 /** Las rutas que declara `src/router/index.tsx`, para comprobar que ninguna quedó fuera. */
 export const ROUTER_ROUTES = [
   '/', '/acceso', '/pedidos', '/pedidos/nuevo', '/pedidos/:orderId', '/pedidos/:orderId/agregar',
-  '/perfil', '/tablero', '/tablero/historial', '/cocina', '/imprimir/:orderId/:kind', '/comprobantes',
+  '/perfil', '/perfil/apariencia', '/tablero', '/tablero/historial', '/cocina', '/imprimir/:orderId/:kind', '/comprobantes',
   '/comprobantes/:invoiceId/imprimir', '/reservas', '/clientes', '/caja', '/menu', '/mesas', '/inventario',
   '/inventario/recetas/:menuItemId', '/personal', '/roles', '/panel', '/panel/reposicion', '/panel/ia', '*',
   '/plataforma/acceso', '/plataforma', '/plataforma/restaurantes/nuevo', '/plataforma/restaurantes/:restaurantId',

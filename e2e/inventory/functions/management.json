@@ -679,5 +679,25 @@
   {
     "id": "funcion:perfil.contrasena-actual-incorrecta",
     "description": "Con la contraseña actual equivocada no se cambia nada"
+  },
+  {
+    "id": "funcion:apariencia.cambiar-tema",
+    "description": "Elegir el tema de colores (también «Según el sistema»): se aplica al instante y se queda al recargar"
+  },
+  {
+    "id": "funcion:apariencia.cambiar-letra",
+    "description": "Elegir la letra y el tamaño del texto de toda la aplicación"
+  },
+  {
+    "id": "funcion:apariencia.ordenar-menu",
+    "description": "Subir y bajar las pantallas del menú; solo salen las que la cuenta puede abrir"
+  },
+  {
+    "id": "funcion:apariencia.barra-inferior",
+    "description": "Elegir las cuatro pantallas de la barra de abajo del celular; el resto queda en «Más»"
+  },
+  {
+    "id": "funcion:apariencia.restablecer",
+    "description": "Volver el menú, o toda la apariencia, a lo de siempre"
   }
 ]
