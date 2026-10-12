@@ -128,3 +128,11 @@ for (const s of result.shortcuts) {
   console.log(`
 Atajo Ctrl+K en ${s.id} (${s.view}): el foco entra a role=${s.onOpen.role}, expandido=${s.onOpen.expanded}, foco devuelto ${s.focusReturned ? 'sí' : 'NO'} («${s.onClose.name}»)`)
 }
+
+// Que el foco no vuelva al botón que abrió la ventana (WCAG 2.4.3) rompe la
+// corrida: así no regresa el fallo sin que nadie lo vea en el resumen.
+const lost = [...result.dialogs, ...result.shortcuts].filter((d) => !d.focusReturned)
+if (lost.length > 0) {
+  console.error(`\nEl foco no volvió al disparador en: ${lost.map((d) => `${d.id} (${d.view})`).join(', ')}`)
+  process.exitCode = 1
+}
