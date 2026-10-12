@@ -2,6 +2,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
 import { SYSTEM_ADMINISTRATION } from '@/services/systemAdministration'
 import { usePreview, useSession } from '@/store/session'
+import { AppearanceLink } from './AppearanceLink'
 import { ChangePasswordForm } from './ChangePasswordForm'
 
 const TERM = 'm-0 text-sm text-muted-foreground'
@@ -53,6 +54,8 @@ export function ProfileView() {
           ))}
         </dl>
       </SectionCard>
+
+      <AppearanceLink />
 
       {/* La cuenta de muestra no tiene contraseña y el servidor rechaza cambiarla; la de plataforma no la cambia desde aquí. */}
       {isPreview || isPlatform ? null : (
