@@ -23,7 +23,8 @@ async function token(account) {
   return r.access_token
 }
 
-const todayLima = () => new Date(Date.now() - 5 * 3600_000).toISOString().slice(0, 10)
+// El día en Lima a `days` de hoy.
+const dayInLima = (days = 0) => new Date(Date.now() - 5 * 3600_000 + days * 86_400_000).toISOString().slice(0, 10)
 
 // Las cuentas de la semilla aceptan los términos vigentes (Ley N.º 29733): si
 // no, cada pantalla mediría la puerta «Antes de empezar». La cuenta
@@ -72,7 +73,8 @@ export async function prepareData() {
     consent: true,
   })
   ids.customer = customer.id
-  const day = todayLima()
+  // Mañana y no hoy: una reserva de hoy a las 20:00 ya pasó si la revisión corre de noche.
+  const day = dayInLima(1)
   const reservations = await call(t, 'GET', `/reservations?day=${day}`)
   const list = Array.isArray(reservations) ? reservations : reservations.items
   if (!list.some((r) => r.customer_name === 'Lucía Quispe (pruebas a11y)')) {

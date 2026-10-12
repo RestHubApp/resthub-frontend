@@ -161,7 +161,7 @@ export const OVERLAYS = [
 
   // Reservas y clientes.
   { id: 'o-nueva-reserva', name: 'Diálogo «Nueva reserva»', type: 'Dialog', route: '/reservas', account: 'owner', steps: [{ button: 'Nueva reserva' }] },
-  { id: 'o-editar-reserva', name: 'Diálogo «Editar reserva»', type: 'Dialog', route: '/reservas', account: 'owner', steps: [{ button: /^Editar/ }] },
+  { id: 'o-editar-reserva', name: 'Diálogo «Editar reserva»', type: 'Dialog', route: '/reservas', account: 'owner', steps: [{ date: 'Día', days: 1 }, { button: /^Editar/ }] },
   { id: 'o-nuevo-cliente', name: 'Diálogo «Nuevo cliente»', type: 'Dialog', route: '/clientes', account: 'owner', steps: [{ button: 'Nuevo cliente' }] },
   { id: 'o-ficha-cliente', name: 'Sheet con la ficha del cliente', type: 'Sheet', route: '/clientes', account: 'owner', steps: [{ button: /Lucía Quispe/ }] },
   { id: 'o-editar-cliente', name: 'Diálogo «Editar cliente» desde la ficha', type: 'Dialog', route: '/clientes', account: 'owner', steps: [{ button: /Lucía Quispe/ }, { wait: DIALOG }, { button: 'Editar datos' }], wait: '[role="dialog"] form' },
