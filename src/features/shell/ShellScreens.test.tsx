@@ -174,8 +174,8 @@ describe('RequireSession: términos y privacidad', () => {
 
     expect(screen.getByRole('heading', { name: BEFORE_STARTING })).toBeInTheDocument()
     expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /términos y condiciones/u })).toHaveAttribute('href', '/privacidad#terminos')
-    expect(screen.getByRole('link', { name: /datos personales/u })).toHaveAttribute('href', '/privacidad#datos')
+    expect(screen.getByRole('link', { name: /términos y condiciones/u })).toHaveAttribute('href', '/terminos')
+    expect(screen.getByRole('link', { name: /datos personales/u })).toHaveAttribute('href', '/privacidad')
     expect(termsBox).not.toBeChecked()
     expect(dataBox).not.toBeChecked()
     expect(proceed).toBeDisabled()
@@ -186,7 +186,7 @@ describe('RequireSession: términos y privacidad', () => {
     await user.click(proceed)
 
     expect(await screen.findByText('Pedidos')).toBeInTheDocument()
-    expect(api.calls('post', TERMS)[0]?.body).toEqual({ terms_version: '2026-10', privacy_version: '2026-10' })
+    expect(api.calls('post', TERMS)[0]?.body).toEqual({ terms_version: '2026-10-12', privacy_version: '2026-10' })
   })
 
   it('si solo falta el tratamiento de datos, igual se pide la puerta', () => {

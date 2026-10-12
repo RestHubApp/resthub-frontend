@@ -12,7 +12,7 @@ describe('PrivacyView', () => {
     server()
     mountScreen(<PrivacyView />, { path: PRIVACY })
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Términos de uso y política de privacidad' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Política de privacidad' })).toBeInTheDocument()
     expect(screen.getByText((text) => text.startsWith(`Versión ${PRIVACY_VERSION}.`))).toBeInTheDocument()
     for (const section of ['Consentimiento', 'Inteligencia artificial y envíos fuera del Perú', RIGHTS]) {
       expect(screen.getByRole('heading', { level: 2, name: section })).toBeInTheDocument()

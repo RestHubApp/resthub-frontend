@@ -33,7 +33,7 @@ export function SignedOutShell() {
       >
         <Outlet />
       </main>
-      <PublicFooter privacyTo={paths.privacy} rightsTo={paths.privacyRights} />
+      <PublicFooter termsTo={paths.terms} privacyTo={paths.privacy} rightsTo={paths.privacyRights} />
     </div>
   )
 }

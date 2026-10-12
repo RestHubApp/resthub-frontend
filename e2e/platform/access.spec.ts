@@ -248,9 +248,19 @@ test('ACC-10 la hoja «Más» del celular abre las otras pantallas, la accesibil
 test('ACC-11 la política de privacidad se lee sin sesión desde el acceso @mobile', async ({ page }) => {
   covers('ruta:/privacidad')
   await page.goto('/acceso')
-  await page.getByRole('link', { name: 'Privacidad y términos' }).click()
+  await page.getByRole('link', { name: 'Privacidad', exact: true }).click()
   await expect(page).toHaveURL(/\/privacidad$/u)
-  await expect(page.getByRole('heading', { name: 'Términos de uso y política de privacidad', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Política de privacidad', level: 1 })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Tus derechos (ARCO)', level: 2 })).toBeVisible()
   await evidence(page, 'acc-privacidad')
+})
+
+test('ACC-12 los términos y condiciones se leen sin sesión desde el acceso @mobile', async ({ page }) => {
+  covers('ruta:/terminos')
+  await page.goto('/acceso')
+  await page.getByRole('link', { name: 'Términos', exact: true }).click()
+  await expect(page).toHaveURL(/\/terminos$/u)
+  await expect(page.getByRole('heading', { name: 'Términos y condiciones del servicio', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Limitación de responsabilidad/u, level: 2 })).toBeVisible()
+  await evidence(page, 'acc-terminos')
 })

@@ -95,7 +95,8 @@ test('GES-21 el encargado da de alta un cliente, lo busca, ve en su ficha que es
   const search = page.getByRole('searchbox', { name: 'Buscar por nombre o teléfono' })
   await search.fill('999')
   await expect(page.getByText('Nadie coincide con la búsqueda')).toBeVisible()
-  await search.fill('9876')
+  // El teléfono se guarda cifrado (Ley N.º 29733): solo se encuentra con el número completo.
+  await search.fill('987654321')
   await expect(row).toBeVisible()
   await search.fill('rosa')
   await expect(row).toBeVisible()

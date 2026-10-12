@@ -60,8 +60,8 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
   await signInByForm(page, email, NEW_SECRET)
   // Su primer acceso: da dos consentimientos separados (Ley N.º 29733).
   await expect(page.getByRole('heading', { name: 'Antes de empezar' })).toBeVisible()
-  await expect(page.getByRole('link', { name: /términos y condiciones/u })).toHaveAttribute('href', '/privacidad#terminos')
-  await expect(page.getByRole('link', { name: /datos personales/u })).toHaveAttribute('href', '/privacidad#datos')
+  await expect(page.getByRole('link', { name: /términos y condiciones/u })).toHaveAttribute('href', '/terminos')
+  await expect(page.getByRole('link', { name: /datos personales/u })).toHaveAttribute('href', '/privacidad')
   const proceed = page.getByRole('button', { name: 'Continuar' })
   await expect(proceed).toBeDisabled()
   await page.getByRole('checkbox', { name: /términos y condiciones del servicio/u }).check()

@@ -32,6 +32,7 @@ export const ROUTES = [
   { id: 'plataforma-acceso', name: 'Plataforma: acceso de antes (redirige al acceso)', route: '/plataforma/acceso', pattern: '/plataforma/acceso', account: null, redirect: true },
   { id: 'vista-previa-sin-codigo', name: 'Vista previa sin código válido', route: '/vista-previa', pattern: '/vista-previa', account: null },
   { id: 'privacidad', name: 'Política de privacidad (pública)', route: '/privacidad', pattern: '/privacidad', account: null },
+  { id: 'terminos-servicio', name: 'Términos y condiciones del servicio (público)', route: '/terminos', pattern: '/terminos', account: null },
   { id: 'terminos', name: 'Aceptar los términos antes de empezar', route: '/', pattern: '/', account: 'sin-terminos' },
 
   // Mesero (celular).
@@ -201,5 +202,5 @@ export const ROUTER_ROUTES = [
   '/comprobantes/:invoiceId/imprimir', '/reservas', '/clientes', '/caja', '/menu', '/mesas', '/inventario',
   '/inventario/recetas/:menuItemId', '/personal', '/roles', '/bitacora', '/panel', '/panel/reposicion', '/panel/ia', '*',
   '/plataforma/acceso', '/plataforma', '/plataforma/restaurantes/nuevo', '/plataforma/restaurantes/:restaurantId',
-  '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/vista-previa', '/privacidad',
+  '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/vista-previa', '/privacidad', '/terminos',
 ]
