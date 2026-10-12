@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router'
 
+import { reportSignOut } from '@/api/auth'
 import { paths } from '@/services/paths'
 import { type QueuedOrder, useQueuedOrders } from '@/store/offlineQueue'
 import { useSession, useStaffAccount } from '@/store/session'
@@ -20,7 +21,8 @@ export function pendingOrdersNotice(pending: readonly QueuedOrder[]): { readonly
  * `pending` son los pedidos de esta cuenta que esperan señal; quien ofrece la
  * salida los avisa antes (`pendingOrdersNotice`). `signOut` vacía la sesión y
  * va al acceso en el mismo evento: React aplica los dos cambios juntos, así que
- * ninguna pantalla privada llega a dibujarse sin cuenta.
+ * ninguna pantalla privada llega a dibujarse sin cuenta. Antes avisa la salida
+ * al servidor (`reportSignOut`) sin esperarla: si falla, la salida sigue igual.
  */
 export function useSignOut() {
   const clearSession = useSession((state) => state.signOut)
@@ -30,6 +32,12 @@ export function useSignOut() {
   return {
     pending,
     signOut: () => {
+      // Solo una cuenta del personal en una sesión real deja asiento: la
+      // vista previa y la cuenta de plataforma no tienen movimientos propios.
+      const { token, account } = useSession.getState()
+      if (token !== null && account?.kind === 'staff' && !account.preview) {
+        void reportSignOut(token)
+      }
       clearSession()
       void navigate(paths.login, { replace: true })
     },

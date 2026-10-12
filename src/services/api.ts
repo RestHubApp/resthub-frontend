@@ -15,7 +15,7 @@ import createClient, { type Client } from 'openapi-fetch'
 import { bearerFor, expireSession } from './apiCredentials'
 import { ApiError, errorMessage, isSessionEnded, isTransportFailure, type NoResponseReason } from './apiError'
 import { clearApiFailure, noteApiFailure } from './apiFailure'
-import { apiOrigin } from './apiRouting'
+import { apiOrigin, tokenFor } from './apiRouting'
 import { logger } from './logger'
 import { anyOf } from './signals'
 
@@ -54,6 +54,12 @@ export interface CallOptions {
    * muestra otra vista previa no manda el token de esa vista previa.
    */
   readonly withoutCredential?: boolean | undefined
+  /**
+   * Sale con este token en vez del de la sesión abierta, y su 401 no cierra
+   * ninguna. Es para lo que se pide justo al descartar la sesión (avisar la
+   * salida): el token ya se capturó y la petición no depende de que siga abierta.
+   */
+  readonly credential?: string | undefined
 }
 
 interface Success<TData> {
@@ -97,15 +103,20 @@ interface Exchange {
   readonly started: number
 }
 
+function tokenOf(request: Request, options: CallOptions): string | null {
+  if (options.credential !== undefined) return tokenFor(request.url, options.credential)
+  return options.withoutCredential === true ? null : bearerFor(request.url)
+}
+
 function prepare(request: Request, options: CallOptions): Exchange {
   const id = newRequestId()
   request.headers.set(REQUEST_ID_HEADER, id)
-  const token = options.withoutCredential === true ? null : bearerFor(request.url)
+  const token = tokenOf(request, options)
   // eslint-disable-next-line security/detect-possible-timing-attacks -- compara con null, no con un secreto: el cliente no verifica credenciales
   if (token !== null) {
     request.headers.set('Authorization', `Bearer ${token}`)
   }
-  return { request, options, id, hasCredential: token !== null, started: performance.now() }
+  return { request, options, id, hasCredential: token !== null && options.credential === undefined, started: performance.now() }
 }
 
 function pathOf(request: Request): string {
