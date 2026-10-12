@@ -77,6 +77,8 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
   await expect(page.getByRole('heading', { name: 'Rutas' })).toBeVisible()
   await expect(page.getByText('orders.open_failed')).toBeVisible()
   await expect(page.getByText('5 peticiones', { exact: true })).toBeVisible()
+  // La barra lateral es fija: la captura parte siempre de arriba, no de donde dejó el desplazamiento.
+  await page.evaluate(() => { window.scrollTo(0, 0) })
   await capture(page, 'plataforma-observabilidad')
 
   await page.getByRole('link', { name: 'Vista previa' }).click()
