@@ -1,5 +1,6 @@
 import { ACCESS_SCREENS } from './screens/accessScreens'
 import { ADMIN_SCREENS } from './screens/adminScreens'
+import { AUDIT_SCREENS } from './screens/auditScreens'
 import { BOARD_SCREENS } from './screens/boardScreens'
 import { CATALOG_SCREENS } from './screens/catalogScreens'
 import { ORDERS_SCREENS } from './screens/ordersScreens'
@@ -29,5 +30,6 @@ export const SCREENS: readonly Screen[] = [
   ...SALES_SCREENS,
   ...CATALOG_SCREENS,
   ...ADMIN_SCREENS,
+  ...AUDIT_SCREENS,
   ...PLATFORM_SCREENS,
 ]

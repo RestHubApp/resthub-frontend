@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import { send } from './client'
-import type { Customer, CustomerExport, CustomerRequest } from './types'
+import type { Customer, CustomerContact, CustomerExport, CustomerRequest } from './types'
 
 // La libreta de clientes del local.
 
@@ -49,5 +49,15 @@ export async function exportCustomer(customerId: number): Promise<CustomerExport
 export async function anonymizeCustomer(customerId: number): Promise<void> {
   await send((client) =>
     client.POST('/api/v1/customers/{customer_id}/anonymize', { params: { path: { customer_id: customerId } } }),
+  )
+}
+
+/**
+ * «Ver completo»: el teléfono y el correo sin enmascarar. Queda en la bitácora
+ * quién los vio. Es una mutación y no una consulta: así el dato no se guarda en el caché.
+ */
+export async function revealCustomer(customerId: number): Promise<CustomerContact> {
+  return send((client) =>
+    client.POST('/api/v1/customers/{customer_id}/reveal', { params: { path: { customer_id: customerId } } }),
   )
 }

@@ -4,11 +4,14 @@ import { SLOW_TIMEOUT_MS } from '@/services/api'
 import { hasCode } from '@/services/apiError'
 import { send } from './client'
 import type {
+  BillingCapabilities,
   BillingSettings,
   BillingSettingsRequest,
   Invoice,
   InvoicePage,
   IssueInvoiceRequest,
+  SendInvoiceEmailRequest,
+  SendInvoiceEmailResponse,
 } from './types'
 
 // Comprobantes electrónicos (SUNAT): boletas, facturas y los datos fiscales.
@@ -85,4 +88,26 @@ export function invoiceQuery(invoiceId: number) {
 
 export function orderInvoiceQuery(orderId: number) {
   return queryOptions({ queryKey: orderInvoiceQueryKey(orderId), queryFn: () => fetchOrderInvoice(orderId) })
+}
+
+/** Qué puede hacer este restaurante con un comprobante ya emitido: enviarlo por correo y respaldarlo. */
+export const billingCapabilitiesQuery = queryOptions({
+  queryKey: [...billingQueryKey, 'capabilities'],
+  queryFn: (): Promise<BillingCapabilities> => send((client) => client.GET('/api/v1/billing/capabilities')),
+  staleTime: 5 * 60_000,
+})
+
+/** Envía el comprobante por correo (Brevo). El servidor devuelve el destino ya enmascarado. */
+export async function sendInvoiceEmail(invoiceId: number, body: SendInvoiceEmailRequest): Promise<SendInvoiceEmailResponse> {
+  return send(
+    (client) => client.POST('/api/v1/billing/invoices/{invoice_id}/email', { params: { path: { invoice_id: invoiceId } }, body }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
+}
+
+/** Pide o reintenta el respaldo del XML y el PDF en Google Drive; responde 202 con el comprobante. */
+export async function archiveInvoice(invoiceId: number): Promise<Invoice> {
+  return send((client) =>
+    client.POST('/api/v1/billing/invoices/{invoice_id}/archive', { params: { path: { invoice_id: invoiceId } } }),
+  )
 }

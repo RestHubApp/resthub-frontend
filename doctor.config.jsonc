@@ -36,7 +36,10 @@
         "files": [
           "src/features/auth/useLogin.ts",
           "src/features/auth/useChangePassword.ts",
-          "src/features/shell/useAcceptTerms.ts"
+          "src/features/shell/useAcceptTerms.ts",
+          // Una consulta de RUC o DNI a un tercero: devuelve datos que solo
+          // rellenan campos del formulario y no se guardan en ningún caché.
+          "src/features/orders/invoice/DocumentLookupButton.tsx"
         ],
         "rules": ["react-doctor/query-mutation-missing-invalidation"]
       },

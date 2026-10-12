@@ -94,5 +94,6 @@
   { "id": "funcion:observabilidad.pausar", "description": "Pausar y reanudar la actualización automática" },
   { "id": "funcion:observabilidad.actualizar", "description": "«Actualizar ahora» relee el panel" },
   { "id": "estado:observabilidad.vacio", "type": "estado", "description": "Sin logs ni peticiones con esos filtros" },
-  { "id": "estado:observabilidad.error", "type": "estado", "description": "Una lectura del panel falla: error y «Reintentar»" }
+  { "id": "estado:observabilidad.error", "type": "estado", "description": "Una lectura del panel falla: error y «Reintentar»" },
+  { "id": "funcion:acceso.consentimientos-separados", "description": "Antes de empezar: dos casillas separadas sin marcar, cada una con su enlace a la privacidad; el botón se habilita solo con ambas" }
 ]

@@ -13,6 +13,8 @@ const ROSA = '/customers/11'
 const NEW = 'Nuevo cliente'
 const ROSA_QUISPE = 'Rosa Quispe'
 const EDITED = 'Rosa Q. Mamani'
+const SEE_FULL = { name: 'Ver completo' }
+const MASKED_PHONE = '987•••321'
 
 function open(customers: Customer[] = [customer()], permissions?: Parameters<typeof signInAs>[0]) {
   const api = server().on('get', LIST, (request: { params: Record<string, unknown> }) => {
@@ -205,5 +207,35 @@ describe('CustomersView: derechos ARCO', () => {
     await within(card).findByText(ROSA_QUISPE)
     expect(within(card).queryByRole('button', { name: DELETE_DATA })).not.toBeInTheDocument()
     expect(within(card).queryByRole('button', { name: 'Descargar sus datos' })).not.toBeInTheDocument()
+  })
+})
+
+describe('CustomersView: contacto enmascarado', () => {
+  it('con el contacto enmascarado ofrece «Ver completo» y muestra el dato al pedirlo', async () => {
+    const { api, user } = open([customer({ phone: MASKED_PHONE, masked: true })], PERMISSIONS_WAITER)
+    api.on('get', ROSA, customer({ phone: MASKED_PHONE, email: 'r•••@correo.pe', masked: true }))
+    api.on('post', `${ROSA}/reveal`, { phone: '987654321', email: 'rosa@correo.pe' })
+
+    await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
+
+    const card = await screen.findByRole('dialog', { name: ROSA_QUISPE })
+    expect(await within(card).findByText(`${MASKED_PHONE} · r•••@correo.pe`)).toBeInTheDocument()
+    expect(within(card).getByText(/Queda registrado quién los ve/u)).toBeInTheDocument()
+    await user.click(within(card).getByRole('button', SEE_FULL))
+
+    expect(await within(card).findByText('987654321 · rosa@correo.pe')).toBeInTheDocument()
+    expect(within(card).queryByRole('button', SEE_FULL)).not.toBeInTheDocument()
+    expect(api.calls('post', `${ROSA}/reveal`)).toHaveLength(1)
+  })
+
+  it('un contacto sin enmascarar no ofrece «Ver completo»', async () => {
+    const { api, user } = open()
+    api.on('get', ROSA, customer())
+
+    await user.click(await screen.findByRole('button', { name: /Rosa Quispe/u }))
+
+    const card = await screen.findByRole('dialog', { name: ROSA_QUISPE })
+    expect(await within(card).findByText('987654321')).toBeInTheDocument()
+    expect(within(card).queryByRole('button', SEE_FULL)).not.toBeInTheDocument()
   })
 })
