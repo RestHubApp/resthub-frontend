@@ -12,11 +12,11 @@ interface MenuHeaderActionsProps {
 export function MenuHeaderActions({ canAddItem, onNewCategory, onNewItem }: MenuHeaderActionsProps) {
   return (
     <>
-      <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onNewCategory}>
+      <Button type="button" variant="outline" onClick={onNewCategory}>
         <Icon name="add" size={16} />
         <span>Nueva categoría</span>
       </Button>
-      <Button type="button" size="lg" className="h-11 px-4" disabled={!canAddItem} onClick={onNewItem}>
+      <Button type="button" disabled={!canAddItem} onClick={onNewItem}>
         <Icon name="add" size={16} />
         <span>Nuevo plato</span>
       </Button>

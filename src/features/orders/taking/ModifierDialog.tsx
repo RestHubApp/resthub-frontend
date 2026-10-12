@@ -59,7 +59,6 @@ export function ModifierDialog({ item, onConfirm, onClose }: ModifierDialogProps
       <Button
         type="button"
         size="lg"
-        className="h-12 text-base"
         disabled={missing.length > 0}
         onClick={() => {
           void Promise.resolve(onConfirm(item, modifiers)).then(settle)

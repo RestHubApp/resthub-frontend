@@ -15,7 +15,7 @@ export function RestockView() {
       <PanelHeader
         description="Qué insumos comprar y cuándo, según el stock, el consumo de las últimas semanas y las mermas."
         actions={
-          <Button type="button" size="lg" className="h-10 px-4" disabled={update.isPending} onClick={() => { update.mutate() }}>
+          <Button type="button" disabled={update.isPending} onClick={() => { update.mutate() }}>
             <Icon name="update" size={16} className={update.isPending ? 'animate-spin' : undefined} />
             <span>{update.isPending ? 'Actualizando…' : 'Actualizar recomendaciones'}</span>
           </Button>

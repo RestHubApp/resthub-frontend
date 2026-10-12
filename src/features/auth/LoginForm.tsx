@@ -28,7 +28,7 @@ export function LoginForm({ destination }: LoginFormProps) {
         </FormMessage>
       ) : null}
 
-      <Button type="submit" size="lg" className="h-11 w-full" disabled={access.isPending}>
+      <Button type="submit" className="w-full" disabled={access.isPending}>
         <Icon name="signIn" size={18} />
         <span>{access.isPending ? 'Entrando…' : 'Entrar'}</span>
       </Button>

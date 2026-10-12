@@ -36,7 +36,7 @@ export function IngredientRowActions({ ingredient, onAction }: IngredientRowActi
           key={action.kind}
           type="button"
           variant={action.kind === 'purchase' ? 'secondary' : 'outline'}
-          className="h-11 px-2.5"
+          className="px-2.5"
           aria-label={`${NAMES[action.kind]} ${ingredient.name}`}
           onClick={() => {
             onAction({ kind: action.kind, ingredient })

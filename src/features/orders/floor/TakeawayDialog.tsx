@@ -15,7 +15,7 @@ export function TakeawayDialog() {
   const [isOpen, setIsOpen] = useState(false)
   return (
     <>
-      <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
+      <Button type="button" onClick={() => {
         setIsOpen(true)
       }}>
         <Icon name="takeaway" size={18} />

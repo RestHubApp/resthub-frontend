@@ -33,12 +33,12 @@ export function PreviewEntryView() {
           <p className="m-0 text-base text-muted-foreground">
             Pide otra desde «Vista previa» en la administración del sistema: cada código sirve una sola vez.
           </p>
-          <Button type="button" variant="outline" size="lg" className="h-11 w-full" onClick={() => {
+          <Button type="button" variant="outline" className="w-full" onClick={() => {
             window.location.reload()
           }}>
             Reintentar
           </Button>
-          <Button asChild size="lg" className="h-11 w-full">
+          <Button asChild className="w-full">
             <a
               href={appUrl(paths.platform.preview)}
               onClick={() => {

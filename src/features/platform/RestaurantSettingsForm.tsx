@@ -47,7 +47,7 @@ export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormPro
       ) : null}
       {save.isSuccess && !isDirty ? <FormMessage tone="ok">Cambios guardados.</FormMessage> : null}
       <div className="flex justify-end">
-        <Button type="submit" size="lg" className="h-11 px-4" disabled={save.isPending || !isDirty}>
+        <Button type="submit" disabled={save.isPending || !isDirty}>
           <Icon name="confirm" size={18} />
           <span>{save.isPending ? 'Guardando…' : 'Guardar cambios'}</span>
         </Button>

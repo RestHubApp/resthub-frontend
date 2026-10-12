@@ -41,8 +41,6 @@ export function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonPro
   const button = (
     <Button
       type="button"
-      size="lg"
-      className="h-11 px-4"
       variant={restaurant.is_active ? 'danger' : 'success'}
       disabled={status.isPending}
       onClick={restaurant.is_active ? undefined : change}

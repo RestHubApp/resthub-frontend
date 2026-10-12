@@ -30,7 +30,7 @@ export function MenuItemStatusButton({ item }: MenuItemStatusButtonProps) {
     <Button
       type="button"
       variant={item.is_active ? 'ghost' : 'success'}
-      className="h-11 px-3"
+      className="px-3"
       disabled={status.isPending}
       onClick={item.is_active ? undefined : change}
     >

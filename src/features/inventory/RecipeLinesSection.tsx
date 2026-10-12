@@ -31,7 +31,7 @@ export function RecipeLinesSection({
   onAdd,
 }: RecipeLinesSectionProps) {
   return (
-    <section aria-labelledby="receta-insumos" className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 ring-foreground/10 sm:p-5">
+    <section aria-labelledby="receta-insumos" className="flex flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10 sm:p-5">
       <h2 id="receta-insumos" className="m-0 font-heading text-lg font-semibold">
         Insumos por porción
       </h2>

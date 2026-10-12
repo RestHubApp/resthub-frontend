@@ -47,7 +47,7 @@ export function MenuItemRow({
         <Button
           type="button"
           variant="outline"
-          className="h-11 px-3"
+          className="px-3"
           aria-label={`Editar ${item.name}`}
           onClick={() => {
             setIsEditing(true)

@@ -22,7 +22,7 @@ export function FilterSelect({ id, label, value, onChange, anyLabel, children, c
       <Label htmlFor={id}>{label}</Label>
       <NativeSelect
         id={id}
-        className="w-full [&_select]:h-11"
+        className="w-full"
         value={value}
         onChange={(event) => {
           onChange(event.target.value)

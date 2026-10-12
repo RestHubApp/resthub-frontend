@@ -33,7 +33,6 @@ export function FilterTextField({
         id={id}
         name={name}
         type={type}
-        className="h-11"
         value={value}
         onChange={(event) => {
           onChange(event.target.value)

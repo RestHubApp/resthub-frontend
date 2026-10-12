@@ -25,7 +25,7 @@ export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartB
   return (
     <div
       data-cart-bar=""
-      className="fixed inset-x-0 bottom-[calc(4.0625rem+env(safe-area-inset-bottom))] z-30 border-t bg-card px-4 py-2.5 shadow-[0_-6px_16px_-8px_rgb(43_37_33/0.25)] lg:bottom-0 lg:left-60"
+      className="fixed inset-x-0 bottom-[calc(4.0625rem+env(safe-area-inset-bottom))] z-30 border-t bg-card px-4 py-2.5 shadow-bar lg:bottom-0 lg:left-60"
     >
       <div className="mx-auto flex max-w-[1100px] items-center gap-3">
         <button
@@ -40,7 +40,7 @@ export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartB
           </span>
           <span className="text-lg font-bold tabular-nums">{total}</span>
         </button>
-        <Button type="button" size="lg" className="h-12 px-4 text-base" disabled={dishes === 0 || pending} onClick={onSubmit}>
+        <Button type="button" size="lg" className="px-4" disabled={dishes === 0 || pending} onClick={onSubmit}>
           <Icon name="send" size={18} />
           <span>{pending ? 'Enviando…' : submitLabel}</span>
         </Button>

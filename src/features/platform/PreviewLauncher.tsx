@@ -29,8 +29,7 @@ export function PreviewLauncher() {
           <Button
             key={as}
             type="button"
-            size="lg"
-            className="h-11 w-full px-4 sm:w-auto"
+            className="w-full sm:w-auto"
             disabled={start.isPending}
             onClick={() => {
               handleOpen(as)

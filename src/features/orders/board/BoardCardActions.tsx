@@ -29,9 +29,8 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
       {step !== undefined && can ? (
         <Button
           type="button"
-          size="lg"
           variant={step.action === 'charge' ? 'success' : 'default'}
-          className="h-11 flex-1 px-3"
+          className="flex-1 px-3"
           disabled={advance.isPending}
           onClick={() => {
             if (step.action === 'charge') {
@@ -48,9 +47,8 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
       {canCancel ? (
         <Button
           type="button"
-          size="lg"
           variant="ghost"
-          className="h-11 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          className="px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
           aria-label={`Cancelar pedido #${String(order.number)}`}
           onClick={() => {
             onCancel(order)

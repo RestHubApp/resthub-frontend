@@ -38,13 +38,11 @@ export function TermsGate({ account }: { readonly account: StaffSession }) {
           ) : null}
         </CardContent>
         <CardFooter className="flex flex-wrap justify-end gap-2 px-6">
-          <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={signOut}>
+          <Button type="button" variant="outline" onClick={signOut}>
             Salir
           </Button>
           <Button
             type="button"
-            size="lg"
-            className="h-11 px-4"
             disabled={accept.isPending}
             onClick={() => {
               accept.mutate()

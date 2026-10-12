@@ -18,7 +18,7 @@ export function OrderHeader({ order, flagFor }: OrderHeaderProps) {
   return (
     <header className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-primary sm:text-3xl">
+        <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-foreground sm:text-3xl">
           Pedido #{order.number}
         </h1>
         <OrderStatusBadge status={order.status} />

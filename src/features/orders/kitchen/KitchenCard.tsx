@@ -25,7 +25,7 @@ export function KitchenCard({ order, now, flagFor }: KitchenCardProps) {
   return (
     <article
       aria-label={`Pedido ${String(order.number)}`}
-      className={`flex flex-col gap-3 rounded-xl bg-card p-4 shadow-xs ${hasAllergy ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
+      className={`flex flex-col gap-3 rounded-xl bg-card p-4 ${hasAllergy ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
     >
       <header className="flex items-start justify-between gap-2">
         <div>

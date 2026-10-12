@@ -36,7 +36,7 @@ export function CategoryHeader({
       <CategoryTitle category={category} headingId={headingId} />
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" variant="secondary" className="h-11 px-3" onClick={onAddItem}>
+        <Button type="button" variant="secondary" className="px-3" onClick={onAddItem}>
           <Icon name="add" size={16} />
           <span>Agregar plato</span>
         </Button>
@@ -44,7 +44,7 @@ export function CategoryHeader({
         <Button
           type="button"
           variant="outline"
-          className="h-11 px-3"
+          className="px-3"
           aria-label={`Editar la categoría ${category.name}`}
           onClick={() => {
             setIsEditing(true)

@@ -47,7 +47,6 @@ export function SaveFormDialog({ open, title, onClose, save, failureText, handle
           failureText={failureText}
           onCancel={onClose}
           submit={{ label: 'Guardar', pendingLabel: 'Guardando…' }}
-          size="lg"
           spansColumns
         />
       </form>

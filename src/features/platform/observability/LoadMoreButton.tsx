@@ -17,7 +17,7 @@ export function LoadMoreButton({ shown, hasMore, loading, onLoad, noun }: LoadMo
         {`${String(shown)} ${noun}${hasMore ? '; hay más' : ''}`}
       </p>
       {hasMore ? (
-        <Button type="button" variant="outline" size="lg" className="h-11 px-4" disabled={loading} onClick={onLoad}>
+        <Button type="button" variant="outline" disabled={loading} onClick={onLoad}>
           {loading ? 'Cargando…' : 'Cargar más'}
         </Button>
       ) : null}

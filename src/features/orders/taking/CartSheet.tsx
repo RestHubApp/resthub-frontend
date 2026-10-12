@@ -52,12 +52,12 @@ export function CartSheet({
           <span className="text-xl font-bold tabular-nums">{total}</span>
         </div>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button type="button" variant="outline" size="lg" className="h-12 px-4" onClick={() => {
+          <Button type="button" variant="outline" size="lg" className="px-4" onClick={() => {
             onOpenChange(false)
           }}>
             Seguir eligiendo
           </Button>
-          <Button type="button" size="lg" className="h-12 px-5 text-base" disabled={lines.length === 0 || pending} onClick={onSubmit}>
+          <Button type="button" size="lg" disabled={lines.length === 0 || pending} onClick={onSubmit}>
             <Icon name="send" size={18} />
             <span>{pending ? 'Enviando…' : submitLabel}</span>
           </Button>

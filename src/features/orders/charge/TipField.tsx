@@ -34,13 +34,13 @@ export function TipField({ field, error, onQuick }: TipFieldProps) {
         error={error}
       />
       <div role="group" aria-label="Propinas rápidas" className="grid grid-cols-4 gap-2">
-        <Button type="button" variant="outline" className="h-10" onClick={() => {
+        <Button type="button" variant="outline" onClick={() => {
           onQuick('')
         }}>
           Sin propina
         </Button>
         {SHORTCUTS.map((amount) => (
-          <Button key={amount} type="button" variant="outline" className="h-10" onClick={() => {
+          <Button key={amount} type="button" variant="outline" onClick={() => {
             onQuick(String(amount))
           }}>
             {formatCents(amount * CENTS)}

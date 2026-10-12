@@ -47,7 +47,7 @@ export function SelectField({
       <FieldIcon icon={icon}>
         <NativeSelect
           id={id}
-          className="w-full [&_select]:h-10"
+          className="w-full"
           aria-invalid={error !== undefined}
           aria-describedby={ids.describedBy}
           {...field}

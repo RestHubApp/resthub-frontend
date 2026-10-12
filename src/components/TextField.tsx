@@ -73,7 +73,6 @@ export function TextField({
         <Input
           id={id}
           type={type}
-          className="h-10"
           aria-invalid={error !== undefined}
           aria-describedby={ids.describedBy}
           {...inputProps}

@@ -13,7 +13,7 @@ export function EmptyTables() {
   return (
     <EmptyState title="No hay mesas activas" description="Los pedidos para llevar siguen funcionando.">
       {canManage ? (
-        <Button asChild variant="outline" size="lg" className="h-11 px-4">
+        <Button asChild variant="outline">
           <Link to={paths.tables}>Crear mesas</Link>
         </Button>
       ) : null}

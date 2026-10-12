@@ -34,7 +34,7 @@ interface CloseCashButtonProps {
 export function CloseCashButton({ pending, expected, difference, open, onCancel, onConfirm }: CloseCashButtonProps) {
   return (
     <>
-      <Button type="submit" size="lg" variant="destructive" className="h-11 px-5" disabled={pending}>
+      <Button type="submit" variant="destructive" className="px-5" disabled={pending}>
         <Icon name="cashRegister" size={18} />
         <span>{pending ? 'Cerrando…' : 'Cerrar caja'}</span>
       </Button>

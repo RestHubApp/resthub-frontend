@@ -23,7 +23,7 @@ export function CustomersView() {
   const [open, openSet] = useState<number | null>(null)
   const [editing, setEditing] = useState<Editing>(null)
   const fresh = (
-    <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
+    <Button type="button" onClick={() => {
       setEditing({ customer: null })
     }}>
       <Icon name="add" size={18} />

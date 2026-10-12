@@ -1,9 +1,6 @@
 import type { OrderResponse } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
-import { FormMessage } from '@/components/FormMessage'
-import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/apiError'
 import { formatMoney } from '@/services/format'
 import { CustomerFields } from './CustomerFields'
 import { InvoiceDocumentSelect } from './InvoiceDocumentSelect'
@@ -45,17 +42,12 @@ export function InvoiceDialog({ order, open, onClose }: InvoiceDialogProps) {
         values={form.customer}
         onChange={form.setCustomer}
       />
-      {mutation.isError ? (
-        <FormMessage tone="error">{errorMessage(mutation.error, 'No se pudo emitir el comprobante.')}</FormMessage>
-      ) : null}
-      <DialogFormActions>
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button type="button" disabled={!form.canIssue} onClick={form.issue}>
-          {mutation.isPending ? 'Emitiendo…' : `Emitir ${kind}`}
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={mutation}
+        failureText="No se pudo emitir el comprobante."
+        onCancel={onClose}
+        submit={{ label: `Emitir ${kind}`, pendingLabel: 'Emitiendo…', onClick: form.issue, isDisabled: !form.canIssue }}
+      />
     </FormDialog>
   )
 }

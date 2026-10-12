@@ -17,12 +17,12 @@ export function SideNav({ entries, account }: SideNavProps) {
   return (
     // La columna pinta el fondo de punta a punta; adentro, el menú queda fijo al desplazarse.
     <div className="hidden border-r bg-card lg:block">
-      <aside className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-5 p-4">
+      <aside className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-3 p-4">
         <div className="px-1 pt-1">
           <Brand to={paths.home} />
         </div>
         <ScopeName name={scopeName(account)} variant="sidebar" spokenLabel={spokenScope(account)} />
-        <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto">
+        <nav aria-label="Navegación principal" className="scroll-shadow -mx-1 flex-1 overflow-y-auto px-1">
           <NavList entries={entries} />
         </nav>
         <SessionActions account={account} />

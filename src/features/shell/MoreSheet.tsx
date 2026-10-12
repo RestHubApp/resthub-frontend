@@ -60,7 +60,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
         <Button
           type="button"
           variant="ghost"
-          className="h-11 justify-start gap-3 px-3"
+          className="justify-start gap-3 px-3"
           onClick={() => {
             close()
             // El menú del widget se abre cuando el panel ya soltó el foco.

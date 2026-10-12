@@ -22,7 +22,7 @@ export function RecipeTotals({ price, cost, hasLines }: RecipeTotalsProps) {
   return (
     <dl
       aria-live="polite"
-      className="m-0 grid grid-cols-2 gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 ring-foreground/10 sm:grid-cols-4"
+      className="m-0 grid grid-cols-2 gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10 sm:grid-cols-4"
     >
       <div className="flex flex-col gap-0.5">
         <dt className="text-sm text-muted-foreground">Precio</dt>

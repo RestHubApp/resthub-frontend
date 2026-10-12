@@ -16,7 +16,7 @@ export function FilterSelect({ id, label, value, options, onChange }: FilterSele
       <Label htmlFor={id}>{label}</Label>
       <NativeSelect
         id={id}
-        className="w-full min-w-40 [&_select]:h-11"
+        className="w-full min-w-40"
         value={value}
         onChange={(event) => {
           onChange(event.target.value)

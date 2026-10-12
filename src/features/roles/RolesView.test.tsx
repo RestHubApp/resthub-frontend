@@ -146,7 +146,12 @@ describe('RolesView: edición y borrado', () => {
     expect(within(window).getByText('El encargado siempre tiene todos los permisos y su rol no se cambia.')).toBeInTheDocument()
     expect(await within(window).findByRole('checkbox', { name: 'Ver el panel BI' })).toBeChecked()
     expect(within(window).queryByRole('button', SAVE)).not.toBeInTheDocument()
-    await user.click(within(window).getByTestId('role-form-done'))
+    // Hay dos «Cerrar»: la X de la ventana y el del pie del formulario, que es el último.
+    const footerClose = within(window).getAllByRole('button', { name: 'Cerrar' }).at(-1)
+    if (footerClose === undefined) {
+      throw new Error('Falta el botón «Cerrar» del pie')
+    }
+    await user.click(footerClose)
     expect(screen.queryByRole('dialog', { name: 'Encargado' })).not.toBeInTheDocument()
   })
 

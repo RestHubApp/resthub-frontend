@@ -1,9 +1,8 @@
 import type { Ingredient } from '@/api/types'
+import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { ChoiceField } from './ChoiceField'
-import { FormButtons } from './FormButtons'
-import { MutationError } from './MutationError'
 import { costHint, costLabel } from './purchaseMath'
 import { QuantityField } from './QuantityField'
 import { StockPreview } from './StockPreview'
@@ -58,8 +57,7 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
       />
       <StockPreview ingredient={ingredient} delta={accounts?.baseQuantity ?? null} />
 
-      <MutationError isError={purchase.isError} error={purchase.error} fallback="No se pudo registrar la compra." />
-      <FormButtons label="Registrar compra" icon="purchase" pending={purchase.isPending} onCancel={onDone} />
+      <FormFooter mutation={purchase} failureText="No se pudo registrar la compra." onCancel={onDone} submit={{ label: 'Registrar compra', icon: 'purchase' }} />
     </form>
   )
 }

@@ -23,7 +23,7 @@ interface AuthCardProps {
  */
 export function AuthCard({ title, description, children, footer, aside }: AuthCardProps) {
   const card = (
-    <Card className="w-full gap-6 py-6 shadow-sm">
+    <Card className="w-full gap-6 py-6">
       <CardHeader className="gap-2 px-6 sm:px-8">
         <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-foreground sm:text-3xl">
           {title}

@@ -135,6 +135,13 @@ test('VIS-05 el cobro de un pedido servido, la comanda impresa y la cocina', asy
   await page.getByRole('button', { name: 'Cobrar' }).click()
   const charge = page.getByRole('dialog', { name: 'Cobrar pedido #1' })
   await charge.getByText('Tarjeta', { exact: true }).click()
+  // Al tocar «Tarjeta» el navegador puede desplazar unos píxeles la ventana,
+  // que en el celular tiene su propio scroll: la captura parte siempre de arriba.
+  await charge.evaluate((window) => {
+    for (const element of [window, ...window.querySelectorAll('*')]) {
+      element.scrollTop = 0
+    }
+  })
   await captureWindow(charge, 'dialogo-cobro')
   await charge.getByRole('button', { name: 'Confirmar pago' }).click()
   const charged = page.getByRole('dialog', { name: 'Cobro registrado' })

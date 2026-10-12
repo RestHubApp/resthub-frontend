@@ -31,7 +31,7 @@ export function DeleteCategoryButton({ category }: DeleteCategoryButtonProps) {
         <Button
           type="button"
           variant="destructive"
-          className="h-11 px-3"
+          className="px-3"
           aria-label={`Eliminar la categoría ${category.name}`}
           disabled={remove.isPending}
         >

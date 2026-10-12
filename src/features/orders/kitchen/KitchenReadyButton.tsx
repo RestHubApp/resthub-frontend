@@ -27,7 +27,6 @@ export function KitchenReadyButton({ order }: KitchenReadyButtonProps) {
     <Button
       type="button"
       size="lg"
-      className="h-12 text-base"
       disabled={ready.isPending}
       onClick={() => {
         ready.mutate()

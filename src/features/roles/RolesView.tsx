@@ -23,7 +23,7 @@ export function RolesView() {
         title="Roles y permisos"
         description="Qué puede hacer cada persona según su rol. El rol de cada cuenta se elige en Personal."
         actions={
-          <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
+          <Button type="button" onClick={() => {
             openSet(null)
           }}>
             <Icon name="add" size={16} />

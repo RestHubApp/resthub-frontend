@@ -30,7 +30,7 @@ export function MovementFilters({
         <Label htmlFor={ingredientFieldId}>Insumo</Label>
         <NativeSelect
           id={ingredientFieldId}
-          className="w-full [&_select]:h-11"
+          className="w-full"
           value={ingredientId}
           onChange={(event) => {
             onIngredient(event.target.value)
@@ -48,7 +48,7 @@ export function MovementFilters({
         <Label htmlFor={typeId}>Tipo</Label>
         <NativeSelect
           id={typeId}
-          className="w-full [&_select]:h-11"
+          className="w-full"
           value={kind}
           onChange={(event) => {
             onKind(event.target.value)

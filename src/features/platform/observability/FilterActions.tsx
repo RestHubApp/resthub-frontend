@@ -11,12 +11,12 @@ interface FilterActionsProps {
 export function FilterActions({ active, onClear }: FilterActionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      <Button type="submit" size="lg" className="h-11 px-4">
+      <Button type="submit">
         <Icon name="search" size={16} />
         <span>Buscar</span>
       </Button>
       {active ? (
-        <Button type="button" variant="ghost" size="lg" className="h-11 px-4" onClick={onClear}>
+        <Button type="button" variant="ghost" onClick={onClear}>
           <Icon name="cancel" size={16} />
           <span>Quitar filtros</span>
         </Button>

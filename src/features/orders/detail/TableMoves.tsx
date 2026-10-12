@@ -8,8 +8,6 @@ interface TableMovesProps {
   readonly order: OrderResponse
 }
 
-const BUTTON = 'h-11 px-4'
-
 /**
  * Cambiar de mesa y unir mesas, para un pedido en mesa que sigue en curso.
  *
@@ -26,7 +24,6 @@ export function TableMoves({ order }: TableMovesProps) {
       <Button
         type="button"
         variant="outline"
-        className={BUTTON}
         onClick={() => {
           setDialog('mover')
         }}
@@ -38,8 +35,7 @@ export function TableMoves({ order }: TableMovesProps) {
         <Button
           type="button"
           variant="outline"
-          className={BUTTON}
-          onClick={() => {
+            onClick={() => {
             setDialog('unir')
           }}
         >

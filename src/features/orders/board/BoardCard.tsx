@@ -35,7 +35,7 @@ export function BoardCard({ order, now, flagFor, onCharge, onCancel }: BoardCard
   return (
     <article
       aria-labelledby={titleId}
-      className={`flex flex-col gap-3 rounded-xl bg-card p-3.5 shadow-xs ${hasAllergy ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
+      className={`flex flex-col gap-3 rounded-xl bg-card p-3.5 ${hasAllergy ? 'border-l-4 border-destructive ring-2 ring-destructive/60' : 'ring-1 ring-foreground/10'}`}
     >
       <header className="flex items-start justify-between gap-2">
         <h3 id={titleId} className="m-0 font-heading text-2xl leading-none font-black tabular-nums">

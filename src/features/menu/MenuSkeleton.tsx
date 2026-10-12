@@ -9,7 +9,7 @@ export function MenuSkeleton() {
   return (
     <LoadingRegion label="Cargando la carta…" className="flex flex-col gap-6">
       {CATEGORIES.map((dishes, category) => (
-        <div key={category} className="flex flex-col rounded-xl bg-card py-4 shadow-sm ring-1 ring-foreground/10">
+        <div key={category} className="flex flex-col rounded-xl bg-card py-4 ring-1 ring-foreground/10">
           <div className="flex flex-col gap-2 border-b px-5 pb-4">
             <Skeleton className="h-6 w-40" />
             <Skeleton className="h-4 w-56" />
