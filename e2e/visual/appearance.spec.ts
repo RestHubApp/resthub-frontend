@@ -1,11 +1,11 @@
-// Regresión visual de «Apariencia»: la pantalla con el tema de siempre y con
-// Noche, con las muestras de cada tema, las letras y el menú de la cuenta.
+// Regresión visual de «Apariencia»: las tres pestañas (Pantalla, Lectura y Menú),
+// la vista previa fija, un modo oscuro, el alto contraste y el texto al 150 %.
 import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
 import { capture, expect, deadline, test } from './capture'
 
-test('VIS-16 apariencia: los temas, la letra, el tamaño del texto y el orden del menú', async ({ page, local }) => {
-  deadline(90_000)
+test('VIS-16 apariencia: modo, color, letra, tamaño del texto y orden del menú', async ({ page, local }) => {
+  deadline(120_000)
   covers('ruta:/perfil/apariencia')
 
   await openAs(page, local.owner, '/perfil/apariencia')
@@ -16,7 +16,23 @@ test('VIS-16 apariencia: los temas, la letra, el tamaño del texto y el orden de
   })
   await capture(page, 'apariencia')
 
-  await page.locator('label').filter({ hasText: 'Fondo oscuro' }).click()
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'night')
+  await page.locator('label').filter({ hasText: /^Oscuro/u }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'terracotta-dark')
   await capture(page, 'apariencia-noche')
+
+  await page.getByRole('checkbox', { name: /Alto contraste/u }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'contrast-dark')
+  await capture(page, 'apariencia-contraste-oscuro')
+  await page.getByRole('checkbox', { name: /Alto contraste/u }).click()
+  await page.locator('label').filter({ hasText: /^Claro/u }).click()
+
+  await page.getByRole('tab', { name: 'Lectura' }).click()
+  await page.locator('label').filter({ hasText: 'Enorme' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-text-size', 'largest')
+  await capture(page, 'apariencia-lectura-enorme')
+
+  await page.locator('label').filter({ hasText: 'Normal (100 %)' }).click()
+  await page.getByRole('tab', { name: 'Menú' }).click()
+  await expect(page.getByRole('list', { name: /^En la barra de abajo/u })).toBeVisible()
+  await capture(page, 'apariencia-menu')
 })

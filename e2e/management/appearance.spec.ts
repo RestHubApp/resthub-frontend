@@ -1,17 +1,27 @@
-// La apariencia de la cuenta: el tema, la letra, el tamaño del texto y el orden
-// del menú. Es solo presentación y vive en el navegador de cada cuenta: no
-// llama al API ni cambia lo que la cuenta puede abrir.
+// La apariencia de la cuenta: el modo, el color, el alto contraste, la letra, el
+// tamaño del texto y el orden del menú. Es solo presentación y vive en el
+// navegador de cada cuenta: no llama al API ni cambia lo que la cuenta puede abrir.
+import type { Locator } from '@playwright/test'
+
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 
 const MENU = { name: 'Navegación principal' }
-const NAMES = '[id^="menu-name-"]'
+const ACTIONS = /^Acciones de /u
+const BAR = { name: /^En la barra de abajo/u }
+const MORE = { name: 'En «Más»' }
 
 test.beforeEach(() => {
   test.slow()
 })
 
-test('GES-35 el encargado cambia el tema, la letra y el tamaño del texto, y se quedan al recargar @mobile', async ({ page, local }) => {
+/** Los nombres de las pantallas de un grupo del menú, en el orden en que se ven. */
+async function namesIn(list: Locator): Promise<string[]> {
+  const labels = await list.getByRole('button', { name: ACTIONS }).evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label') ?? ''))
+  return labels.map((label) => label.replace('Acciones de ', ''))
+}
+
+test('GES-35 el encargado cambia el modo, el color, la letra y el tamaño del texto, y se quedan al recargar @mobile', async ({ page, local }) => {
   covers(
     'ruta:/perfil/apariencia',
     'funcion:apariencia.cambiar-tema',
@@ -24,24 +34,34 @@ test('GES-35 el encargado cambia el tema, la letra y el tamaño del texto, y se 
   const html = page.locator('html')
   await expect(html).toHaveAttribute('data-theme', 'terracotta')
 
-  // Se elige tocando la tarjeta; el tema se aplica al instante.
-  await page.locator('label').filter({ hasText: 'Fondo oscuro' }).click()
-  await expect(page.getByRole('radio', { name: /Noche/u })).toBeChecked()
-  await expect(html).toHaveAttribute('data-theme', 'night')
+  // El color y el modo son cosas distintas: Oliva en oscuro es «olive-dark».
+  await page.locator('label').filter({ hasText: 'Oliva' }).click()
+  await expect(html).toHaveAttribute('data-theme', 'olive')
+  await page.locator('label').filter({ hasText: /^Oscuro/u }).click()
+  await expect(page.getByRole('radio', { name: 'Oscuro' })).toBeChecked()
+  await expect(html).toHaveAttribute('data-theme', 'olive-dark')
+  await page.locator('label').filter({ hasText: 'Terracota' }).click()
+  await expect(html).toHaveAttribute('data-theme', 'terracotta-dark')
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(23, 19, 17)')
+
+  // La letra y el tamaño están en la pestaña «Lectura».
+  await page.getByRole('tab', { name: 'Lectura' }).click()
   await page.locator('label').filter({ hasText: 'Hecha para que no se confundan' }).click()
   await expect(html).toHaveAttribute('data-font', 'atkinson')
   await expect(page.locator('body')).toHaveCSS('font-family', /Atkinson/u)
   await page.locator('label').filter({ hasText: 'Muy grande' }).click()
   await expect(html).toHaveCSS('font-size', '20px')
-  await evidence(page, 'ges-35-1-tema-letra-tamano')
+  await page.locator('label').filter({ hasText: 'Enorme' }).click()
+  await expect(html).toHaveCSS('font-size', '24px')
+  await page.locator('label').filter({ hasText: 'Muy grande' }).click()
+  await evidence(page, 'ges-35-1-modo-letra-tamano')
 
   // Recargar no lo pierde, y ya viene aplicado desde el primer cuadro.
   await page.reload()
-  await expect(html).toHaveAttribute('data-theme', 'night')
+  await expect(html).toHaveAttribute('data-theme', 'terracotta-dark')
   await expect(html).toHaveAttribute('data-font', 'atkinson')
   await expect(html).toHaveAttribute('data-text-size', 'larger')
-  await expect(page.getByRole('radio', { name: /Noche/u })).toBeChecked()
+  await expect(page.getByRole('radio', { name: 'Oscuro' })).toBeChecked()
 
   // Otra cuenta en el mismo navegador no hereda nada: tiene la suya.
   await openAs(page, local.waiter, '/perfil/apariencia')
@@ -49,9 +69,9 @@ test('GES-35 el encargado cambia el tema, la letra y el tamaño del texto, y se 
   await expect(html).toHaveAttribute('data-theme', 'terracotta')
   await expect(html).toHaveAttribute('data-text-size', 'normal')
   await openAs(page, local.owner, '/perfil/apariencia')
-  await expect(html).toHaveAttribute('data-theme', 'night')
+  await expect(html).toHaveAttribute('data-theme', 'terracotta-dark')
 
-  await page.getByRole('button', { name: 'Volver a todo lo de siempre' }).click()
+  await page.getByRole('button', { name: 'Restablecer apariencia' }).click()
   await expect(html).toHaveAttribute('data-theme', 'terracotta')
   await expect(html).toHaveAttribute('data-font', 'geist')
   await expect(html).toHaveAttribute('data-text-size', 'normal')
@@ -62,48 +82,64 @@ test('GES-36 el encargado reordena el menú y elige la barra de abajo del celula
   covers('ruta:/perfil/apariencia', 'funcion:apariencia.ordenar-menu', 'funcion:apariencia.barra-inferior', 'funcion:apariencia.restablecer')
   await openAs(page, local.owner, '/perfil/apariencia')
   await expect(page.getByRole('heading', { level: 1, name: 'Apariencia' })).toBeVisible()
-  const names = () => page.locator(NAMES).allTextContents()
-  const factory = await names()
-  const [first = '', second = '', third = ''] = factory
-  expect(factory.length).toBeGreaterThan(5)
+  await page.getByRole('tab', { name: 'Menú' }).click()
+  const bar = page.getByRole('list', BAR)
+  const more = page.getByRole('list', MORE)
+  const factoryBar = await namesIn(bar)
+  const factoryMore = await namesIn(more)
+  const [first = '', second = ''] = factoryBar
+  expect(factoryBar).toHaveLength(4)
+  expect(factoryMore.length).toBeGreaterThan(1)
   const nav = page.getByRole('navigation', MENU)
   const navLabels = () => nav.getByRole('link').allTextContents()
+  const actions = (name: string) => page.getByRole('button', { name: `Acciones de ${name}` })
 
-  // Bajar la primera la pasa al segundo lugar, y el menú de la página la sigue.
-  await page.getByRole('button', { name: `Bajar ${first}` }).click()
-  await expect(page.locator(NAMES).nth(1)).toHaveText(first)
-  await expect(page.getByRole('main').getByRole('status').filter({ hasText: 'lugar' })).toHaveText(`${first}: lugar 2 de ${String(factory.length)}.`)
-  await expect(page.getByRole('button', { name: `Bajar ${first}` })).toBeFocused()
-  await expect.poll(async () => (await navLabels()).slice(0, 2)).toEqual([second, first])
+  // Bajar la primera de la barra la pasa al segundo lugar, y el menú de la página la sigue.
+  await actions(first).click()
+  await page.getByRole('menuitem', { name: 'Bajar' }).click()
+  await expect.poll(() => namesIn(bar)).toEqual([second, first, ...factoryBar.slice(2)])
+  await expect(page.getByRole('main').getByRole('status').filter({ hasText: 'lugar' })).toHaveText(`${first}: lugar 2 de 4 en la barra de abajo.`)
+  await expect(actions(first)).toBeFocused()
+  await expect.poll(async () => (await navLabels()).filter((label) => factoryBar.includes(label)).slice(0, 2)).toEqual([second, first])
 
-  // Subirla otra vez; luego sacar la tercera de la barra de abajo y poner la quinta (caben cuatro).
-  await page.getByRole('button', { name: `Subir ${first}` }).click()
-  await expect.poll(names).toEqual(factory)
-  await expect(page.getByRole('checkbox', { checked: true })).toHaveCount(4)
-  const fifth = factory[4] ?? ''
-  await expect(page.getByRole('checkbox', { name: fifth })).toBeDisabled()
-  await page.getByRole('checkbox', { name: third }).click()
-  await expect(page.getByText('En la barra de abajo del celular: 3 de 4.')).toBeVisible()
-  await page.getByRole('checkbox', { name: fifth }).click()
-  await expect(page.getByText(/4 de 4/u)).toBeVisible()
+  // Subirla otra vez. La barra está llena: no deja poner otra hasta quitar una.
+  await actions(first).click()
+  await page.getByRole('menuitem', { name: 'Subir' }).click()
+  await expect.poll(() => namesIn(bar)).toEqual(factoryBar)
+  const [outside = ''] = factoryMore
+  await actions(outside).click()
+  await expect(page.getByRole('menuitem', { name: 'Poner en la barra de abajo' })).toHaveAttribute('aria-disabled', 'true')
+  await page.keyboard.press('Escape')
+
+  // Sacar la tercera de la barra y poner otra en su lugar (caben cuatro).
+  const third = factoryBar[2] ?? ''
+  await actions(third).click()
+  await page.getByRole('menuitem', { name: 'Quitar de la barra de abajo' }).click()
+  await expect(page.getByRole('list', { name: /3 de 4/u })).toBeVisible()
+  await actions(outside).click()
+  await page.getByRole('menuitem', { name: 'Poner en la barra de abajo' }).click()
+  await expect(page.getByRole('list', { name: /4 de 4/u })).toBeVisible()
+  const chosen = await namesIn(bar)
+  expect(chosen).toContain(outside)
+  expect(chosen).not.toContain(third)
   await evidence(page, 'ges-35-3-menu')
 
   // Recargar conserva el orden y la barra. En el celular la barra muestra lo elegido.
   await page.reload()
-  await expect(page.getByRole('checkbox', { name: fifth })).toBeChecked()
-  await expect(page.getByRole('checkbox', { name: third })).not.toBeChecked()
+  await page.getByRole('tab', { name: 'Menú' }).click()
+  await expect.poll(() => namesIn(bar)).toEqual(chosen)
   if (test.info().project.name === 'mobile') {
-    await expect.poll(navLabels).toEqual([first, second, factory[3] ?? '', fifth])
+    await expect.poll(navLabels).toEqual(chosen)
   }
 
-  await page.getByRole('button', { name: 'Restablecer el menú' }).click()
-  await expect.poll(names).toEqual(factory)
-  await expect(page.getByRole('checkbox', { checked: true })).toHaveCount(4)
-  await expect(page.getByRole('checkbox', { name: third })).toBeChecked()
+  await page.getByRole('button', { name: 'Restablecer apariencia' }).click()
+  await expect.poll(() => namesIn(bar)).toEqual(factoryBar)
+  await expect.poll(() => namesIn(more)).toEqual(factoryMore)
 
   // El mesero ve solo lo que puede abrir: nunca las pantallas del encargado.
   await openAs(page, local.waiter, '/perfil/apariencia')
-  const waiterNames = await names()
+  await page.getByRole('tab', { name: 'Menú' }).click()
+  const waiterNames = await namesIn(page.getByRole('main'))
   expect(waiterNames).toContain('Pedidos')
   expect(waiterNames).not.toContain('Personal')
   expect(waiterNames).not.toContain('Caja')
