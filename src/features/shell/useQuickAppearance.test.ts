@@ -52,7 +52,7 @@ describe('useQuickAppearance', () => {
       result.current.toggleHighContrast()
     })
     expect(result.current.isHighContrast).toBe(true)
-    expect(document.documentElement).toHaveAttribute('data-theme', 'contrast')
+    expect(document.documentElement).toHaveAttribute('data-theme', 'terracotta-contrast')
 
     act(() => {
       result.current.toggleHighContrast()

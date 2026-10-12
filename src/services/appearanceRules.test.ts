@@ -47,6 +47,13 @@ describe('parseAppearance', () => {
     expect(parseAppearance(serializeAppearance(appearance))).toEqual(appearance)
   })
 
+  it('quien tenía alto contraste con un color en la versión 2 lo conserva junto con el color', () => {
+    const migrated = parseAppearance(stored({ accent: 'olive', contrast: 'high', mode: 'dark' }, 2))
+
+    expect(migrated).toMatchObject({ accent: 'olive', contrast: 'high', mode: 'dark' })
+    expect(resolveTheme(migrated, false)).toBe('olive-contrast-dark')
+  })
+
   it('cada preferencia inválida vuelve a la de fábrica sin tirar las demás', () => {
     const parsed = parseAppearance(
       stored({ mode: 'neón', accent: 'fucsia', contrast: 'máximo', font: 'lexend', textSize: 99, density: 'enorme', menu: 'raro' }),
@@ -138,10 +145,11 @@ describe('resolveTheme', () => {
     expect(resolveTheme({ ...plain, mode: 'system', accent: 'wine' }, false)).toBe('wine')
   })
 
-  it('el alto contraste manda sobre el color y respeta el modo', () => {
-    expect(resolveTheme({ mode: 'light', accent: 'slate', contrast: 'high' }, false)).toBe('contrast')
-    expect(resolveTheme({ mode: 'dark', accent: 'slate', contrast: 'high' }, false)).toBe('contrast-dark')
-    expect(resolveTheme({ mode: 'system', accent: 'slate', contrast: 'high' }, true)).toBe('contrast-dark')
+  it('el alto contraste se combina con el color y respeta el modo', () => {
+    expect(resolveTheme({ mode: 'light', accent: 'slate', contrast: 'high' }, false)).toBe('slate-contrast')
+    expect(resolveTheme({ mode: 'dark', accent: 'slate', contrast: 'high' }, false)).toBe('slate-contrast-dark')
+    expect(resolveTheme({ mode: 'system', accent: 'wine', contrast: 'high' }, true)).toBe('wine-contrast-dark')
+    expect(resolveTheme({ mode: 'system', accent: 'wine', contrast: 'high' }, false)).toBe('wine-contrast')
   })
 
   it('toda combinación de modo y color cae en un tema que existe, con o sin alto contraste', () => {

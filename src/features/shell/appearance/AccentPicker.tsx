@@ -1,14 +1,16 @@
-import { ACCENTS } from '@/services/appearanceRules'
+import { ACCENTS, resolveTheme } from '@/services/appearanceRules'
 import { useAppearance } from '@/store/appearance'
 import { OptionCard } from './OptionCard'
 
 /**
  * El color de acento, en muestras pequeñas. Cada una enseña el color en claro y
  * en oscuro (cada mitad declara su `data-theme`); la descripción solo se ve en la
- * elegida, pero el lector de pantalla la lee en todas.
+ * elegida, pero el lector de pantalla la lee en todas. Con alto contraste las
+ * muestras enseñan el color con ese contraste.
  */
 export function AccentPicker() {
   const accent = useAppearance((state) => state.appearance.accent)
+  const contrast = useAppearance((state) => state.appearance.contrast)
   const change = useAppearance((state) => state.change)
 
   return (
@@ -28,10 +30,10 @@ export function AccentPicker() {
             }}
           >
             <span aria-hidden="true" className="flex h-9 w-14 overflow-hidden rounded-full border">
-              <span data-theme={option.id} className="flex flex-1 items-center justify-center bg-background">
+              <span data-theme={resolveTheme({ mode: 'light', accent: option.id, contrast }, false)} className="flex flex-1 items-center justify-center bg-background">
                 <span className="size-4 rounded-full bg-primary" />
               </span>
-              <span data-theme={`${option.id}-dark`} className="flex flex-1 items-center justify-center bg-background">
+              <span data-theme={resolveTheme({ mode: 'dark', accent: option.id, contrast }, true)} className="flex flex-1 items-center justify-center bg-background">
                 <span className="size-4 rounded-full bg-primary" />
               </span>
             </span>

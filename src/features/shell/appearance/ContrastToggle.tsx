@@ -1,7 +1,7 @@
 import { SettingToggle } from '@/components/SettingToggle'
 import { useQuickAppearance } from '@/features/shell/useQuickAppearance'
 
-/** El interruptor de alto contraste: aparte del color, porque es una necesidad y no un gusto. */
+/** El interruptor de alto contraste: aparte del color, porque es una necesidad y no un gusto; se combina con el color elegido. */
 export function ContrastToggle() {
   const { isHighContrast, toggleHighContrast } = useQuickAppearance()
 
@@ -9,7 +9,7 @@ export function ContrastToggle() {
     <SettingToggle
       id="contrast"
       title="Alto contraste"
-      detail="Blanco y negro firmes, para leer sin esfuerzo. Mientras esté activo, reemplaza el color de acento."
+      detail="Más contraste en textos, bordes y botones, con el color que elegiste."
       isChecked={isHighContrast}
       isPending={false}
       onChange={toggleHighContrast}

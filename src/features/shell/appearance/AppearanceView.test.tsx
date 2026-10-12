@@ -119,16 +119,18 @@ describe('AppearanceView: pestaña Pantalla', () => {
     expect(document.documentElement).toHaveAttribute(THEME, 'wine-dark')
   })
 
-  it('el alto contraste es un interruptor aparte: manda sobre el color y respeta el modo', async () => {
+  it('el alto contraste es un interruptor aparte: se combina con el color y respeta el modo', async () => {
     const { user } = openAppearance()
 
     await user.click(screen.getByRole('checkbox', { name: /Alto contraste/u }))
-    expect(document.documentElement).toHaveAttribute(THEME, 'contrast')
+    expect(document.documentElement).toHaveAttribute(THEME, 'terracotta-contrast')
+    await user.click(screen.getByRole('radio', { name: /Oliva/u }))
+    expect(document.documentElement).toHaveAttribute(THEME, 'olive-contrast')
     await user.click(screen.getByRole('radio', { name: 'Oscuro' }))
-    expect(document.documentElement).toHaveAttribute(THEME, 'contrast-dark')
+    expect(document.documentElement).toHaveAttribute(THEME, 'olive-contrast-dark')
 
     await user.click(screen.getByRole('checkbox', { name: /Alto contraste/u }))
-    expect(document.documentElement).toHaveAttribute(THEME, 'terracotta-dark')
+    expect(document.documentElement).toHaveAttribute(THEME, 'olive-dark')
   })
 
   it('la vista previa «Así se ve» se queda arriba con una descripción para el lector de pantalla', () => {

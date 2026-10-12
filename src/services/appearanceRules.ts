@@ -26,9 +26,9 @@ export const MODES = [
 type ModeId = (typeof MODES)[number]['id']
 
 /**
- * Los colores de acento. Cada uno tiene variante clara y oscura en `index.css`
- * (`[data-theme='olive']` y `[data-theme='olive-dark']`); «Alto contraste» es
- * aparte y no usa acento.
+ * Los colores de acento. Cada uno tiene cuatro variantes en `index.css`: clara y
+ * oscura (`[data-theme='olive']`, `'olive-dark'`) y las dos con alto contraste
+ * (`'olive-contrast'`, `'olive-contrast-dark'`).
  */
 export const ACCENTS = [
   { id: 'terracotta', label: 'Terracota', description: 'Cálido, el de siempre.' },
@@ -39,25 +39,31 @@ export const ACCENTS = [
 
 type AccentId = (typeof ACCENTS)[number]['id']
 
-/** Alto contraste es un interruptor aparte: blanco y negro firmes, en claro o en oscuro. */
+/** Alto contraste es un interruptor aparte: se combina con el acento y con el modo. */
 type ContrastId = 'normal' | 'high'
 
 /**
  * Los temas que existen en `index.css` (`[data-theme]`): cada acento en claro y en
- * oscuro, y el alto contraste en claro y en oscuro. `scheme` es su `color-scheme`.
- * La prueba de contraste recorre esta lista.
+ * oscuro, con contraste normal o alto (16 en total). `scheme` es su
+ * `color-scheme`; `contrast` dice su nivel. La prueba de contraste recorre esta lista.
  */
 export const THEMES = [
-  { id: 'terracotta', scheme: 'light' },
-  { id: 'olive', scheme: 'light' },
-  { id: 'slate', scheme: 'light' },
-  { id: 'wine', scheme: 'light' },
-  { id: 'contrast', scheme: 'light' },
-  { id: 'terracotta-dark', scheme: 'dark' },
-  { id: 'olive-dark', scheme: 'dark' },
-  { id: 'slate-dark', scheme: 'dark' },
-  { id: 'wine-dark', scheme: 'dark' },
-  { id: 'contrast-dark', scheme: 'dark' },
+  { id: 'terracotta', scheme: 'light', contrast: 'normal' },
+  { id: 'olive', scheme: 'light', contrast: 'normal' },
+  { id: 'slate', scheme: 'light', contrast: 'normal' },
+  { id: 'wine', scheme: 'light', contrast: 'normal' },
+  { id: 'terracotta-contrast', scheme: 'light', contrast: 'high' },
+  { id: 'olive-contrast', scheme: 'light', contrast: 'high' },
+  { id: 'slate-contrast', scheme: 'light', contrast: 'high' },
+  { id: 'wine-contrast', scheme: 'light', contrast: 'high' },
+  { id: 'terracotta-dark', scheme: 'dark', contrast: 'normal' },
+  { id: 'olive-dark', scheme: 'dark', contrast: 'normal' },
+  { id: 'slate-dark', scheme: 'dark', contrast: 'normal' },
+  { id: 'wine-dark', scheme: 'dark', contrast: 'normal' },
+  { id: 'terracotta-contrast-dark', scheme: 'dark', contrast: 'high' },
+  { id: 'olive-contrast-dark', scheme: 'dark', contrast: 'high' },
+  { id: 'slate-contrast-dark', scheme: 'dark', contrast: 'high' },
+  { id: 'wine-contrast-dark', scheme: 'dark', contrast: 'high' },
 ] as const
 
 export type ThemeId = (typeof THEMES)[number]['id']
@@ -137,12 +143,12 @@ export function isDarkMode(mode: ModeId, prefersDark: boolean): boolean {
 }
 
 /**
- * El tema que se pinta (`data-theme`). El alto contraste manda sobre el acento;
- * el modo escoge entre la variante clara y la oscura.
+ * El tema que se pinta (`data-theme`): el acento elegido, con `-contrast` si hay alto
+ * contraste y `-dark` si el modo se pinta oscuro (`olive`, `olive-contrast-dark`…).
  */
 export function resolveTheme(appearance: ColorChoice, prefersDark: boolean): ThemeId {
   const isDark = isDarkMode(appearance.mode, prefersDark)
-  const base = appearance.contrast === 'high' ? 'contrast' : appearance.accent
+  const base = appearance.contrast === 'high' ? (`${appearance.accent}-contrast` as const) : appearance.accent
   return isDark ? (`${base}-dark` as const) : base
 }
 
@@ -191,7 +197,9 @@ function menuOf(value: unknown): MenuPreference {
  * Lo que la versión 1 guardaba en un solo `theme` (Terracota, Noche, Alto
  * contraste, Oliva, Pizarra, Vino o «Según el sistema») pasa a modo, acento y
  * contraste sin perder la elección: Noche era el oscuro con acento Terracota;
- * «Según el sistema» sigue el dispositivo; el alto contraste era claro.
+ * «Según el sistema» sigue el dispositivo; el alto contraste era claro y ahora
+ * conserva el acento (Terracota, el de fábrica). Lo guardado en la versión 2 ya
+ * trae acento y contraste por separado, así que no necesita conversión.
  */
 function modeAndColorFromLegacy(theme: unknown): ColorChoice {
   const { mode, accent, contrast } = DEFAULT_APPEARANCE
