@@ -9,6 +9,7 @@ import { ChargeDialog } from './ChargeDialog'
 const PAYMENTS = '/orders/12/payments'
 const CONFIRM = { name: 'Confirmar pago' }
 const EQUAL = { name: 'Partes iguales' }
+const MORE = { name: /Más opciones/u }
 
 // Tras un pago parcial, el pedido baja su saldo; con el último, queda pagado.
 function after(actual: OrderResponse, amount: string): OrderResponse {
@@ -46,6 +47,7 @@ describe('cobro en partes iguales', () => {
   it('divide lo que falta entre dos y cobra la parte de cada uno', async () => {
     const { api, user } = chargeSplit()
 
+    await user.click(await screen.findByRole('button', MORE))
     await user.click(await screen.findByRole('radio', EQUAL))
     expect(screen.getByTestId('equal-split-part')).toHaveTextContent(/Paga cada una\s*S\/ 25\.00/u)
     await user.click(screen.getByRole('radio', { name: 'Tarjeta' }))
@@ -60,6 +62,7 @@ describe('cobro en partes iguales', () => {
   it('la última persona paga lo que queda, sin monto parcial', async () => {
     const { api, user } = chargeSplit()
 
+    await user.click(await screen.findByRole('button', MORE))
     await user.click(await screen.findByRole('radio', EQUAL))
     await user.click(screen.getByRole('button', { name: 'Uno menos de personas' }))
     expect(screen.getByText('Paga lo que falta')).toBeInTheDocument()
@@ -73,6 +76,7 @@ describe('cobro en partes iguales', () => {
   it('entre tres, el redondeo queda para el último', async () => {
     const { user } = chargeSplit(buildOrder({ balance: '100.00', total: '100.00' }))
 
+    await user.click(await screen.findByRole('button', MORE))
     await user.click(await screen.findByRole('radio', EQUAL))
     await user.click(screen.getByRole('button', { name: 'Uno más de personas' }))
 
@@ -84,6 +88,7 @@ describe('cobro por platos', () => {
   it('pide al menos un plato y cobra solo los elegidos', async () => {
     const { api, user } = chargeSplit()
 
+    await user.click(await screen.findByRole('button', MORE))
     await user.click(await screen.findByRole('radio', { name: 'Por platos' }))
     expect(screen.getByText('Elige al menos un plato')).toBeInTheDocument()
     expect(screen.getByRole('button', CONFIRM)).toBeDisabled()
@@ -109,6 +114,7 @@ describe('cobro por platos', () => {
     })
     const { user } = chargeSplit(order)
 
+    await user.click(await screen.findByRole('button', MORE))
     await user.click(await screen.findByRole('radio', { name: 'Por platos' }))
 
     expect(screen.queryByRole('checkbox', { name: /Lomo saltado/u })).not.toBeInTheDocument()

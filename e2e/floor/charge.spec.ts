@@ -19,6 +19,12 @@ async function openCharge(page: Page, number: number): Promise<Locator> {
   await page.getByRole('button', { name: 'Cobrar' }).click()
   const dialog = page.getByRole('dialog', { name: `Cobrar pedido #${String(number)}` })
   await expect(dialog).toBeVisible()
+  // A la vista solo el total, el medio de pago y Confirmar: lo demás está en «Más opciones».
+  await expect(dialog.getByRole('radio', { name: 'Efectivo' })).toBeChecked()
+  await expect(dialog.getByRole('button', { name: 'Confirmar pago' })).toBeVisible()
+  await expect(dialog.getByRole('textbox', { name: 'Monto recibido' })).toBeHidden()
+  await dialog.getByRole('button', { name: /Más opciones/u }).click()
+  await expect(dialog.getByRole('textbox', { name: 'Monto recibido' })).toBeVisible()
   return dialog
 }
 
