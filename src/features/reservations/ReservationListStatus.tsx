@@ -1,7 +1,6 @@
 import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { RetryQueryError } from '@/components/RetryQueryError'
-import { errorMessage } from '@/services/apiError'
 
 interface ReservationListStatusProps {
   readonly isPending: boolean
@@ -16,7 +15,7 @@ export function ReservationListStatus({ isPending, isError, isEmpty, error, onRe
   return (
     <>
       {isPending ? <ListSkeleton label="Cargando reservas…" count={3} itemClassName="h-16 rounded-lg" /> : null}
-      {isError ? <RetryQueryError message={errorMessage(error, 'No se pudieron cargar las reservas.')} onRetry={onRetry} /> : null}
+      {isError ? <RetryQueryError error={error} fallback="No se pudieron cargar las reservas." onRetry={onRetry} /> : null}
       {isEmpty ? <EmptyState title="No hay reservas para este día" /> : null}
     </>
   )

@@ -1,6 +1,7 @@
 import type { RestockAction } from '@/api/types'
 import { Icon } from '@/components/Icon'
-import { ACTION_LABELS, ACTION_ORDER, ACTION_STYLES, TONE_BADGE } from './restockActions'
+import { Badge } from '@/components/ui/badge'
+import { ACTION_LABELS, ACTION_ORDER, ACTION_STYLES } from './restockActions'
 
 interface RestockSummaryProps {
   readonly counts: Readonly<Partial<Record<string, number>>>
@@ -28,10 +29,10 @@ export function RestockSummary({ counts, selected, onSelect }: RestockSummaryPro
             }}
             className={`flex flex-col items-start gap-2 rounded-xl bg-card p-4 text-left ring-1 outline-none transition-shadow focus-visible:ring-3 focus-visible:ring-ring/50 ${isActive ? 'ring-2 ring-foreground' : 'ring-foreground/10 hover:ring-foreground/30'}`}
           >
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${TONE_BADGE[style.tone]}`}>
+            <Badge variant={style.variant} className="font-semibold">
               <Icon name={style.icon} size={14} />
               {ACTION_LABELS[action]}
-            </span>
+            </Badge>
             <span className="text-3xl leading-none font-semibold">{counts[action] ?? 0}</span>
             <span className="text-xs text-muted-foreground">{isActive ? 'Mostrando solo estos' : 'insumos'}</span>
           </button>

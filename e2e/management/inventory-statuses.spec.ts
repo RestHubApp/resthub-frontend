@@ -11,7 +11,7 @@ test.beforeEach(() => {
   test.slow()
 })
 
-test('GES-10 los insumos y el libro de movimientos se paginan', async ({ page, local }) => {
+test('GES-10 los insumos y el historial de stock se paginan', async ({ page, local }) => {
   covers('funcion:inventario.paginar', 'funcion:movimientos.paginar', 'funcion:inventario.cancelar-accion')
   const owner = api(local)
   for (let n = 1; n <= 28; n += 1) {
@@ -70,7 +70,7 @@ test('GES-11 cada pestaña del inventario avisa si el servidor falla', async ({ 
   await expect(page.getByText('No se pudieron cargar los insumos.')).toBeVisible()
   // Pares [nombre visible de la pestaña, aviso]: el nombre es texto de la interfaz.
   const messages: [string, string][] = [
-    ['Movimientos', 'No se pudo cargar el libro de movimientos.'],
+    ['Movimientos', 'No se pudo cargar el historial de stock.'],
     ['Alertas', 'No se pudieron cargar las alertas.'],
     ['Recetas', 'No se pudieron cargar las recetas.'],
     ['Compras', 'No se pudieron cargar las órdenes.'],

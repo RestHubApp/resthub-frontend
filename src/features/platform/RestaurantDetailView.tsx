@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { hasCode } from '@/services/apiError'
 import { paths } from '@/services/paths'
-import { PlatformQueryError } from './PlatformQueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { RestaurantDetailContent } from './RestaurantDetailContent'
 
 const BACK = <BackLink to={paths.platform.home} label="Restaurantes" />
@@ -35,7 +35,7 @@ export function RestaurantDetailView() {
     return (
       <div className="flex flex-col gap-5">
         {BACK}
-        <PlatformQueryError error={card.error} fallback="No se pudo cargar el restaurante." onRetry={() => void card.refetch()} />
+        <RetryQueryError error={card.error} fallback="No se pudo cargar el restaurante." onRetry={() => void card.refetch()} />
       </div>
     )
   }

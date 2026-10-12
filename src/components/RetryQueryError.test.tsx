@@ -8,7 +8,7 @@ import { RetryQueryError } from './RetryQueryError'
 // ofrece «Reintentar»: lo reconoce por `data-reintento`.
 describe('marca de las fallas que ya ofrecen reintentar', () => {
   it('un error de lectura con «Reintentar» lleva la marca', () => {
-    render(<RetryQueryError message="No se pudo cargar la caja." onRetry={jest.fn()} />)
+    render(<RetryQueryError error={null} fallback="No se pudo cargar la caja." onRetry={jest.fn()} />)
 
     expect(screen.getByTestId('retry-query-error')).toHaveAttribute('data-reintento')
   })
@@ -17,7 +17,7 @@ describe('marca de las fallas que ya ofrecen reintentar', () => {
     render(
       <>
         <FormMessage tone="error">No se pudo cargar la carta.</FormMessage>
-        <RetryQueryError message="Sin conexión." onRetry={jest.fn()} fallback />
+        <RetryQueryError error={null} fallback="Sin conexión." onRetry={jest.fn()} isFallbackNotice />
       </>,
     )
 

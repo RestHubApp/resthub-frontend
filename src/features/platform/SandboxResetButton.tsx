@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import {
   platformActivityQueryKey,
@@ -10,7 +11,6 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/apiError'
 
 interface SandboxResetButtonProps {
   /** Si ya existe un local de muestra: la confirmación explica que se archiva. */
@@ -42,7 +42,7 @@ export function SandboxResetButton({ exists, onReset }: SandboxResetButtonProps)
     <div className="flex flex-col items-start gap-3">
       <ConfirmDialog
         trigger={
-          <Button type="button" variant="danger" disabled={restart.isPending}>
+          <Button type="button" variant="destructive" disabled={restart.isPending}>
             <Icon name="update" size={18} />
             <span>{restart.isPending ? 'Reiniciando…' : 'Reiniciar local de muestra'}</span>
           </Button>
@@ -59,7 +59,7 @@ export function SandboxResetButton({ exists, onReset }: SandboxResetButtonProps)
         }}
       />
       {restart.isError ? (
-        <FormMessage tone="error">{errorMessage(restart.error, 'No se pudo reiniciar el local de muestra.')}</FormMessage>
+        <ErrorMessage error={restart.error} fallback="No se pudo reiniciar el local de muestra." />
       ) : null}
       {restart.isSuccess ? <FormMessage tone="ok">Listo: el local de muestra empieza de nuevo.</FormMessage> : null}
     </div>

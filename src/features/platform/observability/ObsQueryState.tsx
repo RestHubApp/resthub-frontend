@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { PlatformQueryError } from '@/features/platform/PlatformQueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 
 interface QueryLike<T> {
   readonly data: T | undefined
@@ -29,7 +29,7 @@ interface ObsQueryStateProps<T> {
  */
 export function ObsQueryState<T>({ query, errorText, loadingLabel, skeletonClassName, children }: ObsQueryStateProps<T>) {
   if (query.isError) {
-    return <PlatformQueryError error={query.error} fallback={errorText} onRetry={() => void query.refetch()} />
+    return <RetryQueryError error={query.error} fallback={errorText} onRetry={() => void query.refetch()} />
   }
   if (query.data === undefined) {
     return <ListSkeleton label={loadingLabel} count={1} itemClassName={skeletonClassName} />

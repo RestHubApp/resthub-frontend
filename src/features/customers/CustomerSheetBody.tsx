@@ -1,7 +1,6 @@
 import { PERMISSION } from '@/api/permissions'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import type { Customer } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/apiError'
 import { useCan, useTimeZone } from '@/store/session'
 import { CustomerDetail } from './CustomerDetail'
 import { CustomerRights } from './CustomerRights'
@@ -22,7 +21,7 @@ export function CustomerSheetBody({ customer, error, canEdit, onEdit, onClose }:
 
   return (
     <>
-      {error === null ? null : <FormMessage tone="error">{errorMessage(error, 'No se pudo cargar.')}</FormMessage>}
+      {error === null ? null : <ErrorMessage error={error} fallback="No se pudo cargar." />}
       {customer ? <CustomerDetail customer={customer} timeZone={timeZone} canEdit={canEdit} onEdit={() => {
         onEdit(customer)
       }} /> : null}

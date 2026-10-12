@@ -40,7 +40,7 @@ export function HourlySection({ range }: HourlySectionProps) {
   const report = useInsightsReport(insightsReportQuery('sales-hourly', range, fetchHourlySales))
 
   return (
-    <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el mapa por hora.">
+    <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el mapa por hora." loadingLabel="Cargando el mapa por hora…">
       {({ cells, peak }) => (
         <ChartCard
           title="Pedidos por día y hora"

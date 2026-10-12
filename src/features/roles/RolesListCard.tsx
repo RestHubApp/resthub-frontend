@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import { permissionsQuery, rolesQuery } from '@/api/roles'
 import type { Role } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { SectionCard } from '@/components/SectionCard'
-import { errorMessage } from '@/services/apiError'
 import { usePermissions } from '@/store/session'
 import { groupPermissions } from './permissionGroups'
 import { roleAccess } from './roleAccess'
@@ -27,7 +26,7 @@ export function RolesListCard({ onOpen }: RolesListCardProps) {
     <SectionCard title="Roles" description={roles.isSuccess ? `${String(list.length)} roles` : undefined}>
       {roles.isPending ? <ListSkeleton label="Cargando roles…" count={3} itemClassName="h-16 rounded-lg" /> : null}
       {roles.isError ? (
-        <FormMessage tone="error">{errorMessage(roles.error, 'No se pudieron cargar los roles.')}</FormMessage>
+        <ErrorMessage error={roles.error} fallback="No se pudieron cargar los roles." />
       ) : null}
       <ul className="m-0 flex list-none flex-col p-0">
         {list.map((role) => (

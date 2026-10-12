@@ -1,7 +1,6 @@
 import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { RetryQueryError } from '@/components/RetryQueryError'
-import { errorMessage } from '@/services/apiError'
 
 interface InvoiceListStatusProps {
   readonly isPending: boolean
@@ -16,7 +15,7 @@ export function InvoiceListStatus({ isPending, isError, isEmpty, error, onRetry 
   return (
     <>
       {isPending ? <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
-      {isError ? <RetryQueryError message={errorMessage(error, 'No se pudieron cargar los comprobantes.')} onRetry={onRetry} /> : null}
+      {isError ? <RetryQueryError error={error} fallback="No se pudieron cargar los comprobantes." onRetry={onRetry} /> : null}
       {isEmpty ? <EmptyState title="Todavía no se emitió ningún comprobante" /> : null}
     </>
   )

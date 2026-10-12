@@ -1,10 +1,9 @@
 import { Link } from 'react-router'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import type { StaffSession } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { errorMessage } from '@/services/apiError'
 import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
 import { useAcceptTerms } from './useAcceptTerms'
@@ -34,7 +33,7 @@ export function TermsGate({ account }: { readonly account: StaffSession }) {
             </Link>
           </p>
           {accept.isError ? (
-            <FormMessage tone="error">{errorMessage(accept.error, 'No se pudo guardar. Vuelve a intentarlo.')}</FormMessage>
+            <ErrorMessage error={accept.error} fallback="No se pudo guardar. Vuelve a intentarlo." />
           ) : null}
         </CardContent>
         <CardFooter className="flex flex-wrap justify-end gap-2 px-6">

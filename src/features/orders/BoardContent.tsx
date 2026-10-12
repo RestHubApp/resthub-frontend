@@ -6,7 +6,7 @@ import { BoardColumn } from './board/BoardColumn'
 import { BoardSkeleton } from './board/BoardSkeleton'
 import { COLUMNS } from './boardColumns'
 import { STATUS_LABELS } from './orderLabels'
-import { QueryError } from './QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 
 interface BoardContentProps {
   /** La consulta de los pedidos en curso: decide si se ve la silueta, el error o las columnas. */
@@ -25,7 +25,7 @@ export function BoardContent({ active, visible, now, flagFor, onCharge, onCancel
     <>
       {active.isPending ? <BoardSkeleton titles={COLUMNS.map((column) => STATUS_LABELS[column])} /> : null}
       {active.isError ? (
-        <QueryError error={active.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void active.refetch()} />
+        <RetryQueryError error={active.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void active.refetch()} />
       ) : null}
       {active.isSuccess ? (
         <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-4">

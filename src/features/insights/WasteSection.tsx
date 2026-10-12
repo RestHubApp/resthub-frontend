@@ -25,7 +25,7 @@ export function WasteSection({ range }: WasteSectionProps) {
   const report = useInsightsReport(insightsReportQuery(WASTE_REPORT, range, fetchWasteReport))
 
   return (
-    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar las mermas.">
+    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar las mermas." loadingLabel="Cargando las mermas…">
       {(data) => (
         <ChartCard
           title="Mermas"

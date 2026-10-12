@@ -1,8 +1,7 @@
-import { FormMessage } from '@/components/FormMessage'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { useCredentialsForm } from '@/hooks/useCredentialsForm'
-import { errorMessage } from '@/services/apiError'
 import { LoginFields } from './LoginFields'
 import { useLogin } from './useLogin'
 
@@ -23,9 +22,7 @@ export function LoginForm({ destination }: LoginFormProps) {
       <LoginFields bind={bind} errors={errors} />
 
       {access.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(access.error, 'No se pudo iniciar sesión. Inténtalo de nuevo.')}
-        </FormMessage>
+        <ErrorMessage error={access.error} fallback="No se pudo iniciar sesión. Inténtalo de nuevo." />
       ) : null}
 
       <Button type="submit" className="w-full" disabled={access.isPending}>

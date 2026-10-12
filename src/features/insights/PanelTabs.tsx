@@ -7,7 +7,7 @@ import { paths } from '@/services/paths'
 const TABS: readonly { to: string; label: string; icon: IconName; end: boolean }[] = [
   { to: paths.insights.overview, label: 'Indicadores', icon: 'indicators', end: true },
   { to: paths.insights.restock, label: 'Reposición', icon: 'buy', end: false },
-  { to: paths.insights.aiAudit, label: 'Auditoría de IA', icon: 'ai', end: false },
+  { to: paths.insights.aiAudit, label: 'Decisiones de la IA', icon: 'ai', end: false },
 ]
 
 const BASE =

@@ -1,7 +1,7 @@
 import { FormMessage } from '@/components/FormMessage'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/apiError'
 import { useClassifyWaste } from './useClassifyWaste'
 
 interface ClassifyWasteButtonProps {
@@ -32,7 +32,7 @@ export function ClassifyWasteButton({ pending }: ClassifyWasteButtonProps) {
         <span>{classify.isPending ? 'Clasificando…' : `Clasificar mermas pendientes (${String(pending)})`}</span>
       </Button>
       {classify.isError ? (
-        <FormMessage tone="error">{errorMessage(classify.error, 'No se pudieron clasificar las mermas.')}</FormMessage>
+        <ErrorMessage error={classify.error} fallback="No se pudieron clasificar las mermas." />
       ) : null}
       {result === undefined ? null : (
         <FormMessage tone="ok">

@@ -27,7 +27,7 @@ export function PaymentsSection({ range }: PaymentsSectionProps) {
   const report = useInsightsReport(insightsReportQuery('payments', range, fetchPaymentMix))
 
   return (
-    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar los medios de pago.">
+    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar los medios de pago." loadingLabel="Cargando los medios de pago…">
       {({ methods, total }) => (
         <ChartCard
           title="Ingresos por medio de pago"

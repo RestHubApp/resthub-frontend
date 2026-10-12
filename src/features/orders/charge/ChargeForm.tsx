@@ -46,7 +46,6 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
             label: 'Confirmar pago',
             pendingLabel: 'Cobrando…',
             icon: 'payment',
-            variant: 'success',
             isDisabled: isClosed || !payment.canCharge,
           }}
         />

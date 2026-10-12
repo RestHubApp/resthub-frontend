@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import { permissionsQuery } from '@/api/roles'
 import type { Role } from '@/api/types'
 import { FormDialog } from '@/components/FormDialog'
-import { FormMessage } from '@/components/FormMessage'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { errorMessage } from '@/services/apiError'
 import { usePermissions } from '@/store/session'
 import { groupPermissions } from './permissionGroups'
 import { type RoleAccess, roleAccess } from './roleAccess'
@@ -50,7 +49,7 @@ export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps
     >
       {catalog.isPending ? <ListSkeleton label="Cargando permisos…" count={6} itemClassName="h-11 rounded-lg" /> : null}
       {catalog.isError ? (
-        <FormMessage tone="error">{errorMessage(catalog.error, 'No se pudieron cargar los permisos.')}</FormMessage>
+        <ErrorMessage error={catalog.error} fallback="No se pudieron cargar los permisos." />
       ) : null}
       {catalog.isSuccess ? (
         <RoleForm role={role} groups={catalog.data} readOnly={access !== 'edit'} onDone={close} />

@@ -29,7 +29,7 @@ export function MenuItemStatusButton({ item }: MenuItemStatusButtonProps) {
   const button = (
     <Button
       type="button"
-      variant={item.is_active ? 'ghost' : 'success'}
+      variant={item.is_active ? 'ghost' : 'secondary'}
       className="px-3"
       disabled={status.isPending}
       onClick={item.is_active ? undefined : change}

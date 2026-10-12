@@ -23,7 +23,7 @@ export function SalesTrendSection({ range }: SalesTrendSectionProps) {
   const report = useInsightsReport(insightsReportQuery('sales-daily', range, fetchDailySales))
 
   return (
-    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar las ventas por día.">
+    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar las ventas por día." loadingLabel="Cargando las ventas por día…">
       {(data) => (
         <ChartCard
           title="Ventas por día"

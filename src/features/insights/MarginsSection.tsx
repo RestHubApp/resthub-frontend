@@ -25,7 +25,7 @@ export function MarginsSection({ range }: MarginsSectionProps) {
       }
     >
       <div className={`transition-opacity ${report.refreshing ? 'opacity-50' : ''}`}>
-        <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el margen por plato.">
+        <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el margen por plato." loadingLabel="Cargando el margen por plato…">
           {({ dishes }) =>
             dishes.length === 0 ? <EmptyState title="No hay platos en la carta." /> : <MarginsTable dishes={dishes} />
           }

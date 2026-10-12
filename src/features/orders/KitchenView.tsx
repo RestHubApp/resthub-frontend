@@ -4,7 +4,7 @@ import { SectionCard } from '@/components/SectionCard'
 import { BoardSkeleton } from './board/BoardSkeleton'
 import { KitchenCard } from './kitchen/KitchenCard'
 import { LiveIndicator } from './LiveIndicator'
-import { QueryError } from './QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { useActiveOrders } from './useActiveOrders'
 import { useLiveUpdates } from './useLiveUpdates'
 import { useNow } from './useNow'
@@ -34,7 +34,7 @@ export function KitchenView() {
       />
       {active.isPending ? <BoardSkeleton titles={['Por preparar', 'Listos para servir']} /> : null}
       {active.isError ? (
-        <QueryError error={active.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void active.refetch()} />
+        <RetryQueryError error={active.error} fallback="No se pudieron cargar los pedidos." onRetry={() => void active.refetch()} />
       ) : null}
       {/* Mientras carga, la silueta ocupa el lugar de las dos secciones; antes se
           veían las dos a la vez y, al irse la silueta, las secciones saltaban

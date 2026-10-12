@@ -5,7 +5,6 @@ import { ListSkeleton } from '@/components/ListSkeleton'
 import { PageHeader } from '@/components/PageHeader'
 import { RetryQueryError } from '@/components/RetryQueryError'
 import { SectionCard } from '@/components/SectionCard'
-import { errorMessage } from '@/services/apiError'
 import { CashCurrentSections } from './CashCurrentSections'
 import { CashHistory } from './CashHistory'
 import { DiscountLimitForm } from './DiscountLimitForm'
@@ -25,10 +24,10 @@ export function CashView() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Caja"
-        description="Un turno a la vez: se abre con el efectivo inicial y se cierra contando el cajón."
+        description="Un turno a la vez: se abre con el efectivo inicial y se cierra contando la caja."
       />
       {cashRegister.isPending ? <ListSkeleton label="Cargando la caja…" count={3} itemClassName="h-16 rounded-lg" /> : null}
-      {cashRegister.isError ? <RetryQueryError message={errorMessage(cashRegister.error, 'No se pudo cargar la caja.')} onRetry={() => { void cashRegister.refetch() }} /> : null}
+      {cashRegister.isError ? <RetryQueryError error={cashRegister.error} fallback="No se pudo cargar la caja." onRetry={() => { void cashRegister.refetch() }} /> : null}
       <CashCurrentSections current={cashRegister.data} onClosed={refresh} />
       {/* Lo de abajo aparece recién con la caja cargada: si no, el turno en
           curso lo empujaba hacia abajo al llegar (Lighthouse medía un CLS de 0,24

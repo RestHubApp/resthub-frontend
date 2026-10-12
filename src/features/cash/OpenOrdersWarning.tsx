@@ -1,3 +1,5 @@
+import { FormMessage } from '@/components/FormMessage'
+
 interface OpenOrdersWarningProps {
   /** Pedidos que siguen sin cobrar al cerrar. */
   readonly count: number
@@ -10,9 +12,9 @@ export function OpenOrdersWarning({ count }: OpenOrdersWarningProps) {
   }
 
   return (
-    <p role="status" className="m-0 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
+    <FormMessage tone="warning">
       {count === 1 ? 'Hay 1 pedido sin cobrar' : `Hay ${String(count)} pedidos sin cobrar`}.
       Puedes cerrar igual: se cobra en el turno siguiente.
-    </p>
+    </FormMessage>
   )
 }

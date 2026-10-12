@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import { Badge } from '@/components/ui/badge'
 
 /**
  * El aviso de que un pedido tiene una alergia en alguna nota, para el
@@ -6,9 +7,9 @@ import { Icon } from '@/components/Icon'
  */
 export function AllergyAlert() {
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive ring-1 ring-destructive/40">
+    <Badge variant="destructive" className="shrink-0 font-bold ring-1 ring-destructive/40">
       <Icon name="allergic" size={14} />
       Con alergia
-    </span>
+    </Badge>
   )
 }

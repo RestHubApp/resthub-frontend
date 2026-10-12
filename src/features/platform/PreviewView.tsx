@@ -4,7 +4,7 @@ import { platformSandboxQuery } from '@/api/platform'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
-import { PlatformQueryError } from './PlatformQueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { PreviewLauncher } from './PreviewLauncher'
 import { SandboxResetButton } from './SandboxResetButton'
 import { SandboxSummary } from './SandboxSummary'
@@ -22,7 +22,7 @@ export function PreviewView() {
   let summary = <ListSkeleton label="Cargando el local de muestra…" count={2} itemClassName="h-16 rounded-xl" />
   if (sample.isError) {
     summary = (
-      <PlatformQueryError error={sample.error} fallback="No se pudo cargar el local de muestra." onRetry={() => void sample.refetch()} />
+      <RetryQueryError error={sample.error} fallback="No se pudo cargar el local de muestra." onRetry={() => void sample.refetch()} />
     )
   } else if (sample.isSuccess) {
     summary = <SandboxSummary sandbox={sample.data} />

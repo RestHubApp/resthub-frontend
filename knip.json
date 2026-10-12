@@ -16,8 +16,7 @@
     "scripts/**/*.ts"
   ],
   "ignore": [
-    "src/api/schema.d.ts",
-    "src/components/ui/**"
+    "src/api/schema.d.ts"
   ],
   "ignoreDependencies": [
     "@stryker-mutator/api",

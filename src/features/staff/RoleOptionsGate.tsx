@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import type { ReactNode } from 'react'
 
 import { rolesQuery } from '@/api/roles'
 import type { Role } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { errorMessage } from '@/services/apiError'
 import { usePermissions } from '@/store/session'
 import { roleOptions } from './roleOptions'
 
@@ -30,7 +30,7 @@ export function RoleOptionsGate({ currentRoleId, children }: RoleOptionsGateProp
     return <ListSkeleton label="Cargando roles…" count={4} itemClassName="h-10 rounded-lg" />
   }
   if (roles.isError) {
-    return <FormMessage tone="error">{errorMessage(roles.error, 'No se pudieron cargar los roles.')}</FormMessage>
+    return <ErrorMessage error={roles.error} fallback="No se pudieron cargar los roles." />
   }
   const options = roleOptions(roles.data, granted, currentRoleId)
   if (options.length === 0) {

@@ -12,7 +12,7 @@ interface DataTableSkeletonProps {
 /** La tabla con sus cabeceras y filas vacías mientras llegan los datos. */
 export function DataTableSkeleton({ label, headers, rows }: DataTableSkeletonProps) {
   return (
-    <LoadingRegion label="Cargando…" className="rounded-xl bg-card ring-1 ring-foreground/10">
+    <LoadingRegion label={`Cargando ${label.toLowerCase()}…`} className="rounded-xl bg-card ring-1 ring-foreground/10">
       <Table label={label}>
         <TableHeader>
           <TableRow>

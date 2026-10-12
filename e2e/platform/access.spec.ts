@@ -40,7 +40,7 @@ const ALL = [
   'Inventario',
   'Personal',
   'Roles',
-  'Panel BI',
+  'Resumen',
 ]
 const OF_WAITER = ['Pedidos', 'Cocina', 'Reservas', 'Clientes']
 const OF_KITCHEN = ['Tablero', 'Inventario']
@@ -66,7 +66,7 @@ test('ACC-02 el mesero de la semilla entra y ve solo Pedidos, Cocina, Reservas y
   await expect(page).toHaveURL(/\/pedidos$/u)
   await expect.poll(() => sections(page)).toEqual(OF_WAITER)
   const nav = navigation(page)
-  for (const forbidden of ['Tablero', 'Caja', 'Inventario', 'Personal', 'Panel BI']) {
+  for (const forbidden of ['Tablero', 'Caja', 'Inventario', 'Personal', 'Resumen']) {
     await expect(nav.getByRole('link', { name: forbidden })).toHaveCount(0)
   }
   if (test.info().project.name === 'mobile') {

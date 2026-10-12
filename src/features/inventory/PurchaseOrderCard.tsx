@@ -1,13 +1,14 @@
 import type { PurchaseOrder } from '@/api/types'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { formatDateTime, formatMoney } from '@/services/format'
 import { useTimeZone } from '@/store/session'
 import { PurchaseOrderActions } from './PurchaseOrderActions'
 
-const TONE: Record<PurchaseOrder['status'], string> = {
-  draft: 'bg-muted text-foreground',
-  sent: 'bg-primary/10 text-primary',
-  received: 'bg-success/10 text-success',
-  cancelled: 'bg-destructive/10 text-destructive',
+const STATUS_VARIANTS: Record<PurchaseOrder['status'], BadgeVariant> = {
+  draft: 'muted',
+  sent: 'info',
+  received: 'success',
+  cancelled: 'destructive',
 }
 
 interface PurchaseOrderCardProps {
@@ -28,7 +29,7 @@ export function PurchaseOrderCard({ order, canManage, isBusy, onSend, onReceive,
     <li className="flex flex-col gap-2 rounded-lg p-3 ring-1 ring-input">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="font-semibold">OC {order.number} · {order.supplier_name}</span>
-        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${TONE[order.status]}`}>{order.status_label}</span>
+        <Badge variant={STATUS_VARIANTS[order.status]} className="font-semibold">{order.status_label}</Badge>
       </div>
       <p className="m-0 text-sm text-muted-foreground">
         {order.lines.map((line) => line.ingredient_name).join(', ')} · {formatDateTime(order.created_at, timeZone)}

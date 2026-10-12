@@ -55,7 +55,6 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
         submit={{
           label: 'Recibir y cargar al stock',
           pendingLabel: 'Recibiendo…',
-          variant: 'success',
           onClick: receive.submit,
           isDisabled: !receive.isValid,
         }}

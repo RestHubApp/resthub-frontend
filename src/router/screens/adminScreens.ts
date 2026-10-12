@@ -27,7 +27,7 @@ export const ADMIN_SCREENS: readonly Screen[] = [
     path: routePatterns.insights,
     permission: PERMISSION.insightsRead,
     nav: {
-      label: 'Panel BI',
+      label: 'Resumen',
       icon: 'indicators',
       description: 'Ventas, platos más vendidos, márgenes y la predicción de demanda.',
     },

@@ -22,7 +22,7 @@ export function RestockView() {
         }
       />
       <RestockUpdateStatus isPending={update.isPending} isError={update.isError} error={update.error} />
-      <ReportState data={recommendation.data} error={recommendation.error} errorText="No se pudo cargar la reposición.">
+      <ReportState data={recommendation.data} error={recommendation.error} errorText="No se pudo cargar la reposición." loadingLabel="Cargando la reposición…">
         {(report) => <RestockReportContent report={report} isUpdating={update.isPending} />}
       </ReportState>
     </div>

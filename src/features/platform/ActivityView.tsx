@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
 import { TablePagination } from '@/components/TablePagination'
 import { formatDateTime } from '@/services/format'
-import { PlatformQueryError } from './PlatformQueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { PLATFORM_TIME_ZONE } from './platformTime'
 import { activityParams, pageCount } from './restaurantList'
 
@@ -34,7 +34,7 @@ export function ActivityView() {
       <PageHeader title="Bitácora" description="Lo que hizo cada administrador del sistema. Horas de Lima." />
       <SectionCard title="Registro" description={log.isSuccess ? `${String(total)} en total` : undefined}>
         {log.isError ? (
-          <PlatformQueryError error={log.error} fallback="No se pudo cargar la bitácora." onRetry={() => void log.refetch()} />
+          <RetryQueryError error={log.error} fallback="No se pudo cargar la bitácora." onRetry={() => void log.refetch()} />
         ) : (
           <DataTable
             label="Bitácora de plataforma"

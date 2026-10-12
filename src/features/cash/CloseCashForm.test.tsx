@@ -25,7 +25,7 @@ function closeShift(shift: CashSession = cashRegisterShift({ summary: cashRegist
 }
 
 describe('CloseCashForm', () => {
-  it('muestra lo esperado y la diferencia mientras se cuenta el cajón', async () => {
+  it('muestra lo esperado y la diferencia mientras se cuenta la caja', async () => {
     const { user } = closeShift()
     expect(screen.getByText('Esperado: S/ 200.00')).toBeInTheDocument()
     expect(screen.getByText('—')).toBeInTheDocument()

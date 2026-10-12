@@ -1,5 +1,6 @@
 import { type SyntheticEvent, useId, useState } from 'react'
 
+import { FormMessage } from '@/components/FormMessage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -40,7 +41,7 @@ export function CustomRangeForm({ initialFrom, initialTo, max, onApply }: Custom
       </div>
       <Button type="submit" size="lg">Aplicar</Button>
       {problem === null ? null : (
-        <p role="alert" className="m-0 w-full text-sm text-destructive">{problem}</p>
+        <div className="w-full"><FormMessage tone="error">{problem}</FormMessage></div>
       )}
     </form>
   )

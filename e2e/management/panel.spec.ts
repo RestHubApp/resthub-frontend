@@ -35,7 +35,7 @@ test('GES-26 el encargado revisa los indicadores del período, mira las tablas, 
   await api(local).post('/inventory/waste', { ingredient_id: defined(local.ingredients[1]).id, quantity: '100', reason: 'Se venció en la cámara' })
 
   await openAs(page, local.owner, '/panel')
-  await expect(page.getByRole('heading', { level: 1, name: 'Panel BI' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Resumen del negocio' })).toBeVisible()
   const range = page.getByRole('group', { name: 'Rango de fechas' })
   await expect(range.getByRole('button', { name: '30 días' })).toHaveAttribute('aria-pressed', 'true')
   const kpis = page.getByRole('region', { name: 'Indicadores del período' })

@@ -17,7 +17,8 @@ const DEFAULT_SIZE = 20
 const STROKE_WIDTH = 1.75
 
 /**
- * El unico componente que dibuja iconos en el frontend.
+ * El componente que dibuja los iconos de las pantallas. El armazón tiene el
+ * suyo, `ShellIcon`, con un registro aparte para que su carga sea la mínima.
  *
  * El icono sale del registro de `icons.ts`, asi que cambiarlo es editar una
  * linea alli y verlo propagado por cada pantalla. `IconName` viene del mismo

@@ -27,7 +27,7 @@ export function LowStockSection() {
         </Button>
       }
     >
-      <ReportState data={ingredients.data} error={ingredients.error} errorText="No se pudo cargar el stock.">
+      <ReportState data={ingredients.data} error={ingredients.error} errorText="No se pudo cargar el stock." loadingLabel="Cargando el stock…">
         {(items) =>
           items.length === 0 ? (
             <EmptyState title="Ningún insumo está bajo su mínimo." />

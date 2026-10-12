@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { activeOrdersQuery } from '@/api/orders'
 import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { QueryError } from '@/features/orders/QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { OrderList } from './OrderList'
 
 /** Los pedidos para llevar que todavia no se cobran, de todos los meseros. */
@@ -15,7 +15,7 @@ export function TakeawayPanel() {
   }
   if (active.isError) {
     return (
-      <QueryError
+      <RetryQueryError
         error={active.error}
         fallback="No se pudieron cargar los pedidos."
         onRetry={() => void active.refetch()}

@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { paths } from '@/services/paths'
 import { LiveIndicator } from './LiveIndicator'
 import { OrderDetailBody } from './OrderDetailBody'
-import { QueryError } from './QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { useAllergyFlags } from './useAllergyFlags'
 import { useLiveUpdates } from './useLiveUpdates'
 
@@ -31,7 +31,7 @@ export function OrderDetailView() {
     return (
       <div className="flex flex-col gap-4">
         <BackLink to={paths.orders.list} label="Pedidos" />
-        <QueryError error={orderResult.error} fallback="No se pudo cargar el pedido." onRetry={() => void orderResult.refetch()} />
+        <RetryQueryError error={orderResult.error} fallback="No se pudo cargar el pedido." onRetry={() => void orderResult.refetch()} />
       </div>
     )
   }

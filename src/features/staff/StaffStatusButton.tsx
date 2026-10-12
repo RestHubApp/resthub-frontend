@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import { changeStaffStatus } from '@/api/staff'
 import type { StaffResponse } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/apiError'
 import { saveStaffMember } from './staffList'
 
 interface StaffStatusButtonProps {
@@ -37,7 +36,7 @@ export function StaffStatusButton({ account, disabled }: StaffStatusButtonProps)
     <Button
       type="button"
       size="sm"
-      variant={account.is_active ? 'ghost' : 'success'}
+      variant={account.is_active ? 'ghost' : 'secondary'}
       disabled={disabled || status.isPending}
       onClick={account.is_active ? undefined : change}
     >
@@ -60,9 +59,7 @@ export function StaffStatusButton({ account, disabled }: StaffStatusButtonProps)
         button
       )}
       {status.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(status.error, 'No se pudo actualizar la cuenta.')}
-        </FormMessage>
+        <ErrorMessage error={status.error} fallback="No se pudo actualizar la cuenta." />
       ) : null}
     </>
   )

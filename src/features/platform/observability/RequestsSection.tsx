@@ -2,7 +2,7 @@ import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { obsRequestsQuery } from '@/api/observability'
 import { SectionCard } from '@/components/SectionCard'
-import { PlatformQueryError } from '@/features/platform/PlatformQueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { LoadMoreButton } from './LoadMoreButton'
 import { type ObsFilters, requestsParams } from './obsFilters'
 import { RequestFilters } from './RequestFilters'
@@ -25,7 +25,7 @@ export function RequestsSection({ filters, onChange, live }: RequestsSectionProp
       <SectionCard title="Peticiones" description="Las más nuevas primero, con su duración y su tiempo de base. Horas de Lima.">
         <RequestFilters filters={filters} onChange={onChange} />
         {requests.isError ? (
-          <PlatformQueryError
+          <RetryQueryError
             error={requests.error}
             fallback="No se pudieron cargar las peticiones."
             onRetry={() => void requests.refetch()}

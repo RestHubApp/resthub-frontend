@@ -58,7 +58,7 @@ export function CancelOrderForm({ order, onClose }: CancelOrderFormProps) {
         mutation={cancel}
         onCancel={onClose}
         cancelLabel="Volver"
-        submit={{ label: 'Cancelar pedido', pendingLabel: 'Cancelando…', variant: 'danger' }}
+        submit={{ label: 'Cancelar pedido', pendingLabel: 'Cancelando…', variant: 'destructive' }}
       />
     </form>
   )

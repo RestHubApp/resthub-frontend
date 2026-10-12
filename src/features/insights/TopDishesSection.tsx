@@ -23,7 +23,7 @@ export function TopDishesSection({ range }: TopDishesSectionProps) {
   const report = useInsightsReport(insightsReportQuery('dishes-top', range, fetchTopDishes))
 
   return (
-    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar los platos más vendidos.">
+    <ReportState data={report.data} error={report.error} errorText="No se pudieron cargar los platos más vendidos." loadingLabel="Cargando los platos más vendidos…">
       {({ dishes }) => (
         <ChartCard
           title="Platos más vendidos"

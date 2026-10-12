@@ -1,7 +1,7 @@
 import type { PurchaseOrder } from '@/api/types'
 import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { MutationError } from './MutationError'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { PurchaseOrderCard } from './PurchaseOrderCard'
 
 interface PurchaseOrdersListProps {
@@ -20,7 +20,7 @@ export function PurchaseOrdersList({ status, error, orders, canManage, isBusy, o
   return (
     <>
       {status === 'pending' ? <ListSkeleton label="Cargando órdenes…" count={3} itemClassName="h-16 rounded-lg" /> : null}
-      <MutationError isError={status === 'error'} error={error} fallback="No se pudieron cargar las órdenes." />
+      <ErrorMessage isError={status === 'error'} error={error} fallback="No se pudieron cargar las órdenes." />
       {status === 'success' && orders.length === 0 ? (
         <EmptyState title="Todavía no hay órdenes de compra" description="Arma una con lo que se está acabando." />
       ) : null}

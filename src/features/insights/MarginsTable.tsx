@@ -12,6 +12,7 @@ import { useState } from 'react'
 
 import type { DishMargin } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { MarginBar } from './MarginBar'
 import { formatInteger, formatMoney, toNumber } from '@/services/format'
@@ -43,10 +44,10 @@ const columns = helper.columns([
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {row.original.category}
           {row.original.recipe_cost === null ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 font-medium text-warning">
+            <Badge variant="warning">
               <Icon name="alert" size={12} />
               Sin receta
-            </span>
+            </Badge>
           ) : null}
         </span>
       </span>

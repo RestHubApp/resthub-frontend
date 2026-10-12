@@ -8,7 +8,7 @@ export interface FooterSubmit {
   /** La etiqueta mientras se envía; por omisión, «Guardando…». */
   readonly pendingLabel?: string
   readonly icon?: IconName
-  readonly variant?: 'default' | 'success' | 'danger'
+  readonly variant?: 'default' | 'destructive'
   /** Para una acción que no envía el formulario (`type="submit"`) sino que llama a esto. */
   readonly onClick?: () => void
   /** Bloquea la acción aunque no esté enviando (el formulario aún no está completo). */

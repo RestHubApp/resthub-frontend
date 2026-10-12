@@ -29,7 +29,6 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
       {step !== undefined && can ? (
         <Button
           type="button"
-          variant={step.action === 'charge' ? 'success' : 'default'}
           className="flex-1 px-3"
           disabled={advance.isPending}
           onClick={() => {

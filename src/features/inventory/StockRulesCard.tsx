@@ -59,9 +59,9 @@ export function StockRulesCard() {
         }}
       />
       <label htmlFor={CHECKBOX_ID} className="cursor-pointer">
-        <span id={TITLE_ID} className="font-medium">Agotar solos los platos sin insumos</span>
+        <span id={TITLE_ID} className="font-medium">Marcar «Sin insumos» automáticamente</span>
         <span id={DETAIL_ID} className="block text-muted-foreground">
-          Si la receta de un plato pide más de lo que hay en stock, el mesero lo ve «Sin insumos» y no lo puede pedir.
+          Si falta un ingrediente de la receta, el mesero ve el plato como no disponible y no lo puede pedir.
         </span>
       </label>
     </div>

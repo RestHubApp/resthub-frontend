@@ -12,7 +12,7 @@ interface PanelHeaderProps {
 export function PanelHeader({ description, actions }: PanelHeaderProps) {
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Panel BI" description={description} actions={actions} />
+      <PageHeader title="Resumen del negocio" description={description} actions={actions} />
       <PanelTabs />
     </div>
   )
