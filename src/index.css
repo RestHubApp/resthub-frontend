@@ -671,7 +671,7 @@
 }
 
 /*
- * El boton de accesibilidad, el de reserva (AccessibilityWidget.tsx) y el del
+ * El boton de accesibilidad de reserva (AccessibilityWidget.tsx, solo sin sesion) y el del
  * widget Sienna una vez cargado, comparten la paleta de la marca (`--primary`,
  * texto blanco: 7,3 a 1), 44 px y la esquina inferior derecha sin halo.
  *
@@ -724,32 +724,15 @@ html .asw-menu-btn:focus-visible,
 }
 
 /*
- * El boton del widget de accesibilidad vive fijo en la esquina inferior
- * derecha. En el celular, con sesion, esa esquina es de la barra de
- * navegacion y de los botones "+" de los platos al tomar un pedido: el boton
- * flotante se oculta y el menu del widget se abre desde "Más". El widget fija
- * su posicion con estilos en linea, por eso hace falta `!important`.
+ * Con sesion no hay boton flotante de accesibilidad en ningun tamano: el menu
+ * del widget se abre desde la fila «Accesibilidad» de la barra lateral y desde
+ * «Cuenta» o «Más» en el celular (`openAccessibilityMenu`, que hace clic en este
+ * boton aunque este oculto). Sin sesion (acceso, privacidad) no hay barra y el
+ * boton se queda en la esquina. El widget fija su posicion con estilos en
+ * linea, por eso hace falta `!important`.
  */
-@media (width < 64rem) {
-  html:has([data-bottom-nav]) .asw-menu-btn,
-  html:has([data-bottom-nav]) .a11y-launcher {
-    display: none !important;
-  }
-}
-
-/*
- * En la laptop con sesión el botón pasa a la esquina inferior izquierda, sobre
- * el hueco que la barra lateral le deja abajo (`data-side-nav`, SideNav.tsx):
- * a la derecha tapaba el "+" de los platos, los botones al pie y la barra del
- * carrito. Sin sesión (acceso, privacidad) no hay barra lateral y se queda a la
- * derecha. Son reglas de la hoja de estilos, no estilos en línea: la CSP no cambia.
- */
-@media (width >= 64rem) {
-  html:has([data-side-nav]) .asw-menu-btn,
-  html:has([data-side-nav]) .a11y-launcher {
-    right: auto !important;
-    left: 1rem !important;
-  }
+html:has([data-side-nav], [data-bottom-nav]) .asw-menu-btn {
+  display: none !important;
 }
 
 /*

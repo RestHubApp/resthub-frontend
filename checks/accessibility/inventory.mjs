@@ -91,7 +91,7 @@ export const OVERLAYS = [
   { id: 'o-paleta', name: 'Diálogo «Buscar o ir a…» (paleta de comandos)', type: 'Dialog', route: '/pedidos', account: 'owner', steps: [{ button: 'Buscar o ir a…' }] },
   { id: 'o-apariencia-rapida', name: 'Hoja «Apariencia rápida»', type: 'Sheet', route: '/pedidos', account: 'owner', steps: [{ button: 'Apariencia rápida' }] },
   { id: 'o-clave-propia', name: 'Diálogo «Cambiar contraseña»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Cambiar contraseña' }] },
-  { id: 'o-widget', name: 'Menú del widget de accesibilidad (Sienna)', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['desktop'], steps: [{ click: '[data-a11y-launcher]' }], wait: '.asw-menu' },
+  { id: 'o-widget', name: 'Menú del widget de accesibilidad desde la barra lateral', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['desktop'], steps: [{ button: 'Accesibilidad' }], wait: '.asw-menu' },
   { id: 'o-widget-movil', name: 'Menú del widget de accesibilidad desde «Cuenta»', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }, { button: 'Accesibilidad' }], wait: '.asw-menu' },
   { id: 'o-salir-pendientes', name: 'Confirmar salir con pedidos sin enviar', type: 'AlertDialog', route: '/pedidos', account: 'waiter', queue: true, steps: [{ button: 'Cerrar sesión' }], views: ['desktop'] },
   { id: 'o-salir-pendientes-movil', name: 'Confirmar salir con pedidos sin enviar (desde «Cuenta»)', type: 'AlertDialog', route: '/pedidos', account: 'waiter', queue: true, steps: [{ button: 'Cuenta' }, { button: 'Cerrar sesión' }], views: ['mobile'] },

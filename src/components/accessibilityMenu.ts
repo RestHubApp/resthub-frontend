@@ -1,5 +1,5 @@
-// En el celular el boton flotante del widget se oculta (index.css): tapaba el
-// "+" de los platos al tomar un pedido. El menu se abre desde "Más" con esto.
+// Con sesion el boton flotante del widget se oculta (index.css): el menu se abre
+// desde la barra lateral, «Cuenta» o «Más» con esto.
 
 const WIDGET_BUTTON = '.asw-menu-btn'
 // Cuánto se espera a que el widget recién importado dibuje su botón.
