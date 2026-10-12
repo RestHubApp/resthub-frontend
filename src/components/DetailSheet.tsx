@@ -9,12 +9,15 @@ interface DetailSheetProps {
   readonly onOpenChange: (open: boolean) => void
   readonly title: string
   readonly description?: ReactNode
+  /** `lg` para tablas y listas anchas; por omisión, una hoja angosta. */
+  readonly size?: 'md' | 'lg'
   readonly children: ReactNode
   /** Los botones que cierran la tarea; quedan fijos al pie, al alcance del pulgar. */
   readonly footer?: ReactNode
 }
 
 const WIDE_SCREEN = '(min-width: 1024px)'
+const SIDE_WIDTHS = { md: 'w-full gap-0 sm:max-w-lg', lg: 'w-full gap-0 sm:max-w-lg lg:max-w-3xl' } as const
 
 /**
  * El detalle o la configuración secundaria de algo, junto a la pantalla.
@@ -25,7 +28,7 @@ const WIDE_SCREEN = '(min-width: 1024px)'
  * en `FormDialog`. Nunca se abre una hoja o ventana sobre otra: si hace falta
  * confirmar, el contenido de la misma hoja cambia.
  */
-export function DetailSheet({ open, onOpenChange, title, description, children, footer }: DetailSheetProps) {
+export function DetailSheet({ open, onOpenChange, title, description, size = 'md', children, footer }: DetailSheetProps) {
   const isWide = useMediaQuery(WIDE_SCREEN)
   const returnFocus = useReturnFocus()
   const withoutDescription = description === undefined ? { 'aria-describedby': undefined } : {}
@@ -38,7 +41,7 @@ export function DetailSheet({ open, onOpenChange, title, description, children, 
         side={isWide ? 'right' : 'bottom'}
         className={
           isWide
-            ? 'w-full gap-0 sm:max-w-lg'
+            ? SIDE_WIDTHS[size]
             : 'mx-auto max-h-[92dvh] w-full max-w-2xl gap-0 rounded-t-2xl'
         }
       >
