@@ -239,7 +239,8 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
   await receipt.getByRole('button', { name: 'Terminar' }).click()
 
   await expect(page.getByText('Cortesías', { exact: true })).toBeVisible()
-  await page.getByRole('link', { name: 'Imprimir ticket' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menuitem', { name: 'Imprimir ticket' }).click()
   const sheet = page.locator('#hoja-impresa')
   await expect(sheet).toContainText('Ticket de venta')
   await expect(sheet).toContainText('1 × Chicha morada (cortesía)')

@@ -1,16 +1,15 @@
 import { Link } from 'react-router'
 
 import { advanceOrder, type OrderStep } from '@/api/orders'
-import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
-import { useCan } from '@/store/session'
 import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
 import { isActive } from '@/features/orders/orderLabels'
 import { useCanTakeStep } from '@/features/orders/useCanTakeStep'
 import { useOrderAction } from '@/features/orders/useOrderAction'
+import { OrderMoreActions } from './OrderMoreActions'
 
 interface OrderActionsProps {
   readonly order: OrderResponse
@@ -21,7 +20,8 @@ interface OrderActionsProps {
 const WIDE = 'w-full sm:w-auto'
 
 /**
- * Lo que se puede hacer con el pedido ahora: un paso principal, grande, y los secundarios.
+ * Lo que se puede hacer con el pedido ahora: un paso principal, grande,
+ * «Agregar platos» y «Más acciones» con el resto.
  *
  * El paso depende del estado y del permiso: el mesero ve "Marcar servido"
  * cuando esta listo, el encargado ademas "Marcar listo" y "Cobrar".
@@ -29,7 +29,6 @@ const WIDE = 'w-full sm:w-auto'
 export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
   const step = nextStepFor(order.status)
   const can = useCanTakeStep(order, step)
-  const canCancel = useCan(PERMISSION.ordersManage)
   const advance = useOrderAction({
     mutationFn: (step: OrderStep) => advanceOrder(order.id, step),
     success: stepDoneMessage,
@@ -37,7 +36,11 @@ export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
   })
 
   if (!isActive(order.status)) {
-    return null
+    return (
+      <div className="flex">
+        <OrderMoreActions order={order} onCancel={onCancel} />
+      </div>
+    )
   }
 
   return (
@@ -68,12 +71,7 @@ export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
           <span>Agregar platos</span>
         </Link>
       </Button>
-      {canCancel ? (
-        <Button type="button" variant="destructive" size="lg" className={WIDE} onClick={onCancel}>
-          <Icon name="cancel" size={18} />
-          <span>Cancelar pedido</span>
-        </Button>
-      ) : null}
+      <OrderMoreActions order={order} onCancel={onCancel} />
     </div>
   )
 }

@@ -103,7 +103,8 @@ test('VIS-04 el detalle del pedido con nota, cambio de mesa y platos agregados',
   await note.getByRole('button', { name: 'Cancelar' }).click()
   await expect(note).toBeHidden()
 
-  await page.getByRole('button', { name: 'Cambiar de mesa' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menuitem', { name: 'Cambiar de mesa' }).click()
   const tables = page.getByRole('dialog', { name: 'Cambiar de mesa' })
   await expect(tables.getByRole('button', { name: /Mesa 2/u })).toBeVisible()
   await captureWindow(tables, 'dialogo-cambiar-de-mesa')

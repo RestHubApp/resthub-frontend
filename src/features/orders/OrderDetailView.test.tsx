@@ -9,6 +9,8 @@ import { OrderDetailView } from './OrderDetailView'
 const ORDER = '/orders/12'
 const CHARGE = { name: 'Cobrar' }
 const CANCEL = { name: 'Cancelar pedido' }
+const PRINT_BILL = { name: 'Imprimir precuenta' }
+const MENU = { name: 'Más acciones del pedido' }
 
 function open(order: OrderResponse | ErrorResponse, permissions: readonly PermissionCode[] = PERMISSIONS_OWNER) {
   const api = server().on('get', ORDER, order).on('get', '/cash/current', { is_open: true, session: null })
@@ -18,7 +20,7 @@ function open(order: OrderResponse | ErrorResponse, permissions: readonly Permis
 
 describe('OrderDetailView: lo que se lee', () => {
   it('muestra número, lugar, estado, mesero, total y los platos con precio', async () => {
-    open(buildOrder({ notes: 'Mesa de cumpleaños' }))
+    const { user } = open(buildOrder({ notes: 'Mesa de cumpleaños' }))
 
     expect(await screen.findByRole('heading', { name: 'Pedido #34', level: 1 })).toBeInTheDocument()
     expect(screen.getByText('Mesa 3')).toBeInTheDocument()
@@ -26,12 +28,13 @@ describe('OrderDetailView: lo que se lee', () => {
     expect(screen.getByText(/Ana Torres · abierto a las .* · 2 platos/u)).toBeInTheDocument()
     expect(screen.getByText('Mesa de cumpleaños')).toHaveTextContent('Nota del pedido: Mesa de cumpleaños')
     expect(screen.getByText('Lomo saltado')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Imprimir precuenta' })).toHaveAttribute('href', '/imprimir/12/cuenta')
-    expect(screen.getByRole('link', { name: 'Imprimir comanda' })).toHaveAttribute('href', '/imprimir/12/comanda')
+    await user.click(screen.getByRole('button', MENU))
+    expect(await screen.findByRole('menuitem', PRINT_BILL)).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Imprimir comanda' })).toBeInTheDocument()
   })
 
   it('un delivery muestra la dirección, la referencia y el teléfono para llamar', async () => {
-    open(
+    const { user } = open(
       buildOrder({
         type: 'delivery',
         table_id: null,
@@ -46,11 +49,13 @@ describe('OrderDetailView: lo que se lee', () => {
     expect(await screen.findByText('Delivery · Rosa')).toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Entrega' })).toHaveTextContent('Jr. Ica 450Ref.: Frente al parque')
     expect(screen.getByRole('link', { name: '987654321' })).toHaveAttribute('href', 'tel:987654321')
-    expect(screen.queryByRole('button', { name: 'Cambiar de mesa' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', MENU))
+    expect(await screen.findByRole('menuitem', PRINT_BILL)).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Cambiar de mesa' })).not.toBeInTheDocument()
   })
 
   it('un pedido pagado muestra cómo se cobró y el ticket, sin acciones', async () => {
-    open(
+    const { user } = open(
       buildOrder({
         status: 'paid',
         payment_method_label: 'Efectivo',
@@ -69,7 +74,8 @@ describe('OrderDetailView: lo que se lee', () => {
     expect(screen.getByText('Efectivo')).toBeInTheDocument()
     expect(screen.getByText('S/ 5.00 · Cliente frecuente')).toBeInTheDocument()
     expect(screen.getByTestId('paid-row-Vuelto')).toHaveTextContent(/Vuelto\s*S\/ 5\.00/u)
-    expect(screen.getByRole('link', { name: 'Imprimir ticket' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', MENU))
+    expect(await screen.findByRole('menuitem', { name: 'Imprimir ticket' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Agregar platos' })).not.toBeInTheDocument()
   })
 
@@ -77,7 +83,7 @@ describe('OrderDetailView: lo que se lee', () => {
     open(buildOrder({ status: 'cancelled', cancel_reason: 'El cliente se fue', cancelled_at: '2026-09-26T18:00:00Z' }))
 
     expect(await screen.findByText(/Motivo: El cliente se fue/u)).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /Imprimir/u })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', MENU)).not.toBeInTheDocument()
   })
 
   it('si no se puede cargar, muestra el error y permite reintentar', async () => {
@@ -93,10 +99,12 @@ describe('OrderDetailView: lo que se lee', () => {
 
 describe('OrderDetailView: quién puede hacer qué', () => {
   it('el mesero cobra los pedidos que tomó, pero no cancela', async () => {
-    open(buildOrder(), PERMISSIONS_WAITER)
+    const { user } = open(buildOrder(), PERMISSIONS_WAITER)
 
     expect(await screen.findByRole('button', CHARGE)).toBeInTheDocument()
-    expect(screen.queryByRole('button', CANCEL)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', MENU))
+    expect(await screen.findByRole('menuitem', PRINT_BILL)).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', CANCEL)).not.toBeInTheDocument()
   })
 
   it('el mesero no cobra el pedido de otro: lo espera quien lo atendió', async () => {

@@ -5,8 +5,6 @@ import type { OrderNoteFlags } from '@/hooks/useOrderNoteFlags'
 import { DeliveryCard } from './detail/DeliveryCard'
 import { OrderActions } from './detail/OrderActions'
 import { OrderHeader } from './detail/OrderHeader'
-import { TableMoves } from './detail/TableMoves'
-import { isActive } from './orderLabels'
 import { OrderDetailFooter } from './OrderDetailFooter'
 import { OrderDialogs } from './OrderDialogs'
 
@@ -35,7 +33,6 @@ export function OrderDetailBody({ order, flagFor }: OrderDetailBodyProps) {
           setDialog('cancel')
         }}
       />
-      {order.type === 'dine_in' && isActive(order.status) ? <TableMoves order={order} /> : null}
       <OrderDetailFooter order={order} flagFor={flagFor} />
       <OrderDialogs
         chargeOrder={dialog === 'charge' ? order : null}

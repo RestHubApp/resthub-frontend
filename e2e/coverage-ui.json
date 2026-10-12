@@ -1,9 +1,9 @@
 {
-  "total": 425,
+  "total": 426,
   "byType": {
     "ruta": 35,
     "confirmacion": 11,
-    "desplegable": 7,
+    "desplegable": 8,
     "dialogo": 24,
     "hoja": 3,
     "pestanas": 2,
@@ -299,6 +299,12 @@
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
       "origin": "src/components\\CollapsibleHeading.tsx"
+    },
+    {
+      "id": "desplegable:components/MoreOptions",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/components\\MoreOptions.tsx"
     },
     {
       "id": "desplegable:insights/AiDecisionTable",
