@@ -16,7 +16,6 @@ export function QuickAmounts({ totalCents, onQuick }: QuickAmountsProps) {
       <Button
         type="button"
         variant="outline"
-        className="h-11"
         onClick={() => {
           onQuick(centsToApi(totalCents))
         }}
@@ -28,7 +27,6 @@ export function QuickAmounts({ totalCents, onQuick }: QuickAmountsProps) {
           key={bill}
           type="button"
           variant="outline"
-          className="h-11"
           disabled={bill * CENTS < totalCents}
           onClick={() => {
             onQuick(String(bill))

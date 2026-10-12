@@ -25,8 +25,6 @@ export function TakeawayModePicker({ value, onChange }: TakeawayModePickerProps)
           role="radio"
           aria-checked={value === modeOption.value}
           variant={value === modeOption.value ? 'default' : 'outline'}
-          size="lg"
-          className="h-11"
           onClick={() => {
             onChange(modeOption.value)
           }}

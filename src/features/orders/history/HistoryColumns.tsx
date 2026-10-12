@@ -24,7 +24,7 @@ export function buildColumns(timeZone: string): DataColumn<OrderResponse>[] {
       <Button
         type="button"
         variant="ghost"
-        className="h-10 px-3"
+        className="px-3"
         aria-expanded={isExpanded}
         aria-label={`${isExpanded ? 'Ocultar' : 'Ver'} el detalle del pedido #${String(order.number)}`}
         onClick={toggleExpanded}

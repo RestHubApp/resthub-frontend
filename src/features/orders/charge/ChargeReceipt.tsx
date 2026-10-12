@@ -27,7 +27,7 @@ export function ChargeReceipt({ order, onClose }: ChargeReceiptProps) {
       <ReceiptTotals order={order} received={received} />
       {order.payments.length > 1 ? <PaymentsDone order={order} /> : null}
       <InvoicePanel order={order} />
-      <Button type="button" size="lg" className="h-11" onClick={onClose}>
+      <Button type="button" onClick={onClose}>
         Terminar
       </Button>
     </div>

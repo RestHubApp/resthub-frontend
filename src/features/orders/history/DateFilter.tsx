@@ -15,7 +15,6 @@ export function DateFilter({ id, label, value, onChange }: DateFilterProps) {
       <Input
         id={id}
         type="date"
-        className="h-11"
         value={value}
         onChange={(event) => {
           onChange(event.target.value)

@@ -20,7 +20,7 @@ export function NewTableOrder({ tableId }: NewTableOrderProps) {
   if (tables.isSuccess && table === undefined) {
     return (
       <EmptyState title="Esa mesa no existe o está desactivada">
-        <Button asChild variant="outline" size="lg" className="h-11 px-4">
+        <Button asChild variant="outline">
           <Link to={paths.orders.list}>Volver a las mesas</Link>
         </Button>
       </EmptyState>

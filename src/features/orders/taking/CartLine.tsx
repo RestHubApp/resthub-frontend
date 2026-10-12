@@ -40,7 +40,7 @@ export function CartLine({ line, onQuantity, onNotes }: CartLineProps) {
         </Label>
         <Input
           id={noteId}
-          className="h-11 text-base"
+          className="text-base"
           placeholder="Sin cebolla, alergia al maní…"
           maxLength={MAX_NOTE}
           autoComplete="off"

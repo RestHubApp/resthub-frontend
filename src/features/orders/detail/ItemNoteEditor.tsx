@@ -23,7 +23,7 @@ export function ItemNoteEditor({ item, isEditing, isPending, onEditingChange, on
       <Button
         type="button"
         variant="ghost"
-        className="h-11 w-fit px-3"
+        className="w-fit px-3"
         onClick={() => {
           onEditingChange(true)
         }}

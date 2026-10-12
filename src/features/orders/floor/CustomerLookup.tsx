@@ -40,7 +40,7 @@ export function CustomerLookup({ onPick }: CustomerLookupProps) {
           value={text}
           placeholder="Nombre o teléfono"
           autoComplete="off"
-          className="h-11 pl-9"
+          className="pl-9"
           onChange={(event) => {
             setText(event.target.value)
           }}

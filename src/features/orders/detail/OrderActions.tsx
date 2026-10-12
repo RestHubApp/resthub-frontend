@@ -18,7 +18,7 @@ interface OrderActionsProps {
   readonly onCancel: () => void
 }
 
-const WIDE = 'h-12 w-full px-5 text-base sm:w-auto'
+const WIDE = 'w-full sm:w-auto'
 
 /**
  * Lo que se puede hacer con el pedido ahora: un paso principal, grande, y los secundarios.
