@@ -77,8 +77,10 @@ test('GES-06 el encargado arma la receta de un plato con su costo y su margen, y
 
   // Desde el menú: el plato muestra su margen y lleva a su receta.
   await page.goto('/menu')
-  await expect(page.getByText(/Costo S\/\s*8\.64 · Margen S\/\s*23\.36 \(73\.0 %\)/u)).toBeVisible()
-  await page.getByRole('link', { name: 'Ver la receta de Lomo saltado' }).click()
+  await page.getByRole('button', { name: 'Ver la ficha de Lomo saltado' }).click()
+  const record = page.getByRole('dialog', { name: 'Lomo saltado' })
+  await expect(record.getByText(/Costo S\/\s*8\.64 · Margen S\/\s*23\.36 \(73\.0 %\)/u)).toBeVisible()
+  await record.getByRole('link', { name: 'Ver la receta de Lomo saltado' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Receta: Lomo saltado' })).toBeVisible()
   await page.getByRole('button', { name: 'Quitar Lomo de res' }).click()
   await page.getByRole('button', { name: 'Quitar Cebolla roja' }).click()
@@ -88,7 +90,9 @@ test('GES-06 el encargado arma la receta de un plato con su costo y su margen, y
   await expect(notice(page, 'Receta de Lomo saltado borrada.')).toBeVisible()
   await page.getByRole('link', { name: 'Volver al menú' }).click()
   await expect(page).toHaveURL(/\/menu$/u)
-  await expect(page.getByRole('link', { name: 'Agregar la receta de Lomo saltado' })).toBeVisible()
+  await page.getByRole('button', { name: 'Ver la ficha de Lomo saltado' }).click()
+  await expect(page.getByRole('dialog', { name: 'Lomo saltado' }).getByRole('link', { name: 'Ver la receta de Lomo saltado' })).toHaveCount(0)
+  await expect(page.getByRole('dialog', { name: 'Lomo saltado' }).getByRole('link', { name: 'Agregar la receta de Lomo saltado' })).toBeVisible()
 })
 
 test('GES-07 quien solo puede ver el inventario mira la receta sin editarla y un plato que no existe avisa', async ({ page, local }) => {

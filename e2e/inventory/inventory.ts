@@ -98,12 +98,12 @@ function codeOverlays(): Element[] {
       // eslint-disable-next-line security/detect-non-literal-regexp -- patrón armado con datos fijos de la propia prueba, sin entradas de usuarios
       for (const match of source.matchAll(new RegExp(`<${label}(?=[\\s>])`, 'gu'))) {
         const fragment = source.slice(match.index, match.index + 900)
-        inFile.push({ id: '', type, description: title(fragment), origin: `src/${relative(SRC, route)}` })
+        inFile.push({ id: '', type, description: title(fragment), origin: `src/${relative(SRC, route).replaceAll(String.fromCharCode(92), '/')}` })
       }
     }
     const expandable = [...source.matchAll(/aria-expanded=|<details[\s>]/gu)].length
     for (let i = 0; i < expandable; i += 1) {
-      inFile.push({ id: '', type: 'desplegable', description: 'Sección que se abre y se cierra', origin: `src/${relative(SRC, route)}` })
+      inFile.push({ id: '', type: 'desplegable', description: 'Sección que se abre y se cierra', origin: `src/${relative(SRC, route).replaceAll(String.fromCharCode(92), '/')}` })
     }
     for (const [index, element] of inFile.entries()) {
       const repeated = inFile.filter((other) => other.type === element.type).length

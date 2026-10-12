@@ -232,313 +232,313 @@
       "id": "confirmacion:cash/CloseCashButton",
       "type": "confirmacion",
       "description": "",
-      "origin": "src/features\\cash\\CloseCashButton.tsx"
+      "origin": "src/features/cash/CloseCashButton.tsx"
     },
     {
       "id": "confirmacion:customers/CustomerRights",
       "type": "confirmacion",
       "description": "`¿Borrar los datos de ${customer.name}?`",
-      "origin": "src/features\\customers\\CustomerRights.tsx"
+      "origin": "src/features/customers/CustomerRights.tsx"
     },
     {
       "id": "confirmacion:menu/CategoryDialogs#1",
       "type": "confirmacion",
       "description": "`¿Desactivar ${category.name}?`",
-      "origin": "src/features\\menu\\CategoryDialogs.tsx"
+      "origin": "src/features/menu/CategoryDialogs.tsx"
     },
     {
       "id": "confirmacion:menu/CategoryDialogs#2",
       "type": "confirmacion",
       "description": "`¿Eliminar ${category.name}?`",
-      "origin": "src/features\\menu\\CategoryDialogs.tsx"
+      "origin": "src/features/menu/CategoryDialogs.tsx"
     },
     {
       "id": "confirmacion:platform/RestaurantStatusButton",
       "type": "confirmacion",
       "description": "`¿Desactivar ${restaurant.name}?`",
-      "origin": "src/features\\platform\\RestaurantStatusButton.tsx"
+      "origin": "src/features/platform/RestaurantStatusButton.tsx"
     },
     {
       "id": "confirmacion:platform/SandboxResetButton",
       "type": "confirmacion",
       "description": "¿Reiniciar el local de muestra?",
-      "origin": "src/features\\platform\\SandboxResetButton.tsx"
+      "origin": "src/features/platform/SandboxResetButton.tsx"
     },
     {
       "id": "confirmacion:roles/DeleteRoleButton",
       "type": "confirmacion",
       "description": "`¿Eliminar el rol ${role.name}?`",
-      "origin": "src/features\\roles\\DeleteRoleButton.tsx"
+      "origin": "src/features/roles/DeleteRoleButton.tsx"
     },
     {
       "id": "confirmacion:shell/PreviewExitButton",
       "type": "confirmacion",
       "description": "¿Salir con pedidos sin enviar?",
-      "origin": "src/features\\shell\\PreviewExitButton.tsx"
+      "origin": "src/features/shell/PreviewExitButton.tsx"
     },
     {
       "id": "confirmacion:shell/SessionActions",
       "type": "confirmacion",
       "description": "¿Cerrar sesión con pedidos sin enviar?",
-      "origin": "src/features\\shell\\SessionActions.tsx"
+      "origin": "src/features/shell/SessionActions.tsx"
     },
     {
       "id": "confirmacion:staff/StaffRowDialogs",
       "type": "confirmacion",
       "description": "`¿Desactivar a ${account.full_name}?`",
-      "origin": "src/features\\staff\\StaffRowDialogs.tsx"
+      "origin": "src/features/staff/StaffRowDialogs.tsx"
     },
     {
       "id": "desplegable:components/AccessibilityWidget",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/components\\AccessibilityWidget.tsx"
+      "origin": "src/components/AccessibilityWidget.tsx"
     },
     {
       "id": "desplegable:components/CollapsibleHeading",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/components\\CollapsibleHeading.tsx"
+      "origin": "src/components/CollapsibleHeading.tsx"
     },
     {
       "id": "desplegable:components/MoreOptions",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/components\\MoreOptions.tsx"
+      "origin": "src/components/MoreOptions.tsx"
     },
     {
       "id": "desplegable:insights/AiDecisionTable",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/features\\insights\\AiDecisionTable.tsx"
+      "origin": "src/features/insights/AiDecisionTable.tsx"
     },
     {
       "id": "desplegable:orders/charge/CourtesyList",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/features\\orders\\charge\\CourtesyList.tsx"
+      "origin": "src/features/orders/charge/CourtesyList.tsx"
     },
     {
       "id": "desplegable:orders/history/HistoryColumns",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/features\\orders\\history\\HistoryColumns.tsx"
+      "origin": "src/features/orders/history/HistoryColumns.tsx"
     },
     {
       "id": "desplegable:platform/observability/ExpandButton",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
-      "origin": "src/features\\platform\\observability\\ExpandButton.tsx"
+      "origin": "src/features/platform/observability/ExpandButton.tsx"
     },
     {
       "id": "dialogo:auth/ChangePasswordDialog",
       "type": "dialogo",
       "description": "Cambiar contraseña",
-      "origin": "src/features\\auth\\ChangePasswordDialog.tsx"
+      "origin": "src/features/auth/ChangePasswordDialog.tsx"
     },
     {
       "id": "dialogo:cash/CashClosedPrompt",
       "type": "dialogo",
       "description": "Abrir caja",
-      "origin": "src/features\\cash\\CashClosedPrompt.tsx"
+      "origin": "src/features/cash/CashClosedPrompt.tsx"
     },
     {
       "id": "dialogo:cash/CashSessionDialog",
       "type": "dialogo",
       "description": "`Turno de caja ${String(sessionId)}`",
-      "origin": "src/features\\cash\\CashSessionDialog.tsx"
+      "origin": "src/features/cash/CashSessionDialog.tsx"
     },
     {
       "id": "dialogo:customers/CustomerDialog",
       "type": "dialogo",
       "description": "customer === null ? 'Nuevo cliente' : `Editar a ${customer.name}`",
-      "origin": "src/features\\customers\\CustomerDialog.tsx"
+      "origin": "src/features/customers/CustomerDialog.tsx"
     },
     {
       "id": "dialogo:inventory/PurchaseOrderDialog",
       "type": "dialogo",
       "description": "Nueva orden de compra",
-      "origin": "src/features\\inventory\\PurchaseOrderDialog.tsx"
+      "origin": "src/features/inventory/PurchaseOrderDialog.tsx"
     },
     {
       "id": "dialogo:inventory/ReceiveOrderDialog",
       "type": "dialogo",
       "description": "`Recibir la orden ${String(order.number)}`",
-      "origin": "src/features\\inventory\\ReceiveOrderDialog.tsx"
+      "origin": "src/features/inventory/ReceiveOrderDialog.tsx"
     },
     {
       "id": "dialogo:inventory/StockActionDialog",
       "type": "dialogo",
       "description": "action === null ? '' : title(action)",
-      "origin": "src/features\\inventory\\StockActionDialog.tsx"
+      "origin": "src/features/inventory/StockActionDialog.tsx"
     },
     {
       "id": "dialogo:inventory/SupplierDialog",
       "type": "dialogo",
       "description": "supplier === null ? 'Nuevo proveedor' : `Editar ${supplier.name}`",
-      "origin": "src/features\\inventory\\SupplierDialog.tsx"
+      "origin": "src/features/inventory/SupplierDialog.tsx"
     },
     {
       "id": "dialogo:menu/CategoryDialogs",
       "type": "dialogo",
       "description": "`Editar ${category.name}`",
-      "origin": "src/features\\menu\\CategoryDialogs.tsx"
+      "origin": "src/features/menu/CategoryDialogs.tsx"
     },
     {
       "id": "dialogo:menu/NewMenuDialogs#1",
       "type": "dialogo",
       "description": "Nueva categoría",
-      "origin": "src/features\\menu\\NewMenuDialogs.tsx"
+      "origin": "src/features/menu/NewMenuDialogs.tsx"
     },
     {
       "id": "dialogo:menu/NewMenuDialogs#2",
       "type": "dialogo",
       "description": "Nuevo plato",
-      "origin": "src/features\\menu\\NewMenuDialogs.tsx"
+      "origin": "src/features/menu/NewMenuDialogs.tsx"
     },
     {
       "id": "dialogo:orders/CancelOrderDialog",
       "type": "dialogo",
       "description": "`¿Cancelar el pedido #${String(order.number)}?`",
-      "origin": "src/features\\orders\\CancelOrderDialog.tsx"
+      "origin": "src/features/orders/CancelOrderDialog.tsx"
     },
     {
       "id": "dialogo:orders/charge/ChargeContent",
       "type": "dialogo",
       "description": "charged === null ? `Cobrar pedido #${String(actual.number)}` : 'Cobro registrado'",
-      "origin": "src/features\\orders\\charge\\ChargeContent.tsx"
+      "origin": "src/features/orders/charge/ChargeContent.tsx"
     },
     {
       "id": "dialogo:orders/detail/ItemNoteDialog",
       "type": "dialogo",
       "description": "`Nota de ${dish}`",
-      "origin": "src/features\\orders\\detail\\ItemNoteDialog.tsx"
+      "origin": "src/features/orders/detail/ItemNoteDialog.tsx"
     },
     {
       "id": "dialogo:orders/detail/TablePickerDialog",
       "type": "dialogo",
       "description": "title",
-      "origin": "src/features\\orders\\detail\\TablePickerDialog.tsx"
+      "origin": "src/features/orders/detail/TablePickerDialog.tsx"
     },
     {
       "id": "dialogo:orders/floor/TakeawayForm",
       "type": "dialogo",
       "description": "Pedido para llevar o delivery",
-      "origin": "src/features\\orders\\floor\\TakeawayForm.tsx"
+      "origin": "src/features/orders/floor/TakeawayForm.tsx"
     },
     {
       "id": "dialogo:orders/invoice/InvoiceDialog",
       "type": "dialogo",
       "description": "`Comprobante del pedido #${String(order.number)}`",
-      "origin": "src/features\\orders\\invoice\\InvoiceDialog.tsx"
+      "origin": "src/features/orders/invoice/InvoiceDialog.tsx"
     },
     {
       "id": "dialogo:orders/taking/ModifierDialog",
       "type": "dialogo",
       "description": "item.name",
-      "origin": "src/features\\orders\\taking\\ModifierDialog.tsx"
+      "origin": "src/features/orders/taking/ModifierDialog.tsx"
     },
     {
       "id": "dialogo:platform/OwnersSection",
       "type": "dialogo",
       "description": "Agregar encargado",
-      "origin": "src/features\\platform\\OwnersSection.tsx"
+      "origin": "src/features/platform/OwnersSection.tsx"
     },
     {
       "id": "dialogo:reservations/ReservationDialog",
       "type": "dialogo",
       "description": "reservation === null ? 'Nueva reserva' : `Reserva de ${reservation.customer_name}`",
-      "origin": "src/features\\reservations\\ReservationDialog.tsx"
+      "origin": "src/features/reservations/ReservationDialog.tsx"
     },
     {
       "id": "dialogo:staff/StaffCreateDialog",
       "type": "dialogo",
       "description": "Nueva cuenta",
-      "origin": "src/features\\staff\\StaffCreateDialog.tsx"
+      "origin": "src/features/staff/StaffCreateDialog.tsx"
     },
     {
       "id": "dialogo:staff/StaffRowDialogs#1",
       "type": "dialogo",
       "description": "`Editar a ${account.full_name}`",
-      "origin": "src/features\\staff\\StaffRowDialogs.tsx"
+      "origin": "src/features/staff/StaffRowDialogs.tsx"
     },
     {
       "id": "dialogo:staff/StaffRowDialogs#2",
       "type": "dialogo",
       "description": "`Restablecer la contraseña de ${account.full_name}`",
-      "origin": "src/features\\staff\\StaffRowDialogs.tsx"
+      "origin": "src/features/staff/StaffRowDialogs.tsx"
     },
     {
       "id": "dialogo:tables/TableFormDialog",
       "type": "dialogo",
       "description": "table === null ? 'Nueva mesa' : `Renombrar ${tableName(table.label)}`",
-      "origin": "src/features\\tables\\TableFormDialog.tsx"
+      "origin": "src/features/tables/TableFormDialog.tsx"
     },
     {
       "id": "hoja:billing/BillingView",
       "type": "hoja",
       "description": "Datos fiscales",
-      "origin": "src/features\\billing\\BillingView.tsx"
+      "origin": "src/features/billing/BillingView.tsx"
     },
     {
       "id": "hoja:customers/CustomerSheet",
       "type": "hoja",
       "description": "{data?.name ?? 'Cliente'}",
-      "origin": "src/features\\customers\\CustomerSheet.tsx"
+      "origin": "src/features/customers/CustomerSheet.tsx"
     },
     {
       "id": "hoja:insights/MarginsBody",
       "type": "hoja",
       "description": "Margen por plato",
-      "origin": "src/features\\insights\\MarginsBody.tsx"
+      "origin": "src/features/insights/MarginsBody.tsx"
     },
     {
       "id": "hoja:inventory/StockRulesSheet",
       "type": "hoja",
       "description": "Reglas de stock",
-      "origin": "src/features\\inventory\\StockRulesSheet.tsx"
+      "origin": "src/features/inventory/StockRulesSheet.tsx"
     },
     {
       "id": "hoja:menu/DishSheet",
       "type": "hoja",
       "description": "mode === 'edit' ? `Editar ${item.name}` : item.name",
-      "origin": "src/features\\menu\\DishSheet.tsx"
+      "origin": "src/features/menu/DishSheet.tsx"
     },
     {
       "id": "hoja:orders/taking/CartSheet",
       "type": "hoja",
       "description": "{title}",
-      "origin": "src/features\\orders\\taking\\CartSheet.tsx"
+      "origin": "src/features/orders/taking/CartSheet.tsx"
     },
     {
       "id": "hoja:roles/RoleFormDialog",
       "type": "hoja",
       "description": "title(role, access)",
-      "origin": "src/features\\roles\\RoleFormDialog.tsx"
+      "origin": "src/features/roles/RoleFormDialog.tsx"
     },
     {
       "id": "hoja:shell/MoreSheet",
       "type": "hoja",
       "description": "{label}",
-      "origin": "src/features\\shell\\MoreSheet.tsx"
+      "origin": "src/features/shell/MoreSheet.tsx"
     },
     {
       "id": "pestanas:insights/InsightsTabs",
       "type": "pestanas",
       "description": "",
-      "origin": "src/features\\insights\\InsightsTabs.tsx"
+      "origin": "src/features/insights/InsightsTabs.tsx"
     },
     {
       "id": "pestanas:inventory/InventoryTabs",
       "type": "pestanas",
       "description": "",
-      "origin": "src/features\\inventory\\InventoryTabs.tsx"
+      "origin": "src/features/inventory/InventoryTabs.tsx"
     },
     {
       "id": "pestanas:orders/OrdersView",
       "type": "pestanas",
       "description": "",
-      "origin": "src/features\\orders\\OrdersView.tsx"
+      "origin": "src/features/orders/OrdersView.tsx"
     },
     {
       "id": "funcion:pedidos.ver-mesas",

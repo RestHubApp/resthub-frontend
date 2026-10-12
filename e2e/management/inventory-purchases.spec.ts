@@ -91,7 +91,9 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
   await expect(oc1.getByRole('button', { name: 'Recibir' })).toBeHidden()
 
   // Lo recibido es una compra más del libro y la alerta se fue.
-  await expect(page.getByText('Stock en orden: nada por debajo del mínimo.')).toBeVisible()
+  await page.getByRole('tab', { name: /Insumos/u }).click()
+  await expect(page.getByRole('tabpanel', { name: /Insumos/u }).getByText('insumos', { exact: false }).first()).toBeVisible()
+  await expect(page.getByText('por reponer')).toHaveCount(0)
   await page.getByRole('tab', { name: /Movimientos/u }).click()
   await expect(page.getByRole('tabpanel', { name: /Movimientos/u }).getByRole('row', { name: /Culantro/u }).first()).toContainText('+250 g')
   const culantro = (await api(local).list<Ingredient>('/inventory/ingredients')).find((i) => i.name === 'Culantro')
