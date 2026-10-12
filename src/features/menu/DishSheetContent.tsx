@@ -63,13 +63,9 @@ export function DishSheetContent({
       isLast={isLast}
       isPending={isPending}
       onMove={onMove}
-      onEdit={() => {
-        onMode('edit')
-      }}
-      onDeactivate={() => {
-        onMode('deactivate')
-      }}
-      onActivate={onToggleActive}
+      onEdit={() => { onMode('edit') }}
+      onDeactivate={() => { onMode('deactivate') }}
+      onActivate={() => { onToggleActive(); onDone() }}
     />
   )
 }

@@ -57,6 +57,7 @@ const OVERLAYS = [
   { label: 'ConfirmDialog', type: 'confirmacion' },
   { label: 'AlertDialog', type: 'confirmacion' },
   { label: 'Sheet', type: 'hoja' },
+  { label: 'DetailSheet', type: 'hoja' },
   { label: 'Tabs', type: 'pestanas' },
 ] as const
 
@@ -81,10 +82,12 @@ function codeOverlays(): Element[] {
       !route.endsWith('.test.tsx') &&
       !route.includes(join('components', 'ui')) &&
       // Las envolturas compartidas, no las ventanas que las usan
-      // (`TableFormDialog`, `RoleFormDialog`, `CustomerDialog`).
+      // (`TableFormDialog`, `RoleFormDialog`, `CustomerDialog`). `DetailSheet` es
+      // la hoja compartida: cada pantalla que la abre cuenta como su propia hoja.
       !route.endsWith(join('components', 'FormDialog.tsx')) &&
       !route.endsWith(join('components', 'SaveFormDialog.tsx')) &&
-      !route.endsWith(join('components', 'ConfirmDialog.tsx')),
+      !route.endsWith(join('components', 'ConfirmDialog.tsx')) &&
+      !route.endsWith(join('components', 'DetailSheet.tsx')),
   )
   for (const route of sources) {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- ruta armada con constantes del repositorio de pruebas, sin entradas de usuarios

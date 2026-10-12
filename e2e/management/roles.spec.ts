@@ -15,7 +15,7 @@ test.beforeEach(() => {
 test('GES-17 el encargado crea un rol con permisos, edita el del mesero, ve que el encargado es fijo y que un rol con personas no se borra, y elimina el suyo', async ({ page, local }) => {
   covers(
     'ruta:/roles',
-    'dialogo:roles/RoleFormDialog',
+    'hoja:roles/RoleFormDialog',
     'confirmacion:roles/DeleteRoleButton',
     'funcion:roles.crear',
     'funcion:roles.editar-permisos',

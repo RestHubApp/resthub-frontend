@@ -18,6 +18,7 @@ test('VIS-06 el tablero, el historial, la cancelación, el comprobante y la caja
     'dialogo:orders/CancelOrderDialog',
     'dialogo:orders/invoice/InvoiceDialog',
     'ruta:/comprobantes',
+    'hoja:billing/BillingView',
     'ruta:/comprobantes/:invoiceId/imprimir',
     'ruta:/caja',
     'dialogo:cash/CashSessionDialog',
@@ -65,6 +66,10 @@ test('VIS-06 el tablero, el historial, la cancelación, el comprobante y la caja
   await expect(page.getByRole('heading', { name: 'Emitidos' })).toBeVisible()
   await expect(page.getByText(salesReceipt.code)).toBeVisible()
   await capture(page, 'comprobantes')
+  await page.getByRole('button', { name: /Datos fiscales/u }).click()
+  await captureWindow(page.getByRole('dialog', { name: 'Datos fiscales' }), 'hoja-datos-fiscales')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog', { name: 'Datos fiscales' })).toBeHidden()
 
   await page.goto(`/comprobantes/${String(id(salesReceipt))}/imprimir`)
   await expect(page.getByText(salesReceipt.code).first()).toBeVisible()
@@ -88,6 +93,17 @@ test('VIS-06 el tablero, el historial, la cancelación, el comprobante y la caja
   await expect(shift.getByText('Cargando el arqueo…')).toBeHidden()
   // El número del turno es el id de la base: cambia con cada restaurante.
   await captureWindow(shift, 'dialogo-turno-de-caja', [shift.getByRole('heading', { name: /^Turno de caja/u })])
+})
+
+test('VIS-17 la caja cerrada y la ventana para abrirla', async ({ page, local }) => {
+  deadline(60_000)
+  covers('dialogo:cash/CashClosedPrompt')
+  await openAs(page, local.owner, '/caja')
+  await expect(page.getByText('La caja está cerrada')).toBeVisible()
+  await capture(page, 'caja-cerrada')
+
+  await page.getByRole('button', { name: 'Abrir caja' }).click()
+  await captureWindow(page.getByRole('dialog', { name: 'Abrir caja' }), 'dialogo-abrir-caja')
 })
 
 test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local }) => {

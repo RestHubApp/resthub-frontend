@@ -17,6 +17,8 @@ test.beforeEach(() => {
 test('GES-26 el encargado revisa los indicadores del período, mira las tablas, ordena el margen y clasifica las mermas', async ({ page, restaurantWithCashRegister: local }) => {
   covers(
     'ruta:/panel',
+    'pestanas:insights/InsightsTabs',
+    'hoja:insights/MarginsBody',
     'funcion:panel.indicadores',
     'funcion:panel.secciones',
     'funcion:panel.ver-tabla',
@@ -33,6 +35,10 @@ test('GES-26 el encargado revisa los indicadores del período, mira las tablas, 
   })
   await api(local).post(`/orders/${String(id(cancelled))}/cancel`, { reason: 'El cliente se fue' })
   await api(local).post('/inventory/waste', { ingredient_id: defined(local.ingredients[1]).id, quantity: '100', reason: 'Se venció en la cámara' })
+  // Con más de diez platos, el margen muestra los extremos y la tabla completa va en una hoja.
+  for (let n = 1; n <= 6; n += 1) {
+    await api(local).post('/menu/items', { category_id: local.dish('Chicha morada').categoryId, name: `Plato extra ${String(n)}`, price: '10.00' })
+  }
 
   await openAs(page, local.owner, '/panel')
   await expect(page.getByRole('heading', { level: 1, name: 'Resumen del negocio' })).toBeVisible()
@@ -56,26 +62,34 @@ test('GES-26 el encargado revisa los indicadores del período, mira las tablas, 
   await expect(dishes.getByRole('button', { name: 'Ver gráfico' })).toHaveAttribute('aria-pressed', 'true')
   await dishes.getByRole('button', { name: 'Ver gráfico' }).click()
   await expect(dishes.getByRole('table')).toHaveCount(0)
+  const days = section('Ventas por día')
+  await days.getByRole('button', { name: 'Ver tabla' }).click()
+  await expect(days.getByRole('row').filter({ hasText: /S\/\s*100\.00/u })).toHaveCount(1)
+
+  // El margen por plato muestra los extremos; la tabla completa se abre en una hoja y se ordena tocando la cabecera.
+  const margin = section('Margen por plato')
+  await expect(margin.getByRole('row').nth(1)).toContainText('Lomo saltado')
+  await margin.getByRole('button', { name: 'Ver los 11 platos' }).click()
+  const allDishes = page.getByRole('dialog', { name: 'Margen por plato' })
+  await allDishes.getByRole('button', { name: /^Plato/u }).click()
+  await expect(allDishes.getByRole('columnheader', { name: /Plato/u })).toHaveAttribute('aria-sort', 'ascending')
+  await expect(allDishes.getByRole('row').nth(1)).toContainText('Ají de gallina')
+  await page.keyboard.press('Escape')
+  await expect(allDishes).toBeHidden()
+
+  // Pagos y servicio.
+  await page.getByRole('tab', { name: 'Pagos y servicio' }).click()
   const payments = section('Ingresos por medio de pago')
   await expect(payments).toContainText(/Total cobrado: S\/\s*100\.00\./u)
   await payments.getByRole('button', { name: 'Ver tabla' }).click()
   await expect(payments.getByRole('row', { name: /Efectivo/u })).toContainText(soles('64.00'))
   await expect(payments.getByRole('row', { name: /Yape/u })).toContainText(soles('36.00'))
-  const days = section('Ventas por día')
-  await days.getByRole('button', { name: 'Ver tabla' }).click()
-  await expect(days.getByRole('row').filter({ hasText: /S\/\s*100\.00/u })).toHaveCount(1)
   await expect(section('Pedidos por día y hora')).toContainText('Hora pico:')
   await expect(section('Rendimiento por mesero').getByRole('row', { name: /Mesero Prueba/u })).toContainText(soles('100.00'))
   await evidence(page, 'ges-26-2-tablas')
 
-  // El margen por plato se ordena tocando la cabecera.
-  const margin = section('Margen por plato')
-  await expect(margin.getByRole('row').nth(1)).toContainText('Lomo saltado')
-  await margin.getByRole('button', { name: /^Plato/u }).click()
-  await expect(margin.getByRole('columnheader', { name: /Plato/u })).toHaveAttribute('aria-sort', 'ascending')
-  await expect(margin.getByRole('row').nth(1)).toContainText('Ají de gallina')
-
   // Lo que está bajo el mínimo lleva a la reposición.
+  await page.getByRole('tab', { name: 'Mermas y stock' }).click()
   const low = section('Insumos bajo mínimo')
   await expect(low).toContainText('Culantro')
   await expect(low.getByRole('link', { name: 'Ver reposición sugerida' })).toHaveAttribute('href', '/panel/reposicion')
@@ -118,10 +132,12 @@ test('GES-28 el encargado acota el panel con los rangos de siempre y uno persona
   await expect(page).toHaveURL(new RegExp(`rango=personalizado&desde=${dayFromToday(-2)}&hasta=${dayFromToday(-1)}`, 'u'))
   await expect(page.getByText(/\(2 días\)\./u)).toBeVisible()
   await expect(kpi('Ventas')).toContainText(soles('0.00'))
-  await expect(page.getByText('No hubo pedidos pagados en este rango.')).toBeVisible()
   await expect(page.getByText('No se vendieron platos en este rango.')).toBeVisible()
+  await page.getByRole('tab', { name: 'Pagos y servicio' }).click()
+  await expect(page.getByText('No hubo pedidos pagados en este rango.')).toBeVisible()
   await expect(page.getByText('No hubo cobros en este rango.')).toBeVisible()
   await expect(page.getByText('Nadie cobró pedidos en este rango.')).toBeVisible()
+  await page.getByRole('tab', { name: 'Mermas y stock' }).click()
   await expect(page.getByText('No se registraron mermas en este rango.')).toBeVisible()
   await evidence(page, 'ges-28-1-sin-ventas')
 })
@@ -130,18 +146,20 @@ test('GES-27 cada sección del panel avisa si el servidor falla', async ({ page,
   covers('estado:panel.error')
   await failureServer(page, '/insights')
   await openAs(page, local.owner, '/panel')
-  for (const message of [
-    'No se pudo cargar el resumen del período.',
-    'No se pudieron cargar las ventas por día.',
-    'No se pudo cargar el mapa por hora.',
-    'No se pudieron cargar los platos más vendidos.',
-    'No se pudieron cargar los medios de pago.',
-    'No se pudo cargar el margen por plato.',
-    'No se pudo cargar el rendimiento por mesero.',
-    'No se pudo cargar el stock.',
-    'No se pudieron cargar las mermas.',
-  ]) {
-    await expect(page.getByText(message)).toBeVisible()
+  // Pares [pestaña, avisos]: lo de arriba se ve siempre y el detalle, en su pestaña.
+  const messages: readonly (readonly [string | null, readonly string[]])[] = [
+    [null, ['No se pudo cargar el resumen del período.', 'No se pudieron cargar las ventas por día.']],
+    ['Platos', ['No se pudieron cargar los platos más vendidos.', 'No se pudo cargar el margen por plato.']],
+    ['Pagos y servicio', ['No se pudo cargar el mapa por hora.', 'No se pudieron cargar los medios de pago.', 'No se pudo cargar el rendimiento por mesero.']],
+    ['Mermas y stock', ['No se pudo cargar el stock.', 'No se pudieron cargar las mermas.']],
+  ]
+  for (const [tab, texts] of messages) {
+    if (tab !== null) {
+      await page.getByRole('tab', { name: tab }).click()
+    }
+    for (const message of texts) {
+      await expect(page.getByText(message)).toBeVisible()
+    }
   }
   await evidence(page, 'ges-27-1-error')
 })

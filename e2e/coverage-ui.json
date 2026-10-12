@@ -1,14 +1,14 @@
 {
-  "total": 432,
+  "total": 434,
   "byType": {
     "ruta": 36,
-    "confirmacion": 11,
+    "confirmacion": 10,
     "desplegable": 8,
     "dialogo": 24,
-    "hoja": 3,
-    "pestanas": 2,
-    "funcion": 265,
-    "estado": 77,
+    "hoja": 8,
+    "pestanas": 3,
+    "funcion": 264,
+    "estado": 75,
     "rol": 6
   },
   "items": [
@@ -253,12 +253,6 @@
       "origin": "src/features\\menu\\CategoryDialogs.tsx"
     },
     {
-      "id": "confirmacion:menu/MenuItemDialogs",
-      "type": "confirmacion",
-      "description": "`¿Sacar ${item.name} de la carta?`",
-      "origin": "src/features\\menu\\MenuItemDialogs.tsx"
-    },
-    {
       "id": "confirmacion:platform/RestaurantStatusButton",
       "type": "confirmacion",
       "description": "`¿Desactivar ${restaurant.name}?`",
@@ -337,6 +331,18 @@
       "origin": "src/features\\platform\\observability\\ExpandButton.tsx"
     },
     {
+      "id": "dialogo:auth/ChangePasswordDialog",
+      "type": "dialogo",
+      "description": "Cambiar contraseña",
+      "origin": "src/features\\auth\\ChangePasswordDialog.tsx"
+    },
+    {
+      "id": "dialogo:cash/CashClosedPrompt",
+      "type": "dialogo",
+      "description": "Abrir caja",
+      "origin": "src/features\\cash\\CashClosedPrompt.tsx"
+    },
+    {
       "id": "dialogo:cash/CashSessionDialog",
       "type": "dialogo",
       "description": "`Turno de caja ${String(sessionId)}`",
@@ -377,12 +383,6 @@
       "type": "dialogo",
       "description": "`Editar ${category.name}`",
       "origin": "src/features\\menu\\CategoryDialogs.tsx"
-    },
-    {
-      "id": "dialogo:menu/MenuItemDialogs",
-      "type": "dialogo",
-      "description": "`Editar ${item.name}`",
-      "origin": "src/features\\menu\\MenuItemDialogs.tsx"
     },
     {
       "id": "dialogo:menu/NewMenuDialogs#1",
@@ -451,12 +451,6 @@
       "origin": "src/features\\reservations\\ReservationDialog.tsx"
     },
     {
-      "id": "dialogo:roles/RoleFormDialog",
-      "type": "dialogo",
-      "description": "title(role, access)",
-      "origin": "src/features\\roles\\RoleFormDialog.tsx"
-    },
-    {
       "id": "dialogo:staff/StaffCreateDialog",
       "type": "dialogo",
       "description": "Nueva cuenta",
@@ -481,10 +475,34 @@
       "origin": "src/features\\tables\\TableFormDialog.tsx"
     },
     {
+      "id": "hoja:billing/BillingView",
+      "type": "hoja",
+      "description": "Datos fiscales",
+      "origin": "src/features\\billing\\BillingView.tsx"
+    },
+    {
       "id": "hoja:customers/CustomerSheet",
       "type": "hoja",
       "description": "{data?.name ?? 'Cliente'}",
       "origin": "src/features\\customers\\CustomerSheet.tsx"
+    },
+    {
+      "id": "hoja:insights/MarginsBody",
+      "type": "hoja",
+      "description": "Margen por plato",
+      "origin": "src/features\\insights\\MarginsBody.tsx"
+    },
+    {
+      "id": "hoja:inventory/StockRulesSheet",
+      "type": "hoja",
+      "description": "Reglas de stock",
+      "origin": "src/features\\inventory\\StockRulesSheet.tsx"
+    },
+    {
+      "id": "hoja:menu/DishSheet",
+      "type": "hoja",
+      "description": "mode === 'edit' ? `Editar ${item.name}` : item.name",
+      "origin": "src/features\\menu\\DishSheet.tsx"
     },
     {
       "id": "hoja:orders/taking/CartSheet",
@@ -493,10 +511,22 @@
       "origin": "src/features\\orders\\taking\\CartSheet.tsx"
     },
     {
+      "id": "hoja:roles/RoleFormDialog",
+      "type": "hoja",
+      "description": "title(role, access)",
+      "origin": "src/features\\roles\\RoleFormDialog.tsx"
+    },
+    {
       "id": "hoja:shell/MoreSheet",
       "type": "hoja",
       "description": "{label}",
       "origin": "src/features\\shell\\MoreSheet.tsx"
+    },
+    {
+      "id": "pestanas:insights/InsightsTabs",
+      "type": "pestanas",
+      "description": "",
+      "origin": "src/features\\insights\\InsightsTabs.tsx"
     },
     {
       "id": "pestanas:inventory/InventoryTabs",
@@ -1191,7 +1221,7 @@
     {
       "id": "funcion:inventario.compra-desde-alerta",
       "type": "funcion",
-      "description": "Registrar la compra desde la tarjeta de la alerta",
+      "description": "Registrar la compra de un insumo bajo mínimo desde su fila",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
@@ -1227,7 +1257,7 @@
     {
       "id": "funcion:inventario.solo-bajo-minimo",
       "type": "funcion",
-      "description": "Filtrar solo los insumos bajo el mínimo",
+      "description": "Filtrar solo los insumos bajo el mínimo; la cuenta de los que faltan está junto al filtro",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
@@ -1237,33 +1267,21 @@
       "origin": "e2e/inventory/functions/management.json"
     },
     {
-      "id": "funcion:inventario.ver-alertas",
-      "type": "funcion",
-      "description": "El resumen de stock bajo lleva a la pestaña de alertas",
-      "origin": "e2e/inventory/functions/management.json"
-    },
-    {
       "id": "funcion:inventario.alerta-desaparece-al-reponer",
       "type": "funcion",
-      "description": "Al reponer, la alerta y el aviso de stock bajo desaparecen solos",
+      "description": "Al reponer, el insumo sale de «Solo bajo mínimo» y deja de contarse como por reponer",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
       "id": "funcion:inventario.agotar-sin-insumos",
       "type": "funcion",
-      "description": "Encender o apagar la regla que agota solos los platos sin insumos",
+      "description": "Encender o apagar, en la hoja «Reglas de stock», la regla que agota solos los platos sin insumos",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
       "id": "estado:inventario.sin-resultados",
       "type": "estado",
       "description": "Una búsqueda sin coincidencias lo dice",
-      "origin": "e2e/inventory/functions/management.json"
-    },
-    {
-      "id": "estado:inventario.alertas-vacio",
-      "type": "estado",
-      "description": "Sin nada bajo el mínimo, las alertas dicen «Nada por reponer»",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
@@ -1282,12 +1300,6 @@
       "id": "estado:inventario.error",
       "type": "estado",
       "description": "Si falla el servidor, la tabla de insumos muestra el error",
-      "origin": "e2e/inventory/functions/management.json"
-    },
-    {
-      "id": "estado:inventario.alertas-error",
-      "type": "estado",
-      "description": "Si falla el servidor, las alertas muestran el error",
       "origin": "e2e/inventory/functions/management.json"
     },
     {

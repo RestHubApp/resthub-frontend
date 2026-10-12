@@ -15,6 +15,7 @@ test.beforeEach(() => {
 test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que queda simulado sin proveedor y lo imprime', async ({ page, restaurantWithCashRegister: local }) => {
   covers(
     'ruta:/comprobantes',
+    'hoja:billing/BillingView',
     'ruta:/comprobantes/:invoiceId/imprimir',
     'funcion:comprobantes.datos-fiscales',
     'funcion:comprobantes.validar-datos-fiscales',
@@ -35,21 +36,24 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
   await expect(row).toContainText(soles('40.00'))
   await expect(row).toContainText('Sin enviar (sin proveedor)')
 
-  // Datos fiscales: abiertos mientras falte algo para enviar a SUNAT.
-  await expect(page.getByRole('button', { name: 'Datos fiscales', exact: true })).toHaveAttribute('aria-expanded', 'true')
-  await page.getByLabel('RUC del local').fill('123')
-  await page.getByLabel('Serie de boletas').fill('X001')
-  await page.getByRole('button', { name: 'Guardar datos fiscales' }).click()
-  await expect(page.getByText('El RUC tiene 11 dígitos y empieza en 10 o 20')).toBeVisible()
-  await expect(page.getByText('Cuatro caracteres, empieza con B')).toBeVisible()
-  await page.getByLabel('RUC del local').fill('20123456789')
-  await page.getByLabel('Razón social').fill('Restaurante E2E S.A.C.')
-  await page.getByLabel('Dirección fiscal').fill('Av. Larco 123, Miraflores')
-  await page.getByLabel('Serie de boletas').fill('B001')
-  await expect(page.getByText('Todavía no cargado.')).toBeVisible()
+  // Datos fiscales: en una hoja; el botón avisa mientras falte algo para enviar a SUNAT.
+  await expect(page.getByRole('button', { name: /Datos fiscales/u })).toContainText('Falta completar')
+  await page.getByRole('button', { name: /Datos fiscales/u }).click()
+  const fiscal = page.getByRole('dialog', { name: 'Datos fiscales' })
+  await fiscal.getByLabel('RUC del local').fill('123')
+  await fiscal.getByLabel('Serie de boletas').fill('X001')
+  await fiscal.getByRole('button', { name: 'Guardar datos fiscales' }).click()
+  await expect(fiscal.getByText('El RUC tiene 11 dígitos y empieza en 10 o 20')).toBeVisible()
+  await expect(fiscal.getByText('Cuatro caracteres, empieza con B')).toBeVisible()
+  await fiscal.getByLabel('RUC del local').fill('20123456789')
+  await fiscal.getByLabel('Razón social').fill('Restaurante E2E S.A.C.')
+  await fiscal.getByLabel('Dirección fiscal').fill('Av. Larco 123, Miraflores')
+  await fiscal.getByLabel('Serie de boletas').fill('B001')
+  await expect(fiscal.getByText('Todavía no cargado.')).toBeVisible()
   await evidence(page, 'ges-19-1-datos-fiscales')
-  await page.getByRole('button', { name: 'Guardar datos fiscales' }).click()
+  await fiscal.getByRole('button', { name: 'Guardar datos fiscales' }).click()
   await expect(notice(page, 'Datos fiscales guardados.')).toBeVisible()
+  await expect(fiscal).toBeHidden()
   const settings = await api(local).get('/billing/settings')
   expect(settings).toMatchObject({ ruc: '20123456789', legal_name: 'Restaurante E2E S.A.C.', is_ready: false, has_provider_token: false })
 

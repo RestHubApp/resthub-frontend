@@ -27,6 +27,22 @@ async function form(page: Page, button: Locator, title: string | RegExp, name: s
   await expect(dialog).toBeHidden()
 }
 
+/** La ficha de un plato en su hoja, su edición y la confirmación de sacarlo, dentro de la misma hoja. */
+async function dishRecord(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Ver la ficha de Lomo saltado' }).click()
+  const record = page.getByRole('dialog', { name: 'Lomo saltado' })
+  await captureWindow(record, 'hoja-plato')
+  await record.getByRole('button', { name: 'Desactivar' }).click()
+  await expect(record.getByRole('group', { name: '¿Sacar Lomo saltado de la carta?' })).toBeVisible()
+  await captureWindow(record, 'hoja-sacar-plato')
+  await record.getByRole('button', { name: 'Volver' }).click()
+  await record.getByRole('button', { name: 'Editar plato' }).click()
+  const edit = page.getByRole('dialog', { name: 'Editar Lomo saltado' })
+  await captureWindow(edit, 'hoja-editar-plato')
+  await page.keyboard.press('Escape')
+  await expect(edit).toBeHidden()
+}
+
 test('VIS-08 la carta con sus ventanas de alta, edición y confirmaciones', async ({ page, local }) => {
   deadline(120_000)
   covers(
@@ -34,10 +50,9 @@ test('VIS-08 la carta con sus ventanas de alta, edición y confirmaciones', asyn
     'dialogo:menu/NewMenuDialogs#1',
     'dialogo:menu/NewMenuDialogs#2',
     'dialogo:menu/CategoryDialogs',
-    'dialogo:menu/MenuItemDialogs',
+    'hoja:menu/DishSheet',
     'confirmacion:menu/CategoryDialogs#1',
     'confirmacion:menu/CategoryDialogs#2',
-    'confirmacion:menu/MenuItemDialogs',
   )
   await api(local).post('/menu/categories', { name: 'Postres' })
 
@@ -49,15 +64,12 @@ test('VIS-08 la carta con sus ventanas de alta, edición y confirmaciones', asyn
   await form(page, page.getByRole('button', { name: 'Nueva categoría' }), 'Nueva categoría', 'dialogo-nueva-categoria')
   await form(page, page.getByRole('button', { name: 'Nuevo plato' }), 'Nuevo plato', 'dialogo-nuevo-plato')
   await form(page, page.getByRole('button', { name: 'Editar la categoría Fondos' }), 'Editar Fondos', 'dialogo-editar-categoria')
-  await form(page, page.getByRole('button', { name: 'Editar Lomo saltado' }), 'Editar Lomo saltado', 'dialogo-editar-plato')
+  await dishRecord(page)
 
   await page.getByRole('button', { name: 'Más acciones de la categoría Fondos' }).click()
   await confirmation(page, page.getByRole('menu', { name: 'Más acciones de la categoría Fondos' }).getByRole('menuitem', { name: 'Desactivar' }), '¿Desactivar Fondos?', 'confirmar-desactivar-categoria')
   await page.getByRole('button', { name: 'Más acciones de la categoría Postres' }).click()
   await confirmation(page, page.getByRole('menu', { name: 'Más acciones de la categoría Postres' }).getByRole('menuitem', { name: 'Eliminar' }), '¿Eliminar Postres?', 'confirmar-eliminar-categoria')
-  const lomo = page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: 'Lomo saltado' }) })
-  await lomo.getByRole('button', { name: 'Más acciones de Lomo saltado' }).click()
-  await confirmation(page, page.getByRole('menu', { name: 'Más acciones de Lomo saltado' }).getByRole('menuitem', { name: 'Desactivar' }), '¿Sacar Lomo saltado de la carta?', 'confirmar-sacar-plato')
 })
 
 test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plato', async ({ page, local }) => {
@@ -66,6 +78,7 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
     'ruta:/inventario',
     'pestanas:inventory/InventoryTabs',
     'dialogo:inventory/StockActionDialog',
+    'hoja:inventory/StockRulesSheet',
     'dialogo:inventory/SupplierDialog',
     'dialogo:inventory/PurchaseOrderDialog',
     'dialogo:inventory/ReceiveOrderDialog',
@@ -89,6 +102,7 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
   await expect(page.getByText('3 insumos')).toBeVisible()
   await capture(page, 'inventario-insumos')
 
+  await form(page, page.getByRole('button', { name: 'Reglas de stock' }), 'Reglas de stock', 'hoja-reglas-de-stock')
   await page.getByRole('button', { name: 'Más acciones de Cebolla roja' }).click()
   await form(page, page.getByRole('menu', { name: 'Más acciones de Cebolla roja' }).getByRole('menuitem', { name: 'Merma' }), 'Registrar merma: Cebolla roja', 'dialogo-merma')
   await form(page, page.getByRole('button', { name: 'Compra de Culantro' }), 'Registrar compra: Culantro', 'dialogo-compra')
@@ -97,7 +111,6 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
 
   const tabs: readonly (readonly [RegExp, string, string])[] = [
     [/^Movimientos/u, 'Stock inicial', 'inventario-movimientos'],
-    [/^Alertas/u, 'Culantro', 'inventario-alertas'],
     [/^Recetas/u, 'Lomo saltado', 'inventario-recetas'],
     [/^Compras/u, 'OC 1 · Mercado Mayorista', 'inventario-compras'],
     [/^Proveedores/u, 'Mercado Mayorista', 'inventario-proveedores'],

@@ -17,6 +17,7 @@ test.beforeEach(() => {
 test('GES-31 el mesero ve sus datos y cambia su contraseña pidiendo la actual @mobile', async ({ page, local }) => {
   covers(
     'ruta:/perfil',
+    'dialogo:auth/ChangePasswordDialog',
     'funcion:perfil.ver-datos',
     'funcion:perfil.cambiar-contrasena',
     'funcion:perfil.validar-contrasena',
@@ -30,10 +31,14 @@ test('GES-31 el mesero ve sus datos y cambia su contraseña pidiendo la actual @
   await expect(data('Rol')).toHaveText('Mesero')
   await expect(data('Restaurante')).toHaveText('Restaurante E2E')
 
-  const actual = page.getByLabel('Contraseña actual', { exact: true })
-  const fresh = page.getByLabel('Nueva contraseña', { exact: true })
-  const repeated = page.getByLabel('Repite la nueva contraseña')
-  const change = page.getByRole('button', { name: 'Cambiar contraseña' })
+  // El formulario se abre en una ventana desde la tarjeta de datos.
+  await expect(page.getByLabel('Contraseña actual', { exact: true })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Cambiar contraseña' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Cambiar contraseña' })
+  const actual = dialog.getByLabel('Contraseña actual', { exact: true })
+  const fresh = dialog.getByLabel('Nueva contraseña', { exact: true })
+  const repeated = dialog.getByLabel('Repite la nueva contraseña')
+  const change = dialog.getByRole('button', { name: 'Cambiar contraseña' })
   await change.click()
   await expect(page.getByText('Escribe tu contraseña actual')).toBeVisible()
   await actual.fill(NEW_SECRET)
@@ -59,7 +64,7 @@ test('GES-31 el mesero ve sus datos y cambia su contraseña pidiendo la actual @
   await expect(page.getByRole('alert').filter({ hasText: /contraseña/iu })).toBeVisible()
   expect(await tryAccess(local.http, local.waiter.email, NEW_SECRET)).toBe(200)
 
-  await page.getByRole('button', { name: 'Mostrar contraseña' }).first().click()
+  await dialog.getByRole('button', { name: 'Mostrar contraseña' }).first().click()
   await expect(actual).toHaveAttribute('type', 'text')
   await actual.fill(NEW_SECRET)
   await change.click()

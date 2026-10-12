@@ -58,12 +58,11 @@ test('GES-11 cada pestaña del inventario avisa si el servidor falla', async ({ 
   covers(
     'estado:inventario.error',
     'estado:movimientos.error',
-    'estado:inventario.alertas-error',
     'estado:recetas.error',
     'estado:compras.error',
     'estado:proveedores.error',
   )
-  for (const route of ['/inventory/ingredients', '/inventory/movements', '/inventory/alerts', '/inventory/recipes', '/inventory/purchase-orders', '/inventory/suppliers']) {
+  for (const route of ['/inventory/ingredients', '/inventory/movements', '/inventory/recipes', '/inventory/purchase-orders', '/inventory/suppliers']) {
     await failureServer(page, route)
   }
   await openAs(page, local.owner, '/inventario')
@@ -71,7 +70,6 @@ test('GES-11 cada pestaña del inventario avisa si el servidor falla', async ({ 
   // Pares [nombre visible de la pestaña, aviso]: el nombre es texto de la interfaz.
   const messages: [string, string][] = [
     ['Movimientos', 'No se pudo cargar el historial de stock.'],
-    ['Alertas', 'No se pudieron cargar las alertas.'],
     ['Recetas', 'No se pudieron cargar las recetas.'],
     ['Compras', 'No se pudieron cargar las órdenes.'],
     ['Proveedores', 'No se pudieron cargar los proveedores.'],

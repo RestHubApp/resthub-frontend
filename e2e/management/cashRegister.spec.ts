@@ -16,6 +16,7 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
     'confirmacion:cash/CloseCashButton',
     'ruta:/caja',
     'dialogo:cash/CashSessionDialog',
+    'dialogo:cash/CashClosedPrompt',
     'funcion:caja.abrir',
     'funcion:caja.arqueo-en-curso',
     'funcion:caja.diferencia-en-vivo',
@@ -29,9 +30,13 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
   await expect(page.getByRole('heading', { level: 1, name: 'Caja' })).toBeVisible()
   await expect(page.getByText('Todavía no hay turnos de caja')).toBeVisible()
 
-  await page.getByLabel('Efectivo inicial').fill('150')
-  await page.getByLabel('Nota (opcional)').fill('Turno de la mañana')
+  // Con la caja cerrada hay un solo botón; el formulario se abre en una ventana.
+  await expect(page.getByLabel('Efectivo inicial')).toHaveCount(0)
   await page.getByRole('button', { name: 'Abrir caja' }).click()
+  const opening = page.getByRole('dialog', { name: 'Abrir caja' })
+  await opening.getByLabel('Efectivo inicial').fill('150')
+  await opening.getByLabel('Nota (opcional)').fill('Turno de la mañana')
+  await opening.getByRole('button', { name: 'Abrir caja' }).click()
   await expect(notice(page, /Caja abierta con S\/\s*150\.00\. Ya se puede cobrar\./u)).toBeVisible()
   const inProgress = page.getByRole('heading', { name: 'Turno en curso' }).locator('xpath=../../..')
   await expect(inProgress).toContainText(soles('150.00'))
@@ -81,7 +86,7 @@ test('GES-01 el encargado abre la caja, ve el efectivo esperado, la cierra con e
   await page.getByRole('button', { name: 'Cerrar caja' }).click()
   await confirm.getByRole('button', { name: 'Cerrar caja' }).click()
   await expect(notice(page, /Caja cerrada\. Faltan S\/\s*1\.50\./u)).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Abrir caja' })).toBeVisible()
+  await expect(page.getByText('La caja está cerrada')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Turno en curso' })).toBeHidden()
 
   // Sin caja abierta, el servidor no deja cobrar.
@@ -116,12 +121,16 @@ test('GES-02 el encargado valida el monto inicial, cambia el tope de descuento d
   )
   await openAs(page, local.owner, '/caja')
   await page.getByRole('button', { name: 'Abrir caja' }).click()
-  await expect(page.getByText('Escribe el monto')).toBeVisible()
-  await page.getByLabel('Efectivo inicial').fill('cien')
-  await page.getByRole('button', { name: 'Abrir caja' }).click()
-  await expect(page.getByText('Escribe un monto como 150 o 150.50')).toBeVisible()
-  await expect(page.getByLabel('Efectivo inicial')).toHaveAttribute('aria-invalid', 'true')
+  const opening = page.getByRole('dialog', { name: 'Abrir caja' })
+  await opening.getByRole('button', { name: 'Abrir caja' }).click()
+  await expect(opening.getByText('Escribe el monto')).toBeVisible()
+  await opening.getByLabel('Efectivo inicial').fill('cien')
+  await opening.getByRole('button', { name: 'Abrir caja' }).click()
+  await expect(opening.getByText('Escribe un monto como 150 o 150.50')).toBeVisible()
+  await expect(opening.getByLabel('Efectivo inicial')).toHaveAttribute('aria-invalid', 'true')
   await evidence(page, 'ges-02-1-monto-invalido')
+  await page.keyboard.press('Escape')
+  await expect(opening).toBeHidden()
 
   // El tope del mesero vive plegado: se abre, se cambia y se vuelve a plegar.
   const collapsible = page.getByRole('button', { name: 'Descuentos del mesero' })
@@ -145,8 +154,9 @@ test('GES-02 el encargado valida el monto inicial, cambia el tope de descuento d
   await expect(cap).toBeHidden()
 
   // Con un pedido abierto, cerrar avisa que queda para el turno siguiente.
-  await page.getByLabel('Efectivo inicial').fill('80,50')
   await page.getByRole('button', { name: 'Abrir caja' }).click()
+  await opening.getByLabel('Efectivo inicial').fill('80,50')
+  await opening.getByRole('button', { name: 'Abrir caja' }).click()
   await expect(notice(page, /Caja abierta con S\/\s*80\.50/u)).toBeVisible()
   await api(local, local.waiter).post('/orders', {
     type: 'dine_in',

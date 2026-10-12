@@ -28,10 +28,20 @@ test('GES-14 el encargado crea, renombra, ordena, desactiva y activa mesas, y un
   await expect(page.getByRole('heading', { level: 1, name: 'Mesas' })).toBeVisible()
   await expect(page.getByText('4 activas de 4')).toBeVisible()
   const table = (name: string) => page.getByRole('main').getByRole('listitem').filter({ has: page.getByText(name, { exact: true }) })
+  // Las acciones de una mesa están tras su menú «⋯».
+  const action = async (name: string, item: string) => {
+    await table(name).getByRole('button', { name: `Más acciones de ${name}` }).click()
+    await page.getByRole('menu', { name: `Más acciones de ${name}` }).getByRole('menuitem', { name: item }).click()
+  }
+  const menuItem = async (name: string, item: string) => {
+    await table(name).getByRole('button', { name: `Más acciones de ${name}` }).click()
+    return page.getByRole('menu', { name: `Más acciones de ${name}` }).getByRole('menuitem', { name: item })
+  }
 
   // Una mesa ocupada muestra su pedido y no se puede desactivar.
   await expect(table('Mesa 1')).toContainText(/Ocupada · pedido #1/u)
-  await expect(table('Mesa 1').getByRole('button', { name: 'Desactivar' })).toBeDisabled()
+  await expect(await menuItem('Mesa 1', 'Desactivar')).toHaveAttribute('aria-disabled', 'true')
+  await page.keyboard.press('Escape')
 
   await page.getByRole('button', { name: 'Nueva mesa' }).click()
   const registration = page.getByRole('dialog', { name: 'Nueva mesa' })
@@ -46,7 +56,7 @@ test('GES-14 el encargado crea, renombra, ordena, desactiva y activa mesas, y un
   await expect(notice(page, 'Mesa creada.')).toBeVisible()
   await expect(page.getByText('5 activas de 5')).toBeVisible()
 
-  await table('Terraza 1').getByRole('button', { name: 'Renombrar' }).click()
+  await action('Terraza 1', 'Renombrar')
   const rename = page.getByRole('dialog', { name: 'Renombrar Terraza 1' })
   await expect(rename.getByLabel('Nombre')).toHaveValue('Terraza 1')
   await rename.getByLabel('Nombre').fill('Terraza 2')
@@ -55,8 +65,8 @@ test('GES-14 el encargado crea, renombra, ordena, desactiva y activa mesas, y un
   await expect(table('Terraza 2')).toBeVisible()
 
   // La terraza va antes que la mesa 4 en el recorrido.
-  await expect(page.getByRole('button', { name: 'Bajar Terraza 2' })).toBeDisabled()
-  await page.getByRole('button', { name: 'Subir Terraza 2' }).click()
+  await expect(await menuItem('Terraza 2', 'Bajar')).toHaveAttribute('aria-disabled', 'true')
+  await page.getByRole('menu', { name: 'Más acciones de Terraza 2' }).getByRole('menuitem', { name: 'Subir' }).click()
   await expect.poll(async () => (await api(local).list<TableState>('/tables?include_inactive=true')).map((m) => m.label)).toEqual([
     '1',
     '2',
@@ -64,16 +74,17 @@ test('GES-14 el encargado crea, renombra, ordena, desactiva y activa mesas, y un
     'Terraza 2',
     '4',
   ])
-  await expect(page.getByRole('button', { name: 'Bajar Terraza 2' })).toBeEnabled()
+  await expect(await menuItem('Terraza 2', 'Bajar')).not.toHaveAttribute('aria-disabled', 'true')
+  await page.keyboard.press('Escape')
 
-  await table('Mesa 4').getByRole('button', { name: 'Desactivar' }).click()
+  await action('Mesa 4', 'Desactivar')
   await expect(notice(page, 'Mesa 4 desactivada.')).toBeVisible()
   await expect(table('Mesa 4')).toContainText('Inactiva')
   await expect(page.getByText('4 activas de 5')).toBeVisible()
   await evidence(page, 'ges-14-2-mesas')
   // El mesero ya no la ve al elegir mesa.
   expect((await api(local, local.waiter).list<TableState>('/tables')).map((m) => m.label)).not.toContain('4')
-  await table('Mesa 4').getByRole('button', { name: 'Activar' }).click()
+  await action('Mesa 4', 'Activar')
   await expect(notice(page, 'Mesa 4 activada.')).toBeVisible()
   await expect(page.getByText('5 activas de 5')).toBeVisible()
 })

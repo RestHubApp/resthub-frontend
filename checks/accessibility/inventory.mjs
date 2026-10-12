@@ -88,6 +88,7 @@ export const OVERLAYS = [
   // Armazón.
   { id: 'o-mas', name: 'Sheet «Más» del encargado', type: 'Sheet', route: '/tablero', account: 'owner', views: ['mobile'], steps: [{ button: 'Más' }] },
   { id: 'o-cuenta', name: 'Sheet «Cuenta» del mesero', type: 'Sheet', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }] },
+  { id: 'o-clave-propia', name: 'Diálogo «Cambiar contraseña»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Cambiar contraseña' }] },
   { id: 'o-widget', name: 'Menú del widget de accesibilidad (Sienna)', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['desktop'], steps: [{ click: '[data-a11y-launcher]' }], wait: '.asw-menu' },
   { id: 'o-widget-movil', name: 'Menú del widget de accesibilidad desde «Cuenta»', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }, { button: 'Accesibilidad' }], wait: '.asw-menu' },
   { id: 'o-salir-pendientes', name: 'Confirmar salir con pedidos sin enviar', type: 'AlertDialog', route: '/pedidos', account: 'waiter', queue: true, steps: [{ button: 'Cerrar sesión' }], views: ['desktop'] },
@@ -113,34 +114,35 @@ export const OVERLAYS = [
   { id: 'o-cambiar-mesa', name: 'Diálogo «Cambiar de mesa»', type: 'Dialog', route: '/pedidos/:orderToCharge', account: 'owner', steps: [{ button: 'Más acciones del pedido' }, { menuitem: 'Cambiar de mesa' }] },
   { id: 'o-unir-mesa', name: 'Diálogo «Unir otra mesa»', type: 'Dialog', route: '/pedidos/:orderToCharge', account: 'owner', steps: [{ button: 'Más acciones del pedido' }, { menuitem: 'Unir otra mesa' }] },
   { id: 'o-comprobante', name: 'Diálogo «Emitir boleta o factura»', type: 'Dialog', route: '/pedidos/:orderWithoutInvoice', account: 'owner', steps: [{ button: 'Emitir boleta o factura' }] },
-  { id: 'o-tablero-cancelar', name: 'Cancelar desde el tablero', type: 'Dialog', route: '/tablero', account: 'owner', steps: [{ button: /^Cancelar pedido #/ }] },
+  { id: 'o-tablero-cancelar', name: 'Cancelar desde el tablero', type: 'Dialog', route: '/tablero', account: 'owner', steps: [{ button: /^Más acciones del pedido #/ }, { menuitem: 'Cancelar pedido' }] },
   { id: 'd-historial', name: 'Historial: detalle desplegado', type: 'Desplegable', route: '/tablero/historial', account: 'owner', steps: [{ date: 'Desde', days: -7 }, { button: /^Ver el detalle del pedido/ }], wait: 'main' },
 
   // Caja y comprobantes.
   { id: 'o-turno', name: 'Diálogo del turno de caja', type: 'Dialog', route: '/caja', account: 'owner', steps: [{ button: /Cerró/ }] },
   { id: 'd-descuentos', name: 'Caja: «Descuentos del mesero» desplegado', type: 'Desplegable', route: '/caja', account: 'owner', steps: [{ button: 'Descuentos del mesero' }], wait: 'main' },
-  { id: 'd-datos-fiscales', name: 'Comprobantes: «Datos fiscales» desplegado', type: 'Desplegable', route: '/comprobantes', account: 'owner', steps: [{ button: 'Datos fiscales' }], wait: 'main' },
+  { id: 'o-datos-fiscales', name: 'Hoja «Datos fiscales»', type: 'Sheet', route: '/comprobantes', account: 'owner', steps: [{ button: /^Datos fiscales/ }] },
 
   // Menú.
   { id: 'o-nueva-categoria', name: 'Diálogo «Nueva categoría»', type: 'Dialog', route: '/menu', account: 'owner', steps: [{ button: 'Nueva categoría' }] },
   { id: 'o-nuevo-plato', name: 'Diálogo «Nuevo plato»', type: 'Dialog', route: '/menu', account: 'owner', steps: [{ button: 'Nuevo plato' }] },
   { id: 'o-editar-categoria', name: 'Diálogo «Editar categoría»', type: 'Dialog', route: '/menu', account: 'owner', steps: [{ button: 'Editar la categoría Entradas' }] },
-  { id: 'o-editar-plato', name: 'Diálogo «Editar plato» (con opciones)', type: 'Dialog', route: '/menu', account: 'owner', steps: [{ button: 'Editar Lomo saltado' }] },
+  { id: 'o-ficha-plato', name: 'Hoja con la ficha de un plato', type: 'Sheet', route: '/menu', account: 'owner', steps: [{ button: 'Ver la ficha de Lomo saltado' }] },
+  { id: 'o-editar-plato', name: 'Hoja «Editar plato» (con opciones)', type: 'Sheet', route: '/menu', account: 'owner', steps: [{ button: 'Ver la ficha de Lomo saltado' }, { button: 'Editar plato' }] },
   { id: 'o-desactivar-categoria', name: 'Confirmar desactivar categoría', type: 'AlertDialog', route: '/menu', account: 'owner', steps: [{ button: 'Más acciones de la categoría Entradas' }, { menuitem: 'Desactivar' }] },
-  { id: 'o-desactivar-plato', name: 'Confirmar desactivar plato', type: 'AlertDialog', route: '/menu', account: 'owner', steps: [{ button: 'Más acciones de Lomo saltado' }, { menuitem: 'Desactivar' }] },
+  { id: 'o-desactivar-plato', name: 'Confirmar desactivar plato (dentro de la hoja)', type: 'Sheet', route: '/menu', account: 'owner', steps: [{ button: 'Ver la ficha de Lomo saltado' }, { button: 'Desactivar' }] },
   { id: 'o-eliminar-categoria', name: 'Confirmar eliminar categoría vacía', type: 'AlertDialog', route: '/menu', account: 'owner', steps: [{ button: 'Más acciones de la categoría Postres (pruebas a11y)' }, { menuitem: 'Eliminar' }] },
 
   // Mesas.
   { id: 'o-nueva-mesa', name: 'Diálogo «Nueva mesa»', type: 'Dialog', route: '/mesas', account: 'owner', steps: [{ button: 'Nueva mesa' }] },
-  { id: 'o-renombrar-mesa', name: 'Diálogo «Renombrar mesa»', type: 'Dialog', route: '/mesas', account: 'owner', steps: [{ button: 'Renombrar' }] },
+  { id: 'o-renombrar-mesa', name: 'Diálogo «Renombrar mesa»', type: 'Dialog', route: '/mesas', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Renombrar' }] },
 
   // Inventario.
   { id: 't-movimientos', name: 'Inventario: pestaña Movimientos', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Movimientos' }], wait: TAB },
-  { id: 't-alertas', name: 'Inventario: pestaña Alertas', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: /^Alertas/ }], wait: TAB },
   { id: 't-recetas', name: 'Inventario: pestaña Recetas', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Recetas' }], wait: TAB },
   { id: 't-compras', name: 'Inventario: pestaña Compras', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }], wait: TAB },
   { id: 't-proveedores', name: 'Inventario: pestaña Proveedores', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }], wait: TAB },
   { id: 'o-nuevo-insumo', name: 'Diálogo «Nuevo insumo»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ button: 'Nuevo insumo' }] },
+  { id: 'o-reglas-stock', name: 'Hoja «Reglas de stock»', type: 'Sheet', route: '/inventario', account: 'owner', steps: [{ button: 'Reglas de stock' }] },
   { id: 'o-compra', name: 'Diálogo «Compra» de un insumo', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ button: 'Compra de Aceite vegetal' }] },
   { id: 'o-merma', name: 'Diálogo «Merma» de un insumo', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ button: 'Más acciones de Aceite vegetal' }, { menuitem: 'Merma' }] },
   { id: 'o-ajuste', name: 'Diálogo «Ajuste» de un insumo', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ button: 'Más acciones de Aceite vegetal' }, { menuitem: 'Ajuste' }] },
@@ -155,9 +157,9 @@ export const OVERLAYS = [
   { id: 'o-editar-cuenta', name: 'Diálogo «Editar cuenta»', type: 'Dialog', route: '/personal', account: 'owner', steps: [{ button: 'Editar' }] },
   { id: 'o-clave-cuenta', name: 'Diálogo «Contraseña» de una cuenta', type: 'Dialog', route: '/personal', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Contraseña' }] },
   { id: 'o-desactivar-cuenta', name: 'Confirmar desactivar cuenta', type: 'AlertDialog', route: '/personal', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Desactivar' }] },
-  { id: 'o-nuevo-rol', name: 'Diálogo «Nuevo rol»', type: 'Dialog', route: '/roles', account: 'owner', steps: [{ button: 'Nuevo rol' }] },
-  { id: 'o-editar-rol', name: 'Diálogo «Editar el rol Mesero»', type: 'Dialog', route: '/roles', account: 'owner', steps: [{ button: 'Editar el rol Mesero' }] },
-  { id: 'o-ver-rol', name: 'Diálogo «Permisos del rol Encargado»', type: 'Dialog', route: '/roles', account: 'owner', steps: [{ button: 'Ver permisos del rol Encargado' }] },
+  { id: 'o-nuevo-rol', name: 'Hoja «Nuevo rol»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Nuevo rol' }] },
+  { id: 'o-editar-rol', name: 'Hoja «Editar el rol Mesero»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Editar el rol Mesero' }] },
+  { id: 'o-ver-rol', name: 'Hoja «Permisos del rol Encargado»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Ver permisos del rol Encargado' }] },
   { id: 'o-eliminar-rol', name: 'Confirmar eliminar rol', type: 'AlertDialog', route: '/roles', account: 'owner', steps: [{ button: /^Eliminar el rol/ }] },
 
   // Reservas y clientes.
@@ -171,6 +173,8 @@ export const OVERLAYS = [
   // Panel BI.
   { id: 'e-panel-personalizado', name: 'Panel: rango personalizado', type: 'Estado', route: '/panel', account: 'owner', steps: [{ button: 'Personalizado' }], wait: 'main input[type="date"]' },
   { id: 'e-panel-tabla', name: 'Panel: gráfico como tabla', type: 'Estado', route: '/panel', account: 'owner', steps: [{ button: 'Ver tabla' }], wait: 'main table' },
+  { id: 't-panel-pagos', name: 'Panel: pestaña Pagos y servicio', type: 'Tabs', route: '/panel', account: 'owner', steps: [{ tab: 'Pagos y servicio' }], wait: TAB },
+  { id: 't-panel-mermas', name: 'Panel: pestaña Mermas y stock', type: 'Tabs', route: '/panel', account: 'owner', steps: [{ tab: 'Mermas y stock' }], wait: TAB },
   { id: 'e-ia-json', name: 'Panel IA: JSON desplegado', type: 'Desplegable', route: '/panel/ia', account: 'owner', steps: [{ button: 'Ver JSON' }], wait: 'main' },
 
   // Plataforma.

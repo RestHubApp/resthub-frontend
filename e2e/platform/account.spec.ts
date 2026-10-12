@@ -18,10 +18,12 @@ test('ACC-11 el perfil muestra los datos de la cuenta y cambia la contraseña @m
   await expect(data).toHaveText(['Mesero Prueba', local.waiter.email, 'Mesero', local.name])
   await evidence(page, 'acc-11-perfil')
 
-  const actual = page.getByLabel('Contraseña actual', { exact: true })
-  const fresh = page.getByLabel('Nueva contraseña', { exact: true })
-  const repeated = page.getByLabel('Repite la nueva contraseña', { exact: true })
-  const change = page.getByRole('button', { name: 'Cambiar contraseña' })
+  await page.getByRole('button', { name: 'Cambiar contraseña' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Cambiar contraseña' })
+  const actual = dialog.getByLabel('Contraseña actual', { exact: true })
+  const fresh = dialog.getByLabel('Nueva contraseña', { exact: true })
+  const repeated = dialog.getByLabel('Repite la nueva contraseña', { exact: true })
+  const change = dialog.getByRole('button', { name: 'Cambiar contraseña' })
 
   // Las dos nuevas no coinciden: no sale nada al servidor.
   await actual.fill(local.waiter.password)
