@@ -35,7 +35,6 @@ export function IngredientFilters({
             <Input
               id={searchId}
               type="search"
-              className="h-11"
               placeholder="Limón, pollo, aceite…"
               autoComplete="off"
               value={search}

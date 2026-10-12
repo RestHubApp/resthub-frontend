@@ -36,7 +36,7 @@ export function RecipeFooter({ empty, hadRecipe, dirty, pending }: RecipeFooterP
       <p className="m-0 text-sm text-muted-foreground" aria-live="polite">
         {noticeOf(isDeleting, dirty)}
       </p>
-      <Button type="submit" size="lg" variant={action.variant} className="h-11 px-5" disabled={pending || !dirty}>
+      <Button type="submit" variant={action.variant} className="px-5" disabled={pending || !dirty}>
         <Icon name={action.icon} size={16} />
         <span>{pending ? 'Guardando…' : action.label}</span>
       </Button>

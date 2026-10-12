@@ -66,7 +66,7 @@ export function LowStockSummary({ onShowAlerts }: LowStockSummaryProps) {
         </div>
       </div>
       {low.length === 0 ? null : (
-        <Button type="button" variant="outline" className="h-11 px-4" onClick={onShowAlerts}>
+        <Button type="button" variant="outline" onClick={onShowAlerts}>
           <Icon name="notice" size={16} />
           <span>Ver alertas</span>
         </Button>

@@ -43,7 +43,7 @@ export function QuantityField({
       <div className="flex gap-2">
         <Input
           id={id}
-          className="h-11 min-w-0 flex-1"
+          className="min-w-0 flex-1"
           inputMode="decimal"
           autoComplete="off"
           aria-invalid={error !== undefined}
@@ -53,7 +53,7 @@ export function QuantityField({
         {unique === undefined ? (
           <NativeSelect
             aria-label={`Unidad de ${label.toLowerCase()}`}
-            className="w-24 [&_select]:h-11"
+            className="w-24"
             {...unit}
           >
             {units.map((option) => (

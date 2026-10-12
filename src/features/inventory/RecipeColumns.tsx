@@ -49,7 +49,7 @@ export function buildRecipeColumns(canManage: boolean): DataColumn<DishCost>[] {
         return (
           <Link
             to={paths.inventory.recipe(cost.menu_item_id)}
-            className={buttonVariants({ variant: cost.has_recipe ? 'outline' : 'secondary', className: 'h-11 px-3' })}
+            className={buttonVariants({ variant: cost.has_recipe ? 'outline' : 'secondary' })}
             aria-label={`${text} de ${cost.menu_item_name}`}
           >
             <Icon name="recipe" size={16} />

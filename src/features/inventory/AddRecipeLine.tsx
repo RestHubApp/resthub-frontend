@@ -24,7 +24,7 @@ export function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
         <Label htmlFor={id}>Agregar insumo</Label>
         <NativeSelect
           id={id}
-          className="w-full [&_select]:h-11"
+          className="w-full"
           value={selected}
           onChange={(event) => {
             selectedSet(event.target.value)
@@ -41,7 +41,6 @@ export function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
       <Button
         type="button"
         variant="secondary"
-        className="h-11 px-4"
         disabled={selected === ''}
         onClick={() => {
           onAdd(Number(selected))

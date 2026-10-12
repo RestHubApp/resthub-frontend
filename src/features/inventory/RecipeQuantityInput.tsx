@@ -22,7 +22,7 @@ export function RecipeQuantityInput({ id, field, unit, error, readOnly }: Recipe
       <div className="flex items-center gap-2">
         <Input
           id={id}
-          className="h-11 w-28 text-right tabular-nums"
+          className="w-28 text-right tabular-nums"
           inputMode="decimal"
           autoComplete="off"
           readOnly={readOnly}

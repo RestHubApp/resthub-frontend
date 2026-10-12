@@ -25,7 +25,7 @@ export function CategoryStatusButton({ category }: CategoryStatusButtonProps) {
     <Button
       type="button"
       variant={category.is_active ? 'ghost' : 'success'}
-      className="h-11 px-3"
+      className="px-3"
       aria-label={`${category.is_active ? 'Desactivar' : 'Activar'} la categoría ${category.name}`}
       disabled={status.isPending}
       onClick={category.is_active ? undefined : change}
