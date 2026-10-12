@@ -11,7 +11,7 @@ export function DishRowInfo({ item }: DishRowInfoProps) {
   const isOutOfStock = item.is_active && !item.is_available
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+    <div className="flex min-w-0 flex-col gap-0.5">
       <h3 className="m-0 text-base leading-snug font-semibold break-words text-foreground">{item.name}</h3>
       <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
         <span className="font-semibold text-foreground tabular-nums">{formatMoney(item.price)}</span>

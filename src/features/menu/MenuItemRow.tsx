@@ -23,8 +23,8 @@ interface MenuItemRowProps {
  * es lo único que se toca a diario. Tocar el plato abre su ficha (descripción,
  * costo y margen, receta, editar, ordenar y sacarlo de la carta).
  *
- * El botón que abre la ficha cubre toda la fila; el interruptor queda encima
- * para seguir siendo tocable sin abrirla. En la laptop se suma el margen.
+ * El botón que abre la ficha cubre el nombre y el precio; el interruptor queda
+ * aparte, así que se toca sin abrirla. En la laptop se suma el margen.
  */
 export function MenuItemRow({ item, cost, category, categories, isFirst, isLast, onMove }: MenuItemRowProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -33,27 +33,25 @@ export function MenuItemRow({ item, cost, category, categories, isFirst, isLast,
   return (
     <li
       className={cn(
-        'relative flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50 sm:px-5',
+        'flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50 sm:px-5',
         !item.is_active && 'bg-muted/60',
       )}
     >
-      <button
-        type="button"
-        aria-label={`Ver la ficha de ${item.name}`}
-        className="absolute inset-0 outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring/50"
-        onClick={() => {
-          setIsOpen(true)
-        }}
-      />
-      <DishRowInfo item={item} />
+      <div className="relative min-w-0 flex-1 self-stretch">
+        <button
+          type="button"
+          aria-label={`Ver la ficha de ${item.name}`}
+          className="absolute -inset-y-2.5 -inset-x-1 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          onClick={() => {
+            setIsOpen(true)
+          }}
+        />
+        <DishRowInfo item={item} />
+      </div>
       {marginPercent === null ? null : (
         <span className="hidden text-sm text-muted-foreground tabular-nums lg:block">Margen {formatPercent(marginPercent)}</span>
       )}
-      {item.is_active ? (
-        <div className="relative">
-          <AvailabilityToggle item={item} />
-        </div>
-      ) : null}
+      {item.is_active ? <AvailabilityToggle item={item} /> : null}
       <DishSheet
         item={item}
         cost={cost}
