@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { useForm } from 'react-hook-form'
 
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/apiError'
 import { ChangePasswordFields } from './ChangePasswordFields'
 import {
   type ChangePasswordForm as Form,
@@ -42,9 +42,7 @@ export function ChangePasswordForm() {
       <ChangePasswordFields register={register} errors={formState.errors} />
 
       {change.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(change.error, 'No se pudo cambiar la contraseña.')}
-        </FormMessage>
+        <ErrorMessage error={change.error} fallback="No se pudo cambiar la contraseña." />
       ) : null}
       {change.isSuccess ? <FormMessage tone="ok">Contraseña actualizada.</FormMessage> : null}
 

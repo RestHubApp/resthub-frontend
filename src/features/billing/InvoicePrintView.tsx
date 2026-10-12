@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { useEffect } from 'react'
 import { useParams } from 'react-router'
 
 import { billingSettingsQuery, invoiceQuery } from '@/api/billing'
 import { PERMISSION } from '@/api/permissions'
 import { EmptyState } from '@/components/EmptyState'
-import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/apiError'
 import { useCan, useTimeZone } from '@/store/session'
 import { InvoicePrintPaper } from './InvoicePrintPaper'
 
@@ -31,7 +30,7 @@ export function InvoicePrintView() {
     return <EmptyState title="Preparando el comprobante…" />
   }
   if (invoice.isError) {
-    return <FormMessage tone="error">{errorMessage(invoice.error, 'No se pudo cargar el comprobante.')}</FormMessage>
+    return <ErrorMessage error={invoice.error} fallback="No se pudo cargar el comprobante." />
   }
 
   return <InvoicePrintPaper invoice={invoice.data} settings={settings.data ?? null} timeZone={timeZone} />

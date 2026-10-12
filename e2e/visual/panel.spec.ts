@@ -37,7 +37,7 @@ test('VIS-11 los indicadores del panel, la reposición y la auditoría de IA', a
   await expect(page.getByRole('heading', { level: 2, name: 'Culantro' })).toBeVisible()
   await capture(page, 'panel-reposicion')
 
-  await sections.getByRole('link', { name: 'Auditoría de IA' }).click()
+  await sections.getByRole('link', { name: 'Decisiones de la IA' }).click()
   await expect(page.getByRole('heading', { name: 'Decisiones' })).toBeVisible()
   await expect(page.getByText(/en total con estos filtros/u)).toBeVisible()
   await capture(page, 'panel-auditoria-ia')

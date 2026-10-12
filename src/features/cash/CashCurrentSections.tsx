@@ -32,7 +32,7 @@ export function CashCurrentSections({ current, onClosed }: CashCurrentSectionsPr
           >
             <CashSummaryView session={shift} summary={shift.summary} />
           </SectionCard>
-          <SectionCard title="Cerrar caja" description="Cuenta el efectivo del cajón, propinas en efectivo incluidas.">
+          <SectionCard title="Cerrar caja" description="Cuenta el efectivo de la caja, propinas en efectivo incluidas.">
             <CloseCashForm session={shift} onClosed={onClosed} />
           </SectionCard>
         </>

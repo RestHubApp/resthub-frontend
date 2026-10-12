@@ -45,7 +45,7 @@ export function OpenCashForm() {
           inputMode="decimal"
           autoComplete="off"
           placeholder="150.00"
-          hint="El sencillo con que arranca el cajón."
+          hint="El sencillo con que arranca la caja."
           field={register('opening_amount')}
           error={formState.errors.opening_amount?.message}
         />
@@ -59,7 +59,7 @@ export function OpenCashForm() {
         />
       </div>
       <div className="flex justify-end">
-        <Button type="submit" variant="success" className="px-5" disabled={open.isPending}>
+        <Button type="submit" className="px-5" disabled={open.isPending}>
           <Icon name="cashRegister" size={18} />
           <span>{open.isPending ? 'Abriendo…' : 'Abrir caja'}</span>
         </Button>

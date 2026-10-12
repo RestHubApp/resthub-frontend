@@ -1,6 +1,5 @@
 import { EmptyState } from '@/components/EmptyState'
-import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/apiError'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { MenuSkeleton } from './MenuSkeleton'
 
 interface MenuStatusProps {
@@ -17,9 +16,7 @@ export function MenuStatus({ isPending, error, isEmpty }: MenuStatusProps) {
     <>
       {isPending ? <MenuSkeleton /> : null}
       {error === null ? null : (
-        <FormMessage tone="error">
-          {errorMessage(error, 'No se pudo cargar la carta.')}
-        </FormMessage>
+        <ErrorMessage error={error} fallback="No se pudo cargar la carta." />
       )}
       {isEmpty ? (
         <EmptyState

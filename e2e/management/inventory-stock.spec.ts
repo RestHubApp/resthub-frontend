@@ -190,7 +190,7 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
     return menu.flatMap((c) => c.items).find((p) => p.name === 'Lomo saltado')?.out_of_stock
   }
   expect(await lomoOutOfStock()).toBe(true)
-  const rule = page.getByRole('checkbox', { name: /Agotar solos los platos sin insumos/u })
+  const rule = page.getByRole('checkbox', { name: /Marcar «Sin insumos» automáticamente/u })
   await expect(rule).toBeChecked()
   await rule.click()
   await expect(notice(page, 'Los platos ya no se agotan por el stock.')).toBeVisible()

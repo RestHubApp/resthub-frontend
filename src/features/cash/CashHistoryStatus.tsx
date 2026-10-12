@@ -1,7 +1,6 @@
 import { EmptyState } from '@/components/EmptyState'
-import { FormMessage } from '@/components/FormMessage'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { errorMessage } from '@/services/apiError'
 
 interface CashHistoryStatusProps {
   readonly isPending: boolean
@@ -17,7 +16,7 @@ export function CashHistoryStatus({ isPending, error, isEmpty }: CashHistoryStat
     <>
       {isPending ? <ListSkeleton label="Cargando turnos…" count={4} itemClassName="h-14 rounded-lg" /> : null}
       {error === null ? null : (
-        <FormMessage tone="error">{errorMessage(error, 'No se pudieron cargar los turnos.')}</FormMessage>
+        <ErrorMessage error={error} fallback="No se pudieron cargar los turnos." />
       )}
       {isEmpty ? <EmptyState title="Todavía no hay turnos de caja" /> : null}
     </>

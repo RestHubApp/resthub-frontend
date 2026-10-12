@@ -28,7 +28,7 @@ export function TableStatusButton({ table }: TableStatusButtonProps) {
   return (
     <Button
       type="button"
-      variant={table.is_active ? 'ghost' : 'success'}
+      variant={table.is_active ? 'ghost' : 'secondary'}
       className="px-3"
       disabled={status.isPending || isBlocked}
       title={isBlocked ? 'No se desactiva una mesa con un pedido en curso' : undefined}

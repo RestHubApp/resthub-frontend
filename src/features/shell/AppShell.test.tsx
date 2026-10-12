@@ -74,7 +74,7 @@ describe('AppShell', () => {
 
     expect(links(sidebar())).toEqual(expect.arrayContaining(['Pedidos', 'Cocina', 'Reservas', 'Clientes']))
     expect(within(sidebar()).queryByRole('link', { name: 'Caja' })).not.toBeInTheDocument()
-    expect(within(sidebar()).queryByRole('link', { name: 'Panel BI' })).not.toBeInTheDocument()
+    expect(within(sidebar()).queryByRole('link', { name: 'Resumen' })).not.toBeInTheDocument()
     expect(screen.getByText('Pantalla de inicio')).toBeInTheDocument()
   })
 

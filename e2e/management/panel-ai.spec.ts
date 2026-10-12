@@ -88,7 +88,7 @@ test('GES-30 el encargado audita las decisiones de la IA: filtra por tipo y moto
   await owner.post('/insights/waste/classify')
 
   await openAs(page, local.owner, '/panel/ia')
-  await expect(page.getByRole('link', { name: 'Auditoría de IA' })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('link', { name: 'Decisiones de la IA' })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByText('22 en total con estos filtros.')).toBeVisible()
   const pages = page.getByRole('navigation', { name: 'Paginación' })
   await expect(pages).toContainText('Página 1 de 2')

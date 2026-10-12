@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import { rolesQuery } from '@/api/roles'
 import type { StaffResponse } from '@/api/types'
 import { DataTable } from '@/components/DataTable'
-import { FormMessage } from '@/components/FormMessage'
 import { SectionCard } from '@/components/SectionCard'
-import { errorMessage } from '@/services/apiError'
 import { staffOf, usePermissions, useSession } from '@/store/session'
 import { canManageAccount } from './roleOptions'
 import { staffColumns } from './StaffColumns'
@@ -22,9 +21,7 @@ export function StaffTeamCard() {
   return (
     <SectionCard title="Equipo">
       {staff.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(staff.error, 'No se pudo cargar el personal.')}
-        </FormMessage>
+        <ErrorMessage error={staff.error} fallback="No se pudo cargar el personal." />
       ) : (
         <DataTable
           label="Personal"

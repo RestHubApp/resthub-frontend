@@ -1,15 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { billingQueryKey, billingSettingsQueryKey, updateBillingSettings } from '@/api/billing'
 import type { BillingSettings } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 
 const schema = z.object({
@@ -90,7 +89,7 @@ export function BillingSettingsForm({ settings }: BillingSettingsFormProps) {
         <TextField id="fiscal-url" label="Ruta del proveedor (Nubefact)" placeholder="https://api.nubefact.com/api/v1/…" field={register('provider_url')} error={errorDe('provider_url')} />
         <TextField id="fiscal-token" label="Token del proveedor" type="password" autoComplete="off" hint={settings.has_provider_token ? 'Cargado. Déjalo vacío para no cambiarlo.' : 'Todavía no cargado.'} field={register('provider_token')} error={errorDe('provider_token')} />
       </div>
-      {save.isError ? <FormMessage tone="error">{errorMessage(save.error, 'No se pudieron guardar los datos.')}</FormMessage> : null}
+      <ErrorMessage isError={save.isError} error={save.error} fallback="No se pudieron guardar los datos." />
       <Button type="submit" className="self-end" disabled={save.isPending}>
         {save.isPending ? 'Guardando…' : 'Guardar datos fiscales'}
       </Button>

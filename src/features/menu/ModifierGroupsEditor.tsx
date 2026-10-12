@@ -1,3 +1,4 @@
+import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { ModifierGroupFields } from './ModifierGroupFields'
@@ -40,7 +41,7 @@ export function ModifierGroupsEditor({ groups, error, onChange }: ModifierGroups
           }}
         />
       ))}
-      {error === null ? null : <p role="alert" className="m-0 text-sm text-destructive">{error}</p>}
+      {error === null ? null : <FormMessage tone="error">{error}</FormMessage>}
       {groups.length < MAX_GROUPS ? (
         <Button type="button" variant="outline" className="self-start" onClick={() => {
           onChange([...groups, emptyGroup()])

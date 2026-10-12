@@ -1,7 +1,6 @@
 import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { RetryQueryError } from '@/components/RetryQueryError'
-import { errorMessage } from '@/services/apiError'
 
 interface CustomerListStatusProps {
   readonly isPending: boolean
@@ -18,7 +17,7 @@ export function CustomerListStatus({ isPending, isError, isEmpty, error, emptyTi
   return (
     <>
       {isPending ? <ListSkeleton label="Cargando clientes…" count={4} itemClassName="h-14 rounded-lg" /> : null}
-      {isError ? <RetryQueryError message={errorMessage(error, 'No se pudieron cargar los clientes.')} onRetry={onRetry} /> : null}
+      {isError ? <RetryQueryError error={error} fallback="No se pudieron cargar los clientes." onRetry={onRetry} /> : null}
       {isEmpty ? <EmptyState title={emptyTitle} /> : null}
     </>
   )
