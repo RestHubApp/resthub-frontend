@@ -31,7 +31,7 @@ test('VIS-16 apariencia: modo, color, letra, tamaño del texto y orden del menú
   await captureFromTop(page, 'apariencia-noche')
 
   await page.getByRole('checkbox', { name: /Alto contraste/u }).click()
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'contrast-dark')
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'terracotta-contrast-dark')
   await captureFromTop(page, 'apariencia-contraste-oscuro')
   await page.getByRole('checkbox', { name: /Alto contraste/u }).click()
   await page.locator('label').filter({ hasText: /^Claro/u }).click()

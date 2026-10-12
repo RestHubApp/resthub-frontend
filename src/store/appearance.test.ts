@@ -125,7 +125,7 @@ describe('preferencias de apariencia', () => {
     useAppearance.getState().change({ contrast: 'high' })
 
     expect(useAppearance.getState().appearance.contrast).toBe('high')
-    expect(root()).toHaveAttribute(THEME_ATTRIBUTE, 'contrast')
+    expect(root()).toHaveAttribute(THEME_ATTRIBUTE, 'terracotta-contrast')
   })
 
   it('«Restablecer» vuelve a lo de fábrica y lo guarda', () => {
@@ -178,7 +178,7 @@ describe('preferencias guardadas por la versión anterior', () => {
   it('el alto contraste se aplica aparte del modo y se puede quitar', () => {
     signIn(7)
     useAppearance.getState().change({ mode: 'dark', contrast: 'high' })
-    expect(root()).toHaveAttribute(THEME_ATTRIBUTE, 'contrast-dark')
+    expect(root()).toHaveAttribute(THEME_ATTRIBUTE, 'terracotta-contrast-dark')
 
     useAppearance.getState().change({ contrast: 'normal' })
     expect(root()).toHaveAttribute(THEME_ATTRIBUTE, DARK_THEME)

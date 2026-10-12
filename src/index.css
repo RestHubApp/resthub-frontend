@@ -106,19 +106,24 @@
  * oscuros comparten en un bloque los gráficos y los estados).
  *
  * El MODO (claro, oscuro o automático) y el COLOR de acento son dos preferencias
- * distintas, y el alto contraste es un interruptor aparte. De las tres sale un
- * solo `data-theme` (`resolveTheme` en `appearanceRules`): cada color tiene
- * variante clara y oscura, y el alto contraste también.
+ * distintas, y el alto contraste es un interruptor aparte que se COMBINA con el
+ * color. De las tres sale un solo `data-theme` (`resolveTheme` en
+ * `appearanceRules`): cada color tiene cuatro variantes (clara y oscura, con
+ * contraste normal y alto). El sufijo `-dark` va al final, así `dark:` sigue
+ * funcionando con `[data-theme$='-dark']`.
  *
- *   claros   terracotta (por omisión)  olive  slate  wine  contrast
- *   oscuros  terracotta-dark  olive-dark  slate-dark  wine-dark  contrast-dark
+ *   claros   terracotta (por omisión)  olive  slate  wine
+ *   oscuros  terracotta-dark  olive-dark  slate-dark  wine-dark
+ *   claros con alto contraste   terracotta-contrast  olive-contrast  …
+ *   oscuros con alto contraste  terracotta-contrast-dark  olive-contrast-dark  …
  *
  * «Automático» no es un bloque: elige el claro o el oscuro del color elegido
  * según `prefers-color-scheme` (`applyAppearance`).
  *
  * Contraste. `src/services/themeContrast.test.ts` lee este archivo y falla si
- * algún tema baja de estos mínimos (WCAG 2.2 AA, y 3 a 1 para bordes de campo,
- * anillos de foco y gráficos), y recorre las 48 combinaciones de modo, color,
+ * algún tema baja de estos mínimos (WCAG 2.2 AA en los temas normales y AAA en los
+ * de alto contraste; los de alto contraste piden además 4,5 a 1 en bordes de campo
+ * y anillos de foco, y los normales 3 a 1), y recorre las 48 combinaciones de modo, color,
  * contraste y modo del dispositivo. Las cifras de abajo son las que da esa prueba.
  *
  *   texto y fondo                   mínimo 7 a 1 (texto de cuerpo, tarjeta, menú)
@@ -131,6 +136,10 @@
  *   `--input` y `--ring`            mínimo 3 a 1 sobre el fondo y la tarjeta
  *   `--chart-1..5`                  mínimo 3 a 1 sobre la tarjeta
  *
+ * En los temas de alto contraste todos los mínimos de texto y de botón suben a
+ * 7 a 1 (el texto es negro o blanco puro), `--input` y `--ring` a 4,5 a 1, y el
+ * foco suma un contorno de 3 px (al final de los temas).
+ *
  * Peor par de cada grupo, por tema (razón de contraste, con un decimal):
  *
  *   Tema               texto/fondo  apagado  botón  estados  campo  anillo
@@ -138,12 +147,18 @@
  *   Oliva                 13,9      6,1     7,8     4,6     3,8    3,8
  *   Pizarra               13,9      5,3     8,4     4,6     3,6    4,8
  *   Vino                  14,4      6,0     9,0     4,6     4,2    5,8
- *   Alto contraste        21,0     11,7    12,3     5,6    21,0   12,3
+ *   Terracota contraste   20,2     10,4    11,2     7,6    12,3   10,8
+ *   Oliva contraste       20,2     10,0     9,7     7,6    12,5    9,4
+ *   Pizarra contraste     19,9     10,2    11,4     7,6    12,7   10,8
+ *   Vino contraste        20,0     10,8    12,2     7,6    13,9   11,6
  *   Terracota oscuro      14,5      6,5     4,8     4,8     3,4    5,9
  *   Oliva oscuro          14,5      6,8     6,7     4,7     3,9    8,6
  *   Pizarra oscuro        14,1      6,6     5,5     4,7     4,0    6,7
  *   Vino oscuro           14,6      6,8     5,0     4,9     3,6    6,2
- *   Alto contraste oscuro 21,0     11,7     7,2     6,4    21,0   10,1
+ *   Terracota contr. osc. 20,0     11,8     8,4     7,3    16,0   11,2
+ *   Oliva contr. oscuro   19,8     12,0    10,9     7,2    16,9   14,6
+ *   Pizarra contr. osc.   20,1     12,1     8,6     7,4    16,8   11,6
+ *   Vino contr. oscuro    20,0     12,1     7,9     7,3    16,4   10,7
  *
  * Detalle de Terracota (el original):
  *
@@ -221,7 +236,10 @@
 /* Lo que comparten los temas claros: los colores de los gráficos y el esquema. */
 :root,
 [data-theme='terracotta'],
-[data-theme='contrast'],
+[data-theme='terracotta-contrast'],
+[data-theme='olive-contrast'],
+[data-theme='slate-contrast'],
+[data-theme='wine-contrast'],
 [data-theme='olive'],
 [data-theme='slate'],
 [data-theme='wine'] {
@@ -275,40 +293,143 @@
     --sidebar-ring: #c2410c;
 }
 
-/* Alto contraste: blanco y negro firmes, bordes marcados y un azul profundo de acento. */
-[data-theme='contrast'] {
-    --background: #ffffff;
+/* Terracota con alto contraste: texto negro, terracota profundo y bordes firmes. */
+[data-theme='terracotta-contrast'] {
+    --background: #fffaf5;
     --foreground: #000000;
     --card: #ffffff;
     --card-foreground: #000000;
     --popover: #ffffff;
     --popover-foreground: #000000;
-    --primary: #0a2a8a;
+    --primary: #6e2000;
     --primary-foreground: #ffffff;
-    --secondary: #e8eefc;
-    --secondary-foreground: #0a1f5c;
-    --muted: #eeeeee;
-    --muted-foreground: #2e2e2e;
-    --accent: #e8eefc;
-    --accent-foreground: #0a1f5c;
-    --destructive: #a00000;
-    --success: #0b5d1e;
-    --success-foreground: #ffffff;
-    --warning: #5c4000;
-    --border: #1a1a1a;
-    --input: #000000;
-    --ring: #0a2a8a;
-    --chart-empty: #eeeeee;
-    --chart-grid: #d9d9d9;
-    --chart-axis: #767676;
+    --secondary: #fde3d3;
+    --secondary-foreground: #5c1a00;
+    --muted: #f1ebe4;
+    --muted-foreground: #3a3430;
+    --accent: #fde3d3;
+    --accent-foreground: #5c1a00;
+    --border: #6b5a4d;
+    --input: #3d3025;
+    --ring: #6e2000;
+    --chart-empty: #f1ebe4;
+    --chart-grid: #d9cdc2;
+    --chart-axis: #7a6c60;
     --sidebar: #ffffff;
     --sidebar-foreground: #000000;
-    --sidebar-primary: #0a2a8a;
+    --sidebar-primary: #6e2000;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #e8eefc;
-    --sidebar-accent-foreground: #0a1f5c;
-    --sidebar-border: #1a1a1a;
-    --sidebar-ring: #0a2a8a;
+    --sidebar-accent: #fde3d3;
+    --sidebar-accent-foreground: #5c1a00;
+    --sidebar-border: #6b5a4d;
+    --sidebar-ring: #6e2000;
+}
+
+/* Oliva con alto contraste: texto negro, oliva profundo y bordes firmes. */
+[data-theme='olive-contrast'] {
+    --background: #fafbf3;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #294d00;
+    --primary-foreground: #ffffff;
+    --secondary: #e1efc0;
+    --secondary-foreground: #1f3d00;
+    --muted: #e9ebe0;
+    --muted-foreground: #34382a;
+    --accent: #e1efc0;
+    --accent-foreground: #1f3d00;
+    --border: #5a6048;
+    --input: #2f3322;
+    --ring: #294d00;
+    --chart-empty: #e9ebe0;
+    --chart-grid: #cfd3bd;
+    --chart-axis: #6f7560;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: #294d00;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e1efc0;
+    --sidebar-accent-foreground: #1f3d00;
+    --sidebar-border: #5a6048;
+    --sidebar-ring: #294d00;
+}
+
+/* Pizarra con alto contraste: texto negro, pizarra profundo y bordes firmes. */
+[data-theme='slate-contrast'] {
+    --background: #f6f9fd;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #0d3a6b;
+    --primary-foreground: #ffffff;
+    --secondary: #d6e6f8;
+    --secondary-foreground: #082c52;
+    --muted: #e6ebf1;
+    --muted-foreground: #2c3643;
+    --accent: #d6e6f8;
+    --accent-foreground: #082c52;
+    --border: #4f5d70;
+    --input: #243040;
+    --ring: #0d3a6b;
+    --chart-empty: #e6ebf1;
+    --chart-grid: #ccd6e2;
+    --chart-axis: #667588;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: #0d3a6b;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #d6e6f8;
+    --sidebar-accent-foreground: #082c52;
+    --sidebar-border: #4f5d70;
+    --sidebar-ring: #0d3a6b;
+}
+
+/* Vino con alto contraste: texto negro, vino profundo y bordes firmes. */
+[data-theme='wine-contrast'] {
+    --background: #fff8f9;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+    --primary: #6b0f2a;
+    --primary-foreground: #ffffff;
+    --secondary: #f8d9e1;
+    --secondary-foreground: #520a1f;
+    --muted: #f0e8ea;
+    --muted-foreground: #3d2d32;
+    --accent: #f8d9e1;
+    --accent-foreground: #520a1f;
+    --border: #6b5058;
+    --input: #3a2229;
+    --ring: #6b0f2a;
+    --chart-empty: #f0e8ea;
+    --chart-grid: #dcc9cf;
+    --chart-axis: #7a6068;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #000000;
+    --sidebar-primary: #6b0f2a;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f8d9e1;
+    --sidebar-accent-foreground: #520a1f;
+    --sidebar-border: #6b5058;
+    --sidebar-ring: #6b0f2a;
+}
+
+/* Alto contraste (claro): estados a 7 a 1 aun sobre su tinte al 20 %. */
+[data-theme='terracotta-contrast'],
+[data-theme='olive-contrast'],
+[data-theme='slate-contrast'],
+[data-theme='wine-contrast'] {
+    --destructive: #7a0000;
+    --success: #084512;
+    --success-foreground: #ffffff;
+    --warning: #4a3200;
 }
 
 /* Oliva: crema verdosa con un verde oliva de cocina. */
@@ -422,8 +543,8 @@
 /*
  * Los temas oscuros. Cada color se eligió para la superficie oscura (no es una
  * inversión automática) y cada acento tiene el suyo: Terracota (el de siempre),
- * Oliva, Pizarra y Vino, más Alto contraste. Los gráficos y los colores de estado
- * (peligro, éxito, aviso) son los mismos en todos y pasaron el validador de paleta
+ * Oliva, Pizarra y Vino, con alto contraste o sin él. Los gráficos y los colores de estado
+ * (peligro, éxito, aviso) son los mismos en todos los normales (los de alto contraste traen los suyos) y pasaron el validador de paleta
  * contra la tarjeta oscura. `color-scheme: dark` oscurece también los controles
  * nativos y las barras de desplazamiento.
  */
@@ -431,7 +552,10 @@
 [data-theme='olive-dark'],
 [data-theme='slate-dark'],
 [data-theme='wine-dark'],
-[data-theme='contrast-dark'] {
+[data-theme='terracotta-contrast-dark'],
+[data-theme='olive-contrast-dark'],
+[data-theme='slate-contrast-dark'],
+[data-theme='wine-contrast-dark'] {
     --destructive: #f68080;
     --success: #4cb86a;
     --success-foreground: #0f1a12;
@@ -577,36 +701,153 @@
     --sidebar-ring: #e8788f;
 }
 
-/* Alto contraste oscuro: negro y blanco firmes, bordes marcados y un azul claro de acento. */
-[data-theme='contrast-dark'] {
+/* Terracota oscuro con alto contraste: texto blanco, terracota claro y bordes firmes. */
+[data-theme='terracotta-contrast-dark'] {
     --background: #000000;
     --foreground: #ffffff;
-    --card: #000000;
+    --card: #0c0805;
     --card-foreground: #ffffff;
-    --popover: #000000;
+    --popover: #120b07;
     --popover-foreground: #ffffff;
-    --primary: #8fb4ff;
+    --primary: #ffb08a;
     --primary-foreground: #000000;
-    --secondary: #14213f;
-    --secondary-foreground: #dbe6ff;
-    --muted: #1a1a1a;
-    --muted-foreground: #d4d4d4;
-    --accent: #14213f;
-    --accent-foreground: #dbe6ff;
-    --border: #e6e6e6;
-    --input: #ffffff;
-    --ring: #8fb4ff;
-    --chart-empty: #1a1a1a;
-    --chart-grid: #333333;
-    --chart-axis: #8c8c8c;
-    --sidebar: #000000;
+    --secondary: #2e1405;
+    --secondary-foreground: #ffd0b8;
+    --muted: #1f1814;
+    --muted-foreground: #dcd2c9;
+    --accent: #2e1405;
+    --accent-foreground: #ffd0b8;
+    --border: #b8a89b;
+    --input: #f0e4da;
+    --ring: #ffb08a;
+    --chart-empty: #1f1814;
+    --chart-grid: #3a302a;
+    --chart-axis: #9a8a7e;
+    --sidebar: #0c0805;
     --sidebar-foreground: #ffffff;
-    --sidebar-primary: #8fb4ff;
+    --sidebar-primary: #ffb08a;
     --sidebar-primary-foreground: #000000;
-    --sidebar-accent: #14213f;
-    --sidebar-accent-foreground: #dbe6ff;
-    --sidebar-border: #e6e6e6;
-    --sidebar-ring: #8fb4ff;
+    --sidebar-accent: #2e1405;
+    --sidebar-accent-foreground: #ffd0b8;
+    --sidebar-border: #b8a89b;
+    --sidebar-ring: #ffb08a;
+}
+
+/* Oliva oscuro con alto contraste: texto blanco, oliva claro y bordes firmes. */
+[data-theme='olive-contrast-dark'] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #090b05;
+    --card-foreground: #ffffff;
+    --popover: #0f1209;
+    --popover-foreground: #ffffff;
+    --primary: #c4ec6a;
+    --primary-foreground: #000000;
+    --secondary: #1f2e00;
+    --secondary-foreground: #e0f5a8;
+    --muted: #1a1d14;
+    --muted-foreground: #d6dac8;
+    --accent: #1f2e00;
+    --accent-foreground: #e0f5a8;
+    --border: #aab38f;
+    --input: #eaf0d8;
+    --ring: #c4ec6a;
+    --chart-empty: #1a1d14;
+    --chart-grid: #343a28;
+    --chart-axis: #8a9275;
+    --sidebar: #090b05;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #c4ec6a;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #1f2e00;
+    --sidebar-accent-foreground: #e0f5a8;
+    --sidebar-border: #aab38f;
+    --sidebar-ring: #c4ec6a;
+}
+
+/* Pizarra oscuro con alto contraste: texto blanco, pizarra claro y bordes firmes. */
+[data-theme='slate-contrast-dark'] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #05080c;
+    --card-foreground: #ffffff;
+    --popover: #0a1017;
+    --popover-foreground: #ffffff;
+    --primary: #9cc8ff;
+    --primary-foreground: #000000;
+    --secondary: #0f2a4a;
+    --secondary-foreground: #d3e6ff;
+    --muted: #151b22;
+    --muted-foreground: #cfd9e5;
+    --accent: #0f2a4a;
+    --accent-foreground: #d3e6ff;
+    --border: #9fb0c6;
+    --input: #e3ecf7;
+    --ring: #9cc8ff;
+    --chart-empty: #151b22;
+    --chart-grid: #2c3644;
+    --chart-axis: #8696ab;
+    --sidebar: #05080c;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #9cc8ff;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #0f2a4a;
+    --sidebar-accent-foreground: #d3e6ff;
+    --sidebar-border: #9fb0c6;
+    --sidebar-ring: #9cc8ff;
+}
+
+/* Vino oscuro con alto contraste: texto blanco, vino claro y bordes firmes. */
+[data-theme='wine-contrast-dark'] {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #0b0709;
+    --card-foreground: #ffffff;
+    --popover: #120b0e;
+    --popover-foreground: #ffffff;
+    --primary: #ffa3b8;
+    --primary-foreground: #000000;
+    --secondary: #4a0f22;
+    --secondary-foreground: #ffd1dc;
+    --muted: #1d1418;
+    --muted-foreground: #e0cfd4;
+    --accent: #4a0f22;
+    --accent-foreground: #ffd1dc;
+    --border: #c0a4ad;
+    --input: #f5e4e9;
+    --ring: #ffa3b8;
+    --chart-empty: #1d1418;
+    --chart-grid: #3a2a30;
+    --chart-axis: #9a808a;
+    --sidebar: #0b0709;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #ffa3b8;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #4a0f22;
+    --sidebar-accent-foreground: #ffd1dc;
+    --sidebar-border: #c0a4ad;
+    --sidebar-ring: #ffa3b8;
+}
+
+/* Alto contraste (oscuro): estados a 7 a 1 aun sobre su tinte al 20 %. */
+[data-theme='terracotta-contrast-dark'],
+[data-theme='olive-contrast-dark'],
+[data-theme='slate-contrast-dark'],
+[data-theme='wine-contrast-dark'] {
+    --destructive: #ffa3a3;
+    --success: #7ee69a;
+    --success-foreground: #000000;
+    --warning: #f5c04a;
+}
+
+/*
+ * Con alto contraste el foco se dibuja con un contorno sólido de 3 px, además del
+ * anillo de cada componente (que va al 50 %): así se ve a 7 a 1 o más y no mueve
+ * el diseño, porque el contorno no ocupa lugar.
+ */
+[data-theme*='-contrast'] :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
 }
 
 @layer base {

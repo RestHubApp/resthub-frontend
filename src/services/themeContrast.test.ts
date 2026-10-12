@@ -3,7 +3,7 @@ import { describe, expect, it, jest } from '@jest/globals'
 import { ACCENTS, type ColorChoice, MODES, resolveTheme, THEMES } from './appearanceRules'
 
 // Lee los temas de `src/index.css` y comprueba el contraste de sus pares de
-// color (WCAG 2.2 AA). Lo que `index.css` dice de cada tema es lo que esta
+// color (WCAG 2.2: AA en los temas normales y AAA en los de alto contraste). Lo que `index.css` dice de cada tema es lo que esta
 // prueba mide: un tema nuevo o un color cambiado que baje de los mínimos falla.
 
 type Rgb = readonly [number, number, number]
@@ -19,6 +19,10 @@ const DEFAULT_THEME = 'terracotta'
 const MUTED = 'muted-foreground'
 const BORDER_MINIMUM = 3
 const TEXT_MINIMUM = 4.5
+// Alto contraste: AAA para el texto y los botones, y 4,5 a 1 para bordes de campo y anillo de foco.
+const HIGH_TEXT_MINIMUM = 7
+const HIGH_BORDER_MINIMUM = 4.5
+const HIGH_THEMES = new Set<string>(THEMES.filter((theme) => theme.contrast === 'high').map((theme) => theme.id))
 
 /** El tema que declara un selector: `[data-theme='wine']` es Vino; `:root` es el de fábrica. */
 function themeOf(selector: string): string[] {
@@ -119,20 +123,22 @@ function colorOf(theme: string, token: string): Rgb {
 /** Un par medido: su nombre, el mínimo que debe dar y lo que da. */
 type Measure = readonly [name: string, minimum: number, actual: number]
 
-function statesOf(theme: string): Measure[] {
+function statesOf(theme: string, textMinimum: number): Measure[] {
   const card = colorOf(theme, 'card')
   return ['destructive', 'success', 'warning'].flatMap((token) => {
     const text = colorOf(theme, token)
     return [
-      [`${token} sobre el fondo`, TEXT_MINIMUM, ratio(text, colorOf(theme, 'background'))],
-      [`${token} sobre la tarjeta`, TEXT_MINIMUM, ratio(text, card)],
-      [`${token} sobre su tinte al 10 %`, TEXT_MINIMUM, ratio(text, over(text, card, 0.1))],
-      [`${token} sobre su tinte al 20 %`, TEXT_MINIMUM, ratio(text, over(text, card, 0.2))],
+      [`${token} sobre el fondo`, textMinimum, ratio(text, colorOf(theme, 'background'))],
+      [`${token} sobre la tarjeta`, textMinimum, ratio(text, card)],
+      [`${token} sobre su tinte al 10 %`, textMinimum, ratio(text, over(text, card, 0.1))],
+      [`${token} sobre su tinte al 20 %`, textMinimum, ratio(text, over(text, card, 0.2))],
     ] as const
   })
 }
 
 function measures(theme: string): readonly Measure[] {
+  const text = HIGH_THEMES.has(theme) ? HIGH_TEXT_MINIMUM : TEXT_MINIMUM
+  const border = HIGH_THEMES.has(theme) ? HIGH_BORDER_MINIMUM : BORDER_MINIMUM
   const plain = (name: string, text: string, background: string, minimum: number): Measure => [
     name,
     minimum,
@@ -143,24 +149,24 @@ function measures(theme: string): readonly Measure[] {
     plain('texto sobre el fondo', 'foreground', 'background', 7),
     plain('texto sobre la tarjeta', 'card-foreground', 'card', 7),
     plain('texto del menú emergente', 'popover-foreground', 'popover', 7),
-    plain('texto apagado sobre el fondo', MUTED, 'background', TEXT_MINIMUM),
-    plain('texto apagado sobre la tarjeta', MUTED, 'card', TEXT_MINIMUM),
-    plain('texto apagado sobre lo apagado', MUTED, 'muted', TEXT_MINIMUM),
-    plain('texto del botón principal', 'primary-foreground', 'primary', TEXT_MINIMUM),
-    ['texto del botón principal al pasar el puntero', TEXT_MINIMUM, ratio(colorOf(theme, 'primary-foreground'), hover)],
-    plain('principal como texto sobre el fondo', 'primary', 'background', TEXT_MINIMUM),
-    plain('principal como texto sobre la tarjeta', 'primary', 'card', TEXT_MINIMUM),
-    plain('texto secundario', 'secondary-foreground', 'secondary', TEXT_MINIMUM),
-    plain('texto de acento', 'accent-foreground', 'accent', TEXT_MINIMUM),
-    plain('texto del aviso de éxito', 'success-foreground', 'success', TEXT_MINIMUM),
+    plain('texto apagado sobre el fondo', MUTED, 'background', text),
+    plain('texto apagado sobre la tarjeta', MUTED, 'card', text),
+    plain('texto apagado sobre lo apagado', MUTED, 'muted', text),
+    plain('texto del botón principal', 'primary-foreground', 'primary', text),
+    ['texto del botón principal al pasar el puntero', text, ratio(colorOf(theme, 'primary-foreground'), hover)],
+    plain('principal como texto sobre el fondo', 'primary', 'background', text),
+    plain('principal como texto sobre la tarjeta', 'primary', 'card', text),
+    plain('texto secundario', 'secondary-foreground', 'secondary', text),
+    plain('texto de acento', 'accent-foreground', 'accent', text),
+    plain('texto del aviso de éxito', 'success-foreground', 'success', text),
     plain('texto del menú lateral', 'sidebar-foreground', 'sidebar', 7),
-    plain('texto del menú lateral marcado', 'sidebar-primary-foreground', 'sidebar-primary', TEXT_MINIMUM),
-    plain('texto del menú lateral con acento', 'sidebar-accent-foreground', 'sidebar-accent', TEXT_MINIMUM),
-    plain('borde de campo sobre el fondo', 'input', 'background', BORDER_MINIMUM),
-    plain('borde de campo sobre la tarjeta', 'input', 'card', BORDER_MINIMUM),
-    plain('anillo de foco sobre el fondo', 'ring', 'background', BORDER_MINIMUM),
-    plain('anillo de foco sobre la tarjeta', 'ring', 'card', BORDER_MINIMUM),
-    ...statesOf(theme),
+    plain('texto del menú lateral marcado', 'sidebar-primary-foreground', 'sidebar-primary', text),
+    plain('texto del menú lateral con acento', 'sidebar-accent-foreground', 'sidebar-accent', text),
+    plain('borde de campo sobre el fondo', 'input', 'background', border),
+    plain('borde de campo sobre la tarjeta', 'input', 'card', border),
+    plain('anillo de foco sobre el fondo', 'ring', 'background', border),
+    plain('anillo de foco sobre la tarjeta', 'ring', 'card', border),
+    ...statesOf(theme, text),
     ...[1, 2, 3, 4, 5].map((n) => plain(`gráfico ${String(n)} sobre la tarjeta`, `chart-${String(n)}`, 'card', BORDER_MINIMUM)),
   ]
 }
@@ -195,7 +201,7 @@ describe('temas de index.css', () => {
 })
 
 // Cada combinación que la persona puede armar (modo, color, alto contraste y el modo del
-// dispositivo en «Automático») termina en uno de los temas de arriba: por eso todas cumplen AA.
+// dispositivo en «Automático») termina en uno de los temas de arriba: por eso todas cumplen AA (y AAA con alto contraste).
 interface Combination extends ColorChoice {
   readonly isDeviceDark: boolean
 }
@@ -223,17 +229,25 @@ describe('combinaciones de modo, color y alto contraste', () => {
     expect(COMBINATIONS.filter((combination) => !defined.has(themeOfCombination(combination)))).toEqual([])
   })
 
-  it('todas cumplen el contraste mínimo de cada par de colores', () => {
+  it('todas cumplen el contraste mínimo de cada par de colores (AA, o AAA con alto contraste)', () => {
     expect(COMBINATIONS.flatMap(failuresOf)).toEqual([])
   })
 
-  it('cada acento tiene variante clara y oscura, y el alto contraste también', () => {
-    const ids = new Set(THEMES.map((theme) => theme.id))
+  it('cada acento tiene cuatro variantes: clara y oscura, con contraste normal y alto', () => {
+    const ids = new Set<string>(THEMES.map((theme) => theme.id))
     for (const { id } of ACCENTS) {
-      expect(ids.has(id)).toBe(true)
-      expect(ids.has(`${id}-dark`)).toBe(true)
+      for (const variant of [id, `${id}-dark`, `${id}-contrast`, `${id}-contrast-dark`]) {
+        expect(ids.has(variant)).toBe(true)
+      }
     }
-    expect(ids.has('contrast')).toBe(true)
-    expect(ids.has('contrast-dark')).toBe(true)
+    expect(HIGH_THEMES.size).toBe(ACCENTS.length * 2)
+    expect(ids.has('contrast')).toBe(false)
+  })
+
+  it('los temas de alto contraste usan texto negro o blanco puro', () => {
+    for (const id of HIGH_THEMES) {
+      const expected = THEME_TOKENS[id]?.['color-scheme'] === 'dark' ? '#ffffff' : '#000000'
+      expect(THEME_TOKENS[id]?.['foreground']).toBe(expected)
+    }
   })
 })
