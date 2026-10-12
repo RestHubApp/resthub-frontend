@@ -1,13 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '@/api/restaurant'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { errorMessage } from '@/services/apiError'
 import { formatPercent } from '@/services/format'
-import { useNotifications } from '@/store/notifications'
+import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const PERCENTAGE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
@@ -21,17 +20,15 @@ const PERCENTAGE = /^(?:100(?:[.,]0{1,2})?|\d{1,2}(?:[.,]\d{1,2})?)$/u
 export function DiscountLimitForm() {
   const restaurant = useQuery(restaurantQuery)
   const [value, setValue] = useState<string | null>(null)
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-  const save = useMutation({
+  const save = useNotifiedMutation({
     mutationFn: (percent: string) => updateRestaurant({ max_waiter_discount_percent: percent }),
-    onSuccess: (updated) => {
+    success: (updated) => `El mesero descuenta hasta ${formatPercent(updated.max_waiter_discount_percent)}.`,
+    failure: 'No se pudo guardar el tope.',
+    updateCache: (queryClient, updated) => {
       queryClient.setQueryData(restaurantQueryKey, updated)
-      setValue(null)
-      push({ tone: 'info', message: `El mesero descuenta hasta ${formatPercent(updated.max_waiter_discount_percent)}.` })
     },
-    onError: (error) => {
-      push({ tone: 'warning', message: errorMessage(error, 'No se pudo guardar el tope.') })
+    onSuccess: () => {
+      setValue(null)
     },
   })
   const actual = restaurant.data?.max_waiter_discount_percent ?? ''
