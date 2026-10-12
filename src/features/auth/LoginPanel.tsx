@@ -20,7 +20,7 @@ const POINTS: readonly PanelPoint[] = [
  */
 export function LoginPanel() {
   return (
-    <aside className="relative isolate hidden overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-end">
+    <aside className="relative isolate hidden overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-center">
       <LoginPattern />
       <div className="relative flex max-w-md flex-col gap-8 p-12 xl:p-16">
         <h2 className="m-0 font-heading text-3xl leading-tight font-bold text-balance">
