@@ -82,6 +82,23 @@ async function dialog(browser, id, trigger, view, item) {
   }
 }
 
+// La paleta se abre también con Ctrl+K (sin botón al que volver): el foco entra al cuadro de búsqueda, Escape cierra y el foco vuelve a donde estaba.
+async function shortcut(browser, id, view) {
+  const context = await browser.newContext(contextOf(view))
+  const page = await openStatus(browser, context, { ...status(id), class: 'ruta', wait: undefined, steps: [] })
+  const field = page.getByRole('link', { name: 'Pedidos' }).first()
+  await field.focus()
+  await page.keyboard.press('Control+K')
+  await page.waitForSelector('[role="dialog"]', { state: 'visible' })
+  await page.waitForTimeout(400)
+  const onOpen = await page.evaluate(() => ({ role: document.activeElement?.getAttribute('role'), expanded: document.activeElement?.getAttribute('aria-expanded') }))
+  await page.keyboard.press('Escape')
+  await page.waitForFunction(() => !document.querySelector('[role="dialog"]'), null, { timeout: 5000 })
+  const onClose = await focus(page)
+  await context.close()
+  return { id, view, onOpen, focusReturned: onClose.name.includes('Pedidos'), onClose }
+}
+
 const browserInstance = await launch()
 const result = {
   routes: [
@@ -94,8 +111,10 @@ const result = {
     await dialog(browserInstance, 'o-cobro', 'Cobrar', 'desktop'),
     await dialog(browserInstance, 'o-nueva-mesa', 'Nueva mesa', 'desktop'),
     await dialog(browserInstance, 'o-llevar', 'Para llevar / Delivery', 'mobile'),
+    await dialog(browserInstance, 'o-paleta', 'Buscar o ir a…', 'desktop'),
     await dialog(browserInstance, 'o-desactivar-cuenta', /^Más acciones de/, 'desktop', 'Desactivar'),
   ],
+  shortcuts: [await shortcut(browserInstance, 'o-paleta', 'desktop')],
 }
 await browserInstance.close()
 await writeJson(join(dir, 'teclado.json'), result)
@@ -104,4 +123,8 @@ for (const r of result.routes) {
 }
 for (const d of result.dialogs) {
   console.log(`\nDiálogo «${d.trigger}» en ${d.id} (${d.view}): foco inicial en «${d.onOpen.name}», atrapado ${d.focusTrapped ? 'sí' : 'NO'}, anillo ausente en [${d.ringVisible.join(', ')}], Escape cierra ${d.closedWithEscape ? 'sí' : 'NO'}, foco devuelto ${d.focusReturned ? 'sí' : 'NO'} («${d.onClose.name}»)`)
+}
+for (const s of result.shortcuts) {
+  console.log(`
+Atajo Ctrl+K en ${s.id} (${s.view}): el foco entra a role=${s.onOpen.role}, expandido=${s.onOpen.expanded}, foco devuelto ${s.focusReturned ? 'sí' : 'NO'} («${s.onClose.name}»)`)
 }

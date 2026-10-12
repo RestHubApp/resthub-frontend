@@ -88,6 +88,8 @@ export const OVERLAYS = [
   // Armazón.
   { id: 'o-mas', name: 'Sheet «Más» del encargado', type: 'Sheet', route: '/tablero', account: 'owner', views: ['mobile'], steps: [{ button: 'Más' }] },
   { id: 'o-cuenta', name: 'Sheet «Cuenta» del mesero', type: 'Sheet', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }] },
+  { id: 'o-paleta', name: 'Diálogo «Buscar o ir a…» (paleta de comandos)', type: 'Dialog', route: '/pedidos', account: 'owner', steps: [{ button: 'Buscar o ir a…' }] },
+  { id: 'o-apariencia-rapida', name: 'Hoja «Apariencia rápida»', type: 'Sheet', route: '/pedidos', account: 'owner', steps: [{ button: 'Apariencia rápida' }] },
   { id: 'o-clave-propia', name: 'Diálogo «Cambiar contraseña»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Cambiar contraseña' }] },
   { id: 'o-widget', name: 'Menú del widget de accesibilidad (Sienna)', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['desktop'], steps: [{ click: '[data-a11y-launcher]' }], wait: '.asw-menu' },
   { id: 'o-widget-movil', name: 'Menú del widget de accesibilidad desde «Cuenta»', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }, { button: 'Accesibilidad' }], wait: '.asw-menu' },

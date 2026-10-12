@@ -1,6 +1,7 @@
 import { Glyph } from '@/components/Glyph'
 import {
   Accessibility,
+  ALargeSmall,
   Activity,
   Armchair,
   BookUser,
@@ -19,6 +20,7 @@ import {
   type LucideIcon,
   LogOut,
   ScrollText,
+  Search,
   ShieldCheck,
   Store,
   UserRound,
@@ -55,6 +57,8 @@ const SHELL_ICONS = {
   more: Ellipsis,
   profile: UserRound,
   accessibility: Accessibility,
+  search: Search,
+  textSize: ALargeSmall,
   signOut: LogOut,
   view: Eye,
   history: History,

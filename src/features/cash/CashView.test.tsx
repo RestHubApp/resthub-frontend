@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { CLOSED_CASH_REGISTER, currentOpenCash, cashRegisterSummary, cashRegisterShift } from '#jest/fixtures/cash'
 import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
@@ -36,6 +36,18 @@ describe('CashView', () => {
     signInAs()
     mountScreen(<CashView />, { path: SCREEN, en: `${SCREEN}?accion=abrir-caja` })
     expect(await screen.findByRole('dialog', OPEN_CASH_REGISTER)).toBeInTheDocument()
+  })
+
+  it('con la caja ya abierta, ?accion=abrir-caja no abre nada y se borra de la dirección', async () => {
+    server().on('get', ACTUAL, currentOpenCash()).on('get', SESSIONS, PAGE_EMPTY)
+    signInAs()
+    const { router } = mountScreen(<CashView />, { path: SCREEN, en: `${SCREEN}?accion=abrir-caja&otro=1` })
+
+    expect(await screen.findByText('Turno en curso')).toBeInTheDocument()
+    expect(screen.queryByRole('dialog', OPEN_CASH_REGISTER)).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(router.state.location.search).toBe('?otro=1')
+    })
   })
 
   it('sin caja abierta ofrece abrirla y envía el monto con punto decimal', async () => {

@@ -4,7 +4,7 @@ import { MODES, resolveTheme } from '@/services/appearanceRules'
 import { useAppearance } from '@/store/appearance'
 import { OptionCard } from './OptionCard'
 import { ThemeChip } from './ThemeChip'
-import { useQuickAppearance } from './useQuickAppearance'
+import { useQuickAppearance } from '@/features/shell/useQuickAppearance'
 
 const MODE_ICON: Record<(typeof MODES)[number]['id'], IconName> = {
   light: 'lightMode',

@@ -133,6 +133,15 @@ describe('ProfileView: ventana de contraseña', () => {
     expect(await screen.findByLabelText(ACTUAL)).toBeInTheDocument()
   })
 
+  it('en la vista previa, ?accion=cambiar-contrasena no abre nada y se borra de la dirección', async () => {
+    const { router } = openProfile(true, '/perfil?accion=cambiar-contrasena')
+
+    await waitFor(() => {
+      expect(router.state.location.search).toBe('')
+    })
+    expect(screen.queryByLabelText(ACTUAL)).not.toBeInTheDocument()
+  })
+
   it('el botón del ojo deja ver lo que se escribe', async () => {
     const { user } = openProfile()
     await user.click(screen.getByRole('button', CHANGE))

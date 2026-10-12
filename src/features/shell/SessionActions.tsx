@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 
 import type { Session } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -6,8 +6,8 @@ import { accountLabels } from './accountLabels'
 import { ShellIcon } from './ShellIcon'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
-import { useQueuedOrders } from '@/store/offlineQueue'
-import { usePreview, useSession, useStaffAccount } from '@/store/session'
+import { usePreview } from '@/store/session'
+import { pendingOrdersNotice, useSignOut } from './useSignOut'
 
 interface SessionActionsProps {
   readonly account: Session
@@ -22,22 +22,14 @@ interface SessionActionsProps {
  */
 export function SessionActions({ account, onNavigate }: SessionActionsProps) {
   const { fullName, roleLabel } = accountLabels(account)
-  const signOut = useSession((state) => state.signOut)
   const isPreview = usePreview()
-  const pending = useQueuedOrders(useStaffAccount())
-  const navigate = useNavigate()
+  const { pending, signOut } = useSignOut()
 
   const handleSignOut = () => {
     onNavigate?.()
-    // Se vacia la sesion y se va al acceso en el mismo evento: React aplica
-    // los dos cambios juntos, asi que ninguna pantalla privada llega a
-    // dibujarse sin cuenta.
     signOut()
-    void navigate(paths.login, { replace: true })
   }
 
-  const howMany =
-    pending.length === 1 ? 'Un pedido tuyo espera' : `${String(pending.length)} pedidos tuyos esperan`
   const signOutMenuItem = (onClick?: () => void) => (
     <Button type="button" variant="ghost" className="justify-start gap-3 px-3" onClick={onClick}>
       <ShellIcon name="signOut" size={18} />
@@ -45,6 +37,7 @@ export function SessionActions({ account, onNavigate }: SessionActionsProps) {
     </Button>
   )
 
+  const notice = pendingOrdersNotice(pending)
   const output =
     pending.length === 0 ? (
       signOutMenuItem(handleSignOut)
@@ -53,8 +46,8 @@ export function SessionActions({ account, onNavigate }: SessionActionsProps) {
       // a entrar: quien cierra la sesion tiene que saberlo.
       <ConfirmDialog
         trigger={signOutMenuItem()}
-        title="¿Cerrar sesión con pedidos sin enviar?"
-        description={`${howMany} señal: ${pending.map((order) => order.label).join(', ')}. Quedan guardados en este celular y se envían cuando vuelvas a entrar con tu cuenta.`}
+        title={notice.title}
+        description={notice.description}
         confirmLabel="Cerrar sesión"
         confirmVariant="default"
         onConfirm={handleSignOut}

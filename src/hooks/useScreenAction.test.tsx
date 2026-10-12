@@ -1,13 +1,15 @@
 import { describe, expect, it } from '@jest/globals'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router'
 
 import { SCREEN_ACTIONS } from './screenActions'
 import { useScreenAction } from './useScreenAction'
 
-function Probe() {
-  const action = useScreenAction('abrir-caja')
+const OPEN_URL = '/caja?accion=abrir-caja&otro=1'
+
+function Probe({ isApplicable = true }: { readonly isApplicable?: boolean }) {
+  const action = useScreenAction('abrir-caja', { isApplicable })
   return (
     <>
       <output>{`${useLocation().search}|${String(action.isRequested)}`}</output>
@@ -18,22 +20,22 @@ function Probe() {
   )
 }
 
-function renderAt(url: string) {
+function renderAt(url: string, isApplicable = true) {
   render(
     <MemoryRouter initialEntries={[url]}>
-      <Probe />
+      <Probe isApplicable={isApplicable} />
     </MemoryRouter>,
   )
 }
 
 describe('useScreenAction', () => {
   it('pide abrir el diálogo cuando la dirección lo trae', () => {
-    renderAt('/caja?accion=abrir-caja&otro=1')
+    renderAt(OPEN_URL)
     expect(screen.getByRole('status')).toHaveTextContent('?accion=abrir-caja&otro=1|true')
   })
 
   it('al cerrar borra solo ese parámetro de la dirección', async () => {
-    renderAt('/caja?accion=abrir-caja&otro=1')
+    renderAt(OPEN_URL)
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Cerrar' }))
 
@@ -46,6 +48,20 @@ describe('useScreenAction', () => {
     await userEvent.setup().click(screen.getByRole('button', { name: 'Cerrar' }))
 
     expect(screen.getByRole('status')).toHaveTextContent('?accion=cualquier-cosa|false')
+  })
+
+  it('si la acción no aplica, no la pide y borra el parámetro sin tocar los demás', async () => {
+    renderAt(OPEN_URL, false)
+
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('?otro=1|false')
+    })
+  })
+
+  it('si la acción no aplica pero el parámetro es de otra, lo deja', () => {
+    renderAt('/caja?accion=nueva-mesa', false)
+
+    expect(screen.getByRole('status')).toHaveTextContent('?accion=nueva-mesa|false')
   })
 
   it('no pide nada sin parámetro', () => {

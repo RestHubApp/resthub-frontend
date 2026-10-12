@@ -1,5 +1,6 @@
 import type { CurrentCash } from '@/api/types'
 import { SectionCard } from '@/components/SectionCard'
+import { useScreenAction } from '@/hooks/useScreenAction'
 import { formatDateTime, formatMoney } from '@/services/format'
 import { useTimeZone } from '@/store/session'
 import { CashClosedPrompt } from './CashClosedPrompt'
@@ -16,6 +17,8 @@ interface CashCurrentSectionsProps {
 export function CashCurrentSections({ current, onClosed }: CashCurrentSectionsProps) {
   const timeZone = useTimeZone()
   const shift = current?.session ?? null
+  // Con la caja ya abierta, `?accion=abrir-caja` no aplica: se borra de la dirección.
+  useScreenAction('abrir-caja', { isApplicable: current?.is_open !== true })
 
   return (
     <>
