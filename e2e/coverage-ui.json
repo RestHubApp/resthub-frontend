@@ -1,13 +1,13 @@
 {
-  "total": 435,
+  "total": 447,
   "byType": {
     "ruta": 36,
-    "confirmacion": 10,
+    "confirmacion": 11,
     "desplegable": 8,
-    "dialogo": 24,
-    "hoja": 8,
+    "dialogo": 25,
+    "hoja": 9,
     "pestanas": 4,
-    "funcion": 264,
+    "funcion": 273,
     "estado": 75,
     "rol": 6
   },
@@ -277,9 +277,15 @@
       "origin": "src/features/shell/PreviewExitButton.tsx"
     },
     {
+      "id": "confirmacion:shell/quick/QuickPaletteHost",
+      "type": "confirmacion",
+      "description": "notice.title",
+      "origin": "src/features/shell/quick/QuickPaletteHost.tsx"
+    },
+    {
       "id": "confirmacion:shell/SessionActions",
       "type": "confirmacion",
-      "description": "¿Cerrar sesión con pedidos sin enviar?",
+      "description": "notice.title",
       "origin": "src/features/shell/SessionActions.tsx"
     },
     {
@@ -451,6 +457,12 @@
       "origin": "src/features/reservations/ReservationDialog.tsx"
     },
     {
+      "id": "dialogo:shell/quick/QuickPalette",
+      "type": "dialogo",
+      "description": "TITLE",
+      "origin": "src/features/shell/quick/QuickPalette.tsx"
+    },
+    {
       "id": "dialogo:staff/StaffCreateDialog",
       "type": "dialogo",
       "description": "Nueva cuenta",
@@ -521,6 +533,12 @@
       "type": "hoja",
       "description": "{label}",
       "origin": "src/features/shell/MoreSheet.tsx"
+    },
+    {
+      "id": "hoja:shell/quick/QuickAppearanceButton",
+      "type": "hoja",
+      "description": "{LABEL}",
+      "origin": "src/features/shell/quick/QuickAppearanceButton.tsx"
     },
     {
       "id": "pestanas:insights/InsightsTabs",
@@ -2206,6 +2224,60 @@
       "id": "funcion:sesion.cerrar-con-pendientes",
       "type": "funcion",
       "description": "Cerrar sesión con pedidos sin enviar: se avisa, se puede cancelar y la cola se conserva",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.abrir",
+      "type": "funcion",
+      "description": "Abrir la paleta «Buscar o ir a…» con Ctrl/Cmd+K o con el botón de la lupa y cerrarla con Escape",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.ir-a-pantalla",
+      "type": "funcion",
+      "description": "Buscar una pantalla sin tildes ni mayúsculas en la paleta y abrirla",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.lanzar-accion",
+      "type": "funcion",
+      "description": "Una acción de la paleta navega a la pantalla y esta abre su diálogo vacío",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.accion-desconocida",
+      "type": "funcion",
+      "description": "Un valor raro en ?accion= no abre nada",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.accion-no-aplica",
+      "type": "funcion",
+      "description": "?accion=abrir-caja con la caja abierta no abre nada y se borra de la dirección",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.cambiar-modo",
+      "type": "funcion",
+      "description": "Cambiar el modo claro, oscuro o automático desde la paleta",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.apariencia-rapida",
+      "type": "funcion",
+      "description": "Apariencia rápida: modo, tamaño del texto y alto contraste desde el encabezado o la barra lateral",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.por-rol",
+      "type": "funcion",
+      "description": "La paleta muestra solo las pantallas y acciones que los permisos de la cuenta abren",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:paleta.cerrar-sesion",
+      "type": "funcion",
+      "description": "Cerrar sesión desde la paleta; con pedidos sin enviar se avisa antes",
       "origin": "e2e/inventory/functions/platform.json"
     },
     {

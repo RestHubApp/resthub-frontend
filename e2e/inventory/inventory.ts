@@ -54,6 +54,7 @@ function routerRoutes(): Element[] {
 const OVERLAYS = [
   { label: 'FormDialog', type: 'dialogo' },
   { label: 'SaveFormDialog', type: 'dialogo' },
+  { label: 'CommandDialog', type: 'dialogo' },
   { label: 'ConfirmDialog', type: 'confirmacion' },
   { label: 'AlertDialog', type: 'confirmacion' },
   { label: 'Sheet', type: 'hoja' },
