@@ -20,10 +20,17 @@ interface MenuEditing {
 
 const WHERE = { bar: 'en la barra de abajo', rest: 'en «Más»' } as const
 
-/** Al reordenar, el navegador puede soltar el foco del botón que se tocó: se le devuelve. */
+/**
+ * Al reordenar, el navegador suelta el foco del botón que se tocó: se le devuelve.
+ *
+ * Son dos cuadros: el cambio de lugar se pinta en el siguiente, y solo después
+ * el botón ya está en su sitio nuevo.
+ */
 function refocus(path: string): void {
   window.requestAnimationFrame(() => {
-    document.getElementById(menuActionsId(path))?.focus()
+    window.requestAnimationFrame(() => {
+      document.getElementById(menuActionsId(path))?.focus()
+    })
   })
 }
 
