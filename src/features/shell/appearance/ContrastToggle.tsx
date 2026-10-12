@@ -1,5 +1,5 @@
 import { SettingToggle } from '@/components/SettingToggle'
-import { useQuickAppearance } from './useQuickAppearance'
+import { useQuickAppearance } from '@/features/shell/useQuickAppearance'
 
 /** El interruptor de alto contraste: aparte del color, porque es una necesidad y no un gusto. */
 export function ContrastToggle() {

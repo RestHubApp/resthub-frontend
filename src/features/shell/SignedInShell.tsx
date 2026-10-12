@@ -1,15 +1,14 @@
 import { Outlet } from 'react-router'
 
 import type { Session } from '@/api/types'
-import { AccessibilityWidget } from '@/components/AccessibilityWidget'
 import { BottomNav } from './BottomNav'
 import { PreviewBannerGate } from './PreviewBannerGate'
 import { ServerFailureNotice } from './ServerFailureNotice'
+import { ShellOverlays } from './ShellOverlays'
 import { SignedInHeader } from './SignedInHeader'
 import { type ShellScreen, ShellScreensContext } from './shellScreens'
 import { SideNav } from './SideNav'
 import { SkipLink } from './SkipLink'
-import { ToastStack } from './ToastStack'
 import { useMenuLayout } from './useMenuLayout'
 
 interface SignedInShellProps {
@@ -32,8 +31,7 @@ export function SignedInShell({ account, screens }: SignedInShellProps) {
       <PreviewBannerGate account={account} />
       <div className="min-h-dvh lg:grid lg:grid-cols-[min(15rem,26vw)_1fr]">
         <SkipLink />
-        <AccessibilityWidget />
-        <ToastStack />
+        <ShellOverlays entries={ordered} account={account} />
         <SideNav entries={ordered} account={account} />
 
         <div className="flex min-h-dvh min-w-0 flex-col">

@@ -11,6 +11,12 @@ function Dialog({
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
+function DialogClose({
+  ...props
+}: Readonly<React.ComponentProps<typeof DialogPrimitive.Close>>) {
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
+}
+
 function DialogPortal({
   ...props
 }: Readonly<React.ComponentProps<typeof DialogPrimitive.Portal>>) {
@@ -115,6 +121,7 @@ function DialogDescription({
 
 export {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,

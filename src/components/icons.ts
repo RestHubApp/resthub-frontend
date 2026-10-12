@@ -10,6 +10,7 @@
 
 import {
   Accessibility,
+  ALargeSmall,
   Activity,
   AlignLeft,
   Armchair,
@@ -143,6 +144,7 @@ export const ICONS = {
   view: Eye,
   hide: EyeOff,
   search: Search,
+  textSize: ALargeSmall,
   previous: ChevronLeft,
   next: ChevronRight,
   unfold: ChevronsUpDown,

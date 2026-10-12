@@ -4,6 +4,8 @@ import { scopeName, spokenScope } from './accountLabels'
 import { Brand } from './Brand'
 import type { NavEntry } from './navigation'
 import { NavList } from './NavList'
+import { QuickAppearanceButton } from './quick/QuickAppearanceButton'
+import { QuickSearchField } from './quick/QuickSearchField'
 import { ScopeName } from './ScopeName'
 import { SessionActions } from './SessionActions'
 
@@ -23,9 +25,11 @@ export function SideNav({ entries, account }: SideNavProps) {
           <Brand to={paths.home} />
         </div>
         <ScopeName name={scopeName(account)} variant="sidebar" spokenLabel={spokenScope(account)} />
+        <QuickSearchField />
         <nav aria-label="Navegación principal" className="scroll-shadow -mx-1 flex-1 overflow-y-auto px-1">
           <NavList entries={entries} />
         </nav>
+        <QuickAppearanceButton variant="row" />
         <SessionActions account={account} />
       </aside>
     </div>

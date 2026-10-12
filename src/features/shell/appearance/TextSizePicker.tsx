@@ -1,6 +1,6 @@
 import { TEXT_SIZES } from '@/services/appearanceRules'
 import { OptionCard } from './OptionCard'
-import { useQuickAppearance } from './useQuickAppearance'
+import { useQuickAppearance } from '@/features/shell/useQuickAppearance'
 
 const SAMPLE_SIZE = { normal: 'text-base', large: 'text-lg', larger: 'text-xl', largest: 'text-2xl' } as const
 

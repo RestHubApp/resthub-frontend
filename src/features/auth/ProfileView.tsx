@@ -1,5 +1,6 @@
 import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
+import { useScreenAction } from '@/hooks/useScreenAction'
 import { SYSTEM_ADMINISTRATION } from '@/services/systemAdministration'
 import { usePreview, useSession } from '@/store/session'
 import { AppearanceLink } from './AppearanceLink'
@@ -18,15 +19,17 @@ const DATA = 'm-0 text-base font-medium break-words'
 export function ProfileView() {
   const account = useSession((state) => state.account)
   const isPreview = usePreview()
+  const isPlatform = account?.kind === 'platform'
+  // La vista previa y la administración del sistema no cambian contraseña: `?accion=cambiar-contrasena` no aplica y se borra.
+  useScreenAction('cambiar-contrasena', { isApplicable: !isPreview && !isPlatform })
 
   if (account === null) {
     return null
   }
 
-  const isPlatform = account.kind === 'platform'
   // La cuenta de muestra no tiene contraseña y el servidor rechaza cambiarla; la de plataforma no la cambia desde aquí.
   const canChangePassword = !isPreview && !isPlatform
-  const data = isPlatform
+  const data = account.kind === 'platform'
     ? [
         { term: 'Nombre', data: account.admin.full_name },
         { term: 'Correo', data: account.admin.email },

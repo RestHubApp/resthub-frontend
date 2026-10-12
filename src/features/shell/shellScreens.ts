@@ -55,7 +55,8 @@ function ignore(): undefined {
   return undefined
 }
 
-function preloadScreen(screen: ShellScreen): void {
+/** Baja el archivo de la pantalla y pide sus datos, sin abrirla. */
+export function preloadScreen(screen: ShellScreen): void {
   void screen.load?.().catch(ignore)
   screen.prefetch?.()
 }
