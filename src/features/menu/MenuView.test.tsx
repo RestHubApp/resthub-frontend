@@ -113,19 +113,22 @@ describe('MenuView: orden', () => {
     api.on('put', '/menu/categories/order', [])
 
     await screen.findByRole('region', { name: 'Entradas' })
-    expect(screen.getByRole('button', { name: 'Subir la categoría Entradas' })).toHaveAttribute('aria-disabled', 'true')
-    await user.click(screen.getByRole('button', { name: 'Bajar la categoría Entradas' }))
+    await user.click(screen.getByRole('button', { name: 'Más acciones de la categoría Entradas' }))
+    expect(await screen.findByRole('menuitem', { name: 'Subir' })).toHaveAttribute('aria-disabled', 'true')
+    await user.click(screen.getByRole('menuitem', { name: 'Bajar' }))
 
     expect(api.calls('put', '/menu/categories/order')[0]?.body).toEqual({ ids: [2, 1] })
   })
 
-  it('subir un plato envía los platos de su categoría y no hace nada en el borde', async () => {
+  it('subir un plato envía los platos de su categoría y el primero no puede subir', async () => {
     const { api, user } = openMenu()
     api.on('put', ORDER_DISHES, [])
 
-    await user.click(await screen.findByRole('button', { name: 'Subir Ceviche' }))
-    expect(api.calls('put', ORDER_DISHES)).toHaveLength(0)
-    await user.click(screen.getByRole('button', { name: 'Subir Causa' }))
+    await user.click(await screen.findByRole('button', { name: 'Más acciones de Ceviche' }))
+    expect(await screen.findByRole('menuitem', { name: 'Subir' })).toHaveAttribute('aria-disabled', 'true')
+    await user.keyboard('{Escape}')
+    await user.click(screen.getByRole('button', { name: 'Más acciones de Causa' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Subir' }))
 
     expect(api.calls('put', ORDER_DISHES)[0]?.body).toEqual({ ids: [11, 10] })
   })

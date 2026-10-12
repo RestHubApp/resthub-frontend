@@ -136,7 +136,8 @@ describe('editar la carta', () => {
     if (row === undefined) {
       throw new Error('No se encontró la fila de Ceviche.')
     }
-    await user.click(within(row).getByRole('button', { name: 'Desactivar' }))
+    await user.click(within(row).getByRole('button', { name: 'Más acciones de Ceviche' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Desactivar' }))
     const confirm = await screen.findByRole('alertdialog', { name: '¿Sacar Ceviche de la carta?' })
     expect(api.calls('patch', DISH_10)).toHaveLength(0)
     await user.click(within(confirm).getByRole('button', { name: 'Desactivar' }))
@@ -149,13 +150,15 @@ describe('editar la carta', () => {
     const { api, user } = openMenu()
     api.once('delete', '/menu/categories/2', new ErrorResponse(409, 'La categoría tiene platos.'))
 
-    await user.click(await screen.findByRole('button', { name: 'Eliminar la categoría Bebidas' }))
+    await user.click(await screen.findByRole('button', { name: 'Más acciones de la categoría Bebidas' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Eliminar' }))
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }))
     expect(await screen.findByText('La categoría tiene platos.')).toBeInTheDocument()
 
     api.on('delete', '/menu/categories/2', null, 204)
     api.on('get', MENU, { categories: [buildMenu().categories[0]] })
-    await user.click(screen.getByRole('button', { name: 'Eliminar la categoría Bebidas' }))
+    await user.click(screen.getByRole('button', { name: 'Más acciones de la categoría Bebidas' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Eliminar' }))
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }))
     expect(await screen.findByText('Categoría Bebidas eliminada.')).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Bebidas' })).not.toBeInTheDocument()
@@ -166,8 +169,9 @@ describe('editar la carta', () => {
     api.on('patch', CATEGORY_1, { id: 1, name: 'Entradas', position: 0, is_active: false, created_at: CREATED })
 
     await screen.findByRole('region', { name: 'Entradas' })
-    expect(screen.queryByRole('button', { name: 'Eliminar la categoría Entradas' })).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Desactivar la categoría Entradas' }))
+    await user.click(screen.getByRole('button', { name: 'Más acciones de la categoría Entradas' }))
+    expect(screen.queryByRole('menuitem', { name: 'Eliminar' })).not.toBeInTheDocument()
+    await user.click(await screen.findByRole('menuitem', { name: 'Desactivar' }))
     await user.click(within(await screen.findByRole('alertdialog', { name: '¿Desactivar Entradas?' })).getByRole('button', { name: 'Desactivar' }))
 
     expect(api.calls('patch', CATEGORY_1)[0]?.body).toEqual({ is_active: false })
@@ -181,7 +185,8 @@ describe('editar la carta', () => {
 
     expect(await screen.findByText('Inactiva')).toBeInTheDocument()
     expect(screen.getByText('Hoy: 0 de 0 platos disponibles')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Activar la categoría Entradas' }))
+    await user.click(screen.getByRole('button', { name: 'Más acciones de la categoría Entradas' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Activar' }))
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect(api.calls('patch', CATEGORY_1)[0]?.body).toEqual({ is_active: true })

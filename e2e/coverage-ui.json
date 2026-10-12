@@ -235,22 +235,22 @@
       "origin": "src/features\\customers\\CustomerRights.tsx"
     },
     {
-      "id": "confirmacion:menu/CategoryStatusButton",
+      "id": "confirmacion:menu/CategoryDialogs#1",
       "type": "confirmacion",
       "description": "`¿Desactivar ${category.name}?`",
-      "origin": "src/features\\menu\\CategoryStatusButton.tsx"
+      "origin": "src/features\\menu\\CategoryDialogs.tsx"
     },
     {
-      "id": "confirmacion:menu/DeleteCategoryButton",
+      "id": "confirmacion:menu/CategoryDialogs#2",
       "type": "confirmacion",
       "description": "`¿Eliminar ${category.name}?`",
-      "origin": "src/features\\menu\\DeleteCategoryButton.tsx"
+      "origin": "src/features\\menu\\CategoryDialogs.tsx"
     },
     {
-      "id": "confirmacion:menu/MenuItemStatusButton",
+      "id": "confirmacion:menu/MenuItemDialogs",
       "type": "confirmacion",
       "description": "`¿Sacar ${item.name} de la carta?`",
-      "origin": "src/features\\menu\\MenuItemStatusButton.tsx"
+      "origin": "src/features\\menu\\MenuItemDialogs.tsx"
     },
     {
       "id": "confirmacion:platform/RestaurantStatusButton",
@@ -283,10 +283,10 @@
       "origin": "src/features\\shell\\SessionActions.tsx"
     },
     {
-      "id": "confirmacion:staff/StaffStatusButton",
+      "id": "confirmacion:staff/StaffRowDialogs",
       "type": "confirmacion",
       "description": "`¿Desactivar a ${account.full_name}?`",
-      "origin": "src/features\\staff\\StaffStatusButton.tsx"
+      "origin": "src/features\\staff\\StaffRowDialogs.tsx"
     },
     {
       "id": "desplegable:components/AccessibilityWidget",
@@ -361,16 +361,16 @@
       "origin": "src/features\\inventory\\SupplierDialog.tsx"
     },
     {
-      "id": "dialogo:menu/CategoryHeader",
+      "id": "dialogo:menu/CategoryDialogs",
       "type": "dialogo",
       "description": "`Editar ${category.name}`",
-      "origin": "src/features\\menu\\CategoryHeader.tsx"
+      "origin": "src/features\\menu\\CategoryDialogs.tsx"
     },
     {
-      "id": "dialogo:menu/MenuItemRow",
+      "id": "dialogo:menu/MenuItemDialogs",
       "type": "dialogo",
       "description": "`Editar ${item.name}`",
-      "origin": "src/features\\menu\\MenuItemRow.tsx"
+      "origin": "src/features\\menu\\MenuItemDialogs.tsx"
     },
     {
       "id": "dialogo:menu/NewMenuDialogs#1",
