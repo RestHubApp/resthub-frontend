@@ -60,7 +60,6 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
             onOpenChange(false)
           }}
           submit={{ label: 'Guardar', pendingLabel: 'Guardando…' }}
-          size="lg"
         />
       </form>
     </FormDialog>

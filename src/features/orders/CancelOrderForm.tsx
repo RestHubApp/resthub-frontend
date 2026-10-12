@@ -4,10 +4,9 @@ import { z } from 'zod'
 
 import { cancelOrder } from '@/api/orders'
 import type { OrderResponse } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormFooter } from '@/components/FormFooter'
 import { textRequired } from '@/components/formRules'
 import { TextareaField } from '@/components/TextareaField'
-import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useOrderAction } from './useOrderAction'
 
@@ -55,14 +54,12 @@ export function CancelOrderForm({ order, onClose }: CancelOrderFormProps) {
         field={register('reason')}
         error={formState.errors.reason?.message}
       />
-      <DialogFormActions>
-        <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onClose}>
-          Volver
-        </Button>
-        <Button type="submit" size="lg" variant="danger" className="h-11 px-4" disabled={cancel.isPending}>
-          {cancel.isPending ? 'Cancelando…' : 'Cancelar pedido'}
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={cancel}
+        onCancel={onClose}
+        cancelLabel="Volver"
+        submit={{ label: 'Cancelar pedido', pendingLabel: 'Cancelando…', variant: 'danger' }}
+      />
     </form>
   )
 }

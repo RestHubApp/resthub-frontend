@@ -1,11 +1,10 @@
 import type { Ingredient } from '@/api/types'
+import { FormFooter } from '@/components/FormFooter'
 import { SelectField } from '@/components/SelectField'
 import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { onSubmit } from '@/hooks/formSubmit'
 import { ChoiceField } from './ChoiceField'
-import { FormButtons } from './FormButtons'
-import { MutationError } from './MutationError'
 import { QuantityField } from './QuantityField'
 import { StockPreview } from './StockPreview'
 import { useAdjustmentForm } from './useAdjustmentForm'
@@ -59,12 +58,7 @@ export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
       />
       <StockPreview ingredient={ingredient} delta={delta} />
 
-      <MutationError
-        isError={adjustment.isError}
-        error={adjustment.error}
-        fallback="No se pudo registrar el ajuste."
-      />
-      <FormButtons label="Guardar ajuste" icon="count" pending={adjustment.isPending} onCancel={onDone} />
+      <FormFooter mutation={adjustment} failureText="No se pudo registrar el ajuste." onCancel={onDone} submit={{ label: 'Guardar ajuste', icon: 'count' }} />
     </form>
   )
 }

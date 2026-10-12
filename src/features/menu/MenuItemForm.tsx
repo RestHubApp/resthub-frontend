@@ -2,10 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
 import type { MenuItem, MenuSection } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
+import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
-import { errorMessage } from '@/services/apiError'
-import { MenuFormActions } from './MenuFormActions'
 import { MenuItemFields } from './MenuItemFields'
 import { ModifierGroupsEditor } from './ModifierGroupsEditor'
 import {
@@ -56,17 +54,11 @@ export function MenuItemForm({
       <MenuItemFields register={register} errors={formState.errors} categories={categories} />
       <ModifierGroupsEditor groups={modifiers.groups} error={modifiers.error} onChange={modifiers.setGroups} />
 
-      {save.isError ? (
-        <FormMessage tone="error">
-          {errorMessage(save.error, 'No se pudo guardar el plato.')}
-        </FormMessage>
-      ) : null}
-
-      <MenuFormActions
-        icon={item === undefined ? 'add' : 'confirm'}
-        submitLabel={item === undefined ? 'Crear plato' : 'Guardar'}
-        isPending={save.isPending}
+      <FormFooter
+        mutation={save}
+        failureText="No se pudo guardar el plato."
         onCancel={onDone}
+        submit={{ label: item === undefined ? 'Crear plato' : 'Guardar', icon: item === undefined ? 'add' : 'confirm' }}
       />
     </form>
   )

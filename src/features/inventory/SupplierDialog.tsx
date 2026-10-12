@@ -3,9 +3,8 @@ import { useForm } from 'react-hook-form'
 
 import { saveSupplier } from '@/api/purchasing'
 import type { Supplier, SupplierRequest } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
-import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { SupplierFields } from './SupplierFields'
 import { supplierSchema, supplierValuesOf, type SupplierValues } from './supplierSchema'
@@ -55,14 +54,7 @@ export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps)
         )}
       >
         <SupplierFields register={register} errors={formState.errors} />
-        <DialogFormActions>
-          <Button type="button" variant="outline" onClick={close}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={save.isPending}>
-            {save.isPending ? 'Guardando…' : 'Guardar'}
-          </Button>
-        </DialogFormActions>
+        <FormFooter mutation={save} onCancel={close} submit={{ label: 'Guardar' }} />
       </form>
     </FormDialog>
   )

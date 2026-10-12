@@ -1,44 +1,45 @@
 import { DialogFormActions } from './DialogFormActions'
 import { FormMessage } from './FormMessage'
-import { Icon } from './Icon'
-import type { IconName } from './icons'
+import { FormSubmitButton, type FooterSubmit } from './FormSubmitButton'
 import { Button } from './ui/button'
 import { mutationErrorText } from '@/hooks/mutationErrorText'
 
-/** Lo que el pie necesita saber de la mutación del formulario. */
+/** Lo que el pie necesita saber de lo que guarda: si está en curso y, si falló, por qué. */
 interface FooterMutation {
-  readonly isError: boolean
-  readonly error: unknown
   readonly isPending: boolean
+  readonly isError?: boolean
+  readonly error?: unknown
 }
 
 interface FormFooterProps {
   readonly mutation: FooterMutation
-  /** El mensaje cuando el error no trae uno propio del servidor. */
-  readonly failureText: string
+  /**
+   * El mensaje cuando el error no trae uno propio del servidor. Sin él, el pie no
+   * muestra error: el formulario ya lo muestra aparte.
+   */
+  readonly failureText?: string
   readonly onCancel: () => void
-  readonly submit: {
-    readonly label: string
-    readonly pendingLabel: string
-    readonly icon?: IconName
-  }
-  /** `lg` es la altura de las ventanas de dos columnas; `md`, la de los formularios en línea. */
-  readonly size?: 'md' | 'lg'
+  /** «Cancelar» por omisión; «Volver» o «Cerrar» cuando eso dice mejor qué pasa. */
+  readonly cancelLabel?: string
+  /** La acción principal. Sin ella (formulario de solo lectura) queda únicamente el botón de cerrar. */
+  readonly submit?: FooterSubmit | undefined
   /** En una grilla de dos columnas, el pie ocupa las dos. */
   readonly spansColumns?: boolean
 }
 
-const HEIGHTS = { md: 'h-10 px-4', lg: 'h-11 px-4' } as const
+function failureOf(mutation: FooterMutation, failureText: string | undefined): string | null {
+  return failureText === undefined ? null : mutationErrorText({ isError: mutation.isError === true, error: mutation.error }, failureText)
+}
 
 /**
- * El pie de un formulario que guarda: el error del envío, si lo hubo, y los
- * botones "Cancelar" y de la acción, con la etiqueta que cambia mientras se
- * envía. Lo comparten los formularios de cuentas, de encargados, de clientes y
- * de reservas.
+ * El pie de los formularios que guardan: el error del envío, si lo hubo, y los
+ * botones «Cancelar» y de la acción, con la etiqueta que cambia mientras se
+ * envía. Es el único lugar donde se escribe esa estructura: los formularios de
+ * cuentas, inventario, carta, roles, cobro y las ventanas de una sola acción lo usan.
  */
-export function FormFooter({ mutation, failureText, onCancel, submit, size = 'md', spansColumns = false }: FormFooterProps) {
+export function FormFooter({ mutation, failureText, onCancel, cancelLabel = 'Cancelar', submit, spansColumns = false }: FormFooterProps) {
   const wrap = spansColumns ? 'sm:col-span-2' : undefined
-  const failure = mutationErrorText(mutation, failureText)
+  const failure = failureOf(mutation, failureText)
   return (
     <>
       {failure === null ? null : (
@@ -48,13 +49,10 @@ export function FormFooter({ mutation, failureText, onCancel, submit, size = 'md
       )}
       <div className={wrap}>
         <DialogFormActions>
-          <Button type="button" variant="outline" size="lg" className={HEIGHTS[size]} onClick={onCancel}>
-            Cancelar
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {cancelLabel}
           </Button>
-          <Button type="submit" size="lg" className={HEIGHTS[size]} disabled={mutation.isPending}>
-            {submit.icon === undefined ? null : <Icon name={submit.icon} size={16} />}
-            <span>{mutation.isPending ? submit.pendingLabel : submit.label}</span>
-          </Button>
+          {submit === undefined ? null : <FormSubmitButton submit={submit} isPending={mutation.isPending} />}
         </DialogFormActions>
       </div>
     </>

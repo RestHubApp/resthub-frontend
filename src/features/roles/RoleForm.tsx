@@ -2,9 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
 import type { Role } from '@/api/types'
+import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
 import type { PermissionGroup } from './permissionGroups'
-import { RoleFormFooter } from './RoleFormFooter'
 import { RoleNameField } from './RoleNameField'
 import { RolePermissionsField } from './RolePermissionsField'
 import { roleSchema, type RoleValues, valuesOf } from './roleSchema'
@@ -40,13 +40,12 @@ export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
     >
       <RoleNameField role={role} readOnly={readOnly} field={register('name')} error={formState.errors.name?.message} />
       <RolePermissionsField control={control} groups={groups} readOnly={readOnly} />
-      <RoleFormFooter
-        readOnly={readOnly}
-        isError={save.isError}
-        error={save.error}
-        isPending={save.isPending}
+      <FormFooter
+        mutation={save}
         failureText={ROLE_SAVE_FAILURE}
-        onDone={onDone}
+        onCancel={onDone}
+        cancelLabel={readOnly ? 'Cerrar' : 'Cancelar'}
+        submit={readOnly ? undefined : { label: 'Guardar', icon: 'confirm' }}
       />
     </form>
   )

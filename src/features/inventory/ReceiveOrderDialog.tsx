@@ -1,7 +1,6 @@
 import type { PurchaseOrder } from '@/api/types'
-import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
-import { Button } from '@/components/ui/button'
 import { ReceiveLineRow } from './ReceiveLineRow'
 import { useReceiveOrder } from './useReceiveOrder'
 
@@ -50,14 +49,17 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
           />
         ))}
       </ul>
-      <DialogFormActions>
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button type="button" variant="success" disabled={!receive.isValid || receive.isPending} onClick={receive.submit}>
-          {receive.isPending ? 'Recibiendo…' : 'Recibir y cargar al stock'}
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={receive}
+        onCancel={onClose}
+        submit={{
+          label: 'Recibir y cargar al stock',
+          pendingLabel: 'Recibiendo…',
+          variant: 'success',
+          onClick: receive.submit,
+          isDisabled: !receive.isValid,
+        }}
+      />
     </FormDialog>
   )
 }

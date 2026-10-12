@@ -1,7 +1,6 @@
-import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
 import { FormMessage } from '@/components/FormMessage'
-import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { CustomerLookup } from './CustomerLookup'
 import { TakeawayConsent } from './TakeawayConsent'
@@ -51,14 +50,11 @@ export function TakeawayForm({ onClose }: TakeawayFormProps) {
         <TakeawayFields form={form} delivery={mode === 'delivery'} />
         <TakeawayConsent form={form} />
         {failure === null ? null : <FormMessage tone="error">{failure}</FormMessage>}
-        <DialogFormActions>
-          <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" size="lg" className="h-11 px-4" disabled={form.formState.isSubmitting}>
-            <span>Elegir platos</span>
-          </Button>
-        </DialogFormActions>
+        <FormFooter
+          mutation={{ isPending: form.formState.isSubmitting }}
+          onCancel={onClose}
+          submit={{ label: 'Elegir platos', pendingLabel: 'Elegir platos' }}
+        />
       </form>
     </FormDialog>
   )

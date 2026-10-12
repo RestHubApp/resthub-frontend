@@ -1,6 +1,5 @@
-import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
-import { Button } from '@/components/ui/button'
 import { PurchaseLinesList } from './PurchaseLinesList'
 import { SuggestionsBar } from './SuggestionsBar'
 import { SupplierSelect } from './SupplierSelect'
@@ -34,14 +33,11 @@ export function PurchaseOrderDialog({ open, onClose }: PurchaseOrderDialogProps)
       <SupplierSelect suppliers={draft.suppliers} value={draft.supplier} onChange={draft.setSupplier} />
       <SuggestionsBar count={draft.suggestionCount} onLoad={draft.loadSuggestions} />
       <PurchaseLinesList lines={draft.lines} ingredients={draft.ingredients} onChange={draft.setLines} />
-      <DialogFormActions>
-        <Button type="button" variant="outline" onClick={draft.close}>
-          Cancelar
-        </Button>
-        <Button type="button" disabled={!draft.canCreate} onClick={draft.submit}>
-          {draft.isCreating ? 'Creando…' : 'Crear orden'}
-        </Button>
-      </DialogFormActions>
+      <FormFooter
+        mutation={{ isPending: draft.isCreating }}
+        onCancel={draft.close}
+        submit={{ label: 'Crear orden', pendingLabel: 'Creando…', onClick: draft.submit, isDisabled: !draft.canCreate }}
+      />
     </FormDialog>
   )
 }

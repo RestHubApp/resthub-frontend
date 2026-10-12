@@ -2,11 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 
 import { currentCashQuery } from '@/api/cash'
 import type { OrderResponse } from '@/api/types'
+import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
 import { AdjustmentsPanel } from './AdjustmentsPanel'
 import { BillSummary } from './BillSummary'
 import { CashClosedNotice } from './CashClosedNotice'
-import { ChargeActions } from './ChargeActions'
 import { ChargeFields } from './ChargeFields'
 import { PaymentsDone } from './PaymentsDone'
 import { usePaymentForm } from './usePaymentForm'
@@ -38,10 +38,17 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
       <AdjustmentsPanel order={order} />
       <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(payment.send)}>
         <ChargeFields order={order} payment={payment} />
-        <ChargeActions
-          isDisabled={isClosed || !payment.canCharge}
-          isPending={payment.payment.isPending}
+        <FormFooter
+          mutation={payment.payment}
           onCancel={onCancel}
+          cancelLabel="Volver"
+          submit={{
+            label: 'Confirmar pago',
+            pendingLabel: 'Cobrando…',
+            icon: 'payment',
+            variant: 'success',
+            isDisabled: isClosed || !payment.canCharge,
+          }}
         />
       </form>
     </div>

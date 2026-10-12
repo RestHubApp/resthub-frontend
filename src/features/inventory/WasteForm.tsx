@@ -1,8 +1,7 @@
 import type { Ingredient } from '@/api/types'
+import { FormFooter } from '@/components/FormFooter'
 import { TextareaField } from '@/components/TextareaField'
 import { onSubmit } from '@/hooks/formSubmit'
-import { FormButtons } from './FormButtons'
-import { MutationError } from './MutationError'
 import { QuantityField } from './QuantityField'
 import { StockPreview } from './StockPreview'
 import { inputUnits } from './units'
@@ -43,8 +42,7 @@ export function WasteForm({ ingredient, onDone }: WasteFormProps) {
       />
       <StockPreview ingredient={ingredient} delta={base > 0 ? -base : null} />
 
-      <MutationError isError={waste.isError} error={waste.error} fallback="No se pudo registrar la merma." />
-      <FormButtons label="Registrar merma" icon="waste" pending={waste.isPending} onCancel={onDone} />
+      <FormFooter mutation={waste} failureText="No se pudo registrar la merma." onCancel={onDone} submit={{ label: 'Registrar merma', icon: 'waste' }} />
     </form>
   )
 }

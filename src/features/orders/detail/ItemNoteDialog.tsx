@@ -2,11 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import { DialogFormActions } from '@/components/DialogFormActions'
+import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
 import { textOptional } from '@/components/formRules'
 import { TextField } from '@/components/TextField'
-import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 
 // El mismo tope que el servidor.
@@ -59,16 +58,13 @@ export function ItemNoteDialog({
           field={register('notes')}
           error={formState.errors.notes?.message}
         />
-        <DialogFormActions>
-          <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={() => {
+        <FormFooter
+          mutation={{ isPending: pending }}
+          onCancel={() => {
             onOpenChange(false)
-          }}>
-            Cancelar
-          </Button>
-          <Button type="submit" size="lg" className="h-11 px-4" disabled={pending}>
-            {pending ? 'Guardando…' : 'Guardar nota'}
-          </Button>
-        </DialogFormActions>
+          }}
+          submit={{ label: 'Guardar nota' }}
+        />
       </form>
     </FormDialog>
   )
