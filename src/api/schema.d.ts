@@ -47,6 +47,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cerrar la sesión y dejarlo en la bitácora
+         * @description Registra la salida del personal en la bitácora; responde 204.
+         *
+         *     El token NO se invalida: la sesión se corta con `sessions_valid_since`, que
+         *     es por cuenta y cerraría también las sesiones de los demás dispositivos, así
+         *     que el token sigue vigente hasta vencer. La interfaz debe descartarlo. Una
+         *     vista previa no deja asiento: sus entradas y salidas son de la plataforma.
+         */
+        post: operations["logout_api_v1_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/me": {
         parameters: {
             query?: never;
@@ -2122,6 +2147,16 @@ export interface components {
             waiter_name: string;
         };
         /**
+         * ActivityGroup
+         * @description Familias de acciones para filtrar la bitácora sin enumerar cada tipo.
+         *
+         *     Un grupo es solo una lista de `ActivityKind`: no se guarda, así que agregar
+         *     un tipo nuevo a un grupo no toca el historial. Un tipo puede estar en más
+         *     de un grupo y algunos no están en ninguno.
+         * @enum {string}
+         */
+        ActivityGroup: "sessions" | "orders" | "cash" | "customers_access" | "inventory" | "menu" | "staff";
+        /**
          * ActivityKind
          * @description Qué ocurrió.
          *
@@ -2130,7 +2165,7 @@ export interface components {
          *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
          * @enum {string}
          */
-        ActivityKind: "signed_in" | "password_changed" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
+        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
         /** ActivityPageResponse */
         ActivityPageResponse: {
             /** Items */
@@ -5008,8 +5043,12 @@ export interface operations {
             query?: {
                 /** @description Filtra por rol */
                 role_id?: number[] | null;
+                /** @description Filtra por persona: solo los movimientos de esa cuenta */
+                user_id?: number | null;
                 /** @description Filtra por acción */
                 kind?: components["schemas"]["ActivityKind"][] | null;
+                /** @description Filtra por familia de acciones: `sessions` (entradas y salidas), `orders`, `cash`, `customers_access`, `inventory`, `menu`, `staff`. Se suma a `kind`: devuelve las acciones de cualquiera de los grupos y tipos pedidos. */
+                group?: components["schemas"]["ActivityGroup"][] | null;
                 limit?: number;
                 offset?: number;
             };
@@ -5167,6 +5206,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    logout_api_v1_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
