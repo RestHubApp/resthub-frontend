@@ -695,6 +695,18 @@
     "description": "Filtrar la bitácora por «Accesos a datos de clientes»"
   },
   {
+    "id": "funcion:bitacora.filtrar-sesiones",
+    "description": "Filtrar la bitácora por «Entradas y salidas» para ver cuándo entra y sale el personal"
+  },
+  {
+    "id": "funcion:bitacora.filtrar-persona",
+    "description": "Filtrar la bitácora por una persona del personal"
+  },
+  {
+    "id": "funcion:personal.ver-movimientos",
+    "description": "Desde Personal, «Ver movimientos» abre la bitácora de esa persona"
+  },
+  {
     "id": "funcion:clientes.ver-completo",
     "description": "Con el contacto enmascarado, «Ver completo» lo muestra y queda en la bitácora"
   },

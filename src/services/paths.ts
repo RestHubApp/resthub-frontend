@@ -70,6 +70,8 @@ export const PRIVACY_RIGHTS_ANCHOR = 'derechos'
 /** El filtro de la bitácora va en `?filtro=`; «accesos» deja solo lo que toca datos de clientes. */
 export const ACTIVITY_FILTER_PARAM = 'filtro'
 export const ACTIVITY_ACCESS_FILTER = 'accesos'
+/** La persona de la bitácora va en `?persona=<id de la cuenta>`. */
+export const ACTIVITY_PERSON_PARAM = 'persona'
 
 export const paths = {
   home: routePatterns.home,
@@ -78,6 +80,7 @@ export const paths = {
   terms: routePatterns.terms,
   privacyRights: `${routePatterns.privacy}#${PRIVACY_RIGHTS_ANCHOR}`,
   activityLogAccess: `${routePatterns.activityLog}?${ACTIVITY_FILTER_PARAM}=${ACTIVITY_ACCESS_FILTER}`,
+  activityLogOfPerson: (userId: PathValue) => `${routePatterns.activityLog}?${ACTIVITY_PERSON_PARAM}=${encodeURIComponent(String(userId))}`,
   profile: routePatterns.profile,
   appearance: routePatterns.appearance,
   previewEntry: routePatterns.previewEntry,

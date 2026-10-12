@@ -80,6 +80,26 @@ export async function exchangePreviewCode(payload: PreviewExchangeRequest): Prom
   return send((client) => client.POST('/api/v1/auth/preview', { body: payload }), { withoutCredential: true })
 }
 
+/** Cuánto se espera, como máximo, el aviso de salida: cerrar la sesión no depende de él. */
+const SIGN_OUT_NOTICE_TIMEOUT_MS = 3000
+
+/**
+ * Avisa al servidor que esta cuenta sale, para dejarlo en la bitácora. Lleva el
+ * `token` que se está por descartar y nunca rechaza: sin red o con un error, la
+ * salida sigue igual (el servidor no invalida el token).
+ */
+export async function reportSignOut(token: string): Promise<void> {
+  try {
+    await send((client) => client.POST('/api/v1/auth/logout'), {
+      credential: token,
+      background: true,
+      timeout: SIGN_OUT_NOTICE_TIMEOUT_MS,
+    })
+  } catch {
+    // El aviso es de cortesía: no hay nada que hacer si no llegó.
+  }
+}
+
 /** La cuenta en curso, releida en segundo plano: un fallo no muestra aviso. */
 export const currentUserQuery = queryOptions({
   queryKey: currentUserQueryKey,

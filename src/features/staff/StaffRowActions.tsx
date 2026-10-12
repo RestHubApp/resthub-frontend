@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 
 import type { StaffResponse } from '@/api/types'
 import { ActionsMenu, type ActionsMenuItem } from '@/components/ActionsMenu'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
+import { PERMISSION } from '@/api/permissions'
+import { paths } from '@/services/paths'
+import { useCan } from '@/store/session'
 import { type StaffDialog, StaffRowDialogs } from './StaffRowDialogs'
 import { useStaffStatus } from './useStaffStatus'
 
@@ -13,14 +17,21 @@ interface MenuItemsOptions {
   readonly isSelf: boolean
   readonly open: (dialog: StaffDialog) => void
   readonly activate: () => void
+  /** Quien mira puede abrir la bitácora: se ofrece «Ver movimientos». */
+  readonly canSeeActivity: boolean
+  readonly seeActivity: () => void
 }
 
-/** Contraseña y activar o desactivar: no existen para la cuenta propia. */
-function menuItems({ account, isSelf, open, activate }: MenuItemsOptions): ActionsMenuItem[] {
+/** «Ver movimientos» para todas; contraseña y activar o desactivar no existen para la cuenta propia. */
+function menuItems({ account, isSelf, open, activate, canSeeActivity, seeActivity }: MenuItemsOptions): ActionsMenuItem[] {
+  const movements: ActionsMenuItem[] = canSeeActivity
+    ? [{ label: 'Ver movimientos', icon: 'schedule', onSelect: seeActivity }]
+    : []
   if (isSelf) {
-    return []
+    return movements
   }
   return [
+    ...movements,
     { label: 'Contraseña', icon: 'key', onSelect: () => { open('contrasena') } },
     account.is_active
       ? { label: 'Desactivar', icon: 'turnOn', onSelect: () => { open('desactivar') }, isDestructive: true }
@@ -36,6 +47,31 @@ interface StaffRowActionsProps {
   readonly manageable: boolean
 }
 
+interface MenuOptions {
+  readonly account: StaffResponse
+  readonly isSelf: boolean
+  readonly open: (dialog: StaffDialog) => void
+  readonly status: ReturnType<typeof useStaffStatus>
+}
+
+/** Los ítems del menú «⋯» de la fila: «Ver movimientos» solo para quien puede abrir la bitácora. */
+function useMenuItems({ account, isSelf, open, status }: MenuOptions): ActionsMenuItem[] {
+  const navigate = useNavigate()
+  const canSeeActivity = useCan(PERMISSION.activityRead)
+  return menuItems({
+    account,
+    isSelf,
+    open,
+    activate: () => {
+      status.mutate()
+    },
+    canSeeActivity,
+    seeActivity: () => {
+      void navigate(paths.activityLogOfPerson(account.id))
+    },
+  })
+}
+
 /**
  * Lo que se hace con una cuenta del personal desde el listado: «Editar» a la
  * vista y el resto (contraseña, activar o desactivar) tras el menú «⋯», para
@@ -48,6 +84,7 @@ interface StaffRowActionsProps {
 export function StaffRowActions({ account, isSelf, manageable }: StaffRowActionsProps) {
   const [dialog, setDialog] = useState<StaffDialog>(null)
   const status = useStaffStatus(account)
+  const items = useMenuItems({ account, isSelf, open: setDialog, status })
   const close = () => {
     setDialog(null)
   }
@@ -59,15 +96,6 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
       </p>
     )
   }
-
-  const items = menuItems({
-    account,
-    isSelf,
-    open: setDialog,
-    activate: () => {
-      status.mutate()
-    },
-  })
 
   return (
     <div className="flex flex-col items-start gap-1.5 whitespace-normal">

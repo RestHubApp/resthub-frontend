@@ -182,6 +182,7 @@ export type LookupDocumentType = DocumentLookup['document_type']
 // Bitácora del restaurante: lo que hizo cada cuenta del personal.
 export type ActivityEntry = components['schemas']['ActivityResponse']
 export type ActivityKind = components['schemas']['ActivityKind']
+export type ActivityGroup = components['schemas']['ActivityGroup']
 export type ActivityParams = NonNullable<operations['read_activity_api_v1_activity_get']['parameters']['query']>
 export type Reservation = components['schemas']['ReservationResponse']
 export type ReservationRequest = components['schemas']['ReservationRequest']
