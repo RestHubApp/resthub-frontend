@@ -47,7 +47,7 @@ export function PasswordField({
         <Input
           id={id}
           type={isVisible ? 'text' : 'password'}
-          className="h-10 pr-11"
+          className="pr-11"
           autoComplete={autoComplete}
           spellCheck={false}
           placeholder={placeholder}
