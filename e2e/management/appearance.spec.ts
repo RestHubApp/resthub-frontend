@@ -8,7 +8,7 @@ import { openAs, evidence, expect, test } from '../support/fixtures'
 
 const MENU = { name: 'Navegación principal' }
 const ACTIONS = /^Acciones de /u
-const BAR = { name: /^En la barra de abajo/u }
+const BAR = { name: /^Barra de navegación/u }
 const MORE = { name: 'En «Más»' }
 
 test.beforeEach(() => {

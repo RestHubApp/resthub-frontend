@@ -57,7 +57,7 @@ function mockMedia(answers: (query: string) => boolean) {
   Object.defineProperty(window, 'matchMedia', { configurable: true, writable: true, value: answer })
 }
 
-const BAR = /^En la barra de abajo/u
+const BAR = /^Barra de navegación/u
 const MORE = 'En «Más»'
 
 afterEach(() => {
