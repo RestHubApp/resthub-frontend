@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { useReturnFocus } from './useReturnFocus'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +43,9 @@ export function ConfirmDialog({
   confirmVariant = 'destructive',
   onConfirm,
 }: ConfirmDialogProps) {
+  // Radix solo devuelve el foco a su propio disparador; abierta desde un menú
+  // «⋯» o desde estado, la ventana recuerda quién lo tenía (ver `useReturnFocus`).
+  const returnFocus = useReturnFocus()
   const controlled = {
     ...(open === undefined ? {} : { open }),
     ...(onOpenChange === undefined ? {} : { onOpenChange }),
@@ -50,7 +54,7 @@ export function ConfirmDialog({
   return (
     <AlertDialog {...controlled}>
       {trigger === undefined ? null : <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
-      <AlertDialogContent>
+      <AlertDialogContent {...returnFocus}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

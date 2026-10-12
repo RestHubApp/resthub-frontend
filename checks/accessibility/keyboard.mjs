@@ -24,6 +24,16 @@ function focus(page) {
   })
 }
 
+/**
+ * El foco vuelve al disparador un instante después de que el diálogo sale del
+ * DOM (Radix lo devuelve en el siguiente ciclo de eventos): se espera a que
+ * salga del body antes de leerlo, para no medir ese hueco como un fallo.
+ */
+async function settledFocus(page) {
+  await page.waitForFunction(() => document.activeElement !== document.body, null, { timeout: 1500 }).catch(() => undefined)
+  return focus(page)
+}
+
 async function traverse(browser, id, view, tabs) {
   const context = await browser.newContext(contextOf(view))
   const page = await openStatus(browser, context, status(id))
@@ -70,7 +80,7 @@ async function dialog(browser, id, trigger, view, item) {
   const closed = await page
     .waitForFunction(() => !document.querySelector('[role="dialog"],[role="alertdialog"]'), null, { timeout: 5000 })
     .then(() => true, () => false)
-  const onClose = await focus(page)
+  const onClose = await settledFocus(page)
   await context.close()
   return {
     id, view, trigger, onOpen,
@@ -94,7 +104,7 @@ async function shortcut(browser, id, view) {
   const onOpen = await page.evaluate(() => ({ role: document.activeElement?.getAttribute('role'), expanded: document.activeElement?.getAttribute('aria-expanded') }))
   await page.keyboard.press('Escape')
   await page.waitForFunction(() => !document.querySelector('[role="dialog"]'), null, { timeout: 5000 })
-  const onClose = await focus(page)
+  const onClose = await settledFocus(page)
   await context.close()
   return { id, view, onOpen, focusReturned: onClose.name.includes('Pedidos'), onClose }
 }
@@ -127,4 +137,12 @@ for (const d of result.dialogs) {
 for (const s of result.shortcuts) {
   console.log(`
 Atajo Ctrl+K en ${s.id} (${s.view}): el foco entra a role=${s.onOpen.role}, expandido=${s.onOpen.expanded}, foco devuelto ${s.focusReturned ? 'sí' : 'NO'} («${s.onClose.name}»)`)
+}
+
+// Que el foco no vuelva al botón que abrió la ventana (WCAG 2.4.3) rompe la
+// corrida: así no regresa el fallo sin que nadie lo vea en el resumen.
+const lost = [...result.dialogs, ...result.shortcuts].filter((d) => !d.focusReturned)
+if (lost.length > 0) {
+  console.error(`\nEl foco no volvió al disparador en: ${lost.map((d) => `${d.id} (${d.view})`).join(', ')}`)
+  process.exitCode = 1
 }
