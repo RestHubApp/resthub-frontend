@@ -119,7 +119,7 @@ describe('armazón de la administración del sistema', () => {
   })
 
   it('cerrar sesión vuelve al acceso de todos y borra la sesión', async () => {
-    platformServer()
+    const api = platformServer()
     signInToPlatform()
     const { user, router } = mountPlatform(PLATFORM)
 
@@ -129,6 +129,8 @@ describe('armazón de la administración del sistema', () => {
     expect(await screen.findByRole('button', SIGN_IN)).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/acceso')
     expect(useSession.getState().token).toBeNull()
+    // La cuenta de plataforma no deja asiento en la bitácora del restaurante.
+    expect(api.calls('post', '/auth/logout')).toHaveLength(0)
   })
 
   it('relee la cuenta con /auth/me', async () => {

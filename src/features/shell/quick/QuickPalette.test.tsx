@@ -1,12 +1,14 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, screen, waitFor, within } from '@testing-library/react'
 
-import { firstOf, mountRoutes, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server, signInAs, TEST_SCREENS } from '#jest/harness'
+import { firstOf, mountRoutes, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server, signInAs, TEST_SCREENS, withoutNetwork } from '#jest/harness'
 import { useAppearance } from '@/store/appearance'
+import { useSession } from '@/store/session'
 import { AppShell } from '@/features/shell/AppShell'
 import { useQuickPalette } from './quickState'
 
 const PALETTE = { name: 'Buscar o ir a…' }
+const LOGOUT = '/auth/logout'
 const CTRL_K = '{Control>}k{/Control}'
 
 function openShell() {
@@ -16,9 +18,9 @@ function openShell() {
 }
 
 function openAs(permissions: Parameters<typeof signInAs>[0], changes: Parameters<typeof signInAs>[1] = {}) {
-  server()
+  const api = server().on('post', LOGOUT, null, 204)
   signInAs(permissions, changes)
-  return openShell()
+  return { api, ...openShell() }
 }
 
 afterEach(() => {
@@ -173,13 +175,29 @@ describe('elegir una opción de la paleta', () => {
     expect(within(dialog).queryByRole('option', { name: /^Cambiar contraseña/u })).not.toBeInTheDocument()
   })
 
-  it('«Cerrar sesión» cierra la sesión y lleva al acceso', async () => {
-    const { user, router } = openAs(PERMISSIONS_OWNER)
+  it('«Cerrar sesión» avisa la salida con el token de la sesión, la cierra y lleva al acceso', async () => {
+    const { api, user, router } = openAs(PERMISSIONS_OWNER)
     await user.keyboard(CTRL_K)
     const dialog = await screen.findByRole('dialog', PALETTE)
 
     await user.click(within(dialog).getByRole('option', { name: /^Cerrar sesión/u }))
 
     expect(router.state.location.pathname).toBe('/acceso')
+    await waitFor(() => {
+      expect(api.calls('post', LOGOUT)).toHaveLength(1)
+    })
+    expect(api.calls('post', LOGOUT)[0]?.headers['authorization']).toBe('Bearer token-de-prueba')
+  })
+
+  it('si el aviso de salida falla, la sesión se cierra igual', async () => {
+    const { api, user, router } = openAs(PERMISSIONS_OWNER)
+    api.on('post', LOGOUT, withoutNetwork)
+    await user.keyboard(CTRL_K)
+    const dialog = await screen.findByRole('dialog', PALETTE)
+
+    await user.click(within(dialog).getByRole('option', { name: /^Cerrar sesión/u }))
+
+    expect(router.state.location.pathname).toBe('/acceso')
+    expect(useSession.getState().token).toBeNull()
   })
 })

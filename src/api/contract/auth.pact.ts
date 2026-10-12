@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 
 import { errorStatus } from '@/services/apiError'
-import { fetchCurrentUser, login } from '@/api/auth'
+import { fetchCurrentUser, login, reportSignOut } from '@/api/auth'
 import {
   API_PREFIX,
   bearer,
@@ -9,6 +9,7 @@ import {
   connectTo,
   connectWithoutSession,
   eachLike,
+  EXAMPLE_TOKEN,
   integer,
   JSON_HEADERS,
   like,
@@ -122,6 +123,20 @@ describe('Contrato: acceso', () => {
         const session = await fetchCurrentUser()
         expect(session.preview).toBe(false)
         expect(session.kind === 'staff' && session.user.email).toBe(OWNER.email)
+      })
+  })
+
+  it('avisa la salida con el token que se descarta y recibe 204', async () => {
+    await pact
+      .addInteraction()
+      .given(STATE.ownerSession)
+      .uponReceiving('el aviso de que la sesión se cierra')
+      .withRequest('POST', `${API_PREFIX}/auth/logout`, (req) => req.headers(bearer()))
+      .willRespondWith(204)
+      .executeTest(async (mockServer) => {
+        // La sesión ya se vació cuando sale el aviso: viaja con el token capturado.
+        connectWithoutSession(mockServer)
+        await expect(reportSignOut(EXAMPLE_TOKEN)).resolves.toBeUndefined()
       })
   })
 })

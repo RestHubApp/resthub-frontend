@@ -14,6 +14,9 @@ const SECRET_SAFE_1 = 'clave-segura-1'
 const CREATE_ACCOUNT = 'Crear cuenta'
 
 const ROLES = [ROLE_OWNER, ROLE_WAITER, role()]
+const SEE_ACTIVITY = { name: 'Ver movimientos' }
+const PASSWORD_ITEM = { name: 'Contraseña' }
+const MORE_OF_LUIS = { name: 'Más acciones de Luis Quispe' }
 const NAME = 'Nombre completo'
 
 type Member = (typeof TEAM)[number]
@@ -92,7 +95,11 @@ describe('StaffView', () => {
     api.on('patch', '/staff/7', (request: Request) => save({ ...firstOf(TEAM), ...(request.body as object) }))
     const own = await rowOf(/Ana Torres/u)
 
-    expect(within(own).queryByRole('button', { name: /Más acciones/u })).not.toBeInTheDocument()
+    await user.click(within(own).getByRole('button', { name: 'Más acciones de Ana Torres' }))
+    expect(await screen.findByRole('menuitem', SEE_ACTIVITY)).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Desactivar' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', PASSWORD_ITEM)).not.toBeInTheDocument()
+    await user.keyboard('{Escape}')
     await user.click(within(own).getByRole('button', { name: 'Editar' }))
     const window = await screen.findByRole('dialog', { name: 'Editar a Ana Torres' })
     expect(await within(window).findByText('No puedes cambiar el rol de tu propia cuenta.')).toBeInTheDocument()
@@ -101,6 +108,27 @@ describe('StaffView', () => {
 
     expect(await rowOf(/Ana Torres Luna/u)).toBeInTheDocument()
     expect(api.calls('patch', '/staff/7')[0]?.body).toEqual({ full_name: 'Ana Torres Luna' })
+  })
+})
+
+describe('StaffView: movimientos de una persona', () => {
+  it('«Ver movimientos» abre la bitácora ya filtrada por esa persona', async () => {
+    const { user, router } = openStaff()
+
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', MORE_OF_LUIS))
+    await user.click(await screen.findByRole('menuitem', SEE_ACTIVITY))
+
+    expect(router.state.location.pathname).toBe('/bitacora')
+    expect(router.state.location.search).toBe('?persona=8')
+  })
+
+  it('sin el permiso de la bitácora no ofrece «Ver movimientos»', async () => {
+    const { user } = openStaff(PERMISSIONS_OWNER.filter((code) => code !== 'activity.read'))
+
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', MORE_OF_LUIS))
+
+    expect(await screen.findByRole('menuitem', PASSWORD_ITEM)).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', SEE_ACTIVITY)).not.toBeInTheDocument()
   })
 })
 
@@ -122,8 +150,8 @@ describe('StaffView: cambios sobre otras cuentas', () => {
     const { api, user } = openStaff()
     api.on('post', '/staff/8/password', null, 204)
 
-    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Más acciones de Luis Quispe' }))
-    await user.click(await screen.findByRole('menuitem', { name: 'Contraseña' }))
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', MORE_OF_LUIS))
+    await user.click(await screen.findByRole('menuitem', PASSWORD_ITEM))
     const window = await screen.findByRole('dialog', { name: 'Restablecer la contraseña de Luis Quispe' })
     await user.type(within(window).getByLabelText('Nueva contraseña'), OTHER_TEST_SECRET)
     await user.click(within(window).getByRole('button', { name: 'Restablecer' }))
@@ -137,7 +165,7 @@ describe('StaffView: cambios sobre otras cuentas', () => {
     api.on('patch', '/staff/8/status', () => save(member({ is_active: false })))
     api.on('patch', '/staff/9/status', () => save({ ...(TEAM.at(2) ?? firstOf(TEAM)), is_active: true }))
 
-    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Más acciones de Luis Quispe' }))
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', MORE_OF_LUIS))
     await user.click(await screen.findByRole('menuitem', { name: 'Desactivar' }))
     const notice = await screen.findByRole('alertdialog', { name: '¿Desactivar a Luis Quispe?' })
     await user.click(within(notice).getByRole('button', { name: 'Desactivar' }))

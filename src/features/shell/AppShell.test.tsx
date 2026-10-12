@@ -124,8 +124,8 @@ describe('AppShell', () => {
 })
 
 describe('AppShell: sesión y precargas', () => {
-  it('cerrar sesión vacía la sesión y lleva al acceso', async () => {
-    server()
+  it('cerrar sesión vacía la sesión, lleva al acceso y avisa la salida al servidor', async () => {
+    const api = server().on('post', '/auth/logout', null, 204)
     signInAs(PERMISSIONS_WAITER)
     const { user } = openShell()
 
@@ -133,6 +133,9 @@ describe('AppShell: sesión y precargas', () => {
 
     expect(await screen.findByText(ACCESS_FORM)).toBeInTheDocument()
     expect(useSession.getState().account).toBeNull()
+    await waitFor(() => {
+      expect(api.calls('post', '/auth/logout')).toHaveLength(1)
+    })
   })
 
   it('con pedidos sin enviar, pregunta antes de cerrar la sesión', async () => {
