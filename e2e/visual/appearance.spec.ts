@@ -43,6 +43,6 @@ test('VIS-16 apariencia: modo, color, letra, tamaño del texto y orden del menú
 
   await page.locator('label').filter({ hasText: 'Normal (100 %)' }).click()
   await page.getByRole('tab', { name: 'Menú' }).click()
-  await expect(page.getByRole('list', { name: /^En la barra de abajo/u })).toBeVisible()
+  await expect(page.getByRole('list', { name: /^Barra de navegación/u })).toBeVisible()
   await captureFromTop(page, 'apariencia-menu')
 })

@@ -21,7 +21,7 @@ export function MenuEditor() {
       <BottomBarPreview bar={layout.bar} hasRest={layout.rest.length > 0} />
       <MenuGroupList
         group="bar"
-        title={`En la barra de abajo, ${String(layout.bar.length)} de ${String(BOTTOM_BAR_SLOTS)}`}
+        title={`Barra de navegación (${String(layout.bar.length)} de ${String(BOTTOM_BAR_SLOTS)})`}
         description={isBarFull ? 'Está llena: quita una para poner otra.' : undefined}
         entries={layout.bar}
         emptyText="No hay ninguna. Pon una desde el botón «⋯» de una pantalla de «Más»."
