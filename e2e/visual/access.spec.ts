@@ -22,13 +22,22 @@ test('VIS-01 acceso, con errores de validación, y el de plataforma de antes que
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
 })
 
-test('VIS-15 términos de uso y política de privacidad', async ({ page }) => {
+test('VIS-15 política de privacidad', async ({ page }) => {
   deadline(60_000)
   covers('ruta:/privacidad')
 
   await page.goto('/privacidad')
-  await expect(page.getByRole('heading', { name: 'Términos de uso y política de privacidad', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Política de privacidad', level: 1 })).toBeVisible()
   await capture(page, 'privacidad')
+})
+
+test('VIS-15b términos y condiciones del servicio', async ({ page }) => {
+  deadline(60_000)
+  covers('ruta:/terminos')
+
+  await page.goto('/terminos')
+  await expect(page.getByRole('heading', { name: 'Términos y condiciones del servicio', level: 1 })).toBeVisible()
+  await capture(page, 'terminos')
 })
 
 test('VIS-02 el inicio y una ruta que no existe llevan a la pantalla de cada cuenta', async ({ page, local }) => {

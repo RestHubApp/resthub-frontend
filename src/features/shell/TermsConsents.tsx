@@ -18,7 +18,7 @@ export function TermsConsents({ account, hasAcceptedTerms, hasAcceptedData, onTe
         id="aceptar-terminos"
         checked={hasAcceptedTerms}
         onChange={onTermsChange}
-        readTo={paths.privacyTerms}
+        readTo={paths.terms}
         readLabel={`Leer los términos y condiciones (versión ${account.terms_version})`}
       >
         Acepto los términos y condiciones del servicio.
@@ -27,7 +27,7 @@ export function TermsConsents({ account, hasAcceptedTerms, hasAcceptedData, onTe
         id="aceptar-datos"
         checked={hasAcceptedData}
         onChange={onDataChange}
-        readTo={paths.privacyData}
+        readTo={paths.privacy}
         readLabel={`Leer cómo se tratan los datos personales (versión ${account.privacy_version})`}
       >
         Acepto el tratamiento de mis datos personales, conforme a la Ley N.º 29733.

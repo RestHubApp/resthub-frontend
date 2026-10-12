@@ -1,7 +1,7 @@
 {
-  "total": 454,
+  "total": 455,
   "byType": {
-    "ruta": 37,
+    "ruta": 38,
     "confirmacion": 11,
     "desplegable": 8,
     "dialogo": 26,
@@ -226,6 +226,12 @@
       "id": "ruta:/tablero/historial",
       "type": "ruta",
       "description": "Pantalla /tablero/historial",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/terminos",
+      "type": "ruta",
+      "description": "Pantalla /terminos",
       "origin": "src/services/paths.ts"
     },
     {
