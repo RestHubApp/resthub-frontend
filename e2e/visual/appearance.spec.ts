@@ -16,7 +16,7 @@ async function captureFromTop(page: Page, name: string): Promise<void> {
 
 test('VIS-16 apariencia: modo, color, letra, tamaño del texto y orden del menú', async ({ page, local }) => {
   deadline(120_000)
-  covers('ruta:/perfil/apariencia')
+  covers('ruta:/perfil/apariencia', 'pestanas:shell/appearance/AppearanceView')
 
   await openAs(page, local.owner, '/perfil/apariencia')
   await expect(page.getByRole('heading', { level: 1, name: 'Apariencia' })).toBeVisible()

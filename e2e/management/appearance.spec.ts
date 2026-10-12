@@ -24,6 +24,7 @@ async function namesIn(list: Locator): Promise<string[]> {
 test('GES-35 el encargado cambia el modo, el color, la letra y el tamaño del texto, y se quedan al recargar @mobile', async ({ page, local }) => {
   covers(
     'ruta:/perfil/apariencia',
+    'pestanas:shell/appearance/AppearanceView',
     'funcion:apariencia.cambiar-tema',
     'funcion:apariencia.cambiar-letra',
     'funcion:apariencia.restablecer',
