@@ -35,7 +35,7 @@ export function TakeOrder({ target, title, description, notice }: TakeOrderProps
     <div className="flex flex-col gap-5 pb-20 lg:pb-24">
       <header className="flex flex-col gap-1">
         <BackLink to={backPath(target)} />
-        <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-primary sm:text-3xl">
+        <h1 className="m-0 font-heading text-2xl leading-tight font-bold text-foreground sm:text-3xl">
           {title}
         </h1>
         <p className="m-0 text-muted-foreground">{description}</p>
