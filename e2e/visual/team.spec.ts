@@ -42,7 +42,7 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
     'dialogo:staff/StaffCreateDialog',
     'dialogo:staff/StaffRowDialogs#1',
     'dialogo:staff/StaffRowDialogs#2',
-    'confirmacion:staff/StaffStatusButton',
+    'confirmacion:staff/StaffRowDialogs',
     'ruta:/roles',
     'confirmacion:roles/DeleteRoleButton',
     'dialogo:roles/RoleFormDialog',
@@ -65,8 +65,10 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
   await capture(page, 'personal')
   await checkWindow(page, { button: page.getByRole('button', { name: 'Nueva cuenta' }), role: 'dialog', title: 'Nueva cuenta', name: 'dialogo-nueva-cuenta' })
   await checkWindow(page, { button: waiter.getByRole('button', { name: 'Editar' }), role: 'dialog', title: 'Editar a Mesero Prueba', name: 'dialogo-editar-cuenta' })
-  await checkWindow(page, { button: waiter.getByRole('button', { name: 'Contraseña' }), role: 'dialog', title: 'Restablecer la contraseña de Mesero Prueba', name: 'dialogo-restablecer-contrasena' })
-  await checkWindow(page, { button: waiter.getByRole('button', { name: 'Desactivar' }), role: 'alertdialog', title: '¿Desactivar a Mesero Prueba?', name: 'confirmar-desactivar-cuenta' })
+  await waiter.getByRole('button', { name: 'Más acciones de Mesero Prueba' }).click()
+  await checkWindow(page, { button: page.getByRole('menu', { name: 'Más acciones de Mesero Prueba' }).getByRole('menuitem', { name: 'Contraseña' }), role: 'dialog', title: 'Restablecer la contraseña de Mesero Prueba', name: 'dialogo-restablecer-contrasena' })
+  await waiter.getByRole('button', { name: 'Más acciones de Mesero Prueba' }).click()
+  await checkWindow(page, { button: page.getByRole('menu', { name: 'Más acciones de Mesero Prueba' }).getByRole('menuitem', { name: 'Desactivar' }), role: 'alertdialog', title: '¿Desactivar a Mesero Prueba?', name: 'confirmar-desactivar-cuenta' })
 
   await page.goto('/roles')
   await expect(page.getByRole('heading', { level: 1, name: 'Roles' })).toBeVisible()

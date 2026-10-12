@@ -24,6 +24,13 @@ async function action(user: ReturnType<typeof open>['user'], button: string, tit
   return screen.findByRole('dialog', { name: title })
 }
 
+// Merma, ajuste y edición están tras el menú «⋯» de la fila.
+async function menuAction(user: ReturnType<typeof open>['user'], item: string, title: string) {
+  await user.click(await screen.findByRole('button', { name: 'Más acciones de Limón' }))
+  await user.click(await screen.findByRole('menuitem', { name: item }))
+  return screen.findByRole('dialog', { name: title })
+}
+
 describe('alta y edición de insumos', () => {
   it('crea un insumo con el mínimo en kilos y el costo por kilo, enviados en gramos', async () => {
     const { api, user } = open()
@@ -58,7 +65,7 @@ describe('alta y edición de insumos', () => {
   it('editar parte de los datos en kilos, no deja cambiar la unidad y muestra el error del servidor', async () => {
     const { api, user } = open()
     api.on('patch', `${INGREDIENTS}/1`, new ErrorResponse(409, 'Ya hay un insumo con ese nombre.'))
-    const window = await action(user, 'Editar Limón', 'Editar: Limón')
+    const window = await menuAction(user, 'Editar', 'Editar: Limón')
 
     expect(within(window).getByLabelText(MIN)).toHaveValue('2')
     expect(within(window).getByText(/Se mide en/u)).toHaveTextContent('Se mide en gramos')
@@ -113,7 +120,7 @@ describe('compras, mermas y ajustes', () => {
   it('una merma exige motivo, avisa si deja el stock bajo el mínimo y se envía en gramos', async () => {
     const { api, user } = open()
     api.on('post', '/inventory/waste', stockChange(ingredient({ stock: '1000' })))
-    const window = await action(user, 'Merma de Limón', 'Registrar merma: Limón')
+    const window = await menuAction(user, 'Merma', 'Registrar merma: Limón')
 
     await user.type(within(window).getByLabelText('Cantidad perdida'), '4000')
     expect(within(window).getByText(/todavía bajo el mínimo/u)).toBeInTheDocument()
@@ -129,7 +136,7 @@ describe('compras, mermas y ajustes', () => {
   it('un conteo envía lo contado y el servidor calcula la diferencia', async () => {
     const { api, user } = open()
     api.on('post', SETTINGS, stockChange(ingredient({ stock: '3000' }), { kind: 'adjustment', quantity: '-2000' }))
-    const window = await action(user, 'Ajuste de Limón', 'Ajustar stock: Limón')
+    const window = await menuAction(user, 'Ajuste', 'Ajustar stock: Limón')
 
     await user.type(within(window).getByLabelText('Stock contado'), '3')
     expect(within(window).getByTestId('stock-preview')).toHaveTextContent('quedará en 3 kg')
@@ -142,7 +149,7 @@ describe('compras, mermas y ajustes', () => {
   it('una diferencia que sobra se suma; si falla, el error queda en el formulario', async () => {
     const { api, user } = open()
     api.on('post', SETTINGS, new ErrorResponse(422, 'El motivo es muy corto.'))
-    const window = await action(user, 'Ajuste de Limón', 'Ajustar stock: Limón')
+    const window = await menuAction(user, 'Ajuste', 'Ajustar stock: Limón')
 
     await user.click(within(window).getByLabelText('Sé cuánto sobra o falta'))
     await user.selectOptions(within(window).getByLabelText('La diferencia'), 'add')

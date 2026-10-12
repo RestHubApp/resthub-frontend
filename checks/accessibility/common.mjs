@@ -199,6 +199,8 @@ async function runStep(page, step) {
     if (step.optional && !(await target.waitFor({ state: 'visible', timeout: 2_000 }).then(() => true, () => false))) return undefined
     return target.click()
   }
+  // Un elemento del menú «⋯» abierto (los menús salen en un portal, fuera de la fila).
+  if (step.menuitem) return first(page.getByRole('menuitem', { name: step.menuitem, exact: true })).click()
   if (step.tab) return first(page.getByRole('tab', { name: step.tab, exact: typeof step.tab === 'string' })).click()
   // Los radios de las fichas son sr-only: fuera de la ventana para el puntero, pero con foco y clic de teclado.
   if (step.option) return page.getByRole('radio', { name: step.option }).first().evaluate((radio) => { radio.click() })

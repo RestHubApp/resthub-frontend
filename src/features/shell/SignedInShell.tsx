@@ -42,7 +42,7 @@ export function SignedInShell({ account, screens }: SignedInShellProps) {
           <main
             id="contenido"
             tabIndex={-1}
-            className="mx-auto w-full max-w-[1100px] flex-1 px-4 pt-6 pb-28 outline-none sm:px-6 lg:pb-20"
+            className="mx-auto w-full max-w-app flex-1 px-4 pt-6 pb-28 outline-none sm:px-6 lg:pb-20"
           >
             <Outlet />
           </main>

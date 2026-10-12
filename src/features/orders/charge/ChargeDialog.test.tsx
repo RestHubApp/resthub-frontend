@@ -74,6 +74,7 @@ describe('ChargeDialog: todo junto', () => {
   it('la propina rápida se suma a lo que se cobra y viaja aparte', async () => {
     const { api, user } = charge()
 
+    await user.click(await screen.findByRole('button', { name: /Más opciones/u }))
     const quick = within(await screen.findByRole('group', { name: 'Propinas rápidas' }))
     await user.click(quick.getByRole('button', { name: /^S\/\s5\.00$/u }))
     await user.click(within(screen.getByRole('group', { name: 'Montos rápidos' })).getByRole('button', { name: 'Monto exacto' }))

@@ -29,6 +29,7 @@ export function BoardContent({ active, visible, now, flagFor, onCharge, onCancel
       ) : null}
       {active.isSuccess ? (
         <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {visible.length === 0 ? <p className="m-0 text-center text-muted-foreground md:hidden">Sin pedidos en curso.</p> : null}
           {COLUMNS.map((column) => (
             <BoardColumn
               key={column}

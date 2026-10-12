@@ -16,7 +16,7 @@ export function HeatmapHeader({ hours, everyHours }: HeatmapHeaderProps) {
         <span className="sr-only">Día</span>
       </span>
       {hours.map((hour, index) => (
-        <span key={hour} role="columnheader" className="text-center text-[11px] leading-5 text-muted-foreground tabular-nums">
+        <span key={hour} role="columnheader" className="text-center text-2xs leading-5 text-muted-foreground tabular-nums">
           <span aria-hidden="true">{index % everyHours === 0 ? String(hour) : ''}</span>
           <span className="sr-only">{`${String(hour)} h`}</span>
         </span>

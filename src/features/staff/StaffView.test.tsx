@@ -92,8 +92,7 @@ describe('StaffView', () => {
     api.on('patch', '/staff/7', (request: Request) => save({ ...firstOf(TEAM), ...(request.body as object) }))
     const own = await rowOf(/Ana Torres/u)
 
-    expect(within(own).queryByRole('button', { name: 'Contraseña' })).not.toBeInTheDocument()
-    expect(within(own).getByRole('button', { name: 'Desactivar' })).toBeDisabled()
+    expect(within(own).queryByRole('button', { name: /Más acciones/u })).not.toBeInTheDocument()
     await user.click(within(own).getByRole('button', { name: 'Editar' }))
     const window = await screen.findByRole('dialog', { name: 'Editar a Ana Torres' })
     expect(await within(window).findByText('No puedes cambiar el rol de tu propia cuenta.')).toBeInTheDocument()
@@ -123,7 +122,8 @@ describe('StaffView: cambios sobre otras cuentas', () => {
     const { api, user } = openStaff()
     api.on('post', '/staff/8/password', null, 204)
 
-    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Contraseña' }))
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Más acciones de Luis Quispe' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Contraseña' }))
     const window = await screen.findByRole('dialog', { name: 'Restablecer la contraseña de Luis Quispe' })
     await user.type(within(window).getByLabelText('Nueva contraseña'), OTHER_TEST_SECRET)
     await user.click(within(window).getByRole('button', { name: 'Restablecer' }))
@@ -137,10 +137,12 @@ describe('StaffView: cambios sobre otras cuentas', () => {
     api.on('patch', '/staff/8/status', () => save(member({ is_active: false })))
     api.on('patch', '/staff/9/status', () => save({ ...(TEAM.at(2) ?? firstOf(TEAM)), is_active: true }))
 
-    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Desactivar' }))
+    await user.click(within(await rowOf(/Luis Quispe/u)).getByRole('button', { name: 'Más acciones de Luis Quispe' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Desactivar' }))
     const notice = await screen.findByRole('alertdialog', { name: '¿Desactivar a Luis Quispe?' })
     await user.click(within(notice).getByRole('button', { name: 'Desactivar' }))
-    await user.click(within(await rowOf(/Rosa Mamani/u)).getByRole('button', { name: 'Activar' }))
+    await user.click(within(await rowOf(/Rosa Mamani/u)).getByRole('button', { name: 'Más acciones de Rosa Mamani' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Activar' }))
 
     expect(api.calls('patch', '/staff/8/status')[0]?.body).toEqual({ is_active: false })
     expect(api.calls('patch', '/staff/9/status')[0]?.body).toEqual({ is_active: true })

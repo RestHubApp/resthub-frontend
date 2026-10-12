@@ -22,7 +22,7 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
     'dialogo:staff/StaffCreateDialog',
     'dialogo:staff/StaffRowDialogs#1',
     'dialogo:staff/StaffRowDialogs#2',
-    'confirmacion:staff/StaffStatusButton',
+    'confirmacion:staff/StaffRowDialogs',
     'funcion:personal.crear',
     'funcion:personal.correo-repetido',
     'funcion:personal.editar',
@@ -66,7 +66,8 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
   await expect(edit).toBeHidden()
   await expect(row).toContainText('Cocinero')
 
-  await row.getByRole('button', { name: 'Contraseña' }).click()
+  await row.getByRole('button', { name: 'Más acciones de Lucía Ramos' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Lucía Ramos' }).getByRole('menuitem', { name: 'Contraseña' }).click()
   const password = page.getByRole('dialog', { name: 'Restablecer la contraseña de Lucía Ramos' })
   await password.getByLabel('Nueva contraseña').fill('corta')
   await password.getByRole('button', { name: 'Restablecer' }).click()
@@ -78,20 +79,21 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
   expect(await tryAccess(local.http, email, OTHER_SECRET)).toBe(200)
 
   // Desactivar se confirma: desde ese momento no entra.
-  await row.getByRole('button', { name: 'Desactivar' }).click()
+  await row.getByRole('button', { name: 'Más acciones de Lucía Ramos' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Lucía Ramos' }).getByRole('menuitem', { name: 'Desactivar' }).click()
   const confirm = page.getByRole('alertdialog', { name: '¿Desactivar a Lucía Ramos?' })
   await evidence(page, 'ges-15-2-desactivar')
   await confirm.getByRole('button', { name: 'Desactivar' }).click()
   await expect(row).toContainText('Inactiva')
   expect(await tryAccess(local.http, email, OTHER_SECRET)).not.toBe(200)
-  await row.getByRole('button', { name: 'Activar' }).click()
+  await row.getByRole('button', { name: 'Más acciones de Lucía Ramos' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Lucía Ramos' }).getByRole('menuitem', { name: 'Activar' }).click()
   await expect(row).toContainText('Activa')
   await expect.poll(() => tryAccess(local.http, email, OTHER_SECRET)).toBe(200)
 
   // La cuenta propia: el rol no se cambia y no se desactiva ni restablece acá.
   const own = page.getByRole('row', { name: /Encargada Prueba \(tú\)/u })
-  await expect(own.getByRole('button', { name: 'Desactivar' })).toBeDisabled()
-  await expect(own.getByRole('button', { name: 'Contraseña' })).toHaveCount(0)
+  await expect(own.getByRole('button', { name: /Más acciones/u })).toHaveCount(0)
   await own.getByRole('button', { name: 'Editar' }).click()
   const mia = page.getByRole('dialog', { name: 'Editar a Encargada Prueba' })
   await expect(mia.getByText('No puedes cambiar el rol de tu propia cuenta.')).toBeVisible()

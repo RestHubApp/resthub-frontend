@@ -1,6 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-import { useNotifications } from '@/store/notifications'
+import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 import { type IngredientResult, saveIngredient } from './ingredientCache'
 
 interface InventoryChange<TVars, TResult extends IngredientResult> {
@@ -24,15 +22,10 @@ export function useInventoryChange<TVars, TResult extends IngredientResult>({
   success,
   onDone,
 }: InventoryChange<TVars, TResult>) {
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-
-  return useMutation({
+  return useNotifiedMutation({
     mutationFn: send,
-    onSuccess: (result) => {
-      saveIngredient(queryClient, result)
-      push({ tone: 'info', message: success(result) })
-      onDone()
-    },
+    success,
+    updateCache: saveIngredient,
+    onSuccess: onDone,
   })
 }

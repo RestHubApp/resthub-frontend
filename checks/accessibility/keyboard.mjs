@@ -42,13 +42,19 @@ async function traverse(browser, id, view, tabs) {
   return { id, view, steps }
 }
 
-async function dialog(browser, id, trigger, view) {
+// `item`: el diálogo se abre desde un elemento del menú «⋯» cuyo botón es `trigger`; el foco debe volver a ese botón.
+async function dialog(browser, id, trigger, view, item) {
   const context = await browser.newContext(contextOf(view))
   const e = status(id)
   const page = await openStatus(browser, context, { ...e, class: 'ruta', wait: undefined, steps: [] })
-  const button = page.getByRole('button', { name: trigger, exact: true }).first()
+  const button = page.getByRole('button', { name: trigger, exact: typeof trigger === 'string' }).first()
   await button.focus()
   await page.keyboard.press('Enter')
+  if (item !== undefined) {
+    const entry = page.getByRole('menuitem', { name: item, exact: true }).first()
+    await entry.focus()
+    await page.keyboard.press('Enter')
+  }
   await page.waitForSelector('[role="dialog"],[role="alertdialog"]', { state: 'visible' })
   await page.waitForTimeout(400)
   const onOpen = await focus(page)
@@ -71,7 +77,7 @@ async function dialog(browser, id, trigger, view) {
     focusTrapped: path.every((p) => p.dialogInside),
     ringVisible: path.filter((p) => !p.visible).map((p) => p.name),
     closedWithEscape: closed,
-    focusReturned: onClose.name.includes(trigger),
+    focusReturned: onClose.name.includes(typeof trigger === 'string' ? trigger : 'Más acciones de'),
     onClose,
   }
 }
@@ -88,7 +94,7 @@ const result = {
     await dialog(browserInstance, 'o-cobro', 'Cobrar', 'desktop'),
     await dialog(browserInstance, 'o-nueva-mesa', 'Nueva mesa', 'desktop'),
     await dialog(browserInstance, 'o-llevar', 'Para llevar / Delivery', 'mobile'),
-    await dialog(browserInstance, 'o-desactivar-cuenta', 'Desactivar', 'desktop'),
+    await dialog(browserInstance, 'o-desactivar-cuenta', /^Más acciones de/, 'desktop', 'Desactivar'),
   ],
 }
 await browserInstance.close()

@@ -2,9 +2,8 @@ import { Link } from 'react-router'
 
 import type { OrderResponse } from '@/api/types'
 import { AllergyAlert } from '@/features/orders/AllergyAlert'
-import { ItemNote } from '@/features/orders/ItemNote'
 import { allergyIn, type FlagFor } from '@/features/orders/noteFlags'
-import { OrderItemLine } from '@/features/orders/OrderItemLine'
+import { OrderItemList } from '@/features/orders/OrderItemList'
 import { orderPlace } from '@/features/orders/orderLabels'
 import { BoardCardActions } from './BoardCardActions'
 import { ElapsedTime } from '@/features/orders/ElapsedTime'
@@ -57,12 +56,7 @@ export function BoardCard({ order, now, flagFor, onCharge, onCancel }: BoardCard
           {order.waiter_name} · {formatMoney(order.total)}
         </p>
       </div>
-      <ul className="m-0 flex list-none flex-col gap-1.5 border-t px-0 pt-3 pb-0 text-sm">
-        {order.items.map((item) => (
-          <OrderItemLine key={item.id} item={item} flag={flagFor(order.id, item.id)} />
-        ))}
-      </ul>
-      <ItemNote note={order.notes} flag={flagFor(order.id, null)} label="Nota del pedido" />
+      <OrderItemList order={order} flagFor={flagFor} size="compact" />
       <BoardCardActions order={order} onCharge={onCharge} onCancel={onCancel} />
     </article>
   )

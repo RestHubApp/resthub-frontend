@@ -21,8 +21,8 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
   covers(
     'ruta:/menu',
     'dialogo:menu/NewMenuDialogs#2',
-    'dialogo:menu/MenuItemRow',
-    'confirmacion:menu/MenuItemStatusButton',
+    'dialogo:menu/MenuItemDialogs',
+    'confirmacion:menu/MenuItemDialogs',
     'funcion:menu.nuevo-plato',
     'funcion:menu.agregar-plato-en-categoria',
     'funcion:menu.opciones-del-plato',
@@ -88,24 +88,28 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
 
   // Sacar de la carta se confirma; volver a la carta, no.
   const aji = page.getByRole('listitem').filter({ hasText: 'Ají de gallina' })
-  await aji.getByRole('button', { name: 'Desactivar' }).click()
+  await aji.getByRole('button', { name: 'Más acciones de Ají de gallina' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Ají de gallina' }).getByRole('menuitem', { name: 'Desactivar' }).click()
   const confirm = page.getByRole('alertdialog', { name: '¿Sacar Ají de gallina de la carta?' })
   await confirm.getByRole('button', { name: 'Cancelar' }).click()
   await expect(confirm).toBeHidden()
   await expect(aji.getByText('Fuera de la carta')).toBeHidden()
-  await aji.getByRole('button', { name: 'Desactivar' }).click()
+  await aji.getByRole('button', { name: 'Más acciones de Ají de gallina' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Ají de gallina' }).getByRole('menuitem', { name: 'Desactivar' }).click()
   await evidence(page, 'ges-12-3-confirmar-desactivar')
   await confirm.getByRole('button', { name: 'Desactivar' }).click()
   await expect(aji.getByText('Fuera de la carta')).toBeVisible()
   await expect(aji.getByRole('switch')).toHaveCount(0)
   await expect(summary).toContainText('Hoy: 5 de 5 platos disponibles')
-  await aji.getByRole('button', { name: 'Activar' }).click()
+  await aji.getByRole('button', { name: 'Más acciones de Ají de gallina' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Ají de gallina' }).getByRole('menuitem', { name: 'Activar' }).click()
   await expect(aji.getByText('Fuera de la carta')).toBeHidden()
 
   // El orden es el que ve el mesero.
   const funds = page.getByRole('region', { name: 'Fondos' })
-  await expect(funds.getByRole('button', { name: 'Subir Lomo saltado' })).toHaveAttribute('aria-disabled', 'true')
-  await funds.getByRole('button', { name: 'Bajar Lomo saltado' }).click()
+  await funds.getByRole('button', { name: 'Más acciones de Lomo saltado' }).click()
+  await expect(page.getByRole('menu', { name: 'Más acciones de Lomo saltado' }).getByRole('menuitem', { name: 'Subir' })).toHaveAttribute('aria-disabled', 'true')
+  await page.getByRole('menu', { name: 'Más acciones de Lomo saltado' }).getByRole('menuitem', { name: 'Bajar' }).click()
   await expect(funds.getByRole('heading', { level: 3 }).first()).toHaveText('Ají de gallina')
   await expect.poll(async () => (await menu(local)).find((c) => c.name === 'Fondos')?.items.map((p) => p.name)).toEqual([
     'Ají de gallina',
@@ -117,9 +121,9 @@ test('GES-12 el encargado crea un plato con opciones, lo edita, lo marca agotado
 test('GES-13 el encargado crea, renombra, ordena, desactiva, activa y elimina categorías', async ({ page, local }) => {
   covers(
     'dialogo:menu/NewMenuDialogs#1',
-    'dialogo:menu/CategoryHeader',
-    'confirmacion:menu/CategoryStatusButton',
-    'confirmacion:menu/DeleteCategoryButton',
+    'dialogo:menu/CategoryDialogs',
+    'confirmacion:menu/CategoryDialogs#1',
+    'confirmacion:menu/CategoryDialogs#2',
     'funcion:menu.nueva-categoria',
     'funcion:menu.editar-categoria',
     'funcion:menu.ordenar-categorias',
@@ -148,30 +152,37 @@ test('GES-13 el encargado crea, renombra, ordena, desactiva, activa y elimina ca
 
   // La última categoría sube un lugar.
   const sweets = page.getByRole('region', { name: 'Dulces' })
-  await expect(sweets.getByRole('button', { name: 'Bajar la categoría Dulces' })).toHaveAttribute('aria-disabled', 'true')
-  await sweets.getByRole('button', { name: 'Subir la categoría Dulces' }).click()
+  await sweets.getByRole('button', { name: 'Más acciones de la categoría Dulces' }).click()
+  await expect(page.getByRole('menu', { name: 'Más acciones de la categoría Dulces' }).getByRole('menuitem', { name: 'Bajar' })).toHaveAttribute('aria-disabled', 'true')
+  await page.getByRole('menu', { name: 'Más acciones de la categoría Dulces' }).getByRole('menuitem', { name: 'Subir' }).click()
   await expect(page.getByRole('heading', { level: 2 }).nth(1)).toHaveText('Dulces')
   await expect.poll(async () => (await menu(local)).map((c) => c.name)).toEqual(['Fondos', 'Dulces', 'Bebidas'])
 
   // Desactivar se confirma y no borra nada.
   const drinks = page.getByRole('region', { name: 'Bebidas' })
-  await drinks.getByRole('button', { name: 'Desactivar la categoría Bebidas' }).click()
+  await drinks.getByRole('button', { name: 'Más acciones de la categoría Bebidas' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de la categoría Bebidas' }).getByRole('menuitem', { name: 'Desactivar' }).click()
   const confirm = page.getByRole('alertdialog', { name: '¿Desactivar Bebidas?' })
   await expect(confirm).toContainText('No se borra nada')
   await confirm.getByRole('button', { name: 'Desactivar' }).click()
   await expect(drinks.getByText('Inactiva')).toBeVisible()
   await expect(page.getByRole('status').filter({ hasText: 'Hoy:' })).toContainText('Hoy: 3 de 3 platos disponibles')
   await evidence(page, 'ges-13-2-categoria-inactiva')
-  await drinks.getByRole('button', { name: 'Activar la categoría Bebidas' }).click()
+  await drinks.getByRole('button', { name: 'Más acciones de la categoría Bebidas' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de la categoría Bebidas' }).getByRole('menuitem', { name: 'Activar' }).click()
   await expect(drinks.getByText('Inactiva')).toBeHidden()
 
   // Solo una categoría vacía se elimina; una con platos no lo ofrece.
-  await expect(drinks.getByRole('button', { name: 'Eliminar la categoría Bebidas' })).toHaveCount(0)
-  await sweets.getByRole('button', { name: 'Eliminar la categoría Dulces' }).click()
+  await drinks.getByRole('button', { name: 'Más acciones de la categoría Bebidas' }).click()
+  await expect(page.getByRole('menu', { name: 'Más acciones de la categoría Bebidas' }).getByRole('menuitem', { name: 'Eliminar' })).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await sweets.getByRole('button', { name: 'Más acciones de la categoría Dulces' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de la categoría Dulces' }).getByRole('menuitem', { name: 'Eliminar' }).click()
   const remove = page.getByRole('alertdialog', { name: '¿Eliminar Dulces?' })
   await remove.getByRole('button', { name: 'Cancelar' }).click()
   await expect(sweets).toBeVisible()
-  await sweets.getByRole('button', { name: 'Eliminar la categoría Dulces' }).click()
+  await sweets.getByRole('button', { name: 'Más acciones de la categoría Dulces' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de la categoría Dulces' }).getByRole('menuitem', { name: 'Eliminar' }).click()
   await remove.getByRole('button', { name: 'Eliminar' }).click()
   await expect(notice(page, 'Categoría Dulces eliminada.')).toBeVisible()
   await expect(sweets).toBeHidden()

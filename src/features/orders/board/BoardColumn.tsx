@@ -11,10 +11,16 @@ interface BoardColumnProps {
   readonly onCancel: (order: OrderResponse) => void
 }
 
-/** Una columna del tablero: un estado y sus pedidos, del mas antiguo al mas nuevo. */
+/**
+ * Una columna del tablero: un estado y sus pedidos, del mas antiguo al mas nuevo.
+ * En el celular una columna vacia no se muestra: no tapa los pedidos reales.
+ */
 export function BoardColumn({ title, orders, now, flagFor, onCharge, onCancel }: BoardColumnProps) {
   return (
-    <section aria-label={`${title}: ${String(orders.length)}`} className="flex min-w-0 flex-col gap-3 rounded-2xl bg-muted/60 p-3">
+    <section
+      aria-label={`${title}: ${String(orders.length)}`}
+      className={`min-w-0 flex-col gap-3 rounded-2xl bg-muted/60 p-3 ${orders.length === 0 ? 'hidden md:flex' : 'flex'}`}
+    >
       <h2 className="m-0 flex items-center justify-between px-1 text-base font-semibold">
         <span>{title}</span>
         <span className="rounded-full bg-card px-2.5 py-0.5 text-sm tabular-nums ring-1 ring-foreground/10">{orders.length}</span>

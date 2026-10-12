@@ -525,8 +525,8 @@ export default tseslint.config(
               allow: [
                 { to: { element: { type: 'components' } } },
                 { to: { element: { type: 'hooks' } } },
-                // El texto de un error del API (`errorMessage`) lo usa `ErrorMessage`.
-                { to: { element: { type: 'services' } } },
+                // Solo el texto de un error del API (`errorMessage`), que usa `ErrorMessage`.
+                { to: { element: { type: 'services' }, file: { path: 'src/services/apiError.ts' } } },
               ],
             },
             {

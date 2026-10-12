@@ -1,10 +1,12 @@
 import type { CashSummary } from '@/api/types'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatInteger, formatMoney } from '@/services/format'
-import { CASH_CELL, CASH_HEADER } from './cashTableStyles'
 
 interface CashMethodTableProps {
   readonly rows: CashSummary['by_method']
 }
+
+const NUMBER = 'text-right tabular-nums'
 
 /** Lo cobrado en el turno por cada medio de pago; sin cobros, un aviso. */
 export function CashMethodTable({ rows }: CashMethodTableProps) {
@@ -13,26 +15,26 @@ export function CashMethodTable({ rows }: CashMethodTableProps) {
   }
 
   return (
-    <table className="w-full border-collapse text-sm">
+    <Table label="Por medio de pago">
       <caption className="pb-2 text-left text-sm font-medium">Por medio de pago</caption>
-      <thead>
-        <tr className="border-b">
-          <th scope="col" className={CASH_HEADER}>Medio</th>
-          <th scope="col" className={`${CASH_HEADER} text-right`}>Pagos</th>
-          <th scope="col" className={`${CASH_HEADER} text-right`}>Cobrado</th>
-          <th scope="col" className={`${CASH_HEADER} text-right`}>Propinas</th>
-        </tr>
-      </thead>
-      <tbody>
+      <TableHeader>
+        <TableRow>
+          <TableHead scope="col">Medio</TableHead>
+          <TableHead scope="col" className="text-right">Pagos</TableHead>
+          <TableHead scope="col" className="text-right">Cobrado</TableHead>
+          <TableHead scope="col" className="text-right">Propinas</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {rows.map((row) => (
-          <tr key={row.method} className="border-b last:border-0">
-            <th scope="row" className="px-3 py-2 text-left font-normal">{row.method_label}</th>
-            <td className={CASH_CELL}>{formatInteger(row.payments)}</td>
-            <td className={CASH_CELL}>{formatMoney(row.amount)}</td>
-            <td className={CASH_CELL}>{formatMoney(row.tips)}</td>
-          </tr>
+          <TableRow key={row.method}>
+            <TableHead scope="row" className="font-normal">{row.method_label}</TableHead>
+            <TableCell className={NUMBER}>{formatInteger(row.payments)}</TableCell>
+            <TableCell className={NUMBER}>{formatMoney(row.amount)}</TableCell>
+            <TableCell className={NUMBER}>{formatMoney(row.tips)}</TableCell>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   )
 }

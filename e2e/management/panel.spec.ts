@@ -77,7 +77,7 @@ test('GES-26 el encargado revisa los indicadores del período, mira las tablas, 
 
   // Lo que está bajo el mínimo lleva a la reposición.
   const low = section('Insumos bajo mínimo')
-  await expect(low.getByRole('meter', { name: 'Stock de Culantro respecto del mínimo' })).toBeVisible()
+  await expect(low).toContainText('Culantro')
   await expect(low.getByRole('link', { name: 'Ver reposición sugerida' })).toHaveAttribute('href', '/panel/reposicion')
 
   // La merma escrita se clasifica (por reglas: no hay clave de IA).

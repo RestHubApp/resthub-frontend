@@ -83,7 +83,8 @@ test('SAL-13 el encargado cancela un pedido con su motivo y la mesa queda libre'
   covers('dialogo:orders/CancelOrderDialog', 'funcion:pedido.cancelar')
   const order = await orderInTable(local, local.table('3'), [{ dish: local.dish('Ceviche clásico') }])
   await openAs(page, local.owner, `/pedidos/${String(order.id)}`)
-  await page.getByRole('button', { name: 'Cancelar pedido' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Cancelar pedido' }).click()
   const dialog = page.getByRole('dialog', { name: '¿Cancelar el pedido #1?' })
   await expect(dialog).toContainText('Mesa 3. La mesa queda libre')
   await dialog.getByRole('button', { name: 'Cancelar pedido' }).click()
@@ -92,13 +93,14 @@ test('SAL-13 el encargado cancela un pedido con su motivo y la mesa queda libre'
   await expect(dialog).toBeHidden()
   expect((await readOrder(local, id(order))).status).toBe('in_kitchen')
 
-  await page.getByRole('button', { name: 'Cancelar pedido' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Cancelar pedido' }).click()
   await dialog.getByRole('textbox', { name: 'Motivo' }).fill('El cliente se fue')
   await evidence(page, 'sal-13-1-motivo')
   await dialog.getByRole('button', { name: 'Cancelar pedido' }).click()
   await expect(notice(page, 'Pedido #1 cancelado.')).toBeVisible()
   await expect(page.getByText(/Cancelado el .*Motivo: El cliente se fue/u)).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Cancelar pedido' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Más acciones del pedido' })).toHaveCount(0)
   await evidence(page, 'sal-13-2-cancelado')
   expect(await readOrder(local, id(order))).toMatchObject({ status: 'cancelled', cancel_reason: 'El cliente se fue' })
   await page.goto('/pedidos')
@@ -110,7 +112,9 @@ test('SAL-14 el mesero no ve cómo cancelar un pedido @mobile', async ({ page, l
   const order = await orderInTable(local, local.table('1'), [{ dish: local.dish('Chicha morada') }])
   await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
   await expect(page.getByRole('link', { name: 'Agregar platos' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Cancelar pedido' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await expect(page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Imprimir precuenta' })).toBeVisible()
+  await expect(page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Cancelar pedido' })).toHaveCount(0)
 })
 
 test('SAL-15 el mesero cambia el pedido de mesa y une otra mesa suya @mobile', async ({ page, local }) => {
@@ -119,7 +123,8 @@ test('SAL-15 el mesero cambia el pedido de mesa y une otra mesa suya @mobile', a
   await orderInTable(local, local.table('2'), [{ dish: local.dish('Chicha morada'), quantity: 2 }])
   await openAs(page, local.waiter, `/pedidos/${String(first.id)}`)
 
-  await page.getByRole('button', { name: 'Cambiar de mesa' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Cambiar de mesa' }).click()
   const move = page.getByRole('dialog', { name: 'Cambiar de mesa' })
   await expect(move.getByRole('button', { name: /^Mesa/u })).toHaveText([/Mesa 3/u, /Mesa 4/u])
   await evidence(page, 'sal-15-1-mesas-libres')
@@ -128,7 +133,8 @@ test('SAL-15 el mesero cambia el pedido de mesa y une otra mesa suya @mobile', a
   await expect(move).toBeHidden()
   await expect(page.getByText('Mesa 3', { exact: true })).toBeVisible()
 
-  await page.getByRole('button', { name: 'Unir otra mesa' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Unir otra mesa' }).click()
   const join = page.getByRole('dialog', { name: 'Unir otra mesa a esta' })
   await expect(join.getByRole('button', { name: /Mesa 2/u })).toContainText(soles('16.00'))
   await join.getByRole('button', { name: /Mesa 2/u }).click()
@@ -137,7 +143,8 @@ test('SAL-15 el mesero cambia el pedido de mesa y une otra mesa suya @mobile', a
   await evidence(page, 'sal-15-2-unidas')
 
   // Ya no quedan otras mesas con pedido para unir.
-  await page.getByRole('button', { name: 'Unir otra mesa' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Unir otra mesa' }).click()
   await expect(join.getByText('No tienes otras mesas con pedido')).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(join).toBeHidden()
@@ -157,7 +164,8 @@ test('SAL-16 el mesero imprime la comanda sin precios y la precuenta @mobile', a
     { dish: local.dish('Inca Kola 500 ml'), quantity: 2 },
   ])
   await openAs(page, local.waiter, `/pedidos/${String(order.id)}`)
-  await page.getByRole('link', { name: 'Imprimir comanda' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Imprimir comanda' }).click()
   const sheet = page.locator('#hoja-impresa')
   await expect(sheet).toContainText('Comanda')
   await expect(sheet).toContainText('#1')
@@ -172,7 +180,8 @@ test('SAL-16 el mesero imprime la comanda sin precios y la precuenta @mobile', a
   await evidence(page, 'sal-16-1-comanda')
 
   await page.getByRole('link', { name: 'Pedido', exact: true }).click()
-  await page.getByRole('link', { name: 'Imprimir precuenta' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido' }).click()
+  await page.getByRole('menu', { name: 'Más acciones del pedido' }).getByRole('menuitem', { name: 'Imprimir precuenta' }).click()
   await expect(sheet).toContainText('Precuenta')
   await expect(sheet).toContainText('Restaurante E2E')
   await expect(sheet).toContainText(/Total\s*S\/\s*44\.00/u)

@@ -1,12 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
 import { currentUserQueryKey } from '@/api/auth'
 import { rolesQuery, rolesQueryKey } from '@/api/roles'
 import { staffQueryKey } from '@/api/staff'
 import type { Role } from '@/api/types'
-import { errorMessage } from '@/services/apiError'
-import { useNotifications } from '@/store/notifications'
 import { staffOf, useSession } from '@/store/session'
+import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 
 interface RoleMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>
@@ -39,27 +36,18 @@ export function useRoleMutation<TVariables, TResult>({
   onSuccess,
   inlineError = false,
 }: RoleMutationOptions<TVariables, TResult>) {
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
   const ownId = useSession((state) => staffOf(state.account)?.user.role_id)
+  const isOwnRole = roleId !== undefined && roleId === ownId
 
-  return useMutation({
+  return useNotifiedMutation({
     mutationFn,
-    onSuccess: (result) => {
+    success,
+    failure: inlineError ? undefined : failure,
+    updateCache: (queryClient, result) => {
       queryClient.setQueryData(rolesQuery().queryKey, (roles) => roles && updateCache(roles, result))
-      void queryClient.invalidateQueries({ queryKey: rolesQueryKey })
-      void queryClient.invalidateQueries({ queryKey: staffQueryKey })
-      if (roleId !== undefined && roleId === ownId) {
-        void queryClient.invalidateQueries({ queryKey: currentUserQueryKey })
-      }
-      push({ tone: 'info', message: success(result) })
-      onSuccess?.()
     },
-    onError: (error) => {
-      void queryClient.invalidateQueries({ queryKey: rolesQueryKey })
-      if (!inlineError) {
-        push({ tone: 'warning', message: errorMessage(error, failure) })
-      }
-    },
+    invalidate: isOwnRole ? [rolesQueryKey, staffQueryKey, currentUserQueryKey] : [rolesQueryKey, staffQueryKey],
+    invalidateOnError: [rolesQueryKey],
+    ...(onSuccess === undefined ? {} : { onSuccess: () => { onSuccess() } }),
   })
 }

@@ -121,12 +121,14 @@ describe('InventoryView: tabla de insumos', () => {
     expect(screen.getByText('Ningún insumo coincide con la búsqueda.')).toBeInTheDocument()
   })
 
-  it('cada fila ofrece compra, merma, ajuste y edición con el nombre del insumo', async () => {
+  it('cada fila ofrece la compra a la vista y merma, ajuste y edición en su menú, con el nombre del insumo', async () => {
     const { user } = open()
-    await user.click(await screen.findByRole('button', { name: 'Merma de Limón' }))
+    await user.click(await screen.findByRole('button', { name: 'Más acciones de Limón' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Merma' }))
     expect(await screen.findByRole('dialog', { name: 'Registrar merma: Limón' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Cancelar' }))
-    await user.click(screen.getByRole('button', { name: 'Ajuste de Limón' }))
+    await user.click(screen.getByRole('button', { name: 'Más acciones de Limón' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Ajuste' }))
     expect(await screen.findByRole('dialog', { name: 'Ajustar stock: Limón' })).toBeInTheDocument()
   })
 

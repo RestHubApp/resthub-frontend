@@ -13,8 +13,11 @@ import {
 } from './ui/alert-dialog'
 
 interface ConfirmDialogProps {
-  /** El boton que abre la confirmacion. */
-  readonly trigger: ReactNode
+  /** El boton que abre la confirmacion; sin el, el dialogo se controla con `open`. */
+  readonly trigger?: ReactNode
+  /** Abre o cierra la confirmacion desde afuera (p. ej. desde un menu «⋯»). */
+  readonly open?: boolean | undefined
+  readonly onOpenChange?: ((open: boolean) => void) | undefined
   readonly title: string
   readonly description: ReactNode
   readonly confirmLabel: string
@@ -31,15 +34,22 @@ interface ConfirmDialogProps {
  */
 export function ConfirmDialog({
   trigger,
+  open,
+  onOpenChange,
   title,
   description,
   confirmLabel,
   confirmVariant = 'destructive',
   onConfirm,
 }: ConfirmDialogProps) {
+  const controlled = {
+    ...(open === undefined ? {} : { open }),
+    ...(onOpenChange === undefined ? {} : { onOpenChange }),
+  }
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+    <AlertDialog {...controlled}>
+      {trigger === undefined ? null : <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

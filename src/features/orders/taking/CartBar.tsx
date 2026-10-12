@@ -27,7 +27,7 @@ export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartB
       data-cart-bar=""
       className="fixed inset-x-0 bottom-[calc(4.0625rem+env(safe-area-inset-bottom))] z-30 border-t bg-card px-4 py-2.5 shadow-bar lg:bottom-0 lg:left-60"
     >
-      <div className="mx-auto flex max-w-[1100px] items-center gap-3">
+      <div className="mx-auto flex max-w-app items-center gap-3">
         <button
           type="button"
           aria-haspopup="dialog"
