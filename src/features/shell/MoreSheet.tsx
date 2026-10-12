@@ -35,7 +35,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
     setIsOpen(false)
   }
   const label = entries.length > 0 ? 'Más' : 'Cuenta'
-  const isInside = pathname === paths.profile || entries.some((entry) => isCurrentEntry(entry, pathname))
+  const isInside = pathname === paths.profile || pathname === paths.appearance || entries.some((entry) => isCurrentEntry(entry, pathname))
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
