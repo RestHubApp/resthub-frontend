@@ -1,7 +1,8 @@
 import { useMutationState } from '@tanstack/react-query'
-import { type ReactNode, useRef, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
 import { FormMessage } from './FormMessage'
+import { useReturnFocus } from './useReturnFocus'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
 
 interface FormDialogProps {
@@ -32,11 +33,12 @@ export function FormDialog({
   size = 'md',
   children,
 }: FormDialogProps) {
-  // La ventana se abre desde estado y no desde su propio disparador, así que
-  // Radix no sabe a dónde devolver el foco. Se recuerda lo que lo tenía al
-  // abrir: quien usa teclado vuelve al botón que la abrió y no al inicio.
-  const returnFocus = useRef<HTMLElement | null>(null)
+  // La ventana se abre desde estado y no desde su propio disparador: el foco
+  // vuelve a quien la abrió (ver `useReturnFocus`).
   const [openFrom, setOpenFrom] = useState(0)
+  const returnFocus = useReturnFocus(() => {
+    setOpenFrom(Date.now())
+  })
   const failures = useMutationState({
     filters: { status: 'error' },
     select: (mutation) => mutation.state.submittedAt,
@@ -50,16 +52,7 @@ export function FormDialog({
       <DialogContent
         {...withoutDescription}
         className={`max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto p-5 sm:p-6 ${WIDTHS[size]}`}
-        onOpenAutoFocus={() => {
-          returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-          setOpenFrom(Date.now())
-        }}
-        onCloseAutoFocus={(event) => {
-          if (returnFocus.current?.isConnected === true) {
-            event.preventDefault()
-            returnFocus.current.focus()
-          }
-        }}
+        {...returnFocus}
       >
         <DialogHeader className="gap-1.5 pr-8">
           <DialogTitle className="text-lg leading-tight font-semibold">{title}</DialogTitle>
