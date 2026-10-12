@@ -3,7 +3,7 @@ import { ErrorMessage } from '@/components/ErrorMessage'
 
 import { permissionsQuery } from '@/api/roles'
 import type { Role } from '@/api/types'
-import { FormDialog } from '@/components/FormDialog'
+import { DetailSheet } from '@/components/DetailSheet'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { usePermissions } from '@/store/session'
 import { groupPermissions } from './permissionGroups'
@@ -30,7 +30,12 @@ function title(role: Role | null, access: RoleAccess): string {
   return access === 'edit' ? `Editar ${role.name}` : role.name
 }
 
-/** Crear un rol, cambiar sus permisos o, si no se puede cambiar, verlos. */
+/**
+ * Crear un rol, cambiar sus permisos o, si no se puede cambiar, verlos.
+ *
+ * Son unas veinte casillas agrupadas, no una tarea corta: van en una hoja (al
+ * costado en la laptop, desde abajo en el celular) y no en una ventana.
+ */
 export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps) {
   const granted = usePermissions()
   const catalog = useQuery({ ...permissionsQuery(), select: groupPermissions, enabled: open })
@@ -40,12 +45,11 @@ export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps
   }
 
   return (
-    <FormDialog
+    <DetailSheet
       open={open}
       onOpenChange={onOpenChange}
       title={title(role, access)}
       description={role === null ? 'Ponle un nombre y elige qué puede hacer quien lo tenga.' : DESCRIPTIONS[access]}
-      size="lg"
     >
       {catalog.isPending ? <ListSkeleton label="Cargando permisos…" count={6} itemClassName="h-11 rounded-lg" /> : null}
       {catalog.isError ? (
@@ -54,6 +58,6 @@ export function RoleFormDialog({ role, open, onOpenChange }: RoleFormDialogProps
       {catalog.isSuccess ? (
         <RoleForm role={role} groups={catalog.data} readOnly={access !== 'edit'} onDone={close} />
       ) : null}
-    </FormDialog>
+    </DetailSheet>
   )
 }

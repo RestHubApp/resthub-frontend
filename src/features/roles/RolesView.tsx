@@ -4,6 +4,7 @@ import type { Role } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
+import { useScreenAction } from '@/hooks/useScreenAction'
 import { RoleFormDialog } from './RoleFormDialog'
 import { RolesListCard } from './RolesListCard'
 
@@ -16,6 +17,10 @@ import { RolesListCard } from './RolesListCard'
 export function RolesView() {
   // `undefined` cerrada; `null` para crear; un rol para editarlo o verlo.
   const [open, openSet] = useState<Role | null | undefined>(undefined)
+
+  useScreenAction('nuevo-rol', () => {
+    openSet(null)
+  })
 
   return (
     <div className="flex flex-col gap-6">
