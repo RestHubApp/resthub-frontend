@@ -39,7 +39,7 @@ export function SessionActions({ account, onNavigate }: SessionActionsProps) {
   const howMany =
     pending.length === 1 ? 'Un pedido tuyo espera' : `${String(pending.length)} pedidos tuyos esperan`
   const signOutMenuItem = (onClick?: () => void) => (
-    <Button type="button" variant="ghost" className="h-11 justify-start gap-3 px-3" onClick={onClick}>
+    <Button type="button" variant="ghost" className="justify-start gap-3 px-3" onClick={onClick}>
       <ShellIcon name="signOut" size={18} />
       <span>Cerrar sesión</span>
     </Button>

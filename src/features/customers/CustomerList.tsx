@@ -29,7 +29,7 @@ export function CustomerList({ onOpen }: CustomerListProps) {
         type="search"
         aria-label="Buscar por nombre o teléfono"
         placeholder="Buscar por nombre o teléfono"
-        className="mb-3 h-11"
+        className="mb-3"
         value={text}
         onChange={(event) => {
           setText(event.target.value)

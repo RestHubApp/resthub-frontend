@@ -18,8 +18,6 @@ export function StaffView() {
         actions={
           <Button
             type="button"
-            size="lg"
-            className="h-10 px-4"
             onClick={() => {
               setIsCreating(true)
             }}

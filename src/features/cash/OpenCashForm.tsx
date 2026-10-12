@@ -59,7 +59,7 @@ export function OpenCashForm() {
         />
       </div>
       <div className="flex justify-end">
-        <Button type="submit" size="lg" variant="success" className="h-11 px-5" disabled={open.isPending}>
+        <Button type="submit" variant="success" className="px-5" disabled={open.isPending}>
           <Icon name="cashRegister" size={18} />
           <span>{open.isPending ? 'Abriendo…' : 'Abrir caja'}</span>
         </Button>

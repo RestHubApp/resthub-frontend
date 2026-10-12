@@ -31,7 +31,7 @@ export function ReservationsView() {
         title="Reservas"
         description="Quién viene, a qué hora y en qué mesa."
         actions={canManage ? (
-          <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
+          <Button type="button" onClick={() => {
             setEditing({ reservation: null })
           }}>
             <Icon name="add" size={18} />

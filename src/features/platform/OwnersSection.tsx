@@ -28,8 +28,6 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
       actions={
         <Button
           type="button"
-          size="lg"
-          className="h-11 px-4"
           onClick={() => {
             setIsAdding(true)
           }}

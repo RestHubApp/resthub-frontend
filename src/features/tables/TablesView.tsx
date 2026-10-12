@@ -23,7 +23,7 @@ export function TablesView() {
         title="Mesas"
         description="Las mesas del salón, en el orden en que las ve el mesero."
         actions={
-          <Button type="button" size="lg" className="h-11 px-4" onClick={() => {
+          <Button type="button" onClick={() => {
             setEditing(null)
           }}>
             <Icon name="add" size={16} />

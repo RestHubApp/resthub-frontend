@@ -39,7 +39,7 @@ export function CustomerDetail({ customer, timeZone, canEdit, onEdit }: Customer
       {customer.notes === '' ? null : <p className="m-0 rounded-md bg-muted p-3 text-sm">{customer.notes}</p>}
       <CustomerRecentOrders orders={customer.recent_orders} timeZone={timeZone} />
       {canEdit ? (
-        <Button type="button" variant="outline" size="lg" className="h-11" onClick={onEdit}>
+        <Button type="button" variant="outline" onClick={onEdit}>
           Editar datos
         </Button>
       ) : null}

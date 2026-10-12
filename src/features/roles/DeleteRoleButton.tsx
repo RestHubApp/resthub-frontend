@@ -30,7 +30,7 @@ export function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
         <Button
           type="button"
           variant="destructive"
-          className="h-11 px-3"
+          className="px-3"
           aria-label={`Eliminar el rol ${role.name}`}
           disabled={remove.isPending}
         >

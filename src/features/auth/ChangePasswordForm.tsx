@@ -50,8 +50,7 @@ export function ChangePasswordForm() {
 
       <Button
         type="submit"
-        size="lg"
-        className="h-11 w-full sm:h-10 sm:w-auto sm:self-start sm:px-4"
+        className="w-full sm:w-auto sm:self-start"
         disabled={change.isPending}
       >
         <Icon name="key" size={16} />

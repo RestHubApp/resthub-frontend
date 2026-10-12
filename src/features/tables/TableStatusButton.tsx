@@ -29,7 +29,7 @@ export function TableStatusButton({ table }: TableStatusButtonProps) {
     <Button
       type="button"
       variant={table.is_active ? 'ghost' : 'success'}
-      className="h-11 px-3"
+      className="px-3"
       disabled={status.isPending || isBlocked}
       title={isBlocked ? 'No se desactiva una mesa con un pedido en curso' : undefined}
       onClick={() => {

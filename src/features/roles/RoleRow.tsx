@@ -35,7 +35,7 @@ export function RoleRow({ role, groups, access, onOpen }: RoleRowProps) {
         <Button
           type="button"
           variant="outline"
-          className="h-11 px-3"
+          className="px-3"
           aria-label={isEditable ? `Editar el rol ${role.name}` : `Ver permisos del rol ${role.name}`}
           onClick={onOpen}
         >

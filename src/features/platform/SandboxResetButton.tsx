@@ -42,7 +42,7 @@ export function SandboxResetButton({ exists, onReset }: SandboxResetButtonProps)
     <div className="flex flex-col items-start gap-3">
       <ConfirmDialog
         trigger={
-          <Button type="button" size="lg" variant="danger" className="h-11 px-4" disabled={restart.isPending}>
+          <Button type="button" variant="danger" disabled={restart.isPending}>
             <Icon name="update" size={18} />
             <span>{restart.isPending ? 'Reiniciando…' : 'Reiniciar local de muestra'}</span>
           </Button>

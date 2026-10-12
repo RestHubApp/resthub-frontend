@@ -24,7 +24,7 @@ export function PreviewEndedView() {
               : 'Esta pestaña ya no tiene sesión. Puedes cerrarla.'
           }
         >
-          <Button type="button" size="lg" className="h-11 px-4" onClick={leavePreview}>
+          <Button type="button" onClick={leavePreview}>
             <ShellIcon name="signOut" size={18} />
             <span>Cerrar la vista previa</span>
           </Button>

@@ -56,10 +56,10 @@ export function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProp
       </SectionCard>
       {registration.isError ? <FormMessage tone="error">{errorMessage(registration.error, 'No se pudo crear el restaurante.')}</FormMessage> : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="outline" size="lg" className="h-11 px-4" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" size="lg" className="h-11 px-4" disabled={registration.isPending || registration.isSuccess}>
+        <Button type="submit" disabled={registration.isPending || registration.isSuccess}>
           <Icon name="add" size={18} />
           <span>{registration.isPending ? 'Creando…' : 'Crear restaurante'}</span>
         </Button>

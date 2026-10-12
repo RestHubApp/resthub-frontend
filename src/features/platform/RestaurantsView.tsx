@@ -25,7 +25,7 @@ export function RestaurantsView() {
         title="Restaurantes"
         description="Los locales que usan RestHub: quién está activo y cuánto personal tiene."
         actions={
-          <Button asChild size="lg" className="h-11 px-4">
+          <Button asChild>
             <Link to={paths.platform.newRestaurant}>
               <Icon name="add" size={18} />
               <span>Nuevo restaurante</span>
@@ -38,7 +38,6 @@ export function RestaurantsView() {
           type="search"
           aria-label="Buscar por nombre o identificador"
           placeholder="Buscar por nombre o identificador"
-          className="h-11"
           maxLength={MAX_RESTAURANT_SEARCH}
           value={text}
           onChange={(event) => {

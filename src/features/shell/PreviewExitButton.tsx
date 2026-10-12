@@ -7,8 +7,8 @@ import { ShellIcon } from './ShellIcon'
 
 // En la franja, blanco sobre su color; en una pantalla, el botón principal de siempre.
 const STYLES = {
-  banner: 'h-11 gap-2 bg-white px-3 text-warning hover:bg-white/90 focus-visible:ring-white/70',
-  page: 'h-11 gap-2 px-4',
+  banner: 'bg-white px-3 text-warning hover:bg-white/90 focus-visible:ring-white/70',
+  page: '',
 } as const
 
 interface PreviewExitButtonProps {
@@ -26,7 +26,7 @@ export function PreviewExitButton({ tone = 'banner' }: PreviewExitButtonProps) {
   const pending = useQueuedOrders(useStaffAccount())
 
   const button = (onClick?: () => void) => (
-    <Button type="button" size={tone === 'page' ? 'lg' : 'default'} className={STYLES[tone]} onClick={onClick}>
+    <Button type="button" className={STYLES[tone]} onClick={onClick}>
       <ShellIcon name="signOut" size={18} />
       <span>Salir de la vista previa</span>
     </Button>

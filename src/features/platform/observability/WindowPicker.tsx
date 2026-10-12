@@ -19,10 +19,9 @@ export function WindowPicker({ value, onChange }: WindowPickerProps) {
           <Button
             key={option.value}
             type="button"
-            size="lg"
             variant={option.value === value ? 'default' : 'outline'}
             aria-pressed={option.value === value}
-            className="h-11 min-w-14 px-3 tabular-nums"
+            className="min-w-14 px-3 tabular-nums"
             onClick={() => {
               onChange(option.value)
             }}

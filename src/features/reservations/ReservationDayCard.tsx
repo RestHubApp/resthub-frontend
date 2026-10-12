@@ -33,7 +33,7 @@ export function ReservationDayCard({ day, timeZone, canManage, onDayChange, onEd
     <SectionCard
       title={formatLongDate(day)}
       actions={
-        <Input type="date" aria-label="Día" className="h-11 w-auto" value={day} onChange={(event) => {
+        <Input type="date" aria-label="Día" className="w-auto" value={day} onChange={(event) => {
           if (event.target.value !== '') {
             onDayChange(event.target.value)
           }

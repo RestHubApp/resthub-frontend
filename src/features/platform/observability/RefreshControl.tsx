@@ -23,8 +23,6 @@ export function RefreshControl({ refresh }: RefreshControlProps) {
         <Button
           type="button"
           variant="outline"
-          size="lg"
-          className="h-11 px-4"
           aria-pressed={isPaused}
           onClick={() => {
             setPaused(!isPaused)
@@ -36,8 +34,6 @@ export function RefreshControl({ refresh }: RefreshControlProps) {
         <Button
           type="button"
           variant="ghost"
-          size="lg"
-          className="h-11 px-4"
           disabled={isReading}
           onClick={() => void queryClient.invalidateQueries({ queryKey: platformObservabilityQueryKey })}
         >

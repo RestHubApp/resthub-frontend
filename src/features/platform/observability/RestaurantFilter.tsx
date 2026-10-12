@@ -26,7 +26,7 @@ export function RestaurantFilter({ value, onChange }: RestaurantFilterProps) {
       <Label htmlFor="obs-restaurante">Restaurante</Label>
       <NativeSelect
         id="obs-restaurante"
-        className="w-full min-w-56 sm:w-64 [&_select]:h-11"
+        className="w-full min-w-56 sm:w-64"
         value={value === null ? '' : String(value)}
         onChange={(event) => {
           onChange(event.target.value === '' ? null : Number(event.target.value))

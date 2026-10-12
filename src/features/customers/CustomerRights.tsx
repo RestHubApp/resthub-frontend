@@ -33,8 +33,6 @@ export function CustomerRights({ customer, onErased }: CustomerRightsProps) {
         <Button
           type="button"
           variant="outline"
-          size="lg"
-          className="h-11"
           disabled={exportAction.isPending}
           onClick={() => {
             exportAction.mutate()
@@ -44,7 +42,7 @@ export function CustomerRights({ customer, onErased }: CustomerRightsProps) {
         </Button>
         <ConfirmDialog
           trigger={
-            <Button type="button" variant="destructive" size="lg" className="h-11" disabled={remove.isPending}>
+            <Button type="button" variant="destructive" disabled={remove.isPending}>
               Borrar sus datos
             </Button>
           }
