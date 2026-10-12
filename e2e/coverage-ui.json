@@ -1,13 +1,13 @@
 {
-  "total": 425,
+  "total": 431,
   "byType": {
-    "ruta": 35,
+    "ruta": 36,
     "confirmacion": 11,
     "desplegable": 7,
     "dialogo": 24,
     "hoja": 3,
     "pestanas": 2,
-    "funcion": 260,
+    "funcion": 265,
     "estado": 77,
     "rol": 6
   },
@@ -136,6 +136,12 @@
       "id": "ruta:/perfil",
       "type": "ruta",
       "description": "Pantalla /perfil",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/perfil/apariencia",
+      "type": "ruta",
+      "description": "Pantalla /perfil/apariencia",
       "origin": "src/services/paths.ts"
     },
     {
@@ -2038,6 +2044,36 @@
       "id": "funcion:perfil.contrasena-actual-incorrecta",
       "type": "funcion",
       "description": "Con la contraseña actual equivocada no se cambia nada",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.cambiar-tema",
+      "type": "funcion",
+      "description": "Elegir el tema de colores (también «Según el sistema»): se aplica al instante y se queda al recargar",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.cambiar-letra",
+      "type": "funcion",
+      "description": "Elegir la letra y el tamaño del texto de toda la aplicación",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.ordenar-menu",
+      "type": "funcion",
+      "description": "Subir y bajar las pantallas del menú; solo salen las que la cuenta puede abrir",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.barra-inferior",
+      "type": "funcion",
+      "description": "Elegir las cuatro pantallas de la barra de abajo del celular; el resto queda en «Más»",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:apariencia.restablecer",
+      "type": "funcion",
+      "description": "Volver el menú, o toda la apariencia, a lo de siempre",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
