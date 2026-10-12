@@ -1,6 +1,7 @@
 import type { RestockAction } from '@/api/types'
 import { Icon } from '@/components/Icon'
-import { ACTION_STYLES, TONE_BADGE } from './restockActions'
+import { Badge } from '@/components/ui/badge'
+import { ACTION_STYLES } from './restockActions'
 
 interface ActionBadgeProps {
   readonly action: RestockAction
@@ -11,9 +12,9 @@ interface ActionBadgeProps {
 export function ActionBadge({ action, label }: ActionBadgeProps) {
   const style = ACTION_STYLES[action]
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${TONE_BADGE[style.tone]}`}>
+    <Badge variant={style.variant} className="font-semibold">
       <Icon name={style.icon} size={14} />
       {label}
-    </span>
+    </Badge>
   )
 }

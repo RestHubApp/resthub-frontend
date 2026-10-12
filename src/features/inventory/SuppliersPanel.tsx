@@ -8,7 +8,7 @@ import { Icon } from '@/components/Icon'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
-import { MutationError } from './MutationError'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { SupplierDialog } from './SupplierDialog'
 import { SupplierRow } from './SupplierRow'
 
@@ -38,7 +38,7 @@ export function SuppliersPanel({ canManage }: SuppliersPanelProps) {
       }
     >
       {suppliers.isPending ? <ListSkeleton label="Cargando proveedores…" count={3} itemClassName="h-14 rounded-lg" /> : null}
-      <MutationError isError={suppliers.isError} error={suppliers.error} fallback="No se pudieron cargar los proveedores." />
+      <ErrorMessage isError={suppliers.isError} error={suppliers.error} fallback="No se pudieron cargar los proveedores." />
       {suppliers.isSuccess && list.length === 0 ? (
         <EmptyState title="Todavía no hay proveedores" description="Da de alta al mercado o distribuidor al que le compras." />
       ) : null}

@@ -21,7 +21,7 @@ export function PurchaseOrderActions({ status, isBusy, onSend, onReceive, onCanc
           <span>Marcar enviada</span>
         </Button>
       ) : null}
-      <Button type="button" size="sm" variant="success" onClick={onReceive}>
+      <Button type="button" size="sm" onClick={onReceive}>
         <Icon name="purchase" size={14} />
         <span>Recibir</span>
       </Button>

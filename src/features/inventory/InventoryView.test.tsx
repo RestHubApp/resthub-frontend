@@ -135,7 +135,7 @@ describe('InventoryView: tabla de insumos', () => {
     await screen.findByText('Limón')
     expect(screen.queryByRole('button', { name: 'Nuevo insumo' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Compra de Limón' })).not.toBeInTheDocument()
-    expect(screen.queryByText('Agotar solos los platos sin insumos')).not.toBeInTheDocument()
+    expect(screen.queryByText('Marcar «Sin insumos» automáticamente')).not.toBeInTheDocument()
     expect(api.calls('get', RESTAURANT)).toHaveLength(0)
   })
 
@@ -154,7 +154,7 @@ describe('InventoryView: regla de agotar platos', () => {
       api.on('get', RESTAURANT, local(true))
       return local(true)
     })
-    const checkbox = await screen.findByRole('checkbox', { name: /Agotar solos los platos sin insumos/u })
+    const checkbox = await screen.findByRole('checkbox', { name: /Marcar «Sin insumos» automáticamente/u })
     await user.click(checkbox)
 
     expect(await screen.findByText('Los platos sin insumos se agotan solos.')).toBeInTheDocument()
@@ -164,7 +164,7 @@ describe('InventoryView: regla de agotar platos', () => {
   it('si el servidor la rechaza, avisa', async () => {
     const { api, user } = open()
     api.on('patch', RESTAURANT, new ErrorResponse(403, 'Solo el encargado.'))
-    await user.click(await screen.findByRole('checkbox', { name: /Agotar solos/u }))
+    await user.click(await screen.findByRole('checkbox', { name: /Marcar «Sin insumos»/u }))
     expect(await screen.findByText('Solo el encargado.')).toBeInTheDocument()
   })
 })

@@ -1,5 +1,6 @@
 import type { LowStockItem } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import { Badge } from '@/components/ui/badge'
 import { formatQuantity, toNumber } from '@/services/format'
 
 const PERCENT = 100
@@ -11,10 +12,10 @@ export function LowStockRow({ item }: { readonly item: LowStockItem }) {
     <li className="flex flex-col gap-1.5 py-3 first:pt-0 last:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-medium">{item.name}</span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+        <Badge variant="destructive">
           <Icon name="critical" size={14} />
           Bajo mínimo
-        </span>
+        </Badge>
       </div>
       <meter
         aria-label={`Stock de ${item.name} respecto del mínimo`}

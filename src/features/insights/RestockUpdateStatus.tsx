@@ -1,5 +1,4 @@
-import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/apiError'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 interface RestockUpdateStatusProps {
   readonly isPending: boolean
@@ -17,7 +16,7 @@ export function RestockUpdateStatus({ isPending, isError, error }: RestockUpdate
         </p>
       ) : null}
       {isError ? (
-        <FormMessage tone="error">{errorMessage(error, 'No se pudieron actualizar las recomendaciones.')}</FormMessage>
+        <ErrorMessage error={error} fallback="No se pudieron actualizar las recomendaciones." />
       ) : null}
     </>
   )

@@ -1,6 +1,6 @@
 import type { Ingredient, Recipe } from '@/api/types'
 import { onSubmit } from '@/hooks/formSubmit'
-import { MutationError } from './MutationError'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { recipeCost } from './recipeMath'
 import { RecipeFooter } from './RecipeFooter'
 import { RecipeLinesSection } from './RecipeLinesSection'
@@ -43,7 +43,7 @@ export function RecipeEditor({ recipe, ingredients, canManage }: RecipeEditorPro
         }}
       />
 
-      <MutationError isError={form.save.isError} error={form.save.error} fallback="No se pudo guardar la receta." />
+      <ErrorMessage isError={form.save.isError} error={form.save.error} fallback="No se pudo guardar la receta." />
       {canManage ? (
         <RecipeFooter
           empty={form.lines.length === 0}

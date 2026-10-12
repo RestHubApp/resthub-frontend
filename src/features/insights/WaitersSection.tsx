@@ -27,7 +27,7 @@ export function WaitersSection({ range }: WaitersSectionProps) {
   return (
     <SectionCard title="Rendimiento por mesero" description="Pedidos que tomó cada uno y se cobraron en el período.">
       <div className={`transition-opacity ${report.refreshing ? 'opacity-50' : ''}`}>
-        <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el rendimiento por mesero.">
+        <ReportState data={report.data} error={report.error} errorText="No se pudo cargar el rendimiento por mesero." loadingLabel="Cargando el rendimiento por mesero…">
           {({ waiters }) => (
             <DataTable
               label="Rendimiento por mesero"

@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
 import { BackToLink } from './BackToLink'
-import { MutationError } from './MutationError'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { RecipeEditor } from './RecipeEditor'
 import { useRecipeEditorData } from './useRecipeEditorData'
 
@@ -30,7 +30,7 @@ export function RecipeEditorView() {
         description="Lo que lleva una porción, en la unidad de cada insumo. El costo usa el costo actual de cada insumo."
         actions={<BackToLink to={back.to} label={back.label} />}
       />
-      <MutationError isError={error !== null} error={error} fallback="No se pudo cargar la receta." />
+      <ErrorMessage isError={error !== null} error={error} fallback="No se pudo cargar la receta." />
       {isLoading ? <EmptyState title="Cargando la receta…" /> : null}
       {recipe !== undefined && ingredients !== undefined ? (
         <RecipeEditor key={menuItemId} recipe={recipe} ingredients={ingredients} canManage={canManage} />

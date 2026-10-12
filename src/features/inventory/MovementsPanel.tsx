@@ -5,7 +5,7 @@ import { TablePagination } from '@/components/TablePagination'
 import { useTimeZone } from '@/store/session'
 import { MovementFilters } from './MovementFilters'
 import { buildMovementColumns } from './MovementColumns'
-import { MutationError } from './MutationError'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { useIngredients } from './useIngredients'
 import { useMovementBook } from './useMovementBook'
 
@@ -26,10 +26,10 @@ export function MovementsPanel() {
         onKind={changeType}
       />
       {book.isError ? (
-        <MutationError isError error={book.error} fallback="No se pudo cargar el libro de movimientos." />
+        <ErrorMessage isError error={book.error} fallback="No se pudo cargar el historial de stock." />
       ) : (
         <DataTable
-          label="Libro de movimientos"
+          label="Historial de stock"
           columns={columns}
           data={book.data?.items ?? []}
           isLoading={book.isPending}

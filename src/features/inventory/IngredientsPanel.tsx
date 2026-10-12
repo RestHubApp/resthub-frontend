@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import type { Ingredient } from '@/api/types'
 import { DataTable } from '@/components/DataTable'
-import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/apiError'
 import { IngredientFilters } from './IngredientFilters'
 import { buildIngredientColumns } from './IngredientColumns'
 import type { StockAction } from './StockActionDialog'
@@ -39,9 +38,7 @@ export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps)
 
   if (ingredients.isError) {
     return (
-      <FormMessage tone="error">
-        {errorMessage(ingredients.error, 'No se pudieron cargar los insumos.')}
-      </FormMessage>
+      <ErrorMessage error={ingredients.error} fallback="No se pudieron cargar los insumos." />
     )
   }
 

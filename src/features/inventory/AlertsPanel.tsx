@@ -1,7 +1,6 @@
 import { EmptyState } from '@/components/EmptyState'
-import { FormMessage } from '@/components/FormMessage'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { errorMessage } from '@/services/apiError'
 import { AlertCard } from './AlertCard'
 import type { StockAction } from './StockActionDialog'
 import { useLowStock } from './useLowStock'
@@ -17,9 +16,7 @@ export function AlertsPanel({ canManage, onAction }: AlertsPanelProps) {
 
   if (alerts.isError) {
     return (
-      <FormMessage tone="error">
-        {errorMessage(alerts.error, 'No se pudieron cargar las alertas.')}
-      </FormMessage>
+      <ErrorMessage error={alerts.error} fallback="No se pudieron cargar las alertas." />
     )
   }
   if (alerts.isPending) {

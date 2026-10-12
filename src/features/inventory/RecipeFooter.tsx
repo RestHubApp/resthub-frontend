@@ -11,7 +11,7 @@ interface RecipeFooterProps {
 
 const DELETE_ACTION = {
   label: 'Borrar receta',
-  variant: 'danger',
+  variant: 'destructive',
   icon: 'delete',
   notice: 'Sin insumos: al guardar, el plato queda sin receta y sin costo.',
 } as const

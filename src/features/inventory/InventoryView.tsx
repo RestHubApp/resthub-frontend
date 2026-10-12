@@ -29,7 +29,7 @@ export function InventoryView() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Inventario"
-        description="El stock sale del libro de movimientos: compras, mermas, ajustes y lo que consumen los pedidos servidos."
+        description="Lo que tienes en cocina y cuándo reponerlo: compras, mermas, ajustes y lo que consumen los pedidos servidos."
         actions={
           canManage ? (
             <NewIngredientButton

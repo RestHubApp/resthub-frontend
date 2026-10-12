@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import { dishCostsQuery } from '@/api/inventory'
 import { DataTable } from '@/components/DataTable'
-import { FormMessage } from '@/components/FormMessage'
-import { errorMessage } from '@/services/apiError'
 import { buildRecipeColumns } from './RecipeColumns'
 
 interface RecipesPanelProps {
@@ -24,9 +23,7 @@ export function RecipesPanel({ canManage }: RecipesPanelProps) {
 
   if (costs.isError) {
     return (
-      <FormMessage tone="error">
-        {errorMessage(costs.error, 'No se pudieron cargar las recetas.')}
-      </FormMessage>
+      <ErrorMessage error={costs.error} fallback="No se pudieron cargar las recetas." />
     )
   }
   const withoutRecipe = (costs.data ?? []).filter((cost) => !cost.has_recipe).length
