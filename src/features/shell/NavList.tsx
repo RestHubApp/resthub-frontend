@@ -9,7 +9,7 @@ interface NavListProps {
 }
 
 const BASE =
-  'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50'
+  'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm lg:min-h-10 lg:py-1.5 font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50'
 
 function linkClass(isCurrent: boolean): string {
   return isCurrent
@@ -26,7 +26,7 @@ function linkClass(isCurrent: boolean): string {
  */
 export function NavList({ entries, onNavigate }: NavListProps) {
   return (
-    <ul className="m-0 flex list-none flex-col gap-1 p-0">
+    <ul className="m-0 flex list-none flex-col gap-1 p-0 lg:gap-0.5">
       {entries.map((entry) => (
         <li key={entry.to}>
           <EntryLink entry={entry} className={linkClass} onClick={onNavigate}>
