@@ -668,7 +668,7 @@
   },
   {
     "id": "funcion:apariencia.cambiar-tema",
-    "description": "Elegir el tema de colores (también «Según el sistema»): se aplica al instante y se queda al recargar"
+    "description": "Elegir el modo (claro, oscuro o automático), el color y el alto contraste: se aplica al instante y se queda al recargar"
   },
   {
     "id": "funcion:apariencia.cambiar-letra",
@@ -676,7 +676,7 @@
   },
   {
     "id": "funcion:apariencia.ordenar-menu",
-    "description": "Subir y bajar las pantallas del menú; solo salen las que la cuenta puede abrir"
+    "description": "Subir, bajar o arrastrar las pantallas del menú; solo salen las que la cuenta puede abrir"
   },
   {
     "id": "funcion:apariencia.barra-inferior",
@@ -684,6 +684,6 @@
   },
   {
     "id": "funcion:apariencia.restablecer",
-    "description": "Volver el menú, o toda la apariencia, a lo de siempre"
+    "description": "Restablecer toda la apariencia, menú incluido, a lo de siempre"
   }
 ]

@@ -41,7 +41,7 @@ export const ROUTES = [
   { id: 'pedido-agregar', name: 'Agregar platos a un pedido', route: '/pedidos/:orderInKitchen/agregar', pattern: '/pedidos/:orderId/agregar', account: 'waiter' },
   { id: 'kitchen', name: 'Cocina', route: '/cocina', pattern: '/cocina', account: 'waiter' },
   { id: 'perfil', name: 'Mi perfil', route: '/perfil', pattern: '/perfil', account: 'waiter' },
-  { id: 'apariencia', name: 'Apariencia: tema, letra y menú', route: '/perfil/apariencia', pattern: '/perfil/apariencia', account: 'owner' },
+  { id: 'apariencia', name: 'Apariencia: modo, color, letra y menú', route: '/perfil/apariencia', pattern: '/perfil/apariencia', account: 'owner' },
   { id: 'imprimir-comanda', name: 'Imprimir comanda', route: '/imprimir/:orderInKitchen/comanda', pattern: '/imprimir/:orderId/:kind', account: 'waiter', wait: PRINTED },
   { id: 'imprimir-cuenta', name: 'Imprimir precuenta', route: '/imprimir/:orderToCharge/cuenta', pattern: '/imprimir/:orderId/:kind', account: 'waiter', wait: PRINTED },
 

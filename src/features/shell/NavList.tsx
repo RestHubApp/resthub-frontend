@@ -9,7 +9,7 @@ interface NavListProps {
 }
 
 const BASE =
-  'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm lg:min-h-10 lg:py-1.5 font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50'
+  'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm lg:min-h-10 lg:py-1.5 in-data-[density=compact]:pointer-fine:lg:min-h-9 in-data-[density=compact]:pointer-fine:lg:py-1 font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50'
 
 function linkClass(isCurrent: boolean): string {
   return isCurrent

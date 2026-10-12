@@ -1,4 +1,5 @@
 import { BOTTOM_BAR_SLOTS, type MenuPreference } from '@/services/appearanceRules'
+import { defaultBottomPaths } from './defaultBottomBar'
 import type { NavEntry } from './navigation'
 
 /** Cómo queda el menú: todas las entradas en orden y cuáles van en la barra de abajo. */
@@ -24,29 +25,48 @@ export function orderEntries(entries: readonly NavEntry[], order: readonly strin
   return [...known, ...entries.filter((entry) => !rank.has(entry.to))]
 }
 
-/** El menú ya ordenado y partido en la barra de abajo y «Más». */
+/**
+ * El menú ya ordenado y partido en la barra de abajo y «Más».
+ *
+ * Sin barra elegida rige la de fábrica, que sale de lo que la cuenta puede abrir
+ * (`defaultBottomPaths`), no del nombre de su rol.
+ */
 export function layoutMenu(entries: readonly NavEntry[], menu: MenuPreference): MenuLayout {
   const ordered = orderEntries(entries, menu.order)
-  if (menu.bottom === null) {
-    return { ordered, bar: ordered.slice(0, BOTTOM_BAR_SLOTS), rest: ordered.slice(BOTTOM_BAR_SLOTS) }
-  }
-  const chosen = new Set(menu.bottom)
+  const chosen = new Set(menu.bottom ?? defaultBottomPaths(ordered))
   const bar = ordered.filter((entry) => chosen.has(entry.to)).slice(0, BOTTOM_BAR_SLOTS)
   const inBar = new Set(bar)
   return { ordered, bar, rest: ordered.filter((entry) => !inBar.has(entry)) }
 }
 
-/** El menú tras subir (`-1`) o bajar (`1`) una posición la entrada que está en `index`. */
-export function moveEntry(layout: MenuLayout, index: number, step: -1 | 1): MenuPreference {
-  const paths = layout.ordered.map((entry) => entry.to)
-  const target = index + step
-  const from = paths[index]
-  const to = paths[target]
-  if (from === undefined || to === undefined) {
-    return menuOf(layout, paths)
+/** Los dos grupos del editor: la barra de abajo del celular y lo que queda en «Más». */
+export type MenuGroup = 'bar' | 'rest'
+
+/** Mover la entrada que está en `from` al lugar `to` de su grupo. */
+export interface GroupMove {
+  readonly group: MenuGroup
+  readonly from: number
+  readonly to: number
+}
+
+/**
+ * El menú tras mover, dentro de su grupo, la entrada que está en `from` al lugar `to`
+ * (subir o bajar una posición, o soltar tras arrastrar). Los lugares que el grupo
+ * ocupa en el orden del menú se reparten en la nueva secuencia: las demás entradas
+ * no se mueven. `null` si no hay nada que mover.
+ */
+export function reorderWithin(layout: MenuLayout, move: GroupMove): MenuPreference | null {
+  const { group, from, to } = move
+  const members = (group === 'bar' ? layout.bar : layout.rest).map((entry) => entry.to)
+  if (from === to || members[from] === undefined || members[to] === undefined) {
+    return null
   }
-  paths[index] = to
-  paths[target] = from
+  const moved = [...members]
+  const [item] = moved.splice(from, 1)
+  moved.splice(to, 0, item ?? '')
+  const slots = new Set(members)
+  const sequence = [...moved]
+  const paths = layout.ordered.map((entry) => (slots.has(entry.to) ? (sequence.shift() ?? entry.to) : entry.to))
   return menuOf(layout, paths)
 }
 

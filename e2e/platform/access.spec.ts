@@ -42,6 +42,8 @@ const ALL = [
   'Roles',
   'Resumen',
 ]
+// La barra de abajo de fábrica de quien lleva el local: pedidos, tablero, caja y resumen.
+const BAR_OF_OWNER = ['Pedidos', 'Tablero', 'Caja', 'Resumen']
 const OF_WAITER = ['Pedidos', 'Cocina', 'Reservas', 'Clientes']
 const OF_KITCHEN = ['Tablero', 'Inventario']
 const ERROR_CREDENTIALS = 'El correo o la contraseña no son correctos.'
@@ -218,10 +220,10 @@ test('ACC-10 la hoja «Más» del celular abre las otras pantallas, la accesibil
   covers('hoja:shell/MoreSheet', 'funcion:shell.mas-navegar', 'funcion:shell.mas-accesibilidad', 'funcion:shell.mas-perfil', 'rol:encargado')
   await openAs(page, local.owner, '/pedidos')
   const nav = navigation(page)
-  await expect.poll(() => sections(page)).toEqual(ALL.slice(0, 4))
+  await expect.poll(() => sections(page)).toEqual(BAR_OF_OWNER)
   await nav.getByRole('button', { name: 'Más' }).click()
   const sheet = page.getByRole('dialog', { name: 'Más' })
-  await expect(sheet.getByRole('link')).toHaveText([...ALL.slice(4), 'Encargada PruebaEncargado'])
+  await expect(sheet.getByRole('link')).toHaveText([...ALL.filter((label) => !BAR_OF_OWNER.includes(label)), 'Encargada PruebaEncargado'])
   await evidence(page, 'acc-10-hoja-mas')
   await sheet.getByRole('link', { name: 'Inventario' }).click()
   await expect(sheet).toBeHidden()

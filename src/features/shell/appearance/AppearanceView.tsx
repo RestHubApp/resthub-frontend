@@ -1,54 +1,61 @@
 import { BackLink } from '@/components/BackLink'
 import { PageHeader } from '@/components/PageHeader'
-import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { paths } from '@/services/paths'
 import { useAppearance } from '@/store/appearance'
-import { FontPicker } from './FontPicker'
+import { AppearancePreview } from './AppearancePreview'
 import { MenuEditor } from './MenuEditor'
-import { TextSizePicker } from './TextSizePicker'
-import { ThemePicker } from './ThemePicker'
+import { ReadingTab } from './ReadingTab'
+import { ScreenTab } from './ScreenTab'
+
+const TAB = 'min-h-10 flex-1 text-base'
 
 /**
- * Apariencia: el tema, la letra, el tamaño del texto y el orden del menú.
+ * Apariencia, en tres pestañas: «Pantalla» (modo, color y alto contraste),
+ * «Lectura» (tamaño del texto, letra y densidad) y «Menú» (orden y barra de
+ * abajo), con una vista previa fija arriba.
  *
- * Cada cambio se ve al instante y se guarda solo, para esta cuenta y en este aparato
- * (ver `store/appearance`). No cambia lo que nadie más ve ni lo que la cuenta
- * puede hacer: es solo presentación.
+ * Cada cambio se ve al instante y se guarda solo, para esta cuenta y en este
+ * celular o computadora (ver `store/appearance`). No cambia lo que nadie más ve ni
+ * lo que la cuenta puede hacer: es solo presentación.
  */
 export function AppearanceView() {
   const reset = useAppearance((state) => state.reset)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <BackLink to={paths.profile} label="Mi perfil" />
       <PageHeader
         title="Apariencia"
-        description="Elige cómo se ve RestHub. Lo que cambies se guarda solo, es para tu cuenta y en este aparato: no cambia nada para tus compañeros."
+        description="Se guarda solo, para tu cuenta y en este celular o computadora. No cambia nada para tus compañeros."
       />
-
-      <SectionCard title="Colores" description="Toca uno para verlo al instante.">
-        <ThemePicker />
-      </SectionCard>
-
-      <SectionCard title="Letra" description="Escoge la que te resulte más cómoda de leer.">
-        <FontPicker />
-      </SectionCard>
-
-      <SectionCard title="Tamaño del texto" description="Agranda todo el texto y los botones.">
-        <TextSizePicker />
-      </SectionCard>
-
-      <SectionCard
-        title="Menú"
-        description="Pon primero lo que más usas y elige las cuatro pantallas de la barra de abajo del celular. Solo cambia el orden: no da ni quita permisos."
-      >
-        <MenuEditor />
-      </SectionCard>
-
+      <AppearancePreview />
+      <Tabs defaultValue="screen" className="gap-4">
+        <TabsList className="h-auto w-full">
+          <TabsTrigger value="screen" className={TAB}>
+            Pantalla
+          </TabsTrigger>
+          <TabsTrigger value="reading" className={TAB}>
+            Lectura
+          </TabsTrigger>
+          <TabsTrigger value="menu" className={TAB}>
+            Menú
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="screen">
+          <ScreenTab />
+        </TabsContent>
+        <TabsContent value="reading">
+          <ReadingTab />
+        </TabsContent>
+        <TabsContent value="menu">
+          <MenuEditor />
+        </TabsContent>
+      </Tabs>
       <div>
         <Button type="button" variant="outline" onClick={reset}>
-          Volver a todo lo de siempre
+          Restablecer apariencia
         </Button>
       </div>
     </div>

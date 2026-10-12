@@ -6,6 +6,7 @@ import { currentUserQueryKey } from '@/api/auth'
 import { queryClient } from '@/services/queryClient'
 import type { OpenOrderRequest } from '@/api/types'
 import { enqueueOrder, removeQueued } from '@/store/offlineQueue'
+import { useAppearance } from '@/store/appearance'
 import { useSession } from '@/store/session'
 import { AppShell } from './AppShell'
 import type { ShellScreen } from './shellScreens'
@@ -52,6 +53,7 @@ function links(zone: HTMLElement): string[] {
 
 afterEach(() => {
   removeQueued('pedido-en-cola')
+  useAppearance.getState().reset()
 })
 
 describe('AppShell', () => {
@@ -89,9 +91,18 @@ describe('AppShell', () => {
     expect(within(sidebar()).queryByRole('link', { name: 'Reservas' })).not.toBeInTheDocument()
   })
 
+  it('quien lleva el local trae de fábrica una barra de abajo con pedidos, tablero, caja y resumen', () => {
+    server()
+    signInAs(PERMISSIONS_OWNER)
+    openShell()
+
+    expect(links(bottomBar())).toEqual(['Pedidos', 'Tablero', 'Caja', 'Resumen'])
+  })
+
   it('en el celular caben cuatro pantallas y el resto va en «Más»', async () => {
     server()
     signInAs(PERMISSIONS_OWNER)
+    useAppearance.getState().change({ menu: { order: [], bottom: ['/pedidos', '/tablero', '/cocina', '/reservas'] } })
     const { user } = openShell()
 
     expect(links(bottomBar())).toEqual(['Pedidos', 'Tablero', 'Cocina', 'Reservas'])
