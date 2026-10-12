@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
+import { useDeferredAction } from './useDeferredAction'
 
 /** Una acción secundaria dentro del menú «⋯». */
 export interface ActionsMenuItem {
@@ -36,6 +37,7 @@ interface ActionsMenuProps {
 export function ActionsMenu({ label, items, text }: ActionsMenuProps) {
   const regular = items.filter((item) => item.isDestructive !== true)
   const destructive = items.filter((item) => item.isDestructive === true)
+  const { choose, onCloseAutoFocus } = useDeferredAction()
 
   return (
     <DropdownMenu modal={false}>
@@ -50,26 +52,23 @@ export function ActionsMenu({ label, items, text }: ActionsMenuProps) {
           {text === undefined ? null : <span>{text}</span>}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {regular.map(renderEntry)}
+      <DropdownMenuContent align="end" onCloseAutoFocus={onCloseAutoFocus}>
+        {regular.map((item) => renderEntry(item, choose))}
         {regular.length > 0 && destructive.length > 0 ? <DropdownMenuSeparator /> : null}
-        {destructive.map(renderEntry)}
+        {destructive.map((item) => renderEntry(item, choose))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-function renderEntry(item: ActionsMenuItem) {
+function renderEntry(item: ActionsMenuItem, choose: (action: () => void) => void) {
   return (
     <DropdownMenuItem
       key={item.label}
       variant={item.isDestructive === true ? 'destructive' : 'default'}
       disabled={item.isDisabled === true}
       onSelect={() => {
-        // La acción espera a que el menú se cierre y devuelva el foco a su
-        // botón: así una ventana que abre la acción recuerda ese botón y le
-        // devuelve el foco al cerrarse.
-        window.setTimeout(item.onSelect, 0)
+        choose(item.onSelect)
       }}
     >
       {item.icon === undefined ? null : <Icon name={item.icon} size={16} />}
