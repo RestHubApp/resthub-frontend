@@ -40,6 +40,6 @@ test('GES-37 una cuenta que solo consulta ve el contacto del cliente oculto, lo 
 
   await page.getByLabel('Mostrar').selectOption({ label: 'Accesos a datos de clientes' })
   await expect(log.getByText('Abrió la ficha de un cliente').first()).toBeVisible()
-  await expect(log.getByText('Aceptó los términos y condiciones')).toBeHidden()
+  await expect(log.getByText('Aceptó los términos y condiciones')).toHaveCount(0)
   await evidence(page, 'ges-37-4-bitacora-accesos')
 })
