@@ -17,7 +17,7 @@ export function AreaMaxMarker({ geometry, value, formatValue }: AreaMaxMarkerPro
         x={Math.min(Math.max(x(maxIndex), geometry.plotLeft + 48), geometry.plotRight - 48)}
         y={y(value) - 10}
         textAnchor="middle"
-        className="fill-foreground text-[11px] font-medium tabular-nums"
+        className="fill-foreground text-2xs font-medium tabular-nums"
       >
         {`Máx. ${formatValue(value)}`}
       </text>

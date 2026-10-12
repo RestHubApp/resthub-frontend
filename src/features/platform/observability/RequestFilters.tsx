@@ -1,5 +1,5 @@
 import { FilterActions } from './FilterActions'
-import { FilterSelect } from './FilterSelect'
+import { FilterSelect } from '@/components/FilterSelect'
 import { FilterTextField } from './FilterTextField'
 import { MAX_REQUEST_ID, MAX_ROUTE, type ObsFilters, STATUS_MIN_OPTIONS } from './obsFilters'
 import { useDraft } from './useDraft'

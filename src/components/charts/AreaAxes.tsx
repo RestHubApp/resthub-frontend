@@ -9,7 +9,7 @@ interface AreaAxesProps {
   readonly maxXLabels: number
 }
 
-const TICK_TEXT = 'fill-muted-foreground text-[11px] tabular-nums'
+const TICK_TEXT = 'fill-muted-foreground text-2xs tabular-nums'
 
 // Las fechas de los extremos se alinean hacia adentro para no salirse del SVG.
 function anchorFor(index: number, length: number): 'start' | 'middle' | 'end' {

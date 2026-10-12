@@ -2,7 +2,7 @@ import type { Reservation, ReservationStatus } from '@/api/types'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { formatTime } from '@/services/format'
-import { STATUS_TONE } from './reservationSchema'
+import { STATUS_TONE } from './reservationLabels'
 
 interface ReservationRowProps {
   readonly reservation: Reservation

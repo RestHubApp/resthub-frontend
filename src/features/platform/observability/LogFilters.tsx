@@ -1,6 +1,6 @@
 import type { ObsLogLevel } from '@/api/types'
 import { FilterActions } from './FilterActions'
-import { FilterSelect } from './FilterSelect'
+import { FilterSelect } from '@/components/FilterSelect'
 import { FilterTextField } from './FilterTextField'
 import { MAX_LOG_SEARCH, MAX_REQUEST_ID, type ObsFilters } from './obsFilters'
 import { useDraft } from './useDraft'

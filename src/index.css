@@ -27,6 +27,9 @@
 @custom-variant dark (&:is(.dark *));
 @theme inline {
     --font-heading: var(--font-sans);
+    /* El ancho de lectura del contenido y el texto más chico que se tolera (ejes de gráficos). */
+    --container-app: 1100px;
+    --text-2xs: 0.6875rem;
     --font-sans: 'Geist Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);

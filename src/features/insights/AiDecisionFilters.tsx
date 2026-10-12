@@ -1,5 +1,5 @@
 import type { DecisionEngine, DecisionKind } from '@/api/types'
-import { FilterSelect } from './FilterSelect'
+import { FilterSelect } from '@/components/FilterSelect'
 
 const KINDS: readonly { value: DecisionKind; label: string }[] = [
   { value: 'restock', label: 'Reposición de insumo' },

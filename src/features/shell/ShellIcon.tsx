@@ -1,3 +1,4 @@
+import { Glyph } from '@/components/Glyph'
 import {
   Accessibility,
   Activity,
@@ -76,22 +77,8 @@ interface ShellIconProps {
 }
 
 const DEFAULT_SIZE = 20
-const STROKE_WIDTH = 1.75
 
 /** La misma pinta que `Icon`, para el puñado de iconos que dibuja el armazón. */
 export function ShellIcon({ name, size = DEFAULT_SIZE, label, className }: ShellIconProps) {
-  const isNamed = label !== undefined && label !== ''
-  const Glyph = SHELL_ICONS[name]
-
-  return (
-    <Glyph
-      className={className}
-      size={size}
-      strokeWidth={STROKE_WIDTH}
-      role={isNamed ? 'img' : undefined}
-      aria-label={label}
-      aria-hidden={isNamed ? undefined : true}
-      focusable="false"
-    />
-  )
+  return <Glyph glyph={SHELL_ICONS[name]} size={size} label={label} className={className} />
 }

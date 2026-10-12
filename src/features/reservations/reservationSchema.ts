@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
-import type { Reservation, ReservationRequest, ReservationStatus } from '@/api/types'
-import type { StatusTone } from '@/components/StatusBadge'
+import type { Reservation, ReservationRequest } from '@/api/types'
 import { textOptional } from '@/components/formRules'
 import { wallClockIn, zonedInstant } from '@/services/format'
 
@@ -65,11 +64,4 @@ export function reservationRequest(values: ReservationValues, timeZone: string):
     table_id: values.table_id === '' ? null : Number(values.table_id),
     notes: values.notes,
   }
-}
-
-export const STATUS_TONE: Record<ReservationStatus, StatusTone | undefined> = {
-  booked: 'pending',
-  seated: 'completed',
-  cancelled: 'cancelled',
-  no_show: 'cancelled',
 }
