@@ -42,7 +42,8 @@ test('VIS-06 el tablero, el historial, la cancelación, el comprobante y la caja
   await expect(page.getByRole('status').filter({ hasText: 'En vivo' })).toBeVisible()
   await capture(page, 'tablero')
 
-  await page.getByRole('button', { name: 'Cancelar pedido #3' }).click()
+  await page.getByRole('button', { name: 'Más acciones del pedido #3' }).click()
+  await page.getByRole('menu', { name: 'Más acciones del pedido #3' }).getByRole('menuitem', { name: 'Cancelar pedido' }).click()
   const cancel = page.getByRole('dialog', { name: '¿Cancelar el pedido #3?' })
   await cancel.getByLabel('Motivo').fill('El cliente se fue')
   await captureWindow(cancel, 'dialogo-cancelar-pedido')
