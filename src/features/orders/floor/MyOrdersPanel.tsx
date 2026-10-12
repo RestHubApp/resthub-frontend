@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { staffOf, useSession, useTimeZone } from '@/store/session'
 import { isActive } from '@/features/orders/orderLabels'
-import { QueryError } from '@/features/orders/QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { OrderList } from './OrderList'
 import { todayIn } from '@/services/format'
 
@@ -22,7 +22,7 @@ export function MyOrdersPanel() {
   }
   if (orders.isError) {
     return (
-      <QueryError
+      <RetryQueryError
         error={orders.error}
         fallback="No se pudieron cargar tus pedidos."
         onRetry={() => void orders.refetch()}

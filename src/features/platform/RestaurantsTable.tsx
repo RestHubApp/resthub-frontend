@@ -4,7 +4,7 @@ import type { PlatformRestaurantSummary } from '@/api/types'
 import { DataTable, type DataColumn } from '@/components/DataTable'
 import { formatDateTime } from '@/services/format'
 import { paths } from '@/services/paths'
-import { PlatformQueryError } from './PlatformQueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { PLATFORM_TIME_ZONE } from './platformTime'
 import { staffSummary } from './restaurantList'
 import { RestaurantStatusBadge } from './RestaurantStatusBadge'
@@ -42,7 +42,7 @@ interface RestaurantsTableProps {
 /** La tabla de restaurantes, o el error con su reintento si la lista no cargó. */
 export function RestaurantsTable({ items, isLoading, emptyMessage, error, onRetry }: RestaurantsTableProps) {
   if (error !== null) {
-    return <PlatformQueryError error={error} fallback="No se pudo cargar la lista." onRetry={onRetry} />
+    return <RetryQueryError error={error} fallback="No se pudo cargar la lista." onRetry={onRetry} />
   }
 
   return <DataTable label="Restaurantes" columns={COLUMNS} data={items} isLoading={isLoading} emptyMessage={emptyMessage} getRowId={(r) => String(r.id)} />

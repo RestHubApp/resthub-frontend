@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { orderMenuQuery } from '@/api/orders'
 import type { OrderMenuItem } from '@/api/types'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { QueryError } from '@/features/orders/QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { CategoryChips } from './CategoryChips'
 import { MenuSections } from './MenuSections'
 import { ModifierDialog } from './ModifierDialog'
@@ -29,7 +29,7 @@ export function MenuPicker({ lines, onAdd, onChange }: MenuPickerProps) {
   }
   if (menu.isError && menu.data === undefined) {
     return (
-      <QueryError error={menu.error} fallback="No se pudo cargar la carta." onRetry={() => void menu.refetch()} />
+      <RetryQueryError error={menu.error} fallback="No se pudo cargar la carta." onRetry={() => void menu.refetch()} />
     )
   }
 

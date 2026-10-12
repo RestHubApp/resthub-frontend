@@ -1,8 +1,8 @@
 import type { PreviewAs } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { errorMessage, hasCode } from '@/services/apiError'
+import { hasCode } from '@/services/apiError'
 import { PREVIEW_AS_LABELS } from './previewLink'
 import { PreviewOpenedNotice } from './PreviewOpenedNotice'
 import { SandboxResetButton } from './SandboxResetButton'
@@ -42,7 +42,7 @@ export function PreviewLauncher() {
       </div>
       {open === null ? null : <PreviewOpenedNotice label={PREVIEW_AS_LABELS[open.as]} url={open.url} onUsed={close} />}
       {start.isError ? (
-        <FormMessage tone="error">{errorMessage(start.error, 'No se pudo abrir la vista previa.')}</FormMessage>
+        <ErrorMessage error={start.error} fallback="No se pudo abrir la vista previa." />
       ) : null}
       {hasCode(start.error, 'sandbox_account_unavailable') ? (
         <SandboxResetButton

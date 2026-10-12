@@ -1,10 +1,9 @@
 import type { PlatformRestaurantDetail } from '@/api/types'
-import { FormMessage } from '@/components/FormMessage'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
 import { SectionCard } from '@/components/SectionCard'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/apiError'
 import { OwnerFields } from './OwnerFields'
 import { MAX_SLUG, sanitizeSlugInput } from './slug'
 import { TimeZoneField } from './TimeZoneField'
@@ -54,7 +53,7 @@ export function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProp
           errors={ownerErrors(errors.owner)}
         />
       </SectionCard>
-      {registration.isError ? <FormMessage tone="error">{errorMessage(registration.error, 'No se pudo crear el restaurante.')}</FormMessage> : null}
+      <ErrorMessage isError={registration.isError} error={registration.error} fallback="No se pudo crear el restaurante." />
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar

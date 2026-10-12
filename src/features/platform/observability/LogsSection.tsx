@@ -2,7 +2,7 @@ import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { obsLogsQuery } from '@/api/observability'
 import { SectionCard } from '@/components/SectionCard'
-import { PlatformQueryError } from '@/features/platform/PlatformQueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { LoadMoreButton } from './LoadMoreButton'
 import { LogFilters } from './LogFilters'
 import { LogTable } from './LogTable'
@@ -25,7 +25,7 @@ export function LogsSection({ filters, onChange, live }: LogsSectionProps) {
       <SectionCard title="Logs" description="Advertencias y errores, los más nuevos primero. Horas de Lima.">
         <LogFilters filters={filters} onChange={onChange} />
         {logs.isError ? (
-          <PlatformQueryError error={logs.error} fallback="No se pudieron cargar los logs." onRetry={() => void logs.refetch()} />
+          <RetryQueryError error={logs.error} fallback="No se pudieron cargar los logs." onRetry={() => void logs.refetch()} />
         ) : (
           <div aria-busy={logs.isPlaceholderData} className={`flex flex-col gap-3 ${logs.isPlaceholderData ? 'opacity-60' : ''}`}>
             <LogTable entries={entries} isLoading={logs.isPending} filters={filters} />

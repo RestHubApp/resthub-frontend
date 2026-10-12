@@ -7,7 +7,7 @@ import { paths } from '@/services/paths'
 import { HistoryFiltersBar } from './history/HistoryFiltersBar'
 import { OrderSummary } from './history/OrderSummary'
 import { useHistoryList } from './history/useHistoryList'
-import { QueryError } from './QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 
 /**
  * El historial de pedidos del encargado, con filtros y el detalle de cada uno.
@@ -27,7 +27,7 @@ export function HistoryView() {
       </SectionCard>
       <SectionCard title="Pedidos" description={history.isSuccess ? `${String(total)} en total` : undefined}>
         {history.isError ? (
-          <QueryError error={history.error} fallback="No se pudo cargar el historial." onRetry={() => void history.refetch()} />
+          <RetryQueryError error={history.error} fallback="No se pudo cargar el historial." onRetry={() => void history.refetch()} />
         ) : (
           <DataTable
             label="Historial de pedidos"

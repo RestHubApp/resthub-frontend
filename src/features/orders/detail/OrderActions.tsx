@@ -46,7 +46,6 @@ export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
         <Button
           type="button"
           size="lg"
-          variant={step.action === 'charge' ? 'success' : 'default'}
           className={WIDE}
           disabled={advance.isPending}
           onClick={() => {

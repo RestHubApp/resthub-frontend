@@ -1,9 +1,9 @@
 import type { PlatformRestaurantDetail } from '@/api/types'
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/apiError'
 import { TimeZoneField } from './TimeZoneField'
 import { useRestaurantSettings } from './useRestaurantSettings'
 
@@ -43,7 +43,7 @@ export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormPro
         />
       </div>
       {save.isError ? (
-        <FormMessage tone="error">{errorMessage(save.error, 'No se pudieron guardar los cambios.')}</FormMessage>
+        <ErrorMessage error={save.error} fallback="No se pudieron guardar los cambios." />
       ) : null}
       {save.isSuccess && !isDirty ? <FormMessage tone="ok">Cambios guardados.</FormMessage> : null}
       <div className="flex justify-end">

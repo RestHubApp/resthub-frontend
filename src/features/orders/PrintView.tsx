@@ -5,7 +5,7 @@ import { useParams } from 'react-router'
 import { orderQuery } from '@/api/orders'
 import { EmptyState } from '@/components/EmptyState'
 import { PrintSheet } from './PrintSheet'
-import { QueryError } from './QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 
 /**
  * Una hoja para la impresora térmica: la comanda para cocina o la cuenta.
@@ -30,7 +30,7 @@ export function PrintView() {
     return <EmptyState title="Preparando la hoja…" />
   }
   if (order.isError) {
-    return <QueryError error={order.error} fallback="No se pudo cargar el pedido." onRetry={() => void order.refetch()} />
+    return <RetryQueryError error={order.error} fallback="No se pudo cargar el pedido." onRetry={() => void order.refetch()} />
   }
 
   return <PrintSheet order={order.data} isTicket={params['kind'] === 'comanda'} />

@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ErrorMessage } from '@/components/ErrorMessage'
 
 import { platformMutationKeys, updatePlatformRestaurant } from '@/api/platform'
 import type { PlatformRestaurantDetail } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
-import { errorMessage } from '@/services/apiError'
 import { saveRestaurant } from './restaurantCache'
 
 interface RestaurantStatusButtonProps {
@@ -41,7 +40,7 @@ export function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonPro
   const button = (
     <Button
       type="button"
-      variant={restaurant.is_active ? 'danger' : 'success'}
+      variant={restaurant.is_active ? 'destructive' : 'secondary'}
       disabled={status.isPending}
       onClick={restaurant.is_active ? undefined : change}
     >
@@ -64,7 +63,7 @@ export function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonPro
         button
       )}
       {status.isError ? (
-        <FormMessage tone="error">{errorMessage(status.error, 'No se pudo cambiar el estado.')}</FormMessage>
+        <ErrorMessage error={status.error} fallback="No se pudo cambiar el estado." />
       ) : null}
     </div>
   )

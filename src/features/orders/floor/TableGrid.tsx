@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { tablesQuery } from '@/api/tables'
 import { ListSkeleton } from '@/components/ListSkeleton'
-import { QueryError } from '@/features/orders/QueryError'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { EmptyTables } from './EmptyTables'
 import { TableCard } from './TableCard'
 
@@ -21,7 +21,7 @@ export function TableGrid() {
   }
   if (tables.isError) {
     return (
-      <QueryError
+      <RetryQueryError
         error={tables.error}
         fallback="No se pudieron cargar las mesas."
         onRetry={() => void tables.refetch()}

@@ -7,7 +7,6 @@ import { FormDialog } from '@/components/FormDialog'
 import { RetryQueryError } from '@/components/RetryQueryError'
 import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/services/format'
-import { errorMessage } from '@/services/apiError'
 
 interface TablePickerDialogProps {
   readonly open: boolean
@@ -51,7 +50,7 @@ export function TablePickerDialog({
         }
       }}
     >
-      {tables.isError ? <RetryQueryError message={errorMessage(tables.error, 'No se pudieron cargar las mesas.')} onRetry={() => { void tables.refetch() }} /> : null}
+      {tables.isError ? <RetryQueryError error={tables.error} fallback="No se pudieron cargar las mesas." onRetry={() => { void tables.refetch() }} /> : null}
       {tables.isSuccess && options.length === 0 ? <EmptyState title={empty} /> : null}
       <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0 sm:grid-cols-3">
         {options.map((table) => (
