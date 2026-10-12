@@ -67,7 +67,7 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
   await expect(row).toContainText('Cocinero')
 
   await row.getByRole('button', { name: 'Más acciones de Lucía Ramos' }).click()
-  await page.getByRole('menuitem', { name: 'Contraseña' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Lucía Ramos' }).getByRole('menuitem', { name: 'Contraseña' }).click()
   const password = page.getByRole('dialog', { name: 'Restablecer la contraseña de Lucía Ramos' })
   await password.getByLabel('Nueva contraseña').fill('corta')
   await password.getByRole('button', { name: 'Restablecer' }).click()
@@ -80,14 +80,14 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
 
   // Desactivar se confirma: desde ese momento no entra.
   await row.getByRole('button', { name: 'Más acciones de Lucía Ramos' }).click()
-  await page.getByRole('menuitem', { name: 'Desactivar' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Lucía Ramos' }).getByRole('menuitem', { name: 'Desactivar' }).click()
   const confirm = page.getByRole('alertdialog', { name: '¿Desactivar a Lucía Ramos?' })
   await evidence(page, 'ges-15-2-desactivar')
   await confirm.getByRole('button', { name: 'Desactivar' }).click()
   await expect(row).toContainText('Inactiva')
   expect(await tryAccess(local.http, email, OTHER_SECRET)).not.toBe(200)
   await row.getByRole('button', { name: 'Más acciones de Lucía Ramos' }).click()
-  await page.getByRole('menuitem', { name: 'Activar' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Lucía Ramos' }).getByRole('menuitem', { name: 'Activar' }).click()
   await expect(row).toContainText('Activa')
   await expect.poll(() => tryAccess(local.http, email, OTHER_SECRET)).toBe(200)
 

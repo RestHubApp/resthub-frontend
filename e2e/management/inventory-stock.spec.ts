@@ -42,7 +42,7 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
   // Merma: se pide el motivo y se ve cómo queda el stock antes de guardar.
   const ingredients = page.getByRole('tabpanel', { name: /Insumos/u })
   await ingredients.getByRole('button', { name: 'Más acciones de Cebolla roja' }).click()
-  await page.getByRole('menuitem', { name: 'Merma' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Cebolla roja' }).getByRole('menuitem', { name: 'Merma' }).click()
   const waste = page.getByRole('dialog', { name: 'Registrar merma: Cebolla roja' })
   await waste.getByLabel('Cantidad perdida', { exact: true }).fill('250')
   await expect(waste.getByText(/Hoy hay 3 kg → quedará en 2\.75 kg/u)).toBeVisible()
@@ -57,7 +57,7 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
 
   // Ajuste por conteo: se escribe lo que hay y el sistema calcula la diferencia.
   await ingredients.getByRole('button', { name: 'Más acciones de Lomo de res' }).click()
-  await page.getByRole('menuitem', { name: 'Ajuste' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Lomo de res' }).getByRole('menuitem', { name: 'Ajuste' }).click()
   const adjustment = page.getByRole('dialog', { name: 'Ajustar stock: Lomo de res' })
   await expect(adjustment.getByLabel('Conté lo que hay')).toBeChecked()
   await adjustment.getByLabel('Stock contado', { exact: true }).fill('4.8')
@@ -68,7 +68,7 @@ test('GES-04 el encargado registra una merma, dos ajustes y una compra, revisa e
 
   // Ajuste por diferencia: sobra algo que no se había anotado.
   await ingredients.getByRole('button', { name: 'Más acciones de Lomo de res' }).click()
-  await page.getByRole('menuitem', { name: 'Ajuste' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Lomo de res' }).getByRole('menuitem', { name: 'Ajuste' }).click()
   await adjustment.getByText('Sé cuánto sobra o falta').click()
   await adjustment.getByLabel('La diferencia', { exact: true }).selectOption({ label: 'Sobra: sumar al stock' })
   await adjustment.getByLabel('Cantidad de la diferencia', { exact: true }).fill('150')
@@ -161,7 +161,7 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
 
   // Editar: la unidad no se cambia; el mínimo sí.
   await ingredients.getByRole('button', { name: 'Más acciones de Limón' }).click()
-  await page.getByRole('menuitem', { name: 'Editar' }).click()
+  await page.getByRole('menu', { name: 'Más acciones de Limón' }).getByRole('menuitem', { name: 'Editar' }).click()
   const edit = page.getByRole('dialog', { name: 'Editar: Limón' })
   await expect(edit.getByText(/Se mide en/u)).toContainText('La unidad no se cambia')
   await expect(edit.getByLabel('Stock mínimo', { exact: true })).toHaveValue('2')

@@ -52,12 +52,12 @@ test('VIS-08 la carta con sus ventanas de alta, edición y confirmaciones', asyn
   await form(page, page.getByRole('button', { name: 'Editar Lomo saltado' }), 'Editar Lomo saltado', 'dialogo-editar-plato')
 
   await page.getByRole('button', { name: 'Más acciones de la categoría Fondos' }).click()
-  await confirmation(page, page.getByRole('menuitem', { name: 'Desactivar' }), '¿Desactivar Fondos?', 'confirmar-desactivar-categoria')
+  await confirmation(page, page.getByRole('menu', { name: 'Más acciones de la categoría Fondos' }).getByRole('menuitem', { name: 'Desactivar' }), '¿Desactivar Fondos?', 'confirmar-desactivar-categoria')
   await page.getByRole('button', { name: 'Más acciones de la categoría Postres' }).click()
-  await confirmation(page, page.getByRole('menuitem', { name: 'Eliminar' }), '¿Eliminar Postres?', 'confirmar-eliminar-categoria')
+  await confirmation(page, page.getByRole('menu', { name: 'Más acciones de la categoría Postres' }).getByRole('menuitem', { name: 'Eliminar' }), '¿Eliminar Postres?', 'confirmar-eliminar-categoria')
   const lomo = page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: 'Lomo saltado' }) })
   await lomo.getByRole('button', { name: 'Más acciones de Lomo saltado' }).click()
-  await confirmation(page, page.getByRole('menuitem', { name: 'Desactivar' }), '¿Sacar Lomo saltado de la carta?', 'confirmar-sacar-plato')
+  await confirmation(page, page.getByRole('menu', { name: 'Más acciones de Lomo saltado' }).getByRole('menuitem', { name: 'Desactivar' }), '¿Sacar Lomo saltado de la carta?', 'confirmar-sacar-plato')
 })
 
 test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plato', async ({ page, local }) => {
@@ -90,10 +90,10 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
   await capture(page, 'inventario-insumos')
 
   await page.getByRole('button', { name: 'Más acciones de Cebolla roja' }).click()
-  await form(page, page.getByRole('menuitem', { name: 'Merma' }), 'Registrar merma: Cebolla roja', 'dialogo-merma')
+  await form(page, page.getByRole('menu', { name: 'Más acciones de Cebolla roja' }).getByRole('menuitem', { name: 'Merma' }), 'Registrar merma: Cebolla roja', 'dialogo-merma')
   await form(page, page.getByRole('button', { name: 'Compra de Culantro' }), 'Registrar compra: Culantro', 'dialogo-compra')
   await page.getByRole('button', { name: 'Más acciones de Lomo de res' }).click()
-  await form(page, page.getByRole('menuitem', { name: 'Ajuste' }), /^Ajust.*Lomo de res$/u, 'dialogo-ajuste')
+  await form(page, page.getByRole('menu', { name: 'Más acciones de Lomo de res' }).getByRole('menuitem', { name: 'Ajuste' }), /^Ajust.*Lomo de res$/u, 'dialogo-ajuste')
 
   const tabs: readonly (readonly [RegExp, string, string])[] = [
     [/^Movimientos/u, 'Stock inicial', 'inventario-movimientos'],
