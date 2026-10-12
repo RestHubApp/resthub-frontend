@@ -1,7 +1,11 @@
-import { Checkbox } from '@/components/ui/checkbox'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
 import { ShellIcon } from '@/features/shell/ShellIcon'
 import type { NavEntry } from '@/features/shell/navigation'
-import { MoveButton } from './MoveButton'
+import { MenuRowActions } from './MenuRowActions'
 
 interface MenuRowProps {
   readonly entry: NavEntry
@@ -10,59 +14,53 @@ interface MenuRowProps {
   readonly isInBar: boolean
   /** La barra de abajo ya tiene sus cuatro: esta, que no está en ella, no puede entrar. */
   readonly isBarFull: boolean
-  readonly onMove: (index: number, step: -1 | 1) => void
+  readonly onStep: (index: number, step: -1 | 1) => void
   readonly onToggleBar: (path: string) => void
 }
 
-// La casilla de Radix es un <button>: se nombra con `aria-labelledby` (la pantalla y el texto «En la
-// barra») y la etiqueta apunta a ella con `htmlFor`, como en `StockRulesCard`.
-/** Una pantalla del menú: su lugar, si va en la barra de abajo y los botones para subirla o bajarla. */
-export function MenuRow({ entry, index, count, isInBar, isBarFull, onMove, onToggleBar }: MenuRowProps) {
-  const nameId = `menu-name-${entry.to}`
-  const barId = `menu-bar-${entry.to}`
-  const checkboxId = `menu-check-${entry.to}`
+/**
+ * Una pantalla del menú: un asa para arrastrarla, su icono y nombre, y un «⋯» con
+ * Subir, Bajar y poner o sacar de la barra de abajo.
+ *
+ * El asa es lo único que arrastra (así el dedo puede desplazar la página sobre el
+ * resto de la fila). El «⋯» es la alternativa de un solo toque, sin arrastrar, para
+ * quien no puede o no quiere hacerlo (WCAG 2.5.7); con teclado, Espacio levanta el
+ * asa, las flechas la mueven y Espacio la suelta.
+ */
+export function MenuRow({ entry, index, count, isInBar, isBarFull, onStep, onToggleBar }: MenuRowProps) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: entry.to })
+
   return (
-    <li className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border bg-card px-3 py-2">
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`flex items-center gap-2 rounded-lg border bg-card py-1 pr-1 pl-1 ${isDragging ? 'relative z-10 shadow-float' : ''}`}
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        ref={setActivatorNodeRef}
+        aria-label={`Arrastrar ${entry.label}`}
+        className="touch-none cursor-grab text-muted-foreground active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <Icon name="dragHandle" size={18} />
+      </Button>
       <span className="flex min-w-0 flex-1 items-center gap-3 font-medium">
         <ShellIcon name={entry.icon} size={18} className="shrink-0 text-muted-foreground" />
-        <span id={nameId} className="min-w-0 truncate">
-          {entry.label}
-        </span>
+        <span className="min-w-0 truncate">{entry.label}</span>
       </span>
-      <span className="flex min-h-11 items-center gap-2 text-sm">
-        <Checkbox
-          id={checkboxId}
-          checked={isInBar}
-          disabled={!isInBar && isBarFull}
-          aria-labelledby={`${nameId} ${barId}`}
-          onCheckedChange={() => {
-            onToggleBar(entry.to)
-          }}
-        />
-        <label htmlFor={checkboxId} id={barId} className="cursor-pointer">
-          En la barra
-        </label>
-      </span>
-      <span className="flex gap-1">
-        <MoveButton
-          path={entry.to}
-          label={entry.label}
-          step={-1}
-          isAtEdge={index === 0}
-          onMove={() => {
-            onMove(index, -1)
-          }}
-        />
-        <MoveButton
-          path={entry.to}
-          label={entry.label}
-          step={1}
-          isAtEdge={index === count - 1}
-          onMove={() => {
-            onMove(index, 1)
-          }}
-        />
-      </span>
+      <MenuRowActions
+        entry={entry}
+        index={index}
+        count={count}
+        isInBar={isInBar}
+        isBarFull={isBarFull}
+        onStep={onStep}
+        onToggleBar={onToggleBar}
+      />
     </li>
   )
 }
