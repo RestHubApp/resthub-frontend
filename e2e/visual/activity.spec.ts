@@ -6,6 +6,8 @@ import { issueSalesReceipt, id, sell } from '../support/management'
 import { capture, captureWindow, expect, deadline, test } from './capture'
 
 const ENTRIES = [
+  { id: 5, kind: 'signed_out', kind_label: 'Cerró sesión', detail: '', user_id: 2, user_name: 'Mesero Prueba', user_role_id: 2, user_role_label: 'Mesero', occurred_at: '2026-10-12T17:30:00Z' },
+  { id: 4, kind: 'order_created', kind_label: 'Tomó un pedido', detail: 'Pedido #12 (mesa 4): 2 platos, S/ 56.00', user_id: 2, user_name: 'Mesero Prueba', user_role_id: 2, user_role_label: 'Mesero', occurred_at: '2026-10-12T17:10:00Z' },
   { id: 3, kind: 'customer_revealed', kind_label: 'Vio completos los datos de un cliente', detail: '', user_id: 2, user_name: 'Mesero Prueba', user_role_id: 2, user_role_label: 'Mesero', occurred_at: '2026-10-12T17:05:00Z' },
   { id: 2, kind: 'customer_viewed', kind_label: 'Abrió la ficha de un cliente', detail: '', user_id: 2, user_name: 'Mesero Prueba', user_role_id: 2, user_role_label: 'Mesero', occurred_at: '2026-10-12T17:04:00Z' },
   { id: 1, kind: 'signed_in', kind_label: 'Inició sesión', detail: '', user_id: 1, user_name: 'Encargada Prueba', user_role_id: 1, user_role_label: 'Encargado', occurred_at: '2026-10-12T17:00:00Z' },

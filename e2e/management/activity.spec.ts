@@ -43,3 +43,32 @@ test('GES-37 una cuenta que solo consulta ve el contacto del cliente oculto, lo 
   await expect(log.getByText('Aceptó los términos y condiciones')).toHaveCount(0)
   await evidence(page, 'ges-37-4-bitacora-accesos')
 })
+
+test('GES-39 el mesero cierra sesión y el encargado ve cuándo salió, filtrando por entradas y salidas y por persona', async ({ page, local }) => {
+  covers('ruta:/bitacora', 'funcion:bitacora.ver', 'funcion:bitacora.filtrar-sesiones', 'funcion:bitacora.filtrar-persona', 'funcion:personal.ver-movimientos')
+  await openAs(page, local.waiter, '/perfil')
+  await page.getByRole('button', { name: 'Buscar o ir a…' }).click()
+  await page.getByRole('dialog', { name: 'Buscar o ir a…' }).getByRole('option', { name: /^Cerrar sesión/u }).click()
+  await expect(page).toHaveURL(/\/acceso$/u)
+  // El aviso de salida es de segundo plano: se espera a que el servidor lo reciba antes de cambiar de cuenta.
+  await page.waitForResponse((response) => response.url().endsWith('/auth/logout'))
+
+  await page.evaluate(() => {
+    localStorage.clear()
+  })
+  await page.goto('about:blank')
+  await openAs(page, local.owner, '/bitacora')
+  await page.getByLabel('Mostrar').selectOption({ label: 'Entradas y salidas' })
+  const log = page.getByRole('region', { name: 'Bitácora del restaurante' })
+  await expect(log.getByText('Cerró sesión').first()).toBeVisible()
+  await evidence(page, 'ges-39-1-bitacora-salidas')
+
+  // Desde Personal, «Ver movimientos» abre la bitácora de esa persona.
+  await page.goto('/personal')
+  await page.getByRole('row', { name: /Mesero Prueba/u }).getByRole('button', { name: /^Más acciones de/u }).click()
+  await page.getByRole('menuitem', { name: 'Ver movimientos' }).click()
+  await expect(page).toHaveURL(/\/bitacora\?persona=\d+$/u)
+  await expect(page.getByLabel('Persona')).toHaveValue(/\d+/u)
+  await expect(log.getByText('Cerró sesión').first()).toBeVisible()
+  await evidence(page, 'ges-39-2-bitacora-persona')
+})

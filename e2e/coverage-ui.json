@@ -1,5 +1,5 @@
 {
-  "total": 455,
+  "total": 458,
   "byType": {
     "ruta": 38,
     "confirmacion": 11,
@@ -7,7 +7,7 @@
     "dialogo": 26,
     "hoja": 9,
     "pestanas": 4,
-    "funcion": 278,
+    "funcion": 281,
     "estado": 75,
     "rol": 6
   },
@@ -2146,6 +2146,24 @@
       "id": "funcion:bitacora.filtrar-accesos",
       "type": "funcion",
       "description": "Filtrar la bitácora por «Accesos a datos de clientes»",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:bitacora.filtrar-sesiones",
+      "type": "funcion",
+      "description": "Filtrar la bitácora por «Entradas y salidas» para ver cuándo entra y sale el personal",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:bitacora.filtrar-persona",
+      "type": "funcion",
+      "description": "Filtrar la bitácora por una persona del personal",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:personal.ver-movimientos",
+      "type": "funcion",
+      "description": "Desde Personal, «Ver movimientos» abre la bitácora de esa persona",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
