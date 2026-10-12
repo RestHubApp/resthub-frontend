@@ -21,6 +21,8 @@
   "ignoreDependencies": [
     "@stryker-mutator/api",
     "@fontsource-variable/geist",
+    "@fontsource-variable/atkinson-hyperlegible-next",
+    "@fontsource-variable/lexend",
     "@cspell/dict-css",
     "@cspell/dict-en_us",
     "@cspell/dict-html",

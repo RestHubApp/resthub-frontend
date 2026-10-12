@@ -8,6 +8,9 @@ import { RouterProvider } from 'react-router/dom'
 // Primero: al cargarse elige el almacenamiento de la pestaña y saca de la barra
 // el código de vista previa, antes de que el router lea la dirección.
 import './services/tabStorage'
+// Pone el tema, la letra y el tamaño de la cuenta en <html> antes de que React
+// pinte: así la página no sale con un tema y salta a otro.
+import '@/store/appearance'
 import { router } from '@/router/routes'
 import { logger, logUncaughtErrors } from './services/logger'
 import { queryClient } from './services/queryClient'
