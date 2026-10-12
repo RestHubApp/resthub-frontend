@@ -247,7 +247,7 @@ test('ACC-10 la hoja «Más» del celular abre las otras pantallas, la accesibil
 test('ACC-11 la política de privacidad se lee sin sesión desde el acceso @mobile', async ({ page }) => {
   covers('ruta:/privacidad')
   await page.goto('/acceso')
-  await page.getByRole('link', { name: 'Privacidad' }).click()
+  await page.getByRole('link', { name: 'Privacidad y términos' }).click()
   await expect(page).toHaveURL(/\/privacidad$/u)
   await expect(page.getByRole('heading', { name: 'Términos de uso y política de privacidad', level: 1 })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Tus derechos (ARCO)', level: 2 })).toBeVisible()

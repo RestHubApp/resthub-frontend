@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router'
 
 import { Brand } from '@/components/Brand'
+import { PublicFooter } from '@/components/PublicFooter'
 import { paths } from '@/services/paths'
 import { LoginPanel } from './LoginPanel'
 
@@ -15,7 +15,7 @@ interface LoginLayoutProps {
  * El formulario manda: va primero, centrado en su columna y con la marca justo
  * encima. En pantallas anchas el panel de marca ocupa el resto a toda la
  * altura; en el celular no hay panel y el formulario queda solo. La
- * privacidad es un enlace discreto al pie de la columna.
+ * El pie (privacidad, derechos y accesibilidad) cierra la columna.
  */
 export function LoginLayout({ children }: LoginLayoutProps) {
   return (
@@ -25,14 +25,11 @@ export function LoginLayout({ children }: LoginLayoutProps) {
           <Brand to={paths.login} />
           {children}
         </div>
-        <footer className="mx-auto w-full max-w-sm pb-14 text-sm sm:pb-0">
-          <Link
-            to={paths.privacy}
-            className="-ml-2 inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            Privacidad
-          </Link>
-        </footer>
+        <div className="mx-auto w-full max-w-sm pb-14 sm:pb-0">
+          <div className="sm:w-md">
+            <PublicFooter privacyTo={paths.privacy} rightsTo={paths.privacyRights} />
+          </div>
+        </div>
       </div>
       <LoginPanel />
     </div>
