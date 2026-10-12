@@ -4,6 +4,7 @@ import type { TableState } from '@/api/types'
 import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
+import { useScreenAction } from '@/hooks/useScreenAction'
 import { TableFormDialog } from './TableFormDialog'
 import { TableListCard } from './TableListCard'
 
@@ -16,6 +17,10 @@ import { TableListCard } from './TableListCard'
 export function TablesView() {
   // `undefined` cerrada; `null` para crear; una mesa para renombrarla.
   const [editing, setEditing] = useState<TableState | null | undefined>(undefined)
+
+  useScreenAction('nueva-mesa', () => {
+    setEditing(null)
+  })
 
   return (
     <div className="flex flex-col gap-6">

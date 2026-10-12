@@ -1,10 +1,8 @@
 import { tableName } from '@/api/tables'
 import type { TableState } from '@/api/types'
-import { Icon } from '@/components/Icon'
+import { ActionsMenu, type ActionsMenuItem } from '@/components/ActionsMenu'
 import { StatusBadge } from '@/components/StatusBadge'
-import { Button } from '@/components/ui/button'
-import { MoveButtons } from './MoveButtons'
-import { TableStatusButton } from './TableStatusButton'
+import { useTableStatus } from './useTableStatus'
 
 interface TableAdminRowProps {
   readonly table: TableState
@@ -15,27 +13,45 @@ interface TableAdminRowProps {
   readonly onRename: () => void
 }
 
-/** Una mesa en la administracion: subir, bajar, renombrar, activar o desactivar. */
-export function TableAdminRow({ table, isFirst, isLast, moving, onMove, onRename }: TableAdminRowProps) {
-  const order = table.active_order
+type TableStatus = ReturnType<typeof useTableStatus>
+
+/** Las acciones de la mesa: subir y bajar en el recorrido, renombrar y activar o desactivar. */
+function tableEntries({ table, isFirst, isLast, moving, onMove, onRename }: TableAdminRowProps, status: TableStatus): ActionsMenuItem[] {
+  const toggle: ActionsMenuItem = table.is_active
+    ? { label: 'Desactivar', icon: 'turnOn', isDestructive: true, isDisabled: status.isBlocked || status.isPending, onSelect: status.toggle }
+    : { label: 'Activar', icon: 'turnOn', isDisabled: status.isPending, onSelect: status.toggle }
+  return [
+    { label: 'Subir', icon: 'up', isDisabled: isFirst || moving, onSelect: () => { onMove(-1) } },
+    { label: 'Bajar', icon: 'down', isDisabled: isLast || moving, onSelect: () => { onMove(1) } },
+    { label: 'Renombrar', icon: 'edit', onSelect: onRename },
+    toggle,
+  ]
+}
+
+/**
+ * Una mesa en la administración: su nombre y su estado a la vista; subir,
+ * bajar, renombrar y activar o desactivar, tras «⋯».
+ *
+ * Una mesa con un pedido en curso no se desactiva: la opción queda
+ * deshabilitada y la fila ya dice que está ocupada.
+ */
+export function TableAdminRow(props: TableAdminRowProps) {
+  const { table } = props
+  const status = useTableStatus(table)
+  const name = tableName(table.label)
 
   return (
-    <li className="flex flex-wrap items-center gap-3 border-b py-3 last:border-b-0">
-      <MoveButtons label={tableName(table.label)} isFirst={isFirst} isLast={isLast} disabled={moving} onMove={onMove} />
-      <div className="flex min-w-32 flex-1 flex-col gap-1">
-        <span className={`text-lg font-semibold ${table.is_active ? '' : 'text-muted-foreground'}`}>{tableName(table.label)}</span>
+    <li className="flex items-center gap-3 border-b py-3 last:border-b-0">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className={`text-lg font-semibold break-words ${table.is_active ? '' : 'text-muted-foreground'}`}>{name}</span>
         <span className="flex flex-wrap gap-1.5">
           <StatusBadge label={table.is_active ? 'Activa' : 'Inactiva'} tone={table.is_active ? 'completed' : undefined} />
-          {order === null ? null : <StatusBadge label={`Ocupada · pedido #${String(order.number)}`} tone="pending" />}
+          {table.active_order === null ? null : (
+            <StatusBadge label={`Ocupada · pedido #${String(table.active_order.number)}`} tone="pending" />
+          )}
         </span>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="ghost" className="px-3" onClick={onRename}>
-          <Icon name="edit" size={16} />
-          <span>Renombrar</span>
-        </Button>
-        <TableStatusButton table={table} />
-      </div>
+      <ActionsMenu label={`Más acciones de ${name}`} items={tableEntries(props, status)} />
     </li>
   )
 }
