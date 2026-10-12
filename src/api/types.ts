@@ -160,14 +160,29 @@ export type PurchaseSuggestion = components['schemas']['PurchaseSuggestionRespon
 export type BillingSettings = components['schemas']['BillingSettingsResponse']
 export type BillingSettingsRequest = components['schemas']['BillingSettingsRequest']
 export type Invoice = components['schemas']['InvoiceResponse']
+export type BillingCapabilities = components['schemas']['BillingCapabilitiesResponse']
+export type SendInvoiceEmailRequest = components['schemas']['SendInvoiceEmailRequest']
+export type SendInvoiceEmailResponse = components['schemas']['SendInvoiceEmailResponse']
 export type InvoicePage = components['schemas']['InvoicePageResponse']
 export type IssueInvoiceRequest = components['schemas']['IssueInvoiceRequest']
 export type InvoiceKind = components['schemas']['InvoiceKind']
-export type DocumentType = components['schemas']['DocumentType']
+// El backend tiene dos enums con este nombre (comprobantes y consulta); el contrato los distingue por módulo, pero ambos valen "none" | "dni" | "ce" | "ruc".
+export type DocumentType = components['schemas']['DocumentType-Input']
 
 // Clientes frecuentes y reservas de mesa.
 export type Customer = components['schemas']['CustomerResponse']
 export type CustomerRequest = components['schemas']['CustomerRequest']
+/** Teléfono y correo completos de un cliente, tras pedir «Ver completo». */
+export type CustomerContact = components['schemas']['CustomerContactResponse']
+
+// Consulta de RUC/DNI a través de Factiliza (un tercero), solo cuando la persona la pide.
+export type DocumentLookup = components['schemas']['DocumentLookupResponse']
+export type LookupDocumentType = DocumentLookup['document_type']
+
+// Bitácora del restaurante: lo que hizo cada cuenta del personal.
+export type ActivityEntry = components['schemas']['ActivityResponse']
+export type ActivityKind = components['schemas']['ActivityKind']
+export type ActivityParams = NonNullable<operations['read_activity_api_v1_activity_get']['parameters']['query']>
 export type Reservation = components['schemas']['ReservationResponse']
 export type ReservationRequest = components['schemas']['ReservationRequest']
 export type ReservationStatus = components['schemas']['ReservationStatus']

@@ -685,5 +685,21 @@
   {
     "id": "funcion:apariencia.restablecer",
     "description": "Restablecer toda la apariencia, menú incluido, a lo de siempre"
+  },
+  {
+    "id": "funcion:bitacora.ver",
+    "description": "El encargado ve en la bitácora quién hizo qué y cuándo"
+  },
+  {
+    "id": "funcion:bitacora.filtrar-accesos",
+    "description": "Filtrar la bitácora por «Accesos a datos de clientes»"
+  },
+  {
+    "id": "funcion:clientes.ver-completo",
+    "description": "Con el contacto enmascarado, «Ver completo» lo muestra y queda en la bitácora"
+  },
+  {
+    "id": "funcion:comprobantes.enviar-correo",
+    "description": "Enviar el comprobante emitido por correo desde su ventana, si el restaurante tiene el correo activo"
   }
 ]

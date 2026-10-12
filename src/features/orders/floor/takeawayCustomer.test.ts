@@ -18,7 +18,7 @@ const saved: CustomerRequest[] = []
 
 const CUSTOMER = {
   id: 9, name: 'Ana', phone: '987654321', email: '', address: 'Av. Larco 123', reference: '', notes: '',
-  consent_at: null, consent_version: null, created_at: '2026-10-01T10:00:00Z', is_frequent: false,
+  consent_at: null, consent_version: null, created_at: '2026-10-01T10:00:00Z', is_frequent: false, masked: false,
   last_visit: null, visits: 0, spent: '0.00', average_ticket: '0.00', recent_orders: [],
 }
 

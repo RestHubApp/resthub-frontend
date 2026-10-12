@@ -1,13 +1,13 @@
 {
-  "total": 447,
+  "total": 454,
   "byType": {
-    "ruta": 36,
+    "ruta": 37,
     "confirmacion": 11,
     "desplegable": 8,
-    "dialogo": 25,
+    "dialogo": 26,
     "hoja": 9,
     "pestanas": 4,
-    "funcion": 273,
+    "funcion": 278,
     "estado": 75,
     "rol": 6
   },
@@ -28,6 +28,12 @@
       "id": "ruta:/acceso",
       "type": "ruta",
       "description": "Pantalla /acceso",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/bitacora",
+      "type": "ruta",
+      "description": "Pantalla /bitacora",
       "origin": "src/services/paths.ts"
     },
     {
@@ -439,6 +445,12 @@
       "origin": "src/features/orders/invoice/InvoiceDialog.tsx"
     },
     {
+      "id": "dialogo:orders/invoice/InvoiceEmailDialog",
+      "type": "dialogo",
+      "description": "Enviar por correo",
+      "origin": "src/features/orders/invoice/InvoiceEmailDialog.tsx"
+    },
+    {
       "id": "dialogo:orders/taking/ModifierDialog",
       "type": "dialogo",
       "description": "item.name",
@@ -495,7 +507,7 @@
     {
       "id": "hoja:customers/CustomerSheet",
       "type": "hoja",
-      "description": "{data?.name ?? 'Cliente'}",
+      "description": "",
       "origin": "src/features/customers/CustomerSheet.tsx"
     },
     {
@@ -2119,6 +2131,30 @@
       "origin": "e2e/inventory/functions/management.json"
     },
     {
+      "id": "funcion:bitacora.ver",
+      "type": "funcion",
+      "description": "El encargado ve en la bitácora quién hizo qué y cuándo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:bitacora.filtrar-accesos",
+      "type": "funcion",
+      "description": "Filtrar la bitácora por «Accesos a datos de clientes»",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:clientes.ver-completo",
+      "type": "funcion",
+      "description": "Con el contacto enmascarado, «Ver completo» lo muestra y queda en la bitácora",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.enviar-correo",
+      "type": "funcion",
+      "description": "Enviar el comprobante emitido por correo desde su ventana, si el restaurante tiene el correo activo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
       "id": "funcion:pedidos.sin-conexion-encolar",
       "type": "funcion",
       "description": "Sin señal, un pedido nuevo queda en la cola del celular con un aviso visible (HU37)",
@@ -2692,6 +2728,12 @@
       "id": "estado:observabilidad.error",
       "type": "estado",
       "description": "Una lectura del panel falla: error y «Reintentar»",
+      "origin": "e2e/inventory/functions/platform.json"
+    },
+    {
+      "id": "funcion:acceso.consentimientos-separados",
+      "type": "funcion",
+      "description": "Antes de empezar: dos casillas separadas sin marcar, cada una con su enlace a la privacidad; el botón se habilita solo con ambas",
       "origin": "e2e/inventory/functions/platform.json"
     }
   ]

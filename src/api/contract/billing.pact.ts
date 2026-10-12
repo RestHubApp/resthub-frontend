@@ -61,6 +61,12 @@ function invoiceShape() {
     status_label: string('Sin enviar (sin proveedor)'),
     provider_message: string(''),
     pdf_url: string(''),
+    xml_url: string(''),
+    cdr_url: string(''),
+    archive_status: oneOf(['disabled', 'pending', 'done', 'failed'], 'disabled'),
+    archive_status_label: string('Respaldo apagado'),
+    archive_message: string(''),
+    archived_at: like(null),
     issued_at: isoDatetime(),
   })
 }

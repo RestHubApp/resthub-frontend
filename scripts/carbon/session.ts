@@ -16,6 +16,8 @@ const WAITER_ACCOUNT = {
   preview: false,
   terms_version: '2026-10',
   terms_accepted: true,
+  privacy_version: '2026-10',
+  privacy_accepted: true,
   restaurant: { id: 1, name: 'La Picantería', slug: 'la-picanteria', timezone: 'America/Lima' },
   user: { id: 7, email: 'ana@resthub.dev', full_name: 'Ana Torres', role_id: 2, role_label: 'Mesero' },
 }

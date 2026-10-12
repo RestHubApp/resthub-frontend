@@ -1,6 +1,7 @@
 import type { DocumentType } from '@/api/types'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DocumentNumberField } from './DocumentNumberField'
 import { customerComplete } from './invoiceDocument'
 
 interface CustomerValues {
@@ -28,12 +29,17 @@ export function CustomerFields({ documentType, withAddress, values, onChange }: 
     <>
       {documentType === 'none' ? null : (
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="comprobante-numero">{isRuc ? 'RUC' : 'Número de documento'}</Label>
-            <Input id="comprobante-numero" inputMode="numeric" value={values.number} onChange={(e) => {
-              onChange({ ...values, number: e.target.value })
-            }} />
-          </div>
+          <DocumentNumberField
+            documentType={documentType}
+            value={values.number}
+            onChange={(number) => {
+              onChange({ ...values, number })
+            }}
+            onFound={(found) => {
+              // Solo rellena los campos: siguen editables y nada se guarda hasta emitir.
+              onChange({ ...values, name: found.name, address: found.address ?? values.address })
+            }}
+          />
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="comprobante-nombre">{isRuc ? 'Razón social' : 'Nombre'}</Label>
             <Input id="comprobante-nombre" value={values.name} onChange={(e) => {

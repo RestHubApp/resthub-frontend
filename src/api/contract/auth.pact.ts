@@ -47,6 +47,11 @@ function sessionShape() {
     }),
     permissions: eachLike(regex(/^[a-z_]+\.[a-z_]+$/u, 'orders.charge')),
     preview: boolean(false),
+    // Los dos consentimientos separados que pide la puerta «Antes de empezar» (Ley N.º 29733).
+    terms_version: string('2026-10'),
+    terms_accepted: boolean(true),
+    privacy_version: string('2026-10'),
+    privacy_accepted: boolean(true),
   }
 }
 

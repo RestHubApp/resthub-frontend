@@ -32,7 +32,9 @@ const dayInLima = (days = 0) => new Date(Date.now() - 5 * 3600_000 + days * 86_4
 async function acceptTerms() {
   for (const account of ['owner', 'waiter', 'kitchen']) {
     const r = await call(null, 'POST', '/auth/login', { email: ACCOUNTS[account].email, password: PASSWORD })
-    if (!r.terms_accepted) await call(r.access_token, 'POST', '/auth/me/terms', { version: r.terms_version })
+    if (!r.terms_accepted || !r.privacy_accepted) {
+      await call(r.access_token, 'POST', '/auth/me/terms', { terms_version: r.terms_version, privacy_version: r.privacy_version })
+    }
   }
 }
 

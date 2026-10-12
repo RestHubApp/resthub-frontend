@@ -22,6 +22,7 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
     'funcion:plataforma.restaurantes.identificador-sugerido',
     'funcion:plataforma.restaurantes.validar-alta',
     'funcion:acceso.entrar',
+    'funcion:acceso.consentimientos-separados',
   )
   const suffix = unique()
   const name = `Cevichería Ñandú ${suffix}`
@@ -57,11 +58,17 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
   // El encargado nuevo entra por el acceso de siempre y ve su local.
   await page.goto('/acceso')
   await signInByForm(page, email, NEW_SECRET)
-  // Su primer acceso: acepta los términos y la política de privacidad (Ley N.º 29733).
+  // Su primer acceso: da dos consentimientos separados (Ley N.º 29733).
   await expect(page.getByRole('heading', { name: 'Antes de empezar' })).toBeVisible()
-  await expect(page.getByRole('link', { name: /términos de uso y la política de privacidad/u })).toHaveAttribute('href', '/privacidad')
+  await expect(page.getByRole('link', { name: /términos y condiciones/u })).toHaveAttribute('href', '/privacidad#terminos')
+  await expect(page.getByRole('link', { name: /datos personales/u })).toHaveAttribute('href', '/privacidad#datos')
+  const proceed = page.getByRole('button', { name: 'Continuar' })
+  await expect(proceed).toBeDisabled()
+  await page.getByRole('checkbox', { name: /términos y condiciones del servicio/u }).check()
+  await expect(proceed).toBeDisabled()
   await evidence(page, 'pla-01-terminos')
-  await page.getByRole('button', { name: 'Acepto los términos' }).click()
+  await page.getByRole('checkbox', { name: /tratamiento de mis datos personales/u }).check()
+  await proceed.click()
   await expect(page).toHaveURL(/\/pedidos$/u)
   await expect(page.getByText(name).first()).toBeVisible()
   await expect(navigation(page).getByRole('link', { name: 'Personal' })).toBeVisible()

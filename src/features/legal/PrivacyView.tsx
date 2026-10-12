@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 
 import { useHashFocus } from '@/hooks/useHashFocus'
-import { paths, PRIVACY_RIGHTS_ANCHOR } from '@/services/paths'
+import { paths, PRIVACY_DATA_ANCHOR, PRIVACY_RIGHTS_ANCHOR, PRIVACY_TERMS_ANCHOR } from '@/services/paths'
 
 /**
  * La versión de este texto. Es la misma que `TERMS_VERSION` en el backend
@@ -24,10 +24,12 @@ const SECTIONS: readonly Section[] = [
     title: 'Quién trata tus datos',
     paragraphs: [
       'Cada restaurante que usa RestHub es el titular de los datos de sus clientes y de su personal, y decide para qué los usa. RestHub es el encargado del tratamiento: guarda y procesa esos datos solo para dar el servicio al restaurante.',
+      'Cuando una persona del restaurante pide buscar un RUC o un DNI, esa consulta se hace a través de Factiliza, un tercero que actúa como encargado de tratamiento; solo se envía el número buscado.',
+      'Cuando el restaurante envía un comprobante por correo, el envío se hace a través de Brevo, y el respaldo de los comprobantes (XML y PDF) se guarda en Google Drive; ambos son terceros que actúan como encargados de tratamiento, y el correo solo sale cuando el usuario lo pide.',
     ],
   },
   {
-    id: 'datos',
+    id: PRIVACY_DATA_ANCHOR,
     title: 'Qué datos se guardan',
     paragraphs: [
       'De los clientes: nombre, teléfono, correo, dirección de entrega, referencia y notas (que pueden incluir alergias, un dato de salud), sus pedidos y sus comprobantes.',
@@ -82,7 +84,8 @@ const SECTIONS: readonly Section[] = [
  * Términos de uso y política de privacidad (Ley N.º 29733).
  *
  * Pública: se abre sin sesión, desde el acceso o desde la pantalla que pide
- * aceptarlos.
+ * aceptarlos. Esa pantalla enlaza el encabezado (términos de uso) y «Qué datos se
+ * guardan» (tratamiento de datos) para que cada consentimiento lleve a su parte.
  */
 export function PrivacyView() {
   useHashFocus()
@@ -90,7 +93,7 @@ export function PrivacyView() {
   return (
     // Se dibuja dentro del armazón, que ya tiene su <main>: un artículo y no otro.
     <article className="mx-auto flex w-full max-w-3xl flex-col gap-6 py-2">
-      <header className="flex flex-col gap-2">
+      <header id={PRIVACY_TERMS_ANCHOR} tabIndex={-1} className="flex scroll-mt-4 flex-col gap-2 outline-none">
         <h1 className="m-0 font-heading text-2xl font-bold sm:text-3xl">Términos de uso y política de privacidad</h1>
         <p className="m-0 text-sm text-muted-foreground">
           {`Versión ${PRIVACY_VERSION}. Conforme a la Ley N.º 29733, Ley de Protección de Datos Personales del Perú.`}

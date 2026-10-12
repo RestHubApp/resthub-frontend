@@ -65,6 +65,7 @@ export const ROUTES = [
   { id: 'receta', name: 'Editor de receta', route: '/inventario/recetas/:dish', pattern: '/inventario/recetas/:menuItemId', account: 'owner' },
   { id: 'personal', name: 'Personal', route: '/personal', pattern: '/personal', account: 'owner' },
   { id: 'roles', name: 'Roles y permisos', route: '/roles', pattern: '/roles', account: 'owner' },
+  { id: 'bitacora', name: 'Bitácora del restaurante', route: '/bitacora', pattern: '/bitacora', account: 'owner' },
   { id: 'panel', name: 'Indicadores (panel BI)', route: '/panel', pattern: '/panel', account: 'owner' },
   { id: 'panel-reposicion', name: 'Panel: reposición', route: '/panel/reposicion', pattern: '/panel/reposicion', account: 'owner' },
   { id: 'panel-ia', name: 'Panel: decisiones de la IA', route: '/panel/ia', pattern: '/panel/ia', account: 'owner' },
@@ -198,7 +199,7 @@ export const ROUTER_ROUTES = [
   '/', '/acceso', '/pedidos', '/pedidos/nuevo', '/pedidos/:orderId', '/pedidos/:orderId/agregar',
   '/perfil', '/perfil/apariencia', '/tablero', '/tablero/historial', '/cocina', '/imprimir/:orderId/:kind', '/comprobantes',
   '/comprobantes/:invoiceId/imprimir', '/reservas', '/clientes', '/caja', '/menu', '/mesas', '/inventario',
-  '/inventario/recetas/:menuItemId', '/personal', '/roles', '/panel', '/panel/reposicion', '/panel/ia', '*',
+  '/inventario/recetas/:menuItemId', '/personal', '/roles', '/bitacora', '/panel', '/panel/reposicion', '/panel/ia', '*',
   '/plataforma/acceso', '/plataforma', '/plataforma/restaurantes/nuevo', '/plataforma/restaurantes/:restaurantId',
   '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/vista-previa', '/privacidad',
 ]

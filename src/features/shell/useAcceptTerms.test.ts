@@ -15,10 +15,10 @@ function wrapper({ children }: { children: ReactNode }) {
 
 describe('useAcceptTerms', () => {
   it('al aceptar deja la cuenta con los términos aceptados', async () => {
-    const accepted = buildAccount(PERMISSIONS_OWNER, { terms_accepted: true })
+    const accepted = buildAccount(PERMISSIONS_OWNER, { terms_accepted: true, privacy_accepted: true })
     server().on('post', TERMS, accepted)
     signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
-    const { result } = renderHook(() => useAcceptTerms('2026-01'), { wrapper })
+    const { result } = renderHook(() => useAcceptTerms({ terms_version: '2026-01', privacy_version: '2026-01' }), { wrapper })
 
     act(() => {
       result.current.mutate()
@@ -33,7 +33,7 @@ describe('useAcceptTerms', () => {
     const newer = buildAccount(PERMISSIONS_OWNER, { terms_accepted: false, terms_version: '2027-01' })
     server().on('post', TERMS, new ErrorResponse(409, 'Cambió', 'outdated_terms')).on('get', '/auth/me', newer)
     signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
-    const { result } = renderHook(() => useAcceptTerms('2026-01'), { wrapper })
+    const { result } = renderHook(() => useAcceptTerms({ terms_version: '2026-01', privacy_version: '2026-01' }), { wrapper })
 
     act(() => {
       result.current.mutate()

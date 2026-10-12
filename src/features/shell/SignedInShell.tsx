@@ -2,6 +2,7 @@ import { Outlet } from 'react-router'
 
 import type { Session } from '@/api/types'
 import { BottomNav } from './BottomNav'
+import { DataAccessAlert } from './DataAccessAlert'
 import { PreviewBannerGate } from './PreviewBannerGate'
 import { ServerFailureNotice } from './ServerFailureNotice'
 import { ShellOverlays } from './ShellOverlays'
@@ -37,6 +38,7 @@ export function SignedInShell({ account, screens }: SignedInShellProps) {
         <div className="flex min-h-dvh min-w-0 flex-col">
           <SignedInHeader account={account} />
           <ServerFailureNotice />
+          <DataAccessAlert />
           <main
             id="contenido"
             tabIndex={-1}

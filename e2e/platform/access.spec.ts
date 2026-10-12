@@ -41,6 +41,7 @@ const ALL = [
   'Personal',
   'Roles',
   'Resumen',
+  'Bitácora',
 ]
 // La barra de abajo de fábrica de quien lleva el local: pedidos, tablero, caja y resumen.
 const BAR_OF_OWNER = ['Pedidos', 'Tablero', 'Caja', 'Resumen']

@@ -9,6 +9,7 @@ import type { PermissionCode, PlatformPermissionCode } from '@/api/types'
  * prohibe fuera de este archivo.
  */
 export const PERMISSION = {
+  activityRead: 'activity.read',
   billingIssue: 'billing.issue',
   billingManage: 'billing.manage',
   cashManage: 'cash.manage',

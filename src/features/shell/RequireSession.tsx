@@ -30,7 +30,7 @@ export function RequireSession({ permission }: RequireSessionProps) {
   // Ley N.º 29733: sin aceptar los términos vigentes no se trabaja. Una vista
   // previa no los acepta: quien mira no es el dueño de la cuenta.
   // La administración del sistema no trabaja con datos de clientes: no los acepta.
-  if (account.kind === 'staff' && !account.terms_accepted && !account.preview) {
+  if (account.kind === 'staff' && (!account.terms_accepted || !account.privacy_accepted) && !account.preview) {
     return <TermsGate account={account} />
   }
   if (permission !== undefined && !hasPermission(account, permission)) {

@@ -1,20 +1,23 @@
-import { Link } from 'react-router'
-import { ErrorMessage } from '@/components/ErrorMessage'
+import { useState } from 'react'
 
+import { ErrorMessage } from '@/components/ErrorMessage'
 import type { StaffSession } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { paths } from '@/services/paths'
 import { useSession } from '@/store/session'
+import { TermsConsents } from './TermsConsents'
 import { useAcceptTerms } from './useAcceptTerms'
 
 /**
- * Ley N.º 29733: antes de trabajar, cada cuenta acepta los términos de uso y
- * la política de privacidad vigentes. Si cambian, se vuelven a pedir.
+ * Ley N.º 29733: antes de trabajar, cada cuenta da dos consentimientos
+ * separados y sin marcar de antemano: los términos y condiciones del servicio, y
+ * el tratamiento de sus datos personales. Si cambia el texto de alguno, se vuelven a pedir.
  */
 export function TermsGate({ account }: { readonly account: StaffSession }) {
   const signOut = useSession((state) => state.signOut)
-  const accept = useAcceptTerms(account.terms_version)
+  const accept = useAcceptTerms({ terms_version: account.terms_version, privacy_version: account.privacy_version })
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false)
+  const [hasAcceptedData, setHasAcceptedData] = useState(false)
 
   return (
     // Dentro del armazón, que ya tiene su <main>: una sección y no otro.
@@ -25,13 +28,15 @@ export function TermsGate({ account }: { readonly account: StaffSession }) {
         </CardHeader>
         <CardContent className="flex flex-col gap-3 px-6 leading-relaxed">
           <p className="m-0">
-            {`Hola, ${account.user.full_name}. En RestHub vas a trabajar con datos personales de clientes, como su teléfono, su dirección o sus alergias. La Ley N.º 29733 pide que los uses solo para atender al restaurante y que los cuides.`}
+            {`Hola, ${account.user.full_name}. En RestHub vas a trabajar con datos personales de clientes, como su teléfono, su dirección o sus alergias. La Ley N.º 29733 pide que los uses solo para atender al restaurante y que los cuides. Acepta cada punto por separado.`}
           </p>
-          <p className="m-0">
-            <Link to={paths.privacy} target="_blank" className="inline-flex min-h-11 items-center underline underline-offset-4">
-              {`Leer los términos de uso y la política de privacidad (versión ${account.terms_version})`}
-            </Link>
-          </p>
+          <TermsConsents
+            account={account}
+            hasAcceptedTerms={hasAcceptedTerms}
+            hasAcceptedData={hasAcceptedData}
+            onTermsChange={setHasAcceptedTerms}
+            onDataChange={setHasAcceptedData}
+          />
           {accept.isError ? (
             <ErrorMessage error={accept.error} fallback="No se pudo guardar. Vuelve a intentarlo." />
           ) : null}
@@ -42,12 +47,12 @@ export function TermsGate({ account }: { readonly account: StaffSession }) {
           </Button>
           <Button
             type="button"
-            disabled={accept.isPending}
+            disabled={accept.isPending || !hasAcceptedTerms || !hasAcceptedData}
             onClick={() => {
               accept.mutate()
             }}
           >
-            {accept.isPending ? 'Guardando…' : 'Acepto los términos'}
+            {accept.isPending ? 'Guardando…' : 'Continuar'}
           </Button>
         </CardFooter>
       </Card>

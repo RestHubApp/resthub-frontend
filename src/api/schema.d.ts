@@ -98,11 +98,12 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Aceptar los términos de uso y la política de privacidad
-         * @description Ley N.º 29733: la cuenta acepta la versión vigente antes de trabajar.
+         * Aceptar por separado los términos y el tratamiento de datos personales
+         * @description Ley N.º 29733: dos consentimientos separados antes de trabajar.
          *
-         *     Responde la sesión ya al día. Si la versión leída no es la vigente, 409:
-         *     la interfaz vuelve a mostrar el texto nuevo.
+         *     La cuenta acepta los términos y condiciones y, aparte, el tratamiento de sus
+         *     datos personales. Responde la sesión ya al día. Si alguna versión leída no es
+         *     la vigente, 409: la interfaz vuelve a mostrar el texto nuevo.
          */
         post: operations["accept_terms_api_v1_auth_me_terms_post"];
         delete?: never;
@@ -162,6 +163,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/billing/capabilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Qué funciones opcionales tiene encendidas el servidor */
+        get: operations["read_capabilities_api_v1_billing_capabilities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/billing/invoices": {
         parameters: {
             query?: never;
@@ -191,6 +209,40 @@ export interface paths {
         get: operations["read_invoice_api_v1_billing_invoices__invoice_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/invoices/{invoice_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pedir o reintentar el respaldo del XML y el PDF en Google Drive */
+        post: operations["archive_invoice_api_v1_billing_invoices__invoice_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/invoices/{invoice_id}/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enviar el comprobante por correo al cliente */
+        post: operations["email_invoice_api_v1_billing_invoices__invoice_id__email_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -359,7 +411,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Ficha del cliente */
+        /**
+         * Ficha del cliente
+         * @description Abrir la ficha queda en la bitácora (quién, cuándo y qué cliente).
+         *
+         *     Sin `customers.manage`, el teléfono y el correo llegan enmascarados
+         *     (`masked: true`). Más fichas abiertas de las que permite la política
+         *     (`DLP_ALERT_MAX_CARDS` en `DLP_ALERT_WINDOW_MINUTES`) dejan una alerta.
+         */
         get: operations["read_customer_api_v1_customers__customer_id__get"];
         /** Editar un cliente */
         put: operations["update_customer_api_v1_customers__customer_id__put"];
@@ -404,6 +463,26 @@ export interface paths {
         get: operations["export_customer_api_v1_customers__customer_id__export_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/{customer_id}/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ver completos el teléfono y el correo de un cliente
+         * @description «Ver completo»: devuelve los datos sin enmascarar y queda en la bitácora.
+         */
+        post: operations["reveal_customer_api_v1_customers__customer_id__reveal_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -988,6 +1067,57 @@ export interface paths {
         put?: never;
         /** Registrar una merma con su motivo */
         post: operations["register_waste_api_v1_inventory_waste_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lookup/dni/{dni}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Buscar un DNI en RENIEC */
+        get: operations["lookup_dni_api_v1_lookup_dni__dni__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lookup/ruc/{ruc}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Buscar un RUC en SUNAT */
+        get: operations["lookup_ruc_api_v1_lookup_ruc__ruc__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lookup/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** ¿Está activa la búsqueda? */
+        get: operations["read_status_api_v1_lookup_status_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1948,8 +2078,10 @@ export interface components {
     schemas: {
         /** AcceptTermsRequest */
         AcceptTermsRequest: {
-            /** Version */
-            version: string;
+            /** Privacy Version */
+            privacy_version: string;
+            /** Terms Version */
+            terms_version: string;
         };
         /**
          * ActiveOrderSummaryResponse
@@ -1998,7 +2130,7 @@ export interface components {
          *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
          * @enum {string}
          */
-        ActivityKind: "signed_in" | "password_changed" | "terms_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "reservation_created" | "reservation_updated";
+        ActivityKind: "signed_in" | "password_changed" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
         /** ActivityPageResponse */
         ActivityPageResponse: {
             /** Items */
@@ -2093,6 +2225,24 @@ export interface components {
             /** Subject Label */
             subject_label: string | null;
             subject_type: components["schemas"]["SubjectType"];
+        };
+        /**
+         * ArchiveStatus
+         * @description Estado del respaldo del XML y el PDF de un comprobante en el almacenamiento propio.
+         * @enum {string}
+         */
+        ArchiveStatus: "disabled" | "pending" | "done" | "failed";
+        /**
+         * BillingCapabilitiesResponse
+         * @description Qué funciones opcionales tiene encendidas el servidor; la pantalla oculta lo apagado.
+         */
+        BillingCapabilitiesResponse: {
+            /** Archive Enabled */
+            archive_enabled: boolean;
+            /** Email Enabled */
+            email_enabled: boolean;
+            /** Email Max Per Hour */
+            email_max_per_hour: number;
         };
         /** BillingSettingsRequest */
         BillingSettingsRequest: {
@@ -2400,6 +2550,16 @@ export interface components {
             session: components["schemas"]["CashSessionResponse"] | null;
         };
         /**
+         * CustomerContactResponse
+         * @description Los datos de contacto completos, tras pedir «Ver completo».
+         */
+        CustomerContactResponse: {
+            /** Email */
+            email: string;
+            /** Phone */
+            phone: string;
+        };
+        /**
          * CustomerExportResponse
          * @description Derecho de acceso: todo lo que el local guarda de un cliente.
          */
@@ -2518,6 +2678,8 @@ export interface components {
             is_frequent: boolean;
             /** Last Visit */
             last_visit: string | null;
+            /** Masked */
+            masked: boolean;
             /** Name */
             name: string;
             /** Notes */
@@ -2619,11 +2781,28 @@ export interface components {
             period: components["schemas"]["PeriodResponse"];
         };
         /**
+         * DocumentLookupResponse
+         * @description Lo que dice SUNAT (RUC) o RENIEC (DNI). Se rellena el formulario; no se guarda.
+         */
+        DocumentLookupResponse: {
+            /** Address */
+            address: string | null;
+            /** Condition */
+            condition: string | null;
+            /** Document Number */
+            document_number: string;
+            document_type: components["schemas"]["resthub__modules__lookup__domain__documents__DocumentType"];
+            /** Name */
+            name: string;
+            /** Status */
+            status: string | null;
+        };
+        /**
          * DocumentType
          * @description Tipo de documento del cliente, con el código del catálogo 6 de SUNAT.
          * @enum {string}
          */
-        DocumentType: "none" | "dni" | "ce" | "ruc";
+        "DocumentType-Input": "none" | "dni" | "ce" | "ruc";
         /** EditPurchaseOrderRequest */
         EditPurchaseOrderRequest: {
             /** Lines */
@@ -2641,7 +2820,7 @@ export interface components {
          * @description Código estable de un error del API (ver `resthub.core.error_codes`).
          * @enum {string}
          */
-        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_not_found" | "invoice_number_taken" | "log_entry_not_found" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "weak_password" | "wrong_current_password";
+        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_not_found" | "invoice_number_taken" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "weak_password" | "wrong_current_password";
         /**
          * ErrorResponse
          * @description Un error del API: el texto para la persona y el código estable.
@@ -2803,13 +2982,22 @@ export interface components {
         };
         /** InvoiceResponse */
         InvoiceResponse: {
+            /** Archive Message */
+            archive_message: string;
+            archive_status: components["schemas"]["ArchiveStatus"];
+            /** Archive Status Label */
+            archive_status_label: string;
+            /** Archived At */
+            archived_at: string | null;
+            /** Cdr Url */
+            cdr_url: string;
             /** Code */
             code: string;
             /** Customer Address */
             customer_address: string;
             /** Customer Document Number */
             customer_document_number: string;
-            customer_document_type: components["schemas"]["DocumentType"];
+            customer_document_type: components["schemas"]["resthub__modules__billing__domain__invoices__DocumentType"];
             /** Customer Name */
             customer_name: string;
             /** Discount */
@@ -2847,6 +3035,8 @@ export interface components {
             taxable: string;
             /** Total */
             total: string;
+            /** Xml Url */
+            xml_url: string;
         };
         /**
          * InvoiceStatus
@@ -2866,7 +3056,7 @@ export interface components {
              */
             customer_document_number: string;
             /** @default none */
-            customer_document_type: components["schemas"]["DocumentType"];
+            customer_document_type: components["schemas"]["DocumentType-Input"];
             /**
              * Customer Name
              * @default
@@ -2953,6 +3143,14 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+        };
+        /**
+         * LookupStatusResponse
+         * @description Si la búsqueda por RUC/DNI está activa; si no, el frontend no ofrece el botón.
+         */
+        LookupStatusResponse: {
+            /** Enabled */
+            enabled: boolean;
         };
         /** LowStockResponse */
         LowStockResponse: {
@@ -4299,6 +4497,26 @@ export interface components {
             accounts: components["schemas"]["SandboxAccountResponse"][];
             restaurant: components["schemas"]["RestaurantSummaryResponse"] | null;
         };
+        /** SendInvoiceEmailRequest */
+        SendInvoiceEmailRequest: {
+            /**
+             * To Email
+             * Format: email
+             */
+            to_email: string;
+            /**
+             * To Name
+             * @default
+             */
+            to_name: string;
+        };
+        /** SendInvoiceEmailResponse */
+        SendInvoiceEmailResponse: {
+            /** Masked To */
+            masked_to: string;
+            /** Sent */
+            sent: boolean;
+        };
         /** SessionAdminResponse */
         SessionAdminResponse: {
             /** Email */
@@ -4358,6 +4576,10 @@ export interface components {
             permissions: components["schemas"]["Permission"][];
             /** Preview */
             preview: boolean;
+            /** Privacy Accepted */
+            privacy_accepted: boolean;
+            /** Privacy Version */
+            privacy_version: string;
             restaurant: components["schemas"]["SessionRestaurantResponse"];
             /** Terms Accepted */
             terms_accepted: boolean;
@@ -4414,6 +4636,10 @@ export interface components {
             permissions: components["schemas"]["Permission"][];
             /** Preview */
             preview: boolean;
+            /** Privacy Accepted */
+            privacy_accepted: boolean;
+            /** Privacy Version */
+            privacy_version: string;
             restaurant: components["schemas"]["SessionRestaurantResponse"];
             /** Terms Accepted */
             terms_accepted: boolean;
@@ -4757,6 +4983,17 @@ export interface components {
          * @enum {string}
          */
         Window: "1h" | "6h" | "24h" | "7d";
+        /**
+         * DocumentType
+         * @description Tipo de documento del cliente, con el código del catálogo 6 de SUNAT.
+         * @enum {string}
+         */
+        resthub__modules__billing__domain__invoices__DocumentType: "none" | "dni" | "ce" | "ruc";
+        /**
+         * DocumentType
+         * @enum {string}
+         */
+        resthub__modules__lookup__domain__documents__DocumentType: "ruc" | "dni";
     };
     responses: never;
     parameters: never;
@@ -5352,6 +5589,80 @@ export interface operations {
             };
         };
     };
+    read_capabilities_api_v1_billing_capabilities_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingCapabilitiesResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     list_invoices_api_v1_billing_invoices_get: {
         parameters: {
             query?: {
@@ -5546,6 +5857,180 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InvoiceResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    archive_invoice_api_v1_billing_invoices__invoice_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invoice_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    email_invoice_api_v1_billing_invoices__invoice_id__email_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invoice_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendInvoiceEmailRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SendInvoiceEmailResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */
@@ -6813,6 +7298,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CustomerExportResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    reveal_customer_api_v1_customers__customer_id__reveal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerContactResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */
@@ -10226,6 +10796,250 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    lookup_dni_api_v1_lookup_dni__dni__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dni: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentLookupResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    lookup_ruc_api_v1_lookup_ruc__ruc__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ruc: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentLookupResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    read_status_api_v1_lookup_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookupStatusResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */

@@ -137,20 +137,20 @@ export async function signInByApi(http: APIRequestContext, email: string, passwo
   // Como la persona al entrar por primera vez: acepta los términos vigentes
   // (Ley N.º 29733). Su pantalla tiene sus propias pruebas; las demás entran
   // con la cuenta ya al día.
-  const data = access.terms_accepted ? access : await body<StaffSession>(
+  const data = access.terms_accepted && access.privacy_accepted ? access : await body<StaffSession>(
     await http.post(`${API}/auth/me/terms`, {
-      data: { version: access.terms_version },
+      data: { terms_version: access.terms_version, privacy_version: access.privacy_version },
       headers: { Authorization: `Bearer ${token}` },
     }),
     `términos de ${email}`,
   )
-  const { user, restaurant, permissions, preview, terms_version, terms_accepted } = data
+  const { user, restaurant, permissions, preview, terms_version, terms_accepted, privacy_version, privacy_accepted } = data
   return {
     email,
     password,
     name: user.full_name,
     token,
-    account: { kind: 'staff', user, restaurant, permissions, preview, terms_version, terms_accepted },
+    account: { kind: 'staff', user, restaurant, permissions, preview, terms_version, terms_accepted, privacy_version, privacy_accepted },
   }
 }
 

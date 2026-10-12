@@ -20,8 +20,8 @@ export const currentUserQueryKey = ['auth', 'me'] as const
  * `GET /auth/me` para una cuenta del personal.
  */
 export function staffSessionOf(response: StaffAccessTokenResponse): StaffSession {
-  const { user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted } = response
-  return { kind: 'staff', user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted }
+  const { user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted } = response
+  return { kind: 'staff', user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted }
 }
 
 /**
@@ -51,9 +51,9 @@ export async function fetchCurrentUser({ background = false } = {}): Promise<Ses
   return send((client) => client.GET('/api/v1/auth/me'), { background })
 }
 
-/** Acepta los términos y la política de privacidad leídos; devuelve la sesión al día. */
-export async function acceptTerms(version: AcceptTermsRequest['version']): Promise<StaffSession> {
-  return send((client) => client.POST('/api/v1/auth/me/terms', { body: { version } }))
+/** Acepta, por separado, los términos y el tratamiento de datos leídos; devuelve la sesión al día. */
+export async function acceptTerms(versions: AcceptTermsRequest): Promise<StaffSession> {
+  return send((client) => client.POST('/api/v1/auth/me/terms', { body: versions }))
 }
 
 /**

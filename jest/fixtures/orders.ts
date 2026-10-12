@@ -191,6 +191,7 @@ export function customer(changes: Partial<Customer> = {}): Customer {
     reference: 'Frente al parque',
     notes: '',
     is_frequent: true,
+    masked: false,
     visits: 4,
     spent: '240.00',
     average_ticket: '60.00',

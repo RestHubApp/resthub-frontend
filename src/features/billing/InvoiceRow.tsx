@@ -4,6 +4,7 @@ import type { Invoice } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { formatDateTime, formatMoney } from '@/services/format'
 import { paths } from '@/services/paths'
+import { InvoiceArchiveStatus } from './InvoiceArchiveStatus'
 
 interface InvoiceRowProps {
   readonly invoice: Invoice
@@ -24,7 +25,8 @@ export function InvoiceRow({ invoice, timeZone, resending, onResend }: InvoiceRo
           {invoice.customer_name} · {formatDateTime(invoice.issued_at, timeZone)} · {invoice.status_label}
         </span>
       </span>
-      <span className="flex gap-2">
+      <span className="flex flex-wrap items-center gap-2">
+        <InvoiceArchiveStatus invoice={invoice} />
         {invoice.status === 'accepted' ? null : (
           <Button type="button" size="sm" variant="outline" disabled={resending} onClick={onResend}>
             Reenviar

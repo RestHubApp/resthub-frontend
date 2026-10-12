@@ -32,6 +32,7 @@ export const routePatterns = {
   recipeEditor: '/inventario/recetas/:menuItemId',
   staff: '/personal',
   roles: '/roles',
+  activityLog: '/bitacora',
   insights: '/panel',
   restock: '/panel/reposicion',
   aiAudit: '/panel/ia',
@@ -65,11 +66,22 @@ export type PrintKind = 'comanda' | 'cuenta'
 /** El ancla de «Tus derechos (ARCO)» en la privacidad: la usan el enlace del pie y la sección. */
 export const PRIVACY_RIGHTS_ANCHOR = 'derechos'
 
+/** Las anclas de la privacidad que enlaza la puerta «Antes de empezar»: los términos y el tratamiento de datos. */
+export const PRIVACY_TERMS_ANCHOR = 'terminos'
+export const PRIVACY_DATA_ANCHOR = 'datos'
+
+/** El filtro de la bitácora va en `?filtro=`; «accesos» deja solo lo que toca datos de clientes. */
+export const ACTIVITY_FILTER_PARAM = 'filtro'
+export const ACTIVITY_ACCESS_FILTER = 'accesos'
+
 export const paths = {
   home: routePatterns.home,
   login: routePatterns.login,
   privacy: routePatterns.privacy,
   privacyRights: `${routePatterns.privacy}#${PRIVACY_RIGHTS_ANCHOR}`,
+  activityLogAccess: `${routePatterns.activityLog}?${ACTIVITY_FILTER_PARAM}=${ACTIVITY_ACCESS_FILTER}`,
+  privacyTerms: `${routePatterns.privacy}#${PRIVACY_TERMS_ANCHOR}`,
+  privacyData: `${routePatterns.privacy}#${PRIVACY_DATA_ANCHOR}`,
   profile: routePatterns.profile,
   appearance: routePatterns.appearance,
   previewEntry: routePatterns.previewEntry,

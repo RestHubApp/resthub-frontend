@@ -162,37 +162,58 @@ describe('RequireSession: términos y privacidad', () => {
     return mountRoutes(routes, '/pedidos')
   }
 
-  it('sin aceptar los términos vigentes no se trabaja, y al aceptarlos se entra', async () => {
+  it('sin aceptar los dos consentimientos no se trabaja, y con ambos se entra', async () => {
     const api = server()
-    const accepted = buildAccount(PERMISSIONS_OWNER, { terms_accepted: true })
+    const accepted = buildAccount(PERMISSIONS_OWNER, { terms_accepted: true, privacy_accepted: true })
     api.on('post', TERMS, accepted)
-    signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
+    signInAs(PERMISSIONS_OWNER, { terms_accepted: false, privacy_accepted: false })
     const { user } = openProtected()
+    const proceed = screen.getByRole('button', { name: 'Continuar' })
+    const termsBox = screen.getByRole('checkbox', { name: /términos y condiciones del servicio/u })
+    const dataBox = screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/u })
 
     expect(screen.getByRole('heading', { name: BEFORE_STARTING })).toBeInTheDocument()
     expect(screen.queryByText('Pedidos')).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /términos de uso y la política de privacidad/u })).toHaveAttribute('href', '/privacidad')
-    await user.click(screen.getByRole('button', { name: 'Acepto los términos' }))
+    expect(screen.getByRole('link', { name: /términos y condiciones/u })).toHaveAttribute('href', '/privacidad#terminos')
+    expect(screen.getByRole('link', { name: /datos personales/u })).toHaveAttribute('href', '/privacidad#datos')
+    expect(termsBox).not.toBeChecked()
+    expect(dataBox).not.toBeChecked()
+    expect(proceed).toBeDisabled()
+    await user.click(termsBox)
+    expect(proceed).toBeDisabled()
+    await user.click(dataBox)
+    expect(proceed).toBeEnabled()
+    await user.click(proceed)
 
     expect(await screen.findByText('Pedidos')).toBeInTheDocument()
-    expect(api.calls('post', TERMS)[0]?.body).toEqual({ version: '2026-10' })
+    expect(api.calls('post', TERMS)[0]?.body).toEqual({ terms_version: '2026-10', privacy_version: '2026-10' })
+  })
+
+  it('si solo falta el tratamiento de datos, igual se pide la puerta', () => {
+    server()
+    signInAs(PERMISSIONS_OWNER, { terms_accepted: true, privacy_accepted: false })
+    openProtected()
+
+    expect(screen.getByRole('heading', { name: BEFORE_STARTING })).toBeInTheDocument()
   })
 
   it('si la versión cambió mientras se leía, la relee y la vuelve a pedir', async () => {
     const api = server()
     api.on('post', TERMS, new ErrorResponse(409, 'Los términos cambiaron.', 'outdated_terms'))
     api.on('get', '/auth/me', buildAccount(PERMISSIONS_OWNER, { terms_accepted: false, terms_version: '2027-01' }))
-    signInAs(PERMISSIONS_OWNER, { terms_accepted: false })
+    signInAs(PERMISSIONS_OWNER, { terms_accepted: false, privacy_accepted: false })
     const { user } = openProtected()
 
-    await user.click(screen.getByRole('button', { name: 'Acepto los términos' }))
+    await user.click(screen.getByRole('checkbox', { name: /términos y condiciones del servicio/u }))
+    await user.click(screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/u }))
+    await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
     expect(await screen.findByRole('link', { name: /versión 2027-01/u })).toBeInTheDocument()
   })
 
   it('una vista previa no los pide: quien mira no es el dueño de la cuenta', () => {
     server()
-    signInAs(PERMISSIONS_OWNER, { terms_accepted: false, preview: true })
+    signInAs(PERMISSIONS_OWNER, { terms_accepted: false, privacy_accepted: false, preview: true })
     openProtected()
 
     expect(screen.getByText('Pedidos')).toBeInTheDocument()
