@@ -5,7 +5,8 @@ import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 
 const NEW = 'otra-clave-e2e-2026'
-const OPEN_WIDGET = 'Abrir menú de accesibilidad'
+// Con sesión no hay botón flotante: en escritorio el menú se abre desde la fila de la barra lateral.
+const OPEN_WIDGET = 'Accesibilidad'
 const CLOSE_WIDGET = 'Cerrar menú de accesibilidad'
 // El widget pinta el alto contraste con un filtro sobre <html>.
 const FILTER = /aws-filter/u
@@ -66,8 +67,9 @@ test('ACC-12 «Saltar al contenido» lleva el foco al contenido principal', asyn
 test('ACC-13 el menú de accesibilidad se abre, aplica el alto contraste, lo restablece y se cierra', async ({ page, local }) => {
   covers('desplegable:components/AccessibilityWidget', 'funcion:accesibilidad.opcion')
   await openAs(page, local.owner, '/tablero')
-  const open = page.getByRole('button', { name: OPEN_WIDGET })
+  const open = page.getByRole('button', { name: OPEN_WIDGET, exact: true })
   await expect(open).toBeVisible()
+  await expect(page.locator('.asw-menu-btn, .a11y-launcher')).toHaveCount(0)
   await open.click()
   const close = page.getByRole('button', { name: CLOSE_WIDGET })
   await expect(close).toBeVisible()
@@ -81,12 +83,12 @@ test('ACC-13 el menú de accesibilidad se abre, aplica el alto contraste, lo res
 
   await close.click()
   await expect(close).toBeHidden()
-  await expect(open).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.locator('.asw-menu-btn')).toBeHidden()
 })
 
 test('ACC-14 las opciones del menú de accesibilidad se anuncian con el texto que se ve', async ({ page, local }) => {
   await openAs(page, local.owner, '/tablero')
-  await page.getByRole('button', { name: OPEN_WIDGET }).click()
+  await page.getByRole('button', { name: OPEN_WIDGET, exact: true }).click()
   await expect(page.getByRole('button', { name: CLOSE_WIDGET })).toBeVisible()
   for (const name of ['Alto contraste', 'Monocromo', 'Fuente para dislexia', 'Cursor grande']) {
     await expect(page.getByRole('button', { name, exact: true })).toBeVisible()
