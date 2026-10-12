@@ -30,7 +30,7 @@ export function SignedInShell({ account, screens }: SignedInShellProps) {
   return (
     <ShellScreensContext value={screens}>
       <PreviewBannerGate account={account} />
-      <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
+      <div className="min-h-dvh lg:grid lg:grid-cols-[min(15rem,26vw)_1fr]">
         <SkipLink />
         <AccessibilityWidget />
         <ToastStack />

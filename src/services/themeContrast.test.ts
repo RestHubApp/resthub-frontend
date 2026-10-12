@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals'
 
-import { THEMES } from './appearanceRules'
+import { ACCENTS, type ColorChoice, MODES, resolveTheme, THEMES } from './appearanceRules'
 
 // Lee los temas de `src/index.css` y comprueba el contraste de sus pares de
 // color (WCAG 2.2 AA). Lo que `index.css` dice de cada tema es lo que esta
@@ -191,5 +191,49 @@ describe('temas de index.css', () => {
     for (const { id, scheme } of THEMES) {
       expect(THEME_TOKENS[id]?.['color-scheme']).toBe(scheme)
     }
+  })
+})
+
+// Cada combinación que la persona puede armar (modo, color, alto contraste y el modo del
+// dispositivo en «Automático») termina en uno de los temas de arriba: por eso todas cumplen AA.
+interface Combination extends ColorChoice {
+  readonly isDeviceDark: boolean
+}
+
+const CONTRASTS = ['normal', 'high'] as const
+const withDevice = (choice: ColorChoice): Combination[] => [true, false].map((isDeviceDark) => ({ ...choice, isDeviceDark }))
+const withContrast = (mode: ColorChoice['mode'], accent: ColorChoice['accent']): Combination[] =>
+  CONTRASTS.flatMap((contrast) => withDevice({ mode, accent, contrast }))
+const COMBINATIONS = MODES.flatMap(({ id: mode }) => ACCENTS.flatMap(({ id: accent }) => withContrast(mode, accent)))
+
+const themeOfCombination = ({ isDeviceDark, ...choice }: Combination) => resolveTheme(choice, isDeviceDark)
+
+function failuresOf(combination: Combination): string[] {
+  const theme = themeOfCombination(combination)
+  const label = `${combination.mode}/${combination.accent}/${combination.contrast}/${String(combination.isDeviceDark)} (${theme})`
+  return measures(theme)
+    .filter(([, minimum, actual]) => actual < minimum)
+    .map(([name, minimum, actual]) => `${label} ${name}: ${actual.toFixed(2)} (mínimo ${String(minimum)})`)
+}
+
+describe('combinaciones de modo, color y alto contraste', () => {
+  it('hay 48 combinaciones y todas dan un tema que existe en index.css', () => {
+    expect(COMBINATIONS).toHaveLength(48)
+    const defined = new Set(Object.keys(THEME_TOKENS))
+    expect(COMBINATIONS.filter((combination) => !defined.has(themeOfCombination(combination)))).toEqual([])
+  })
+
+  it('todas cumplen el contraste mínimo de cada par de colores', () => {
+    expect(COMBINATIONS.flatMap(failuresOf)).toEqual([])
+  })
+
+  it('cada acento tiene variante clara y oscura, y el alto contraste también', () => {
+    const ids = new Set(THEMES.map((theme) => theme.id))
+    for (const { id } of ACCENTS) {
+      expect(ids.has(id)).toBe(true)
+      expect(ids.has(`${id}-dark`)).toBe(true)
+    }
+    expect(ids.has('contrast')).toBe(true)
+    expect(ids.has('contrast-dark')).toBe(true)
   })
 })

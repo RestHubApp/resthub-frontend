@@ -1,12 +1,12 @@
 {
-  "total": 432,
+  "total": 433,
   "byType": {
     "ruta": 36,
     "confirmacion": 11,
     "desplegable": 8,
     "dialogo": 24,
     "hoja": 3,
-    "pestanas": 2,
+    "pestanas": 3,
     "funcion": 265,
     "estado": 77,
     "rol": 6
@@ -509,6 +509,12 @@
       "type": "pestanas",
       "description": "",
       "origin": "src/features\\orders\\OrdersView.tsx"
+    },
+    {
+      "id": "pestanas:shell/appearance/AppearanceView",
+      "type": "pestanas",
+      "description": "",
+      "origin": "src/features\\shell\\appearance\\AppearanceView.tsx"
     },
     {
       "id": "funcion:pedidos.ver-mesas",
@@ -2055,7 +2061,7 @@
     {
       "id": "funcion:apariencia.cambiar-tema",
       "type": "funcion",
-      "description": "Elegir el tema de colores (también «Según el sistema»): se aplica al instante y se queda al recargar",
+      "description": "Elegir el modo (claro, oscuro o automático), el color y el alto contraste: se aplica al instante y se queda al recargar",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
@@ -2067,7 +2073,7 @@
     {
       "id": "funcion:apariencia.ordenar-menu",
       "type": "funcion",
-      "description": "Subir y bajar las pantallas del menú; solo salen las que la cuenta puede abrir",
+      "description": "Subir, bajar o arrastrar las pantallas del menú; solo salen las que la cuenta puede abrir",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
@@ -2079,7 +2085,7 @@
     {
       "id": "funcion:apariencia.restablecer",
       "type": "funcion",
-      "description": "Volver el menú, o toda la apariencia, a lo de siempre",
+      "description": "Restablecer toda la apariencia, menú incluido, a lo de siempre",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
