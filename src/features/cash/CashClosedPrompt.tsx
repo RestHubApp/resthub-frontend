@@ -15,9 +15,7 @@ import { OpenCashForm } from './OpenCashForm'
  */
 export function CashClosedPrompt() {
   const [isOpen, setIsOpen] = useState(false)
-  useScreenAction('abrir-caja', () => {
-    setIsOpen(true)
-  })
+  const request = useScreenAction('abrir-caja')
 
   return (
     <>
@@ -34,8 +32,13 @@ export function CashClosedPrompt() {
         </Button>
       </EmptyState>
       <FormDialog
-        open={isOpen}
-        onOpenChange={setIsOpen}
+        open={isOpen || request.isRequested}
+        onOpenChange={(isNowOpen) => {
+          setIsOpen(isNowOpen)
+          if (!isNowOpen) {
+            request.clear()
+          }
+        }}
         title="Abrir caja"
         description="Cuenta el efectivo que hay en el cajón y anótalo. Con eso empieza el turno."
       >

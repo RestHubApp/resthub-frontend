@@ -18,9 +18,9 @@ export function TablesView() {
   // `undefined` cerrada; `null` para crear; una mesa para renombrarla.
   const [editing, setEditing] = useState<TableState | null | undefined>(undefined)
 
-  useScreenAction('nueva-mesa', () => {
-    setEditing(null)
-  })
+  const request = useScreenAction('nueva-mesa')
+  // Lo pedido por la dirección abre «Nueva mesa» salvo que ya haya otra ventana abierta.
+  const current = editing === undefined && request.isRequested ? null : editing
 
   return (
     <div className="flex flex-col gap-6">
@@ -37,11 +37,12 @@ export function TablesView() {
         }
       />
       <TableFormDialog
-        table={editing ?? null}
-        open={editing !== undefined}
+        table={current ?? null}
+        open={current !== undefined}
         onOpenChange={(open) => {
           if (!open) {
             setEditing(undefined)
+            request.clear()
           }
         }}
       />

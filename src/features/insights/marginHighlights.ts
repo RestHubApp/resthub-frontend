@@ -1,7 +1,7 @@
 import type { DishMargin } from '@/api/types'
 
-/** Cuántos platos de cada extremo se muestran en la pantalla; el resto va en la hoja con la tabla completa. */
-export const HIGHLIGHTED = 5
+/** Cuántos platos de cada extremo se ven en la pantalla; el resto va en la hoja con la tabla completa. */
+const HIGHLIGHTED = 5
 
 function percentOf(dish: DishMargin): number {
   return Number(dish.margin_percent)

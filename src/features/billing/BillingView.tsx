@@ -22,10 +22,10 @@ import { InvoiceList } from './InvoiceList'
 export function BillingView() {
   const settings = useQuery(billingSettingsQuery)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const fiscal = useScreenAction('datos-fiscales')
   const open = () => {
     setIsSheetOpen(true)
   }
-  useScreenAction('datos-fiscales', open)
 
   return (
     <div className="flex flex-col gap-6">
@@ -46,8 +46,13 @@ export function BillingView() {
       )}
       {settings.data ? (
         <DetailSheet
-          open={isSheetOpen}
-          onOpenChange={setIsSheetOpen}
+          open={isSheetOpen || fiscal.isRequested}
+          onOpenChange={(isOpen) => {
+            setIsSheetOpen(isOpen)
+            if (!isOpen) {
+              fiscal.clear()
+            }
+          }}
           title="Datos fiscales"
           description="El RUC, las series y la conexión con el proveedor. Se llenan una vez."
         >
@@ -55,6 +60,7 @@ export function BillingView() {
             settings={settings.data}
             onSaved={() => {
               setIsSheetOpen(false)
+              fiscal.clear()
             }}
           />
         </DetailSheet>

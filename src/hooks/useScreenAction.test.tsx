@@ -1,45 +1,56 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { describe, expect, it } from '@jest/globals'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router'
 
 import { SCREEN_ACTIONS } from './screenActions'
 import { useScreenAction } from './useScreenAction'
 
-function Probe({ onOpen }: { readonly onOpen: () => void }) {
-  useScreenAction('abrir-caja', onOpen)
-  return <output>{useLocation().search}</output>
+function Probe() {
+  const action = useScreenAction('abrir-caja')
+  return (
+    <>
+      <output>{`${useLocation().search}|${String(action.isRequested)}`}</output>
+      <button type="button" onClick={action.clear}>
+        Cerrar
+      </button>
+    </>
+  )
 }
 
-function renderAt(url: string, onOpen: () => void) {
-  return render(
+function renderAt(url: string) {
+  render(
     <MemoryRouter initialEntries={[url]}>
-      <Probe onOpen={onOpen} />
+      <Probe />
     </MemoryRouter>,
   )
 }
 
 describe('useScreenAction', () => {
-  it('abre el diálogo pedido y borra el parámetro de la dirección', () => {
-    const open = jest.fn()
-    renderAt('/caja?accion=abrir-caja&otro=1', open)
-
-    expect(open).toHaveBeenCalledTimes(1)
-    expect(screen.getByRole('status')).toHaveTextContent('?otro=1')
+  it('pide abrir el diálogo cuando la dirección lo trae', () => {
+    renderAt('/caja?accion=abrir-caja&otro=1')
+    expect(screen.getByRole('status')).toHaveTextContent('?accion=abrir-caja&otro=1|true')
   })
 
-  it('ignora un valor que no es el suyo y no toca la dirección', () => {
-    const open = jest.fn()
-    renderAt('/caja?accion=cualquier-cosa', open)
+  it('al cerrar borra solo ese parámetro de la dirección', async () => {
+    renderAt('/caja?accion=abrir-caja&otro=1')
 
-    expect(open).not.toHaveBeenCalled()
-    expect(screen.getByRole('status')).toHaveTextContent('?accion=cualquier-cosa')
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Cerrar' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('?otro=1|false')
   })
 
-  it('no hace nada sin parámetro', () => {
-    const open = jest.fn()
-    renderAt('/caja', open)
+  it('ignora un valor que no es el suyo y no toca la dirección', async () => {
+    renderAt('/caja?accion=cualquier-cosa')
 
-    expect(open).not.toHaveBeenCalled()
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Cerrar' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('?accion=cualquier-cosa|false')
+  })
+
+  it('no pide nada sin parámetro', () => {
+    renderAt('/caja')
+    expect(screen.getByRole('status')).toHaveTextContent('|false')
   })
 })
 

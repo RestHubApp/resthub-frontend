@@ -15,9 +15,7 @@ import { ChangePasswordForm } from './ChangePasswordForm'
  */
 export function ChangePasswordDialog() {
   const [isOpen, setIsOpen] = useState(false)
-  useScreenAction('cambiar-contrasena', () => {
-    setIsOpen(true)
-  })
+  const request = useScreenAction('cambiar-contrasena')
 
   return (
     <>
@@ -32,8 +30,13 @@ export function ChangePasswordDialog() {
         <span>Cambiar contraseña</span>
       </Button>
       <FormDialog
-        open={isOpen}
-        onOpenChange={setIsOpen}
+        open={isOpen || request.isRequested}
+        onOpenChange={(isNowOpen) => {
+          setIsOpen(isNowOpen)
+          if (!isNowOpen) {
+            request.clear()
+          }
+        }}
         title="Cambiar contraseña"
         description="Escribe la contraseña actual y la nueva dos veces."
       >

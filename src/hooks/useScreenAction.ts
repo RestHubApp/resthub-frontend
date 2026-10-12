@@ -1,36 +1,34 @@
-import { useEffect, useEffectEvent } from 'react'
 import { useSearchParams } from 'react-router'
 
 import { ACTION_PARAM, type ScreenActionId } from './screenActions'
 
 /**
- * Abre el diálogo de una pantalla cuando la dirección lo pide
- * (`?accion=abrir-caja`).
+ * Si la dirección pide abrir el diálogo de una pantalla (`?accion=abrir-caja`).
  *
  * Solo reconoce el id que la pantalla declara en `SCREEN_ACTIONS`; cualquier
- * otro valor se ignora. Llama al mismo `open` que usa el botón, así que no
- * ejecuta nada por sí solo, y borra el parámetro (con `replace`) para que
- * «Atrás» y recargar no lo vuelvan a abrir.
+ * otro valor se ignora. No ejecuta nada y no lee datos del parámetro: la
+ * pantalla abre el mismo diálogo vacío de su botón (`isRequested`) y, al
+ * cerrarlo, llama a `clear` para borrar el parámetro de la dirección (con
+ * `replace`, así «Atrás» no lo vuelve a abrir).
  */
-export function useScreenAction(id: ScreenActionId, open: () => void) {
+export function useScreenAction(id: ScreenActionId) {
   const [params, setParams] = useSearchParams()
-  const requested = params.get(ACTION_PARAM)
-  const consume = useEffectEvent((value: string | null) => {
-    if (value !== id) {
-      return
-    }
-    open()
-    setParams(
-      (current) => {
-        const next = new URLSearchParams(current)
-        next.delete(ACTION_PARAM)
-        return next
-      },
-      { replace: true },
-    )
-  })
+  const isRequested = params.get(ACTION_PARAM) === id
 
-  useEffect(() => {
-    consume(requested)
-  }, [requested])
+  return {
+    isRequested,
+    clear: () => {
+      if (!isRequested) {
+        return
+      }
+      setParams(
+        (current) => {
+          const next = new URLSearchParams(current)
+          next.delete(ACTION_PARAM)
+          return next
+        },
+        { replace: true },
+      )
+    },
+  }
 }

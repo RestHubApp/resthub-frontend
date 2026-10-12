@@ -26,11 +26,7 @@ export function InventoryView() {
   const open = useCallback((fresh: StockAction) => {
     setAction(fresh)
   }, [])
-  useScreenAction('reglas-de-stock', () => {
-    if (canManage) {
-      setIsRulesOpen(true)
-    }
-  })
+  const rules = useScreenAction('reglas-de-stock')
 
   return (
     <div className="flex flex-col gap-6">
@@ -57,7 +53,17 @@ export function InventoryView() {
           setAction(null)
         }}
       />
-      {canManage ? <StockRulesSheet open={isRulesOpen} onOpenChange={setIsRulesOpen} /> : null}
+      {canManage ? (
+        <StockRulesSheet
+          open={isRulesOpen || rules.isRequested}
+          onOpenChange={(isOpen) => {
+            setIsRulesOpen(isOpen)
+            if (!isOpen) {
+              rules.clear()
+            }
+          }}
+        />
+      ) : null}
     </div>
   )
 }
