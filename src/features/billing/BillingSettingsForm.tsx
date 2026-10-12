@@ -27,6 +27,8 @@ type Values = z.infer<typeof schema>
 
 interface BillingSettingsFormProps {
   readonly settings: BillingSettings
+  /** Se llama al guardar; la hoja que lo contiene se cierra. */
+  readonly onSaved?: (() => void) | undefined
 }
 
 function valuesOf(settings: BillingSettings): Values {
@@ -49,7 +51,7 @@ function valuesOf(settings: BillingSettings): Values {
  * estaba. Sin RUC, razón social, ruta y token los comprobantes quedan «sin
  * enviar» y se reenvían después.
  */
-export function BillingSettingsForm({ settings }: BillingSettingsFormProps) {
+export function BillingSettingsForm({ settings, onSaved }: BillingSettingsFormProps) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
   const { register, handleSubmit, formState } = useForm<Values>({
@@ -68,6 +70,7 @@ export function BillingSettingsForm({ settings }: BillingSettingsFormProps) {
       queryClient.setQueryData(billingSettingsQueryKey, saved)
       void queryClient.invalidateQueries({ queryKey: billingQueryKey })
       push({ tone: 'info', message: 'Datos fiscales guardados.' })
+      onSaved?.()
     },
   })
 

@@ -10,29 +10,42 @@ const SETTINGS = '/billing/settings'
 const ISSUED = '/billing/invoices'
 const RUC = 'RUC del local'
 const SAVE = { name: 'Guardar datos fiscales' }
+const FISCAL = { name: /Datos fiscales/u }
 
-function open(settings: BillingSettings = taxSettings(), issued: Invoice[] = []) {
+function open(settings: BillingSettings = taxSettings(), issued: Invoice[] = [], at = '/') {
   const api = server().on('get', SETTINGS, settings).on('get', ISSUED, { items: issued, total: issued.length })
   signInAs()
-  return { api, ...mountScreen(<BillingView />) }
+  return { api, ...mountScreen(<BillingView />, { en: at }) }
 }
 
 describe('BillingView: datos fiscales', () => {
-  it('con todo listo, los datos fiscales empiezan cerrados', async () => {
+  it('con todo listo los datos fiscales no ocupan la pantalla ni piden completarse', async () => {
     open()
-    const title = await screen.findByRole('button', { name: /Datos fiscales/u })
-    expect(title).toHaveAttribute('aria-expanded', 'false')
+    expect(await screen.findByRole('button', FISCAL)).toBeInTheDocument()
+    expect(screen.queryByLabelText(RUC)).not.toBeInTheDocument()
+    expect(screen.queryByText('Falta completar')).not.toBeInTheDocument()
   })
 
-  it('si falta algo para enviar a SUNAT se abren solos y dicen que falta el token', async () => {
-    open(taxSettings({ is_ready: false, has_provider_token: false }))
-    expect(await screen.findByRole('button', { name: /Datos fiscales/u })).toHaveAttribute('aria-expanded', 'true')
+  it('si falta algo para enviar a SUNAT lo dice en el botón y la hoja avisa que falta el token', async () => {
+    const { user } = open(taxSettings({ is_ready: false, has_provider_token: false }))
+    expect(await screen.findByText('Falta completar')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', FISCAL))
+
+    expect(await screen.findByRole('dialog', FISCAL)).toBeInTheDocument()
     expect(screen.getByText('Todavía no cargado.')).toBeInTheDocument()
+  })
+
+  it('se abre sola desde la dirección con ?accion=datos-fiscales y la limpia', async () => {
+    open(taxSettings(), [], '/?accion=datos-fiscales')
+
+    expect(await screen.findByLabelText(RUC)).toBeInTheDocument()
   })
 
   it('guarda con la tasa en punto decimal, series en mayúsculas y sin tocar el token vacío', async () => {
     const { api, user } = open(taxSettings({ is_ready: false }))
     api.on('put', SETTINGS, taxSettings())
+    await user.click(await screen.findByRole('button', FISCAL))
     const igv = await screen.findByLabelText('IGV (%)')
 
     await user.clear(igv)
@@ -42,6 +55,7 @@ describe('BillingView: datos fiscales', () => {
     await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('Datos fiscales guardados.')).toBeInTheDocument()
+    expect(screen.queryByLabelText(RUC)).not.toBeInTheDocument()
     expect(api.calls('put', SETTINGS)[0]?.body).toMatchObject({
       igv_rate: '10.5',
       boleta_series: 'B002',
@@ -52,6 +66,7 @@ describe('BillingView: datos fiscales', () => {
 
   it('valida el RUC y las series antes de enviar', async () => {
     const { api, user } = open(taxSettings({ is_ready: false }))
+    await user.click(await screen.findByRole('button', FISCAL))
     const ruc = await screen.findByLabelText(RUC)
 
     await user.clear(ruc)
@@ -69,6 +84,7 @@ describe('BillingView: datos fiscales', () => {
     const { api, user } = open(taxSettings({ is_ready: false }))
     api.on('put', SETTINGS, new ErrorResponse(422, 'El proveedor rechazó el token'))
 
+    await user.click(await screen.findByRole('button', FISCAL))
     await user.type(await screen.findByLabelText('Token del proveedor'), 'secreto')
     await user.click(screen.getByRole('button', SAVE))
 

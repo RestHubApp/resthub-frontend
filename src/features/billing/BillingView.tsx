@@ -1,32 +1,42 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 import { billingSettingsQuery } from '@/api/billing'
-import { PageHeader } from '@/components/PageHeader'
+import { DetailSheet } from '@/components/DetailSheet'
 import { ListSkeleton } from '@/components/ListSkeleton'
+import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
+import { useScreenAction } from '@/hooks/useScreenAction'
 import { BillingSettingsForm } from './BillingSettingsForm'
+import { FiscalDataButton } from './FiscalDataButton'
 import { InvoiceList } from './InvoiceList'
 
 /**
- * Comprobantes electrónicos: los datos fiscales del local y lo emitido.
+ * Comprobantes electrónicos: lo emitido y, en una hoja, los datos fiscales.
  *
  * Un comprobante rechazado o sin enviar se reenvía desde acá, por ejemplo
- * después de cargar el token del proveedor. Los datos fiscales se abren solos
- * mientras falte algo para enviar a SUNAT.
+ * después de cargar el token del proveedor. Los datos fiscales se llenan una
+ * vez, así que no ocupan la pantalla: el botón de la cabecera los abre y lleva
+ * «Falta completar» mientras falte algo para enviar a SUNAT.
  */
 export function BillingView() {
   const settings = useQuery(billingSettingsQuery)
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const open = () => {
+    setIsSheetOpen(true)
+  }
+  useScreenAction('datos-fiscales', open)
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Comprobantes" description="Boletas y facturas electrónicas enviadas a SUNAT por el proveedor autorizado." />
-      {settings.data ? (
-        <SectionCard title="Datos fiscales" collapsible defaultOpen={!settings.data.is_ready}>
-          <BillingSettingsForm settings={settings.data} />
-        </SectionCard>
-      ) : null}
-      {/* «Emitidos» espera a los datos fiscales, que van arriba: si no, la
-          tarjeta de datos fiscales la empujaba hacia abajo al llegar (CLS). */}
+      <PageHeader
+        title="Comprobantes"
+        description="Boletas y facturas electrónicas enviadas a SUNAT por el proveedor autorizado."
+        actions={
+          settings.data === undefined ? undefined : <FiscalDataButton isIncomplete={!settings.data.is_ready} onClick={open} />
+        }
+      />
+      {/* «Emitidos» espera a los datos fiscales para no moverse al llegar (CLS). */}
       {settings.isPending ? (
         <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" />
       ) : (
@@ -34,6 +44,21 @@ export function BillingView() {
           <InvoiceList />
         </SectionCard>
       )}
+      {settings.data ? (
+        <DetailSheet
+          open={isSheetOpen}
+          onOpenChange={setIsSheetOpen}
+          title="Datos fiscales"
+          description="El RUC, las series y la conexión con el proveedor. Se llenan una vez."
+        >
+          <BillingSettingsForm
+            settings={settings.data}
+            onSaved={() => {
+              setIsSheetOpen(false)
+            }}
+          />
+        </DetailSheet>
+      ) : null}
     </div>
   )
 }
