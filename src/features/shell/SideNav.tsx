@@ -1,7 +1,7 @@
 import type { Session } from '@/api/types'
 import { paths } from '@/services/paths'
 import { scopeName, spokenScope } from './accountLabels'
-import { Brand } from './Brand'
+import { Brand } from '@/components/Brand'
 import type { NavEntry } from './navigation'
 import { NavList } from './NavList'
 import { QuickAppearanceButton } from './quick/QuickAppearanceButton'
