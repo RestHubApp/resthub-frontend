@@ -87,6 +87,9 @@ jobs:
           E2E_DB_PREPARED: '1'
           A11Y_STRICT: '1'
         run: |
+          # Al terminar se cierran el backend y la vista previa: si `uv run` sigue
+          # vivo, retiene la caché de uv y su limpieza final agota el tiempo.
+          trap 'kill $(jobs -p) 2>/dev/null; wait 2>/dev/null' EXIT
           bash e2e/server/backend.sh &
           pnpm exec vite preview --outDir dist-a11y --port 5202 --strictPort &
           until curl -sf http://localhost:8202/api/v1/health > /dev/null; do sleep 1; done
