@@ -12,6 +12,12 @@ describe('AccessibilityWidget', () => {
     expect(screen.getByRole('button', OPEN)).toHaveAttribute('aria-expanded', 'false')
   })
 
+  it('sin botón de reserva no dibuja nada (con sesión)', () => {
+    render(<AccessibilityWidget showLauncher={false} />)
+
+    expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
+  })
+
   it('retira su botón cuando el widget dibuja el suyo', async () => {
     render(<AccessibilityWidget />)
     const widgetButton = document.createElement('a')

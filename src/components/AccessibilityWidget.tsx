@@ -6,6 +6,11 @@ import { ATTRIBUTES_LABEL, patchMenuButton, pinWidgetMenu } from './accessibilit
 
 const WIDGET_BUTTON = '.asw-menu-btn'
 
+interface AccessibilityWidgetProps {
+  /** Dibuja el botón flotante de reserva; con sesión se apaga y el menú se abre desde la navegación. */
+  readonly showLauncher?: boolean
+}
+
 /**
  * Widget de accesibilidad Sienna (MIT, github.com/bennyluk/Sienna-Accessibility-Widget).
  *
@@ -15,9 +20,10 @@ const WIDGET_BUTTON = '.asw-menu-btn'
  * hasta que alguien lo pide: la página dibuja un botón propio, igual al del
  * widget (`.a11y-launcher` en index.css), y al tocarlo se importa el paquete,
  * que dibuja el suyo, y se abre su menú (ver accessibilityMenu.ts). En cuanto
- * existe el botón del widget, el nuestro se retira. En el celular con sesión el
- * botón flotante se oculta (tapaba el "+" de los platos) y el menú se abre
- * desde "Más".
+ * existe el botón del widget, el nuestro se retira. Con sesión no hay botón
+ * flotante (`showLauncher` apagado, y index.css oculta el del widget): el menú
+ * se abre desde «Accesibilidad» en la barra lateral y desde «Cuenta» o «Más»
+ * en el celular.
  *
  * El paquete arma las URL de su idioma y de la fuente de lectura contra
  * cdn.jsdelivr.net; `vite.config.ts`
@@ -36,7 +42,7 @@ const WIDGET_BUTTON = '.asw-menu-btn'
  * 'Abrir menú de accesibilidad' tanto al montarse como ante cualquier
  * mutación del DOM.
  */
-export function AccessibilityWidget() {
+export function AccessibilityWidget({ showLauncher = true }: AccessibilityWidgetProps) {
   // El widget ya dibujó su botón (se cargó desde «Más» o antes de montar esto): el de reserva sobra.
   const [isLoaded, setIsLoaded] = useState(() => document.querySelector(WIDGET_BUTTON) !== null)
 
@@ -69,7 +75,7 @@ export function AccessibilityWidget() {
     }
   }, [])
 
-  if (isLoaded) {
+  if (isLoaded || !showLauncher) {
     return null
   }
   return (

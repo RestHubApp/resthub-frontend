@@ -1,5 +1,6 @@
 import type { Session } from '@/api/types'
 import { paths } from '@/services/paths'
+import { AccessibilityRow } from './AccessibilityRow'
 import { scopeName, spokenScope } from './accountLabels'
 import { Brand } from '@/components/Brand'
 import type { NavEntry } from './navigation'
@@ -17,10 +18,10 @@ interface SideNavProps {
 /** La barra lateral de escritorio, donde trabaja el encargado (y la administración del sistema). */
 export function SideNav({ entries, account }: SideNavProps) {
   return (
-    // `data-side-nav` y el relleno de abajo dejan sitio al botón de accesibilidad (ver `index.css`).
+    // `data-side-nav` lo usa `index.css` para ocultar el botón flotante de accesibilidad con sesión.
     // La columna pinta el fondo de punta a punta; adentro, el menú queda fijo al desplazarse.
     <div className="hidden border-r bg-card lg:block">
-      <aside data-side-nav="" className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-3 p-4 pb-18">
+      <aside data-side-nav="" className="sticky top-[var(--preview-banner-h,0px)] flex h-[calc(100vh_-_var(--preview-banner-h,0px))] flex-col gap-3 p-4">
         <div className="px-1 pt-1">
           <Brand to={paths.home} />
         </div>
@@ -30,6 +31,7 @@ export function SideNav({ entries, account }: SideNavProps) {
           <NavList entries={entries} />
         </nav>
         <QuickAppearanceButton variant="row" />
+        <AccessibilityRow />
         <SessionActions account={account} />
       </aside>
     </div>
