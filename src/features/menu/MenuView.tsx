@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { PageHeader } from '@/components/PageHeader'
+import { useScreenAction } from '@/hooks/useScreenAction'
 import { CategorySection } from './CategorySection'
 import { MenuHeaderActions } from './MenuHeaderActions'
 import { MenuStatus } from './MenuStatus'
@@ -22,6 +23,8 @@ export function MenuView() {
     setDialog(fresh)
   }
   const last = categories.length - 1
+  useScreenAction('nuevo-plato', open({ type: 'plato' }))
+  useScreenAction('nueva-categoria', open({ type: 'categoria' }))
 
   return (
     <div className="flex flex-col gap-6">

@@ -34,6 +34,12 @@ function withCategory(extra: MenuResponse['categories'][number]): MenuResponse {
   return { categories: [...buildMenu().categories, extra] }
 }
 
+/** Abre la ficha de un plato tocando su fila. */
+async function openRecord(user: ReturnType<typeof openMenu>['user'], dish: string) {
+  await user.click(await screen.findByRole('button', { name: `Ver la ficha de ${dish}` }))
+  return screen.findByRole('dialog', { name: dish })
+}
+
 async function openNewDish(user: ReturnType<typeof openMenu>['user']) {
   await user.click(await screen.findByRole('button', { name: 'Nuevo plato' }))
   return screen.findByRole('dialog', { name: 'Nuevo plato' })
@@ -117,7 +123,7 @@ describe('editar la carta', () => {
     const { api, user } = openMenu()
     api.on('patch', DISH_10, new ErrorResponse(409, 'Ya existe un plato con ese nombre.'))
 
-    await user.click(await screen.findByRole('button', { name: 'Editar Ceviche' }))
+    await user.click(within(await openRecord(user, 'Ceviche')).getByRole('button', { name: 'Editar plato' }))
     const window = await screen.findByRole('dialog', { name: 'Editar Ceviche' })
     expect(within(window).getByLabelText(PRICE)).toHaveValue('30.00')
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
@@ -132,13 +138,8 @@ describe('editar la carta', () => {
     outside.categories[0] = { ...firstOf(buildMenu().categories), items: [dish({ is_active: false }), dish({ id: 11, name: 'Causa' })] }
     api.on('patch', DISH_10, andThen(api, dish({ is_active: false }), outside))
 
-    const row = (await screen.findAllByRole('listitem')).find((item) => within(item).queryByRole('heading', { name: 'Ceviche' }) !== null)
-    if (row === undefined) {
-      throw new Error('No se encontró la fila de Ceviche.')
-    }
-    await user.click(within(row).getByRole('button', { name: 'Más acciones de Ceviche' }))
-    await user.click(await screen.findByRole('menuitem', { name: 'Desactivar' }))
-    const confirm = await screen.findByRole('alertdialog', { name: '¿Sacar Ceviche de la carta?' })
+    await user.click(within(await openRecord(user, 'Ceviche')).getByRole('button', { name: 'Desactivar' }))
+    const confirm = await screen.findByRole('group', { name: '¿Sacar Ceviche de la carta?' })
     expect(api.calls('patch', DISH_10)).toHaveLength(0)
     await user.click(within(confirm).getByRole('button', { name: 'Desactivar' }))
 
