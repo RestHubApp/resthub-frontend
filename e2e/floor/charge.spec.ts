@@ -40,6 +40,7 @@ test('SAL-17 el mesero cobra en partes iguales con pago mixto: efectivo con vuel
 }) => {
   covers(
     'dialogo:orders/charge/ChargeContent',
+    'desplegable:components/MoreOptions',
     'funcion:cobro.partes-iguales',
     'funcion:cobro.pago-mixto',
     'funcion:cobro.vuelto',
