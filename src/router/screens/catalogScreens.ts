@@ -22,7 +22,7 @@ export const CATALOG_SCREENS: readonly Screen[] = [
   {
     path: routePatterns.inventory,
     permission: PERMISSION.inventoryRead,
-    nav: { label: 'Inventario', icon: 'inventory', description: 'Insumos, compras, mermas, recetas y alertas de stock bajo.' },
+    nav: { label: 'Inventario', icon: 'inventory', description: 'Insumos, compras, mermas, recetas y stock bajo.' },
     load: asDefault(() => import('@/features/inventory/InventoryView'), 'InventoryView'),
     prefetch: prefetchOf(() => import('@/features/inventory/prefetchInventory'), 'prefetchInventory'),
   },

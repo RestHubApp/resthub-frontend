@@ -34,6 +34,7 @@ export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps)
         (text === '' || normalize(ingredient.name).includes(text)),
     )
   }, [all, search, isOnlyLow])
+  const lowCount = useMemo(() => all.filter((ingredient) => ingredient.is_low || ingredient.is_negative).length, [all])
   const cols = useMemo(() => buildIngredientColumns(canManage, onAction), [canManage, onAction])
 
   if (ingredients.isError) {
@@ -51,6 +52,7 @@ export function IngredientsPanel({ canManage, onAction }: IngredientsPanelProps)
         onOnlyLow={setIsOnlyLow}
         shown={visible.length}
         total={all.length}
+        lowCount={lowCount}
       />
       <DataTable
         label="Insumos"

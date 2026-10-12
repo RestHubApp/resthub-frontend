@@ -4,6 +4,7 @@ import { FieldIcon } from '@/components/FieldIcon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { IngredientCount } from './IngredientCount'
 
 interface IngredientFiltersProps {
   readonly search: string
@@ -12,6 +13,8 @@ interface IngredientFiltersProps {
   readonly onOnlyLow: (value: boolean) => void
   readonly shown: number
   readonly total: number
+  /** Cuántos insumos están bajo su mínimo (negativos incluidos). */
+  readonly lowCount: number
 }
 
 /** Buscar por nombre y quedarse con lo que hay que reponer. */
@@ -22,6 +25,7 @@ export function IngredientFilters({
   onOnlyLow,
   shown,
   total,
+  lowCount,
 }: IngredientFiltersProps) {
   const searchId = useId()
   const lowId = useId()
@@ -59,9 +63,7 @@ export function IngredientFilters({
           </Label>
         </div>
       </div>
-      <p className="m-0 text-sm text-muted-foreground" aria-live="polite">
-        {shown === total ? `${String(total)} insumos` : `${String(shown)} de ${String(total)} insumos`}
-      </p>
+      <IngredientCount shown={shown} total={total} lowCount={lowCount} />
     </div>
   )
 }
