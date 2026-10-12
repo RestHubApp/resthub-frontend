@@ -62,10 +62,14 @@ function fill<P extends string>(pattern: P, params: Record<ParamsOf<P>, PathValu
 /** Los tipos de impresion que acepta la ruta de impresion. */
 export type PrintKind = 'comanda' | 'cuenta'
 
+/** El ancla de «Tus derechos (ARCO)» en la privacidad: la usan el enlace del pie y la sección. */
+export const PRIVACY_RIGHTS_ANCHOR = 'derechos'
+
 export const paths = {
   home: routePatterns.home,
   login: routePatterns.login,
   privacy: routePatterns.privacy,
+  privacyRights: `${routePatterns.privacy}#${PRIVACY_RIGHTS_ANCHOR}`,
   profile: routePatterns.profile,
   appearance: routePatterns.appearance,
   previewEntry: routePatterns.previewEntry,

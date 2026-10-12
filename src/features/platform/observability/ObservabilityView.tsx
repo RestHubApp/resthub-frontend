@@ -1,4 +1,5 @@
 import { PageHeader } from '@/components/PageHeader'
+import { useHashFocus } from '@/hooks/useHashFocus'
 import { DeferredPanels } from './DeferredPanels'
 import { LatencySection } from './LatencySection'
 import { windowParams } from './obsFilters'
@@ -6,7 +7,6 @@ import { ObsToolbar } from './ObsToolbar'
 import { StatusSection } from './StatusSection'
 import { SummarySection } from './SummarySection'
 import { TrafficSection } from './TrafficSection'
-import { useHashFocus } from './useHashFocus'
 import { useObsFilters } from './useObsFilters'
 import { useObsRefresh } from './useObsRefresh'
 
