@@ -22,7 +22,7 @@ export function TodaySummary({ categories }: TodaySummaryProps) {
   return (
     <div
       role="status"
-      className="flex flex-col gap-1 rounded-xl bg-card px-5 py-4 shadow-sm ring-1 ring-foreground/10 sm:flex-row sm:items-baseline sm:gap-4"
+      className="flex flex-col gap-1 rounded-xl bg-card px-5 py-4 ring-1 ring-foreground/10 sm:flex-row sm:items-baseline sm:gap-4"
     >
       <p className="m-0 text-base font-semibold">
         Hoy: {available} de {inMenu.length} platos disponibles

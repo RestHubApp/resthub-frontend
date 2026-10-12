@@ -53,7 +53,7 @@ export function SectionCard({
   const contentId = useId()
 
   return (
-    <Card data-testid={`section-${title}`} className="gap-4 py-5 shadow-sm">
+    <Card data-testid={`section-${title}`} className="gap-4 py-5">
       <CardHeader className="flex flex-wrap items-start justify-between gap-3 px-5">
         {collapsible ? (
           <CollapsibleHeading

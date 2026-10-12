@@ -34,7 +34,7 @@ export function ToastItem({ id, tone, message }: ToastItemProps) {
   }, [id, dismiss])
 
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-card p-3 text-sm text-card-foreground shadow-lg ring-1 ring-foreground/10">
+    <div className="flex items-start gap-3 rounded-xl bg-card p-3 text-sm text-card-foreground shadow-float ring-1 ring-foreground/10">
       <ShellIcon name={ICON_TONE[tone].name} size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone].className}`} />
       <p className="m-0 flex-1">{message}</p>
       <Button

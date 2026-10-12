@@ -33,7 +33,7 @@ export function CategorySection({
 
   return (
     <section aria-labelledby={headingId}>
-      <Card className="gap-0 py-4 shadow-sm">
+      <Card className="gap-0 py-4">
         <CategoryHeader
           category={category}
           headingId={headingId}

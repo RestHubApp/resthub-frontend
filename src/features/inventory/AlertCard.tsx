@@ -16,7 +16,7 @@ export function AlertCard({ ingredient, canManage, onPurchase }: AlertCardProps)
   const missing = Number(ingredient.min_stock) - Number(ingredient.stock)
 
   return (
-    <li className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 ring-foreground/10">
+    <li className="flex flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="m-0 text-base font-semibold">{ingredient.name}</h2>
         <IngredientStatus ingredient={ingredient} />
@@ -37,7 +37,7 @@ export function AlertCard({ ingredient, canManage, onPurchase }: AlertCardProps)
         <Button
           type="button"
           variant="secondary"
-          className="h-11 self-start px-4"
+          className="self-start"
           aria-label={`Registrar compra de ${ingredient.name}`}
           onClick={onPurchase}
         >

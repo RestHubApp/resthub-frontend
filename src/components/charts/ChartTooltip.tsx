@@ -34,7 +34,7 @@ export function ChartTooltip({ x, y, containerWidth, title, rows }: ChartTooltip
   return (
     <div
       role="status"
-      className="pointer-events-none absolute z-10 flex flex-col gap-1.5 rounded-lg border bg-popover px-3 py-2 text-popover-foreground shadow-md"
+      className="pointer-events-none absolute z-10 flex flex-col gap-1.5 rounded-lg border bg-popover px-3 py-2 text-popover-foreground shadow-float"
       style={{ left, top: Math.max(0, y - OFFSET), width: TOOLTIP_WIDTH }}
     >
       <p className="m-0 text-xs text-muted-foreground">{title}</p>
