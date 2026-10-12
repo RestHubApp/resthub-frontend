@@ -1,14 +1,15 @@
 import { paths } from '@/services/paths'
-// Dónde guarda esta pestaña la sesión de restaurante y la cola sin señal.
+// Dónde guarda esta pestaña la sesión (la del personal o la de la
+// administración del sistema) y la cola sin señal.
 //
 // Una pestaña normal usa `localStorage`: la sesión sobrevive a recargar y a
 // cerrar la app. Una pestaña de vista previa (la que abre el administrador del
 // sistema para ver RestHub como una cuenta del local de muestra) usa
 // `sessionStorage`: dura lo que dure esa pestaña y nunca lee ni pisa la sesión
-// de restaurante guardada en el navegador ni la de plataforma. Se decide una
+// guardada en el navegador. Se decide una
 // sola vez, al cargar la página, y no cambia mientras la pestaña siga abierta.
 
-/** La sesión de restaurante de siempre, en `localStorage`. */
+/** La sesión del navegador (personal o plataforma), en `localStorage`. */
 export const RESTAURANT_SESSION_KEY = 'resthub.session.v2'
 /** La sesión de vista previa, en el `sessionStorage` de su pestaña. */
 export const PREVIEW_SESSION_KEY = 'resthub.vista-previa.sesion.v1'
@@ -34,7 +35,7 @@ export interface TabStorage {
   readonly kind: TabKind
   /** `null` si el navegador no deja usar el almacenamiento: la sesión vive solo en memoria. */
   readonly storage: KeyValueStorage | null
-  /** La clave de la sesión de restaurante en `storage`. */
+  /** La clave de la sesión en `storage`. */
   readonly sessionKey: string
 }
 

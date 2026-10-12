@@ -1,6 +1,6 @@
 import type { PermissionCode } from '@/api/types'
 import { isPreviewTab } from '@/services/tabStorage'
-import { useSession } from '@/store/session'
+import { staffOf, useSession } from '@/store/session'
 import { PreviewEndedView } from './PreviewEndedView'
 import type { ShellScreen } from './shellScreens'
 import { SignedInShell } from './SignedInShell'
@@ -18,7 +18,8 @@ interface AppShellProps {
 }
 
 /**
- * El armazon de todas las pantallas.
+ * El armazon de todas las pantallas, para el personal y para la administración
+ * del sistema.
  *
  * Sin sesion solo esta el acceso: la marca arriba y el formulario al centro.
  * Con sesion hay dos disposiciones. En pantallas anchas, la laptop del
@@ -30,7 +31,8 @@ export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
   const account = useSession((state) => state.account)
   useAccountRefresh()
   useSessionRenewal()
-  useOfflineWarmup(screens, account?.permissions ?? WITHOUT_PERMISSIONS)
+  // Las pantallas sin señal son del mesero: la administración del sistema no las baja.
+  useOfflineWarmup(screens, staffOf(account)?.permissions ?? WITHOUT_PERMISSIONS)
 
   // Una pestaña de vista previa sin sesión no ofrece el acceso normal.
   if (account === null && isPreviewTab()) {

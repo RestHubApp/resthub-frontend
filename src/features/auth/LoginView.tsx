@@ -18,19 +18,13 @@ const PANEL = (
   />
 )
 
-// Discreto a propósito: es la puerta del equipo de RestHub, no la del
-// personal, y lleva a otra sesión que no toca la de este acceso.
-const LINK =
-  'inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50'
-const PLATFORM = (
-  <>
-    <Link to={paths.privacy} className={LINK}>
-      Privacidad
-    </Link>
-    <Link to={paths.platform.login} className={LINK}>
-      Administración del sistema
-    </Link>
-  </>
+const FOOTER = (
+  <Link
+    to={paths.privacy}
+    className="inline-flex min-h-11 items-center rounded-lg px-2 text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+  >
+    Privacidad
+  </Link>
 )
 
 /**
@@ -45,7 +39,11 @@ function destinationOf(status: unknown): string {
   return typeof from === 'string' && from.startsWith('/') && from !== paths.login ? from : paths.home
 }
 
-/** Pantalla de acceso: panel lateral, formulario y enlaces del pie. */
+/**
+ * Pantalla de acceso, la única: la misma para el personal de un restaurante y
+ * para el equipo de RestHub. El servidor decide qué cuenta es; la interfaz solo
+ * muestra lo que sus permisos dejan.
+ */
 export function LoginView() {
   const destination = destinationOf(useLocation().state)
 
@@ -56,7 +54,7 @@ export function LoginView() {
   }
 
   return (
-    <AuthCard title="Iniciar sesión" aside={PANEL} footer={PLATFORM}>
+    <AuthCard title="Iniciar sesión" aside={PANEL} footer={FOOTER}>
       <LoginForm destination={destination} />
     </AuthCard>
   )

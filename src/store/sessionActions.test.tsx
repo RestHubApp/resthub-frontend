@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
 import { renderHook } from '@testing-library/react'
 
-import { buildAccount, PERMISSIONS_WAITER } from '#jest/harness'
+import { buildAccount, currentStaff, PERMISSIONS_WAITER } from '#jest/harness'
 import { currentAuthToken } from '@/services/apiCredentials'
 import { queryClient } from '@/services/queryClient'
 import { RESTAURANT_SESSION_KEY } from '@/services/tabStorage'
@@ -57,7 +57,7 @@ describe('sesión de restaurante', () => {
     useSession.getState().signIn('t-1', WAITER)
     const renamed = buildAccount(PERMISSIONS_WAITER, { preview: false, user: { ...WAITER.user, full_name: 'Ana T.' } })
     useSession.getState().refresh(renamed)
-    expect(useSession.getState().account?.user.full_name).toBe('Ana T.')
+    expect(currentStaff()?.user.full_name).toBe('Ana T.')
     expect(saved()).toEqual({ token: 't-1', account: renamed })
   })
 
@@ -74,7 +74,7 @@ describe('sesión de restaurante', () => {
   it('cerrar la sesión borra lo guardado y vacía el caché de esa cuenta', () => {
     useSession.getState().signIn('t-1', WAITER)
     queryClient.setQueryData(['orders'], [1, 2])
-    queryClient.setQueryData(['platform', 'restaurants'], ['se queda'])
+    queryClient.setQueryData(['platform', 'restaurants'], ['de plataforma'])
 
     useSession.getState().signOut()
 
@@ -82,7 +82,7 @@ describe('sesión de restaurante', () => {
     expect(saved()).toBeNull()
     expect(currentAuthToken()).toBeNull()
     expect(queryClient.getQueryData(['orders'])).toBeUndefined()
-    expect(queryClient.getQueryData(['platform', 'restaurants'])).toEqual(['se queda'])
+    expect(queryClient.getQueryData(['platform', 'restaurants'])).toBeUndefined()
   })
 
   it('vencer marca la sesión como vencida; sin sesión abierta no cambia nada', () => {

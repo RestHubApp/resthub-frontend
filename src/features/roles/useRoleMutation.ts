@@ -6,7 +6,7 @@ import { staffQueryKey } from '@/api/staff'
 import type { Role } from '@/api/types'
 import { errorMessage } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
-import { useSession } from '@/store/session'
+import { staffOf, useSession } from '@/store/session'
 
 interface RoleMutationOptions<TVariables, TResult> {
   readonly mutationFn: (variables: TVariables) => Promise<TResult>
@@ -41,7 +41,7 @@ export function useRoleMutation<TVariables, TResult>({
 }: RoleMutationOptions<TVariables, TResult>) {
   const queryClient = useQueryClient()
   const push = useNotifications((state) => state.push)
-  const ownId = useSession((state) => state.account?.user.role_id)
+  const ownId = useSession((state) => staffOf(state.account)?.user.role_id)
 
   return useMutation({
     mutationFn,

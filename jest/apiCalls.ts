@@ -4,9 +4,9 @@
 // importar la capa `api`; las piden por aquí.
 import { QueryClient } from '@tanstack/react-query'
 
-import { exchangePreviewCode } from '../src/api/auth'
 import { anonymizeCustomer } from '../src/api/customers'
-import { platformSandboxQuery, renewPlatformSession } from '../src/api/platform'
+import { exchangePreviewCode, renewSession } from '../src/api/auth'
+import { platformSandboxQuery } from '../src/api/platform'
 import { fetchTables } from '../src/api/tables'
 
 /** GET /api/v1/tables: una lectura de restaurante. */
@@ -24,9 +24,9 @@ export function readPlatform(): Promise<unknown> {
   return new QueryClient().query(platformSandboxQuery)
 }
 
-/** POST /api/v1/platform/auth/refresh: una escritura de plataforma. */
-export function writePlatform(): Promise<unknown> {
-  return renewPlatformSession()
+/** POST /api/v1/auth/refresh: una escritura con credencial. */
+export function writeSession(): Promise<unknown> {
+  return renewSession()
 }
 
 /** POST /api/v1/auth/preview: sale siempre sin credencial. */

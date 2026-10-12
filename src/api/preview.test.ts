@@ -43,7 +43,7 @@ describe('API de la vista previa', () => {
     expect(sent).toMatchObject([{ method: 'POST', path: '/api/v1/platform/preview', body: '{"as":"waiter"}' }])
   })
 
-  it('las mutaciones de plataforma salen del caché con la sesión de plataforma', () => {
+  it('las mutaciones de plataforma llevan la raíz de plataforma', () => {
     expect(platformMutationKeys.startPreview[0]).toBe(PLATFORM_QUERY_ROOT)
     expect(platformMutationKeys.resetSandbox[0]).toBe(PLATFORM_QUERY_ROOT)
   })
@@ -60,11 +60,12 @@ describe('API de la vista previa', () => {
       access_token: 't',
       expires_in: 1800,
       token_type: 'bearer',
+      kind: 'staff',
       user: { id: 1 },
       restaurant: { id: 2 },
       permissions: [],
       preview: true,
     } as unknown as Parameters<typeof sessionOf>[0]
-    expect(sessionOf(response)).toEqual({ user: { id: 1 }, restaurant: { id: 2 }, permissions: [], preview: true })
+    expect(sessionOf(response)).toEqual({ kind: 'staff', user: { id: 1 }, restaurant: { id: 2 }, permissions: [], preview: true })
   })
 })

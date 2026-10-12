@@ -31,8 +31,8 @@ function files(folder: string): string[] {
 }
 
 function routerRoutes(): Element[] {
-  // Cada ruta está una sola vez en `routePatterns`; las comodines de cada área
-  // (una ruta que no existe lleva al inicio) las arma el router, no el módulo.
+  // Cada ruta está una sola vez en `routePatterns`; la comodín (una ruta que
+  // no existe lleva al inicio) la arma el router, no el módulo.
   const source = readFileSync(join(SRC, 'services', 'paths.ts'), 'utf8')
   const patterns = /export const routePatterns = \{([^}]*)\}/u.exec(source)?.[1] ?? ''
   const origin = 'src/services/paths.ts'
@@ -41,7 +41,6 @@ function routerRoutes(): Element[] {
     routes.set(defined(match[1]), origin)
   }
   routes.set('/*', 'src/router/routes.tsx')
-  routes.set('/plataforma/*', 'src/router/routes.tsx')
   return [...routes]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([path, sourceFile]) => ({

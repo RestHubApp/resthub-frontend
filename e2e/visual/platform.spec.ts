@@ -22,7 +22,6 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
   deadline(150_000)
   covers(
     'ruta:/plataforma',
-    'ruta:/plataforma/*',
     'ruta:/plataforma/restaurantes/nuevo',
     'ruta:/plataforma/restaurantes/:restaurantId',
     'dialogo:platform/OwnersSection',
@@ -68,12 +67,18 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
   // solo paso, en vez de tocar el botón, que el propio observador puede
   // desprender del DOM a medio clic (la pestaña de scroll-y-clic quedaba
   // esperando un botón que ya no estaba).
-  await page
-    .getByText('Rutas del API', { exact: true })
-    .evaluate((el) => { el.scrollIntoView({ block: 'center' }) })
-    .catch(() => undefined)
+  // Con el armazón único la pantalla ancha monta algunas secciones sola: se baja
+  // por la página hasta que el observador las haya cargado todas.
+  await page.mouse.move(700, 500)
+  await expect(async () => {
+    await page.mouse.wheel(0, 700)
+    await expect(page.getByText('5 peticiones', { exact: true })).toBeVisible({ timeout: 1_000 })
+  }).toPass()
   await expect(page.getByRole('heading', { name: 'Rutas' })).toBeVisible()
   await expect(page.getByText('orders.open_failed')).toBeVisible()
+  await expect(page.getByText('5 peticiones', { exact: true })).toBeVisible()
+  // La barra lateral es fija: la captura parte siempre de arriba, no de donde dejó el desplazamiento.
+  await page.evaluate(() => { window.scrollTo(0, 0) })
   await capture(page, 'plataforma-observabilidad')
 
   await page.getByRole('link', { name: 'Vista previa' }).click()
@@ -141,8 +146,8 @@ test('VIS-14 la franja de la vista previa como mesero, su salida con pedidos sin
     await signOut.getByRole('button', { name: 'Cancelar' }).click()
     await expect(signOut).toBeHidden()
 
+    // La sesión de la vista previa no tiene permisos de plataforma: la guarda la lleva al inicio.
     await page.goto('/plataforma')
-    await expect(page.getByText('Estás en una vista previa')).toBeVisible()
-    await capture(page, 'vista-previa-plataforma-bloqueada', { mask: [page.getByRole('region', { name: 'Vista previa' })] })
+    await expect(page).toHaveURL(/\/pedidos$/u)
   })
 })

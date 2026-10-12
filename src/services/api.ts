@@ -1,7 +1,7 @@
 // El único punto de red de la aplicación: el cliente tipado de `openapi-fetch`
 // con lo que cada petición lleva o provoca.
 //
-// - la credencial de la sesión dueña de la ruta (`apiCredentials`);
+// - la credencial de la sesión abierta (`apiCredentials`);
 // - un identificador de petición que el servidor repite en sus logs;
 // - un plazo, y la cancelación de quien la pidió;
 // - el cierre de sesión ante un 401 y el recuerdo de los cortes (`apiFailure`);
@@ -12,9 +12,9 @@
 // sin señal distinga un corte de un rechazo del servidor.
 import createClient, { type Client } from 'openapi-fetch'
 
-import { bearerFor, expireSessionOf } from './apiCredentials'
+import { bearerFor, expireSession } from './apiCredentials'
 import { ApiError, errorMessage, isSessionEnded, isTransportFailure, type NoResponseReason } from './apiError'
-import { clearApiFailureOf, noteApiFailure, type ApiFailureScope } from './apiFailure'
+import { clearApiFailure, noteApiFailure } from './apiFailure'
 import { apiOrigin } from './apiRouting'
 import { logger } from './logger'
 import { anyOf } from './signals'
@@ -119,10 +119,6 @@ function isRead(request: Request): boolean {
 // Solo las lecturas: una escritura que falla la avisa su propio formulario o
 // su aviso emergente, y recordarla dejaba el mensaje en el armazón después de
 // cerrar la ventana.
-function scopeOf(path: string): ApiFailureScope {
-  return path.includes('/platform/') ? 'platform' : 'restaurant'
-}
-
 function logOf(current: Exchange, extra: object) {
   return {
     method: current.request.method.toLowerCase(),
@@ -148,10 +144,7 @@ function registerFailure(current: Exchange, error: ApiError): void {
 
 function rememberTransportFailure(current: Exchange, error: ApiError): void {
   if (!isTransportFailure(error) || !isRead(current.request) || current.options.background === true) return
-  noteApiFailure(
-    scopeOf(error.path),
-    errorMessage(error, 'No se pudieron cargar los datos. Comprueba la conexión e inténtalo de nuevo.'),
-  )
+  noteApiFailure(errorMessage(error, 'No se pudieron cargar los datos. Comprueba la conexión e inténtalo de nuevo.'))
 }
 
 /**
@@ -161,13 +154,13 @@ function rememberTransportFailure(current: Exchange, error: ApiError): void {
  * llevaba credencial es una sesión vencida o revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
  * y el acceso explica qué pasó. Un rechazo sin credencial, como una contraseña
  * equivocada al entrar (`invalid_credentials`), lo resuelve su propio formulario. Se cierra solo
- * la sesión dueña de la ruta: la otra sigue abierta.
+ * la sesión.
  */
 function fail(current: Exchange, error: ApiError): never {
   registerFailure(current, error)
   rememberTransportFailure(current, error)
   if (current.hasCredential && isSessionEnded(error)) {
-    expireSessionOf(current.request.url)
+    expireSession()
   }
   throw error
 }
@@ -192,7 +185,7 @@ async function settle(current: Exchange, response: Response): Promise<Response> 
     return fail(current, errorOf(current, { status: response.status, body: await readBody(response) }))
   }
   httpLogger.debug(logOf(current, { status: response.status }), 'http.request_completed')
-  if (isRead(current.request)) clearApiFailureOf(scopeOf(pathOf(current.request)))
+  if (isRead(current.request)) clearApiFailure()
   return response
 }
 

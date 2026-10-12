@@ -4,7 +4,7 @@ import { mergeOrders, moveOrder } from '@/api/orders'
 import { PERMISSION } from '@/api/permissions'
 import { tableName } from '@/api/tables'
 import type { OrderResponse, TableState } from '@/api/types'
-import { useCan, useSession } from '@/store/session'
+import { staffOf, useCan, useSession } from '@/store/session'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 
 export type TableMoveDialog = 'mover' | 'unir' | null
@@ -17,7 +17,7 @@ export type TableMoveDialog = 'mover' | 'unir' | null
 export function useTableMoves(order: OrderResponse) {
   const [dialog, setDialog] = useState<TableMoveDialog>(null)
   const canViewAll = useCan(PERMISSION.ordersReadAll)
-  const me = useSession((state) => state.account?.user.id)
+  const me = useSession((state) => staffOf(state.account)?.user.id)
   const close = () => {
     setDialog(null)
   }

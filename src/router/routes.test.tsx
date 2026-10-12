@@ -1,14 +1,15 @@
 import { beforeAll, describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
-import { signInToPlatform, signInAs, mountRoutes, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
+import { signInToPlatform } from '#jest/fixtures/platform'
+import { signInAs, mountRoutes, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
 import { router } from './routes'
 
 const PROFILE = '/perfil'
 const CASH_REGISTER = '/caja'
 const LOG = '/plataforma/bitacora'
+const PLATFORM_HOME = '/plataforma'
 const PLATFORM = /^\/platform\//u
-const ME_IN_PLATFORM = { admin: { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' } }
 
 function open(en: string) {
   return mountRoutes(router.routes, en).router
@@ -67,22 +68,46 @@ describe('guardas de las rutas del restaurante', () => {
   })
 })
 
-describe('guarda del área de plataforma', () => {
-  it('una sesión de restaurante no entra: pide el acceso de plataforma', async () => {
-    server()
+describe('pantallas de la administración del sistema, por permiso', () => {
+  it('una cuenta del personal no entra: la guarda la lleva al inicio de su cuenta', async () => {
+    server().on('get', '/orders', [])
     signInAs(PERMISSIONS_OWNER)
-    await arrivesTo(open(LOG), '/plataforma/acceso')
+    await arrivesTo(open(LOG), '/pedidos')
+    await arrivesTo(open(PLATFORM_HOME), '/pedidos')
   })
 
-  it('con la sesión de plataforma abre la pantalla pedida', async () => {
-    server().on('get', PLATFORM, { items: [], total: 0 }).on('get', '/platform/auth/me', ME_IN_PLATFORM)
+  it('sin sesión, una pantalla de plataforma lleva al acceso de todos', async () => {
+    server()
+    await arrivesTo(open(LOG), '/acceso')
+    expect(await screen.findByRole('button', { name: /entrar/i })).toBeInTheDocument()
+  })
+
+  it('con el permiso de la pantalla, la abre', async () => {
+    server().on('get', PLATFORM, { items: [], total: 0 })
     signInToPlatform()
     await arrivesTo(open(LOG), LOG)
   })
 
-  it('una ruta desconocida del área vuelve a su inicio', async () => {
-    server().on('get', PLATFORM, { items: [], total: 0 }).on('get', '/platform/auth/me', ME_IN_PLATFORM)
+  it('la guarda mira el permiso: sin el de la bitácora lleva al inicio de la cuenta, que es la primera pantalla permitida', async () => {
+    server().on('get', PLATFORM, { items: [], total: 0 })
+    signInToPlatform(['platform.observability.read'])
+    await arrivesTo(open(LOG), '/plataforma/observabilidad')
+  })
+
+  it('el inicio de una cuenta de plataforma es Restaurantes', async () => {
+    server().on('get', PLATFORM, { items: [], total: 0 })
     signInToPlatform()
-    await arrivesTo(open('/plataforma/cualquier-cosa'), '/plataforma')
+    await arrivesTo(open('/'), PLATFORM_HOME)
+  })
+
+  it('una ruta desconocida lleva al inicio de la cuenta', async () => {
+    server().on('get', PLATFORM, { items: [], total: 0 })
+    signInToPlatform()
+    await arrivesTo(open('/plataforma/cualquier-cosa'), PLATFORM_HOME)
+  })
+
+  it('el acceso de plataforma de antes lleva al acceso de todos', async () => {
+    server()
+    await arrivesTo(open('/plataforma/acceso'), '/acceso')
   })
 })

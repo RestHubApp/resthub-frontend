@@ -30,6 +30,7 @@ const INVALID_CREDENTIALS = 'El correo o la contraseña no son correctos.'
 /** La sesión que abre el acceso y que devuelve `GET /auth/me`. */
 function sessionShape() {
   return {
+    kind: 'staff',
     user: like({
       id: integer(1),
       full_name: string('Encargado Demo'),
@@ -68,7 +69,8 @@ describe('Contrato: acceso', () => {
         connectWithoutSession(mockServer)
         const response = await login(OWNER)
         expect(response.token_type).toBe('bearer')
-        expect(response.restaurant.timezone).toBe('America/Lima')
+        expect(response.kind).toBe('staff')
+        expect(response.kind === 'staff' && response.restaurant.timezone).toBe('America/Lima')
         expect(response.permissions).toContain('orders.charge')
       })
   })
@@ -114,7 +116,31 @@ describe('Contrato: acceso', () => {
         connectTo(mockServer)
         const session = await fetchCurrentUser()
         expect(session.preview).toBe(false)
-        expect(session.user.email).toBe(OWNER.email)
+        expect(session.kind === 'staff' && session.user.email).toBe(OWNER.email)
+      })
+  })
+})
+
+describe('Contrato: sesión de la administración del sistema', () => {
+  it('lee la sesión de la administración del sistema con sus permisos platform.*', async () => {
+    await pact
+      .addInteraction()
+      .given(STATE.platformSession)
+      .uponReceiving('la lectura de la sesión de plataforma')
+      .withRequest('GET', `${API_PREFIX}/auth/me`, (req) => req.headers(bearer()))
+      .willRespondWith(200, (res) =>
+        res.jsonBody({
+          kind: 'platform',
+          admin: like({ id: integer(1), full_name: string('Equipo RestHub'), email: string('plataforma@resthub.dev') }),
+          permissions: eachLike(regex(/^platform\.[a-z_]+\.[a-z_]+$/u, 'platform.restaurants.read')),
+          preview: boolean(false),
+        }),
+      )
+      .executeTest(async (mockServer) => {
+        connectTo(mockServer)
+        const session = await fetchCurrentUser()
+        expect(session.kind).toBe('platform')
+        expect(session.permissions).toContain('platform.restaurants.read')
       })
   })
 })

@@ -1,17 +1,18 @@
-import type { CurrentUserResponse } from '@/api/types'
+import type { Session } from '@/api/types'
 import { paths } from '@/services/paths'
+import { scopeName, spokenScope } from './accountLabels'
 import { Brand } from './Brand'
 import type { NavEntry } from './navigation'
 import { NavList } from './NavList'
-import { RestaurantName } from './RestaurantName'
+import { ScopeName } from './ScopeName'
 import { SessionActions } from './SessionActions'
 
 interface SideNavProps {
   readonly entries: readonly NavEntry[]
-  readonly account: CurrentUserResponse
+  readonly account: Session
 }
 
-/** La barra lateral de escritorio, donde trabaja el encargado. */
+/** La barra lateral de escritorio, donde trabaja el encargado (y la administración del sistema). */
 export function SideNav({ entries, account }: SideNavProps) {
   return (
     // La columna pinta el fondo de punta a punta; adentro, el menú queda fijo al desplazarse.
@@ -20,11 +21,11 @@ export function SideNav({ entries, account }: SideNavProps) {
         <div className="px-1 pt-1">
           <Brand to={paths.home} />
         </div>
-        <RestaurantName name={account.restaurant.name} variant="sidebar" />
+        <ScopeName name={scopeName(account)} variant="sidebar" spokenLabel={spokenScope(account)} />
         <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto">
           <NavList entries={entries} />
         </nav>
-        <SessionActions fullName={account.user.full_name} roleLabel={account.user.role_label} />
+        <SessionActions account={account} />
       </aside>
     </div>
   )

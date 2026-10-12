@@ -102,7 +102,6 @@ export const paths = {
   },
   platform: {
     home: routePatterns.platform,
-    login: routePatterns.platformLogin,
     newRestaurant: routePatterns.newRestaurant,
     restaurant: (restaurantId: PathValue) => fill(routePatterns.restaurantDetail, { restaurantId }),
     activity: routePatterns.activity,

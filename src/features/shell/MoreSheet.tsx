@@ -4,10 +4,10 @@ import { useLocation } from 'react-router'
 import { openAccessibilityMenu } from '@/components/accessibilityMenu'
 import { ShellIcon } from './ShellIcon'
 import { Button } from '@/components/ui/button'
-import type { CurrentUserResponse } from '@/api/types'
+import type { Session } from '@/api/types'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { paths } from '@/services/paths'
-import type { NavEntry } from './navigation'
+import { isCurrentEntry, type NavEntry } from './navigation'
 import { NavList } from './NavList'
 import { SessionActions } from './SessionActions'
 import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
@@ -18,7 +18,7 @@ const SHEET_CLOSE_MS = 350
 interface MoreSheetProps {
   /** Las pantallas que no entraron en la barra. */
   readonly entries: readonly NavEntry[]
-  readonly account: CurrentUserResponse
+  readonly account: Session
 }
 
 /**
@@ -35,7 +35,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
     setIsOpen(false)
   }
   const label = entries.length > 0 ? 'Más' : 'Cuenta'
-  const isInside = pathname === paths.profile || entries.some((entry) => entry.to === pathname)
+  const isInside = pathname === paths.profile || entries.some((entry) => isCurrentEntry(entry, pathname))
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -70,11 +70,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
           <ShellIcon name="accessibility" size={18} />
           <span>Accesibilidad</span>
         </Button>
-        <SessionActions
-          fullName={account.user.full_name}
-          roleLabel={account.user.role_label}
-          onNavigate={close}
-        />
+        <SessionActions account={account} onNavigate={close} />
       </SheetContent>
     </Sheet>
   )

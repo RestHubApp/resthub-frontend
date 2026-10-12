@@ -91,32 +91,34 @@ test('ACC-03 la cuenta de cocina de la semilla entra al tablero y no toma pedido
   await expect(page).toHaveURL(/\/tablero$/u)
 })
 
-test('ACC-04 el administrador del sistema entra por su formulario y cierra su sesión', async ({ page }) => {
+test('ACC-04 el administrador del sistema entra por el mismo acceso, ve solo sus pantallas y cierra su sesión', async ({ page }) => {
   covers(
     'ruta:/plataforma/acceso',
     'ruta:/plataforma',
-    'funcion:acceso.ir-a-plataforma',
     'funcion:plataforma.entrar',
     'funcion:plataforma.cerrar-sesion',
     'rol:plataforma',
   )
-  await page.goto('/acceso')
-  await page.getByRole('link', { name: 'Administración del sistema' }).click()
-  await expect(page).toHaveURL(/\/plataforma\/acceso$/u)
-  await expect(page.getByRole('heading', { name: 'Administración del sistema', level: 1 })).toBeVisible()
-  await evidence(page, 'acc-04-acceso-plataforma')
+  // El acceso de plataforma de antes ya no existe: lleva al de todos.
+  await page.goto('/plataforma/acceso')
+  await expect(page).toHaveURL(/\/acceso$/u)
+  await expect(page.getByRole('heading', { name: 'Iniciar sesión', level: 1 })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Administración del sistema' })).toHaveCount(0)
+  await evidence(page, 'acc-04-acceso-unico')
   await signInByForm(page, SEED.platform, SECRET)
   await expect(page).toHaveURL(/\/plataforma$/u)
   await expect(page.getByRole('heading', { name: 'Restaurantes', level: 1 })).toBeVisible()
-  const area = page.getByRole('navigation', { name: 'Administración del sistema' })
-  await expect(area.getByRole('link')).toHaveText(['Restaurantes', 'Bitácora', 'Vista previa', 'Observabilidad'])
-  await expect(area.getByRole('link', { name: 'Restaurantes' })).toHaveAttribute('aria-current', 'page')
+  // El mismo armazón y el mismo menú: solo se ofrece lo que los permisos de la cuenta dejan abrir.
+  await expect.poll(() => sections(page)).toEqual(['Restaurantes', 'Bitácora', 'Vista previa', 'Observabilidad'])
+  await expect(navigation(page).getByRole('link', { name: 'Restaurantes' })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByText('Administración del sistema').first()).toBeVisible()
   await evidence(page, 'acc-04-restaurantes')
+  // Una pantalla del restaurante no se abre sin sus permisos: vuelve al inicio de la cuenta.
+  await page.goto('/pedidos')
+  await expect(page).toHaveURL(/\/plataforma$/u)
   await page.getByRole('button', { name: 'Cerrar sesión' }).click()
-  await expect(page).toHaveURL(/\/plataforma\/acceso$/u)
-  await expect(page.getByLabel('Correo')).toBeEmpty()
-  await page.getByRole('link', { name: 'Ir al acceso de restaurantes' }).click()
   await expect(page).toHaveURL(/\/acceso$/u)
+  await expect(page.getByLabel('Correo')).toBeEmpty()
   await expect(page.getByRole('heading', { name: 'Iniciar sesión' })).toBeVisible()
 })
 

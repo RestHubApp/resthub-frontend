@@ -18,9 +18,8 @@ async function call(token, method, route, body) {
   return data
 }
 
-async function token(account, platform = false) {
-  const route = platform ? '/platform/auth/login' : '/auth/login'
-  const r = await call(null, 'POST', route, { email: ACCOUNTS[account].email, password: PASSWORD })
+async function token(account) {
+  const r = await call(null, 'POST', '/auth/login', { email: ACCOUNTS[account].email, password: PASSWORD })
   return r.access_token
 }
 
@@ -186,12 +185,12 @@ export async function prepareData() {
     await call(t, 'POST', '/menu/categories', { name: 'Postres (pruebas a11y)' })
   }
 
-  const tp = await token('platform', true)
-  // Un acceso fallido a plataforma deja un aviso (platform.login_failed) en el
+  const tp = await token('platform')
+  // Un acceso fallido de una cuenta de plataforma deja un aviso (platform.login_failed) en el
   // registro de observabilidad: así la tabla de registros tiene una fila que abrir.
   const records = await call(tp, 'GET', '/platform/observability/logs')
   if (records.items.length === 0) {
-    await call(null, 'POST', '/platform/auth/login', { email: ACCOUNTS.platform.email, password: 'clave-equivocada-a11y' }).catch(() => undefined)
+    await call(null, 'POST', '/auth/login', { email: ACCOUNTS.platform.email, password: 'clave-equivocada-a11y' }).catch(() => undefined)
   }
   const restaurants = await call(tp, 'GET', '/platform/restaurants')
   ids.restaurant = (restaurants.items ?? restaurants)[0].id

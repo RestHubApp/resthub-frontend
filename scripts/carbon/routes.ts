@@ -27,11 +27,5 @@ export const OFFLINE_SCREENS: readonly string[] = [
 export const ROUTES: readonly Route[] = [
   { name: 'Acceso', path: '/acceso', session: 'none', lazy: ['src/features/auth/LoginView.tsx'] },
   { name: 'Privacidad', path: '/privacidad', session: 'none', lazy: ['src/features/legal/PrivacyView.tsx'] },
-  {
-    name: 'Acceso de plataforma',
-    path: '/plataforma/acceso',
-    session: 'none',
-    lazy: ['src/features/platform/PlatformShell.tsx', 'src/features/platform/PlatformLoginView.tsx'],
-  },
   { name: 'Pedidos (mesero)', path: '/pedidos', session: 'waiter', lazy: ['src/features/orders/OrdersView.tsx'] },
 ]

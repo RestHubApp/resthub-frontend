@@ -1,21 +1,21 @@
 import { ShellIcon } from './ShellIcon'
-import type { CurrentUserResponse } from '@/api/types'
+import type { Session } from '@/api/types'
 import { MoreSheet } from './MoreSheet'
 import type { NavEntry } from './navigation'
-import { PreloadLink } from './PreloadLink'
+import { EntryLink } from './EntryLink'
 import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
 
 interface BottomNavProps {
   readonly entries: readonly NavEntry[]
-  readonly account: CurrentUserResponse
+  readonly account: Session
 }
 
 // Cuatro pantallas y "Más" es lo que entra en un celular de 360 px con
 // etiquetas legibles y blancos de al menos 44 px de ancho.
 const VISIBLE = 4
 
-function tabClass({ isActive }: { isActive: boolean }): string {
-  return isActive ? TAB_ACTIVE : TAB_IDLE
+function tabClass(isCurrent: boolean): string {
+  return isCurrent ? TAB_ACTIVE : TAB_IDLE
 }
 
 /**
@@ -39,10 +39,10 @@ export function BottomNav({ entries, account }: BottomNavProps) {
       <ul className="m-0 flex list-none gap-1 p-0">
         {visible.map((entry) => (
           <li key={entry.to} className="flex flex-1">
-            <PreloadLink to={entry.to} className={tabClass}>
+            <EntryLink entry={entry} className={tabClass}>
               <ShellIcon name={entry.icon} size={22} />
               <span className="max-w-full truncate">{entry.label}</span>
-            </PreloadLink>
+            </EntryLink>
           </li>
         ))}
         <li className="flex flex-1">

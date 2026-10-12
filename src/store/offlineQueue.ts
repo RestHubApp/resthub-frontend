@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-import type { CurrentUserResponse, OpenOrderRequest } from '@/api/types'
+import type { StaffSession, OpenOrderRequest } from '@/api/types'
 import { tabStorage } from '@/services/tabStorage'
 
 // Los pedidos que el mesero tomó sin señal, a la espera de enviarse.
@@ -48,7 +48,7 @@ const view: { base: readonly QueuedOrder[] | null; owner: string; value: readonl
 }
 
 /** La dueña de lo que se toma con esta sesión, o `null` sin sesión. */
-export function ownerOf(account: CurrentUserResponse | null): QueueOwner | null {
+export function ownerOf(account: StaffSession | null): QueueOwner | null {
   return account === null ? null : { userId: account.user.id, restaurantId: account.restaurant.id }
 }
 
@@ -160,7 +160,7 @@ export function subscribeQueue(listener: Listener): () => void {
 }
 
 /** Los pedidos en cola de la cuenta, al día con cada cambio de la cola. */
-export function useQueuedOrders(account: CurrentUserResponse | null): readonly QueuedOrder[] {
+export function useQueuedOrders(account: StaffSession | null): readonly QueuedOrder[] {
   const owner = ownerOf(account)
   const snapshot = () => queuedOrders(owner)
   // La misma lectura sirve al generar la pantalla fuera del navegador (las pruebas).

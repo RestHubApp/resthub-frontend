@@ -10,14 +10,13 @@ import { request, type APIRequestContext } from '@playwright/test'
 
 import type {
   AccessTokenResponse,
-  CurrentUserResponse,
   MenuCategory,
   MenuItem,
   OrderResponse,
-  PlatformAdmin,
   PlatformRestaurantDetail,
-  PlatformTokenResponse,
+  PlatformSession,
   Role,
+  StaffSession,
   TableResponse,
 } from '../../src/api/types'
 
@@ -41,12 +40,13 @@ export interface Session {
   readonly name: string
   readonly token: string
   /** Lo que la aplicación guarda como cuenta (`sessionOf` de la respuesta de acceso). */
-  readonly account: CurrentUserResponse
+  readonly account: StaffSession
 }
 
 export interface SessionPlatform {
   readonly token: string
-  readonly admin: PlatformAdmin
+  /** Lo que la aplicación guarda como cuenta: la sesión discriminada de plataforma. */
+  readonly account: PlatformSession
 }
 
 export interface Dish {
@@ -130,11 +130,14 @@ export async function signInByApi(http: APIRequestContext, email: string, passwo
     await http.post(`${API}/auth/login`, { data: { email, password } }),
     `acceso de ${email}`,
   )
+  if (access.kind !== 'staff') {
+    throw new Error(`${email} no es una cuenta del personal.`)
+  }
   const token = access.access_token
   // Como la persona al entrar por primera vez: acepta los términos vigentes
   // (Ley N.º 29733). Su pantalla tiene sus propias pruebas; las demás entran
   // con la cuenta ya al día.
-  const data = access.terms_accepted ? access : await body<CurrentUserResponse>(
+  const data = access.terms_accepted ? access : await body<StaffSession>(
     await http.post(`${API}/auth/me/terms`, {
       data: { version: access.terms_version },
       headers: { Authorization: `Bearer ${token}` },
@@ -147,16 +150,20 @@ export async function signInByApi(http: APIRequestContext, email: string, passwo
     password,
     name: user.full_name,
     token,
-    account: { user, restaurant, permissions, preview, terms_version, terms_accepted },
+    account: { kind: 'staff', user, restaurant, permissions, preview, terms_version, terms_accepted },
   }
 }
 
 export async function signInPlatformByApi(http: APIRequestContext): Promise<SessionPlatform> {
-  const data = await body<PlatformTokenResponse>(
-    await http.post(`${API}/platform/auth/login`, { data: { email: SEED.platform, password: SECRET } }),
+  const data = await body<AccessTokenResponse>(
+    await http.post(`${API}/auth/login`, { data: { email: SEED.platform, password: SECRET } }),
     'acceso de plataforma',
   )
-  return { token: data.access_token, admin: data.admin }
+  if (data.kind !== 'platform') {
+    throw new Error('La cuenta de plataforma de la semilla no entró como plataforma.')
+  }
+  const { admin, permissions, preview } = data
+  return { token: data.access_token, account: { kind: 'platform', admin, permissions, preview } }
 }
 
 /** La carta mínima de cada restaurante de prueba. Los precios incluyen IGV. */

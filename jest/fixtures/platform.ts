@@ -1,12 +1,13 @@
 // Datos de roles, personal y plataforma para las pruebas, con la forma del API,
 // y el área de plataforma montada con su sesión (el arnés solo abre la del
 // restaurante).
-import { afterEach } from '@jest/globals'
-import { createElement } from 'react'
+import { type ComponentType, createElement } from 'react'
 import type { RouteObject } from 'react-router'
 
 import type {
   PermissionCode,
+  PlatformPermissionCode,
+  PlatformSession,
   PermissionInfo,
   PlatformActivityEntry,
   ObsLogEntry,
@@ -17,17 +18,20 @@ import type {
   PlatformRestaurantSummary,
   Role,
 } from '../../src/api/types'
+import { LoginView } from '../../src/features/auth/LoginView'
+import { AppShell } from '../../src/features/shell/AppShell'
+import { HomeRedirect } from '../../src/features/shell/HomeRedirect'
+import { RequireSession } from '../../src/features/shell/RequireSession'
+import { PLATFORM_SCREENS } from '../../src/router/screens/platformScreens'
+import { SCREENS } from '../../src/router/screens'
+import { setAuthToken } from '../../src/services/apiCredentials'
+import { useSession } from '../../src/store/session'
 import { ActivityView } from '../../src/features/platform/ActivityView'
 import { ObservabilityView } from '../../src/features/platform/observability/ObservabilityView'
 import { NewRestaurantView } from '../../src/features/platform/NewRestaurantView'
-import { PlatformLoginView } from '../../src/features/platform/PlatformLoginView'
-import { PlatformShell } from '../../src/features/platform/PlatformShell'
 import { PreviewView } from '../../src/features/platform/PreviewView'
-import { RequirePlatformSession } from '../../src/features/platform/RequirePlatformSession'
 import { RestaurantDetailView } from '../../src/features/platform/RestaurantDetailView'
 import { RestaurantsView } from '../../src/features/platform/RestaurantsView'
-import { setPlatformAuthToken } from '../../src/services/apiCredentials'
-import { usePlatformSession } from '../../src/store/platformSession'
 import { mountRoutes, type Mount } from '../harness'
 
 const GROUP_ORDERS = 'Pedidos'
@@ -105,36 +109,52 @@ export const TEAM = [
 
 export const ADMIN: PlatformAdmin = { id: 1, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' }
 
-/** Abre la sesión del administrador del sistema sin pasar por su acceso. */
-export function signInToPlatform(admin: PlatformAdmin = ADMIN): PlatformAdmin {
-  setPlatformAuthToken('token-de-plataforma')
-  usePlatformSession.setState({ token: 'token-de-plataforma', admin, expired: false })
-  return admin
+/** Todos los permisos de la administración del sistema: lo que tiene hoy toda cuenta de plataforma. */
+export const PERMISSIONS_PLATFORM: readonly PlatformPermissionCode[] = [
+  'platform.restaurants.read',
+  'platform.restaurants.manage',
+  'platform.activity.read',
+  'platform.preview.open',
+  'platform.observability.read',
+]
+
+/** Abre la sesión de la administración del sistema sin pasar por el acceso. */
+export function signInToPlatform(
+  permissions: readonly PlatformPermissionCode[] = PERMISSIONS_PLATFORM,
+  admin: PlatformAdmin = ADMIN,
+): PlatformSession {
+  const account: PlatformSession = { kind: 'platform', admin, permissions: [...permissions], preview: false }
+  setAuthToken('token-de-plataforma')
+  useSession.setState({ token: 'token-de-plataforma', account, expired: false, passwordChanged: false })
+  return account
 }
 
-afterEach(() => {
-  setPlatformAuthToken(null)
-  usePlatformSession.setState({ token: null, admin: null, expired: false })
-})
+// Las pantallas de plataforma del registro, ya cargadas: la prueba no espera a la carga perezosa.
+const PLATFORM_COMPONENTS: ReadonlyMap<string, ComponentType> = new Map([
+  ['/plataforma', RestaurantsView],
+  ['/plataforma/restaurantes/nuevo', NewRestaurantView],
+  ['/plataforma/restaurantes/:restaurantId', RestaurantDetailView],
+  ['/plataforma/bitacora', ActivityView],
+  ['/plataforma/vista-previa', PreviewView],
+  ['/plataforma/observabilidad', ObservabilityView],
+])
 
-// Las mismas rutas que `src/router` arma para `/plataforma`, sin la carga perezosa.
+// Las mismas rutas que `src/router` arma para `/plataforma` (el mismo armazón y
+// la misma guarda por permiso), sin la carga perezosa.
 const PLATFORM_ROUTES: RouteObject[] = [
   {
-    path: '/plataforma',
-    element: createElement(PlatformShell),
+    path: '/',
+    element: createElement(AppShell, { screens: SCREENS }),
     children: [
-      { path: 'acceso', element: createElement(PlatformLoginView) },
-      {
-        element: createElement(RequirePlatformSession),
-        children: [
-          { index: true, element: createElement(RestaurantsView) },
-          { path: 'restaurantes/nuevo', element: createElement(NewRestaurantView) },
-          { path: 'restaurantes/:restaurantId', element: createElement(RestaurantDetailView) },
-          { path: 'bitacora', element: createElement(ActivityView) },
-          { path: 'vista-previa', element: createElement(PreviewView) },
-          { path: 'observabilidad', element: createElement(ObservabilityView) },
-        ],
-      },
+      { index: true, Component: HomeRedirect },
+      { path: 'acceso', element: createElement(LoginView) },
+      ...PLATFORM_SCREENS.map(({ path, permission }) => {
+        const Component = PLATFORM_COMPONENTS.get(path)
+        if (Component === undefined) {
+          throw new Error(`Falta la pantalla de ${path} en las pruebas.`)
+        }
+        return { element: createElement(RequireSession, { permission }), children: [{ path, element: createElement(Component) }] }
+      }),
     ],
   },
 ]

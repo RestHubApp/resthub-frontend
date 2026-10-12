@@ -5,33 +5,29 @@ import { send } from './client'
 import type {
   CreatePlatformRestaurantRequest,
   PlatformActivityParams,
-  PlatformLoginRequest,
   PlatformOwner,
   PlatformOwnerRequest,
   PlatformRestaurantDetail,
   PlatformRestaurantListParams,
   PlatformSandbox,
-  PlatformTokenResponse,
   PreviewCodeResponse,
   PreviewRequest,
   UpdatePlatformRestaurantRequest,
 } from './types'
 
 // El administrador del sistema: el equipo de RestHub, que da de alta los
-// restaurantes y los activa o desactiva. Todas sus rutas van bajo
-// `/platform`, y el cliente HTTP les pone el token de esa sesión y nunca el
-// de un restaurante.
+// restaurantes y los activa o desactiva. Todas sus rutas van bajo `/platform`
+// y cada una exige un permiso `platform.*`. Entra por el mismo acceso que el
+// personal (`api/auth`): la sesión es una sola.
 
 export const platformQueryKey = [PLATFORM_QUERY_ROOT] as const
 export const platformRestaurantsQueryKey = [...platformQueryKey, 'restaurants'] as const
 export const platformActivityQueryKey = [...platformQueryKey, 'activity'] as const
 export const platformSandboxQueryKey = [...platformQueryKey, 'sandbox'] as const
 
-// Las escrituras llevan la misma raíz: cerrar la sesión de plataforma las saca
-// del caché de mutaciones, que guarda lo enviado, y cerrar la del restaurante
-// no las toca.
+// Las escrituras llevan la misma raíz, por orden: el caché de mutaciones guarda
+// lo enviado y se vacía entero al cerrar la sesión.
 export const platformMutationKeys = {
-  login: [...platformQueryKey, 'login'],
   createRestaurant: [...platformRestaurantsQueryKey, 'create'],
   updateRestaurant: [...platformRestaurantsQueryKey, 'update'],
   addOwner: [...platformRestaurantsQueryKey, 'owners', 'add'],
@@ -47,20 +43,6 @@ export const PASSWORD_MUTATION_GC_TIME = 0
 
 /** Lo que el servidor devuelve por página si no se le pide otra cosa. */
 export const PLATFORM_PAGE_SIZE = 25
-
-export async function platformLogin(payload: PlatformLoginRequest): Promise<PlatformTokenResponse> {
-  return send((client) => client.POST('/api/v1/platform/auth/login', { body: payload }))
-}
-
-/** Un token nuevo para la sesión de plataforma, pedido antes de que venza el que hay. */
-export async function renewPlatformSession(): Promise<PlatformTokenResponse> {
-  return send((client) => client.POST('/api/v1/platform/auth/refresh'))
-}
-
-export const platformMeQuery = queryOptions({
-  queryKey: [...platformQueryKey, 'me'],
-  queryFn: () => send((client) => client.GET('/api/v1/platform/auth/me')),
-})
 
 export function platformRestaurantsQuery(params: PlatformRestaurantListParams) {
   return queryOptions({

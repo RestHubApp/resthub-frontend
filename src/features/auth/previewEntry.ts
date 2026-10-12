@@ -1,6 +1,6 @@
 import { redirect } from 'react-router'
 
-import { exchangePreviewCode, sessionOf } from '@/api/auth'
+import { exchangePreviewCode, staffSessionOf } from '@/api/auth'
 import { logger } from '@/services/logger'
 import { paths } from '@/services/paths'
 import { isPreviewTab, previewEntryUrl, takeEntryFragment } from '@/services/tabStorage'
@@ -37,7 +37,7 @@ async function exchange(code: string): Promise<PreviewEntryResult | Response> {
       logger.error('auth.preview_not_marked')
       return 'failed'
     }
-    useSession.getState().startPreview(response.access_token, sessionOf(response))
+    useSession.getState().startPreview(response.access_token, staffSessionOf(response))
     return redirect(paths.home)
   } catch (error) {
     const reason = failureOf(error)

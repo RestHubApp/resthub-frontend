@@ -1,5 +1,6 @@
 import {
   Accessibility,
+  Activity,
   Armchair,
   BookUser,
   Boxes,
@@ -13,6 +14,7 @@ import {
   CookingPot,
   Ellipsis,
   Eye,
+  History,
   type LucideIcon,
   LogOut,
   ScrollText,
@@ -54,6 +56,8 @@ const SHELL_ICONS = {
   accessibility: Accessibility,
   signOut: LogOut,
   view: Eye,
+  history: History,
+  observability: Activity,
   restaurant: Store,
   correct: CircleCheck,
   alert: CircleAlert,

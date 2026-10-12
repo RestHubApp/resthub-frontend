@@ -1,11 +1,11 @@
-import type { PermissionCode } from '@/api/types'
+import type { AnyPermissionCode } from '@/api/types'
 import type { ScreenNav, ShellScreen } from './shellScreens'
 
 /** Una entrada del menú: la pantalla, su ruta y el permiso que la muestra. */
 export interface NavEntry extends ScreenNav {
   readonly to: string
   /** El mismo permiso que exige la ruta. */
-  readonly permission: PermissionCode
+  readonly permission: AnyPermissionCode
 }
 
 /**
@@ -24,7 +24,7 @@ function allEntries(screens: readonly ShellScreen[]): readonly NavEntry[] {
 
 export function entriesFor(
   screens: readonly ShellScreen[],
-  permissions: readonly PermissionCode[],
+  permissions: readonly AnyPermissionCode[],
 ): readonly NavEntry[] {
   const granted = new Set(permissions)
   return allEntries(screens).filter((entry) => granted.has(entry.permission))
@@ -32,4 +32,15 @@ export function entriesFor(
 
 export function entryFor(screens: readonly ShellScreen[], pathname: string): NavEntry | undefined {
   return allEntries(screens).find((entry) => entry.to === pathname)
+}
+
+/** Si la entrada es la pantalla de `pathname` (o una de las que cuelgan de ella). */
+export function isCurrentEntry(entry: NavEntry, pathname: string): boolean {
+  if (pathname === entry.to) {
+    return true
+  }
+  if (entry.activeOn !== undefined) {
+    return entry.activeOn.some((prefix) => pathname.startsWith(prefix))
+  }
+  return pathname.startsWith(`${entry.to}/`)
 }

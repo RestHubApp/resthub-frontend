@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import type { PermissionCode } from '@/api/types'
+import type { AnyPermissionCode } from '@/api/types'
 import type { ShellIconName } from './ShellIcon'
 
 /** Cómo se muestra una pantalla en el menú. */
@@ -9,6 +9,12 @@ export interface ScreenNav {
   readonly icon: ShellIconName
   /** Para que sirve la pantalla. Lo muestra el aviso de "Próximamente". */
   readonly description: string
+  /**
+   * Otras rutas en las que la entrada sigue marcada, como prefijos: la ficha y
+   * el alta de un restaurante marcan «Restaurantes». Sin esto, la entrada se
+   * marca en su ruta y en las que cuelgan de ella.
+   */
+  readonly activeOn?: readonly string[]
 }
 
 /**
@@ -22,7 +28,7 @@ export interface ShellScreen {
   /** La ruta, como la entiende el router: `/tablero`, `/panel/ia`. */
   readonly path: string
   /** El permiso que exige su ruta y que muestra su entrada. Sin él, basta con la sesión. */
-  readonly permission?: PermissionCode
+  readonly permission?: AnyPermissionCode
   /** La entrada del menú. Sin ella, la pantalla no sale en el menú. */
   readonly nav?: ScreenNav
   /** El mismo `import()` de la ruta perezosa: descarga el archivo de la pantalla. */

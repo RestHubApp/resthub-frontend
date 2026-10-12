@@ -9,13 +9,24 @@ export type ApiPaths = paths
 /** El código estable de un error del API (`{ detail, code }`): lo que decide qué hace la interfaz. */
 export type ErrorCode = components['schemas']['ErrorCode']
 
-export type AccessTokenResponse = components['schemas']['AccessTokenResponse']
+export type StaffAccessTokenResponse = components['schemas']['StaffAccessTokenResponse']
+type PlatformAccessTokenResponse = components['schemas']['PlatformAdminAccessTokenResponse']
+/** La respuesta de entrar o renovar: la sesión (de personal o de plataforma, según `kind`) y su token. */
+export type AccessTokenResponse = StaffAccessTokenResponse | PlatformAccessTokenResponse
 export type LoginRequest = components['schemas']['LoginRequest']
 export type ChangeOwnPasswordRequest = components['schemas']['ChangeOwnPasswordRequest']
-export type CurrentUserResponse = components['schemas']['SessionResponse']
+/** La sesión del personal de un restaurante: la cuenta, su restaurante y sus permisos. */
+export type StaffSession = components['schemas']['StaffSessionResponse']
+/** La sesión de la administración del sistema: la cuenta y sus permisos `platform.*`. */
+export type PlatformSession = components['schemas']['PlatformAdminSessionResponse']
+/** Lo que devuelve `GET /auth/me`: una u otra, según `kind`. */
+export type Session = StaffSession | PlatformSession
 export type AcceptTermsRequest = components['schemas']['AcceptTermsRequest']
 export type CustomerExport = components['schemas']['CustomerExportResponse']
 export type PermissionCode = components['schemas']['Permission']
+export type PlatformPermissionCode = components['schemas']['PlatformPermission']
+/** Cualquier permiso que una sesión puede traer: del restaurante o de la administración del sistema. */
+export type AnyPermissionCode = PermissionCode | PlatformPermissionCode
 
 // Roles del restaurante: el encargado, el mesero y los que arma cada local.
 export type Role = components['schemas']['RoleResponse']
@@ -163,9 +174,7 @@ export type ReservationStatus = components['schemas']['ReservationStatus']
 
 // Administración del sistema (`/platform`): el equipo de RestHub, sus
 // restaurantes, sus encargados y la bitácora.
-export type PlatformAdmin = components['schemas']['PlatformAdminResponse']
-export type PlatformLoginRequest = components['schemas']['PlatformLoginRequest']
-export type PlatformTokenResponse = components['schemas']['PlatformAccessTokenResponse']
+export type PlatformAdmin = PlatformSession['admin']
 export type PlatformRestaurantSummary = components['schemas']['RestaurantSummaryResponse']
 export type PlatformRestaurantPage = components['schemas']['RestaurantPageResponse']
 export type PlatformRestaurantListParams = NonNullable<

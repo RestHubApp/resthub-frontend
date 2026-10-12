@@ -21,12 +21,16 @@ function card(page: Page, title: string) {
  */
 async function show(page: Page, load: string, title: string): Promise<void> {
   const titleLoc = page.getByRole('heading', { name: title, exact: true })
-  if (await titleLoc.isVisible()) return
   const button = page.getByRole('button', { name: load, exact: true })
-  // Al acercar el botón, el observer monta la sección y lo quita del DOM.
-  await button.scrollIntoViewIfNeeded()
-  const isMounted = await titleLoc.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true, () => false)
-  if (!isMounted) await button.click()
+  // Con la pantalla ancha el observer puede montar la sección antes de mirarla:
+  // se le da un momento a que el título aparezca solo.
+  const isShown = await titleLoc.waitFor({ state: 'visible', timeout: 3_000 }).then(() => true, () => false)
+  if (!isShown && (await button.isVisible())) {
+    // Al acercar el botón, el observer monta la sección y lo quita del DOM.
+    await button.scrollIntoViewIfNeeded()
+    const isMounted = await titleLoc.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true, () => false)
+    if (!isMounted && (await button.isVisible())) await button.click()
+  }
   await expect(titleLoc).toBeVisible()
 }
 

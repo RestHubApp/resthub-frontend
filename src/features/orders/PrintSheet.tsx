@@ -4,7 +4,7 @@ import { Icon } from '@/components/Icon'
 import { PRINT_CSS } from '@/components/printSheet'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
-import { useSession, useTimeZone } from '@/store/session'
+import { staffOf, useSession, useTimeZone } from '@/store/session'
 import { BillTicket } from './print/BillTicket'
 import { KitchenTicket } from './print/KitchenTicket'
 
@@ -17,7 +17,7 @@ interface PrintSheetProps {
 /** La hoja de 80 mm lista para imprimir, con su titulo para lector de pantalla y el boton de imprimir. */
 export function PrintSheet({ order, isTicket }: PrintSheetProps) {
   const timeZone = useTimeZone()
-  const restaurant = useSession((state) => state.account?.restaurant.name ?? '')
+  const restaurant = useSession((state) => staffOf(state.account)?.restaurant.name ?? '')
 
   return (
     <div className="flex flex-col items-center gap-4">

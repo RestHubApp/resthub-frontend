@@ -7,19 +7,19 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { unstubAllGlobals } from '#jest/globals'
 import { type TestStorage, notify, fakeStorage, readSaved, newTab, tokenThatExpires } from '#jest/tabs'
 
-import type { CurrentUserResponse } from '@/api/types'
+import type { StaffSession } from '@/api/types'
 
 const STORAGE_KEY = 'resthub.session.v2'
 const PREVIEW = 'resthub.vista-previa.sesion.v1'
 const MARK = 'resthub.vista-previa.pestana.v1'
 
-function account(userId: number, changes: Partial<CurrentUserResponse> = {}): CurrentUserResponse {
+function account(userId: number, changes: Partial<StaffSession> = {}): StaffSession {
   return {
     user: { id: userId, role_id: 1 },
     restaurant: { id: 1, timezone: 'America/Lima' },
     permissions: [],
     ...changes,
-  } as unknown as CurrentUserResponse
+  } as unknown as StaffSession
 }
 
 async function openTab(local: TestStorage, route = '/') {
@@ -30,7 +30,7 @@ async function openTab(local: TestStorage, route = '/') {
 }
 
 function saved(local: TestStorage) {
-  return readSaved(local, STORAGE_KEY) as { token: string; account: CurrentUserResponse } | null
+  return readSaved(local, STORAGE_KEY) as { token: string; account: StaffSession } | null
 }
 
 beforeEach(() => {

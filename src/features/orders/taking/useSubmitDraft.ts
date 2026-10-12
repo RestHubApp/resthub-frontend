@@ -7,7 +7,7 @@ import { errorMessage } from '@/services/apiError'
 import { paths } from '@/services/paths'
 import { useNotifications } from '@/store/notifications'
 import { ownerOf } from '@/store/offlineQueue'
-import { useSession } from '@/store/session'
+import { useStaffAccount } from '@/store/session'
 import { draftKey, type OrderTarget } from './orderTarget'
 import { NotSentError, QUEUED, sendDraft, successMessage } from './submitDraft'
 import { type DraftLine, useDraftActions } from './useOrderDraft'
@@ -26,7 +26,7 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
   const navigate = useNavigate()
   const push = useNotifications((state) => state.push)
   const { clear } = useDraftActions()
-  const owner = ownerOf(useSession((state) => state.account))
+  const owner = ownerOf(useStaffAccount())
   const key = draftKey(target)
 
   const refresh = () =>
