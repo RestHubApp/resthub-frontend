@@ -1,0 +1,44 @@
+import { useState } from 'react'
+
+import { FormDialog } from '@/components/FormDialog'
+import { Icon } from '@/components/Icon'
+import { Button } from '@/components/ui/button'
+import { useScreenAction } from '@/hooks/useScreenAction'
+import { ChangePasswordForm } from './ChangePasswordForm'
+
+/**
+ * «Cambiar contraseña» como botón que abre una ventana con el formulario.
+ *
+ * Solo cambia dónde se ve el formulario: la contraseña actual, la validación
+ * y lo que pasa con la sesión siguen en `ChangePasswordForm`. También se abre
+ * desde la dirección (`?accion=cambiar-contrasena`).
+ */
+export function ChangePasswordDialog() {
+  const [isOpen, setIsOpen] = useState(false)
+  useScreenAction('cambiar-contrasena', () => {
+    setIsOpen(true)
+  })
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => {
+          setIsOpen(true)
+        }}
+      >
+        <Icon name="key" size={16} />
+        <span>Cambiar contraseña</span>
+      </Button>
+      <FormDialog
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Cambiar contraseña"
+        description="Escribe la contraseña actual y la nueva dos veces."
+      >
+        <ChangePasswordForm />
+      </FormDialog>
+    </>
+  )
+}
