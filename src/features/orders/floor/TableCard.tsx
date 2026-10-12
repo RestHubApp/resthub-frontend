@@ -15,6 +15,10 @@ interface TableCardProps {
 const BASE =
   'flex min-h-28 flex-col gap-1 rounded-xl p-3.5 text-left outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50'
 
+// Con el texto grande («Muy grande», 125 %), «Servido, por cobrar» no cabe en una
+// línea dentro de la tarjeta: baja de línea en vez de salirse de su borde.
+const WRAPPING_BADGE = 'h-auto min-w-0 shrink whitespace-normal py-0.5 text-left leading-tight'
+
 /**
  * Una mesa del salon, que es tambien el boton para trabajar en ella.
  *
@@ -46,9 +50,9 @@ export function TableCard({ table }: TableCardProps) {
       to={paths.orders.detail(order.id)}
       className={`${BASE} bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)] ${order.status === 'ready' ? 'ring-2 ring-success' : 'ring-1 ring-primary/25'}`}
     >
-      <span className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
-        <span className="font-heading text-xl font-bold whitespace-nowrap">{name}</span>
-        <OrderStatusBadge status={order.status} />
+      <span className="flex min-w-0 flex-wrap items-start justify-between gap-x-2 gap-y-1">
+        <span className="max-w-full font-heading text-xl font-bold break-words">{name}</span>
+        <OrderStatusBadge status={order.status} className={WRAPPING_BADGE} />
       </span>
       <span className="text-sm font-semibold tabular-nums">
         #{order.number} · {formatMoney(order.total)}

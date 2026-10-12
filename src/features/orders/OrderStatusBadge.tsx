@@ -4,8 +4,9 @@ import { STATUS_LABELS, STATUS_TONE } from './orderLabels'
 
 interface OrderStatusBadgeProps {
   readonly status: OrderStatus
+  readonly className?: string | undefined
 }
 
-export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
-  return <StatusBadge label={STATUS_LABELS[status]} tone={STATUS_TONE[status]} />
+export function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
+  return <StatusBadge label={STATUS_LABELS[status]} tone={STATUS_TONE[status]} className={className} />
 }
