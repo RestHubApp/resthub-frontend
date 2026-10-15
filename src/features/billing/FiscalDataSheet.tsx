@@ -27,7 +27,7 @@ export function FiscalDataSheet({ settings, open, onOpenChange, onSaved }: Fisca
       description="El RUC, las series, las credenciales SOL y el certificado digital. Se llenan una vez."
     >
       <div className="flex flex-col gap-6">
-        <BillingReadiness settings={settings} now={now} />
+        <BillingReadiness settings={settings} />
         <BillingSettingsForm settings={settings} onSaved={onSaved} />
         <CertificateForm settings={settings} now={now} />
       </div>

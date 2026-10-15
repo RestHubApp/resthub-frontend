@@ -51,6 +51,14 @@ function catchDownload() {
   return { created, names, revoke }
 }
 
+describe('IssuedInvoice: estado', () => {
+  it('rechazado muestra el motivo de SUNAT tal cual', async () => {
+    open({}, { status: 'rejected', status_label: 'Rechazada', provider_message: '0111 - No tiene el perfil para enviar comprobantes electrónicos', has_pdf: false })
+
+    expect(await screen.findByText('0111 - No tiene el perfil para enviar comprobantes electrónicos')).toBeInTheDocument()
+  })
+})
+
 describe('IssuedInvoice: descargar', () => {
   it('ofrece solo los archivos que existen y ningún enlace externo', async () => {
     open({}, { has_pdf: false, has_xml: true, has_cdr: false })

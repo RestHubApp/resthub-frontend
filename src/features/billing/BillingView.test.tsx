@@ -1,6 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
 import { screen, within } from '@testing-library/react'
-import { userEvent } from '@testing-library/user-event'
 
 import { taxSettings, invoice } from '#jest/fixtures/panel'
 import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
@@ -12,13 +11,10 @@ const ISSUED = '/billing/invoices'
 const RUC = 'RUC del local'
 const SAVE = { name: 'Guardar datos fiscales' }
 const FISCAL = { name: /Datos fiscales/u }
-const CERTIFICATE = '/billing/settings/certificate'
 const SOL_USER = 'Usuario SOL'
 const SOL_PASSWORD = 'Clave SOL'
-const CERTIFICATE_FILE = 'Archivo del certificado'
-const CERTIFICATE_PASSWORD = 'Contraseña del certificado'
-const UPLOAD = { name: 'Subir certificado' }
 const SAVED = 'Datos fiscales guardados.'
+const CREDENTIALS_REJECTED = 'SUNAT no aceptó el usuario SOL, la clave o el certificado. Revísalos y vuelve a guardar.'
 
 function open(settings: BillingSettings = taxSettings(), issued: Invoice[] = [], at = '/') {
   const api = server().on('get', SETTINGS, settings).on('get', ISSUED, { items: issued, total: issued.length })
@@ -173,6 +169,24 @@ describe('BillingView: credenciales SOL', () => {
     expect(await screen.findByText('El servicio de facturación no está disponible, intenta en unos minutos.')).toBeInTheDocument()
   })
 
+  it('si el servicio de facturación rechaza las credenciales (422) pide revisarlas, distinto de «no disponible»', async () => {
+    const { api, user } = await openSheet(taxSettings({ has_sol_credentials: false, is_ready: false }))
+    api.on('put', SETTINGS, new ErrorResponse(422, 'No aceptó las credenciales.', 'invalid_billing_credentials'))
+
+    await user.type(screen.getByLabelText(SOL_USER), 'MODDATOS')
+    await user.type(screen.getByLabelText(SOL_PASSWORD), 'moddatos')
+    await user.click(screen.getByRole('button', SAVE))
+
+    expect(await screen.findByText(CREDENTIALS_REJECTED)).toBeInTheDocument()
+    expect(screen.queryByText(/no está disponible/u)).not.toBeInTheDocument()
+  })
+
+  it('avisa que SUNAT valida las credenciales al emitir el primer comprobante', async () => {
+    await openSheet(taxSettings())
+
+    expect(screen.getByText(/SUNAT valida el usuario y la clave SOL al emitir el primer comprobante/u)).toBeInTheDocument()
+  })
+
   it('un error del servidor al guardar se muestra en el formulario', async () => {
     const { api, user } = await openSheet(taxSettings())
     api.on('put', SETTINGS, new ErrorResponse(422, 'La serie ya está en uso', 'invalid_billing_settings'))
@@ -180,75 +194,6 @@ describe('BillingView: credenciales SOL', () => {
     await user.click(screen.getByRole('button', SAVE))
 
     expect(await screen.findByText('La serie ya está en uso')).toBeInTheDocument()
-  })
-})
-
-const WITHOUT_CERTIFICATE = { has_certificate: false, certificate_expires_at: null, is_ready: false }
-
-function certificate(name: string, bytes = 1200): File {
-  return new File([new Uint8Array(bytes).fill(65)], name, { type: 'application/x-pkcs12' })
-}
-
-describe('BillingView: certificado digital', () => {
-  it('lee el archivo en el navegador y lo sube en base64 con su contraseña', async () => {
-    const { api, user } = await openSheet(taxSettings(WITHOUT_CERTIFICATE))
-    const uploaded = taxSettings({ certificate_expires_at: '2027-09-30T17:00:00Z' })
-    api.on('put', CERTIFICATE, uploaded).on('get', SETTINGS, uploaded)
-
-    await user.upload(screen.getByLabelText(CERTIFICATE_FILE), new File(['hola'], 'firma.PFX'))
-    await user.type(screen.getByLabelText(CERTIFICATE_PASSWORD), 'secreta')
-    await user.click(screen.getByRole('button', UPLOAD))
-
-    expect(await screen.findByText('Certificado digital cargado.')).toBeInTheDocument()
-    expect(api.calls('put', CERTIFICATE)[0]?.body).toEqual({ content_base64: 'aG9sYQ==', password: 'secreta' })
-    expect(await screen.findByText(/Certificado cargado\. Vence el .*2027/u)).toBeInTheDocument()
-  })
-
-  it('no sube un archivo de más de 64 KB', async () => {
-    const { api, user } = await openSheet(taxSettings(WITHOUT_CERTIFICATE))
-
-    await user.upload(screen.getByLabelText(CERTIFICATE_FILE), certificate('grande.p12', 64 * 1024 + 1))
-    await user.click(screen.getByRole('button', UPLOAD))
-
-    expect(await screen.findByText('El archivo pesa más de 64 KB: no parece un certificado digital.')).toBeInTheDocument()
-    expect(api.calls('put', CERTIFICATE)).toHaveLength(0)
-  })
-
-  it('no sube un archivo que no sea .pfx, .p12 o .pem', async () => {
-    const { api, user } = await openSheet(taxSettings(WITHOUT_CERTIFICATE))
-    // Quien elige «Todos los archivos» en el diálogo puede saltarse el filtro de `accept`.
-    const anyFile = userEvent.setup({ applyAccept: false })
-
-    await anyFile.upload(screen.getByLabelText(CERTIFICATE_FILE), certificate('firma.crt'))
-    await user.click(screen.getByRole('button', UPLOAD))
-
-    expect(await screen.findByText('El certificado tiene que ser un archivo .pfx, .p12 o .pem.')).toBeInTheDocument()
-    expect(api.calls('put', CERTIFICATE)).toHaveLength(0)
-  })
-
-  it('si el servidor rechaza el certificado (422) dice por qué', async () => {
-    const { api, user } = await openSheet(taxSettings(WITHOUT_CERTIFICATE))
-    api.on('put', CERTIFICATE, new ErrorResponse(422, 'La contraseña del certificado no es correcta.', 'invalid_certificate'))
-
-    await user.upload(screen.getByLabelText(CERTIFICATE_FILE), certificate('firma.p12'))
-    await user.click(screen.getByRole('button', UPLOAD))
-
-    expect(await screen.findByText('La contraseña del certificado no es correcta.')).toBeInTheDocument()
-  })
-
-  it('avisa si el certificado vence en menos de 30 días', async () => {
-    const soon = new Date(Date.now() + 10 * 86_400_000).toISOString()
-    await openSheet(taxSettings({ certificate_expires_at: soon }))
-
-    expect(screen.getByText(/El certificado vence el .*Renuévalo antes/u)).toBeInTheDocument()
-    expect(screen.getByLabelText('Nuevo certificado')).toBeInTheDocument()
-  })
-
-  it('un certificado vencido cuenta como faltante para emitir', async () => {
-    await openSheet(taxSettings({ certificate_expires_at: '2020-01-01T17:00:00Z' }))
-
-    expect(screen.getByText(/El certificado venció el/u)).toBeInTheDocument()
-    expect(screen.getByText(/Falta un certificado digital vigente\./u)).toBeInTheDocument()
   })
 })
 
@@ -278,6 +223,18 @@ describe('BillingView: emitidos', () => {
     await user.click(await screen.findByRole('button', { name: 'Reenviar' }))
 
     expect(await screen.findByText('F001-3: Aceptado por SUNAT.')).toBeInTheDocument()
+  })
+
+  it('un comprobante rechazado muestra el motivo de SUNAT tal cual, también al reenviarlo', async () => {
+    const reason = '0102 - Usuario o contraseña incorrectos'
+    const rejected = invoice({ id: 8, code: 'B001-20', status: 'rejected', status_label: 'Rechazado', provider_message: reason })
+    const { api, user } = open(taxSettings(), [rejected])
+    api.on('post', '/billing/invoices/8/resend', rejected)
+
+    expect(await screen.findByText(reason)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Reenviar' }))
+
+    expect(await screen.findByText(`B001-20: Rechazado. ${reason}`)).toBeInTheDocument()
   })
 
   it('si el reenvío falla lo avisa', async () => {

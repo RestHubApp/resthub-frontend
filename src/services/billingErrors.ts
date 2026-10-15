@@ -1,11 +1,13 @@
 // Los errores de la facturación electrónica que la persona tiene que entender
-// sin leer el detalle técnico: el servicio de facturación caído, un
-// certificado que no sirve y un archivo del comprobante que todavía no existe.
+// sin leer el detalle técnico: el servicio de facturación caído, credenciales
+// o certificado rechazados, un certificado que no sirve y un archivo del
+// comprobante que todavía no existe.
 import type { ErrorCode } from '@/api/types'
 import { errorCode, errorMessage } from './apiError'
 
 const MESSAGES: Readonly<Partial<Record<ErrorCode, string>>> = {
   billing_provider: 'El servicio de facturación no está disponible, intenta en unos minutos.',
+  invalid_billing_credentials: 'SUNAT no aceptó el usuario SOL, la clave o el certificado. Revísalos y vuelve a guardar.',
   invoice_document_unavailable: 'Ese archivo del comprobante todavía no está disponible. Si SUNAT aún no lo aceptó, reenvíalo e inténtalo después.',
 }
 

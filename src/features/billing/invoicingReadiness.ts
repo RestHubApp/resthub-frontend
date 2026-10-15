@@ -16,15 +16,17 @@ export function certificateState(settings: BillingSettings, now: number): Certif
   return left < CERTIFICATE_WARNING_DAYS * DAY_MS ? 'expiring' : 'valid'
 }
 
-/** Lo que le falta al local para emitir, en el orden en que se llena la hoja. */
-export function missingForInvoicing(settings: BillingSettings, now: number): string[] {
-  const certificate = certificateState(settings, now)
+/**
+ * Lo que falta cargar, en el orden en que se llena la hoja. Solo explica: si el
+ * local puede emitir lo dice `is_ready` del servidor (un certificado vencido lo
+ * avisa `CertificateStatus`).
+ */
+export function missingForInvoicing(settings: BillingSettings): string[] {
   return [
     settings.ruc === '' ? 'el RUC' : '',
     settings.legal_name === '' ? 'la razón social' : '',
     settings.has_sol_credentials ? '' : 'el usuario y la clave SOL',
-    certificate === 'missing' ? 'el certificado digital' : '',
-    certificate === 'expired' ? 'un certificado digital vigente' : '',
+    settings.has_certificate ? '' : 'el certificado digital',
   ].filter((item) => item !== '')
 }
 

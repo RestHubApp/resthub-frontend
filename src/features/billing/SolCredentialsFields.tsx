@@ -14,6 +14,10 @@ interface SolCredentialsFieldsProps {
   readonly savedRuc: string
 }
 
+// SUNAT recién revisa el usuario y la clave al recibir un comprobante: guardarlos no los valida.
+const VALIDATION_HINT = 'SUNAT valida el usuario y la clave SOL al emitir el primer comprobante: si están mal, ese comprobante sale rechazado con el motivo.'
+const HINT_CLASS = 'm-0 text-xs text-muted-foreground'
+
 /**
  * El usuario y la clave SOL del local. Guardados no se muestran nunca: solo se
  * dice que están cargados y se ofrece reemplazarlos. Si cambia el RUC, hay que
@@ -27,15 +31,18 @@ export function SolCredentialsFields({ form, hasCredentials, savedRuc }: SolCred
 
   if (canKeep && !isReplacing) {
     return (
-      <FormMessage
-        tone="ok"
-        icon="key"
-        action={<Button type="button" variant="outline" size="sm" onClick={() => {
-          setIsReplacing(true)
-        }}>Reemplazar</Button>}
-      >
-        Usuario y clave SOL cargados.
-      </FormMessage>
+      <div className="flex flex-col gap-2">
+        <FormMessage
+          tone="ok"
+          icon="key"
+          action={<Button type="button" variant="outline" size="sm" onClick={() => {
+            setIsReplacing(true)
+          }}>Reemplazar</Button>}
+        >
+          Usuario y clave SOL cargados.
+        </FormMessage>
+        <p className={HINT_CLASS}>{VALIDATION_HINT}</p>
+      </div>
     )
   }
   return (
@@ -54,6 +61,7 @@ export function SolCredentialsFields({ form, hasCredentials, savedRuc }: SolCred
           Conservar las cargadas
         </Button>
       ) : null}
+      <p className={HINT_CLASS}>{VALIDATION_HINT}</p>
     </fieldset>
   )
 }

@@ -8,7 +8,7 @@ import { paths } from '@/services/paths'
  * (`accounts/domain/entities.py`): si el texto cambia, cambian las dos y cada
  * cuenta vuelve a aceptarlo al entrar.
  */
-export const TERMS_VERSION = '2026-10-12'
+export const TERMS_VERSION = '2026-10-15'
 
 // Marcadores que el dueño del proyecto completa antes de usar el texto con clientes reales.
 const OWNER_PLACEHOLDER = '[Razón social y RUC del titular]'

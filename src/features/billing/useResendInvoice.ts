@@ -13,7 +13,8 @@ export function useResendInvoice() {
     mutationFn: resendInvoice,
     onSuccess: (invoice) => {
       void queryClient.invalidateQueries({ queryKey: billingQueryKey })
-      push({ tone: 'info', message: `${invoice.code}: ${invoice.status_label}.` })
+      const reason = invoice.status === 'rejected' && invoice.provider_message !== '' ? ` ${invoice.provider_message}` : ''
+      push({ tone: 'info', message: `${invoice.code}: ${invoice.status_label}.${reason}` })
     },
     onError: (error) => {
       push({ tone: 'warning', message: billingErrorMessage(error, 'No se pudo reenviar.') })

@@ -25,6 +25,9 @@ export function InvoiceRow({ invoice, timeZone, resending, onResend }: InvoiceRo
         <span className="text-xs text-muted-foreground">
           {invoice.customer_name} · {formatDateTime(invoice.issued_at, timeZone)} · {invoice.status_label}
         </span>
+        {invoice.status === 'rejected' && invoice.provider_message !== '' ? (
+          <span className="text-xs text-destructive">{invoice.provider_message}</span>
+        ) : null}
       </span>
       <div className="flex flex-wrap items-center gap-2">
         <InvoiceArchiveStatus invoice={invoice} />
