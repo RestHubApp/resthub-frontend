@@ -1487,7 +1487,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Anular un plato ya enviado a cocina */
+        /** Anular un plato ya enviado a cocina (antes del primer pago) */
         post: operations["void_item_api_v1_orders__order_id__items__item_id__void_post"];
         delete?: never;
         options?: never;
@@ -2216,7 +2216,7 @@ export interface components {
          *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
          * @enum {string}
          */
-        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
+        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "order_item_voided" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
         /** ActivityPageResponse */
         ActivityPageResponse: {
             /** Items */
@@ -2563,11 +2563,6 @@ export interface components {
         ConfidenceKind: "model" | "rule";
         /** CourtesyRequest */
         CourtesyRequest: {
-            /** Reason */
-            reason: string;
-        };
-        /** VoidItemRequest */
-        VoidItemRequest: {
             /** Reason */
             reason: string;
         };
@@ -5001,6 +4996,11 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VoidItemRequest */
+        VoidItemRequest: {
+            /** Reason */
+            reason: string;
         };
         /** WaiterPerformanceResponse */
         WaiterPerformanceResponse: {
@@ -13369,7 +13369,7 @@ export interface operations {
             };
         };
     };
-    void_item_api_v1_orders__order_id__items__item_id__void_post: {
+    revoke_courtesy_api_v1_orders__order_id__items__item_id__courtesy_delete: {
         parameters: {
             query?: never;
             header?: never;
@@ -13379,11 +13379,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VoidItemRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -13459,7 +13455,7 @@ export interface operations {
             };
         };
     };
-    revoke_courtesy_api_v1_orders__order_id__items__item_id__courtesy_delete: {
+    void_item_api_v1_orders__order_id__items__item_id__void_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -13469,7 +13465,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidItemRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
