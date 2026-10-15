@@ -1,13 +1,13 @@
 {
-  "total": 459,
+  "total": 464,
   "byType": {
     "ruta": 38,
     "confirmacion": 11,
-    "desplegable": 8,
-    "dialogo": 26,
+    "desplegable": 9,
+    "dialogo": 27,
     "hoja": 10,
     "pestanas": 4,
-    "funcion": 281,
+    "funcion": 284,
     "estado": 75,
     "rol": 6
   },
@@ -343,6 +343,12 @@
       "origin": "src/features/orders/history/HistoryColumns.tsx"
     },
     {
+      "id": "desplegable:orders/RoundGroups",
+      "type": "desplegable",
+      "description": "Sección que se abre y se cierra",
+      "origin": "src/features/orders/RoundGroups.tsx"
+    },
+    {
       "id": "desplegable:platform/observability/ExpandButton",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
@@ -437,6 +443,12 @@
       "type": "dialogo",
       "description": "title",
       "origin": "src/features/orders/detail/TablePickerDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/detail/VoidItemDialog",
+      "type": "dialogo",
+      "description": "isEmptied ? 'Ya no queda ningún plato' : `¿Anular ${String(item.quantity)} × ${item.name}?`",
+      "origin": "src/features/orders/detail/VoidItemDialog.tsx"
     },
     {
       "id": "dialogo:orders/floor/TakeawayForm",
@@ -814,6 +826,24 @@
       "id": "funcion:pedido.cancelar-sin-permiso",
       "type": "funcion",
       "description": "Detalle: el mesero no ve «Cancelar pedido»",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.anular-plato",
+      "type": "funcion",
+      "description": "Pedido: el encargado o la cocina anulan un plato ya enviado, con motivo obligatorio o rápido; queda tachado con «Anulado: <motivo>» y fuera del total",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:pedido.anular-sin-permiso",
+      "type": "funcion",
+      "description": "Pedido: el mesero no ve «Anular» en los platos ya enviados",
+      "origin": "e2e/inventory/functions/floor.json"
+    },
+    {
+      "id": "funcion:cocina.rondas",
+      "type": "funcion",
+      "description": "Cocina: lo agregado a un pedido ya enviado va bajo «Agregado (ronda N)» con «Nuevo»; lo anterior, plegado en «Ya enviados»",
       "origin": "e2e/inventory/functions/floor.json"
     },
     {
