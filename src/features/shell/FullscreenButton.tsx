@@ -3,6 +3,8 @@ import { useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { ShellIcon } from './ShellIcon'
 
+const LABEL = 'Pantalla completa'
+
 function subscribe(listener: () => void): () => void {
   document.addEventListener('fullscreenchange', listener)
   return () => {
@@ -32,7 +34,9 @@ export function FullscreenButton() {
   if ((document.fullscreenEnabled as boolean | undefined) !== true) {
     return null
   }
-  const label = isActive ? 'Salir de pantalla completa' : 'Pantalla completa'
+  // El nombre no cambia: el estado lo dice `aria-pressed`. Cambiar los dos haría
+  // que el lector diga «Salir de pantalla completa, presionado». El tooltip sí cambia.
+  const title = isActive ? 'Salir de pantalla completa' : LABEL
 
   return (
     <Button
@@ -40,9 +44,9 @@ export function FullscreenButton() {
       variant="ghost"
       size="icon"
       className="size-11"
-      aria-label={label}
+      aria-label={LABEL}
       aria-pressed={isActive}
-      title={label}
+      title={title}
       onClick={toggleFullscreen}
     >
       <ShellIcon name={isActive ? 'exitFullscreen' : 'fullscreen'} size={20} />

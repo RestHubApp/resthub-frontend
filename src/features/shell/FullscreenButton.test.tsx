@@ -8,6 +8,7 @@ import { FullscreenButton } from './FullscreenButton'
 const state: { element: Element | null } = { element: null }
 const ENTER = 'Pantalla completa'
 const EXIT = 'Salir de pantalla completa'
+const TITLE = 'title'
 const PRESSED = 'aria-pressed'
 
 function enter() {
@@ -55,26 +56,31 @@ describe('FullscreenButton', () => {
 
     const button = screen.getByRole('button', { name: ENTER })
     expect(button).toHaveAttribute(PRESSED, 'false')
-    expect(button).toHaveAttribute('title', ENTER)
+    expect(button).toHaveAttribute(TITLE, ENTER)
 
     await user.click(button)
     expect(request).toHaveBeenCalledTimes(1)
-    const exitButton = screen.getByRole('button', { name: EXIT })
-    expect(exitButton).toHaveAttribute(PRESSED, 'true')
+    // El nombre se queda fijo; el estado lo dice aria-pressed y el tooltip cambia.
+    expect(button).toHaveAccessibleName(ENTER)
+    expect(button).toHaveAttribute(PRESSED, 'true')
+    expect(button).toHaveAttribute(TITLE, EXIT)
+    expect(screen.queryByRole('button', { name: EXIT })).not.toBeInTheDocument()
 
-    await user.click(exitButton)
+    await user.click(button)
     expect(leave).toHaveBeenCalledTimes(1)
-    expect(screen.getByRole('button', { name: ENTER })).toHaveAttribute(PRESSED, 'false')
+    expect(button).toHaveAttribute(PRESSED, 'false')
+    expect(button).toHaveAttribute(TITLE, ENTER)
   })
 
   it('refleja la salida con Esc, que el navegador avisa con fullscreenchange', () => {
     stubFullscreen(true)
     render(<FullscreenButton />)
 
+    const button = screen.getByRole('button', { name: ENTER, pressed: false })
     act(enter)
-    expect(screen.getByRole('button', { name: EXIT })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ENTER, pressed: true })).toBe(button)
     act(exit)
-    expect(screen.getByRole('button', { name: ENTER })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ENTER, pressed: false })).toBe(button)
   })
 
   it('no aparece donde la página no puede pedirla (iPhone, PWA)', () => {
