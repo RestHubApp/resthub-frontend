@@ -1,9 +1,14 @@
+import { Suspense } from 'react'
+
+import { lazyNamed } from '@/components/lazyNamed'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { ShellIcon } from '@/features/shell/ShellIcon'
 import { connectionLabel, STATE_COPY } from './connectionCopy'
-import { ConnectionPanel } from './ConnectionPanel'
 import { useConnection } from './useConnection'
+
+// El panel y el envío de la cola se bajan al abrirlo, no con el armazón.
+const ConnectionPanel = lazyNamed(() => import('./ConnectionPanel'), 'ConnectionPanel')
 
 // Más de dos cifras no entran en el globito.
 const MAX_BADGE = 9
@@ -39,7 +44,9 @@ export function ConnectionButton() {
       <SheetContent side="right" className="gap-4 px-4 pt-5 pb-4 lg:max-w-xs">
         <SheetTitle className="m-0 font-heading text-lg font-semibold">Conexión en vivo</SheetTitle>
         <SheetDescription className="sr-only">Si este equipo tiene internet, si la pantalla se actualiza sola y los pedidos sin enviar.</SheetDescription>
-        <ConnectionPanel connection={connection} />
+        <Suspense fallback={null}>
+          <ConnectionPanel connection={connection} />
+        </Suspense>
       </SheetContent>
     </Sheet>
   )

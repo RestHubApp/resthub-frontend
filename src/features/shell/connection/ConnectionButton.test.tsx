@@ -100,7 +100,8 @@ describe('ConnectionButton', () => {
     const { user } = open()
 
     await user.click(screen.getByRole('button', { name: /^Conexión en vivo: en línea\. 1 pedido sin enviar$/u }))
-    expect(screen.getByRole('status')).toHaveTextContent('En línea')
+    // El panel se baja al abrirlo.
+    expect(await screen.findByRole('status')).toHaveTextContent('En línea')
     expect(screen.getByText('1 pedido sin enviar: Mesa 3.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: RETRY }))
@@ -116,7 +117,7 @@ describe('ConnectionButton', () => {
     const { user } = open()
 
     await user.click(screen.getByRole('button', { name: /1 pedido sin enviar/u }))
-    await user.click(screen.getByRole('button', { name: RETRY }))
+    await user.click(await screen.findByRole('button', { name: RETRY }))
 
     expect(await screen.findByRole('button', { name: RETRY })).toBeEnabled()
     expect(api.calls('post', ORDERS)).toHaveLength(1)

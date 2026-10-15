@@ -2,15 +2,37 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { ShellIcon } from '@/features/shell/ShellIcon'
-import { pendingText, STATE_COPY, stateDetail } from './connectionCopy'
-import type { Connection } from './useConnection'
+import { useSendQueuedOrders } from '@/store/queuedDelivery'
+import type { LiveStatus } from '@/store/liveStatus'
+import { pendingText, STATE_COPY } from './connectionCopy'
+import type { Connection, ConnectionState } from './useConnection'
 
 interface ConnectionPanelProps {
   readonly connection: Connection
 }
 
-/** El contenido del panel de «Conexión en vivo»: el estado en palabras y la cola, con su reintento. */
-export function ConnectionPanel({ connection: { state, live, pending, retry } }: ConnectionPanelProps) {
+// Aquí y no en `connectionCopy`: estas frases solo se leen con el panel abierto.
+
+/** El estado en una frase sencilla, para el panel. */
+function stateDetail(state: ConnectionState, live: LiveStatus | null): string {
+  if (state === 'offline') {
+    return 'Este equipo no tiene internet. Los pedidos que tomes se guardan aquí y se envían al volver la señal.'
+  }
+  if (state === 'reconnecting') {
+    return 'Se cortó la actualización en tiempo real y se está volviendo a conectar. Lo que ves puede tener unos segundos de atraso.'
+  }
+  return live === 'live'
+    ? 'Hay internet y la pantalla se actualiza sola, en tiempo real.'
+    : 'Hay internet. Pedidos, cocina y el tablero se actualizan solos en tiempo real.'
+}
+
+/**
+ * El contenido del panel de «Conexión en vivo»: el estado en palabras y la
+ * cola, con su reintento. Se baja al abrir el panel: el envío de la cola trae
+ * la API de pedidos, que el armazón no necesita para dibujar el botón.
+ */
+export function ConnectionPanel({ connection: { state, live, pending } }: ConnectionPanelProps) {
+  const retry = useSendQueuedOrders()
   const [isSending, setIsSending] = useState(false)
   const copy = STATE_COPY[state]
 
