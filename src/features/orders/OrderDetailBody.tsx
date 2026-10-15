@@ -19,6 +19,9 @@ export function OrderDetailBody({ order, flagFor }: OrderDetailBodyProps) {
   const close = () => {
     setDialog(null)
   }
+  const openCancel = () => {
+    setDialog('cancel')
+  }
 
   return (
     <>
@@ -29,11 +32,9 @@ export function OrderDetailBody({ order, flagFor }: OrderDetailBodyProps) {
         onCharge={() => {
           setDialog('charge')
         }}
-        onCancel={() => {
-          setDialog('cancel')
-        }}
+        onCancel={openCancel}
       />
-      <OrderDetailFooter order={order} flagFor={flagFor} />
+      <OrderDetailFooter order={order} flagFor={flagFor} onCancel={openCancel} />
       <OrderDialogs
         chargeOrder={dialog === 'charge' ? order : null}
         cancelOrder={dialog === 'cancel' ? order : null}
