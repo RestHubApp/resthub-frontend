@@ -1,11 +1,11 @@
 {
-  "total": 458,
+  "total": 459,
   "byType": {
     "ruta": 38,
     "confirmacion": 11,
     "desplegable": 8,
     "dialogo": 26,
-    "hoja": 9,
+    "hoja": 10,
     "pestanas": 4,
     "funcion": 281,
     "estado": 75,
@@ -547,6 +547,12 @@
       "origin": "src/features/roles/RoleFormDialog.tsx"
     },
     {
+      "id": "hoja:shell/connection/ConnectionButton",
+      "type": "hoja",
+      "description": "label} data-connection={state",
+      "origin": "src/features/shell/connection/ConnectionButton.tsx"
+    },
+    {
       "id": "hoja:shell/MoreSheet",
       "type": "hoja",
       "description": "{label}",
@@ -555,7 +561,7 @@
     {
       "id": "hoja:shell/quick/QuickAppearanceButton",
       "type": "hoja",
-      "description": "{LABEL}",
+      "description": "LABEL",
       "origin": "src/features/shell/quick/QuickAppearanceButton.tsx"
     },
     {
