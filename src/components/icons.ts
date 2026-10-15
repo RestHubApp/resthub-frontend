@@ -9,7 +9,6 @@
 // rodea, para que hereden el tono de donde se usen.
 
 import {
-  Accessibility,
   ALargeSmall,
   Activity,
   AlignLeft,
@@ -63,7 +62,9 @@ import {
   LogOut,
   Mail,
   MapPin,
+  Maximize,
   Menu,
+  Minimize,
   Minus,
   Monitor,
   Moon,
@@ -71,8 +72,10 @@ import {
   OctagonAlert,
   PackageMinus,
   PackageX,
+  Palette,
   Pause,
   Pencil,
+  PersonStanding,
   Phone,
   Play,
   Plus,
@@ -109,6 +112,7 @@ import {
   UsersRound,
   UtensilsCrossed,
   Wallet,
+  Wifi,
   WifiOff,
 } from 'lucide-react'
 
@@ -127,7 +131,7 @@ export const ICONS = {
   roles: ShieldCheck,
   indicators: ChartColumnIncreasing,
   profile: UserRound,
-  accessibility: Accessibility,
+  accessibility: PersonStanding,
   lightMode: Sun,
   darkMode: Moon,
   deviceMode: Monitor,
@@ -147,6 +151,9 @@ export const ICONS = {
   hide: EyeOff,
   search: Search,
   textSize: ALargeSmall,
+  appearance: Palette,
+  fullscreen: Maximize,
+  exitFullscreen: Minimize,
   previous: ChevronLeft,
   next: ChevronRight,
   unfold: ChevronsUpDown,
@@ -170,6 +177,7 @@ export const ICONS = {
   up: ArrowUp,
   down: ArrowDown,
   live: Radio,
+  online: Wifi,
   offline: WifiOff,
   retry: RefreshCw,
   cashRegister: Wallet,

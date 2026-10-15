@@ -9,8 +9,8 @@ import { QuickAppearancePanel } from './QuickAppearancePanel'
 const LABEL = 'Apariencia rápida'
 
 interface QuickAppearanceButtonProps {
-  /** `icon`: el botón de la cabecera del celular; `row`: la fila de la barra lateral. */
-  readonly variant: 'icon' | 'row'
+  /** `icon`: el botón de la cabecera del celular; `tile`: el botón cuadrado del pie de la barra lateral. */
+  readonly variant: 'icon' | 'tile'
 }
 
 /**
@@ -26,12 +26,12 @@ export function QuickAppearanceButton({ variant }: QuickAppearanceButtonProps) {
       <SheetTrigger asChild>
         {variant === 'icon' ? (
           <Button type="button" variant="ghost" size="icon" aria-label={LABEL}>
-            <ShellIcon name="textSize" size={22} />
+            <ShellIcon name="appearance" size={22} />
           </Button>
         ) : (
-          <Button type="button" variant="ghost" className="justify-start gap-3 px-3">
-            <ShellIcon name="textSize" size={18} />
-            <span>{LABEL}</span>
+          // 44 px fijos, aun con la densidad compacta: es un blanco solo de ícono.
+          <Button type="button" variant="ghost" size="icon" className="size-11" aria-label={LABEL} title={LABEL}>
+            <ShellIcon name="appearance" size={20} />
           </Button>
         )}
       </SheetTrigger>

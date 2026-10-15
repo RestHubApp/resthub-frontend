@@ -1,6 +1,6 @@
 import { Icon } from '@/components/Icon'
 import { Badge, type BadgeVariant } from '@/components/ui/badge'
-import type { LiveStatus } from './useLiveUpdates'
+import type { LiveStatus } from '@/store/liveStatus'
 
 interface LiveIndicatorProps {
   readonly status: LiveStatus

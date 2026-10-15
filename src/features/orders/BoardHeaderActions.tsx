@@ -4,7 +4,7 @@ import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
 import { LiveIndicator } from './LiveIndicator'
-import type { LiveStatus } from './useLiveUpdates'
+import type { LiveStatus } from '@/store/liveStatus'
 
 interface BoardHeaderActionsProps {
   readonly live: LiveStatus

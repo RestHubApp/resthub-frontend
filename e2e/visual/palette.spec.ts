@@ -1,9 +1,9 @@
 // Regresión visual de la paleta «Buscar o ir a…» (encargado y mesero), de
-// «Apariencia rápida» y del aviso al salir desde la paleta con un pedido que
-// espera señal.
+// «Apariencia rápida», del aviso al salir desde la paleta con un pedido que
+// espera señal y del panel «Conexión en vivo» de la barra lateral.
 import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
-import { capture, captureWindow, expect, deadline, test } from './capture'
+import { capture, captureWindow, expect, deadline, isMobile, test } from './capture'
 import { ownerOf, orderInQueue } from './prepare'
 
 const PALETTE = { name: 'Buscar o ir a…' }
@@ -56,4 +56,20 @@ test('VIS-18 la paleta de comandos del mesero y el aviso al salir con un pedido 
   await captureWindow(notice, 'paleta-confirmar-cerrar-sesion')
   await notice.getByRole('button', { name: 'Cancelar' }).click()
   await expect(notice).toBeHidden()
+})
+
+test('VIS-21 el panel «Conexión en vivo» de la barra lateral con un pedido sin enviar', async ({ page, local }) => {
+  // A 390 px no hay barra lateral: el indicador de conexión solo existe en escritorio.
+  test.skip(isMobile(), 'La barra lateral, y con ella el indicador de conexión, solo existe en escritorio.')
+  deadline(60_000)
+  covers('hoja:shell/connection/ConnectionButton')
+
+  await openAs(page, local.waiter, '/perfil')
+  await orderInQueue(page, { owner: ownerOf(local.waiter), table: local.table('3'), dish: local.dish('Lomo saltado') })
+  await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Conexión en vivo: en línea. 1 pedido sin enviar' }).click()
+  const sheet = page.getByRole('dialog', { name: 'Conexión en vivo' })
+  await expect(sheet.getByText('1 pedido sin enviar: Mesa 3.')).toBeVisible()
+  await captureWindow(sheet, 'conexion-en-vivo')
 })

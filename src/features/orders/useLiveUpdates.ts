@@ -5,11 +5,9 @@ import { isSessionCode } from '@/services/apiError'
 import { apiUrl } from '@/services/apiRouting'
 import { EventStreamError, readEventStream } from '@/services/eventStream'
 import { logger } from '@/services/logger'
+import { reportLiveStatus, type LiveStatus } from '@/store/liveStatus'
 import { useSession } from '@/store/session'
 import { createLiveEventHandler } from './liveEvents'
-
-/** `connecting` al abrir, `live` con el canal activo, `offline` mientras reintenta. */
-export type LiveStatus = 'connecting' | 'live' | 'offline'
 
 // El mismo plazo que anuncia el servidor en el aviso `ready`.
 const RETRY_MS = 3000
@@ -21,7 +19,8 @@ const liveLogger = logger.child({ module: 'realtime' })
  *
  * Abre el canal de avisos del servidor y, si se corta, reintenta cada tres
  * segundos. Al reconectar vuelve a pedir pedidos, mesas y carta: pudo perderse un aviso en el
- * corte. Un 401 no se reintenta: la credencial ya no vale.
+ * corte. Un 401 no se reintenta: la credencial ya no vale. El estado también
+ * se anota en `store/liveStatus`, de donde lo lee el indicador del armazón.
  */
 export function useLiveUpdates(): LiveStatus {
   const token = useSession((state) => state.token)
@@ -35,15 +34,20 @@ export function useLiveUpdates(): LiveStatus {
     }
     const controller = new AbortController()
     const retry: { timer: number | undefined } = { timer: undefined }
+    const channel = Symbol('live')
+    const update = (next: LiveStatus) => {
+      setStatus(next)
+      reportLiveStatus(channel, next)
+    }
     const onEvent = createLiveEventHandler(queryClient, () => {
-      setStatus('live')
+      update('live')
     })
 
     const scheduleRetry = (error?: unknown) => {
       if (controller.signal.aborted) {
         return
       }
-      setStatus('offline')
+      update('offline')
       if (error instanceof EventStreamError && isSessionCode(error.code)) {
         return
       }
@@ -62,10 +66,12 @@ export function useLiveUpdates(): LiveStatus {
       }, scheduleRetry)
     }
 
+    reportLiveStatus(channel, 'connecting')
     connect()
     return () => {
       controller.abort()
       window.clearTimeout(retry.timer)
+      reportLiveStatus(channel, null)
     }
   }, [token, queryClient])
 
