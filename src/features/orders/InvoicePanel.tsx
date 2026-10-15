@@ -18,7 +18,7 @@ interface InvoicePanelProps {
  * El comprobante electrónico de un pedido pagado: emitirlo o verlo.
  *
  * Aparece solo con el pedido pagado y para quien puede emitir. Ya emitido,
- * muestra el número, cómo lo recibió SUNAT, el PDF del proveedor y cómo enviarlo.
+ * muestra el número, cómo lo recibió SUNAT, sus archivos y cómo enviarlo.
  */
 export function InvoicePanel({ order }: InvoicePanelProps) {
   const can = useCan(PERMISSION.billingIssue)
@@ -45,5 +45,5 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
     )
   }
 
-  return <IssuedInvoice invoice={issued} customerPhone={order.customer_phone} />
+  return <IssuedInvoice invoice={issued} />
 }

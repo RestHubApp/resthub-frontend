@@ -291,6 +291,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/billing/invoices/{invoice_id}/{document_format}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Descargar el PDF, el XML firmado o la constancia de SUNAT (CDR) de un comprobante */
+        get: operations["download_invoice_document_api_v1_billing_invoices__invoice_id___document_format__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/billing/orders/{order_id}/invoice": {
         parameters: {
             query?: never;
@@ -319,6 +336,23 @@ export interface paths {
         get: operations["read_settings_api_v1_billing_settings_get"];
         /** Editar datos fiscales */
         put: operations["update_settings_api_v1_billing_settings_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/settings/certificate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Subir o reemplazar el certificado digital (.pfx, .p12 o .pem) */
+        put: operations["upload_certificate_api_v1_billing_settings_certificate_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2297,18 +2331,15 @@ export interface components {
              * @default
              */
             legal_name: string;
-            /** Provider Token */
-            provider_token?: string | null;
-            /**
-             * Provider Url
-             * @default
-             */
-            provider_url: string;
             /**
              * Ruc
              * @default
              */
             ruc: string;
+            /** Sol Password */
+            sol_password?: string | null;
+            /** Sol User */
+            sol_user?: string | null;
         };
         /** BillingSettingsResponse */
         BillingSettingsResponse: {
@@ -2316,18 +2347,20 @@ export interface components {
             address: string;
             /** Boleta Series */
             boleta_series: string;
+            /** Certificate Expires At */
+            certificate_expires_at: string | null;
             /** Factura Series */
             factura_series: string;
-            /** Has Provider Token */
-            has_provider_token: boolean;
+            /** Has Certificate */
+            has_certificate: boolean;
+            /** Has Sol Credentials */
+            has_sol_credentials: boolean;
             /** Igv Rate */
             igv_rate: string;
             /** Is Ready */
             is_ready: boolean;
             /** Legal Name */
             legal_name: string;
-            /** Provider Url */
-            provider_url: string;
             /** Ruc */
             ruc: string;
         };
@@ -2410,6 +2443,16 @@ export interface components {
             count: number;
             /** Label */
             label: string;
+        };
+        /** CertificateUploadRequest */
+        CertificateUploadRequest: {
+            /** Content Base64 */
+            content_base64: string;
+            /**
+             * Password
+             * @default
+             */
+            password: string;
         };
         /** ChangeItemRequest */
         ChangeItemRequest: {
@@ -2816,6 +2859,11 @@ export interface components {
             period: components["schemas"]["PeriodResponse"];
         };
         /**
+         * DocumentFormat
+         * @enum {string}
+         */
+        DocumentFormat: "pdf" | "xml" | "cdr";
+        /**
          * DocumentLookupResponse
          * @description Lo que dice SUNAT (RUC) o RENIEC (DNI). Se rellena el formulario; no se guarda.
          */
@@ -2855,7 +2903,7 @@ export interface components {
          * @description Código estable de un error del API (ver `resthub.core.error_codes`).
          * @enum {string}
          */
-        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_not_found" | "invoice_number_taken" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "weak_password" | "wrong_current_password";
+        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_not_found" | "invoice_number_taken" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "weak_password" | "wrong_current_password";
         /**
          * ErrorResponse
          * @description Un error del API: el texto para la persona y el código estable.
@@ -3001,6 +3049,8 @@ export interface components {
         InvoiceLineResponse: {
             /** Description */
             description: string;
+            /** Is Courtesy */
+            is_courtesy: boolean;
             /** Quantity */
             quantity: number;
             /** Total */
@@ -3024,8 +3074,6 @@ export interface components {
             archive_status_label: string;
             /** Archived At */
             archived_at: string | null;
-            /** Cdr Url */
-            cdr_url: string;
             /** Code */
             code: string;
             /** Customer Address */
@@ -3037,6 +3085,12 @@ export interface components {
             customer_name: string;
             /** Discount */
             discount: string;
+            /** Has Cdr */
+            has_cdr: boolean;
+            /** Has Pdf */
+            has_pdf: boolean;
+            /** Has Xml */
+            has_xml: boolean;
             /** Id */
             id: number;
             /** Igv */
@@ -3057,8 +3111,6 @@ export interface components {
             number: number;
             /** Order Id */
             order_id: number;
-            /** Pdf Url */
-            pdf_url: string;
             /** Provider Message */
             provider_message: string;
             /** Series */
@@ -3070,8 +3122,6 @@ export interface components {
             taxable: string;
             /** Total */
             total: string;
-            /** Xml Url */
-            xml_url: string;
         };
         /**
          * InvoiceStatus
@@ -6294,6 +6344,103 @@ export interface operations {
             };
         };
     };
+    download_invoice_document_api_v1_billing_invoices__invoice_id___document_format__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invoice_id: number;
+                document_format: components["schemas"]["DocumentFormat"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El archivo del comprobante. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
+                    "application/xml": unknown;
+                    "application/zip": unknown;
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `invoice_document_unavailable`: el comprobante todavía no tiene ese documento (el PDF solo existe para uno aceptado por SUNAT). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `billing_provider`: el servicio de facturación (Lycet) no responde o falla; reintentar. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     invoice_for_order_api_v1_billing_orders__order_id__invoice_get: {
         parameters: {
             query?: never;
@@ -6520,7 +6667,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description `invalid_billing_settings` (datos fiscales o credenciales SOL inválidos) o `invalid_billing_credentials` (el servicio de facturación rechazó el usuario SOL, la clave o el certificado). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -6531,6 +6678,111 @@ export interface operations {
             };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `billing_provider`: el servicio de facturación (Lycet) no responde o falla; reintentar. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    upload_certificate_api_v1_billing_settings_certificate_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CertificateUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingSettingsResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `invalid_certificate` (el archivo no abre, la contraseña no corresponde, no es RSA, pesa más de 64 KB o está vencido) o `invalid_billing_credentials` (el servicio de facturación lo rechazó). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `billing_provider`: el servicio de facturación (Lycet) no responde o falla; reintentar. */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };

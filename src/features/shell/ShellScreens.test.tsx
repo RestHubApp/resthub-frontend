@@ -186,7 +186,7 @@ describe('RequireSession: términos y privacidad', () => {
     await user.click(proceed)
 
     expect(await screen.findByText('Pedidos')).toBeInTheDocument()
-    expect(api.calls('post', TERMS)[0]?.body).toEqual({ terms_version: '2026-10-12', privacy_version: '2026-10' })
+    expect(api.calls('post', TERMS)[0]?.body).toEqual({ terms_version: '2026-10-15', privacy_version: '2026-10' })
   })
 
   it('si solo falta el tratamiento de datos, igual se pide la puerta', () => {

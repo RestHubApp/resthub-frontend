@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { billingQueryKey, resendInvoice } from '@/api/billing'
-import { errorMessage } from '@/services/apiError'
+import { billingErrorMessage } from '@/services/billingErrors'
 import { useNotifications } from '@/store/notifications'
 
 /** Reenviar un comprobante al proveedor y avisar cómo quedó. */
@@ -13,10 +13,11 @@ export function useResendInvoice() {
     mutationFn: resendInvoice,
     onSuccess: (invoice) => {
       void queryClient.invalidateQueries({ queryKey: billingQueryKey })
-      push({ tone: 'info', message: `${invoice.code}: ${invoice.status_label}.` })
+      const reason = invoice.status === 'rejected' && invoice.provider_message !== '' ? ` ${invoice.provider_message}` : ''
+      push({ tone: 'info', message: `${invoice.code}: ${invoice.status_label}.${reason}` })
     },
     onError: (error) => {
-      push({ tone: 'warning', message: errorMessage(error, 'No se pudo reenviar.') })
+      push({ tone: 'warning', message: billingErrorMessage(error, 'No se pudo reenviar.') })
     },
   })
 }

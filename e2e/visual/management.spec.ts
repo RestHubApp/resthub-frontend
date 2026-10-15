@@ -18,7 +18,7 @@ test('VIS-06 el tablero, el historial, la cancelación, el comprobante y la caja
     'dialogo:orders/CancelOrderDialog',
     'dialogo:orders/invoice/InvoiceDialog',
     'ruta:/comprobantes',
-    'hoja:billing/BillingView',
+    'hoja:billing/FiscalDataSheet',
     'ruta:/comprobantes/:invoiceId/imprimir',
     'ruta:/caja',
     'dialogo:cash/CashSessionDialog',

@@ -7,7 +7,9 @@ import type {
   BillingCapabilities,
   BillingSettings,
   BillingSettingsRequest,
+  CertificateUploadRequest,
   Invoice,
+  InvoiceDocumentFormat,
   InvoicePage,
   IssueInvoiceRequest,
   SendInvoiceEmailRequest,
@@ -39,6 +41,27 @@ export const billingSettingsQuery = queryOptions({
 
 export async function updateBillingSettings(payload: BillingSettingsRequest): Promise<BillingSettings> {
   return send((client) => client.PUT('/api/v1/billing/settings', { body: payload }))
+}
+
+/** Sube o reemplaza el certificado digital del local; devuelve los datos fiscales con su vencimiento. */
+export async function uploadCertificate(payload: CertificateUploadRequest): Promise<BillingSettings> {
+  return send((client) => client.PUT('/api/v1/billing/settings/certificate', { body: payload }), { timeout: SLOW_TIMEOUT_MS })
+}
+
+/**
+ * Un archivo del comprobante (PDF, XML o CDR), pedido con la sesión: ya no hay
+ * enlaces públicos. Si todavía no existe, rechaza con `invoice_document_unavailable`.
+ */
+export async function downloadInvoiceDocument(invoiceId: number, format: InvoiceDocumentFormat): Promise<Blob> {
+  return send(
+    (client) =>
+      client.GET('/api/v1/billing/invoices/{invoice_id}/{document_format}', {
+        params: { path: { invoice_id: invoiceId, document_format: format } },
+        headers: { Accept: '*/*' },
+        parseAs: 'blob',
+      }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
 }
 
 async function fetchInvoices(offset = 0): Promise<InvoicePage> {

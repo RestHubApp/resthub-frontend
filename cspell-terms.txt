@@ -6,7 +6,6 @@ ruc
 igv
 sunat
 dni
-nubefact
 boleta
 factura
 

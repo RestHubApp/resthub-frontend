@@ -1,6 +1,6 @@
 // HU35: los comprobantes electrónicos. Datos fiscales del local, la lista de
-// lo emitido y su estado ante SUNAT, el reenvío y la hoja impresa. Sin token
-// del proveedor el comprobante queda «Sin enviar (sin proveedor)», simulado.
+// lo emitido y su estado ante SUNAT, el reenvío y la hoja impresa. Sin usuario
+// SOL ni certificado el comprobante queda «Sin enviar (sin proveedor)», simulado.
 import { defined } from '../support/defined'
 import { covers } from '../support/coverage'
 import { openAs, notice, evidence, expect, test } from '../support/fixtures'
@@ -12,10 +12,10 @@ test.beforeEach(() => {
   test.slow()
 })
 
-test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que queda simulado sin proveedor y lo imprime', async ({ page, restaurantWithCashRegister: local }) => {
+test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que queda simulado sin credenciales SOL y lo imprime', async ({ page, restaurantWithCashRegister: local }) => {
   covers(
     'ruta:/comprobantes',
-    'hoja:billing/BillingView',
+    'hoja:billing/FiscalDataSheet',
     'ruta:/comprobantes/:invoiceId/imprimir',
     'funcion:comprobantes.datos-fiscales',
     'funcion:comprobantes.validar-datos-fiscales',
@@ -40,6 +40,8 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
   await expect(page.getByRole('button', { name: /Datos fiscales/u })).toContainText('Falta completar')
   await page.getByRole('button', { name: /Datos fiscales/u }).click()
   const fiscal = page.getByRole('dialog', { name: 'Datos fiscales' })
+  // Lo que falta se cuenta con los datos guardados, no con lo que se va escribiendo.
+  await expect(fiscal.getByText(/Falta el RUC, la razón social, el usuario y la clave SOL y el certificado digital\./u)).toBeVisible()
   await fiscal.getByLabel('RUC del local').fill('123')
   await fiscal.getByLabel('Serie de boletas').fill('X001')
   await fiscal.getByRole('button', { name: 'Guardar datos fiscales' }).click()
@@ -49,15 +51,21 @@ test('GES-19 el encargado carga los datos fiscales, reenvía un comprobante que 
   await fiscal.getByLabel('Razón social').fill('Restaurante E2E S.A.C.')
   await fiscal.getByLabel('Dirección fiscal').fill('Av. Larco 123, Miraflores')
   await fiscal.getByLabel('Serie de boletas').fill('B001')
-  await expect(fiscal.getByText('Todavía no cargado.')).toBeVisible()
+  await expect(fiscal.getByLabel('Usuario SOL')).toBeVisible()
+  await expect(fiscal.getByText('Todavía no hay un certificado cargado.')).toBeVisible()
   await evidence(page, 'ges-19-1-datos-fiscales')
   await fiscal.getByRole('button', { name: 'Guardar datos fiscales' }).click()
   await expect(notice(page, 'Datos fiscales guardados.')).toBeVisible()
   await expect(fiscal).toBeHidden()
   const settings = await api(local).get('/billing/settings')
-  expect(settings).toMatchObject({ ruc: '20123456789', legal_name: 'Restaurante E2E S.A.C.', is_ready: false, has_provider_token: false })
+  expect(settings).toMatchObject({ ruc: '20123456789', legal_name: 'Restaurante E2E S.A.C.', is_ready: false, has_sol_credentials: false, has_certificate: false })
+  await expect(page.getByRole('button', { name: /Datos fiscales/u })).toContainText('Falta completar')
+  await page.getByRole('button', { name: /Datos fiscales/u }).click()
+  await expect(fiscal.getByText(/Falta el usuario y la clave SOL y el certificado digital\./u)).toBeVisible()
+  await fiscal.getByRole('button', { name: 'Cerrar' }).click()
+  await expect(fiscal).toBeHidden()
 
-  // Sin proveedor, reenviar deja el comprobante simulado: no se manda a SUNAT.
+  // Sin credenciales SOL ni certificado, reenviar deja el comprobante simulado: no se manda a SUNAT.
   await row.getByRole('button', { name: 'Reenviar' }).click()
   await expect(notice(page, `${code}: Sin enviar (sin proveedor).`)).toBeVisible()
   await expect(row).toContainText('Sin enviar (sin proveedor)')
