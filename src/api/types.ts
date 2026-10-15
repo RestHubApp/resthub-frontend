@@ -159,6 +159,9 @@ export type PurchaseSuggestion = components['schemas']['PurchaseSuggestionRespon
 // Comprobantes electrónicos: datos fiscales, boletas y facturas.
 export type BillingSettings = components['schemas']['BillingSettingsResponse']
 export type BillingSettingsRequest = components['schemas']['BillingSettingsRequest']
+export type CertificateUploadRequest = components['schemas']['CertificateUploadRequest']
+/** Los archivos de un comprobante que sirve RestHub: el PDF, el XML firmado y la constancia de SUNAT (CDR). */
+export type InvoiceDocumentFormat = components['schemas']['DocumentFormat']
 export type Invoice = components['schemas']['InvoiceResponse']
 export type BillingCapabilities = components['schemas']['BillingCapabilitiesResponse']
 export type SendInvoiceEmailRequest = components['schemas']['SendInvoiceEmailRequest']

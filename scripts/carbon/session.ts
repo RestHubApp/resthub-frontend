@@ -14,7 +14,7 @@ const WAITER_ACCOUNT = {
   kind: 'staff',
   permissions: WAITER_PERMISSIONS,
   preview: false,
-  terms_version: '2026-10-12',
+  terms_version: '2026-10-15',
   terms_accepted: true,
   privacy_version: '2026-10',
   privacy_accepted: true,

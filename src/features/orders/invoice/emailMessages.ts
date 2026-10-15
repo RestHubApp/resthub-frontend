@@ -8,6 +8,7 @@ export function emailErrorMessage(error: unknown, maxPerHour: number): string {
   const messages: Partial<Record<ErrorCode, string>> = {
     email_sending_disabled: 'El envío por correo no está activado en este restaurante.',
     email_delivery: 'No se pudo entregar el correo. Revisa la dirección o inténtalo en unos minutos.',
+    billing_provider: 'El servicio de facturación no está disponible, intenta en unos minutos.',
     email_rate_limited: `Se llegó al límite de ${String(maxPerHour)} correos por hora. Inténtalo más tarde.`,
     invalid_invoice: 'Este comprobante no se puede enviar por correo.',
     validation_error: 'Escribe un correo válido.',

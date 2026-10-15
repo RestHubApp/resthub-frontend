@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 
 import type { Invoice } from '@/api/types'
+import { InvoiceDownloads } from '@/components/InvoiceDownloads'
 import { Button } from '@/components/ui/button'
 import { formatDateTime, formatMoney } from '@/services/format'
 import { paths } from '@/services/paths'
@@ -24,9 +25,13 @@ export function InvoiceRow({ invoice, timeZone, resending, onResend }: InvoiceRo
         <span className="text-xs text-muted-foreground">
           {invoice.customer_name} · {formatDateTime(invoice.issued_at, timeZone)} · {invoice.status_label}
         </span>
+        {invoice.status === 'rejected' && invoice.provider_message !== '' ? (
+          <span className="text-xs text-destructive">{invoice.provider_message}</span>
+        ) : null}
       </span>
-      <span className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <InvoiceArchiveStatus invoice={invoice} />
+        <InvoiceDownloads invoice={invoice} />
         {invoice.status === 'accepted' ? null : (
           <Button type="button" size="sm" variant="outline" disabled={resending} onClick={onResend}>
             Reenviar
@@ -35,7 +40,7 @@ export function InvoiceRow({ invoice, timeZone, resending, onResend }: InvoiceRo
         <Button asChild size="sm" variant="ghost">
           <Link to={paths.billing.print(invoice.id)}>Imprimir</Link>
         </Button>
-      </span>
+      </div>
     </li>
   )
 }

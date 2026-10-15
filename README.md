@@ -441,10 +441,14 @@ descarga aparte, como el resto del área.
 
 - Con el pedido pagado, el recibo del cobro y el detalle del pedido ofrecen
   «Emitir boleta o factura» (`features/orders/invoice`). Ya emitido, muestran
-  el número, el estado ante SUNAT, el PDF del proveedor e «Imprimir».
+  el número, el estado ante SUNAT, «Descargar PDF / XML / CDR» (los sirve
+  RestHub con la sesión: se piden con el cliente del API y se guardan como
+  archivo, sin enlaces públicos) e «Imprimir».
 - «Comprobantes» (`features/billing`, `billing.manage`): datos fiscales del
-  local (el token del proveedor nunca se muestra), lo emitido y el reenvío de
-  lo pendiente o rechazado. `/comprobantes/:id/imprimir` es la representación
+  local, si ya puede emitir y qué le falta, el usuario y la clave SOL (nunca se
+  muestran: solo «cargados» y «Reemplazar»), el certificado digital (.pfx,
+  .p12 o .pem de hasta 64 KB, leído en el navegador, con aviso de vencimiento),
+  lo emitido y el reenvío de lo pendiente o rechazado. `/comprobantes/:id/imprimir` es la representación
   impresa en 80 mm con base imponible, IGV y total.
 
 ## Opciones de platos y compras

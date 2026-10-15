@@ -505,10 +505,10 @@
       "origin": "src/features/tables/TableFormDialog.tsx"
     },
     {
-      "id": "hoja:billing/BillingView",
+      "id": "hoja:billing/FiscalDataSheet",
       "type": "hoja",
       "description": "Datos fiscales",
-      "origin": "src/features/billing/BillingView.tsx"
+      "origin": "src/features/billing/FiscalDataSheet.tsx"
     },
     {
       "id": "hoja:customers/CustomerSheet",

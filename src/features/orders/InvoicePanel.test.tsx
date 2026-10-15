@@ -92,23 +92,24 @@ describe('InvoicePanel', () => {
     })
   })
 
-  it('si el proveedor rechaza la emisión, lo dice dentro de la ventana', async () => {
+  it('si el servidor rechaza la emisión, lo dice dentro de la ventana', async () => {
     const { api, user } = issueFor()
-    api.on('post', ISSUE, new ErrorResponse(502, 'El proveedor no respondió.'))
+    api.on('post', ISSUE, new ErrorResponse(422, 'La factura necesita el RUC del cliente.'))
 
     await user.click(await screen.findByRole('button', OPEN))
     await user.click(await screen.findByRole('button', ISSUE_SALES_RECEIPT))
 
-    expect(await screen.findByText('El proveedor no respondió.')).toBeInTheDocument()
+    expect(await screen.findByText('La factura necesita el RUC del cliente.')).toBeInTheDocument()
     expect(screen.getByRole('dialog', DIALOG)).toBeInTheDocument()
   })
 
-  it('ya emitido muestra el estado y el PDF del proveedor', async () => {
+  it('ya emitido muestra el estado y sus archivos; sin aceptar no hay PDF', async () => {
     const { api } = issueFor()
-    api.on('get', OF_ORDER, invoice({ status: 'rejected', status_label: 'Rechazada', pdf_url: 'https://pse.pe/b.pdf' }))
+    api.on('get', OF_ORDER, invoice({ status: 'rejected', status_label: 'Rechazada', has_pdf: false, has_xml: true, has_cdr: true }))
 
     expect(await screen.findByText('Rechazada')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'PDF' })).toHaveAttribute('href', 'https://pse.pe/b.pdf')
+    expect(screen.getByRole('button', { name: 'Descargar XML' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Descargar PDF' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
   })
 

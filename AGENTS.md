@@ -50,7 +50,7 @@ Además de `typecheck`, `lint`, `test` y `build`, el CI corre `pnpm knip`,
   dentro de cadenas y los commits. Los campos del API (`src/api/schema.d.ts` y
   los cuerpos de petición y respuesta) no se tocan, ni los valores del contrato
   (`'boleta'`, `'factura'`). Lo que se escribe igual a propósito (siglas
-  legales `ruc`, `igv`, `sunat`, `dni`, `nubefact`, nombres de platos, marcas y
+  legales `ruc`, `igv`, `sunat`, `dni`, nombres de platos, marcas y
   nombres propios de los datos de prueba) se agrega a `cspell-terms.txt`; no se
   silencia con comentarios. Un valor que es un dato en español (el parámetro
   `?rango=mes` de la URL, el id de una sección) se escribe entre comillas como
