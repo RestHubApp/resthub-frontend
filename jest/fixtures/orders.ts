@@ -28,6 +28,9 @@ export function orderItem(changes: Partial<Item> = {}): Item {
     is_courtesy: false,
     courtesy_reason: '',
     is_paid: false,
+    kitchen_round: 1,
+    voided_at: null,
+    void_reason: null,
     created_at: CREATED,
     ...changes,
   }
@@ -67,6 +70,7 @@ export function order(changes: Partial<OrderResponse> = {}): OrderResponse {
     payment_method_label: null,
     payments: [],
     merged_into_id: null,
+    kitchen_round: 1,
     cancel_reason: '',
     cancelled_at: null,
     paid_at: null,

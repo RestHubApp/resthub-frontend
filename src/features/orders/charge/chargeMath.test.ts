@@ -16,6 +16,9 @@ function item(id: number, subtotal: string, extra: Partial<OrderItemResponse> = 
     is_courtesy: false,
     courtesy_reason: '',
     is_paid: false,
+    kitchen_round: 1,
+    voided_at: null,
+    void_reason: null,
     created_at: '2026-09-25T20:00:00Z',
     ...extra,
   }

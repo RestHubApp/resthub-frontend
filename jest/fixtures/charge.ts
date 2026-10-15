@@ -23,6 +23,9 @@ export function dish(changes: Partial<OrderItemResponse> = {}): OrderItemRespons
     is_courtesy: false,
     courtesy_reason: '',
     is_paid: false,
+    kitchen_round: 1,
+    voided_at: null,
+    void_reason: null,
     created_at: CREATED,
     ...changes,
   }
@@ -85,6 +88,7 @@ export function buildOrder(changes: Partial<OrderResponse> = {}): OrderResponse 
     cancelled_at: null,
     cancel_reason: '',
     merged_into_id: null,
+    kitchen_round: 1,
     business_date: '2026-09-26',
     created_at: CREATED,
     updated_at: CREATED,
