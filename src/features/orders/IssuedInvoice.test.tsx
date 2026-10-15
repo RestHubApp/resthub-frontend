@@ -1,5 +1,5 @@
-import { describe, expect, it } from '@jest/globals'
-import { screen, within } from '@testing-library/react'
+import { describe, expect, it, jest } from '@jest/globals'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { invoice } from '#jest/fixtures/charge'
 import { ErrorResponse, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server, signInAs } from '#jest/harness'
@@ -8,47 +8,102 @@ import { IssuedInvoice } from '@/features/orders/invoice/IssuedInvoice'
 
 const CAPABILITIES = '/billing/capabilities'
 const EMAIL = '/billing/invoices/90/email'
+const PDF_FILE = '/billing/invoices/90/pdf'
 const SEND_EMAIL = { name: 'Enviar por correo' }
 const SEND = { name: 'Enviar' }
 const RECIPIENT = 'Correo de quien lo recibe'
-const PDF = 'https://nubefact.example/b001-15.pdf'
-const DRIVE = 'https://drive.example'
 const RECEIVER = 'rosa@correo.pe'
 const EMAIL_DIALOG = SEND_EMAIL
-const WHATSAPP = { name: 'Enviar por WhatsApp' }
-const PDF_LINK = { name: 'PDF' }
-const CLEAR_PDF = 'http:' + '//nubefact.example/a.pdf'
+const DOWNLOAD_PDF = { name: 'Descargar PDF' }
 
 function open(capabilities: Partial<BillingCapabilities>, changes = {}, permissions = PERMISSIONS_OWNER) {
   const api = server().on('get', CAPABILITIES, { email_enabled: false, email_max_per_hour: 20, archive_enabled: false, ...capabilities })
   signInAs(permissions)
-  return { api, ...mountScreen(<IssuedInvoice invoice={invoice({ pdf_url: PDF, ...changes })} customerPhone="987654321" />) }
+  return { api, ...mountScreen(<IssuedInvoice invoice={invoice(changes)} />) }
 }
 
-describe('IssuedInvoice: enviar y descargar', () => {
-  it('muestra el PDF, el XML y el CDR si son https, y abre WhatsApp con el número del cliente', async () => {
-    open({}, { xml_url: `${DRIVE}/x.xml`, cdr_url: `${DRIVE}/c.zip` })
+function fileResponse(content: string, type: string): Response {
+  return new Response(content, { headers: { 'Content-Type': type } })
+}
 
-    expect(await screen.findByRole('link', PDF_LINK)).toHaveAttribute('href', PDF)
-    expect(screen.getByRole('link', { name: 'XML' })).toHaveAttribute('href', `${DRIVE}/x.xml`)
-    expect(screen.getByRole('link', { name: 'CDR' })).toHaveAttribute('href', `${DRIVE}/c.zip`)
-    const whatsapp = screen.getByRole('link', WHATSAPP)
-    expect(whatsapp).toHaveAttribute('href', expect.stringMatching(/^https:\/\/wa\.me\/51987654321\?text=/u))
-    expect(whatsapp).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(whatsapp).toHaveAttribute('target', '_blank')
+/** Atrapa la descarga: el archivo de la URL de objeto, el nombre con que se guarda y si se revocó. */
+function catchDownload() {
+  const created: Blob[] = []
+  const names: string[] = []
+  const revoke = jest.fn()
+  Object.assign(URL, {
+    createObjectURL: (file: Blob) => {
+      created.push(file)
+      return 'blob:comprobante'
+    },
+    revokeObjectURL: revoke,
+  })
+  jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function click(this: HTMLAnchorElement) {
+    names.push(this.download)
+  })
+  return { created, names, revoke }
+}
+
+describe('IssuedInvoice: descargar', () => {
+  it('ofrece solo los archivos que existen y ningún enlace externo', async () => {
+    open({}, { has_pdf: false, has_xml: true, has_cdr: false })
+
+    expect(await screen.findByRole('button', { name: 'Descargar XML' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', DOWNLOAD_PDF)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Descargar CDR' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /PDF|XML|CDR|WhatsApp/u })).not.toBeInTheDocument()
   })
 
-  it('no usa un enlace que no sea https', () => {
-    open({}, { pdf_url: CLEAR_PDF, xml_url: 'javascript:alert(1)' })
+  it('baja el PDF con la sesión y lo guarda con la serie y el número', async () => {
+    const { api, user } = open({})
+    api.on('get', PDF_FILE, fileResponse('%PDF-1.4', 'application/pdf'))
+    const download = catchDownload()
 
-    expect(screen.queryByRole('link', PDF_LINK)).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'XML' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', WHATSAPP)).not.toBeInTheDocument()
+    await user.click(await screen.findByRole('button', DOWNLOAD_PDF))
+
+    await waitFor(() => {
+      expect(download.revoke).toHaveBeenCalledWith('blob:comprobante')
+    })
+    expect(download.names).toEqual(['B001-15.pdf'])
+    expect(await download.created[0]?.text()).toBe('%PDF-1.4')
+    expect(api.calls('get', PDF_FILE)[0]?.headers['authorization']).toMatch(/^Bearer /u)
   })
 
+  it('el CDR sale como zip con la serie y el número', async () => {
+    const { api, user } = open({})
+    api.on('get', '/billing/invoices/90/cdr', fileResponse('PK', 'application/zip'))
+    const download = catchDownload()
+
+    await user.click(await screen.findByRole('button', { name: 'Descargar CDR' }))
+
+    await waitFor(() => {
+      expect(download.names).toEqual(['B001-15-cdr.zip'])
+    })
+  })
+
+  it('si el archivo todavía no está disponible (409) lo dice en español', async () => {
+    const { api, user } = open({})
+    api.on('get', PDF_FILE, new ErrorResponse(409, 'El comprobante B001-15 todavía no tiene PDF.', 'invoice_document_unavailable'))
+
+    await user.click(await screen.findByRole('button', DOWNLOAD_PDF))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Ese archivo del comprobante todavía no está disponible.')
+  })
+
+  it('si el servicio de facturación no responde (502) pide intentar en unos minutos', async () => {
+    const { api, user } = open({})
+    api.on('get', PDF_FILE, new ErrorResponse(502, 'No se pudo conectar.', 'billing_provider'))
+
+    await user.click(await screen.findByRole('button', DOWNLOAD_PDF))
+
+    expect(await screen.findByText('El servicio de facturación no está disponible, intenta en unos minutos.')).toBeInTheDocument()
+  })
+})
+
+describe('IssuedInvoice: enviar por correo', () => {
   it('«Enviar por correo» solo aparece con el correo activo', async () => {
     open({ email_enabled: false })
-    await screen.findByRole('link', PDF_LINK)
+    await screen.findByRole('button', DOWNLOAD_PDF)
     expect(screen.queryByRole('button', SEND_EMAIL)).not.toBeInTheDocument()
   })
 
@@ -82,6 +137,5 @@ describe('IssuedInvoice: enviar y descargar', () => {
     open({ email_enabled: true }, {}, PERMISSIONS_WAITER)
 
     expect(screen.queryByRole('button', SEND_EMAIL)).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', WHATSAPP)).not.toBeInTheDocument()
   })
 })

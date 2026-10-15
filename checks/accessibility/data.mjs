@@ -111,7 +111,7 @@ export async function prepareData() {
   // Datos fiscales, un pedido cobrado con comprobante y uno servido por cobrar.
   await call(t, 'PUT', '/billing/settings', {
     ruc: '20123456789', legal_name: 'Restaurante Demo S.A.C.', address: 'Jr. Lima 456, Lima',
-    igv_rate: '18.00', boleta_series: 'B001', factura_series: 'F001', provider_url: '', provider_token: null,
+    igv_rate: '18.00', boleta_series: 'B001', factura_series: 'F001',
   })
   const menu = await call(t, 'GET', '/menu')
   const dishes = menu.categories.flatMap((c) => c.items ?? [])

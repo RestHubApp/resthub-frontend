@@ -2,17 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { anonymizeCustomer, customersQueryKey, exportCustomer } from '@/api/customers'
 import type { CustomerExport } from '@/api/types'
+import { saveFile } from '@/services/download'
 import { useNotifications } from '@/store/notifications'
 
 /** Entrega el archivo al navegador, como cualquier descarga. */
 function download(data: CustomerExport, customerId: number): void {
-  const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(file)
-  link.href = url
-  link.download = `cliente-${String(customerId)}-datos.json`
-  link.click()
-  URL.revokeObjectURL(url)
+  saveFile(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `cliente-${String(customerId)}-datos.json`)
 }
 
 /**

@@ -174,8 +174,9 @@ export class FakeServer {
   })
 }
 
-/** La respuesta HTTP de lo que declaró la prueba: un error del API, un valor JSON o nada. */
+/** La respuesta HTTP de lo que declaró la prueba: un error del API, un valor JSON, una `Response` armada (un archivo) o nada. */
 function responseOf(value: unknown, routeStatus: number): Response {
+  if (value instanceof Response) return value
   const status = value instanceof ErrorResponse ? value.status : routeStatus
   const data = value instanceof ErrorResponse ? { detail: value.detail, code: value.code } : value
   if (status === 204 || data === undefined) {

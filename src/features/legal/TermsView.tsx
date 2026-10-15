@@ -58,7 +58,7 @@ const SECTIONS: readonly Section[] = [
     title: 'Responsabilidades del restaurante',
     paragraphs: [
       'El restaurante es responsable de que los datos que registra sean verdaderos y estén al día, en especial sus datos fiscales y su régimen tributario, de los que dependen sus comprobantes.',
-      'Los comprobantes electrónicos se emiten ante la SUNAT a través de Nubefact. El restaurante responde por su contenido, por sus precios, por su carta y por lo que escribe en el sistema.',
+      'Los comprobantes electrónicos se firman con el certificado digital del restaurante y se envían a la SUNAT con sus credenciales SOL, que RestHub guarda cifradas. El restaurante responde por su contenido, por sus precios, por su carta y por lo que escribe en el sistema.',
       'El restaurante también responde de contar con el consentimiento de sus clientes antes de guardar sus datos personales, como explica la política de privacidad.',
     ],
   },
@@ -75,7 +75,7 @@ const SECTIONS: readonly Section[] = [
     id: 'terceros',
     title: 'Servicios de terceros',
     paragraphs: [
-      'RestHub se apoya en otros servicios: Railway y Vercel para el alojamiento, Nubefact y la SUNAT para los comprobantes, Factiliza para consultar RUC y DNI, Brevo para enviar correos, Google Drive para el respaldo de comprobantes y, si el restaurante los tiene activados, proveedores de inteligencia artificial a través de OpenRouter.',
+      'RestHub se apoya en otros servicios: Railway y Vercel para el alojamiento, un servicio de facturación propio (Lycet) y la SUNAT para los comprobantes, Factiliza para consultar RUC y DNI, Brevo para enviar correos, Google Drive para el respaldo de comprobantes y, si el restaurante los tiene activados, proveedores de inteligencia artificial a través de OpenRouter.',
       'El uso de esos servicios se rige además por sus propias condiciones. Cómo se tratan los datos personales en ellos se explica en la política de privacidad.',
     ],
   },
