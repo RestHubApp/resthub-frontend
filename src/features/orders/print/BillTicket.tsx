@@ -1,6 +1,7 @@
 import type { OrderResponse } from '@/api/types'
 import { formatDateTime, formatMoney, formatPercent, toCents } from '@/services/format'
 import { deliveryLines, orderPlace } from '@/features/orders/orderLabels'
+import { liveItems } from '@/features/orders/kitchenRounds'
 
 interface BillTicketProps {
   readonly order: OrderResponse
@@ -31,7 +32,7 @@ export function BillTicket({ order, restaurant, timeZone }: BillTicketProps) {
       ))}
       <hr className="my-1 border-dashed border-black" />
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
-        {order.items.map((item) => (
+        {liveItems(order).map((item) => (
           <li key={item.id} className={ROW}>
             <span>
               {item.quantity} × {item.name}

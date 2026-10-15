@@ -20,6 +20,9 @@ export function orderItemShape(menuItemId = 1) {
     is_courtesy: boolean(false),
     courtesy_reason: string(''),
     is_paid: boolean(false),
+    kitchen_round: integer(1),
+    voided_at: nullValue(),
+    void_reason: nullValue(),
     created_at: isoDatetime(),
   }
 }
@@ -56,6 +59,7 @@ export function orderShape(status: (typeof ORDER_STATUSES)[number], overrides: R
     notes: string(''),
     items: eachLike(orderItemShape()),
     item_count: integer(2),
+    kitchen_round: integer(1),
     subtotal: money('56.00'),
     courtesy_amount: money('0.00'),
     discount_percent: money('0.00'),

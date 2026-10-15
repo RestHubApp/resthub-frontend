@@ -157,6 +157,23 @@ export async function revokeCourtesy(orderId: number, itemId: number): Promise<O
   )
 }
 
+/**
+ * Anula un plato que ya salió a cocina: queda en el pedido, tachado y con su
+ * motivo, pero no suma en el total ni en el cobro.
+ */
+export async function voidOrderItem(
+  orderId: number,
+  itemId: number,
+  reason: string,
+): Promise<OrderResponse> {
+  return send((client) =>
+    client.POST('/api/v1/orders/{order_id}/items/{item_id}/void', {
+      params: { path: { order_id: orderId, item_id: itemId } },
+      body: { reason },
+    }),
+  )
+}
+
 /** Los comensales se mudaron: el pedido pasa a otra mesa libre. */
 export async function moveOrder(orderId: number, tableId: number): Promise<OrderResponse> {
   return send((client) =>

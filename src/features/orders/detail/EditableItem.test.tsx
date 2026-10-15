@@ -9,11 +9,12 @@ const DISH = '/orders/12/items/1'
 const NOTE = 'Sin cebolla'
 const open = buildOrder({ status: 'open', items: [dish({ notes: NOTE })], item_count: 1 })
 const withoutFlag = () => undefined
+const ignoreCancel = () => undefined
 
 function edit(order = open) {
   const api = server()
   signInAs(PERMISSIONS_WAITER)
-  return { api, ...mountScreen(<OrderItems order={order} flagFor={withoutFlag} />) }
+  return { api, ...mountScreen(<OrderItems order={order} flagFor={withoutFlag} onCancelOrder={ignoreCancel} />) }
 }
 
 describe('platos de un pedido abierto', () => {
