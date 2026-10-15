@@ -9,7 +9,6 @@
 // rodea, para que hereden el tono de donde se usen.
 
 import {
-  Accessibility,
   ALargeSmall,
   Activity,
   AlignLeft,
@@ -72,6 +71,7 @@ import {
   PackageX,
   Pause,
   Pencil,
+  PersonStanding,
   Phone,
   Play,
   Plus,
@@ -125,7 +125,7 @@ export const ICONS = {
   roles: ShieldCheck,
   indicators: ChartColumnIncreasing,
   profile: UserRound,
-  accessibility: Accessibility,
+  accessibility: PersonStanding,
   lightMode: Sun,
   darkMode: Moon,
   deviceMode: Monitor,
