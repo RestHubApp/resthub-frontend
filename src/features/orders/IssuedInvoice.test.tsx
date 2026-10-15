@@ -1,10 +1,11 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
 import { invoice } from '#jest/fixtures/charge'
 import { ErrorResponse, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server, signInAs } from '#jest/harness'
 import type { BillingCapabilities } from '@/api/types'
 import { IssuedInvoice } from '@/features/orders/invoice/IssuedInvoice'
+import { formatMoney } from '@/services/format'
 
 const CAPABILITIES = '/billing/capabilities'
 const EMAIL = '/billing/invoices/90/email'
@@ -24,6 +25,12 @@ function open(capabilities: Partial<BillingCapabilities>, changes = {}, permissi
 
 function fileResponse(content: string, type: string): Response {
   return new Response(content, { headers: { 'Content-Type': type } })
+}
+
+const PDF_CONTENT = '%PDF-1.4'
+
+function pdfResponse(): Response {
+  return fileResponse(PDF_CONTENT, 'application/pdf')
 }
 
 /** Atrapa la descarga: el archivo de la URL de objeto, el nombre con que se guarda y si se revocó. */
@@ -56,7 +63,7 @@ describe('IssuedInvoice: descargar', () => {
 
   it('baja el PDF con la sesión y lo guarda con la serie y el número', async () => {
     const { api, user } = open({})
-    api.on('get', PDF_FILE, fileResponse('%PDF-1.4', 'application/pdf'))
+    api.on('get', PDF_FILE, pdfResponse())
     const download = catchDownload()
 
     await user.click(await screen.findByRole('button', DOWNLOAD_PDF))
@@ -65,7 +72,7 @@ describe('IssuedInvoice: descargar', () => {
       expect(download.revoke).toHaveBeenCalledWith('blob:comprobante')
     })
     expect(download.names).toEqual(['B001-15.pdf'])
-    expect(await download.created[0]?.text()).toBe('%PDF-1.4')
+    expect(await download.created[0]?.text()).toBe(PDF_CONTENT)
     expect(api.calls('get', PDF_FILE)[0]?.headers['authorization']).toMatch(/^Bearer /u)
   })
 
@@ -97,6 +104,96 @@ describe('IssuedInvoice: descargar', () => {
     await user.click(await screen.findByRole('button', DOWNLOAD_PDF))
 
     expect(await screen.findByText('El servicio de facturación no está disponible, intenta en unos minutos.')).toBeInTheDocument()
+  })
+})
+
+const SHARE = { name: 'Compartir comprobante' }
+
+/** Un navegador que comparte archivos (o no): `share` responde lo que diga la prueba. */
+function shareSupport(canShare: boolean, share: (data: ShareData) => Promise<void> = () => Promise.resolve()) {
+  const shared = jest.fn(share)
+  Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => canShare })
+  Object.defineProperty(navigator, 'share', { configurable: true, value: shared })
+  return shared
+}
+
+describe('IssuedInvoice: compartir el PDF', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(navigator, 'canShare')
+    Reflect.deleteProperty(navigator, 'share')
+  })
+
+  it('comparte el PDF como archivo con el local, la serie-número y el total', async () => {
+    const share = shareSupport(true)
+    const { api, user } = open({})
+    api.on('get', PDF_FILE, pdfResponse())
+
+    await user.click(await screen.findByRole('button', SHARE))
+
+    await waitFor(() => {
+      expect(share).toHaveBeenCalledTimes(1)
+    })
+    const data = share.mock.calls[0]?.[0]
+    const file = data?.files?.[0]
+    expect(file?.name).toBe('B001-15.pdf')
+    expect(file?.type).toBe('application/pdf')
+    expect(file?.size).toBe(PDF_CONTENT.length)
+    expect(data?.title).toBe('Boleta B001-15')
+    expect(data?.text).toBe(`La Picantería · Boleta B001-15 · Total ${formatMoney('50.00')}`)
+  })
+
+  it('en un navegador que no comparte archivos no aparece: queda «Descargar PDF»', async () => {
+    shareSupport(false)
+    open({})
+
+    expect(await screen.findByRole('button', DOWNLOAD_PDF)).toBeInTheDocument()
+    expect(screen.queryByRole('button', SHARE)).not.toBeInTheDocument()
+  })
+
+  it('sin PDF (comprobante no aceptado) no aparece', async () => {
+    shareSupport(true)
+    open({}, { has_pdf: false })
+
+    expect(await screen.findByRole('button', { name: 'Descargar XML' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', SHARE)).not.toBeInTheDocument()
+  })
+
+  it('si la persona cancela la hoja de compartir no muestra error', async () => {
+    const share = shareSupport(true, () => Promise.reject(new DOMException('Cancelado', 'AbortError')))
+    const { api, user } = open({})
+    api.on('get', PDF_FILE, pdfResponse())
+
+    await user.click(await screen.findByRole('button', SHARE))
+
+    await waitFor(() => {
+      expect(share).toHaveBeenCalledTimes(1)
+    })
+    expect(await screen.findByRole('button', SHARE)).toBeEnabled()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('si el navegador pide otro toque, deja el PDF listo y no lo vuelve a bajar', async () => {
+    const share = shareSupport(true, () => Promise.reject(new DOMException('Sin gesto', 'NotAllowedError')))
+    const { api, user } = open({})
+    api.on('get', PDF_FILE, pdfResponse())
+
+    await user.click(await screen.findByRole('button', SHARE))
+    share.mockImplementation(() => Promise.resolve())
+    await user.click(await screen.findByRole('button', { name: 'Tocar para compartir' }))
+
+    expect(await screen.findByRole('button', SHARE)).toBeInTheDocument()
+    expect(share).toHaveBeenCalledTimes(2)
+    expect(api.calls('get', PDF_FILE)).toHaveLength(1)
+  })
+
+  it('si el PDF no está disponible lo dice en español', async () => {
+    shareSupport(true)
+    const { api, user } = open({})
+    api.on('get', PDF_FILE, new ErrorResponse(409, 'x', 'invoice_document_unavailable'))
+
+    await user.click(await screen.findByRole('button', SHARE))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Ese archivo del comprobante todavía no está disponible.')
   })
 })
 
