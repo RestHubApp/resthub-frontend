@@ -171,7 +171,7 @@
   },
   {
     "id": "funcion:cocina.rondas",
-    "description": "Cocina: lo agregado a un pedido ya enviado va bajo «Agregado (ronda N)» con «Nuevo»; lo anterior, plegado en «Ya enviados»"
+    "description": "Tablero y cocina: lo agregado a un pedido ya enviado va bajo «Agregado (ronda N)» con «Nuevo»; lo anterior, plegado en «Ya enviados»"
   },
   {
     "id": "funcion:pedido.cambiar-mesa",
