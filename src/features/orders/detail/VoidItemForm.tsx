@@ -62,7 +62,7 @@ export function VoidItemForm({ order, item, onClose, onVoided }: VoidItemFormPro
         mutation={voidItem}
         onCancel={onClose}
         cancelLabel="Volver"
-        submit={{ label: 'Anular plato', pendingLabel: 'Anulando…', icon: 'voidItem', variant: 'destructive' }}
+        submit={{ label: 'Anular plato', pendingLabel: 'Anulando…', icon: 'cancel', variant: 'destructive' }}
       />
     </form>
   )

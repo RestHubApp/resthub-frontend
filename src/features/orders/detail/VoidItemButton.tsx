@@ -11,7 +11,7 @@ interface VoidItemButtonProps {
 export function VoidItemButton({ item, onVoid }: VoidItemButtonProps) {
   return (
     <Button type="button" variant="outline" size="sm" aria-label={`Anular ${item.name}`} onClick={onVoid}>
-      <Icon name="voidItem" size={16} />
+      <Icon name="cancel" size={16} />
       <span>Anular</span>
     </Button>
   )

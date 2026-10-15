@@ -4,7 +4,7 @@ import { Icon } from '@/components/Icon'
 export function NewRoundBadge() {
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
-      <Icon name="newRound" size={14} />
+      <Icon name="add" size={14} />
       Nuevo
     </span>
   )
