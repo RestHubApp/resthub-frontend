@@ -1,5 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 
 import { downloadInvoiceDocument } from '@/api/billing'
 import type { Invoice } from '@/api/types'
@@ -32,33 +31,45 @@ function isError(error: unknown, name: string): boolean {
  * Si la descarga tardó y el navegador ya no considera el toque como reciente
  * (`NotAllowedError`), el archivo queda listo y basta con tocar otra vez.
  * Cancelar la hoja de compartir no es un error.
+ *
+ * No es una mutación: no cambia nada en el servidor, así que no hay caché que
+ * refrescar. Basta una transición con su propio error.
  */
 export function useShareInvoice(invoice: Invoice, restaurantName: string) {
   const [ready, setReady] = useState<File | null>(null)
   const title = `${invoice.kind_label} ${invoice.code}`
   const text = [restaurantName, title, `Total ${formatMoney(invoice.total)}`].filter((part) => part !== '').join(' · ')
-  const share = useMutation({
-    mutationFn: async () => {
-      const file = ready ?? (await pdfFile(invoice))
-      try {
-        await navigator.share({ files: [file], title, text })
-        setReady(null)
-      } catch (error) {
-        if (isError(error, 'AbortError')) return
-        if (isError(error, 'NotAllowedError') && ready === null) {
-          setReady(file)
-          return
-        }
-        throw error
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<unknown>(null)
+
+  async function shareFile() {
+    const file = ready ?? (await pdfFile(invoice))
+    try {
+      await navigator.share({ files: [file], title, text })
+      setReady(null)
+    } catch (shareError) {
+      if (isError(shareError, 'AbortError')) return
+      if (isError(shareError, 'NotAllowedError') && ready === null) {
+        setReady(file)
+        return
       }
-    },
-  })
+      throw shareError
+    }
+  }
+
   return {
     share: () => {
-      share.mutate()
+      setError(null)
+      startTransition(async () => {
+        try {
+          await shareFile()
+        } catch (shareError) {
+          setError(shareError)
+        }
+      })
     },
-    isPending: share.isPending,
+    isPending,
     isReady: ready !== null,
-    error: share.isError ? billingErrorMessage(share.error, 'No se pudo compartir el comprobante.') : null,
+    error: error === null ? null : billingErrorMessage(error, 'No se pudo compartir el comprobante.'),
   }
 }
