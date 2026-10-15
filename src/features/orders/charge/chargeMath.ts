@@ -1,4 +1,5 @@
 import type { OrderItemResponse, OrderResponse } from '@/api/types'
+import { liveItems } from '@/features/orders/kitchenRounds'
 import { toCents } from '@/services/format'
 
 // Las cuentas del cobro en céntimos, con las mismas reglas que el servidor.
@@ -34,9 +35,9 @@ function discountOf(cents: number, percent: number): number {
   return Math.floor((cents * percent) / PERCENT + HALF)
 }
 
-/** Los platos que todavía nadie pagó. */
+/** Los platos que todavía nadie pagó; los anulados no se cobran. */
 export function unpaidItems(order: OrderResponse): OrderItemResponse[] {
-  return order.items.filter((item) => !item.is_paid)
+  return liveItems(order).filter((item) => !item.is_paid)
 }
 
 /**
