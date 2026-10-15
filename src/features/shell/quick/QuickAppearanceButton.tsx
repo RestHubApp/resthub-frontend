@@ -26,12 +26,12 @@ export function QuickAppearanceButton({ variant }: QuickAppearanceButtonProps) {
       <SheetTrigger asChild>
         {variant === 'icon' ? (
           <Button type="button" variant="ghost" size="icon" aria-label={LABEL}>
-            <ShellIcon name="textSize" size={22} />
+            <ShellIcon name="appearance" size={22} />
           </Button>
         ) : (
           // 44 px fijos, aun con la densidad compacta: es un blanco solo de ícono.
           <Button type="button" variant="ghost" size="icon" className="size-11" aria-label={LABEL} title={LABEL}>
-            <ShellIcon name="textSize" size={20} />
+            <ShellIcon name="appearance" size={20} />
           </Button>
         )}
       </SheetTrigger>

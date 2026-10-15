@@ -1,14 +1,13 @@
 import type { Session } from '@/api/types'
 import { paths } from '@/services/paths'
-import { AccessibilityButton } from './AccessibilityButton'
 import { scopeName, spokenScope } from './accountLabels'
 import { Brand } from '@/components/Brand'
 import type { NavEntry } from './navigation'
 import { NavList } from './NavList'
-import { QuickAppearanceButton } from './quick/QuickAppearanceButton'
 import { QuickSearchField } from './quick/QuickSearchField'
 import { ScopeName } from './ScopeName'
 import { SessionActions } from './SessionActions'
+import { SideNavTiles } from './SideNavTiles'
 
 interface SideNavProps {
   readonly entries: readonly NavEntry[]
@@ -30,11 +29,7 @@ export function SideNav({ entries, account }: SideNavProps) {
         <nav aria-label="Navegación principal" className="scroll-shadow -mx-1 min-h-0 flex-1 overflow-y-auto px-1">
           <NavList entries={entries} />
         </nav>
-        {/* Dos botones cuadrados en una fila: en una laptop baja, dos filas completas le quitaban alto al menú. */}
-        <div className="flex gap-1 px-1">
-          <QuickAppearanceButton variant="tile" />
-          <AccessibilityButton />
-        </div>
+        <SideNavTiles />
         <SessionActions account={account} />
       </aside>
     </div>

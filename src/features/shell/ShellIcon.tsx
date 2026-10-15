@@ -1,6 +1,5 @@
 import { Glyph } from '@/components/Glyph'
 import {
-  ALargeSmall,
   Activity,
   Armchair,
   BookUser,
@@ -18,7 +17,11 @@ import {
   History,
   type LucideIcon,
   LogOut,
+  Maximize,
+  Minimize,
+  Palette,
   PersonStanding,
+  RefreshCw,
   ScrollText,
   Search,
   ShieldCheck,
@@ -27,6 +30,8 @@ import {
   UsersRound,
   UtensilsCrossed,
   Wallet,
+  Wifi,
+  WifiOff,
 } from 'lucide-react'
 
 /**
@@ -58,7 +63,12 @@ const SHELL_ICONS = {
   profile: UserRound,
   accessibility: PersonStanding,
   search: Search,
-  textSize: ALargeSmall,
+  appearance: Palette,
+  fullscreen: Maximize,
+  exitFullscreen: Minimize,
+  online: Wifi,
+  offline: WifiOff,
+  retry: RefreshCw,
   signOut: LogOut,
   view: Eye,
   history: History,
