@@ -966,7 +966,7 @@ html .asw-menu-btn:focus-visible,
 
 /*
  * Con sesion no hay boton flotante de accesibilidad en ningun tamano: el menu
- * del widget se abre desde la fila «Accesibilidad» de la barra lateral y desde
+ * del widget se abre desde el botón «Accesibilidad» de la barra lateral y desde
  * «Cuenta» o «Más» en el celular (`openAccessibilityMenu`, que hace clic en este
  * boton aunque este oculto). Sin sesion (acceso, privacidad) no hay barra y el
  * boton se queda en la esquina. El widget fija su posicion con estilos en
