@@ -8,9 +8,9 @@ import type { Session } from '@/api/types'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { paths } from '@/services/paths'
 import { isCurrentEntry, type NavEntry } from './navigation'
+import { MoreButton } from './MoreButton'
 import { NavList } from './NavList'
 import { SessionActions } from './SessionActions'
-import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
 
 // Lo que tarda en cerrarse el panel (la animación de `sheet`).
 const SHEET_CLOSE_MS = 350
@@ -40,13 +40,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <button
-          type="button"
-          className={isInside ? TAB_ACTIVE : TAB_IDLE}
-        >
-          <ShellIcon name={entries.length > 0 ? 'more' : 'profile'} size={22} />
-          <span>{label}</span>
-        </button>
+        <MoreButton entries={entries} label={label} isInside={isInside} />
       </SheetTrigger>
       <SheetContent
         side="bottom"
