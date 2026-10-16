@@ -97,7 +97,7 @@ describe('compras, mermas y ajustes', () => {
     await user.click(within(window).getByRole('button', { name: 'Registrar compra' }))
 
     expect(await screen.findByText('Compra registrada: Limón queda en 10 kg')).toBeInTheDocument()
-    expect(api.calls('post', PURCHASES)[0]?.body).toEqual({ ingredient_id: 1, quantity: '5000', unit_cost: '0.004', reason: '' })
+    expect(api.calls('post', PURCHASES)[0]?.body).toEqual({ ingredient_id: 1, entry_mode: 'base', quantity: '5000', unit_cost: '0.004', reason: '' })
   })
 
   it('con el total pagado, el costo por gramo sale de dividir', async () => {

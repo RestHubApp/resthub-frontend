@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { decimalRule, textRequired, textOptional } from '@/components/formRules'
+import { packagingFields, packagingIssues } from './packagingSchema'
 import { parseDecimal } from './units'
 
 // Los limites repiten los del backend: avisan mientras se escribe.
@@ -26,18 +27,25 @@ function quantityRule({ allowsZero }: { readonly allowsZero: boolean }) {
 
 const costRule = decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles', required: true })
 
-export const ingredientSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Escribe el nombre del insumo')
-    .max(MAX_NAME, `Usa como máximo ${String(MAX_NAME)} caracteres`),
-  unit: z.enum(['g', 'ml', 'unit'], 'Elige cómo se mide'),
-  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-  min_stock: z.string().trim().regex(/^(?:\d+(?:[.,]\d{1,3})?)?$/u, 'Escribe un número con hasta 3 decimales'),
-  min_stock_unit: z.string(),
-  unit_cost: decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles' }),
-})
+export const ingredientSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, 'Escribe el nombre del insumo')
+      .max(MAX_NAME, `Usa como máximo ${String(MAX_NAME)} caracteres`),
+    unit: z.enum(['g', 'ml', 'unit'], 'Elige cómo se mide'),
+    // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
+    min_stock: z.string().trim().regex(/^(?:\d+(?:[.,]\d{1,3})?)?$/u, 'Escribe un número con hasta 3 decimales'),
+    min_stock_unit: z.string(),
+    unit_cost: decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles' }),
+    ...packagingFields,
+  })
+  .superRefine((values, context) => {
+    for (const [field, message] of packagingIssues(values)) {
+      context.addIssue({ code: 'custom', path: [field], message })
+    }
+  })
 
 export type IngredientValues = z.infer<typeof ingredientSchema>
 
