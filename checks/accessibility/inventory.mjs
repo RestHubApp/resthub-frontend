@@ -127,6 +127,8 @@ export const OVERLAYS = [
   { id: 'o-turno', name: 'Diálogo del turno de caja', type: 'Dialog', route: '/caja', account: 'owner', steps: [{ button: /Cerró/ }] },
   { id: 'd-descuentos', name: 'Caja: «Descuentos del mesero» desplegado', type: 'Desplegable', route: '/caja', account: 'owner', steps: [{ button: 'Descuentos del mesero' }], wait: 'main' },
   { id: 'o-datos-fiscales', name: 'Hoja «Datos fiscales»', type: 'Sheet', route: '/comprobantes', account: 'owner', steps: [{ button: /^Datos fiscales/ }] },
+  { id: 'o-cambiar-comprobante', name: 'Diálogo «Cambiar comprobante»: el motivo', type: 'Dialog', route: '/comprobantes', account: 'owner', steps: [{ button: 'Cambiar comprobante' }] },
+  { id: 'o-cambiar-comprobante-nuevo', name: 'Diálogo «Cambiar comprobante»: los datos del nuevo', type: 'Dialog', route: '/comprobantes', account: 'owner', steps: [{ button: 'Cambiar comprobante' }, { button: 'El cliente pidió factura' }, { button: 'Siguiente' }] },
 
   // Menú.
   { id: 'o-nueva-categoria', name: 'Diálogo «Nueva categoría»', type: 'Dialog', route: '/menu', account: 'owner', steps: [{ button: 'Nueva categoría' }] },
