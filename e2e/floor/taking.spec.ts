@@ -117,7 +117,8 @@ test('SAL-03 un plato agotado o sin insumos se ve pero no se puede elegir @mobil
   await api(local).patch(`/menu/items/${String(local.dish('Ají de gallina').id)}/availability`, { is_available: false })
   // Sin lomo de res en el almacén, la receta del Lomo saltado no alcanza.
   const lomoRes = defined(local.ingredients[0])
-  await api(local).post('/inventory/waste', { ingredient_id: lomoRes.id, quantity: '5000', reason: 'Se malogró' })
+  // Un ajuste y no una merma: 5 kg de lomo pasan el monto de aprobación y la merma quedaría pendiente.
+  await api(local).post('/inventory/adjustments', { ingredient_id: lomoRes.id, counted_stock: '0', reason: 'Se malogró' })
   await openAs(page, local.waiter, `/pedidos/nuevo?mesa=${String(local.table('1').id)}`)
 
   const aji = page.getByRole('button', { name: /^Ají de gallina/u })

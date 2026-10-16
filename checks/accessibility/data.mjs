@@ -180,6 +180,18 @@ export async function prepareData() {
   }
   ids.orderWithoutInvoice = withoutInvoice.id
 
+  // Un conteo físico cerrado, para su reporte de diferencias y la tendencia de un insumo.
+  const counts = await call(t, 'GET', '/inventory/stock-counts?status=closed&limit=1')
+  let closedCount = counts.items[0]
+  if (!closedCount) {
+    const [first] = await call(t, 'GET', '/inventory/ingredients')
+    const opened = await call(t, 'POST', '/inventory/stock-counts', { scope: 'selected', ingredient_ids: [first.id], note: 'Pruebas a11y' })
+    const counted = Math.max(0, Number(first.stock) - 1).toFixed(3)
+    await call(t, 'PUT', `/inventory/stock-counts/${opened.id}/lines`, { lines: [{ ingredient_id: first.id, mode: 'base', quantity: counted, full_packages: '0' }] })
+    closedCount = await call(t, 'POST', `/inventory/stock-counts/${opened.id}/close`)
+  }
+  ids.stockCount = closedCount.id
+
   // Un rol sin personas y una categoría vacía: solo esos se pueden eliminar.
   const roles = await call(t, 'GET', '/roles')
   if (!(roles.items ?? roles).some((r) => r.name === 'Caja (pruebas a11y)')) {

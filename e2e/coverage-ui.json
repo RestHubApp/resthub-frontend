@@ -1,13 +1,13 @@
 {
-  "total": 464,
+  "total": 489,
   "byType": {
-    "ruta": 38,
-    "confirmacion": 11,
+    "ruta": 40,
+    "confirmacion": 14,
     "desplegable": 9,
-    "dialogo": 27,
-    "hoja": 10,
+    "dialogo": 29,
+    "hoja": 11,
     "pestanas": 4,
-    "funcion": 284,
+    "funcion": 301,
     "estado": 75,
     "rol": 6
   },
@@ -79,6 +79,12 @@
       "origin": "src/services/paths.ts"
     },
     {
+      "id": "ruta:/inventario/conteos/:countId",
+      "type": "ruta",
+      "description": "Pantalla /inventario/conteos/:countId",
+      "origin": "src/services/paths.ts"
+    },
+    {
       "id": "ruta:/inventario/recetas/:menuItemId",
       "type": "ruta",
       "description": "Pantalla /inventario/recetas/:menuItemId",
@@ -88,6 +94,12 @@
       "id": "ruta:/menu",
       "type": "ruta",
       "description": "Pantalla /menu",
+      "origin": "src/services/paths.ts"
+    },
+    {
+      "id": "ruta:/mermas-por-aprobar",
+      "type": "ruta",
+      "description": "Pantalla /mermas-por-aprobar",
       "origin": "src/services/paths.ts"
     },
     {
@@ -253,6 +265,24 @@
       "origin": "src/features/customers/CustomerRights.tsx"
     },
     {
+      "id": "confirmacion:inventory/stock-count/CountActions#1",
+      "type": "confirmacion",
+      "description": "`¿Cerrar el conteo #${String(count.number)}?`",
+      "origin": "src/features/inventory/stock-count/CountActions.tsx"
+    },
+    {
+      "id": "confirmacion:inventory/stock-count/CountActions#2",
+      "type": "confirmacion",
+      "description": "`¿Cancelar el conteo #${String(count.number)}?`",
+      "origin": "src/features/inventory/stock-count/CountActions.tsx"
+    },
+    {
+      "id": "confirmacion:inventory/waste-approvals/WasteApprovalActions",
+      "type": "confirmacion",
+      "description": "`¿Aprobar la merma de ${approval.ingredient_name}?`",
+      "origin": "src/features/inventory/waste-approvals/WasteApprovalActions.tsx"
+    },
+    {
       "id": "confirmacion:menu/CategoryDialogs#1",
       "type": "confirmacion",
       "description": "`¿Desactivar ${category.name}?`",
@@ -391,6 +421,12 @@
       "origin": "src/features/inventory/ReceiveOrderDialog.tsx"
     },
     {
+      "id": "dialogo:inventory/stock-count/StartCountDialog",
+      "type": "dialogo",
+      "description": "Iniciar conteo físico",
+      "origin": "src/features/inventory/stock-count/StartCountDialog.tsx"
+    },
+    {
       "id": "dialogo:inventory/StockActionDialog",
       "type": "dialogo",
       "description": "action === null ? '' : title(action)",
@@ -401,6 +437,12 @@
       "type": "dialogo",
       "description": "supplier === null ? 'Nuevo proveedor' : `Editar ${supplier.name}`",
       "origin": "src/features/inventory/SupplierDialog.tsx"
+    },
+    {
+      "id": "dialogo:inventory/waste-approvals/RejectWasteDialog",
+      "type": "dialogo",
+      "description": "approval === null ? 'Rechazar merma' : `Rechazar la merma de ${approval.ingredient_name}`",
+      "origin": "src/features/inventory/waste-approvals/RejectWasteDialog.tsx"
     },
     {
       "id": "dialogo:menu/CategoryDialogs",
@@ -533,6 +575,12 @@
       "type": "hoja",
       "description": "Margen por plato",
       "origin": "src/features/insights/MarginsBody.tsx"
+    },
+    {
+      "id": "hoja:inventory/stock-count/DifferenceTrendSheet",
+      "type": "hoja",
+      "description": "Cargando los conteos…",
+      "origin": "src/features/inventory/stock-count/DifferenceTrendSheet.tsx"
     },
     {
       "id": "hoja:inventory/StockRulesSheet",
@@ -1354,6 +1402,108 @@
       "id": "funcion:inventario.agotar-sin-insumos",
       "type": "funcion",
       "description": "Encender o apagar, en la hoja «Reglas de stock», la regla que agota solos los platos sin insumos",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.envase",
+      "type": "funcion",
+      "description": "Dar a un insumo su envase («botella de 750 ml») con los pesos lleno y vacío, validando que vayan juntos",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.compra-en-envases",
+      "type": "funcion",
+      "description": "Registrar una compra en envases con la conversión a la unidad del insumo a la vista",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.merma-por-aprobar",
+      "type": "funcion",
+      "description": "Una merma que pasa el monto del local se anticipa y queda por aprobar sin mover el stock",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:inventario.monto-aprobacion",
+      "type": "funcion",
+      "description": "Cambiar en «Reglas de stock» el monto desde el que una merma pide aprobación, o apagarlo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.iniciar",
+      "type": "funcion",
+      "description": "Iniciar un conteo físico de todos los insumos o de una selección",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.contar",
+      "type": "funcion",
+      "description": "Contar en la unidad, en envases o por peso, con la conversión en vivo y guardado por línea",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.buscar",
+      "type": "funcion",
+      "description": "Buscar un insumo en la lista para contar y ver solo los pendientes",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.cerrar",
+      "type": "funcion",
+      "description": "Cerrar el conteo con confirmación que dice cuántos quedan sin contar; el stock queda ajustado",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.cancelar",
+      "type": "funcion",
+      "description": "Cancelar un conteo en curso sin tocar el stock",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.reporte",
+      "type": "funcion",
+      "description": "El reporte de un conteo cerrado: total valorizado, orden por pérdida y diferencias grandes con aviso",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.tendencia",
+      "type": "funcion",
+      "description": "La tendencia de las diferencias de un insumo en sus últimos conteos",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.historial",
+      "type": "funcion",
+      "description": "El historial de conteos con su estado y su avance",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:conteo.sin-permiso",
+      "type": "funcion",
+      "description": "Quien solo lee el inventario no puede iniciar ni cerrar conteos",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mermas.aprobar",
+      "type": "funcion",
+      "description": "Aprobar una merma grande con confirmación: recién ahí baja el stock",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mermas.rechazar",
+      "type": "funcion",
+      "description": "Rechazar una merma grande con su motivo: el stock no cambia",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mermas.insignia",
+      "type": "funcion",
+      "description": "El menú cuenta las mermas que esperan aprobación",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:mermas.sin-permiso",
+      "type": "funcion",
+      "description": "Sin inventory.approve_waste no se ve la bandeja de mermas por aprobar",
       "origin": "e2e/inventory/functions/management.json"
     },
     {
