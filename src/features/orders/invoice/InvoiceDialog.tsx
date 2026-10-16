@@ -2,9 +2,7 @@ import type { OrderResponse } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
 import { formatMoney } from '@/services/format'
-import { CustomerFields } from './CustomerFields'
-import { InvoiceDocumentSelect } from './InvoiceDocumentSelect'
-import { InvoiceKindPicker } from './InvoiceKindPicker'
+import { InvoiceDraftFields } from './InvoiceDraftFields'
 import { useInvoiceForm } from './useInvoiceForm'
 
 interface InvoiceDialogProps {
@@ -21,7 +19,6 @@ interface InvoiceDialogProps {
  */
 export function InvoiceDialog({ order, open, onClose }: InvoiceDialogProps) {
   const form = useInvoiceForm(order, onClose)
-  const { kind, type, mutation } = form
 
   return (
     <FormDialog
@@ -34,19 +31,12 @@ export function InvoiceDialog({ order, open, onClose }: InvoiceDialogProps) {
         }
       }}
     >
-      <InvoiceKindPicker kind={kind} onChange={form.setKind} />
-      <InvoiceDocumentSelect kind={kind} totalCents={form.total} value={type} onChange={form.setDoc} />
-      <CustomerFields
-        documentType={type}
-        withAddress={kind === 'factura'}
-        values={form.customer}
-        onChange={form.setCustomer}
-      />
+      <InvoiceDraftFields draft={form.draft} />
       <FormFooter
-        mutation={mutation}
+        mutation={form.mutation}
         failureText="No se pudo emitir el comprobante."
         onCancel={onClose}
-        submit={{ label: `Emitir ${kind}`, pendingLabel: 'Emitiendo…', onClick: form.issue, isDisabled: !form.canIssue }}
+        submit={{ label: `Emitir ${form.draft.kind}`, pendingLabel: 'Emitiendo…', onClick: form.issue, isDisabled: !form.canIssue }}
       />
     </FormDialog>
   )

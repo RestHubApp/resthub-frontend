@@ -1,14 +1,14 @@
 {
-  "total": 489,
+  "total": 494,
   "byType": {
     "ruta": 40,
     "confirmacion": 14,
     "desplegable": 9,
-    "dialogo": 29,
+    "dialogo": 30,
     "hoja": 11,
     "pestanas": 4,
-    "funcion": 301,
-    "estado": 75,
+    "funcion": 304,
+    "estado": 76,
     "rol": 6
   },
   "items": [
@@ -509,6 +509,12 @@
       "type": "dialogo",
       "description": "Enviar por correo",
       "origin": "src/features/orders/invoice/InvoiceEmailDialog.tsx"
+    },
+    {
+      "id": "dialogo:orders/invoice/InvoiceVoidDialog",
+      "type": "dialogo",
+      "description": "isChange ? `Cambiar ${name}` : `Anular ${name}`",
+      "origin": "src/features/orders/invoice/InvoiceVoidDialog.tsx"
     },
     {
       "id": "dialogo:orders/taking/ModifierDialog",
@@ -2362,6 +2368,30 @@
       "id": "funcion:comprobantes.enviar-correo",
       "type": "funcion",
       "description": "Enviar el comprobante emitido por correo desde su ventana, si el restaurante tiene el correo activo",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.anular-sin-nota",
+      "type": "funcion",
+      "description": "Anular un comprobante simulado o rechazado: se anula sin nota de crédito porque nunca fue válido ante SUNAT",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.cambiar",
+      "type": "funcion",
+      "description": "Cambiar una boleta por una factura: se anula la boleta, se emite la factura y la nueva dice a cuál reemplaza",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "funcion:comprobantes.series-nota-credito",
+      "type": "funcion",
+      "description": "Las series de notas de crédito (BC01 y FC01) no pueden repetir la del comprobante",
+      "origin": "e2e/inventory/functions/management.json"
+    },
+    {
+      "id": "estado:comprobante.anulado",
+      "type": "estado",
+      "description": "El comprobante anulado muestra su motivo y el pedido vuelve a ofrecer emitir boleta o factura",
       "origin": "e2e/inventory/functions/management.json"
     },
     {

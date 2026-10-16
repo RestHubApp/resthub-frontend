@@ -1,21 +1,18 @@
-import { Link } from 'react-router'
-
 import type { Invoice } from '@/api/types'
-import { InvoiceDownloads } from '@/components/InvoiceDownloads'
-import { Button } from '@/components/ui/button'
 import { formatDateTime, formatMoney } from '@/services/format'
-import { paths } from '@/services/paths'
-import { InvoiceArchiveStatus } from './InvoiceArchiveStatus'
+import { InvoiceRowActions } from './InvoiceRowActions'
+import type { InvoiceSlot } from './invoiceSlot'
 
 interface InvoiceRowProps {
   readonly invoice: Invoice
   readonly timeZone: string
   readonly resending: boolean
   readonly onResend: () => void
+  readonly Slot?: InvoiceSlot | undefined
 }
 
-/** Un comprobante emitido: número, monto, cliente, estado y qué se puede hacer. */
-export function InvoiceRow({ invoice, timeZone, resending, onResend }: InvoiceRowProps) {
+/** Un comprobante emitido: número, monto, cliente, estado (o la anulación) y qué se puede hacer. */
+export function InvoiceRow({ invoice, timeZone, resending, onResend, Slot }: InvoiceRowProps) {
   return (
     <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 ring-1 ring-input">
       <span className="flex flex-col">
@@ -23,24 +20,14 @@ export function InvoiceRow({ invoice, timeZone, resending, onResend }: InvoiceRo
           {invoice.code} · {formatMoney(invoice.total)}
         </span>
         <span className="text-xs text-muted-foreground">
-          {invoice.customer_name} · {formatDateTime(invoice.issued_at, timeZone)} · {invoice.status_label}
+          {invoice.customer_name} · {formatDateTime(invoice.issued_at, timeZone)} · {invoice.is_voided ? 'Anulado' : invoice.status_label}
         </span>
-        {invoice.status === 'rejected' && invoice.provider_message !== '' ? (
+        {invoice.status === 'rejected' && invoice.provider_message !== '' && !invoice.is_voided ? (
           <span className="text-xs text-destructive">{invoice.provider_message}</span>
         ) : null}
       </span>
-      <div className="flex flex-wrap items-center gap-2">
-        <InvoiceArchiveStatus invoice={invoice} />
-        <InvoiceDownloads invoice={invoice} />
-        {invoice.status === 'accepted' ? null : (
-          <Button type="button" size="sm" variant="outline" disabled={resending} onClick={onResend}>
-            Reenviar
-          </Button>
-        )}
-        <Button asChild size="sm" variant="ghost">
-          <Link to={paths.billing.print(invoice.id)}>Imprimir</Link>
-        </Button>
-      </div>
+      <InvoiceRowActions invoice={invoice} resending={resending} onResend={onResend} />
+      {Slot === undefined ? null : <Slot invoice={invoice} />}
     </li>
   )
 }

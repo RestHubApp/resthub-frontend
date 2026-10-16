@@ -6,12 +6,13 @@ import { TablePagination } from '@/components/TablePagination'
 import { useTimeZone } from '@/store/session'
 import { InvoiceListStatus } from './InvoiceListStatus'
 import { InvoiceRow } from './InvoiceRow'
+import type { InvoiceSlot } from './invoiceSlot'
 import { useResendInvoice } from './useResendInvoice'
 
 const PAGE = 25
 
 /** Los comprobantes emitidos, del más reciente al más antiguo, de a 25. */
-export function InvoiceList() {
+export function InvoiceList({ Slot }: { readonly Slot?: InvoiceSlot | undefined }) {
   const timeZone = useTimeZone()
   const [page, setPage] = useState(0)
   const issued = useQuery(invoicesQuery(page * PAGE))
@@ -37,6 +38,7 @@ export function InvoiceList() {
             invoice={invoice}
             timeZone={timeZone}
             resending={resend.isPending}
+            Slot={Slot}
             onResend={() => {
               resend.mutate(invoice.id)
             }}

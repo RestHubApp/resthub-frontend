@@ -7,9 +7,9 @@ import { FormFooter } from '@/components/FormFooter'
 import { FormMessage } from '@/components/FormMessage'
 import { TextareaField } from '@/components/TextareaField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { QuickReasons } from '@/features/orders/QuickReasons'
 import { useOrderAction } from '@/features/orders/useOrderAction'
-import { QuickVoidReasons } from './QuickVoidReasons'
-import { voidErrorMessage } from './voidItemMessages'
+import { QUICK_VOID_REASONS, voidErrorMessage } from './voidItemMessages'
 import { MAX_VOID_REASON, type VoidItemValues, voidItemSchema } from './voidItemSchema'
 
 interface VoidItemFormProps {
@@ -44,7 +44,8 @@ export function VoidItemForm({ order, item, onClose, onVoided }: VoidItemFormPro
         }),
       )}
     >
-      <QuickVoidReasons
+      <QuickReasons
+        reasons={QUICK_VOID_REASONS}
         onPick={(reason) => {
           setValue('reason', reason, { shouldValidate: true })
         }}

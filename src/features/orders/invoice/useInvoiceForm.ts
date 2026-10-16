@@ -1,30 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 
 import { billingQueryKey, issueInvoice, orderInvoiceQueryKey } from '@/api/billing'
-import type { DocumentType, InvoiceKind, IssueInvoiceRequest, OrderResponse } from '@/api/types'
-import { toCents } from '@/services/format'
-import { customerComplete, effectiveDocument } from './invoiceDocument'
-
-/** Los datos del cliente que se escriben para el comprobante. */
-export interface InvoiceCustomer {
-  readonly number: string
-  readonly name: string
-  readonly address: string
-}
-
-const EMPTY_CUSTOMER: InvoiceCustomer = { number: '', name: '', address: '' }
+import type { IssueInvoiceRequest, OrderResponse } from '@/api/types'
+import { useInvoiceDraft } from './useInvoiceDraft'
 
 /**
- * El borrador del comprobante de un pedido: tipo, documento y datos del cliente.
+ * El comprobante de un pedido: el borrador y su emisión.
  *
  * `issue` emite el comprobante; al lograrlo refresca la facturación y llama a
  * `onClose` para cerrar el diálogo.
  */
 export function useInvoiceForm(order: OrderResponse, onClose: () => void) {
-  const [kind, setKind] = useState<InvoiceKind>('boleta')
-  const [doc, setDoc] = useState<DocumentType>('none')
-  const [customer, setCustomer] = useState<InvoiceCustomer>(EMPTY_CUSTOMER)
+  const draft = useInvoiceDraft(order.total)
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationFn: (payload: IssueInvoiceRequest) => issueInvoice(payload),
@@ -34,28 +21,13 @@ export function useInvoiceForm(order: OrderResponse, onClose: () => void) {
       onClose()
     },
   })
-  const total = toCents(order.total)
-  const type = effectiveDocument(kind, doc, total)
 
   return {
-    kind,
-    setKind,
-    setDoc,
-    customer,
-    setCustomer,
-    total,
-    type,
+    draft,
     mutation,
-    canIssue: !mutation.isPending && customerComplete(type, customer.number, customer.name),
+    canIssue: !mutation.isPending && draft.isComplete,
     issue: () => {
-      mutation.mutate({
-        order_id: order.id,
-        kind,
-        customer_document_type: type,
-        customer_document_number: customer.number.trim(),
-        customer_name: customer.name.trim(),
-        customer_address: customer.address.trim(),
-      })
+      mutation.mutate(draft.request(order.id))
     },
   }
 }

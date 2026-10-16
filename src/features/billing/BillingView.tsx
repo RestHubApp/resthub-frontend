@@ -9,6 +9,7 @@ import { useScreenAction } from '@/hooks/useScreenAction'
 import { FiscalDataButton } from './FiscalDataButton'
 import { FiscalDataSheet } from './FiscalDataSheet'
 import { InvoiceList } from './InvoiceList'
+import type { InvoiceSlot } from './invoiceSlot'
 
 /**
  * Comprobantes electrónicos: lo emitido y, en una hoja, los datos fiscales.
@@ -17,8 +18,9 @@ import { InvoiceList } from './InvoiceList'
  * después de cargar las credenciales SOL o el certificado. Los datos fiscales
  * se llenan una vez, así que no ocupan la pantalla: el botón de la cabecera los
  * abre y lleva «Falta completar» mientras falte algo para enviar a SUNAT.
+ * `InvoiceSlot` va debajo de cada comprobante: su anulación (ver `invoiceSlot`).
  */
-export function BillingView() {
+export function BillingView({ InvoiceSlot }: { readonly InvoiceSlot?: InvoiceSlot | undefined }) {
   const settings = useQuery(billingSettingsQuery)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const fiscal = useScreenAction('datos-fiscales')
@@ -40,7 +42,7 @@ export function BillingView() {
         <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" />
       ) : (
         <SectionCard title="Emitidos">
-          <InvoiceList />
+          <InvoiceList Slot={InvoiceSlot} />
         </SectionCard>
       )}
       {settings.data ? (

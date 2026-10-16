@@ -1,14 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
 
 import { orderInvoiceQuery } from '@/api/billing'
 import { PERMISSION } from '@/api/permissions'
-import type { OrderResponse } from '@/api/types'
-import { Icon } from '@/components/Icon'
-import { Button } from '@/components/ui/button'
+import type { Invoice, OrderResponse } from '@/api/types'
 import { useCan } from '@/store/session'
-import { InvoiceDialog } from '@/features/orders/invoice/InvoiceDialog'
 import { IssuedInvoice } from '@/features/orders/invoice/IssuedInvoice'
+import { IssueInvoiceButton } from '@/features/orders/invoice/IssueInvoiceButton'
+
+/** Sin comprobante, o con el vigente anulado, se puede emitir uno. */
+function isIssuable(issued: Invoice | null): boolean {
+  return issued === null || issued.is_voided
+}
 
 interface InvoicePanelProps {
   readonly order: OrderResponse
@@ -18,32 +20,22 @@ interface InvoicePanelProps {
  * El comprobante electrónico de un pedido pagado: emitirlo o verlo.
  *
  * Aparece solo con el pedido pagado y para quien puede emitir. Ya emitido,
- * muestra el número, cómo lo recibió SUNAT, sus archivos y cómo enviarlo.
+ * muestra el número, cómo lo recibió SUNAT, sus archivos y cómo enviarlo. Si el
+ * vigente se anuló, lo muestra anulado y vuelve a ofrecer emitir otro.
  */
 export function InvoicePanel({ order }: InvoicePanelProps) {
   const can = useCan(PERMISSION.billingIssue)
-  const [isIssuing, setIsIssuing] = useState(false)
-  const invoice = useQuery({ ...orderInvoiceQuery(order.id), enabled: can && order.status === 'paid' })
-  if (!can || order.status !== 'paid' || invoice.isPending) {
+  const isShown = can && order.status === 'paid'
+  const invoice = useQuery({ ...orderInvoiceQuery(order.id), enabled: isShown })
+  if (!isShown || invoice.isPending) {
     return null
   }
-  const issued = invoice.data
+  const issued = invoice.data ?? null
 
-  if (issued === null || issued === undefined) {
-    return (
-      <>
-        <Button type="button" variant="outline" className="self-start" onClick={() => {
-          setIsIssuing(true)
-        }}>
-          <Icon name="recipe" size={16} />
-          <span>Emitir boleta o factura</span>
-        </Button>
-        <InvoiceDialog order={order} open={isIssuing} onClose={() => {
-          setIsIssuing(false)
-        }} />
-      </>
-    )
-  }
-
-  return <IssuedInvoice invoice={issued} />
+  return (
+    <>
+      {issued === null ? null : <IssuedInvoice invoice={issued} />}
+      {isIssuable(issued) ? <IssueInvoiceButton order={order} /> : null}
+    </>
+  )
 }

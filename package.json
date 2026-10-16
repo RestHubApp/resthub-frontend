@@ -177,7 +177,7 @@
       "name": "Todo el JS",
       "path": "dist/assets/*.js",
       "gzip": true,
-      "limit": "499 kB"
+      "limit": "505 kB"
     }
   ]
 }

@@ -187,6 +187,7 @@ export type CertificateUploadRequest = components['schemas']['CertificateUploadR
 /** Los archivos de un comprobante que sirve RestHub: el PDF, el XML firmado y la constancia de SUNAT (CDR). */
 export type InvoiceDocumentFormat = components['schemas']['DocumentFormat']
 export type Invoice = components['schemas']['InvoiceResponse']
+export type CreditNote = components['schemas']['CreditNoteResponse']
 export type BillingCapabilities = components['schemas']['BillingCapabilitiesResponse']
 export type SendInvoiceEmailRequest = components['schemas']['SendInvoiceEmailRequest']
 export type SendInvoiceEmailResponse = components['schemas']['SendInvoiceEmailResponse']
