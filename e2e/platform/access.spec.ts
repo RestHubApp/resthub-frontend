@@ -38,6 +38,7 @@ const ALL = [
   'Menú',
   'Mesas',
   'Inventario',
+  'Mermas por aprobar',
   'Personal',
   'Roles',
   'Resumen',
