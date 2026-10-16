@@ -46,6 +46,10 @@ export function BillingSettingsForm({ settings, onSaved }: BillingSettingsFormPr
         <TextField id="fiscal-serie-b" label="Serie de boletas" field={register('boleta_series')} error={errorOf('boleta_series')} />
         <TextField id="fiscal-serie-f" label="Serie de facturas" field={register('factura_series')} error={errorOf('factura_series')} />
       </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <TextField id="fiscal-serie-nc-b" label="Serie de notas de crédito de boletas" hint="Las que anulan una boleta, como BC01." field={register('boleta_credit_note_series')} error={errorOf('boleta_credit_note_series')} />
+        <TextField id="fiscal-serie-nc-f" label="Serie de notas de crédito de facturas" hint="Las que anulan una factura, como FC01." field={register('factura_credit_note_series')} error={errorOf('factura_credit_note_series')} />
+      </div>
       <SolCredentialsFields form={form} hasCredentials={settings.has_sol_credentials} savedRuc={settings.ruc} />
       {save.isError ? <FormMessage tone="error">{billingErrorMessage(save.error, 'No se pudieron guardar los datos.')}</FormMessage> : null}
       <Button type="submit" className="self-end" disabled={save.isPending}>

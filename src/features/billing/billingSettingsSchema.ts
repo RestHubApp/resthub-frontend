@@ -4,6 +4,12 @@ import type { BillingSettings, BillingSettingsRequest } from '@/api/types'
 
 const SOL_USER = /^[A-Z0-9]{3,20}$/u
 
+const SERIES = { B: /^B[A-Z0-9]{3}$/u, F: /^F[A-Z0-9]{3}$/u } as const
+
+function series(letter: keyof typeof SERIES) {
+  return z.string().trim().toUpperCase().regex(SERIES[letter], `Cuatro caracteres, empieza con ${letter}`)
+}
+
 /**
  * Las reglas de los datos fiscales, con los guardados a la vista: el usuario y
  * la clave SOL van juntos, y con otro RUC las credenciales cargadas ya no
@@ -18,8 +24,10 @@ export function settingsSchema(saved: BillingSettings) {
       address: z.string().trim().max(200, 'Usa como máximo 200 caracteres'),
       // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
       igv_rate: z.string().trim().regex(/^\d{1,2}(?:[.,]\d{1,2})?$/u, 'Escribe un porcentaje como 18 o 10.5'),
-      boleta_series: z.string().trim().toUpperCase().regex(/^B[A-Z0-9]{3}$/u, 'Cuatro caracteres, empieza con B'),
-      factura_series: z.string().trim().toUpperCase().regex(/^F[A-Z0-9]{3}$/u, 'Cuatro caracteres, empieza con F'),
+      boleta_series: series('B'),
+      factura_series: series('F'),
+      boleta_credit_note_series: series('B'),
+      factura_credit_note_series: series('F'),
       sol_user: z
         .string()
         .trim()
@@ -28,9 +36,10 @@ export function settingsSchema(saved: BillingSettings) {
       sol_password: z.string().max(100, 'Usa como máximo 100 caracteres'),
     })
     .superRefine((values, context) => {
-      const issue = solIssue(saved, values)
-      if (issue !== null) {
-        context.addIssue({ code: 'custom', ...issue })
+      for (const issue of [solIssue(saved, values), ...creditNoteSeriesIssues(values)]) {
+        if (issue !== null) {
+          context.addIssue({ code: 'custom', ...issue })
+        }
       }
     })
 }
@@ -56,6 +65,23 @@ function solIssue(saved: BillingSettings, { ruc, sol_user, sol_password }: SolVa
   return null
 }
 
+interface SeriesValues {
+  readonly boleta_series: string
+  readonly factura_series: string
+  readonly boleta_credit_note_series: string
+  readonly factura_credit_note_series: string
+}
+
+const SAME_SERIES = 'Usa una serie distinta a la del comprobante'
+
+/** La nota de crédito numera aparte: no puede compartir la serie de las boletas o las facturas que anula. */
+function creditNoteSeriesIssues(values: SeriesValues) {
+  return [
+    values.boleta_credit_note_series === values.boleta_series ? { path: ['boleta_credit_note_series'], message: SAME_SERIES } : null,
+    values.factura_credit_note_series === values.factura_series ? { path: ['factura_credit_note_series'], message: SAME_SERIES } : null,
+  ]
+}
+
 /** Lo que se muestra al abrir: los datos guardados y las credenciales SOL vacías (nunca se devuelven). */
 export function valuesOf(settings: BillingSettings): SettingsValues {
   return {
@@ -65,6 +91,8 @@ export function valuesOf(settings: BillingSettings): SettingsValues {
     igv_rate: settings.igv_rate,
     boleta_series: settings.boleta_series,
     factura_series: settings.factura_series,
+    boleta_credit_note_series: settings.boleta_credit_note_series,
+    factura_credit_note_series: settings.factura_credit_note_series,
     sol_user: '',
     sol_password: '',
   }

@@ -95,6 +95,40 @@ describe('BillingView: datos fiscales', () => {
   })
 })
 
+describe('BillingView: series de notas de crédito', () => {
+  it('las series de notas de crédito vienen con BC01 y FC01, y no pueden repetir la del comprobante', async () => {
+    const { api, user } = open(taxSettings({ is_ready: false }))
+    await user.click(await screen.findByRole('button', FISCAL))
+    const boletaNotes = await screen.findByLabelText('Serie de notas de crédito de boletas')
+    const facturaNotes = screen.getByLabelText('Serie de notas de crédito de facturas')
+    expect(boletaNotes).toHaveValue('BC01')
+    expect(facturaNotes).toHaveValue('FC01')
+
+    await user.clear(facturaNotes)
+    await user.type(facturaNotes, 'BC02')
+    await user.click(screen.getByRole('button', SAVE))
+    expect(await screen.findByText('Cuatro caracteres, empieza con F')).toBeInTheDocument()
+
+    await user.clear(facturaNotes)
+    await user.type(facturaNotes, 'FC01')
+    await user.clear(boletaNotes)
+    await user.type(boletaNotes, 'b001')
+    await user.click(screen.getByRole('button', SAVE))
+    expect(await screen.findByText('Usa una serie distinta a la del comprobante')).toBeInTheDocument()
+    expect(api.calls('put', SETTINGS)).toHaveLength(0)
+
+    api.on('put', SETTINGS, taxSettings({ boleta_credit_note_series: 'BC02', factura_credit_note_series: 'FC02' }))
+    await user.clear(boletaNotes)
+    await user.type(boletaNotes, 'bc02')
+    await user.clear(facturaNotes)
+    await user.type(facturaNotes, 'fc02')
+    await user.click(screen.getByRole('button', SAVE))
+
+    expect(await screen.findByText(SAVED)).toBeInTheDocument()
+    expect(api.calls('put', SETTINGS)[0]?.body).toMatchObject({ boleta_credit_note_series: 'BC02', factura_credit_note_series: 'FC02' })
+  })
+})
+
 async function openSheet(settings: BillingSettings) {
   const opened = open(settings)
   await opened.user.click(await screen.findByRole('button', FISCAL))
