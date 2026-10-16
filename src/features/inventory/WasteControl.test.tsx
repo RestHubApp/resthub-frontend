@@ -47,7 +47,7 @@ describe('envase del insumo', () => {
     await user.type(within(window).getByLabelText('Nombre'), 'Pisco')
     await user.selectOptions(within(window).getByLabelText('Cómo se mide'), 'ml')
     await user.type(within(window).getByLabelText('Cuánto trae'), '750')
-    await user.type(within(window).getByLabelText('Nombre del envase'), 'botella')
+    await user.type(within(window).getByLabelText('Tipo de envase'), 'botella')
     await user.type(within(window).getByLabelText('Peso lleno (g)'), '1250')
     await user.click(within(window).getByRole('button', { name: 'Crear insumo' }))
     expect(await within(window).findByText('Para contar por peso escribe los dos pesos, o deja los dos vacíos')).toBeInTheDocument()

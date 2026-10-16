@@ -40,7 +40,7 @@ export function IngredientPackagingFields({ register, errors, unit }: Ingredient
         />
         <TextField
           id="packaging-label"
-          label="Nombre del envase"
+          label="Tipo de envase"
           placeholder="botella, saco, lata…"
           autoComplete="off"
           maxLength={30}
