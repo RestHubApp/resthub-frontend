@@ -205,6 +205,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/billing/credit-notes/{credit_note_id}/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reenviar una nota de crédito pendiente, rechazada o sin enviar
+         * @description Responde el comprobante que anula, con la nota al día: anulado si SUNAT la aceptó.
+         */
+        post: operations["resend_credit_note_api_v1_billing_credit_notes__credit_note_id__resend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/credit-notes/{credit_note_id}/{document_format}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Descargar el PDF, el XML firmado o la constancia de SUNAT de una nota de crédito */
+        get: operations["download_credit_note_document_api_v1_billing_credit_notes__credit_note_id___document_format__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/billing/invoices": {
         parameters: {
             query?: never;
@@ -285,6 +322,30 @@ export interface paths {
         put?: never;
         /** Reenviar un comprobante pendiente, rechazado o sin enviar */
         post: operations["resend_invoice_api_v1_billing_invoices__invoice_id__resend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/invoices/{invoice_id}/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Anular un comprobante (con nota de crédito si SUNAT ya lo aceptó)
+         * @description Aceptado: emite la nota de crédito 01 y queda anulado cuando SUNAT la acepta.
+         *
+         *     Si la nota queda pendiente o rechazada, el comprobante sigue vigente (con
+         *     `credit_note` en curso) y la nota se reenvía. Rechazado o sin enviar: se anula
+         *     solo en RestHub. Anulado, el pedido admite un comprobante nuevo.
+         */
+        post: operations["void_invoice_api_v1_billing_invoices__invoice_id__void_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -907,6 +968,23 @@ export interface paths {
         patch: operations["update_ingredient_api_v1_inventory_ingredients__ingredient_id__patch"];
         trace?: never;
     };
+    "/api/v1/inventory/ingredients/{ingredient_id}/count-differences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Últimas diferencias de un insumo en conteos cerrados */
+        get: operations["ingredient_count_history_api_v1_inventory_ingredients__ingredient_id__count_differences_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventory/movements": {
         parameters: {
             query?: never;
@@ -1037,7 +1115,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Registrar una compra (actualiza el costo por promedio ponderado) */
+        /** Registrar una compra (en su unidad o en envases; pondera el costo) */
         post: operations["register_purchase_api_v1_inventory_purchases_post"];
         delete?: never;
         options?: never;
@@ -1073,6 +1151,109 @@ export interface paths {
         get: operations["read_recipe_api_v1_inventory_recipes__menu_item_id__get"];
         /** Guardar la receta completa de un plato (vacía la borra) */
         put: operations["replace_recipe_api_v1_inventory_recipes__menu_item_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock-counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Conteos físicos */
+        get: operations["list_stock_counts_api_v1_inventory_stock_counts_get"];
+        put?: never;
+        /** Abrir un conteo físico (toma la foto del stock) */
+        post: operations["open_stock_count_api_v1_inventory_stock_counts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock-counts/{count_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Un conteo físico */
+        get: operations["read_stock_count_api_v1_inventory_stock_counts__count_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock-counts/{count_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancelar el conteo sin tocar el stock */
+        post: operations["cancel_stock_count_api_v1_inventory_stock_counts__count_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock-counts/{count_id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cerrar el conteo: cada diferencia entra al stock como un ajuste */
+        post: operations["close_stock_count_api_v1_inventory_stock_counts__count_id__close_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock-counts/{count_id}/differences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Diferencias valorizadas de un conteo cerrado, de la mayor pérdida a la mayor sobra */
+        get: operations["count_differences_api_v1_inventory_stock_counts__count_id__differences_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock-counts/{count_id}/lines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Cargar o corregir lo contado (en su unidad, en envases o por peso) */
+        put: operations["record_count_lines_api_v1_inventory_stock_counts__count_id__lines_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1124,8 +1305,59 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Registrar una merma con su motivo */
+        /** Registrar una merma con su motivo (si es grande, queda por aprobar) */
         post: operations["register_waste_api_v1_inventory_waste_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/waste-approvals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mermas que pidieron aprobación (filtra por estado) */
+        get: operations["list_waste_approvals_api_v1_inventory_waste_approvals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/waste-approvals/{approval_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Aprobar una merma: recién ahí resta del stock */
+        post: operations["approve_waste_api_v1_inventory_waste_approvals__approval_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/waste-approvals/{approval_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rechazar una merma con su motivo (no toca el stock) */
+        post: operations["reject_waste_api_v1_inventory_waste_approvals__approval_id__reject_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2216,7 +2448,7 @@ export interface components {
          *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
          * @enum {string}
          */
-        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "order_item_voided" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
+        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "order_item_voided" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "waste_approval_requested" | "waste_approved" | "waste_rejected" | "stock_count_opened" | "stock_count_closed" | "stock_count_cancelled" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "invoice_voided" | "credit_note_issued" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
         /** ActivityPageResponse */
         ActivityPageResponse: {
             /** Items */
@@ -2337,8 +2569,12 @@ export interface components {
              * @default
              */
             address: string;
+            /** Boleta Credit Note Series */
+            boleta_credit_note_series?: string | null;
             /** Boleta Series */
             boleta_series: string;
+            /** Factura Credit Note Series */
+            factura_credit_note_series?: string | null;
             /** Factura Series */
             factura_series: string;
             /** Igv Rate */
@@ -2362,10 +2598,14 @@ export interface components {
         BillingSettingsResponse: {
             /** Address */
             address: string;
+            /** Boleta Credit Note Series */
+            boleta_credit_note_series: string;
             /** Boleta Series */
             boleta_series: string;
             /** Certificate Expires At */
             certificate_expires_at: string | null;
+            /** Factura Credit Note Series */
+            factura_credit_note_series: string;
             /** Factura Series */
             factura_series: string;
             /** Has Certificate */
@@ -2561,6 +2801,76 @@ export interface components {
          * @enum {string}
          */
         ConfidenceKind: "model" | "rule";
+        /** CountDifferenceResponse */
+        CountDifferenceResponse: {
+            /** Counted */
+            counted: string;
+            /** Difference */
+            difference: string;
+            /** Difference Percent */
+            difference_percent: string | null;
+            /** Difference Value */
+            difference_value: string;
+            /** Expected */
+            expected: string;
+            /** Ingredient Id */
+            ingredient_id: number;
+            /** Ingredient Name */
+            ingredient_name: string;
+            unit: components["schemas"]["Unit"] | null;
+            /** Unit Cost */
+            unit_cost: string;
+        };
+        /** CountDifferencesResponse */
+        CountDifferencesResponse: {
+            count: components["schemas"]["StockCountSummaryResponse"];
+            /** Gain Value */
+            gain_value: string;
+            /** Lines */
+            lines: components["schemas"]["CountDifferenceResponse"][];
+            /** Loss Value */
+            loss_value: string;
+            /** Total Value */
+            total_value: string;
+        };
+        /** CountHistoryItemResponse */
+        CountHistoryItemResponse: {
+            /**
+             * Closed At
+             * Format: date-time
+             */
+            closed_at: string;
+            /** Count Id */
+            count_id: number;
+            /** Count Number */
+            count_number: number;
+            /** Counted */
+            counted: string;
+            /** Difference */
+            difference: string;
+            /** Difference Percent */
+            difference_percent: string | null;
+            /** Difference Value */
+            difference_value: string;
+            /** Expected */
+            expected: string;
+            /** Unit Cost */
+            unit_cost: string;
+        };
+        /** CountLineRequest */
+        CountLineRequest: {
+            /**
+             * Full Packages
+             * @default 0
+             */
+            full_packages: number | string;
+            /** Ingredient Id */
+            ingredient_id: number;
+            /** @default base */
+            mode: components["schemas"]["EntryMode"];
+            /** Quantity */
+            quantity: number | string | null;
+        };
         /** CourtesyRequest */
         CourtesyRequest: {
             /** Reason */
@@ -2580,6 +2890,7 @@ export interface components {
             min_stock: number | string;
             /** Name */
             name: string;
+            packaging?: components["schemas"]["PackagingRequest"] | null;
             unit: components["schemas"]["Unit"];
             /**
              * Unit Cost
@@ -2634,6 +2945,48 @@ export interface components {
         CreateTableRequest: {
             /** Label */
             label: string;
+        };
+        /**
+         * CreditNoteReason
+         * @description Motivo de la nota, con el código del catálogo 09 de SUNAT.
+         * @enum {string}
+         */
+        CreditNoteReason: "01";
+        /** CreditNoteResponse */
+        CreditNoteResponse: {
+            /** Code */
+            code: string;
+            /** Has Cdr */
+            has_cdr: boolean;
+            /** Has Pdf */
+            has_pdf: boolean;
+            /** Has Xml */
+            has_xml: boolean;
+            /** Id */
+            id: number;
+            /** Invoice Id */
+            invoice_id: number;
+            /**
+             * Issued At
+             * Format: date-time
+             */
+            issued_at: string;
+            /** Number */
+            number: number;
+            /** Provider Message */
+            provider_message: string;
+            /** Reason */
+            reason: string;
+            reason_code: components["schemas"]["CreditNoteReason"];
+            /** Reason Label */
+            reason_label: string;
+            /** Series */
+            series: string;
+            status: components["schemas"]["InvoiceStatus"];
+            /** Status Label */
+            status_label: string;
+            /** Total */
+            total: string;
         };
         /**
          * CurrentCashResponse
@@ -2916,11 +3269,17 @@ export interface components {
          */
         Engine: "jev" | "rules";
         /**
+         * EntryMode
+         * @description Cómo se ingresó una cantidad.
+         * @enum {string}
+         */
+        EntryMode: "base" | "packages" | "weight";
+        /**
          * ErrorCode
          * @description Código estable de un error del API (ver `resthub.core.error_codes`).
          * @enum {string}
          */
-        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_not_found" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "weak_password" | "wrong_current_password";
+        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
         /**
          * ErrorResponse
          * @description Un error del API: el texto para la persona y el código estable.
@@ -3030,6 +3389,16 @@ export interface components {
             peak: components["schemas"]["HourlyCellResponse"] | null;
             period: components["schemas"]["PeriodResponse"];
         };
+        /** IngredientCountHistoryResponse */
+        IngredientCountHistoryResponse: {
+            /** Ingredient Id */
+            ingredient_id: number;
+            /** Ingredient Name */
+            ingredient_name: string;
+            /** Items */
+            items: components["schemas"]["CountHistoryItemResponse"][];
+            unit: components["schemas"]["Unit"];
+        };
         /** IngredientResponse */
         IngredientResponse: {
             /**
@@ -3049,6 +3418,7 @@ export interface components {
             min_stock: string;
             /** Name */
             name: string;
+            packaging: components["schemas"]["PackagingResponse"] | null;
             /** Stock */
             stock: string;
             unit: components["schemas"]["Unit"];
@@ -3093,6 +3463,9 @@ export interface components {
             archived_at: string | null;
             /** Code */
             code: string;
+            credit_note: components["schemas"]["CreditNoteResponse"] | null;
+            /** Credit Note Id */
+            credit_note_id: number | null;
             /** Customer Address */
             customer_address: string;
             /** Customer Document Number */
@@ -3114,6 +3487,8 @@ export interface components {
             igv: string;
             /** Igv Rate */
             igv_rate: string;
+            /** Is Voided */
+            is_voided: boolean;
             /**
              * Issued At
              * Format: date-time
@@ -3130,6 +3505,8 @@ export interface components {
             order_id: number;
             /** Provider Message */
             provider_message: string;
+            /** Replaces Invoice Id */
+            replaces_invoice_id: number | null;
             /** Series */
             series: string;
             status: components["schemas"]["InvoiceStatus"];
@@ -3139,6 +3516,10 @@ export interface components {
             taxable: string;
             /** Total */
             total: string;
+            /** Void Reason */
+            void_reason: string;
+            /** Voided At */
+            voided_at: string | null;
         };
         /**
          * InvoiceStatus
@@ -3433,6 +3814,9 @@ export interface components {
             created_at: string;
             /** Created By */
             created_by: number;
+            entry_mode: components["schemas"]["EntryMode"] | null;
+            /** Entry Quantity */
+            entry_quantity: string | null;
             /** Id */
             id: number;
             /** Ingredient Id */
@@ -3452,6 +3836,8 @@ export interface components {
             quantity: string;
             /** Reason */
             reason: string;
+            /** Stock Count Id */
+            stock_count_id: number | null;
             unit: components["schemas"]["Unit"];
             /** Unit Cost */
             unit_cost: string | null;
@@ -3595,6 +3981,18 @@ export interface components {
             /** Table Id */
             table_id?: number | null;
             type: components["schemas"]["OrderType"];
+        };
+        /** OpenStockCountRequest */
+        OpenStockCountRequest: {
+            /** Ingredient Ids */
+            ingredient_ids?: number[];
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /** @default all */
+            scope: components["schemas"]["StockCountScope"];
         };
         /** OrderItemResponse */
         OrderItemResponse: {
@@ -3761,6 +4159,33 @@ export interface components {
             /** Is Active */
             is_active: boolean;
         };
+        /** PackagingRequest */
+        PackagingRequest: {
+            /** Empty Weight G */
+            empty_weight_g?: number | string | null;
+            /** Full Weight G */
+            full_weight_g?: number | string | null;
+            /**
+             * Label
+             * @default
+             */
+            label: string;
+            /** Size */
+            size: number | string;
+        };
+        /** PackagingResponse */
+        PackagingResponse: {
+            /** Empty Weight G */
+            empty_weight_g: string | null;
+            /** Full Weight G */
+            full_weight_g: string | null;
+            /** Label */
+            label: string;
+            /** Size */
+            size: string;
+            /** Weighable */
+            weighable: boolean;
+        };
         /**
          * PaymentMethod
          * @enum {string}
@@ -3860,7 +4285,7 @@ export interface components {
          * Permission
          * @enum {string}
          */
-        Permission: "menu.read" | "menu.manage" | "tables.read" | "tables.manage" | "orders.take" | "orders.read_all" | "orders.manage" | "orders.charge" | "orders.discount_any" | "cash.manage" | "billing.issue" | "billing.manage" | "customers.read" | "customers.manage" | "customers.erase" | "reservations.read" | "reservations.manage" | "inventory.read" | "inventory.manage" | "staff.manage" | "restaurant.manage" | "insights.read" | "activity.read" | "roles.manage";
+        Permission: "menu.read" | "menu.manage" | "tables.read" | "tables.manage" | "orders.take" | "orders.read_all" | "orders.manage" | "orders.charge" | "orders.discount_any" | "cash.manage" | "billing.issue" | "billing.manage" | "customers.read" | "customers.manage" | "customers.erase" | "reservations.read" | "reservations.manage" | "inventory.read" | "inventory.manage" | "inventory.approve_waste" | "staff.manage" | "restaurant.manage" | "insights.read" | "activity.read" | "roles.manage";
         /** PermissionResponse */
         PermissionResponse: {
             code: components["schemas"]["Permission"];
@@ -4123,6 +4548,8 @@ export interface components {
         PurchaseOrderStatus: "draft" | "sent" | "received" | "cancelled";
         /** PurchaseRequest */
         PurchaseRequest: {
+            /** @default base */
+            entry_mode: components["schemas"]["EntryMode"];
             /** Ingredient Id */
             ingredient_id: number;
             /** Quantity */
@@ -4209,6 +4636,11 @@ export interface components {
             /** Price */
             price: string;
         };
+        /** RecordCountLinesRequest */
+        RecordCountLinesRequest: {
+            /** Lines */
+            lines: components["schemas"]["CountLineRequest"][];
+        };
         /** RegisterStaffRequest */
         RegisterStaffRequest: {
             /**
@@ -4222,6 +4654,11 @@ export interface components {
             password: string;
             /** Role Id */
             role_id: number;
+        };
+        /** RejectWasteRequest */
+        RejectWasteRequest: {
+            /** Reason */
+            reason: string;
         };
         /** ReorderRequest */
         ReorderRequest: {
@@ -4416,6 +4853,8 @@ export interface components {
             slug: string;
             /** Timezone */
             timezone: string;
+            /** Waste Approval Threshold */
+            waste_approval_threshold: string | null;
         };
         /** RestaurantSummaryResponse */
         RestaurantSummaryResponse: {
@@ -4772,6 +5211,107 @@ export interface components {
             ingredient: components["schemas"]["IngredientResponse"];
             movement: components["schemas"]["MovementResponse"];
         };
+        /** StockCountLineResponse */
+        StockCountLineResponse: {
+            /** Counted */
+            counted: string | null;
+            /** Counted At */
+            counted_at: string | null;
+            /** Counted By */
+            counted_by: number | null;
+            /** Difference */
+            difference: string | null;
+            /** Entry Full Packages */
+            entry_full_packages: string | null;
+            entry_mode: components["schemas"]["EntryMode"] | null;
+            /** Entry Quantity */
+            entry_quantity: string | null;
+            /** Expected */
+            expected: string;
+            /** Ingredient Id */
+            ingredient_id: number;
+            /** Ingredient Name */
+            ingredient_name: string;
+            /** Opening Stock */
+            opening_stock: string;
+            packaging: components["schemas"]["PackagingResponse"] | null;
+            unit: components["schemas"]["Unit"] | null;
+        };
+        /** StockCountPageResponse */
+        StockCountPageResponse: {
+            /** Items */
+            items: components["schemas"]["StockCountSummaryResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** StockCountResponse */
+        StockCountResponse: {
+            /** Closed At */
+            closed_at: string | null;
+            /** Closed By */
+            closed_by: number | null;
+            /** Counted Lines */
+            counted_lines: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: number;
+            /** Id */
+            id: number;
+            /** Lines */
+            lines: components["schemas"]["StockCountLineResponse"][];
+            /** Note */
+            note: string;
+            /** Number */
+            number: number;
+            scope: components["schemas"]["StockCountScope"];
+            status: components["schemas"]["StockCountStatus"];
+            /** Status Label */
+            status_label: string;
+            /** Total Lines */
+            total_lines: number;
+        };
+        /**
+         * StockCountScope
+         * @enum {string}
+         */
+        StockCountScope: "all" | "selected";
+        /**
+         * StockCountStatus
+         * @enum {string}
+         */
+        StockCountStatus: "draft" | "closed" | "cancelled";
+        /** StockCountSummaryResponse */
+        StockCountSummaryResponse: {
+            /** Closed At */
+            closed_at: string | null;
+            /** Closed By */
+            closed_by: number | null;
+            /** Counted Lines */
+            counted_lines: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: number;
+            /** Id */
+            id: number;
+            /** Note */
+            note: string;
+            /** Number */
+            number: number;
+            scope: components["schemas"]["StockCountScope"];
+            status: components["schemas"]["StockCountStatus"];
+            /** Status Label */
+            status_label: string;
+            /** Total Lines */
+            total_lines: number;
+        };
         /**
          * SubjectType
          * @description Sobre qué se decidió. Con el identificador, apunta a una fila de otro módulo.
@@ -4924,6 +5464,7 @@ export interface components {
             min_stock?: number | string | null;
             /** Name */
             name?: string | null;
+            packaging?: components["schemas"]["PackagingRequest"] | null;
             /** Unit Cost */
             unit_cost?: number | string | null;
         };
@@ -4969,6 +5510,8 @@ export interface components {
             name?: string | null;
             /** Timezone */
             timezone?: string | null;
+            /** Waste Approval Threshold */
+            waste_approval_threshold?: number | string | null;
         };
         /** UpdateStaffRequest */
         UpdateStaffRequest: {
@@ -4996,6 +5539,11 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VoidInvoiceRequest */
+        VoidInvoiceRequest: {
+            /** Reason */
+            reason: string;
         };
         /** VoidItemRequest */
         VoidItemRequest: {
@@ -5038,6 +5586,54 @@ export interface components {
             /** Waiters */
             waiters: components["schemas"]["WaiterPerformanceResponse"][];
         };
+        /** WasteApprovalPageResponse */
+        WasteApprovalPageResponse: {
+            /** Items */
+            items: components["schemas"]["WasteApprovalResponse"][];
+            /** Total */
+            total: number;
+        };
+        /** WasteApprovalResponse */
+        WasteApprovalResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Created By */
+            created_by: number;
+            /** Decided At */
+            decided_at: string | null;
+            /** Decided By */
+            decided_by: number | null;
+            /** Id */
+            id: number;
+            /** Ingredient Id */
+            ingredient_id: number;
+            /** Ingredient Name */
+            ingredient_name: string;
+            /** Movement Id */
+            movement_id: number | null;
+            /** Quantity */
+            quantity: string;
+            /** Reason */
+            reason: string;
+            /** Rejection Reason */
+            rejection_reason: string;
+            status: components["schemas"]["WasteApprovalStatus"];
+            /** Status Label */
+            status_label: string;
+            unit: components["schemas"]["Unit"] | null;
+            /** Unit Cost */
+            unit_cost: string;
+            /** Value */
+            value: string;
+        };
+        /**
+         * WasteApprovalStatus
+         * @enum {string}
+         */
+        WasteApprovalStatus: "pending_approval" | "approved" | "rejected";
         /** WasteByCauseResponse */
         WasteByCauseResponse: {
             cause: components["schemas"]["WasteCause"] | null;
@@ -5854,6 +6450,188 @@ export interface operations {
             };
         };
     };
+    resend_credit_note_api_v1_billing_credit_notes__credit_note_id__resend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                credit_note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    download_credit_note_document_api_v1_billing_credit_notes__credit_note_id___document_format__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                credit_note_id: number;
+                document_format: components["schemas"]["DocumentFormat"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El archivo del comprobante. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
+                    "application/xml": unknown;
+                    "application/zip": unknown;
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `invoice_document_unavailable`: el comprobante todavía no tiene ese documento (el PDF solo existe para uno aceptado por SUNAT). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `billing_provider`: el servicio de facturación (Lycet) no responde o falla; reintentar. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     list_invoices_api_v1_billing_invoices_get: {
         parameters: {
             query?: {
@@ -6355,6 +7133,95 @@ export interface operations {
                 };
             };
             /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    void_invoice_api_v1_billing_invoices__invoice_id__void_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invoice_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidInvoiceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `invoice_not_found`: no existe en este local. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `invoice_already_voided` (ya está anulado) o `invoice_not_voidable` (pendiente en SUNAT, o con su nota de crédito en curso: reenviarla). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `invalid_invoice`: falta el motivo o pasa de 200 caracteres. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -9758,6 +10625,93 @@ export interface operations {
             };
         };
     };
+    ingredient_count_history_api_v1_inventory_ingredients__ingredient_id__count_differences_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                ingredient_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngredientCountHistoryResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     list_movements_api_v1_inventory_movements_get: {
         parameters: {
             query?: {
@@ -10865,6 +11819,609 @@ export interface operations {
             };
         };
     };
+    list_stock_counts_api_v1_inventory_stock_counts_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["StockCountStatus"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockCountPageResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    open_stock_count_api_v1_inventory_stock_counts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenStockCountRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockCountResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    read_stock_count_api_v1_inventory_stock_counts__count_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                count_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockCountResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    cancel_stock_count_api_v1_inventory_stock_counts__count_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                count_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockCountResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    close_stock_count_api_v1_inventory_stock_counts__count_id__close_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                count_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockCountResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    count_differences_api_v1_inventory_stock_counts__count_id__differences_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                count_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountDifferencesResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    record_count_lines_api_v1_inventory_stock_counts__count_id__lines_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                count_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordCountLinesRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockCountResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     list_suppliers_api_v1_inventory_suppliers_get: {
         parameters: {
             query?: never;
@@ -11135,6 +12692,276 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StockChangeResponse"];
+                };
+            };
+            /** @description La merma supera el monto del local: queda por aprobar y no mueve el stock. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WasteApprovalResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_waste_approvals_api_v1_inventory_waste_approvals_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["WasteApprovalStatus"] | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WasteApprovalPageResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    approve_waste_api_v1_inventory_waste_approvals__approval_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                approval_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WasteApprovalResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    reject_waste_api_v1_inventory_waste_approvals__approval_id__reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                approval_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectWasteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WasteApprovalResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */

@@ -2,6 +2,7 @@ import { ShellIcon } from './ShellIcon'
 import type { Session } from '@/api/types'
 import { MoreSheet } from './MoreSheet'
 import type { NavEntry } from './navigation'
+import { EntryBadge } from './EntryBadge'
 import { EntryLink } from './EntryLink'
 import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
 
@@ -40,6 +41,7 @@ export function BottomNav({ bar, rest, account }: BottomNavProps) {
             <EntryLink entry={entry} className={tabClass}>
               <ShellIcon name={entry.icon} size={22} />
               <span className="max-w-full truncate">{entry.label}</span>
+              <EntryBadge entry={entry} isFloating />
             </EntryLink>
           </li>
         ))}

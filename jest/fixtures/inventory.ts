@@ -28,6 +28,7 @@ export function ingredient(changes: Partial<Ingredient> = {}): Ingredient {
     is_active: true,
     is_low: false,
     is_negative: false,
+    packaging: null,
     created_at: CREATED,
     ...changes,
   }
@@ -49,6 +50,9 @@ export function movement(changes: Partial<Movement> = {}): Movement {
     reason: 'Mercado',
     unit: 'g',
     unit_cost: '0.004',
+    entry_mode: 'base',
+    entry_quantity: '1000',
+    stock_count_id: null,
     ...changes,
   }
 }

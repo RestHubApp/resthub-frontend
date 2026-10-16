@@ -19,6 +19,8 @@ export function taxSettings(changes: Partial<BillingSettings> = {}): BillingSett
     igv_rate: '18.00',
     boleta_series: 'B001',
     factura_series: 'F001',
+    boleta_credit_note_series: 'BC01',
+    factura_credit_note_series: 'FC01',
     has_sol_credentials: true,
     has_certificate: true,
     certificate_expires_at: '2027-09-30T05:00:00Z',
@@ -29,6 +31,12 @@ export function taxSettings(changes: Partial<BillingSettings> = {}): BillingSett
 
 export function invoice(changes: Partial<Invoice> = {}): Invoice {
   return {
+    credit_note: null,
+    credit_note_id: null,
+    replaces_invoice_id: null,
+    is_voided: false,
+    voided_at: null,
+    void_reason: '',
     id: 5,
     order_id: 40,
     kind: 'boleta',

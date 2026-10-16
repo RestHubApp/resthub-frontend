@@ -92,7 +92,7 @@ test('PLA-12 la vista previa como encargado abre otra pestaña con su franja y t
     await expect(slot).toContainText('Vista previa · Restaurante de muestra · como Encargado')
     await expect(slot.getByRole('timer')).toHaveText(/\d{1,2}:\d{2}/u)
     await expect.poll(() => sections(preview)).toContain('Resumen')
-    expect(await sections(preview)).toHaveLength(14)
+    expect(await sections(preview)).toHaveLength(15)
     // En la vista previa se sale desde la franja, no con «Cerrar sesión».
     await expect(navigation(preview).locator('xpath=..').getByRole('button', { name: 'Cerrar sesión' })).toHaveCount(0)
     await expect(preview.getByRole('button', { name: 'Cerrar sesión' })).toHaveCount(0)

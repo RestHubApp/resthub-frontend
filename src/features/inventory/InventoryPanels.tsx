@@ -4,6 +4,7 @@ import { InventoryTabs } from './InventoryTabs'
 import { MovementsPanel } from './MovementsPanel'
 import { PurchaseOrdersPanel } from './PurchaseOrdersPanel'
 import { RecipesPanel } from './RecipesPanel'
+import { StockCountsPanel } from '@/features/inventory/stock-count/StockCountsPanel'
 import type { StockAction } from './StockActionDialog'
 import { SuppliersPanel } from './SuppliersPanel'
 
@@ -23,6 +24,7 @@ export function InventoryPanels({ section, onSectionChange, canManage, onAction 
       panels={{
         'insumos': <IngredientsPanel canManage={canManage} onAction={onAction} />,
         'movimientos': <MovementsPanel />,
+        'conteos': <StockCountsPanel canManage={canManage} />,
         'recetas': <RecipesPanel canManage={canManage} />,
         'compras': <PurchaseOrdersPanel canManage={canManage} />,
         'proveedores': <SuppliersPanel canManage={canManage} />,

@@ -17,6 +17,7 @@ export const PERMISSION = {
   customersManage: 'customers.manage',
   customersRead: 'customers.read',
   insightsRead: 'insights.read',
+  inventoryApproveWaste: 'inventory.approve_waste',
   inventoryManage: 'inventory.manage',
   inventoryRead: 'inventory.read',
   menuManage: 'menu.manage',

@@ -182,7 +182,8 @@ test('GES-05 el encargado da de alta y edita un insumo, busca y filtra los bajos
   await expect(ingredients.getByText('4 insumos', { exact: true })).toBeVisible()
 
   // Sin lomo en stock, el Lomo saltado se agota solo; con la regla apagada, no.
-  await api(local).post('/inventory/waste', { ingredient_id: defined(local.ingredients[0]).id, quantity: '5000', reason: 'Se venció' })
+  // Un ajuste y no una merma: 5 kg de lomo pasan el monto de aprobación y la merma quedaría pendiente.
+  await api(local).post('/inventory/adjustments', { ingredient_id: defined(local.ingredients[0]).id, counted_stock: '0', reason: 'Se venció' })
   const lomoOutOfStock = async () => {
     const menu = (await api(local, local.waiter).get<MenuResponse>('/menu')).categories
     return menu.flatMap((c) => c.items).find((p) => p.name === 'Lomo saltado')?.out_of_stock

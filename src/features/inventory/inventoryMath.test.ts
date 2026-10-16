@@ -1,10 +1,11 @@
 import { describe, expect, it } from '@jest/globals'
 
 import { ingredient, recipe } from '#jest/fixtures/inventory'
+import { packaging } from '#jest/fixtures/stockControl'
 import { adjustmentDelta, adjustmentPayload } from './adjustmentMath'
 import { EMPTY_INGREDIENT, ingredientNumbers, ingredientValuesOf } from './ingredientValues'
 import { adjustmentSchema, ingredientSchema, purchaseSchema, recipeSchema, wasteSchema } from './inventorySchema'
-import { costHint, costLabel, purchaseDefaults, purchaseMath, purchasePayload } from './purchaseMath'
+import { costHint, costLabel, packageHint, purchaseDefaults, purchaseMath, purchasePayload, purchaseUnits } from './purchaseMath'
 import { availableIngredients, lineCost, recipeCatalog, recipeCost, recipePayload, recipeValuesOf } from './recipeMath'
 import { findInputUnit, formatUnitCost, fromBase, inputUnits, priceUnit, toBaseCost, toBaseQuantity } from './units'
 
@@ -36,25 +37,38 @@ describe('units', () => {
 
 describe('purchaseMath', () => {
   it('con el precio por kilo calcula el total', () => {
-    expect(purchaseMath(PURCHASE, 'g')).toEqual({ baseQuantity: 5000, pricePerUnit: 4.2, total: 21 })
-    expect(flat(costHint(purchaseMath(PURCHASE, 'g'), 'kg'))).toBe('Total S/ 21.00 · sale a S/ 4.20 por kg')
+    expect(purchaseMath(PURCHASE, LIMON)).toEqual({ baseQuantity: 5000, pricePerUnit: 4.2, total: 21 })
+    expect(flat(costHint(purchaseMath(PURCHASE, LIMON), 'kg'))).toBe('Total S/ 21.00 · sale a S/ 4.20 por kg')
   })
 
   it('con el total pagado calcula el precio por kilo', () => {
-    const accounts = purchaseMath({ ...PURCHASE, quantity: '500', quantity_unit: 'g', cost_mode: 'total', cost: '3' }, 'g')
+    const accounts = purchaseMath({ ...PURCHASE, quantity: '500', quantity_unit: 'g', cost_mode: 'total', cost: '3' }, LIMON)
     expect(accounts?.pricePerUnit).toBeCloseTo(6)
     expect(accounts?.total).toBe(3)
   })
 
   it('mientras falte un dato no hay cuentas', () => {
-    expect(purchaseMath({ ...PURCHASE, quantity: '' }, 'g')).toBeNull()
-    expect(purchaseMath({ ...PURCHASE, cost: 'abc' }, 'g')).toBeNull()
+    expect(purchaseMath({ ...PURCHASE, quantity: '' }, LIMON)).toBeNull()
+    expect(purchaseMath({ ...PURCHASE, cost: 'abc' }, LIMON)).toBeNull()
     expect(costHint(null, 'kg')).toBeUndefined()
   })
 
   it('envía la compra en gramos y el costo por gramo, en los dos modos', () => {
-    expect(purchasePayload(1, PURCHASE, 'g')).toEqual({ ingredient_id: 1, quantity: '5000', unit_cost: '0.0042', reason: '' })
-    expect(purchasePayload(1, { ...PURCHASE, cost_mode: 'total', cost: '21' }, 'g').unit_cost).toBe('0.0042')
+    expect(purchasePayload(PURCHASE, LIMON)).toEqual({ ingredient_id: 1, entry_mode: 'base', quantity: '5000', unit_cost: '0.0042', reason: '' })
+    expect(purchasePayload({ ...PURCHASE, cost_mode: 'total', cost: '21' }, LIMON).unit_cost).toBe('0.0042')
+  })
+
+  it('en envases: ofrece la botella, muestra la conversión y envía cuántas con el costo por ml', () => {
+    const pisco = ingredient({ id: 2, name: 'Pisco', unit: 'ml', unit_label: 'mililitros', packaging: packaging() })
+    const bottles = { quantity: '4', quantity_unit: 'package', cost_mode: 'total' as const, cost: '120', reason: '' }
+    expect(purchaseUnits(pisco).map((unit) => unit.label)).toEqual(['L', 'ml', 'botella'])
+    expect(purchaseUnits(LIMON).map((unit) => unit.value)).toEqual(['kg', 'g'])
+    expect(flat(packageHint(bottles, pisco))).toBe('4 × botella de 750 ml = 3 L')
+    expect(packageHint({ ...bottles, quantity_unit: 'l' }, pisco)).toBeUndefined()
+    expect(purchaseMath(bottles, pisco)).toMatchObject({ baseQuantity: 3000, total: 120 })
+    // S/ 120 por 4 botellas de 750 ml: S/ 0.04 el mililitro.
+    expect(purchasePayload(bottles, pisco)).toEqual({ ingredient_id: 2, entry_mode: 'packages', quantity: '4', unit_cost: '0.04', reason: '' })
+    expect(purchasePayload({ ...bottles, cost_mode: 'unit', cost: '40' }, pisco).unit_cost).toBe('0.04')
   })
 
   it('propone el costo actual del insumo por kilo y la unidad grande', () => {
@@ -87,7 +101,7 @@ describe('adjustmentMath', () => {
 
 describe('ingredientValues', () => {
   it('muestra un insumo en kilos para editarlo', () => {
-    expect(ingredientValuesOf(LIMON)).toEqual({ name: 'Limón', unit: 'g', min_stock: '2', min_stock_unit: 'kg', unit_cost: '4' })
+    expect(ingredientValuesOf(LIMON)).toMatchObject({ name: 'Limón', unit: 'g', min_stock: '2', min_stock_unit: 'kg', unit_cost: '4', packaging_size: '' })
     expect(ingredientValuesOf(ingredient({ unit_cost: '0' })).unit_cost).toBe('')
   })
 

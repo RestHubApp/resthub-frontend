@@ -111,6 +111,30 @@ export type StockChange = components['schemas']['StockChangeResponse']
 export type DishCost = components['schemas']['DishCostResponse']
 export type Recipe = components['schemas']['RecipeResponse']
 export type ReplaceRecipeRequest = components['schemas']['ReplaceRecipeRequest']
+export type Packaging = components['schemas']['PackagingResponse']
+export type PackagingRequest = components['schemas']['PackagingRequest']
+export type EntryMode = components['schemas']['EntryMode']
+
+// Conteos físicos: el stock contado contra el del sistema, y sus diferencias.
+export type StockCount = components['schemas']['StockCountResponse']
+export type StockCountSummary = components['schemas']['StockCountSummaryResponse']
+export type StockCountLine = components['schemas']['StockCountLineResponse']
+export type StockCountPage = components['schemas']['StockCountPageResponse']
+export type StockCountStatus = components['schemas']['StockCountStatus']
+export type StockCountListParams = NonNullable<
+  operations['list_stock_counts_api_v1_inventory_stock_counts_get']['parameters']['query']
+>
+export type OpenStockCountRequest = components['schemas']['OpenStockCountRequest']
+export type CountLineRequest = components['schemas']['CountLineRequest']
+export type CountDifferences = components['schemas']['CountDifferencesResponse']
+export type CountDifference = components['schemas']['CountDifferenceResponse']
+export type IngredientCountHistory = components['schemas']['IngredientCountHistoryResponse']
+export type CountHistoryItem = components['schemas']['CountHistoryItemResponse']
+
+// Mermas grandes que esperan la aprobación del encargado.
+export type WasteApproval = components['schemas']['WasteApprovalResponse']
+export type WasteApprovalPage = components['schemas']['WasteApprovalPageResponse']
+export type WasteApprovalStatus = components['schemas']['WasteApprovalStatus']
 
 // Panel BI e IA (`/insights`).
 export type InsightsPeriod = components['schemas']['PeriodResponse']

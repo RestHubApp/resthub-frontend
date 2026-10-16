@@ -2,11 +2,12 @@ import type { Ingredient } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { InventoryFailure } from './InventoryFailure'
 import { ChoiceField } from './ChoiceField'
-import { costHint, costLabel } from './purchaseMath'
+import { costHint, costLabel, purchaseUnits } from './purchaseMath'
 import { QuantityField } from './QuantityField'
 import { StockPreview } from './StockPreview'
-import { inputUnits, priceUnit } from './units'
+import { priceUnit } from './units'
 import { usePurchaseForm } from './usePurchaseForm'
 
 interface PurchaseFormProps {
@@ -17,7 +18,7 @@ interface PurchaseFormProps {
 /** Registra una compra: entra stock y se actualiza lo que cuesta el insumo. */
 export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
   const price = priceUnit(ingredient.unit)
-  const { register, submit, errors, costMode, accounts, purchase } = usePurchaseForm(ingredient, onDone)
+  const { register, submit, errors, costMode, accounts, hint, purchase } = usePurchaseForm(ingredient, onDone)
 
   return (
     <form noValidate className="flex flex-col gap-5" onSubmit={onSubmit(submit)}>
@@ -26,8 +27,9 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
         label="Cantidad comprada"
         amount={register('quantity')}
         unit={register('quantity_unit')}
-        units={inputUnits(ingredient.unit)}
+        units={purchaseUnits(ingredient)}
         error={errors.quantity?.message}
+        hint={hint}
       />
       <ChoiceField
         legend="¿Qué costo tienes a la mano?"
@@ -57,7 +59,8 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
       />
       <StockPreview ingredient={ingredient} delta={accounts?.baseQuantity ?? null} />
 
-      <FormFooter mutation={purchase} failureText="No se pudo registrar la compra." onCancel={onDone} submit={{ label: 'Registrar compra', icon: 'purchase' }} />
+      <InventoryFailure mutation={purchase} fallback="No se pudo registrar la compra." />
+      <FormFooter mutation={purchase} onCancel={onDone} submit={{ label: 'Registrar compra', icon: 'purchase' }} />
     </form>
   )
 }

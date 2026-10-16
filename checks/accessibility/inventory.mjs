@@ -64,6 +64,8 @@ export const ROUTES = [
   { id: 'mesas', name: 'Mesas', route: '/mesas', pattern: '/mesas', account: 'owner' },
   { id: 'inventario', name: 'Inventario', route: '/inventario', pattern: '/inventario', account: 'owner' },
   { id: 'receta', name: 'Editor de receta', route: '/inventario/recetas/:dish', pattern: '/inventario/recetas/:menuItemId', account: 'owner' },
+  { id: 'conteo', name: 'Conteo físico cerrado: reporte de diferencias', route: '/inventario/conteos/:stockCount', pattern: '/inventario/conteos/:countId', account: 'owner' },
+  { id: 'mermas-por-aprobar', name: 'Mermas por aprobar', route: '/mermas-por-aprobar', pattern: '/mermas-por-aprobar', account: 'owner' },
   { id: 'personal', name: 'Personal', route: '/personal', pattern: '/personal', account: 'owner' },
   { id: 'roles', name: 'Roles y permisos', route: '/roles', pattern: '/roles', account: 'owner' },
   { id: 'bitacora', name: 'Bitácora del restaurante', route: '/bitacora', pattern: '/bitacora', account: 'owner' },
@@ -142,6 +144,7 @@ export const OVERLAYS = [
 
   // Inventario.
   { id: 't-movimientos', name: 'Inventario: pestaña Movimientos', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Movimientos' }], wait: TAB },
+  { id: 't-conteos', name: 'Inventario: pestaña Conteos', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Conteos' }], wait: TAB },
   { id: 't-recetas', name: 'Inventario: pestaña Recetas', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Recetas' }], wait: TAB },
   { id: 't-compras', name: 'Inventario: pestaña Compras', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }], wait: TAB },
   { id: 't-proveedores', name: 'Inventario: pestaña Proveedores', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }], wait: TAB },
@@ -153,6 +156,8 @@ export const OVERLAYS = [
   { id: 'o-editar-insumo', name: 'Diálogo «Editar insumo»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ button: 'Más acciones de Aceite vegetal' }, { menuitem: 'Editar' }] },
   { id: 'o-nueva-orden', name: 'Diálogo «Nueva orden de compra»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }, { button: 'Nueva orden' }] },
   { id: 'o-recibir-orden', name: 'Diálogo «Recibir la orden»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }, { button: 'Recibir' }] },
+  { id: 'o-iniciar-conteo', name: 'Diálogo «Iniciar conteo físico»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Conteos' }, { button: 'Iniciar conteo' }] },
+  { id: 'o-tendencia-conteo', name: 'Hoja «Tendencia» de un insumo contado', type: 'Sheet', route: '/inventario/conteos/:stockCount', account: 'owner', steps: [{ button: /^Tendencia de/ }] },
   { id: 'o-nuevo-proveedor', name: 'Diálogo «Nuevo proveedor»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }, { button: 'Nuevo proveedor' }] },
   { id: 'o-editar-proveedor', name: 'Diálogo «Editar proveedor»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }, { button: 'Editar' }] },
 
@@ -200,7 +205,7 @@ export const ROUTER_ROUTES = [
   '/', '/acceso', '/pedidos', '/pedidos/nuevo', '/pedidos/:orderId', '/pedidos/:orderId/agregar',
   '/perfil', '/perfil/apariencia', '/tablero', '/tablero/historial', '/cocina', '/imprimir/:orderId/:kind', '/comprobantes',
   '/comprobantes/:invoiceId/imprimir', '/reservas', '/clientes', '/caja', '/menu', '/mesas', '/inventario',
-  '/inventario/recetas/:menuItemId', '/personal', '/roles', '/bitacora', '/panel', '/panel/reposicion', '/panel/ia', '*',
+  '/inventario/recetas/:menuItemId', '/inventario/conteos/:countId', '/mermas-por-aprobar', '/personal', '/roles', '/bitacora', '/panel', '/panel/reposicion', '/panel/ia', '*',
   '/plataforma/acceso', '/plataforma', '/plataforma/restaurantes/nuevo', '/plataforma/restaurantes/:restaurantId',
   '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/vista-previa', '/privacidad', '/terminos',
 ]
