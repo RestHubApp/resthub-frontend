@@ -781,5 +781,22 @@
   {
     "id": "funcion:comprobantes.enviar-correo",
     "description": "Enviar el comprobante emitido por correo desde su ventana, si el restaurante tiene el correo activo"
+  },
+  {
+    "id": "funcion:comprobantes.anular-sin-nota",
+    "description": "Anular un comprobante simulado o rechazado: se anula sin nota de crédito porque nunca fue válido ante SUNAT"
+  },
+  {
+    "id": "funcion:comprobantes.cambiar",
+    "description": "Cambiar una boleta por una factura: se anula la boleta, se emite la factura y la nueva dice a cuál reemplaza"
+  },
+  {
+    "id": "funcion:comprobantes.series-nota-credito",
+    "description": "Las series de notas de crédito (BC01 y FC01) no pueden repetir la del comprobante"
+  },
+  {
+    "id": "estado:comprobante.anulado",
+    "type": "estado",
+    "description": "El comprobante anulado muestra su motivo y el pedido vuelve a ofrecer emitir boleta o factura"
   }
 ]
