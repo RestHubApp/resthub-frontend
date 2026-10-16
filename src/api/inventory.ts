@@ -13,6 +13,7 @@ import type {
   ReplaceRecipeRequest,
   StockChange,
   UpdateIngredientRequest,
+  WasteApproval,
   WasteRequest,
 } from './types'
 
@@ -82,7 +83,12 @@ export async function registerPurchase(payload: PurchaseRequest): Promise<StockC
   return send((client) => client.POST('/api/v1/inventory/purchases', { body: payload }))
 }
 
-export async function registerWaste(payload: WasteRequest): Promise<StockChange> {
+/**
+ * Una merma chica se registra al momento (201, con el insumo como quedó). Si su
+ * valor supera el monto que fija el local, queda por aprobar (202) y el stock
+ * no se mueve hasta que el encargado la apruebe.
+ */
+export async function registerWaste(payload: WasteRequest): Promise<StockChange | WasteApproval> {
   return send((client) => client.POST('/api/v1/inventory/waste', { body: payload }))
 }
 

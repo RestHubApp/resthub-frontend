@@ -19,6 +19,7 @@ function ingredient(id: number, name: string, overrides: Partial<Ingredient> = {
     is_active: true,
     is_low: false,
     is_negative: false,
+    packaging: null,
     created_at: '2026-01-01T00:00:00Z',
     ...overrides,
   }
@@ -79,6 +80,9 @@ describe('saveIngredient', () => {
         reason: '',
         unit: 'g',
         unit_cost: '15',
+        entry_mode: 'base',
+        entry_quantity: '5',
+        stock_count_id: null,
       },
       ingredient: ingredient(1, ARROZ, { stock: '15' }),
     }

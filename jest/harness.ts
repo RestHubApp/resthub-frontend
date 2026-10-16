@@ -207,7 +207,7 @@ export const PERMISSIONS_OWNER: readonly PermissionCode[] = [
   'menu.read', 'menu.manage', 'tables.read', 'tables.manage', 'orders.take', 'orders.read_all',
   'orders.manage', 'orders.charge', 'orders.discount_any', 'cash.manage', 'billing.issue',
   'billing.manage', 'customers.read', 'customers.manage', 'customers.erase', 'reservations.read', 'reservations.manage',
-  'inventory.read', 'inventory.manage', 'staff.manage', 'restaurant.manage', 'insights.read',
+  'inventory.read', 'inventory.manage', 'inventory.approve_waste', 'staff.manage', 'restaurant.manage', 'insights.read',
   'activity.read', 'roles.manage',
 ]
 

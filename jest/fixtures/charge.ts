@@ -130,6 +130,12 @@ export function table(changes: Partial<TableState> = {}): TableState {
 
 export function invoice(changes: Partial<Invoice> = {}): Invoice {
   return {
+    credit_note: null,
+    credit_note_id: null,
+    replaces_invoice_id: null,
+    is_voided: false,
+    voided_at: null,
+    void_reason: '',
     id: 90,
     order_id: 12,
     kind: 'boleta',
