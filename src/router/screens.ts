@@ -3,6 +3,7 @@ import { ADMIN_SCREENS } from './screens/adminScreens'
 import { AUDIT_SCREENS } from './screens/auditScreens'
 import { BOARD_SCREENS } from './screens/boardScreens'
 import { CATALOG_SCREENS } from './screens/catalogScreens'
+import { INVENTORY_SCREENS } from './screens/inventoryScreens'
 import { ORDERS_SCREENS } from './screens/ordersScreens'
 import { PLATFORM_SCREENS } from './screens/platformScreens'
 import { SALES_SCREENS } from './screens/salesScreens'
@@ -29,6 +30,7 @@ export const SCREENS: readonly Screen[] = [
   ...BOARD_SCREENS,
   ...SALES_SCREENS,
   ...CATALOG_SCREENS,
+  ...INVENTORY_SCREENS,
   ...ADMIN_SCREENS,
   ...AUDIT_SCREENS,
   ...PLATFORM_SCREENS,

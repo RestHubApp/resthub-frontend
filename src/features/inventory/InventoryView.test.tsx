@@ -27,6 +27,7 @@ function local(autoOutOfStock = false) {
     is_active: true,
     auto_out_of_stock: autoOutOfStock,
     max_waiter_discount_percent: '10.00',
+    waste_approval_threshold: '50.00',
     external_ai_enabled: true,
     created_at: '2026-09-26T13:00:00Z',
   }
@@ -58,6 +59,7 @@ describe('InventoryView: lo que hay que reponer', () => {
     expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
       'Insumos',
       'Movimientos',
+      'Conteos',
       'Recetas',
       'Compras',
       'Proveedores',
