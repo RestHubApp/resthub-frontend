@@ -21,7 +21,7 @@ export function WasteApprovalActions({ approval, onReject }: WasteApprovalAction
     send: () => approveWaste(approval.id),
     success: (decided) => `Merma de ${decided.ingredient_name} aprobada: el stock bajó.`,
   })
-  const quantity = formatQuantity(approval.quantity, approval.unit ?? 'unit')
+  const quantity = formatQuantity(approval.quantity, approval.unit)
 
   return (
     <div className="flex flex-col gap-2">

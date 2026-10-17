@@ -2817,7 +2817,7 @@ export interface components {
             ingredient_id: number;
             /** Ingredient Name */
             ingredient_name: string;
-            unit: components["schemas"]["Unit"] | null;
+            unit: components["schemas"]["Unit"];
             /** Unit Cost */
             unit_cost: string;
         };
@@ -4548,8 +4548,12 @@ export interface components {
         PurchaseOrderStatus: "draft" | "sent" | "received" | "cancelled";
         /** PurchaseRequest */
         PurchaseRequest: {
-            /** @default base */
-            entry_mode: components["schemas"]["EntryMode"];
+            /**
+             * Entry Mode
+             * @default base
+             * @enum {string}
+             */
+            entry_mode: "base" | "packages";
             /** Ingredient Id */
             ingredient_id: number;
             /** Quantity */
@@ -5235,7 +5239,7 @@ export interface components {
             /** Opening Stock */
             opening_stock: string;
             packaging: components["schemas"]["PackagingResponse"] | null;
-            unit: components["schemas"]["Unit"] | null;
+            unit: components["schemas"]["Unit"];
         };
         /** StockCountPageResponse */
         StockCountPageResponse: {
@@ -5602,10 +5606,14 @@ export interface components {
             created_at: string;
             /** Created By */
             created_by: number;
+            /** Created By Name */
+            created_by_name: string;
             /** Decided At */
             decided_at: string | null;
             /** Decided By */
             decided_by: number | null;
+            /** Decided By Name */
+            decided_by_name: string | null;
             /** Id */
             id: number;
             /** Ingredient Id */
@@ -5623,7 +5631,7 @@ export interface components {
             status: components["schemas"]["WasteApprovalStatus"];
             /** Status Label */
             status_label: string;
-            unit: components["schemas"]["Unit"] | null;
+            unit: components["schemas"]["Unit"];
             /** Unit Cost */
             unit_cost: string;
             /** Value */

@@ -33,7 +33,7 @@ export function WasteApprovalCard({ approval, actions }: WasteApprovalCardProps)
       <dl className="m-0 grid grid-cols-2 gap-2 text-sm">
         <div>
           <dt className="text-muted-foreground">Cantidad</dt>
-          <dd className="m-0 font-medium tabular-nums">{formatQuantity(approval.quantity, approval.unit ?? 'unit')}</dd>
+          <dd className="m-0 font-medium tabular-nums">{formatQuantity(approval.quantity, approval.unit)}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Valor</dt>
