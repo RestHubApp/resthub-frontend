@@ -95,6 +95,9 @@ export const OVERLAYS = [
   { id: 'o-paleta', name: 'Diálogo «Buscar o ir a…» (paleta de comandos)', type: 'Dialog', route: '/pedidos', account: 'owner', steps: [{ button: 'Buscar o ir a…' }] },
   { id: 'o-apariencia-rapida', name: 'Hoja «Apariencia rápida»', type: 'Sheet', route: '/pedidos', account: 'owner', steps: [{ button: 'Apariencia rápida' }] },
   { id: 'o-clave-propia', name: 'Diálogo «Cambiar contraseña»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Cambiar contraseña' }] },
+  { id: 'o-pin', name: 'Diálogo «Elegir un PIN»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Elegir un PIN' }] },
+  // Activar la verificación en dos pasos pide antes la contraseña (RFS-21): la sesión del navegador no la confirmó.
+  { id: 'o-confirmar-clave', name: 'Diálogo «Confirma tu contraseña»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Activar' }] },
   { id: 'o-widget', name: 'Menú del widget de accesibilidad desde la barra lateral', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['desktop'], steps: [{ button: 'Accesibilidad' }], wait: '.asw-menu' },
   { id: 'o-widget-movil', name: 'Menú del widget de accesibilidad desde «Cuenta»', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }, { button: 'Accesibilidad' }], wait: '.asw-menu' },
   { id: 'o-salir-pendientes', name: 'Confirmar salir con pedidos sin enviar', type: 'AlertDialog', route: '/pedidos', account: 'waiter', queue: true, steps: [{ button: 'Cerrar sesión' }], views: ['desktop'] },
@@ -168,6 +171,7 @@ export const OVERLAYS = [
   { id: 'o-editar-cuenta', name: 'Diálogo «Editar cuenta»', type: 'Dialog', route: '/personal', account: 'owner', steps: [{ button: 'Editar' }] },
   { id: 'o-clave-cuenta', name: 'Diálogo «Contraseña» de una cuenta', type: 'Dialog', route: '/personal', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Contraseña' }] },
   { id: 'o-desactivar-cuenta', name: 'Confirmar desactivar cuenta', type: 'AlertDialog', route: '/personal', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Desactivar' }] },
+  { id: 'o-sesiones-cuenta', name: 'Hoja «Sesiones» de una cuenta', type: 'Sheet', route: '/personal', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Sesiones abiertas' }] },
   { id: 'o-nuevo-rol', name: 'Hoja «Nuevo rol»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Nuevo rol' }] },
   { id: 'o-editar-rol', name: 'Hoja «Editar el rol Mesero»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Editar el rol Mesero' }] },
   { id: 'o-ver-rol', name: 'Hoja «Permisos del rol Encargado»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Ver permisos del rol Encargado' }] },

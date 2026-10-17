@@ -25,6 +25,10 @@ interface ConfirmDialogProps {
   /** `default` para una accion afirmativa; `destructive` para una que quita algo. */
   readonly confirmVariant?: 'default' | 'destructive'
   readonly onConfirm: () => void
+  /** Lo que se pide antes de confirmar (un motivo), entre el texto y los botones. */
+  readonly children?: ReactNode
+  /** La confirmación todavía no se puede dar: falta lo que se pide. */
+  readonly isConfirmDisabled?: boolean
 }
 
 /**
@@ -42,6 +46,8 @@ export function ConfirmDialog({
   confirmLabel,
   confirmVariant = 'destructive',
   onConfirm,
+  children,
+  isConfirmDisabled = false,
 }: ConfirmDialogProps) {
   // Radix solo devuelve el foco a su propio disparador; abierta desde un menú
   // «⋯» o desde estado, la ventana recuerda quién lo tenía (ver `useReturnFocus`).
@@ -59,9 +65,10 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {children}
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction variant={confirmVariant} onClick={onConfirm}>
+          <AlertDialogAction variant={confirmVariant} disabled={isConfirmDisabled} onClick={onConfirm}>
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { setAuthToken, setUnauthorizedHandler } from '@/services/apiCredentials'
+import { setAuthToken, setLockHandler, setUnauthorizedHandler } from '@/services/apiCredentials'
 import { DEFAULT_TIME_ZONE } from '@/services/format'
 import { logger } from '@/services/logger'
 import { expiryTimer, isTokenExpired } from '@/services/tokenExpiry'
@@ -41,6 +41,11 @@ interface SessionState {
   signOut: () => void
   /** Cierra la sesion porque el servidor ya no acepta el token. */
   expire: () => void
+  /**
+   * Bloquea o desbloquea la sesión del personal por inactividad (RFS-29). El
+   * servidor es quien bloquea de verdad (423); esto solo decide qué se muestra.
+   */
+  setLocked: (isLocked: boolean) => void
   /**
    * Cierra la sesion despues de cambiar la contraseña propia cuando no se pudo
    * seguir con el token nuevo: el servidor ya revoco el que habia y usarlo solo
@@ -227,11 +232,21 @@ export const useSession = create<SessionState>((set, get) => ({
     logger.warn('auth.session_expired')
   },
 
+  setLocked: (isLocked) => {
+    const account = staffOf(get().account)
+    if (account === null || account.session_locked === isLocked) return
+    refreshSession({ ...account, session_locked: isLocked })
+    logger.info(isLocked ? 'auth.session_locked' : 'auth.session_unlocked')
+  },
+
 }))
 
 scheduleExpiry(restored?.token ?? null)
 setUnauthorizedHandler(() => {
   useSession.getState().expire()
+})
+setLockHandler(() => {
+  useSession.getState().setLocked(true)
 })
 
 function accountId(account: Session): number {

@@ -24,6 +24,9 @@ export JWT_SECRET_KEY="pruebas-locales-solo-desarrollo-000000000000"
 export OPENROUTER_API_KEY="" TYPESAFE_API_KEY=""
 # Todas las pruebas salen de la misma IP: el límite por IP del backend las cortaría.
 export RATE_LIMIT_PER_MINUTE=0
+# La contraseña confirmada al entrar por el API (RFS-21) vale toda la corrida:
+# las pruebas que no tratan de eso no pasan por «Confirma tu contraseña».
+export REAUTHENTICATION_WINDOW_SECONDS=7200
 export CORS_ALLOWED_ORIGINS="[\"$FRONT\"]"
 export FRONTEND_BASE_URL="$FRONT"
 

@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 
 import { advanceOrder, openOrder, ordersQueryKey } from '@/api/orders'
 import { tablesQueryKey } from '@/api/tables'
-import { errorMessage, hasCode, isSessionEnded, isUnreachable } from '@/services/apiError'
+import { errorMessage, hasCode, isSessionEnded, isSessionLocked, isUnreachable } from '@/services/apiError'
 import { useNotifications } from '@/store/notifications'
 import { belongsTo, ownerOf, queuedOrders, removeQueued, type QueuedOrder } from '@/store/offlineQueue'
 import { staffOf, useSession } from '@/store/session'
@@ -38,9 +38,9 @@ async function deliverQueued(order: QueuedOrder, notify: NotifyQueued): Promise<
     return true
   } catch (error: unknown) {
     // Sin señal (no hubo respuesta del servidor) se corta y se reintenta
-    // después, igual que con la sesión vencida: vuelve a salir cuando esa
-    // cuenta entre. Un rechazo sale de la cola.
-    if (isUnreachable(error) || isSessionEnded(error)) {
+    // después, igual que con la sesión vencida o bloqueada: vuelve a salir
+    // cuando esa cuenta entre o la desbloquee. Un rechazo sale de la cola.
+    if (isUnreachable(error) || isSessionEnded(error) || isSessionLocked(error)) {
       return false
     }
     removeQueued(requestId)

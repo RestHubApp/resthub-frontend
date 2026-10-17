@@ -39,6 +39,10 @@ export interface paths {
          *     `kind` (`staff` o `platform`) y la sesión que corresponde. Una credencial
          *     que no sirve en ninguna responde el mismo 401 y gasta el mismo contador de
          *     intentos, así que no revela de qué clase es el correo.
+         *
+         *     Con la verificación en dos pasos (RFS-22), la contraseña correcta sin
+         *     `otp_code` responde 401 `two_factor_required`, y un código equivocado, 401
+         *     `invalid_two_factor_code`, que cuenta como intento fallido.
          */
         post: operations["login_api_v1_auth_login_post"];
         delete?: never;
@@ -58,12 +62,11 @@ export interface paths {
         put?: never;
         /**
          * Cerrar la sesión y dejarlo en la bitácora
-         * @description Registra la salida del personal en la bitácora; responde 204.
+         * @description Cierra la sesión de este dispositivo y la deja en la bitácora; responde 204.
          *
-         *     El token NO se invalida: la sesión se corta con `sessions_valid_since`, que
-         *     es por cuenta y cerraría también las sesiones de los demás dispositivos, así
-         *     que el token sigue vigente hasta vencer. La interfaz debe descartarlo. Una
-         *     vista previa no deja asiento: sus entradas y salidas son de la plataforma.
+         *     Solo esta: las de los demás dispositivos siguen abiertas. Sirve a las dos
+         *     clases de cuenta, también con la contraseña temporal o la sesión bloqueada.
+         *     Una vista previa no deja asiento: sus entradas y salidas son de la plataforma.
          */
         post: operations["logout_api_v1_auth_logout_post"];
         delete?: never;
@@ -79,10 +82,59 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Sesión de la cuenta que pregunta */
+        /**
+         * Sesión de la cuenta que pregunta
+         * @description La sesión, con el valor anti-CSRF de la cookie si la hay.
+         *
+         *     Así una pestaña que perdió el `csrf_token` (o una recarga que no lo guardó)
+         *     lo recupera sin volver a entrar: este GET no lo pide. Solo lo leen los
+         *     orígenes que CORS permite.
+         */
         get: operations["read_current_session_api_v1_auth_me_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/access-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Los últimos inicios de sesión de la cuenta propia
+         * @description RFS-15: cada intento con fecha, resultado, dispositivo, red y ubicación.
+         *
+         *     Sirve a las dos clases de cuenta. Se guarda 90 días.
+         */
+        get: operations["read_own_access_history_api_v1_auth_me_access_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/lock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bloquear la sesión de este equipo
+         * @description Lo llama la interfaz al cumplirse los minutos sin uso, o a pedido.
+         */
+        post: operations["lock_own_session_api_v1_auth_me_lock_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -102,12 +154,109 @@ export interface paths {
          * Cambiar la contraseña propia
          * @description Cambia la contraseña, cierra las demás sesiones y devuelve una nueva.
          *
+         *     No desde una sesión bloqueada por inactividad: primero se desbloquea.
+         *
          *     El cambio corta todos los tokens emitidos antes, el de esta petición
          *     incluido. La respuesta trae el token nuevo y la sesión, con la forma del
          *     login, para que quien cambió la contraseña siga dentro sin volver a entrar.
          */
         post: operations["change_own_password_api_v1_auth_me_password_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Elegir el PIN de desbloqueo
+         * @description De 4 a 6 dígitos. Reemplaza el anterior si había uno.
+         */
+        put: operations["set_own_pin_api_v1_auth_me_pin_put"];
+        post?: never;
+        /**
+         * Quitar el PIN de desbloqueo
+         * @description Sin PIN, la sesión bloqueada se retoma con la contraseña.
+         */
+        delete: operations["remove_own_pin_api_v1_auth_me_pin_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/reauthenticate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirmar la contraseña antes de una acción crítica
+         * @description Marca esta sesión como reautenticada (RFS-21).
+         *
+         *     Datos fiscales, credenciales SOL, certificado, roles y permisos, y desactivar
+         *     cuentas o locales piden la contraseña de nuevo. Vale cinco minutos y solo en
+         *     esta sesión. Los intentos fallidos cuentan como los del acceso: tras varios
+         *     seguidos responde 429.
+         */
+        post: operations["reauthenticate_api_v1_auth_me_reauthenticate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Las sesiones abiertas de la cuenta propia
+         * @description RFS-17: cada dispositivo con la sesión abierta, el usado más recientemente primero.
+         */
+        get: operations["list_own_sessions_api_v1_auth_me_sessions_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Cerrar las sesiones de los demás dispositivos
+         * @description Deja abierta solo la sesión de esta petición.
+         */
+        delete: operations["close_other_sessions_api_v1_auth_me_sessions_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/sessions/{session_ref}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Cerrar una sesión propia
+         * @description Cierra la sesión de un dispositivo (el celular perdido) sin tocar las demás.
+         *
+         *     Si es la de esta petición, equivale a salir.
+         */
+        delete: operations["close_own_session_api_v1_auth_me_sessions__session_ref__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -131,6 +280,104 @@ export interface paths {
          *     la vigente, 409: la interfaz vuelve a mostrar el texto nuevo.
          */
         post: operations["accept_terms_api_v1_auth_me_terms_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/two-factor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Estado de la verificación en dos pasos */
+        get: operations["read_two_factor_api_v1_auth_me_two_factor_get"];
+        put?: never;
+        post?: never;
+        /** Desactivar la verificación en dos pasos */
+        delete: operations["disable_two_factor_api_v1_auth_me_two_factor_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/two-factor/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Activar la verificación en dos pasos con el primer código
+         * @description Responde los diez códigos de recuperación: no se vuelven a mostrar.
+         */
+        post: operations["confirm_two_factor_api_v1_auth_me_two_factor_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/two-factor/recovery-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cambiar los códigos de recuperación
+         * @description Los anteriores dejan de servir.
+         */
+        post: operations["renew_recovery_codes_api_v1_auth_me_two_factor_recovery_codes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/two-factor/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Empezar el alta de la verificación en dos pasos
+         * @description Un secreto nuevo, pendiente hasta confirmarlo con un código de la aplicación.
+         */
+        post: operations["begin_two_factor_api_v1_auth_me_two_factor_setup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/unlock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Desbloquear la sesión con el PIN o la contraseña
+         * @description Un PIN equivocado responde 400 con los intentos que quedan; el tercero cierra la sesión.
+         */
+        post: operations["unlock_own_session_api_v1_auth_me_unlock_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2091,7 +2338,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Editar, activar o desactivar un restaurante */
+        /**
+         * Editar, activar o desactivar un restaurante
+         * @description Desactivar un local pide la contraseña de nuevo (RFS-21); editarlo o activarlo, no.
+         */
         patch: operations["update_restaurant_api_v1_platform_restaurants__restaurant_id__patch"];
         trace?: never;
     };
@@ -2106,6 +2356,29 @@ export interface paths {
         put?: never;
         /** Agregar un encargado a un restaurante */
         post: operations["add_owner_api_v1_platform_restaurants__restaurant_id__owners_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/restaurants/{restaurant_id}/owners/{owner_id}/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Restablecer la contraseña de un encargado (temporal)
+         * @description Para el encargado que olvidó su contraseña y no tiene a quién pedírsela.
+         *
+         *     La contraseña es temporal: al entrar, el encargado solo puede cambiarla. Sus
+         *     sesiones abiertas se cierran. 404 si la cuenta no es un encargado del local.
+         */
+        post: operations["reset_owner_password_api_v1_platform_restaurants__restaurant_id__owners__owner_id__password_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2276,6 +2549,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/staff/unused": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Las cuentas activas sin uso en los últimos días
+         * @description RFS-24: quién no usa el sistema hace `days` días (60 por omisión).
+         *
+         *     Cuenta como uso cualquier petición de una sesión, no solo escribir la
+         *     contraseña. Se desactivan con `PATCH /staff/{id}/status`, con su motivo.
+         */
+        get: operations["list_unused_staff_api_v1_staff_unused_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/staff/{user_id}": {
         parameters: {
             query?: never;
@@ -2290,8 +2586,31 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Editar nombre o rol */
+        /**
+         * Editar nombre o rol
+         * @description Cambiarle el rol a alguien pide la contraseña de nuevo (RFS-21); el nombre, no.
+         */
         patch: operations["update_staff_api_v1_staff__user_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/staff/{user_id}/access-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Los últimos inicios de sesión de un miembro
+         * @description RFS-15: el encargado revisa los accesos de su personal. Otro local responde 404.
+         */
+        get: operations["read_staff_access_history_api_v1_staff__user_id__access_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/staff/{user_id}/password": {
@@ -2311,6 +2630,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/staff/{user_id}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Las sesiones abiertas de un miembro */
+        get: operations["list_staff_sessions_api_v1_staff__user_id__sessions_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Cerrar todas las sesiones de un miembro
+         * @description Cierra todas, también la propia si alguien se gestiona a sí mismo por esta ruta.
+         */
+        delete: operations["close_all_staff_sessions_api_v1_staff__user_id__sessions_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{user_id}/sessions/{session_ref}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cerrar una sesión de un miembro */
+        delete: operations["close_staff_session_api_v1_staff__user_id__sessions__session_ref__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/staff/{user_id}/status": {
         parameters: {
             query?: never;
@@ -2324,7 +2681,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Activar o desactivar una cuenta */
+        /**
+         * Activar o desactivar una cuenta
+         * @description Desactivar pide la contraseña de nuevo (RFS-21) y cierra sus sesiones; activar, no.
+         */
         patch: operations["change_staff_status_api_v1_staff__user_id__status_patch"];
         trace?: never;
     };
@@ -2392,6 +2752,44 @@ export interface components {
             terms_version: string;
         };
         /**
+         * AccessEntryResponse
+         * @description Un intento de acceso de una cuenta (RFS-15). La IP va sin su último bloque.
+         */
+        AccessEntryResponse: {
+            /** City */
+            city: string;
+            /** Country */
+            country: string;
+            /** Device */
+            device: string;
+            /** Id */
+            id: number;
+            /** Network */
+            network: string;
+            /** New Country */
+            new_country: boolean;
+            /** New Device */
+            new_device: boolean;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            outcome: components["schemas"]["AccessOutcome"];
+        };
+        /** AccessHistoryPageResponse */
+        AccessHistoryPageResponse: {
+            /** Items */
+            items: components["schemas"]["AccessEntryResponse"][];
+            /** Total */
+            total: number;
+        };
+        /**
+         * AccessOutcome
+         * @enum {string}
+         */
+        AccessOutcome: "succeeded" | "failed" | "throttled" | "blocked";
+        /**
          * ActiveOrderSummaryResponse
          * @description Lo justo para pintar la tarjeta de una mesa ocupada.
          */
@@ -2448,7 +2846,7 @@ export interface components {
          *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
          * @enum {string}
          */
-        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "order_item_voided" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "waste_approval_requested" | "waste_approved" | "waste_rejected" | "stock_count_opened" | "stock_count_closed" | "stock_count_cancelled" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "invoice_voided" | "credit_note_issued" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
+        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "session_closed" | "session_locked_out" | "pin_changed" | "two_factor_enabled" | "two_factor_disabled" | "recovery_code_used" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "staff_session_closed" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "order_item_voided" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "waste_approval_requested" | "waste_approved" | "waste_rejected" | "stock_count_opened" | "stock_count_closed" | "stock_count_cancelled" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "invoice_voided" | "credit_note_issued" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
         /** ActivityPageResponse */
         ActivityPageResponse: {
             /** Items */
@@ -2729,6 +3127,8 @@ export interface components {
         ChangeStaffStatusRequest: {
             /** Is Active */
             is_active: boolean;
+            /** Reason */
+            reason?: string | null;
         };
         /** ChargeOrderRequest */
         ChargeOrderRequest: {
@@ -2817,7 +3217,7 @@ export interface components {
             ingredient_id: number;
             /** Ingredient Name */
             ingredient_name: string;
-            unit: components["schemas"]["Unit"] | null;
+            unit: components["schemas"]["Unit"];
             /** Unit Cost */
             unit_cost: string;
         };
@@ -3168,6 +3568,34 @@ export interface components {
          * @enum {string}
          */
         DecisionKind: "restock" | "order_note" | "waste_cause";
+        /**
+         * DeviceSessionResponse
+         * @description Una sesión abierta en un dispositivo (RFS-17). La IP va sin su último bloque.
+         */
+        DeviceSessionResponse: {
+            /** City */
+            city: string;
+            /** Country */
+            country: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Current */
+            current: boolean;
+            /** Device */
+            device: string;
+            /** Id */
+            id: string;
+            /**
+             * Last Seen At
+             * Format: date-time
+             */
+            last_seen_at: string;
+            /** Network */
+            network: string;
+        };
         /** DiscountRequest */
         DiscountRequest: {
             /** Percent */
@@ -3279,7 +3707,7 @@ export interface components {
          * @description Código estable de un error del API (ver `resthub.core.error_codes`).
          * @enum {string}
          */
-        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
+        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "csrf_token_invalid" | "password_change_required" | "session_locked" | "two_factor_required" | "invalid_two_factor_code" | "two_factor_state_conflict" | "unlock_attempts_exhausted" | "session_not_found" | "reauthentication_required" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invalid_idle_lock" | "invalid_pin" | "wrong_pin" | "pin_not_set" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "owner_not_found" | "invalid_deactivation_reason" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
         /**
          * ErrorResponse
          * @description Un error del API: el texto para la persona y el código estable.
@@ -3624,6 +4052,8 @@ export interface components {
              * Format: email
              */
             email: string;
+            /** Otp Code */
+            otp_code?: string | null;
             /** Password */
             password: string;
         };
@@ -4158,6 +4588,11 @@ export interface components {
             id: number;
             /** Is Active */
             is_active: boolean;
+            /**
+             * Must Change Password
+             * @default false
+             */
+            must_change_password: boolean;
         };
         /** PackagingRequest */
         PackagingRequest: {
@@ -4299,6 +4734,8 @@ export interface components {
             /** Access Token */
             access_token: string;
             admin: components["schemas"]["PlatformAdminResponse"];
+            /** Csrf Token */
+            csrf_token?: string | null;
             /** Expires In */
             expires_in: number;
             /**
@@ -4339,6 +4776,8 @@ export interface components {
             /** Access Token */
             access_token: string;
             admin: components["schemas"]["SessionAdminResponse"];
+            /** Csrf Token */
+            csrf_token?: string | null;
             /** Expires In */
             expires_in: number;
             /**
@@ -4377,6 +4816,8 @@ export interface components {
          */
         PlatformAdminSessionResponse: {
             admin: components["schemas"]["SessionAdminResponse"];
+            /** Csrf Token */
+            csrf_token?: string | null;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -4397,6 +4838,8 @@ export interface components {
              * Format: email
              */
             email: string;
+            /** Otp Code */
+            otp_code?: string | null;
             /** Password */
             password: string;
         };
@@ -4548,8 +4991,12 @@ export interface components {
         PurchaseOrderStatus: "draft" | "sent" | "received" | "cancelled";
         /** PurchaseRequest */
         PurchaseRequest: {
-            /** @default base */
-            entry_mode: components["schemas"]["EntryMode"];
+            /**
+             * Entry Mode
+             * @default base
+             * @enum {string}
+             */
+            entry_mode: "base" | "packages";
             /** Ingredient Id */
             ingredient_id: number;
             /** Quantity */
@@ -4579,6 +5026,27 @@ export interface components {
             unit: components["schemas"]["Unit"];
             /** Unit Cost */
             unit_cost: string;
+        };
+        /** ReauthenticateRequest */
+        ReauthenticateRequest: {
+            /** Password */
+            password: string;
+        };
+        /**
+         * ReauthenticationResponse
+         * @description Hasta cuándo valen las acciones críticas en esta sesión (RFS-21).
+         */
+        ReauthenticationResponse: {
+            /**
+             * Reauthenticated At
+             * Format: date-time
+             */
+            reauthenticated_at: string;
+            /**
+             * Valid Until
+             * Format: date-time
+             */
+            valid_until: string;
         };
         /** ReceiptRequest */
         ReceiptRequest: {
@@ -4640,6 +5108,14 @@ export interface components {
         RecordCountLinesRequest: {
             /** Lines */
             lines: components["schemas"]["CountLineRequest"][];
+        };
+        /**
+         * RecoveryCodesResponse
+         * @description Se muestran una sola vez: cada uno sirve para entrar sin el celular.
+         */
+        RecoveryCodesResponse: {
+            /** Recovery Codes */
+            recovery_codes: string[];
         };
         /** RegisterStaffRequest */
         RegisterStaffRequest: {
@@ -4794,6 +5270,11 @@ export interface components {
          * @enum {string}
          */
         ReservationStatus: "booked" | "seated" | "cancelled" | "no_show";
+        /** ResetOwnerPasswordRequest */
+        ResetOwnerPasswordRequest: {
+            /** New Password */
+            new_password: string;
+        };
         /** ResetStaffPasswordRequest */
         ResetStaffPasswordRequest: {
             /** New Password */
@@ -4843,6 +5324,8 @@ export interface components {
             external_ai_enabled: boolean;
             /** Id */
             id: number;
+            /** Idle Lock Minutes */
+            idle_lock_minutes: number;
             /** Is Active */
             is_active: boolean;
             /** Max Waiter Discount Percent */
@@ -5104,6 +5587,11 @@ export interface components {
             /** Is Available */
             is_available: boolean;
         };
+        /** SetPinRequest */
+        SetPinRequest: {
+            /** Pin */
+            pin: string;
+        };
         /**
          * StaffAccessTokenResponse
          * @description El token y, en la misma respuesta, la sesión que abre.
@@ -5114,13 +5602,27 @@ export interface components {
         StaffAccessTokenResponse: {
             /** Access Token */
             access_token: string;
+            /** Csrf Token */
+            csrf_token?: string | null;
             /** Expires In */
             expires_in: number;
+            /**
+             * Has Pin
+             * @default false
+             */
+            has_pin: boolean;
+            /**
+             * Idle Lock Minutes
+             * @default 0
+             */
+            idle_lock_minutes: number;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
             kind: "staff";
+            /** Must Change Password */
+            must_change_password: boolean;
             /** Permissions */
             permissions: components["schemas"]["Permission"][];
             /** Preview */
@@ -5130,6 +5632,11 @@ export interface components {
             /** Privacy Version */
             privacy_version: string;
             restaurant: components["schemas"]["SessionRestaurantResponse"];
+            /**
+             * Session Locked
+             * @default false
+             */
+            session_locked: boolean;
             /** Terms Accepted */
             terms_accepted: boolean;
             /** Terms Version */
@@ -5148,6 +5655,15 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Deactivated At */
+            deactivated_at?: string | null;
+            /** Deactivated By */
+            deactivated_by?: number | null;
+            /**
+             * Deactivation Reason
+             * @default
+             */
+            deactivation_reason: string;
             /** Email */
             email: string;
             /** Full Name */
@@ -5156,6 +5672,11 @@ export interface components {
             id: number;
             /** Is Active */
             is_active: boolean;
+            /**
+             * Must Change Password
+             * @default false
+             */
+            must_change_password: boolean;
             /** Role Id */
             role_id: number;
             /** Role Label */
@@ -5176,11 +5697,25 @@ export interface components {
          *     no permitido, así que ocultar es comodidad y no seguridad.
          */
         StaffSessionResponse: {
+            /** Csrf Token */
+            csrf_token?: string | null;
+            /**
+             * Has Pin
+             * @default false
+             */
+            has_pin: boolean;
+            /**
+             * Idle Lock Minutes
+             * @default 0
+             */
+            idle_lock_minutes: number;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
             kind: "staff";
+            /** Must Change Password */
+            must_change_password: boolean;
             /** Permissions */
             permissions: components["schemas"]["Permission"][];
             /** Preview */
@@ -5190,6 +5725,11 @@ export interface components {
             /** Privacy Version */
             privacy_version: string;
             restaurant: components["schemas"]["SessionRestaurantResponse"];
+            /**
+             * Session Locked
+             * @default false
+             */
+            session_locked: boolean;
             /** Terms Accepted */
             terms_accepted: boolean;
             /** Terms Version */
@@ -5235,7 +5775,7 @@ export interface components {
             /** Opening Stock */
             opening_stock: string;
             packaging: components["schemas"]["PackagingResponse"] | null;
-            unit: components["schemas"]["Unit"] | null;
+            unit: components["schemas"]["Unit"];
         };
         /** StockCountPageResponse */
         StockCountPageResponse: {
@@ -5444,11 +5984,56 @@ export interface components {
             dishes: components["schemas"]["TopDishResponse"][];
             period: components["schemas"]["PeriodResponse"];
         };
+        /** TwoFactorCodeRequest */
+        TwoFactorCodeRequest: {
+            /** Code */
+            code: string;
+        };
+        /**
+         * TwoFactorSetupResponse
+         * @description Lo que la aplicación de códigos necesita: el QR codifica `otpauth_uri`.
+         */
+        TwoFactorSetupResponse: {
+            /** Otpauth Uri */
+            otpauth_uri: string;
+            /** Secret */
+            secret: string;
+        };
+        /** TwoFactorStatusResponse */
+        TwoFactorStatusResponse: {
+            /** Enabled */
+            enabled: boolean;
+            /** Pending */
+            pending: boolean;
+            /** Recovery Codes Left */
+            recovery_codes_left: number;
+        };
         /**
          * Unit
          * @enum {string}
          */
         Unit: "g" | "ml" | "unit";
+        /**
+         * UnlockRequest
+         * @description El PIN o, si la cuenta no tiene (o lo olvidó), la contraseña: uno de los dos.
+         */
+        UnlockRequest: {
+            /** Password */
+            password?: string | null;
+            /** Pin */
+            pin?: string | null;
+        };
+        /**
+         * UnusedStaffResponse
+         * @description Una cuenta activa que nadie usa hace tiempo (RFS-24).
+         */
+        UnusedStaffResponse: {
+            /** Last Activity At */
+            last_activity_at: string | null;
+            member: components["schemas"]["StaffMemberResponse"];
+            /** Unused Days */
+            unused_days: number;
+        };
         /** UpdateCategoryRequest */
         UpdateCategoryRequest: {
             /** Is Active */
@@ -5504,6 +6089,8 @@ export interface components {
             auto_out_of_stock?: boolean | null;
             /** External Ai Enabled */
             external_ai_enabled?: boolean | null;
+            /** Idle Lock Minutes */
+            idle_lock_minutes?: number | null;
             /** Max Waiter Discount Percent */
             max_waiter_discount_percent?: number | string | null;
             /** Name */
@@ -5602,10 +6189,14 @@ export interface components {
             created_at: string;
             /** Created By */
             created_by: number;
+            /** Created By Name */
+            created_by_name: string;
             /** Decided At */
             decided_at: string | null;
             /** Decided By */
             decided_by: number | null;
+            /** Decided By Name */
+            decided_by_name: string | null;
             /** Id */
             id: number;
             /** Ingredient Id */
@@ -5623,7 +6214,7 @@ export interface components {
             status: components["schemas"]["WasteApprovalStatus"];
             /** Status Label */
             status_label: string;
-            unit: components["schemas"]["Unit"] | null;
+            unit: components["schemas"]["Unit"];
             /** Unit Cost */
             unit_cost: string;
             /** Value */
@@ -5797,6 +6388,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -5884,6 +6484,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -5949,6 +6558,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6023,6 +6641,191 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    read_own_access_history_api_v1_auth_me_access_history_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessHistoryPageResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    lock_own_session_api_v1_auth_me_lock_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6117,6 +6920,542 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    set_own_pin_api_v1_auth_me_pin_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPinRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    remove_own_pin_api_v1_auth_me_pin_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    reauthenticate_api_v1_auth_me_reauthenticate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReauthenticateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReauthenticationResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_own_sessions_api_v1_auth_me_sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceSessionResponse"][];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    close_other_sessions_api_v1_auth_me_sessions_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    close_own_session_api_v1_auth_me_sessions__session_ref__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_ref: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -6202,6 +7541,535 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    read_two_factor_api_v1_auth_me_two_factor_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TwoFactorStatusResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    disable_two_factor_api_v1_auth_me_two_factor_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    confirm_two_factor_api_v1_auth_me_two_factor_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TwoFactorCodeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryCodesResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    renew_recovery_codes_api_v1_auth_me_two_factor_recovery_codes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryCodesResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    begin_two_factor_api_v1_auth_me_two_factor_setup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TwoFactorSetupResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    unlock_own_session_api_v1_auth_me_unlock_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UnlockRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -6291,6 +8159,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -6365,6 +8242,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -6432,6 +8318,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6524,6 +8419,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -6610,6 +8514,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -6710,6 +8623,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -6797,6 +8719,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -6882,6 +8813,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -6965,6 +8905,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -7056,6 +9005,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -7139,6 +9097,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -7230,6 +9197,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -7316,6 +9292,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -7412,6 +9397,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -7479,6 +9473,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7571,6 +9574,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -7669,6 +9681,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -7765,6 +9786,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -7832,6 +9862,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7926,6 +9965,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -8012,6 +10060,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -8095,6 +10152,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -8185,6 +10251,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -8272,6 +10347,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -8355,6 +10439,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -8446,6 +10539,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -8527,6 +10629,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -8614,6 +10725,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -8699,6 +10819,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -8773,6 +10902,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -8840,6 +10978,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8946,6 +11093,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -9032,6 +11188,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -9123,6 +11288,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -9190,6 +11364,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9283,6 +11466,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -9350,6 +11542,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9445,6 +11646,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -9519,6 +11729,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -9586,6 +11805,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9681,6 +11909,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -9767,6 +12004,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -9857,6 +12103,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -9943,6 +12198,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -10033,6 +12297,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -10100,6 +12373,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10194,6 +12476,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -10261,6 +12552,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10353,6 +12653,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -10440,6 +12749,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -10523,6 +12841,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -10614,6 +12941,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -10699,6 +13035,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -10791,6 +13136,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -10877,6 +13231,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -10966,6 +13329,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -11049,6 +13421,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -11140,6 +13521,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -11223,6 +13613,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -11314,6 +13713,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -11399,6 +13807,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -11466,6 +13883,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11560,6 +13986,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -11627,6 +14062,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11719,6 +14163,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -11808,6 +14261,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -11893,6 +14355,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -11982,6 +14453,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -12065,6 +14545,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -12152,6 +14641,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -12237,6 +14735,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -12320,6 +14827,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -12411,6 +14927,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -12478,6 +15003,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12572,6 +15106,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -12659,6 +15202,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -12757,6 +15309,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -12844,6 +15405,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -12927,6 +15497,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -13018,6 +15597,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -13101,6 +15689,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -13188,6 +15785,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -13255,6 +15861,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13348,6 +15963,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -13433,6 +16057,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -13522,6 +16155,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -13603,6 +16245,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -13694,6 +16345,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -13783,6 +16443,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -13870,6 +16539,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -13953,6 +16631,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -14044,6 +16731,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -14131,6 +16827,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -14228,6 +16933,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -14315,6 +17029,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -14382,6 +17105,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14474,6 +17206,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -14561,6 +17302,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -14652,6 +17402,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -14739,6 +17498,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -14830,6 +17598,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -14919,6 +17696,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -15003,6 +17789,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -15095,6 +17890,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -15185,6 +17989,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -15269,6 +18082,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -15361,6 +18183,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -15448,6 +18279,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -15539,6 +18379,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -15628,6 +18477,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -15711,6 +18569,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -15798,6 +18665,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -15883,6 +18759,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -15950,6 +18835,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16043,6 +18937,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -16130,6 +19033,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -16204,6 +19116,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -16271,6 +19192,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16372,6 +19302,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -16455,6 +19394,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -16552,6 +19500,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -16642,6 +19599,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -16728,6 +19694,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -16818,6 +19793,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -16906,6 +19890,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -16991,6 +19984,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -17081,6 +20083,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -17168,6 +20179,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -17251,6 +20271,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -17342,6 +20371,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -17431,6 +20469,114 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    reset_owner_password_api_v1_platform_restaurants__restaurant_id__owners__owner_id__password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurant_id: number;
+                owner_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetOwnerPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnerResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -17505,6 +20651,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -17572,6 +20727,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -17665,6 +20829,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -17750,6 +20923,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -17841,6 +21023,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -17928,6 +21119,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -17995,6 +21195,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -18089,6 +21298,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -18156,6 +21374,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -18250,6 +21477,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -18339,6 +21575,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -18420,6 +21665,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -18516,6 +21770,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -18603,6 +21866,109 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_unused_staff_api_v1_staff_unused_get: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnusedStaffResponse"][];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -18686,6 +22052,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -18777,6 +22152,112 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    read_staff_access_history_api_v1_staff__user_id__access_history_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessHistoryPageResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -18862,6 +22343,294 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_staff_sessions_api_v1_staff__user_id__sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceSessionResponse"][];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    close_all_staff_sessions_api_v1_staff__user_id__sessions_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    close_staff_session_api_v1_staff__user_id__sessions__session_ref__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+                session_ref: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -18953,6 +22722,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -19037,6 +22815,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -19126,6 +22913,15 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Demasiadas peticiones desde esta dirección. */
             429: {
                 headers: {
@@ -19211,6 +23007,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */
@@ -19300,6 +23105,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Demasiadas peticiones desde esta dirección. */

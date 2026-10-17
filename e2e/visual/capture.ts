@@ -90,6 +90,22 @@ function normalize(route: string, text: string): string {
   return LISTS_WITH_HOUR.some((list) => list.test(route)) ? withoutSuffixes.replaceAll(INSTANT, '"$1T17:00:00Z"') : withoutSuffixes
 }
 
+/**
+ * Campos que se fijan en respuestas reales: el bloqueo de la sesión (RFS-29)
+ * depende de la versión del backend y su texto se ve en Mi perfil y Personal.
+ */
+const MERGED: Readonly<Record<string, object>> = {
+  [`${API}/auth/me`]: { idle_lock_minutes: 10, has_pin: false, session_locked: false },
+  [`${API}/restaurant`]: { idle_lock_minutes: 10 },
+}
+
+function withMerged(route: string, text: string): string {
+  const fields = MERGED[route]
+  if (fields === undefined) return text
+  const data: unknown = JSON.parse(text)
+  return typeof data === 'object' && data !== null ? JSON.stringify({ ...data, ...fields }) : text
+}
+
 function fixedData(route: string): unknown {
   if (route.startsWith(OBS)) {
     const key = route.slice(OBS.length) as keyof typeof OBSERVABILITY
@@ -114,7 +130,7 @@ async function respond(route: Route, request: Request): Promise<void> {
   // aun así se corta, se intenta una vez más.
   const options = { headers: { ...request.headers(), connection: 'close' } }
   const response = await route.fetch(options).catch(async () => route.fetch(options))
-  await route.fulfill({ response, body: normalize(pathname, await response.text()) })
+  await route.fulfill({ response, body: withMerged(pathname, normalize(pathname, await response.text())) })
 }
 
 function esApi(url: URL): boolean {

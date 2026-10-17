@@ -21,7 +21,11 @@ export const currentUserQueryKey = ['auth', 'me'] as const
  */
 export function staffSessionOf(response: StaffAccessTokenResponse): StaffSession {
   const { user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted } = response
-  return { kind: 'staff', user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted }
+  const { must_change_password, idle_lock_minutes, has_pin, session_locked } = response
+  return {
+    kind: 'staff', user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted,
+    must_change_password, idle_lock_minutes, has_pin, session_locked,
+  }
 }
 
 /**
@@ -84,9 +88,10 @@ export async function exchangePreviewCode(payload: PreviewExchangeRequest): Prom
 const SIGN_OUT_NOTICE_TIMEOUT_MS = 3000
 
 /**
- * Avisa al servidor que esta cuenta sale, para dejarlo en la bitácora. Lleva el
+ * Avisa al servidor que esta cuenta sale: cierra la sesión de este dispositivo
+ * (su token deja de servir) y, en el personal, lo deja en la bitácora. Lleva el
  * `token` que se está por descartar y nunca rechaza: sin red o con un error, la
- * salida sigue igual (el servidor no invalida el token).
+ * salida sigue igual y la sesión vence sola.
  */
 export async function reportSignOut(token: string): Promise<void> {
   try {
@@ -97,6 +102,18 @@ export async function reportSignOut(token: string): Promise<void> {
     })
   } catch {
     // El aviso es de cortesía: no hay nada que hacer si no llegó.
+  }
+}
+
+/**
+ * Bloquea la sesión de este dispositivo (RFS-29). Vive aquí y no con el resto de
+ * la seguridad de la cuenta porque la usa el armazón, que se descarga siempre.
+ */
+export async function lockOwnSession(): Promise<void> {
+  try {
+    await send((client) => client.POST('/api/v1/auth/me/lock'), { background: true })
+  } catch {
+    // Sin red la pantalla se bloquea igual; el servidor la bloquea solo al ver la inactividad.
   }
 }
 

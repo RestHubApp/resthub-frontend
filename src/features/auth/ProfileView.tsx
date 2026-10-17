@@ -5,6 +5,7 @@ import { SYSTEM_ADMINISTRATION } from '@/services/systemAdministration'
 import { usePreview, useSession } from '@/store/session'
 import { AppearanceLink } from './AppearanceLink'
 import { ChangePasswordDialog } from './ChangePasswordDialog'
+import { AccountSecurity } from './security/AccountSecurity'
 
 const TERM = 'm-0 text-sm text-muted-foreground'
 const DATA = 'm-0 text-base font-medium break-words'
@@ -13,8 +14,9 @@ const DATA = 'm-0 text-base font-medium break-words'
  * La cuenta propia.
  *
  * Los datos se leen pero no se editan aca: el nombre, el correo y el tipo de
- * cuenta los administra el encargado desde Personal. Lo unico propio es la
- * contraseña, que se cambia en una ventana.
+ * cuenta los administra el encargado desde Personal. Lo propio es la
+ * contraseña, que se cambia en una ventana, y la seguridad de la cuenta: las
+ * sesiones abiertas, la verificación en dos pasos y el PIN de desbloqueo.
  */
 export function ProfileView() {
   const account = useSession((state) => state.account)
@@ -59,6 +61,8 @@ export function ProfileView() {
           ))}
         </dl>
       </SectionCard>
+
+      <AccountSecurity account={account} />
 
       <AppearanceLink />
 

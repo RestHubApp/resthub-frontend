@@ -13,6 +13,8 @@ const LOGIN = '/auth/login'
 const TEST_SECRET = 'resthub123'
 const WHERE = { name: 'Ruta actual' }
 const PLATFORM_EMAIL = 'plataforma@resthub.dev'
+const WAITER_EMAIL = 'mesero@resthub.dev'
+const ASKS_FOR_CODE = 'Escribe el código de tu aplicación de verificación.'
 
 function accessResponse() {
   const { kind, user, restaurant, permissions, preview: isPreview } = buildAccount(PERMISSIONS_WAITER)
@@ -33,12 +35,12 @@ describe('LoginView', () => {
     const { api, user } = openAccess()
     api.on('post', LOGIN, accessResponse())
 
-    await user.type(screen.getByLabelText(EMAIL), 'mesero@resthub.dev')
+    await user.type(screen.getByLabelText(EMAIL), WAITER_EMAIL)
     await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
     await user.click(screen.getByRole('button', SIGN_IN))
 
     expect(await screen.findByRole('status', WHERE)).toHaveTextContent(/^\/$/u)
-    expect(api.calls('post', LOGIN)[0]?.body).toEqual({ email: 'mesero@resthub.dev', password: TEST_SECRET })
+    expect(api.calls('post', LOGIN)[0]?.body).toEqual({ email: WAITER_EMAIL, password: TEST_SECRET })
     expect(useSession.getState().token).toBe('token-nuevo')
     expect(useSession.getState().account?.permissions).toEqual([...PERMISSIONS_WAITER])
   })
@@ -109,5 +111,37 @@ describe('LoginView', () => {
     expect(await screen.findByRole('status', WHERE)).toHaveTextContent(/^\/$/u)
     expect(useSession.getState().token).toBe('token-plataforma')
     expect(useSession.getState().account).toMatchObject({ kind: 'platform', permissions: ['platform.restaurants.read'] })
+  })
+})
+
+describe('LoginView con la verificación en dos pasos', () => {
+  it('con la verificación en dos pasos pide el código y lo manda con las credenciales', async () => {
+    const { api, user } = openAccess()
+    api.on('post', LOGIN, accessResponse()).once('post', LOGIN, new ErrorResponse(401, ASKS_FOR_CODE, 'two_factor_required'))
+
+    await user.type(screen.getByLabelText(EMAIL), WAITER_EMAIL)
+    await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
+    await user.click(screen.getByRole('button', SIGN_IN))
+    await user.type(await screen.findByLabelText('Código de verificación'), '123456')
+    await user.click(screen.getByRole('button', SIGN_IN))
+
+    expect(await screen.findByRole('status', WHERE)).toHaveTextContent(/^\/$/u)
+    expect(api.calls('post', LOGIN)[1]?.body).toEqual({ email: WAITER_EMAIL, password: TEST_SECRET, otp_code: '123456' })
+  })
+
+  it('un código de verificación equivocado se avisa y no abre sesión', async () => {
+    const { api, user } = openAccess()
+    api.on('post', LOGIN, new ErrorResponse(401, 'El código de verificación no es correcto.', 'invalid_two_factor_code'))
+      .once('post', LOGIN, new ErrorResponse(401, ASKS_FOR_CODE, 'two_factor_required'))
+
+    await user.type(screen.getByLabelText(EMAIL), WAITER_EMAIL)
+    await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
+    await user.click(screen.getByRole('button', SIGN_IN))
+    expect(screen.queryByText(ASKS_FOR_CODE)).not.toBeInTheDocument()
+    await user.type(await screen.findByLabelText('Código de verificación'), '000000')
+    await user.click(screen.getByRole('button', SIGN_IN))
+
+    expect(await screen.findByText('El código de verificación no es correcto.')).toBeInTheDocument()
+    expect(useSession.getState().token).toBeNull()
   })
 })

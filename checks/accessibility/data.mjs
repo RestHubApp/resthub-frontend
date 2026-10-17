@@ -20,6 +20,9 @@ async function call(token, method, route, body) {
 
 async function token(account) {
   const r = await call(null, 'POST', '/auth/login', { email: ACCOUNTS[account].email, password: PASSWORD })
+  // Los datos fiscales y los roles piden la contraseña confirmada (RFS-21). Un
+  // backend sin esa ruta responde 404 y se sigue.
+  await call(r.access_token, 'POST', '/auth/me/reauthenticate', { password: PASSWORD }).catch(() => undefined)
   return r.access_token
 }
 
@@ -62,6 +65,11 @@ async function prepareCash(t) {
 export async function prepareData() {
   await acceptTerms()
   const t = await token('owner')
+  // La revisión usa la sesión de cada cuenta durante toda la corrida: con el
+  // bloqueo por inactividad (RFS-29), una cuenta que pasa diez minutos sin
+  // pedir nada mostraría el desbloqueo en vez de su pantalla. Un backend sin
+  // ese ajuste lo ignora.
+  await call(t, 'PATCH', '/restaurant', { idle_lock_minutes: 0 })
   await prepareCash(t)
   await accountWithoutTerms(t)
   const ids = {}

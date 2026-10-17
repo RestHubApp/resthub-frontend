@@ -45,14 +45,16 @@ export async function updateStaff(
   )
 }
 
+/** Activa o desactiva una cuenta; `reason` dice por qué se desactiva y queda en su ficha. */
 export async function changeStaffStatus(
   userId: number,
   isActive: boolean,
+  reason?: string,
 ): Promise<StaffResponse> {
   return send((client) =>
     client.PATCH('/api/v1/staff/{user_id}/status', {
       params: { path: { user_id: userId } },
-      body: { is_active: isActive },
+      body: reason === undefined ? { is_active: isActive } : { is_active: isActive, reason },
     }),
   )
 }

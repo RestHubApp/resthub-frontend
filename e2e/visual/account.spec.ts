@@ -4,12 +4,15 @@ import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
 import { capture, captureWindow, isMobile, expect, deadline, test } from './capture'
 import { ownerOf, orderInQueue } from './prepare'
+import { profileSecurity, withLockFields } from './securityData'
 
 test('VIS-12 el perfil, el panel de la cuenta y el aviso de pedidos sin enviar al salir', async ({ page, local }) => {
   deadline(90_000)
   covers('ruta:/perfil', 'dialogo:auth/ChangePasswordDialog', 'hoja:shell/MoreSheet', 'confirmacion:shell/SessionActions')
 
-  await openAs(page, local.waiter, '/perfil')
+  // Las sesiones y la verificación en dos pasos, con datos fijos: las reales cambian con cada corrida.
+  await profileSecurity(page)
+  await openAs(page, withLockFields(local.waiter), '/perfil')
   await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible()
   await expect(page.getByText('mesero@e2e.resthub.dev')).toBeVisible()
   await capture(page, 'perfil')

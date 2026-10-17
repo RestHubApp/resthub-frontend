@@ -37,7 +37,7 @@ export interface CountReading {
 }
 
 export function unitOf(line: StockCountLine): IngredientUnit {
-  return line.unit ?? 'unit'
+  return line.unit
 }
 
 /** Las formas de contar esta línea: su unidad, el envase si lo tiene, y el peso si el envase tiene sus pesos. */

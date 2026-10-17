@@ -1,0 +1,23 @@
+{
+  "id": "acceso",
+  "name": "Acceso",
+  "class": "ruta",
+  "type": "Ruta",
+  "view": "desktop",
+  "url": "http://localhost:5202/acceso",
+  "byImpact": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
+  },
+  "violations": [],
+  "rulesApproved": 40,
+  "toReview": [
+    {
+      "rule": "color-contrast",
+      "nodes": 4
+    }
+  ],
+  "version": "4.13.0"
+}
