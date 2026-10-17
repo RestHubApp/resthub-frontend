@@ -1,0 +1,16 @@
+{
+  "customer": 1,
+  "supplier": 1,
+  "invoice": 1,
+  "orderCharged": 1921,
+  "orderToCharge": 1922,
+  "openOrder": 1923,
+  "orderInKitchen": 1918,
+  "dish": 1,
+  "dishWithOptions": 8,
+  "orderWithoutInvoice": 1924,
+  "stockCount": 1,
+  "restaurant": 1,
+  "shiftCashRegister": 60,
+  "freeTable": 8
+}

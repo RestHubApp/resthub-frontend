@@ -65,6 +65,11 @@ async function prepareCash(t) {
 export async function prepareData() {
   await acceptTerms()
   const t = await token('owner')
+  // La revisión usa la sesión de cada cuenta durante toda la corrida: con el
+  // bloqueo por inactividad (RFS-29), una cuenta que pasa diez minutos sin
+  // pedir nada mostraría el desbloqueo en vez de su pantalla. Un backend sin
+  // ese ajuste lo ignora.
+  await call(t, 'PATCH', '/restaurant', { idle_lock_minutes: 0 })
   await prepareCash(t)
   await accountWithoutTerms(t)
   const ids = {}
