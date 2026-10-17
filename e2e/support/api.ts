@@ -125,15 +125,41 @@ export async function newHttp(): Promise<APIRequestContext> {
   return request.newContext({ extraHTTPHeaders: { Connection: 'close' } })
 }
 
-export async function signInByApi(http: APIRequestContext, email: string, password = SECRET): Promise<Session> {
-  const access = await body<AccessTokenResponse>(
-    await http.post(`${API}/auth/login`, { data: { email, password } }),
-    `acceso de ${email}`,
+/**
+ * Confirma la contraseña de la sesión recién abierta (RFS-21): las acciones
+ * críticas (roles, datos fiscales, desactivar cuentas) la piden, y las pruebas
+ * que no tratan de eso no tienen que pasar por la ventana. El backend de E2E
+ * la deja vigente dos horas (`REAUTHENTICATION_WINDOW_SECONDS` en
+ * `e2e/server/backend.sh`). Un backend sin esa ruta responde 404 y se sigue.
+ */
+async function confirmPassword(http: APIRequestContext, token: string, password: string): Promise<void> {
+  await http.post(`${API}/auth/me/reauthenticate`, { data: { password }, headers: { Authorization: `Bearer ${token}` } })
+}
+
+/**
+ * Entra y, si la cuenta tiene una contraseña temporal (RFS-20: la creó otra
+ * persona), la cambia por la misma, como lo haría al entrar por primera vez.
+ * Las pruebas de ese paso lo recorren por la pantalla.
+ */
+async function keptPassword(http: APIRequestContext, email: string, password: string): Promise<AccessTokenResponse> {
+  const access = await body<AccessTokenResponse>(await http.post(`${API}/auth/login`, { data: { email, password } }), `acceso de ${email}`)
+  if (access.kind !== 'staff' || !access.must_change_password) return access
+  return body<AccessTokenResponse>(
+    await http.post(`${API}/auth/me/password`, {
+      data: { current_password: password, new_password: password },
+      headers: { Authorization: `Bearer ${access.access_token}` },
+    }),
+    `contraseña temporal de ${email}`,
   )
+}
+
+export async function signInByApi(http: APIRequestContext, email: string, password = SECRET): Promise<Session> {
+  const access = await keptPassword(http, email, password)
   if (access.kind !== 'staff') {
     throw new Error(`${email} no es una cuenta del personal.`)
   }
   const token = access.access_token
+  await confirmPassword(http, token, password)
   // Como la persona al entrar por primera vez: acepta los términos vigentes
   // (Ley N.º 29733). Su pantalla tiene sus propias pruebas; las demás entran
   // con la cuenta ya al día.
@@ -166,6 +192,7 @@ export async function signInPlatformByApi(http: APIRequestContext): Promise<Sess
   if (data.kind !== 'platform') {
     throw new Error('La cuenta de plataforma de la semilla no entró como plataforma.')
   }
+  await confirmPassword(http, data.access_token, SECRET)
   const { admin, permissions, preview } = data
   return { token: data.access_token, account: { kind: 'platform', admin, permissions, preview } }
 }

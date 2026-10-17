@@ -45,3 +45,4 @@ pisco
 reauthentication
 totp
 otpauth
+reauthenticated

@@ -1,4 +1,5 @@
-import { lockOwnSession, removeOwnPin, setOwnPin } from '@/api/accountSecurity'
+import { removeOwnPin, setOwnPin } from '@/api/accountSecurity'
+import { lockOwnSession } from '@/api/auth'
 import { useSession, useStaffAccount } from '@/store/session'
 import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 

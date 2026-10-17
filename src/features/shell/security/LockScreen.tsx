@@ -15,7 +15,9 @@ import { PinUnlockForm } from './PinUnlockForm'
  * con la contraseña; al tercer intento equivocado la sesión se cierra.
  */
 export function LockScreen({ account }: { readonly account: StaffSession }) {
-  const [isUsingPassword, setIsUsingPassword] = useState(!account.has_pin)
+  // Sin PIN solo queda la contraseña; con PIN, la persona elige.
+  const [hasSwitched, setHasSwitched] = useState(false)
+  const isUsingPassword = !account.has_pin || hasSwitched
   const { signOut } = useSignOut()
 
   return (
@@ -32,7 +34,7 @@ export function LockScreen({ account }: { readonly account: StaffSession }) {
         </CardContent>
         <CardFooter className="flex flex-wrap justify-between gap-2 px-6">
           {account.has_pin ? (
-            <Button type="button" variant="link" className="px-0" onClick={() => { setIsUsingPassword(!isUsingPassword) }}>
+            <Button type="button" variant="link" className="px-0" onClick={() => { setHasSwitched(!hasSwitched) }}>
               {isUsingPassword ? 'Usar mi PIN' : 'Usar mi contraseña'}
             </Button>
           ) : null}

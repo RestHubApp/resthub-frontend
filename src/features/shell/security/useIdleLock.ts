@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { lockOwnSession } from '@/api/accountSecurity'
+import { lockOwnSession } from '@/api/auth'
 import { useSession, useStaffAccount } from '@/store/session'
 
 // Lo que cuenta como uso: tocar, escribir, hacer clic o desplazarse.

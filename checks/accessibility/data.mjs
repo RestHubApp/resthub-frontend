@@ -20,6 +20,9 @@ async function call(token, method, route, body) {
 
 async function token(account) {
   const r = await call(null, 'POST', '/auth/login', { email: ACCOUNTS[account].email, password: PASSWORD })
+  // Los datos fiscales y los roles piden la contraseña confirmada (RFS-21). Un
+  // backend sin esa ruta responde 404 y se sigue.
+  await call(r.access_token, 'POST', '/auth/me/reauthenticate', { password: PASSWORD }).catch(() => undefined)
   return r.access_token
 }
 

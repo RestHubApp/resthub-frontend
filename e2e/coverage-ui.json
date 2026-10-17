@@ -1,11 +1,11 @@
 {
-  "total": 494,
+  "total": 502,
   "byType": {
     "ruta": 40,
-    "confirmacion": 14,
+    "confirmacion": 18,
     "desplegable": 9,
-    "dialogo": 30,
-    "hoja": 11,
+    "dialogo": 32,
+    "hoja": 13,
     "pestanas": 4,
     "funcion": 304,
     "estado": 76,
@@ -253,6 +253,24 @@
       "origin": "src/services/paths.ts"
     },
     {
+      "id": "confirmacion:auth/security/OwnSessionsCard",
+      "type": "confirmacion",
+      "description": "¿Cerrar las sesiones de los demás dispositivos?",
+      "origin": "src/features/auth/security/OwnSessionsCard.tsx"
+    },
+    {
+      "id": "confirmacion:auth/security/PinCard",
+      "type": "confirmacion",
+      "description": "¿Quitar el PIN?",
+      "origin": "src/features/auth/security/PinCard.tsx"
+    },
+    {
+      "id": "confirmacion:auth/security/TwoFactorCard",
+      "type": "confirmacion",
+      "description": "¿Desactivar la verificación en dos pasos?",
+      "origin": "src/features/auth/security/TwoFactorCard.tsx"
+    },
+    {
       "id": "confirmacion:cash/CloseCashButton",
       "type": "confirmacion",
       "description": "",
@@ -337,6 +355,12 @@
       "origin": "src/features/staff/StaffRowDialogs.tsx"
     },
     {
+      "id": "confirmacion:staff/UnusedStaffRow",
+      "type": "confirmacion",
+      "description": "`¿Desactivar a ${member.full_name}?`",
+      "origin": "src/features/staff/UnusedStaffRow.tsx"
+    },
+    {
       "id": "desplegable:components/AccessibilityWidget",
       "type": "desplegable",
       "description": "Sección que se abre y se cierra",
@@ -389,6 +413,12 @@
       "type": "dialogo",
       "description": "Cambiar contraseña",
       "origin": "src/features/auth/ChangePasswordDialog.tsx"
+    },
+    {
+      "id": "dialogo:auth/security/PinCard",
+      "type": "dialogo",
+      "description": "hasPin ? 'Cambiar PIN' : 'Elegir un PIN'",
+      "origin": "src/features/auth/security/PinCard.tsx"
     },
     {
       "id": "dialogo:cash/CashClosedPrompt",
@@ -541,6 +571,12 @@
       "origin": "src/features/shell/quick/QuickPalette.tsx"
     },
     {
+      "id": "dialogo:shell/security/ReauthenticationDialog",
+      "type": "dialogo",
+      "description": "Confirma tu contraseña",
+      "origin": "src/features/shell/security/ReauthenticationDialog.tsx"
+    },
+    {
       "id": "dialogo:staff/StaffCreateDialog",
       "type": "dialogo",
       "description": "Nueva cuenta",
@@ -563,6 +599,12 @@
       "type": "dialogo",
       "description": "table === null ? 'Nueva mesa' : `Renombrar ${tableName(table.label)}`",
       "origin": "src/features/tables/TableFormDialog.tsx"
+    },
+    {
+      "id": "hoja:auth/security/TwoFactorSheet",
+      "type": "hoja",
+      "description": "isShowingCodes ? 'Códigos de recuperación' : 'Activar la verificación en dos pasos'",
+      "origin": "src/features/auth/security/TwoFactorSheet.tsx"
     },
     {
       "id": "hoja:billing/FiscalDataSheet",
@@ -629,6 +671,12 @@
       "type": "hoja",
       "description": "LABEL",
       "origin": "src/features/shell/quick/QuickAppearanceButton.tsx"
+    },
+    {
+      "id": "hoja:staff/StaffSessionsSheet",
+      "type": "hoja",
+      "description": "`Sesiones de ${account.full_name}`",
+      "origin": "src/features/staff/StaffSessionsSheet.tsx"
     },
     {
       "id": "pestanas:insights/InsightsTabs",

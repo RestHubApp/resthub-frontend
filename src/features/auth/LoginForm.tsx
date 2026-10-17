@@ -25,7 +25,7 @@ export function LoginForm({ destination }: LoginFormProps) {
   const [isAskingCode, setIsAskingCode] = useState(false)
   const { bind, errors, submit } = useCredentialsForm((credentials) => {
     access.mutate(
-      { ...credentials, otp_code: isAskingCode && code !== '' ? code : null },
+      isAskingCode && code !== '' ? { ...credentials, otp_code: code } : credentials,
       { onError: (error) => { if (hasCode(error, 'two_factor_required')) setIsAskingCode(true) } },
     )
   })

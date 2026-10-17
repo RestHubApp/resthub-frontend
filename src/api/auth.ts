@@ -105,6 +105,18 @@ export async function reportSignOut(token: string): Promise<void> {
   }
 }
 
+/**
+ * Bloquea la sesión de este dispositivo (RFS-29). Vive aquí y no con el resto de
+ * la seguridad de la cuenta porque la usa el armazón, que se descarga siempre.
+ */
+export async function lockOwnSession(): Promise<void> {
+  try {
+    await send((client) => client.POST('/api/v1/auth/me/lock'), { background: true })
+  } catch {
+    // Sin red la pantalla se bloquea igual; el servidor la bloquea solo al ver la inactividad.
+  }
+}
+
 /** La cuenta en curso, releida en segundo plano: un fallo no muestra aviso. */
 export const currentUserQuery = queryOptions({
   queryKey: currentUserQueryKey,

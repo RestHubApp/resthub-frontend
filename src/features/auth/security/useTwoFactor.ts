@@ -8,7 +8,8 @@ export function useTwoFactor() {
   const queryClient = useQueryClient()
   const reread = () => queryClient.invalidateQueries({ queryKey: twoFactorQueryKey })
   const status = useQuery(twoFactorQuery)
-  const begin = useMutation({ mutationFn: beginTwoFactor })
+  // El alta deja la verificación pendiente de confirmar: el estado se relee.
+  const begin = useMutation({ mutationFn: beginTwoFactor, onSuccess: reread })
   const confirm = useMutation({ mutationFn: (code: string) => confirmTwoFactor(code), onSuccess: reread })
   const renew = useMutation({ mutationFn: renewRecoveryCodes, onSuccess: reread })
   const disable = useNotifiedMutation({

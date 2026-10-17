@@ -79,15 +79,6 @@ export async function removeOwnPin(): Promise<void> {
   await send((client) => client.DELETE('/api/v1/auth/me/pin'))
 }
 
-/** Bloquea la sesión de este dispositivo. De fondo: si falla, el servidor la bloquea igual al volver. */
-export async function lockOwnSession(): Promise<void> {
-  try {
-    await send((client) => client.POST('/api/v1/auth/me/lock'), { background: true })
-  } catch {
-    // Sin red la pantalla se bloquea igual; el servidor la bloquea solo al ver la inactividad.
-  }
-}
-
 /** Desbloquea la sesión con el PIN o con la contraseña. */
 export async function unlockOwnSession(payload: UnlockRequest): Promise<void> {
   await send((client) => client.POST('/api/v1/auth/me/unlock', { body: payload }))

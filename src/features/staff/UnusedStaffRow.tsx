@@ -18,7 +18,7 @@ export function UnusedStaffRow({ entry }: { readonly entry: UnusedStaff }) {
   const queryClient = useQueryClient()
   const status = useStaffStatus(member)
   const deactivate = () => {
-    status.mutate(undefined, { onSuccess: () => { void queryClient.invalidateQueries({ queryKey: unusedStaffQuery.queryKey }) } })
+    status.mutate(`Sin uso en ${String(entry.unused_days)} días (revisión de accesos).`, { onSuccess: () => { void queryClient.invalidateQueries({ queryKey: unusedStaffQuery.queryKey }) } })
   }
 
   return (
