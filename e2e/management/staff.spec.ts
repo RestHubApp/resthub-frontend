@@ -22,7 +22,7 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
     'dialogo:staff/StaffCreateDialog',
     'dialogo:staff/StaffRowDialogs#1',
     'dialogo:staff/StaffRowDialogs#2',
-    'confirmacion:staff/StaffRowDialogs',
+    'confirmacion:staff/StaffDeactivateConfirm',
     'funcion:personal.crear',
     'funcion:personal.correo-repetido',
     'funcion:personal.editar',

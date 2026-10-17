@@ -43,7 +43,7 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
     'dialogo:staff/StaffCreateDialog',
     'dialogo:staff/StaffRowDialogs#1',
     'dialogo:staff/StaffRowDialogs#2',
-    'confirmacion:staff/StaffRowDialogs',
+    'confirmacion:staff/StaffDeactivateConfirm',
     'ruta:/roles',
     'confirmacion:roles/DeleteRoleButton',
     'hoja:roles/RoleFormDialog',

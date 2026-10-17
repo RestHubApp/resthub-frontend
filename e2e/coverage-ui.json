@@ -349,10 +349,10 @@
       "origin": "src/features/shell/SessionActions.tsx"
     },
     {
-      "id": "confirmacion:staff/StaffRowDialogs",
+      "id": "confirmacion:staff/StaffDeactivateConfirm",
       "type": "confirmacion",
       "description": "`¿Desactivar a ${account.full_name}?`",
-      "origin": "src/features/staff/StaffRowDialogs.tsx"
+      "origin": "src/features/staff/StaffDeactivateConfirm.tsx"
     },
     {
       "id": "confirmacion:staff/UnusedStaffRow",
