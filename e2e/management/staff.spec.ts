@@ -82,6 +82,7 @@ test('GES-15 el encargado da de alta una cuenta, la edita, le restablece la cont
   await row.getByRole('button', { name: 'Más acciones de Lucía Ramos' }).click()
   await page.getByRole('menu', { name: 'Más acciones de Lucía Ramos' }).getByRole('menuitem', { name: 'Desactivar' }).click()
   const confirm = page.getByRole('alertdialog', { name: '¿Desactivar a Lucía Ramos?' })
+  await confirm.getByLabel('Motivo').fill('Ya no trabaja en el local')
   await evidence(page, 'ges-15-2-desactivar')
   await confirm.getByRole('button', { name: 'Desactivar' }).click()
   await expect(row).toContainText('Inactiva')

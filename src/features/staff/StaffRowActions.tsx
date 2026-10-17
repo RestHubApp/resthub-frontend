@@ -120,8 +120,8 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
         isSelf={isSelf}
         dialog={dialog}
         onClose={close}
-        onDeactivate={() => {
-          status.mutate()
+        onDeactivate={(reason) => {
+          status.mutate(reason)
         }}
       />
     </div>

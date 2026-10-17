@@ -1,7 +1,7 @@
 import type { StaffResponse } from '@/api/types'
-import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormDialog } from '@/components/FormDialog'
 import { RoleOptionsGate } from './RoleOptionsGate'
+import { StaffDeactivateConfirm } from './StaffDeactivateConfirm'
 import { StaffEditForm } from './StaffEditForm'
 import { StaffPasswordForm } from './StaffPasswordForm'
 import { StaffSessionsSheet } from './StaffSessionsSheet'
@@ -14,8 +14,8 @@ interface StaffRowDialogsProps {
   readonly isSelf: boolean
   readonly dialog: StaffDialog
   readonly onClose: () => void
-  /** Lo que se hace al confirmar la desactivación. */
-  readonly onDeactivate: () => void
+  /** Lo que se hace al confirmar la desactivación, con su motivo. */
+  readonly onDeactivate: (reason: string) => void
 }
 
 /** Las ventanas de una cuenta del personal: editarla, restablecer su contraseña y confirmar su desactivación. */
@@ -41,14 +41,7 @@ export function StaffRowDialogs({ account, isSelf, dialog, onClose, onDeactivate
       >
         <StaffPasswordForm account={account} onDone={onClose} />
       </FormDialog>
-      <ConfirmDialog
-        open={dialog === 'desactivar'}
-        onOpenChange={onChange}
-        title={`¿Desactivar a ${account.full_name}?`}
-        description="Se cierran sus sesiones abiertas y no podrá entrar a RestHub hasta que vuelvas a activar su cuenta. Sus pedidos y registros se conservan."
-        confirmLabel="Desactivar"
-        onConfirm={onDeactivate}
-      />
+      <StaffDeactivateConfirm account={account} open={dialog === 'desactivar'} onOpenChange={onChange} onDeactivate={onDeactivate} />
       <StaffSessionsSheet account={account} open={dialog === 'sesiones'} onClose={onClose} />
     </>
   )
