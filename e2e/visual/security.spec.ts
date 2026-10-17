@@ -5,14 +5,14 @@
 import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
 import { capture, captureWindow, expect, deadline, test } from './capture'
-import { answer, DEVICE_SESSIONS, profileSecurity, RECOVERY_CODES, TWO_FACTOR_ON, TWO_FACTOR_SETUP } from './securityData'
+import { answer, DEVICE_SESSIONS, profileSecurity, RECOVERY_CODES, staffSecurity, TWO_FACTOR_ON, TWO_FACTOR_SETUP, withLockFields } from './securityData'
 
 test('VIS-26 sesiones abiertas, PIN, «Confirma tu contraseña» y bloqueo de la sesión', async ({ page, local }) => {
   deadline(90_000)
   covers('confirmacion:auth/security/OwnSessionsCard', 'dialogo:auth/security/PinCard', 'dialogo:shell/security/ReauthenticationDialog', 'confirmacion:auth/security/PinCard')
 
   await profileSecurity(page)
-  await openAs(page, local.waiter, '/perfil')
+  await openAs(page, withLockFields(local.waiter), '/perfil')
   await expect(page.getByRole('list', { name: 'Sesiones abiertas' })).toContainText('Safari en iPhone')
 
   await page.getByRole('button', { name: 'Cerrar las demás' }).click()
@@ -58,7 +58,7 @@ test('VIS-27 activar la verificación en dos pasos y desactivarla', async ({ pag
   await profileSecurity(page)
   await answer(page, '/auth/me/two-factor/setup', TWO_FACTOR_SETUP)
   await answer(page, '/auth/me/two-factor/confirm', { recovery_codes: RECOVERY_CODES })
-  await openAs(page, local.waiter, '/perfil')
+  await openAs(page, withLockFields(local.waiter), '/perfil')
 
   await page.getByRole('button', { name: 'Activar' }).click()
   const sheet = page.getByRole('dialog', { name: 'Activar la verificación en dos pasos' })
@@ -85,7 +85,7 @@ test('VIS-28 las sesiones de otra persona y las cuentas sin uso, en Personal', a
 
   const { user } = local.waiter.account
   const member = { ...user, is_active: true, must_change_password: false, deactivation_reason: '', created_at: '2026-07-01T15:00:00Z' }
-  await answer(page, '/staff/unused?days=60', [{ member, last_activity_at: null, unused_days: 108 }])
+  await staffSecurity(page, [{ member, last_activity_at: null, unused_days: 108 }])
   await answer(page, `/staff/${String(member.id)}/sessions`, DEVICE_SESSIONS.map((session) => ({ ...session, current: false })))
   await openAs(page, local.owner, '/personal')
 

@@ -7,6 +7,7 @@ import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
 import { capture, captureWindow, expect, deadline, test } from './capture'
 import { inKitchen } from './prepare'
+import { staffSecurity } from './securityData'
 
 interface WindowSpec {
   readonly button: Locator
@@ -60,6 +61,7 @@ test('VIS-10 las mesas, el personal y los roles con sus ventanas', async ({ page
   await table1.getByRole('button', { name: 'Más acciones de Mesa 1' }).click()
   await form(page, page.getByRole('menu', { name: 'Más acciones de Mesa 1' }).getByRole('menuitem', { name: 'Renombrar' }), 'Renombrar Mesa 1', 'dialogo-renombrar-mesa')
 
+  await staffSecurity(page)
   await page.goto('/personal')
   const waiter = page.getByRole('row', { name: /Mesero Prueba/u })
   await expect(waiter).toContainText('mesero@e2e.resthub.dev')

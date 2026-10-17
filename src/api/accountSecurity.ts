@@ -65,6 +65,8 @@ export const UNUSED_DAYS = 60
 /** Las cuentas activas sin uso en `UNUSED_DAYS` días o más (RFS-24). */
 export const unusedStaffQuery = queryOptions({
   queryKey: [...staffQueryKey, 'unused', UNUSED_DAYS] as const,
+  // Es un aviso de más en Personal: si falla, la tarjeta no aparece y el armazón no avisa.
+  meta: { background: true },
   queryFn: (): Promise<UnusedStaff[]> =>
     send((client) => client.GET('/api/v1/staff/unused', { params: { query: { days: UNUSED_DAYS } } })),
 })

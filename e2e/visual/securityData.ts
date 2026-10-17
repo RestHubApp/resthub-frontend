@@ -4,6 +4,8 @@
 // dibuja siempre igual.
 import type { Page, Route } from '@playwright/test'
 
+import type { Session } from '../support/api'
+
 const SEEN = '2026-10-17T15:00:00Z'
 
 export const DEVICE_SESSIONS = [
@@ -35,4 +37,18 @@ export async function answer(page: Page, path: string, body: unknown, status = 2
 export async function profileSecurity(page: Page, twoFactor: unknown = TWO_FACTOR_OFF): Promise<void> {
   await answer(page, '/auth/me/sessions', DEVICE_SESSIONS)
   await answer(page, '/auth/me/two-factor', twoFactor)
+}
+
+/** Personal sin cuentas sin uso (la tarjeta no aparece), o con las que se pasen. */
+export async function staffSecurity(page: Page, unused: unknown = []): Promise<void> {
+  await answer(page, '/staff/unused?days=60', unused)
+}
+
+// Lo que la sesión dice del bloqueo, fijo: 10 minutos, sin PIN y sin bloquear
+// (`GET /auth/me` lo fija `capture.ts`).
+const LOCK_FIELDS = { idle_lock_minutes: 10, has_pin: false, session_locked: false }
+
+/** La sesión guardada en el navegador con el bloqueo fijo, como la relee `GET /auth/me`. */
+export function withLockFields(session: Session): Session {
+  return { ...session, account: { ...session.account, ...LOCK_FIELDS } }
 }

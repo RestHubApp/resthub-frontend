@@ -1,7 +1,7 @@
 import type { PermissionCode } from '@/api/types'
 import { isPreviewTab } from '@/services/tabStorage'
 import { staffOf, useSession } from '@/store/session'
-import { PreviewEndedView } from './PreviewEndedView'
+import { PreviewEndedGate } from './PreviewEndedGate'
 import { LockGate } from './security/LockGate'
 import type { ShellScreen } from './shellScreens'
 import { SignedInShell } from './SignedInShell'
@@ -38,7 +38,7 @@ export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
 
   // Una pestaña de vista previa sin sesión no ofrece el acceso normal.
   if (account === null && isPreviewTab()) {
-    return <PreviewEndedView />
+    return <PreviewEndedGate />
   }
   if (account === null) {
     return <SignedOutShell />
