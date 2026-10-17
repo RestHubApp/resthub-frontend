@@ -8,9 +8,10 @@ interface Credential {
   onExpire: (() => void) | null
   onLock: (() => void) | null
   onReauthenticate: (() => Promise<boolean>) | null
+  onPasswordChange: (() => void) | null
 }
 
-const credential: Credential = { token: null, onExpire: null, onLock: null, onReauthenticate: null }
+const credential: Credential = { token: null, onExpire: null, onLock: null, onReauthenticate: null, onPasswordChange: null }
 
 /**
  * Pone o quita la credencial que acompaña a cada petición.
@@ -65,4 +66,14 @@ export function setReauthenticationHandler(handler: (() => Promise<boolean>) | n
 /** Pide la contraseña; `false` si no hay quién la pida o la persona desistió. */
 export async function confirmIdentity(): Promise<boolean> {
   return credential.onReauthenticate === null ? false : credential.onReauthenticate()
+}
+
+/** Qué hacer cuando el servidor pide cambiar la contraseña temporal (403 `password_change_required`). */
+export function setPasswordChangeHandler(handler: (() => void) | null): void {
+  credential.onPasswordChange = handler
+}
+
+/** La cuenta tiene que cambiar su contraseña temporal antes de seguir (RFS-20). */
+export function requirePasswordChange(): void {
+  credential.onPasswordChange?.()
 }

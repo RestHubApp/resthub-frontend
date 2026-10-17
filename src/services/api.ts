@@ -12,10 +12,11 @@
 // sin señal distinga un corte de un rechazo del servidor.
 import createClient, { type Client } from 'openapi-fetch'
 
-import { bearerFor, confirmIdentity, expireSession, lockOpenSession } from './apiCredentials'
+import { bearerFor, confirmIdentity, expireSession, lockOpenSession, requirePasswordChange } from './apiCredentials'
 import {
   ApiError,
   errorMessage,
+  isPasswordChangeRequired,
   isSessionEnded,
   isSessionLocked,
   isTransportFailure,
@@ -172,7 +173,8 @@ function rememberTransportFailure(current: Exchange, error: ApiError): void {
  * Un error de sesión (`unauthenticated`, `invalid_token`) de una petición que
  * llevaba credencial es una sesión vencida o revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
  * y el acceso explica qué pasó. Una sesión bloqueada por inactividad (423)
- * muestra el desbloqueo. Un rechazo sin credencial, como una contraseña
+ * muestra el desbloqueo, y una contraseña temporal (403
+ * `password_change_required`), la pantalla para cambiarla. Un rechazo sin credencial, como una contraseña
  * equivocada al entrar (`invalid_credentials`), lo resuelve su propio formulario. Se cierra solo
  * la sesión.
  */
@@ -184,6 +186,9 @@ function fail(current: Exchange, error: ApiError): never {
   }
   if (current.hasCredential && isSessionLocked(error)) {
     lockOpenSession()
+  }
+  if (current.hasCredential && isPasswordChangeRequired(error)) {
+    requirePasswordChange()
   }
   throw error
 }

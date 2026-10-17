@@ -33,6 +33,7 @@ function menuItems({ account, isSelf, open, activate, canSeeActivity, seeActivit
   return [
     ...movements,
     { label: 'Sesiones abiertas', icon: 'deviceMode', onSelect: () => { open('sesiones') } },
+    { label: 'Accesos', icon: 'history', onSelect: () => { open('accesos') } },
     { label: 'Contraseña', icon: 'key', onSelect: () => { open('contrasena') } },
     account.is_active
       ? { label: 'Desactivar', icon: 'turnOn', onSelect: () => { open('desactivar') }, isDestructive: true }

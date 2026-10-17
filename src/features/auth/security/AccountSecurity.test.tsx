@@ -12,8 +12,11 @@ const PHONE = { ...THIS_DEVICE, id: 'bb22', device: 'Safari en iPhone', city: ''
 const OFF = { enabled: false, pending: false, recovery_codes_left: 0 }
 const CODES = ['abcdefghjk', 'mnpqrstuvw']
 
+const ACCESSES = '/auth/me/access-history'
+const ACCESS = { id: 1, occurred_at: '2026-10-17T15:00:00Z', outcome: 'succeeded', device: 'Chrome en Windows', network: '190.42.17.x', city: 'Lima', country: 'PE', new_device: false, new_country: true }
+
 function openSecurity(twoFactor = OFF) {
-  const api = server().on('get', SESSIONS, [THIS_DEVICE, PHONE]).on('get', TWO_FACTOR, twoFactor)
+  const api = server().on('get', SESSIONS, [THIS_DEVICE, PHONE]).on('get', TWO_FACTOR, twoFactor).on('get', ACCESSES, { items: [ACCESS], total: 12 })
   const account = signInAs(PERMISSIONS_WAITER)
   return { api, ...mountScreen(<AccountSecurity account={account} />) }
 }
@@ -86,5 +89,18 @@ describe('seguridad de la cuenta en Mi perfil', () => {
     mountScreen(<AccountSecurity account={account} />)
 
     expect(screen.queryByText('Sesiones abiertas')).not.toBeInTheDocument()
+  })
+
+  it('«Mis accesos» lista los intentos y pide más con «Ver más» (RFS-15)', async () => {
+    const { api, user } = openSecurity()
+
+    const list = await screen.findByRole('list', { name: 'Mis accesos' })
+    expect(within(list).getByText('Correcto')).toBeInTheDocument()
+    expect(within(list).getByText('País nuevo')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Ver más' }))
+
+    await waitFor(() => {
+      expect(api.calls('get', ACCESSES).at(-1)?.params).toEqual({ limit: '20', offset: '0' })
+    })
   })
 })
