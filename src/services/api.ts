@@ -12,8 +12,16 @@
 // sin señal distinga un corte de un rechazo del servidor.
 import createClient, { type Client } from 'openapi-fetch'
 
-import { bearerFor, expireSession } from './apiCredentials'
-import { ApiError, errorMessage, isSessionEnded, isTransportFailure, type NoResponseReason } from './apiError'
+import { bearerFor, confirmIdentity, expireSession, lockOpenSession } from './apiCredentials'
+import {
+  ApiError,
+  errorMessage,
+  isSessionEnded,
+  isSessionLocked,
+  isTransportFailure,
+  needsReauthentication,
+  type NoResponseReason,
+} from './apiError'
 import { clearApiFailure, noteApiFailure } from './apiFailure'
 import { apiOrigin, tokenFor } from './apiRouting'
 import { logger } from './logger'
@@ -163,7 +171,8 @@ function rememberTransportFailure(current: Exchange, error: ApiError): void {
  *
  * Un error de sesión (`unauthenticated`, `invalid_token`) de una petición que
  * llevaba credencial es una sesión vencida o revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
- * y el acceso explica qué pasó. Un rechazo sin credencial, como una contraseña
+ * y el acceso explica qué pasó. Una sesión bloqueada por inactividad (423)
+ * muestra el desbloqueo. Un rechazo sin credencial, como una contraseña
  * equivocada al entrar (`invalid_credentials`), lo resuelve su propio formulario. Se cierra solo
  * la sesión.
  */
@@ -172,6 +181,9 @@ function fail(current: Exchange, error: ApiError): never {
   rememberTransportFailure(current, error)
   if (current.hasCredential && isSessionEnded(error)) {
     expireSession()
+  }
+  if (current.hasCredential && isSessionLocked(error)) {
+    lockOpenSession()
   }
   throw error
 }
@@ -236,6 +248,20 @@ async function exchange(request: Request, options: CallOptions): Promise<Respons
 }
 
 /**
+ * Corre la petición y, si una acción crítica pide la contraseña (RFS-21), la
+ * pide y la repite una vez. El servidor rechazó la primera sin hacer nada, así
+ * que repetirla no duplica el cambio. Si la persona desiste, sale el 403.
+ */
+async function runConfirmingIdentity<TResult>(attempt: () => Promise<TResult>): Promise<TResult> {
+  try {
+    return await attempt()
+  } catch (error) {
+    if (!needsReauthentication(error) || !(await confirmIdentity())) throw error
+    return attempt()
+  }
+}
+
+/**
  * Hace una petición con el cliente tipado y devuelve su cuerpo de éxito.
  *
  * `run` recibe el cliente ya armado (dirección, cabeceras, credencial y plazo)
@@ -251,7 +277,7 @@ export async function call<TPaths extends object, TData, TError>(
     headers: { Accept: 'application/json' },
     fetch: (request) => exchange(request, options),
   })
-  const result = await run(client)
+  const result = await runConfirmingIdentity(() => run(client))
   if (isSuccess(result)) {
     return result.data
   }

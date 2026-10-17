@@ -3,8 +3,10 @@ import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
+import { IdleLockCard } from './IdleLockCard'
 import { StaffCreateDialog } from './StaffCreateDialog'
 import { StaffTeamCard } from './StaffTeamCard'
+import { UnusedStaffCard } from './UnusedStaffCard'
 
 /** Las cuentas del restaurante, cada una con su rol. */
 export function StaffView() {
@@ -30,7 +32,11 @@ export function StaffView() {
 
       <StaffCreateDialog open={isCreating} onOpenChange={setIsCreating} />
 
+      <UnusedStaffCard />
+
       <StaffTeamCard />
+
+      <IdleLockCard />
     </div>
   )
 }

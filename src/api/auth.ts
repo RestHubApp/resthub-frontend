@@ -88,9 +88,10 @@ export async function exchangePreviewCode(payload: PreviewExchangeRequest): Prom
 const SIGN_OUT_NOTICE_TIMEOUT_MS = 3000
 
 /**
- * Avisa al servidor que esta cuenta sale, para dejarlo en la bitácora. Lleva el
+ * Avisa al servidor que esta cuenta sale: cierra la sesión de este dispositivo
+ * (su token deja de servir) y, en el personal, lo deja en la bitácora. Lleva el
  * `token` que se está por descartar y nunca rechaza: sin red o con un error, la
- * salida sigue igual (el servidor no invalida el token).
+ * salida sigue igual y la sesión vence sola.
  */
 export async function reportSignOut(token: string): Promise<void> {
   try {

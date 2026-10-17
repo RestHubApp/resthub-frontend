@@ -4,9 +4,10 @@ import { FormDialog } from '@/components/FormDialog'
 import { RoleOptionsGate } from './RoleOptionsGate'
 import { StaffEditForm } from './StaffEditForm'
 import { StaffPasswordForm } from './StaffPasswordForm'
+import { StaffSessionsSheet } from './StaffSessionsSheet'
 
-/** Qué ventana de la fila está abierta: editar la cuenta, restablecer su contraseña, confirmar la desactivación o ninguna. */
-export type StaffDialog = 'editar' | 'contrasena' | 'desactivar' | null
+/** Qué ventana de la fila está abierta: editar la cuenta, restablecer su contraseña, confirmar la desactivación, sus sesiones o ninguna. */
+export type StaffDialog = 'editar' | 'contrasena' | 'desactivar' | 'sesiones' | null
 
 interface StaffRowDialogsProps {
   readonly account: StaffResponse
@@ -44,10 +45,11 @@ export function StaffRowDialogs({ account, isSelf, dialog, onClose, onDeactivate
         open={dialog === 'desactivar'}
         onOpenChange={onChange}
         title={`¿Desactivar a ${account.full_name}?`}
-        description="No podrá entrar a RestHub hasta que vuelvas a activar su cuenta. Sus pedidos y registros se conservan."
+        description="Se cierran sus sesiones abiertas y no podrá entrar a RestHub hasta que vuelvas a activar su cuenta. Sus pedidos y registros se conservan."
         confirmLabel="Desactivar"
         onConfirm={onDeactivate}
       />
+      <StaffSessionsSheet account={account} open={dialog === 'sesiones'} onClose={onClose} />
     </>
   )
 }
