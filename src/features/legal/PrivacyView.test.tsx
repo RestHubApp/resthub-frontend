@@ -19,6 +19,17 @@ describe('PrivacyView', () => {
     }
   })
 
+  it('nombra el cifrado vigente y a cada proveedor que recibe datos fuera del Perú', () => {
+    server()
+    mountScreen(<PrivacyView />, { path: PRIVACY })
+
+    expect(screen.getByText(/Argon2id.*AES-256-GCM/u)).toBeInTheDocument()
+    expect(screen.queryByText(/bcrypt/u)).not.toBeInTheDocument()
+    for (const provider of ['TypeSafe AI', 'OpenRouter', 'Railway', 'Vercel', 'GitHub', 'Google Drive', 'Brevo', 'Lycet', 'Azure', 'SUNAT']) {
+      expect(screen.getAllByText((text) => text.includes(provider)).length).toBeGreaterThan(0)
+    }
+  })
+
   it('no abre otro <main>: el armazón ya tiene el suyo', () => {
     server()
     mountScreen(<PrivacyView />, { path: PRIVACY })
