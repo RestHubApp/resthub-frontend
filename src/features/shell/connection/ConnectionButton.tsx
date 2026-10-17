@@ -34,7 +34,7 @@ export function ConnectionButton() {
           {pending.length > 0 ? (
             <span
               aria-hidden="true"
-              className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.625rem] leading-none font-semibold text-primary-foreground"
+              className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-2xs leading-none font-semibold text-primary-foreground"
             >
               {pending.length > MAX_BADGE ? `${String(MAX_BADGE)}+` : pending.length}
             </span>

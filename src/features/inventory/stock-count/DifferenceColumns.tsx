@@ -11,7 +11,7 @@ const TONES = { loss: 'text-destructive', gain: 'text-success', even: '' } as co
 const NUMERIC = 'tabular-nums'
 
 function unitOf(line: CountDifference): string {
-  return line.unit ?? 'unit'
+  return line.unit
 }
 
 /** Las columnas del reporte de diferencias; `onTrend` abre la tendencia del insumo. */
