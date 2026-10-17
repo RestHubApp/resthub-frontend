@@ -16,6 +16,8 @@ function member(id: number, fullName: string, roleId = 1): StaffResponse {
     email: `${String(id)}@resthub.dev`,
     role_id: roleId,
     is_active: true,
+    must_change_password: false,
+    deactivation_reason: '',
     created_at: '2026-01-01T00:00:00Z',
     role_label: 'Mesero',
   }

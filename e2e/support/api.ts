@@ -145,12 +145,16 @@ export async function signInByApi(http: APIRequestContext, email: string, passwo
     `términos de ${email}`,
   )
   const { user, restaurant, permissions, preview, terms_version, terms_accepted, privacy_version, privacy_accepted } = data
+  const { must_change_password, idle_lock_minutes, has_pin, session_locked } = data
   return {
     email,
     password,
     name: user.full_name,
     token,
-    account: { kind: 'staff', user, restaurant, permissions, preview, terms_version, terms_accepted, privacy_version, privacy_accepted },
+    account: {
+      kind: 'staff', user, restaurant, permissions, preview, terms_version, terms_accepted, privacy_version, privacy_accepted,
+      must_change_password, idle_lock_minutes, has_pin, session_locked,
+    },
   }
 }
 

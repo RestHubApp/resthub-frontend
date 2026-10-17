@@ -21,7 +21,11 @@ export const currentUserQueryKey = ['auth', 'me'] as const
  */
 export function staffSessionOf(response: StaffAccessTokenResponse): StaffSession {
   const { user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted } = response
-  return { kind: 'staff', user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted }
+  const { must_change_password, idle_lock_minutes, has_pin, session_locked } = response
+  return {
+    kind: 'staff', user, restaurant, permissions, preview: isPreview, terms_version, terms_accepted, privacy_version, privacy_accepted,
+    must_change_password, idle_lock_minutes, has_pin, session_locked,
+  }
 }
 
 /**
