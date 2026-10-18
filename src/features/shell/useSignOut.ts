@@ -36,7 +36,7 @@ export function useSignOut() {
       // Salir cierra la sesión de este dispositivo en el servidor (y, en el
       // personal, deja asiento en la bitácora). La vista previa no tiene una.
       const { token, account } = useSession.getState()
-      if (token !== null && account !== null && !account.preview) {
+      if (account !== null && !account.preview) {
         void reportSignOut(token)
       }
       clearSession()

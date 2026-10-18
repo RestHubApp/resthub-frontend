@@ -21,7 +21,7 @@ export function ownAccessHistoryQuery(limit: number) {
   })
 }
 
-export function staffAccessHistoryQueryKey(userId: number) {
+function staffAccessHistoryQueryKey(userId: number) {
   return [...staffQueryKey, 'access-history', userId] as const
 }
 

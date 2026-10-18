@@ -147,3 +147,19 @@ test('SEG-04 el encargado cierra las sesiones de otra persona y revisa las cuent
   await page.getByRole('alertdialog').getByRole('button', { name: 'Desactivar' }).click()
   await expect.poll(() => isOpen(local.kitchen.token)).toBe(false)
 })
+
+test('SEG-05 el encargado revisa los accesos de otra persona y los propios', async ({ page, local }) => {
+  covers('hoja:staff/StaffAccessSheet')
+  await openAs(page, local.owner, '/personal')
+
+  await page.getByRole('button', { name: `Más acciones de ${local.waiter.name}` }).click()
+  await page.getByRole('menuitem', { name: 'Accesos' }).click()
+  const sheet = page.getByRole('dialog', { name: `Accesos de ${local.waiter.name}` })
+  // La prueba entró por el API con esa cuenta: ese acceso figura como correcto.
+  await expect(sheet.getByRole('list', { name: `Accesos de ${local.waiter.name}` })).toContainText('Correcto')
+  await page.keyboard.press('Escape')
+  await expect(sheet).toBeHidden()
+
+  await page.goto('/perfil')
+  await expect(page.getByRole('list', { name: 'Mis accesos' })).toContainText('Correcto')
+})

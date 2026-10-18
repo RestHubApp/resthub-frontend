@@ -111,7 +111,9 @@ async function readStorage(page) {
 
 /**
  * Inicia sesión como lo haría una persona y guarda lo que la aplicación dejó
- * en el almacenamiento del navegador, para reutilizarlo en cada medición.
+ * en el almacenamiento del navegador y las cookies del API (la sesión vive en
+ * una cookie `HttpOnly`; lo guardado solo trae la cuenta), para reutilizarlo
+ * en cada medición.
  *
  * - Cuentas normales (y la de plataforma): el formulario de acceso, que es uno solo.
  * - Vista previa: el administrador del sistema pide el código de un solo uso
@@ -135,7 +137,7 @@ export async function signIn(browser, account) {
     await page.waitForURL((url) => !url.pathname.endsWith('/acceso'), { timeout: 20_000 })
   }
   await waitReady(page, 'main h1')
-  const storage = await readStorage(page)
+  const storage = { ...(await readStorage(page)), cookies: await context.cookies() }
   await writeJson(routeSession(account), storage)
   await context.close()
   return storage
@@ -171,7 +173,7 @@ const SCRIPT_QUEUE = `(() => { try {
   const COLA = 'resthub.pedidos-sin-enviar.v2';
   const vp = sessionStorage.getItem('resthub.vista-previa.sesion.v1');
   const almacen = vp ? sessionStorage : localStorage;
-  const s = JSON.parse(vp ?? localStorage.getItem('resthub.session.v2'));
+  const s = JSON.parse(vp ?? localStorage.getItem('resthub.session.v3'));
   if (!almacen.getItem(COLA)) almacen.setItem(COLA, JSON.stringify([{
     userId: s.account.user.id, restaurantId: s.account.restaurant.id, label: 'Para llevar · Ana',
     queuedAt: new Date().toISOString(), request: { type: 'takeaway', customer_name: 'Ana', items: [{ menu_item_id: 1, quantity: 1 }] },
@@ -236,7 +238,10 @@ export async function openStatus(browser, context, status, limitMs = 90_000) {
 async function openStatusWithoutLimit(browser, context, status) {
   const storage = await session(browser, status.account)
   const page = await context.newPage()
-  if (storage) await page.addInitScript(sessionScript(storage))
+  if (storage) {
+    await context.addCookies(storage.cookies ?? [])
+    await page.addInitScript(sessionScript(storage))
+  }
   if (status.queue) {
     await page.route('**/api/v1/orders', (route) => (route.request().method() === 'POST' ? route.abort('internetdisconnected') : route.continue()))
     await page.addInitScript(SCRIPT_QUEUE)

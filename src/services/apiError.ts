@@ -135,6 +135,11 @@ export function isPasswordChangeRequired(error: unknown): boolean {
   return hasCode(error, 'password_change_required')
 }
 
+/** Si el valor anti-CSRF que viajó ya no es el de la cookie de sesión (403 `csrf_token_invalid`). */
+export function isCsrfInvalid(error: unknown): boolean {
+  return hasCode(error, 'csrf_token_invalid')
+}
+
 /** Si la acción pide confirmar la contraseña antes (403 `reauthentication_required`). */
 export function needsReauthentication(error: unknown): boolean {
   return hasCode(error, 'reauthentication_required')

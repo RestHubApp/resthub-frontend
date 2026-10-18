@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
+import { setCsrfRecovery, setCsrfToken } from '@/services/apiCredentials'
 import { send } from './client'
 import type {
   AcceptTermsRequest,
@@ -40,20 +41,71 @@ export function sessionOf(response: AccessTokenResponse): Session {
   return { kind: 'platform', admin, permissions, preview: isPreview }
 }
 
+/**
+ * Anota el valor anti-CSRF que trae una respuesta (S2) y la devuelve. El
+ * servidor deja la sesión también en una cookie `HttpOnly`; ese valor es lo
+ * único de ella que la página puede leer, y lo exige en lo que cambia algo.
+ */
+function withCsrf<TResponse extends { csrf_token?: string | null }>(response: TResponse): TResponse {
+  // Un servidor viejo respondía 204 sin cuerpo al cambiar la contraseña.
+  const body = response as Partial<TResponse> | null
+  setCsrfToken(body?.csrf_token)
+  return response
+}
+
 /** El token y, en la misma respuesta, la sesión: la del personal o la de la administración del sistema. */
 export async function login(payload: LoginRequest): Promise<AccessTokenResponse> {
-  return send((client) => client.POST('/api/v1/auth/login', { body: payload }))
+  return withCsrf(await send((client) => client.POST('/api/v1/auth/login', { body: payload })))
 }
 
 /** Un token nuevo para la sesion actual (de cualquiera de las dos clases), pedido antes de que venza el que hay. */
 export async function renewSession(): Promise<AccessTokenResponse> {
-  return send((client) => client.POST('/api/v1/auth/refresh'))
+  return withCsrf(await send((client) => client.POST('/api/v1/auth/refresh')))
 }
 
 /** La sesión al día (del personal o de plataforma). `background`: si falla, no avisa en el armazón (ver `useAccountRefresh`). */
 export async function fetchCurrentUser({ background = false } = {}): Promise<Session> {
-  return send((client) => client.GET('/api/v1/auth/me'), { background })
+  const { csrf_token: csrf, ...account } = await send((client) => client.GET('/api/v1/auth/me'), { background })
+  setCsrfToken(csrf)
+  return account
 }
+
+const sessionRestoreQueryKey = ['auth', 'restore'] as const
+
+/**
+ * Recupera la sesión de la cookie tras recargar la página: el token ya no se
+ * guarda en el navegador. `GET /auth/me` da el valor anti-CSRF que la
+ * renovación necesita, y la renovación, un token para esta pestaña. Sin cookie
+ * (el navegador la bloquea, o venció) responde 401 y la sesión se cierra.
+ */
+async function restoreSession(): Promise<AccessTokenResponse> {
+  await fetchCurrentUser({ background: true })
+  return renewSession()
+}
+
+/**
+ * La recuperación como consulta: TanStack Query la reintenta sin red y no la
+ * repite mientras ya viaja. No se guarda (`gcTime: 0`): cada token que falte
+ * se recupera de nuevo.
+ */
+export const sessionRestoreQuery = queryOptions({
+  queryKey: sessionRestoreQueryKey,
+  queryFn: restoreSession,
+  gcTime: 0,
+  staleTime: 0,
+  meta: { background: true },
+})
+
+// Si otra pestaña renovó la cookie, el valor anti-CSRF de esta ya no coincide:
+// se relee de `GET /auth/me`, que no lo exige.
+setCsrfRecovery(async () => {
+  try {
+    await fetchCurrentUser({ background: true })
+    return true
+  } catch {
+    return false
+  }
+})
 
 /** Acepta, por separado, los términos y el tratamiento de datos leídos; devuelve la sesión al día. */
 export async function acceptTerms(versions: AcceptTermsRequest): Promise<StaffSession> {
@@ -66,7 +118,7 @@ export async function acceptTerms(versions: AcceptTermsRequest): Promise<StaffSe
  * misma forma que el acceso).
  */
 export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<StaffAccessTokenResponse> {
-  return send((client) => client.POST('/api/v1/auth/me/password', { body: payload }))
+  return withCsrf(await send((client) => client.POST('/api/v1/auth/me/password', { body: payload })))
 }
 
 /**
@@ -89,11 +141,12 @@ const SIGN_OUT_NOTICE_TIMEOUT_MS = 3000
 
 /**
  * Avisa al servidor que esta cuenta sale: cierra la sesión de este dispositivo
- * (su token deja de servir) y, en el personal, lo deja en la bitácora. Lleva el
- * `token` que se está por descartar y nunca rechaza: sin red o con un error, la
- * salida sigue igual y la sesión vence sola.
+ * (su token deja de servir), borra la cookie de sesión y, en el personal, lo
+ * deja en la bitácora. Lleva el `token` que se está por descartar (sin él, tras
+ * recargar, viaja la cookie) y nunca rechaza: sin red o con un error, la salida
+ * sigue igual y la sesión vence sola.
  */
-export async function reportSignOut(token: string): Promise<void> {
+export async function reportSignOut(token: string | null): Promise<void> {
   try {
     await send((client) => client.POST('/api/v1/auth/logout'), {
       credential: token,

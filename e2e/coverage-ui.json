@@ -1,11 +1,11 @@
 {
-  "total": 502,
+  "total": 504,
   "byType": {
     "ruta": 40,
     "confirmacion": 18,
     "desplegable": 9,
-    "dialogo": 32,
-    "hoja": 13,
+    "dialogo": 33,
+    "hoja": 14,
     "pestanas": 4,
     "funcion": 304,
     "estado": 76,
@@ -553,6 +553,12 @@
       "origin": "src/features/orders/taking/ModifierDialog.tsx"
     },
     {
+      "id": "dialogo:platform/OwnerRow",
+      "type": "dialogo",
+      "description": "`Restablecer la contraseña de ${owner.full_name}`",
+      "origin": "src/features/platform/OwnerRow.tsx"
+    },
+    {
       "id": "dialogo:platform/OwnersSection",
       "type": "dialogo",
       "description": "Agregar encargado",
@@ -671,6 +677,12 @@
       "type": "hoja",
       "description": "LABEL",
       "origin": "src/features/shell/quick/QuickAppearanceButton.tsx"
+    },
+    {
+      "id": "hoja:staff/StaffAccessSheet",
+      "type": "hoja",
+      "description": "`Accesos de ${account.full_name}`",
+      "origin": "src/features/staff/StaffAccessSheet.tsx"
     },
     {
       "id": "hoja:staff/StaffSessionsSheet",

@@ -3,7 +3,7 @@
 import type { AccessEntry, AccessOutcome } from '@/api/types'
 import { formatDateTime } from './format'
 
-export const OUTCOME_LABELS: Readonly<Record<AccessOutcome, string>> = {
+const OUTCOME_LABELS: Readonly<Record<AccessOutcome, string>> = {
   succeeded: 'Correcto',
   failed: 'Fallido',
   throttled: 'Frenado',

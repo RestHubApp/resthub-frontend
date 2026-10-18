@@ -232,3 +232,33 @@ test('PLA-06 la lista de restaurantes se busca por nombre o identificador y se p
   await expect(page.getByRole('heading', { name: '0 restaurantes' })).toBeVisible()
   await evidence(page, 'pla-06-sin-resultados')
 })
+
+test('PLA-07 el administrador restablece la contraseña del encargado y este la cambia al entrar', async ({ page, platform, local, browser }) => {
+  covers('dialogo:platform/OwnerRow', 'funcion:acceso.entrar', 'funcion:perfil.cambiar-contrasena')
+  const temporary = `temporal-${unique()}`
+  const chosen = `elegida-${unique()}`
+  const { owner } = local
+  await openAsPlatform(page, platform, `/plataforma/restaurantes/${String(local.id)}`)
+  await page.getByRole('button', { name: `Restablecer la contraseña de ${owner.name}` }).click()
+  const dialog = page.getByRole('dialog', { name: `Restablecer la contraseña de ${owner.name}` })
+  await dialog.getByLabel('Contraseña temporal').fill(temporary)
+  await dialog.getByRole('button', { name: 'Restablecer' }).click()
+  await expect(dialog).toBeHidden()
+  const row = page.getByRole('listitem').filter({ hasText: owner.email })
+  await expect(row).toContainText('Contraseña temporal')
+  await evidence(page, 'pla-07-contrasena-temporal')
+
+  // El encargado entra con la temporal y no pasa de «Cambia tu contraseña» hasta cambiarla.
+  const context = await browser.newContext()
+  const mobile = await context.newPage()
+  await mobile.goto('/acceso')
+  await signInByForm(mobile, owner.email, temporary)
+  await expect(mobile.getByRole('heading', { level: 1, name: 'Cambia tu contraseña' })).toBeVisible()
+  await mobile.getByLabel('Contraseña actual').fill(temporary)
+  await mobile.getByLabel('Nueva contraseña', { exact: true }).fill(chosen)
+  await mobile.getByLabel('Repite la nueva contraseña').fill(chosen)
+  await mobile.getByRole('button', { name: 'Cambiar contraseña' }).click()
+  await expect(mobile.getByRole('heading', { level: 1, name: 'Cambia tu contraseña' })).toBeHidden()
+  await expect(navigation(mobile)).toBeVisible()
+  await context.close()
+})

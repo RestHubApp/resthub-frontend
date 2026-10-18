@@ -5,7 +5,7 @@ import { setPasswordChangeHandler } from '@/services/apiCredentials'
 import { staffOf, useSession } from './session'
 
 /** Marca que la cuenta del personal tiene que cambiar su contraseña antes de seguir. */
-export function markPasswordChangeRequired(): void {
+function markPasswordChangeRequired(): void {
   const { account, refresh } = useSession.getState()
   const staff = staffOf(account)
   if (staff === null || staff.must_change_password) return

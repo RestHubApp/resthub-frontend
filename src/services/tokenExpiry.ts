@@ -21,22 +21,17 @@ export function tokenExpiresAt(token: string): number | null {
   }
 }
 
-export function isTokenExpired(token: string, now: number = Date.now()): boolean {
-  const expiry = tokenExpiresAt(token)
-  return expiry !== null && expiry <= now
-}
-
 /**
  * Un temporizador que cierra una sesion en el momento en que vence su token,
  * en vez de esperar a que una pantalla se quede sin datos por un 401.
  *
- * Devuelve la funcion que lo reprograma; con `null` solo lo apaga.
+ * Devuelve la funcion que lo reprograma con el vencimiento en milisegundos
+ * (`tokenExpiresAt`); con `null` solo lo apaga.
  */
-export function expiryTimer(onExpire: () => void): (token: string | null) => void {
+export function expiryTimer(onExpire: () => void): (expiry: number | null) => void {
   let id: ReturnType<typeof setTimeout> | undefined
-  return (token) => {
+  return (expiry) => {
     clearTimeout(id)
-    const expiry = token === null ? null : tokenExpiresAt(token)
     if (expiry === null) {
       return
     }
