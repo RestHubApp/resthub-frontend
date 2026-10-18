@@ -69,6 +69,7 @@ export function order(changes: Partial<OrderResponse> = {}): OrderResponse {
     payment_method: null,
     payment_method_label: null,
     payments: [],
+    voided_payments: [],
     merged_into_id: null,
     kitchen_round: 1,
     cancel_reason: '',

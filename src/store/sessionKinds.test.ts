@@ -22,6 +22,7 @@ function platformAccount(adminId: number): PlatformSession {
     admin: { id: adminId, email: 'plataforma@resthub.dev', full_name: 'Equipo RestHub' },
     permissions: ['platform.restaurants.read'],
     preview: false,
+    two_factor_setup_required: false,
   }
 }
 

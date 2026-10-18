@@ -2,6 +2,7 @@ import type { OrderResponse } from '@/api/types'
 import { formatDateTime, formatMoney, formatPercent, toCents } from '@/services/format'
 import { useTimeZone } from '@/store/session'
 import { PaymentsDone } from '@/features/orders/charge/PaymentsDone'
+import { useCanVoidPayments } from '@/features/orders/charge/useCanVoidPayments'
 import { InvoicePanel } from './InvoicePanel'
 
 interface OrderClosedInfoProps {
@@ -41,6 +42,10 @@ function paidRows(order: OrderResponse, timeZone: string): Row[] {
 /** Cómo terminó un pedido: cobrado con qué y cuánto, o cancelado y por qué. */
 export function OrderClosedInfo({ order }: OrderClosedInfoProps) {
   const timeZone = useTimeZone()
+  // Un pago único ya se lee arriba; el detalle se muestra si hay varios, si
+  // hubo uno anulado o si quien mira puede anularlo.
+  const canVoid = useCanVoidPayments(order)
+  const hasPaymentDetail = order.payments.length > 1 || order.voided_payments.length > 0 || canVoid
   if (order.status === 'cancelled') {
     return (
       <p className="m-0 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -52,7 +57,7 @@ export function OrderClosedInfo({ order }: OrderClosedInfoProps) {
   }
   if (order.status !== 'paid') {
     // Una cuenta dividida a medio cobrar: se ve qué pagó cada uno.
-    return <PaymentsDone order={order} />
+    return <PaymentsDone order={order} canVoid={canVoid} />
   }
   return (
     <div className="flex flex-col gap-3">
@@ -64,7 +69,7 @@ export function OrderClosedInfo({ order }: OrderClosedInfoProps) {
           </div>
         ))}
       </dl>
-      {order.payments.length > 1 ? <PaymentsDone order={order} /> : null}
+      {hasPaymentDetail ? <PaymentsDone order={order} canVoid={canVoid} /> : null}
       <InvoicePanel order={order} />
     </div>
   )

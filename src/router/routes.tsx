@@ -3,17 +3,14 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
 import { HomeRedirect } from '@/features/shell/HomeRedirect'
 import { AppShell } from '@/features/shell/AppShell'
 import { RequireSession } from '@/features/shell/RequireSession'
-import { lazyNamed } from '@/components/lazyNamed'
 import { paths, routePatterns } from '@/services/paths'
 import { lazyRoute } from './lazyRoute'
 import { PREVIEW } from './previewRoute'
 
 import { RouteError } from './RouteError'
 import { SCREENS } from './screens'
+import { SETUP_VIEWS } from './setupViews'
 import type { Screen } from './screens/screenTypes'
-
-// Solo la ve una cuenta con contraseña temporal (RFS-20): se descarga recién entonces.
-const TemporaryPasswordView = lazyNamed(() => import('@/features/auth/TemporaryPasswordView'), 'TemporaryPasswordView')
 
 /**
  * La ruta de una pantalla del registro, detrás de su guarda.
@@ -34,7 +31,7 @@ export const router = createBrowserRouter(
     { ...PREVIEW, ErrorBoundary: RouteError },
     {
       path: routePatterns.home,
-      element: <AppShell screens={SCREENS} passwordChange={TemporaryPasswordView} />,
+      element: <AppShell screens={SCREENS} setupViews={SETUP_VIEWS} />,
       ErrorBoundary: RouteError,
       children: [
         { index: true, Component: HomeRedirect },

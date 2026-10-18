@@ -18,6 +18,7 @@ function restaurant(changes: Partial<OwnRestaurant> = {}): OwnRestaurant {
     is_active: true,
     auto_out_of_stock: false,
     idle_lock_minutes: 10,
+    opening_hours: [],
     created_at: '2026-01-01T00:00:00Z',
     max_waiter_discount_percent: '10.00',
     waste_approval_threshold: '50.00',

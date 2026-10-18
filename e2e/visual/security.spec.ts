@@ -54,7 +54,7 @@ test('VIS-26 sesiones abiertas, PIN, «Confirma tu contraseña» y bloqueo de la
 
 test('VIS-27 activar la verificación en dos pasos y desactivarla', async ({ page, local }) => {
   deadline(90_000)
-  covers('hoja:auth/security/TwoFactorSheet', 'confirmacion:auth/security/TwoFactorCard')
+  covers('hoja:auth/security/TwoFactorSheet', 'confirmacion:auth/security/TwoFactorEnabledActions')
 
   await profileSecurity(page)
   await answer(page, '/auth/me/two-factor/setup', TWO_FACTOR_SETUP)

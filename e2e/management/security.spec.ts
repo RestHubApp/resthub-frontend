@@ -90,7 +90,7 @@ test('SEG-02 elegir un PIN pide la contraseña; la sesión se bloquea y se abre 
 })
 
 test('SEG-03 activa la verificación en dos pasos, entra con el código y la desactiva', async ({ page, local }) => {
-  covers('hoja:auth/security/TwoFactorSheet', 'confirmacion:auth/security/TwoFactorCard')
+  covers('hoja:auth/security/TwoFactorSheet', 'confirmacion:auth/security/TwoFactorEnabledActions')
   await openAs(page, local.waiter, '/perfil')
 
   await page.getByRole('button', { name: 'Activar' }).click()

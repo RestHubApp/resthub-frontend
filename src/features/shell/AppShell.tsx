@@ -3,7 +3,7 @@ import { isPreviewTab } from '@/services/tabStorage'
 import { staffOf, useSession } from '@/store/session'
 import { PreviewEndedGate } from './PreviewEndedGate'
 import { LockGate } from './security/LockGate'
-import { type PasswordChangeView, TemporaryPasswordGate } from './security/TemporaryPasswordGate'
+import { AccountSetupGate, type AccountSetupViews } from './security/AccountSetupGate'
 import type { ShellScreen } from './shellScreens'
 import { SignedInShell } from './SignedInShell'
 import { SignedOutShell } from './SignedOutShell'
@@ -13,12 +13,13 @@ import { useSessionRenewal } from './useSessionRenewal'
 
 const WITHOUT_SCREENS: readonly ShellScreen[] = []
 const WITHOUT_PERMISSIONS: readonly PermissionCode[] = []
+const WITHOUT_SETUP_VIEWS: AccountSetupViews = {}
 
 interface AppShellProps {
   /** Las pantallas del registro: de ellas salen el menú y lo que se adelanta al acercarse a un enlace. */
   readonly screens?: readonly ShellScreen[]
-  /** El cambio de la contraseña temporal (RFS-20), que tapa el armazón mientras haga falta. */
-  readonly passwordChange?: PasswordChangeView | undefined
+  /** Lo que tapa el armazón mientras a la cuenta le falte algo (contraseña propia, dos pasos). */
+  readonly setupViews?: AccountSetupViews
 }
 
 /**
@@ -32,7 +33,7 @@ interface AppShellProps {
  * reserva abajo el alto de esa barra para que nada quede tapado. Una sesión
  * bloqueada por inactividad solo muestra el desbloqueo.
  */
-export function AppShell({ screens = WITHOUT_SCREENS, passwordChange }: AppShellProps) {
+export function AppShell({ screens = WITHOUT_SCREENS, setupViews = WITHOUT_SETUP_VIEWS }: AppShellProps) {
   const account = useSession((state) => state.account)
   useAccountRefresh()
   useSessionRenewal()
@@ -47,10 +48,10 @@ export function AppShell({ screens = WITHOUT_SCREENS, passwordChange }: AppShell
     return <SignedOutShell />
   }
   return (
-    <TemporaryPasswordGate account={account} view={passwordChange}>
+    <AccountSetupGate account={account} views={setupViews}>
       <LockGate account={account}>
         <SignedInShell account={account} screens={screens} />
       </LockGate>
-    </TemporaryPasswordGate>
+    </AccountSetupGate>
   )
 }

@@ -206,9 +206,9 @@ export const OBSERVABILITY = {
  */
 export const ACCESS_HISTORY = {
   items: [
-    { id: 3, occurred_at: '2026-10-17T15:00:00Z', outcome: 'succeeded', device: 'Chrome en Windows', network: '190.42.17.x', city: 'Lima', country: 'PE', new_device: false, new_country: false },
-    { id: 2, occurred_at: '2026-10-16T22:10:00Z', outcome: 'succeeded', device: 'Safari en iPhone', network: '181.65.2.x', city: 'Arequipa', country: 'PE', new_device: true, new_country: false },
-    { id: 1, occurred_at: '2026-10-16T22:08:00Z', outcome: 'failed', device: 'Safari en iPhone', network: '181.65.2.x', city: 'Arequipa', country: 'PE', new_device: false, new_country: false },
+    { id: 3, occurred_at: '2026-10-17T15:00:00Z', outcome: 'succeeded', device: 'Chrome en Windows', network: '190.42.17.x', city: 'Lima', country: 'PE', new_device: false, new_country: false, outside_hours: false },
+    { id: 2, occurred_at: '2026-10-16T22:10:00Z', outcome: 'succeeded', device: 'Safari en iPhone', network: '181.65.2.x', city: 'Arequipa', country: 'PE', new_device: true, new_country: false, outside_hours: false },
+    { id: 1, occurred_at: '2026-10-16T22:08:00Z', outcome: 'failed', device: 'Safari en iPhone', network: '181.65.2.x', city: 'Arequipa', country: 'PE', new_device: false, new_country: false, outside_hours: false },
   ],
   total: 3,
   limit: 10,

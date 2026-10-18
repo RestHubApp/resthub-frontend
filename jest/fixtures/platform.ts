@@ -123,7 +123,13 @@ export function signInToPlatform(
   permissions: readonly PlatformPermissionCode[] = PERMISSIONS_PLATFORM,
   admin: PlatformAdmin = ADMIN,
 ): PlatformSession {
-  const account: PlatformSession = { kind: 'platform', admin, permissions: [...permissions], preview: false }
+  const account: PlatformSession = {
+    kind: 'platform',
+    admin,
+    permissions: [...permissions],
+    preview: false,
+    two_factor_setup_required: false,
+  }
   setAuthToken('token-de-plataforma')
   useSession.setState({ token: 'token-de-plataforma', account, expired: false, passwordChanged: false })
   return account

@@ -10,7 +10,7 @@ import { onSubmit } from '@/hooks/formSubmit'
 import { QuickReasons } from '@/features/orders/QuickReasons'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { QUICK_VOID_REASONS, voidErrorMessage } from './voidItemMessages'
-import { MAX_VOID_REASON, type VoidItemValues, voidItemSchema } from './voidItemSchema'
+import { MAX_VOID_REASON, type VoidItemValues, voidItemSchema } from '@/features/orders/voidItemSchema'
 
 interface VoidItemFormProps {
   readonly order: OrderResponse

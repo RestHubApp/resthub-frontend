@@ -6,7 +6,7 @@ import { mountScreen, PERMISSIONS_OWNER, server, signInAs } from '#jest/harness'
 import { StaffView } from './StaffView'
 
 const ROSA = { ...member({ id: 9, full_name: 'Rosa Mamani', email: 'rosa@resthub.dev', role_id: 5, role_label: 'Cocina', is_active: false }), deactivated_at: '2026-10-10T15:00:00Z', deactivated_by: 7, deactivation_reason: 'Ya no trabaja en el local' }
-const ACCESS = { id: 1, occurred_at: '2026-10-17T15:00:00Z', outcome: 'failed', device: 'Chrome en Android', network: '181.65.2.x', city: '', country: '', new_device: true, new_country: false }
+const ACCESS = { id: 1, occurred_at: '2026-10-17T15:00:00Z', outcome: 'failed', device: 'Chrome en Android', network: '181.65.2.x', city: '', country: '', new_device: true, new_country: false, outside_hours: true }
 
 function openStaff() {
   const api = server()
@@ -36,6 +36,7 @@ describe('Personal: bajas y accesos', () => {
 
     expect(await within(sheet).findByText('Fallido')).toBeInTheDocument()
     expect(within(sheet).getByText('Dispositivo nuevo')).toBeInTheDocument()
+    expect(within(sheet).getByText('Fuera de horario')).toBeInTheDocument()
     expect(within(sheet).getByText('Chrome en Android · — · 181.65.2.x')).toBeInTheDocument()
     expect(within(sheet).queryByRole('button', { name: 'Ver más' })).not.toBeInTheDocument()
   })

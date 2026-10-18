@@ -1,6 +1,6 @@
 import type { ErrorCode } from '@/api/types'
 import { errorCode } from '@/services/apiError'
-import { MAX_VOID_REASON } from './voidItemSchema'
+import { MAX_VOID_REASON } from '@/features/orders/voidItemSchema'
 
 /** Los motivos que más se repiten: un toque y listo. */
 export const QUICK_VOID_REASONS = ['Error del mesero', 'Cliente cambió de opinión', 'Sin insumo'] as const

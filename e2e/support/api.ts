@@ -194,7 +194,8 @@ export async function signInPlatformByApi(http: APIRequestContext): Promise<Sess
   }
   await confirmPassword(http, data.access_token, SECRET)
   const { admin, permissions, preview } = data
-  return { token: data.access_token, account: { kind: 'platform', admin, permissions, preview } }
+  const account = { kind: 'platform', admin, permissions, preview, two_factor_setup_required: false } as const
+  return { token: data.access_token, account }
 }
 
 /** La carta mínima de cada restaurante de prueba. Los precios incluyen IGV. */

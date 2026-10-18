@@ -80,6 +80,7 @@ export function buildOrder(changes: Partial<OrderResponse> = {}): OrderResponse 
     balance: '50.00',
     tips: '0.00',
     payments: [],
+    voided_payments: [],
     payment_method: null,
     payment_method_label: null,
     amount_received: null,

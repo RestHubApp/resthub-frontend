@@ -18,7 +18,7 @@ export interface AccessLine {
   readonly isSuccess: boolean
   readonly device: string
   readonly detail: string
-  /** «Dispositivo nuevo», «País nuevo» o los dos. */
+  /** «Dispositivo nuevo», «País nuevo» y «Fuera de horario» (RFS-32), los que tocan. */
   readonly marks: readonly string[]
 }
 
@@ -28,7 +28,11 @@ function placeOf(entry: AccessEntry): string {
 }
 
 function marksOf(entry: AccessEntry): string[] {
-  return [entry.new_device ? 'Dispositivo nuevo' : '', entry.new_country ? 'País nuevo' : ''].filter((mark) => mark !== '')
+  return [
+    entry.new_device ? 'Dispositivo nuevo' : '',
+    entry.new_country ? 'País nuevo' : '',
+    entry.outside_hours ? 'Fuera de horario' : '',
+  ].filter((mark) => mark !== '')
 }
 
 /** `17 oct 2026, 10:30 · Correcto · Chrome en Android · Lima, PE · 190.42.17.x`. */
