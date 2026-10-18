@@ -4,6 +4,7 @@ import { Icon } from '@/components/Icon'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { IdleLockCard } from './IdleLockCard'
+import { OpeningHoursCard } from './OpeningHoursCard'
 import { StaffCreateDialog } from './StaffCreateDialog'
 import { StaffTeamCard } from './StaffTeamCard'
 import { UnusedStaffCard } from './UnusedStaffCard'
@@ -37,6 +38,8 @@ export function StaffView() {
       <StaffTeamCard />
 
       <IdleLockCard />
+
+      <OpeningHoursCard />
     </div>
   )
 }

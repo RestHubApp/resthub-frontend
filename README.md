@@ -251,6 +251,10 @@ Lo que mantiene la primera visita liviana:
   tiene el rol le llega el aviso `permissions`, que relee su sesión mientras
   mira una pantalla en vivo (pedidos, tablero, cocina); en las demás, la
   sesión se relee cada cinco minutos.
+- «Personal» también tiene el horario de atención del local (RFS-32,
+  `restaurant.manage`): tramos por día en la hora del local; un cierre antes de
+  la apertura es de madrugada. Los accesos fuera de él se marcan «Fuera de
+  horario» en el historial de accesos. Sin tramos no se marca nada.
 
 ## Administración del sistema (`/plataforma`)
 
@@ -311,6 +315,12 @@ celular del mesero nunca baja este código.
   sesión. La vista previa no tiene cookie: guarda su token en su pestaña. Las
   mutaciones que llevan una contraseña (alta, nuevo encargado) salen del
   caché en cuanto nadie mira su resultado (`gcTime: 0`).
+- **Dos pasos obligatorio en la plataforma (RFS-22).** Si `GET /auth/me` trae
+  `two_factor_setup_required` (o cualquier petición responde 403
+  `two_factor_setup_required`), el armazón solo muestra el alta de la
+  verificación (`TwoFactorSetupView`, en `AccountSetupGate` junto a la
+  contraseña temporal); al confirmar el primer código la plataforma se abre.
+  Para la administración no se ofrece desactivarla.
 - Vence y se renueva igual para las dos clases (`hooks/useTokenRenewal.ts`,
   `POST /auth/refresh` cinco minutos antes) y se relee con `GET /auth/me`.
 - **Identificador (slug):** se sugiere del nombre (minúsculas, sin tildes,
@@ -414,6 +424,10 @@ backend guarda de sí mismo (`/platform/observability/*`, con el permiso
 sin servicios externos). Vive en `features/platform/observability` y se
 descarga aparte, como el resto del área.
 
+- **Alertas de seguridad (RFS-31).** Arriba van los últimos picos de accesos
+  fallidos, bloqueos o 403 que el servidor detectó solo
+  (`GET /platform/observability/security-alerts`), con su cuenta, su umbral y
+  su ventana.
 - **Ventana y restaurante.** 1 h, 6 h, 24 h (por omisión) o 7 d hasta ahora, y
   un restaurante o todos (la lista son los 100 más nuevos de
   `GET /platform/restaurants`). Acá el cliente sí manda `restaurant_id`: es un
@@ -501,6 +515,11 @@ descarga aparte, como el resto del área.
   arqueo en vivo (escucha los avisos `orders` y `cash`), el historial de
   turnos y el tope de descuento del mesero. Sin caja abierta, el cobro lo
   avisa y no deja confirmar.
+- Un cobro mal hecho se anula desde el detalle del pedido (RFS-25): «Anular»
+  junto a cada pago, solo con `cash.manage` y en un pedido servido o pagado,
+  pide un motivo (`POST /orders/{id}/payments/{payment_id}/void`). El cobro
+  queda tachado en «Cobros anulados» con quién y por qué, sale de la caja y el
+  pedido vuelve a deber ese monto. Dentro de la ventana de cobro no se ofrece.
 
 ## Delivery, clientes y reservas
 

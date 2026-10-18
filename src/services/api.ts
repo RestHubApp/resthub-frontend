@@ -21,6 +21,7 @@ import {
   lockOpenSession,
   recoverCsrf,
   requirePasswordChange,
+  requireTwoFactorSetup,
 } from './apiCredentials'
 import {
   ApiError,
@@ -30,6 +31,7 @@ import {
   isSessionEnded,
   isSessionLocked,
   isTransportFailure,
+  isTwoFactorSetupRequired,
   needsReauthentication,
   type NoResponseReason,
 } from './apiError'
@@ -217,23 +219,30 @@ function rememberTransportFailure(current: Exchange, error: ApiError): void {
  * llevaba credencial es una sesión vencida o revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
  * y el acceso explica qué pasó. Una sesión bloqueada por inactividad (423)
  * muestra el desbloqueo, y una contraseña temporal (403
- * `password_change_required`), la pantalla para cambiarla. Un rechazo sin credencial, como una contraseña
+ * `password_change_required`), la pantalla para cambiarla; a la administración sin
+ * dos pasos (`two_factor_setup_required`), su alta. Un rechazo sin credencial, como una contraseña
  * equivocada al entrar (`invalid_credentials`), lo resuelve su propio formulario. Se cierra solo
  * la sesión.
  */
 function fail(current: Exchange, error: ApiError): never {
   registerFailure(current, error)
   rememberTransportFailure(current, error)
-  if (current.hasCredential && isSessionEnded(error)) {
-    expireSession(current.bearer)
-  }
-  if (current.hasCredential && isSessionLocked(error)) {
-    lockOpenSession()
-  }
-  if (current.hasCredential && isPasswordChangeRequired(error)) {
-    requirePasswordChange()
+  if (current.hasCredential) {
+    reactToSessionState(current, error)
   }
   throw error
+}
+
+function reactToSessionState(current: Exchange, error: ApiError): void {
+  if (isSessionEnded(error)) {
+    expireSession(current.bearer)
+  } else if (isSessionLocked(error)) {
+    lockOpenSession()
+  } else if (isPasswordChangeRequired(error)) {
+    requirePasswordChange()
+  } else if (isTwoFactorSetupRequired(error)) {
+    requireTwoFactorSetup()
+  }
 }
 
 function errorOf(current: Exchange, failure: { status?: number; body?: unknown; reason?: NoResponseReason; cause?: unknown }): ApiError {

@@ -14,6 +14,7 @@ interface Credential {
   onLock: (() => void) | null
   onReauthenticate: (() => Promise<boolean>) | null
   onPasswordChange: (() => void) | null
+  onTwoFactorSetup: (() => void) | null
 }
 
 // Quienes siguen el token (el canal de avisos): tras recargar llega después,
@@ -29,6 +30,7 @@ const credential: Credential = {
   onLock: null,
   onReauthenticate: null,
   onPasswordChange: null,
+  onTwoFactorSetup: null,
 }
 
 /**
@@ -141,4 +143,14 @@ export function setCsrfRecovery(handler: (() => Promise<boolean>) | null): void 
 /** Relee el valor anti-CSRF; `false` si no hay cómo o no se pudo. */
 export async function recoverCsrf(): Promise<boolean> {
   return credential.onCsrfLost === null ? false : credential.onCsrfLost()
+}
+
+/** Qué hacer cuando la plataforma pide activar la verificación en dos pasos (403 `two_factor_setup_required`). */
+export function setTwoFactorSetupHandler(handler: (() => void) | null): void {
+  credential.onTwoFactorSetup = handler
+}
+
+/** La cuenta de plataforma tiene que activar la verificación en dos pasos antes de seguir (RFS-22). */
+export function requireTwoFactorSetup(): void {
+  credential.onTwoFactorSetup?.()
 }

@@ -174,6 +174,19 @@ export async function voidOrderItem(
   )
 }
 
+/**
+ * Anula un cobro mal hecho del turno de caja abierto (RFS-25): queda a la vista
+ * con su motivo, deja de sumar y el pedido vuelve a deber ese monto.
+ */
+export async function voidPayment(orderId: number, paymentId: number, reason: string): Promise<OrderResponse> {
+  return send((client) =>
+    client.POST('/api/v1/orders/{order_id}/payments/{payment_id}/void', {
+      params: { path: { order_id: orderId, payment_id: paymentId } },
+      body: { reason },
+    }),
+  )
+}
+
 /** Los comensales se mudaron: el pedido pasa a otra mesa libre. */
 export async function moveOrder(orderId: number, tableId: number): Promise<OrderResponse> {
   return send((client) =>

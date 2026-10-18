@@ -13,7 +13,7 @@ const OFF = { enabled: false, pending: false, recovery_codes_left: 0 }
 const CODES = ['abcdefghjk', 'mnpqrstuvw']
 
 const ACCESSES = '/auth/me/access-history'
-const ACCESS = { id: 1, occurred_at: '2026-10-17T15:00:00Z', outcome: 'succeeded', device: 'Chrome en Windows', network: '190.42.17.x', city: 'Lima', country: 'PE', new_device: false, new_country: true }
+const ACCESS = { id: 1, occurred_at: '2026-10-17T15:00:00Z', outcome: 'succeeded', device: 'Chrome en Windows', network: '190.42.17.x', city: 'Lima', country: 'PE', new_device: false, new_country: true, outside_hours: false }
 
 function openSecurity(twoFactor = OFF) {
   const api = server().on('get', SESSIONS, [THIS_DEVICE, PHONE]).on('get', TWO_FACTOR, twoFactor).on('get', ACCESSES, { items: [ACCESS], total: 12 })

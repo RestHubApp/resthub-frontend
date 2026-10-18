@@ -135,6 +135,16 @@ export function isPasswordChangeRequired(error: unknown): boolean {
   return hasCode(error, 'password_change_required')
 }
 
+/** Si a la cuenta le falta algo que el servidor exige antes (contraseña propia o dos pasos). */
+function needsAccountSetup(error: ApiError): boolean {
+  return isPasswordChangeRequired(error) || hasCode(error, 'two_factor_setup_required')
+}
+
+/** Si la plataforma pide activar antes la verificación en dos pasos (403 `two_factor_setup_required`). */
+export function isTwoFactorSetupRequired(error: unknown): boolean {
+  return hasCode(error, 'two_factor_setup_required')
+}
+
 /** Si el valor anti-CSRF que viajó ya no es el de la cookie de sesión (403 `csrf_token_invalid`). */
 export function isCsrfInvalid(error: unknown): boolean {
   return hasCode(error, 'csrf_token_invalid')
@@ -188,7 +198,7 @@ export function isUnreachable(error: unknown): boolean {
  * Una sesión vencida la resuelve el cierre de sesión, no es un corte.
  */
 export function isTransportFailure(error: ApiError): boolean {
-  if (error.reason === 'canceled' || isSessionEnded(error) || isSessionLocked(error) || isPasswordChangeRequired(error)) return false
+  if (error.reason === 'canceled' || isSessionEnded(error) || isSessionLocked(error) || needsAccountSetup(error)) return false
   return isServerFault(error) || hasCode(error, ...CHANGED_CODES)
 }
 

@@ -20,8 +20,12 @@ const SUMMARY = `${BASE}/summary`
 const ROUTES = `${BASE}/routes`
 const PAGE = { items: [], next_before_id: null }
 
-function openPanel(en = '/plataforma/observabilidad') {
+const ALERTS = `${BASE}/security-alerts`
+const FAILED_LOGINS = { id: 4, kind: 'failed_logins', kind_label: 'Accesos fallidos', count: 47, threshold: 30, window_minutes: 15, raised_at: '2026-10-17T15:00:00Z' }
+
+function openPanel(en = '/plataforma/observabilidad', alerts: unknown = []) {
   const api = server()
+    .on('get', ALERTS, alerts)
     .on('get', SUMMARY, SUMMARY_OBS)
     .on('get', `${BASE}/timeseries`, SERIES_OBS)
     .on('get', `${BASE}/status`, STATUSES_OBS)
@@ -43,6 +47,20 @@ function lastRead(api: ReturnType<typeof openPanel>['api'], route: string) {
 }
 
 describe('ObservabilityView', () => {
+  it('muestra las alertas de seguridad por picos (RFS-31)', async () => {
+    openPanel(undefined, [FAILED_LOGINS])
+
+    const list = await screen.findByRole('list', { name: 'Alertas de seguridad' })
+    expect(within(list).getByText('Accesos fallidos')).toBeInTheDocument()
+    expect(within(list).getByText('47 en 15 min (umbral 30)')).toBeInTheDocument()
+  })
+
+  it('sin picos lo dice', async () => {
+    openPanel()
+
+    expect(await screen.findByText('Sin picos recientes.')).toBeInTheDocument()
+  })
+
   it('resume la ventana: peticiones, errores y latencias', async () => {
     openPanel()
 

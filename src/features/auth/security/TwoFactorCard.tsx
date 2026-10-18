@@ -1,12 +1,12 @@
 import { useState } from 'react'
 
 import type { TwoFactorStatus } from '@/api/types'
-import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Icon } from '@/components/Icon'
 import { RetryQueryError } from '@/components/RetryQueryError'
 import { SectionCard } from '@/components/SectionCard'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
+import { TwoFactorEnabledActions } from './TwoFactorEnabledActions'
 import { TwoFactorSheet } from './TwoFactorSheet'
 import { useTwoFactor } from './useTwoFactor'
 
@@ -17,8 +17,11 @@ function statusText(status: TwoFactorStatus): string {
   return `Al entrar se pide el código de tu aplicación. Te ${remaining} de recuperación.`
 }
 
-/** La verificación en dos pasos de la cuenta propia (RFS-22). */
-export function TwoFactorCard() {
+/**
+ * La verificación en dos pasos de la cuenta propia (RFS-22). Sin `canDisable`
+ * (la administración del sistema, que la tiene obligatoria) no se ofrece apagarla.
+ */
+export function TwoFactorCard({ canDisable }: { readonly canDisable: boolean }) {
   const twoFactor = useTwoFactor()
   const { status, begin, confirm, renew, disable } = twoFactor
   const [isOpen, setIsOpen] = useState(false)
@@ -36,20 +39,12 @@ export function TwoFactorCard() {
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge label={isEnabled ? 'Activa' : 'Sin activar'} tone={isEnabled ? 'completed' : undefined} />
           {isEnabled ? (
-            <>
-              <Button type="button" variant="outline" onClick={() => { open(() => { renew.mutate() }) }}>
-                <Icon name="retry" size={16} />
-                <span>Nuevos códigos de recuperación</span>
-              </Button>
-              <ConfirmDialog
-                trigger={<Button type="button" variant="outline" disabled={disable.isPending}>Desactivar</Button>}
-                title="¿Desactivar la verificación en dos pasos?"
-                description="Para entrar bastará tu contraseña. Los códigos de recuperación dejan de servir."
-                confirmLabel="Desactivar"
-                confirmVariant="destructive"
-                onConfirm={() => { disable.mutate() }}
-              />
-            </>
+            <TwoFactorEnabledActions
+              canDisable={canDisable}
+              isDisabling={disable.isPending}
+              onRenew={() => { open(() => { renew.mutate() }) }}
+              onDisable={() => { disable.mutate() }}
+            />
           ) : (
             <Button type="button" onClick={() => { open(() => { begin.mutate() }) }}>
               <Icon name="key" size={16} />

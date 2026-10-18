@@ -78,6 +78,7 @@ export type NewItemRequest = components['schemas']['NewItemRequest']
 export type ChangeItemRequest = components['schemas']['ChangeItemRequest']
 export type PaymentRequest = components['schemas']['PaymentRequest']
 export type PaymentResponse = components['schemas']['PaymentResponse']
+export type VoidedPaymentResponse = components['schemas']['VoidedPaymentResponse']
 export type DiscountRequest = components['schemas']['DiscountRequest']
 
 // Caja: el turno abierto, su arqueo y los turnos anteriores.
@@ -276,3 +277,5 @@ export type ObsWindowParams = ObsQuery<'read_summary_api_v1_platform_observabili
 export type ObsRoutesParams = ObsQuery<'read_routes_api_v1_platform_observability_routes_get'>
 export type ObsLogsParams = ObsQuery<'search_logs_api_v1_platform_observability_logs_get'>
 export type ObsRequestsParams = ObsQuery<'search_requests_api_v1_platform_observability_requests_get'>
+export type OpeningPeriod = components['schemas']['OpeningPeriodResponse']
+export type SecurityAlert = components['schemas']['SecurityAlertResponse']

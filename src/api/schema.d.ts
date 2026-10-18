@@ -297,7 +297,10 @@ export interface paths {
         get: operations["read_two_factor_api_v1_auth_me_two_factor_get"];
         put?: never;
         post?: never;
-        /** Desactivar la verificación en dos pasos */
+        /**
+         * Desactivar la verificación en dos pasos
+         * @description La administración del sistema no puede quedarse sin ella: la cambia renovándola.
+         */
         delete: operations["disable_two_factor_api_v1_auth_me_two_factor_delete"];
         options?: never;
         head?: never;
@@ -2025,6 +2028,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orders/{order_id}/payments/{payment_id}/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Anular un cobro del turno de caja abierto, con su motivo
+         * @description RFS-25: un cobro mal hecho se anula, no se borra: queda con quién y por qué.
+         *
+         *     El pedido vuelve a deber ese monto. 409 si el turno de caja del cobro ya se
+         *     cerró (`payment_not_voidable`) o si el pedido tiene comprobante vigente
+         *     (`order_already_invoiced`).
+         */
+        post: operations["void_payment_api_v1_orders__order_id__payments__payment_id__void_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orders/{order_id}/ready": {
         parameters: {
             query?: never;
@@ -2230,6 +2257,26 @@ export interface paths {
         };
         /** Rutas de la ventana */
         get: operations["read_routes_api_v1_platform_observability_routes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/observability/security-alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Alertas por picos de accesos fallidos, bloqueos o 403
+         * @description RFS-31: las 50 más nuevas. Las deja la revisión que corre cada minuto.
+         */
+        get: operations["read_security_alerts_api_v1_platform_observability_security_alerts_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2776,6 +2823,11 @@ export interface components {
              */
             occurred_at: string;
             outcome: components["schemas"]["AccessOutcome"];
+            /**
+             * Outside Hours
+             * @default false
+             */
+            outside_hours: boolean;
         };
         /** AccessHistoryPageResponse */
         AccessHistoryPageResponse: {
@@ -2846,7 +2898,7 @@ export interface components {
          *     podría filtrar ni contar; así, cambiar la redacción no rompe el historial.
          * @enum {string}
          */
-        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "session_closed" | "session_locked_out" | "pin_changed" | "two_factor_enabled" | "two_factor_disabled" | "recovery_code_used" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "staff_session_closed" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "order_item_voided" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "waste_approval_requested" | "waste_approved" | "waste_rejected" | "stock_count_opened" | "stock_count_closed" | "stock_count_cancelled" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "invoice_voided" | "credit_note_issued" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
+        ActivityKind: "signed_in" | "signed_out" | "password_changed" | "session_closed" | "session_locked_out" | "pin_changed" | "two_factor_enabled" | "two_factor_disabled" | "recovery_code_used" | "terms_accepted" | "privacy_accepted" | "staff_registered" | "staff_updated" | "staff_status_changed" | "staff_password_reset" | "staff_session_closed" | "role_created" | "role_updated" | "role_deleted" | "restaurant_updated" | "menu_category_created" | "menu_category_updated" | "menu_category_deleted" | "menu_item_created" | "menu_item_updated" | "menu_item_availability" | "table_created" | "table_updated" | "order_created" | "order_items_added" | "order_served" | "order_cancelled" | "order_charged" | "payment_received" | "payment_voided" | "order_discounted" | "order_courtesy" | "order_moved" | "order_merged" | "order_item_voided" | "cash_opened" | "cash_closed" | "ingredient_created" | "ingredient_updated" | "stock_purchase" | "stock_waste" | "stock_adjustment" | "waste_approval_requested" | "waste_approved" | "waste_rejected" | "stock_count_opened" | "stock_count_closed" | "stock_count_cancelled" | "recipe_updated" | "restock_refreshed" | "order_notes_classified" | "waste_classified" | "supplier_created" | "supplier_updated" | "purchase_order_created" | "purchase_order_sent" | "purchase_order_received" | "purchase_order_cancelled" | "invoice_issued" | "invoice_emailed" | "invoice_voided" | "credit_note_issued" | "billing_settings_updated" | "customer_created" | "customer_updated" | "customer_exported" | "customer_anonymized" | "customer_viewed" | "customer_revealed" | "data_access_alert" | "reservation_created" | "reservation_updated";
         /** ActivityPageResponse */
         ActivityPageResponse: {
             /** Items */
@@ -3707,7 +3759,7 @@ export interface components {
          * @description Código estable de un error del API (ver `resthub.core.error_codes`).
          * @enum {string}
          */
-        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "csrf_token_invalid" | "password_change_required" | "session_locked" | "two_factor_required" | "invalid_two_factor_code" | "two_factor_state_conflict" | "unlock_attempts_exhausted" | "session_not_found" | "reauthentication_required" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invalid_idle_lock" | "invalid_pin" | "wrong_pin" | "pin_not_set" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "owner_not_found" | "invalid_deactivation_reason" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
+        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "csrf_token_invalid" | "password_change_required" | "session_locked" | "two_factor_required" | "invalid_two_factor_code" | "two_factor_setup_required" | "two_factor_state_conflict" | "unlock_attempts_exhausted" | "session_not_found" | "reauthentication_required" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invalid_idle_lock" | "invalid_opening_hours" | "invalid_pin" | "wrong_pin" | "pin_not_set" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "payment_not_found" | "payment_not_voidable" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "owner_not_found" | "invalid_deactivation_reason" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
         /**
          * ErrorResponse
          * @description Un error del API: el texto para la persona y el código estable.
@@ -4424,6 +4476,41 @@ export interface components {
             /** @default all */
             scope: components["schemas"]["StockCountScope"];
         };
+        /** OpeningPeriodRequest */
+        OpeningPeriodRequest: {
+            /**
+             * Closes
+             * Format: time
+             */
+            closes: string;
+            /** Day */
+            day: number;
+            /**
+             * Opens
+             * Format: time
+             */
+            opens: string;
+        };
+        /**
+         * OpeningPeriodResponse
+         * @description Un tramo del horario: el día (0 lunes … 6 domingo) y las horas del local.
+         *
+         *     Un cierre igual o anterior a la apertura cruza la medianoche.
+         */
+        OpeningPeriodResponse: {
+            /**
+             * Closes
+             * Format: time
+             */
+            closes: string;
+            /** Day */
+            day: number;
+            /**
+             * Opens
+             * Format: time
+             */
+            opens: string;
+        };
         /** OrderItemResponse */
         OrderItemResponse: {
             /** Courtesy Reason */
@@ -4563,6 +4650,11 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+            /**
+             * Voided Payments
+             * @default []
+             */
+            voided_payments: components["schemas"]["VoidedPaymentResponse"][];
             /** Waiter Id */
             waiter_id: number;
             /** Waiter Name */
@@ -4797,6 +4889,11 @@ export interface components {
              * @default bearer
              */
             token_type: string;
+            /**
+             * Two Factor Setup Required
+             * @default false
+             */
+            two_factor_setup_required: boolean;
         };
         /** PlatformAdminResponse */
         PlatformAdminResponse: {
@@ -4830,6 +4927,11 @@ export interface components {
              * @default false
              */
             preview: boolean;
+            /**
+             * Two Factor Setup Required
+             * @default false
+             */
+            two_factor_setup_required: boolean;
         };
         /** PlatformLoginRequest */
         PlatformLoginRequest: {
@@ -5332,6 +5434,8 @@ export interface components {
             max_waiter_discount_percent: string;
             /** Name */
             name: string;
+            /** Opening Hours */
+            opening_hours: components["schemas"]["OpeningPeriodResponse"][];
             /** Slug */
             slug: string;
             /** Timezone */
@@ -5529,6 +5633,28 @@ export interface components {
             accounts: components["schemas"]["SandboxAccountResponse"][];
             restaurant: components["schemas"]["RestaurantSummaryResponse"] | null;
         };
+        /**
+         * SecurityAlertResponse
+         * @description Un pico que pasó su umbral (RFS-31).
+         */
+        SecurityAlertResponse: {
+            /** Count */
+            count: number;
+            /** Id */
+            id: number;
+            kind: components["schemas"]["SpikeKind"];
+            /** Kind Label */
+            kind_label: string;
+            /**
+             * Raised At
+             * Format: date-time
+             */
+            raised_at: string;
+            /** Threshold */
+            threshold: number;
+            /** Window Minutes */
+            window_minutes: number;
+        };
         /** SendInvoiceEmailRequest */
         SendInvoiceEmailRequest: {
             /**
@@ -5592,6 +5718,11 @@ export interface components {
             /** Pin */
             pin: string;
         };
+        /**
+         * SpikeKind
+         * @enum {string}
+         */
+        SpikeKind: "failed_logins" | "lockouts" | "forbidden";
         /**
          * StaffAccessTokenResponse
          * @description El token y, en la misma respuesta, la sesión que abre.
@@ -6095,6 +6226,8 @@ export interface components {
             max_waiter_discount_percent?: number | string | null;
             /** Name */
             name?: string | null;
+            /** Opening Hours */
+            opening_hours?: components["schemas"]["OpeningPeriodRequest"][] | null;
             /** Timezone */
             timezone?: string | null;
             /** Waste Approval Threshold */
@@ -6136,6 +6269,52 @@ export interface components {
         VoidItemRequest: {
             /** Reason */
             reason: string;
+        };
+        /** VoidPaymentRequest */
+        VoidPaymentRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /**
+         * VoidedPaymentResponse
+         * @description Un cobro anulado: no suma a la cuenta ni a la caja (RFS-25).
+         */
+        VoidedPaymentResponse: {
+            /** Amount */
+            amount: string;
+            /** Amount Received */
+            amount_received: string | null;
+            /** Change */
+            change: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Item Ids */
+            item_ids: number[];
+            method: components["schemas"]["PaymentMethod"];
+            /** Method Label */
+            method_label: string;
+            /** Received By */
+            received_by: number;
+            /** Received By Name */
+            received_by_name: string;
+            /** Tip */
+            tip: string;
+            /** Void Reason */
+            void_reason: string;
+            /**
+             * Voided At
+             * Format: date-time
+             */
+            voided_at: string;
+            /** Voided By */
+            voided_by: number | null;
+            /** Voided By Name */
+            voided_by_name: string;
         };
         /** WaiterPerformanceResponse */
         WaiterPerformanceResponse: {
@@ -18497,6 +18676,105 @@ export interface operations {
             };
         };
     };
+    void_payment_api_v1_orders__order_id__payments__payment_id__void_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: number;
+                payment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidPaymentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponse"];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     mark_ready_api_v1_orders__order_id__ready_post: {
         parameters: {
             query?: never;
@@ -19597,6 +19875,89 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiadas peticiones desde esta dirección. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    read_security_alerts_api_v1_platform_observability_security_alerts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityAlertResponse"][];
+                };
+            };
+            /** @description La petición no se puede atender tal como llegó. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta la credencial de acceso o ya no vale. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La cuenta no tiene el permiso que la operación exige. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El recurso no existe (o es de otro restaurante). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El estado actual no permite la operación. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */

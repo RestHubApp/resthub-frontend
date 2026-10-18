@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
 import { member, ROLE_OWNER, ROLE_WAITER, TEAM } from '#jest/fixtures/platform'
-import { mountScreen, PERMISSIONS_OWNER, server, signInAs } from '#jest/harness'
+import { ErrorResponse, firstOf, mountScreen, PERMISSIONS_OWNER, server, signInAs } from '#jest/harness'
 import { StaffView } from './StaffView'
 
 const RESTAURANT = '/restaurant'
@@ -72,5 +72,29 @@ describe('seguridad del personal', () => {
     await waitFor(() => {
       expect(api.calls('patch', RESTAURANT)[0]?.body).toEqual({ idle_lock_minutes: 5 })
     })
+  })
+
+  it('el encargado arma el horario y el servidor explica lo que rechaza (RFS-32)', async () => {
+    const { api, user } = openStaff()
+    api.on('patch', RESTAURANT, new ErrorResponse(422, 'El horario admite hasta 21 tramos.', 'invalid_opening_hours'))
+
+    expect(await screen.findByText('Sin horario: no se marcan accesos fuera de horario.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Agregar tramo' }))
+    await user.click(screen.getByRole('button', { name: 'Agregar tramo' }))
+    const closes = screen.getAllByLabelText('Cierra')
+    await user.clear(firstOf(closes))
+    await user.type(firstOf(closes), '12:00')
+    expect(screen.getByText('No puede abrir y cerrar a la misma hora.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Guardar horario' })).toBeDisabled()
+
+    await user.clear(firstOf(closes))
+    await user.type(firstOf(closes), '02:00')
+    await user.click(screen.getByRole('button', { name: 'Quitar el tramo del martes de 12:00 a 23:00' }))
+    await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
+
+    await waitFor(() => {
+      expect(api.calls('patch', RESTAURANT)[0]?.body).toEqual({ opening_hours: [{ day: 0, opens: '12:00', closes: '02:00' }] })
+    })
+    expect(await screen.findByText('El horario admite hasta 21 tramos.')).toBeInTheDocument()
   })
 })

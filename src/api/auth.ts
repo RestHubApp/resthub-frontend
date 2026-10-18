@@ -38,7 +38,9 @@ export function sessionOf(response: AccessTokenResponse): Session {
     return staffSessionOf(response)
   }
   const { admin, permissions, preview: isPreview } = response
-  return { kind: 'platform', admin, permissions, preview: isPreview }
+  // El acceso no dice si falta la verificación en dos pasos: lo dicen `GET
+  // /auth/me` y el primer 403 `two_factor_setup_required` (RFS-22).
+  return { kind: 'platform', admin, permissions, preview: isPreview, two_factor_setup_required: false }
 }
 
 /**

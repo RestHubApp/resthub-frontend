@@ -1,10 +1,10 @@
 {
-  "total": 504,
+  "total": 505,
   "byType": {
     "ruta": 40,
     "confirmacion": 18,
     "desplegable": 9,
-    "dialogo": 33,
+    "dialogo": 34,
     "hoja": 14,
     "pestanas": 4,
     "funcion": 304,
@@ -265,10 +265,10 @@
       "origin": "src/features/auth/security/PinCard.tsx"
     },
     {
-      "id": "confirmacion:auth/security/TwoFactorCard",
+      "id": "confirmacion:auth/security/TwoFactorEnabledActions",
       "type": "confirmacion",
       "description": "¿Desactivar la verificación en dos pasos?",
-      "origin": "src/features/auth/security/TwoFactorCard.tsx"
+      "origin": "src/features/auth/security/TwoFactorEnabledActions.tsx"
     },
     {
       "id": "confirmacion:cash/CloseCashButton",
@@ -503,6 +503,12 @@
       "type": "dialogo",
       "description": "charged === null ? `Cobrar pedido #${String(actual.number)}` : 'Cobro registrado'",
       "origin": "src/features/orders/charge/ChargeContent.tsx"
+    },
+    {
+      "id": "dialogo:orders/charge/VoidPaymentButton",
+      "type": "dialogo",
+      "description": "`¿Anular el cobro de ${what}?`",
+      "origin": "src/features/orders/charge/VoidPaymentButton.tsx"
     },
     {
       "id": "dialogo:orders/detail/ItemNoteDialog",
