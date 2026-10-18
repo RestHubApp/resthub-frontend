@@ -57,7 +57,7 @@ describe('useServerEvent', () => {
   })
 
   it('si el canal se corta, reintenta a los tres segundos', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const channel = noticesChannel()
     setAuthToken('t')
     listen(ORDERS)
@@ -72,7 +72,7 @@ describe('useServerEvent', () => {
   })
 
   it('con 401 no reintenta: la credencial no va a mejorar sola', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const channel = noticesChannel()
     channel.respondWith(401, 'unauthenticated')
     setAuthToken('vencido')
@@ -83,7 +83,7 @@ describe('useServerEvent', () => {
   })
 
   it('con `forbidden` tampoco reintenta, pero un error sin código de acceso sí', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const channel = noticesChannel()
     channel.respondWith(403, 'forbidden')
     setAuthToken('t')
@@ -99,7 +99,7 @@ describe('useServerEvent', () => {
   })
 
   it('al desmontarse cierra la conexión y no reintenta', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const channel = noticesChannel()
     setAuthToken('t')
     const { unmount } = listen(ORDERS)

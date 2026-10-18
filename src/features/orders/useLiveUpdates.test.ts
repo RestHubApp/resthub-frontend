@@ -107,7 +107,7 @@ describe('useLiveUpdates', () => {
   })
 
   it('si el canal se corta, reintenta y al reconectar vuelve a pedir todo', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const { result } = listen()
     await waitFor(() => {
       expect(connections).toHaveLength(1)
@@ -131,7 +131,7 @@ describe('useLiveUpdates', () => {
   })
 
   it('un 401 no se reintenta: la credencial ya no vale', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     responseStatus = 401
     responseCode = 'unauthenticated'
     const { result } = listen()

@@ -24,6 +24,9 @@ const DE_NODE = [
   'BroadcastChannel',
   // MSW intercepta este `fetch` (ver jest/mswServer.ts): sin él no hay nada que interceptar.
   'fetch',
+  // MSW 3 intercepta en el socket de Node y agenda con `setImmediate`, que jsdom no trae.
+  'setImmediate',
+  'clearImmediate',
 ]
 
 class EnvironmentJsdom extends TestEnvironment {

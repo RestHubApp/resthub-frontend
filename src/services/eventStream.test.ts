@@ -2,33 +2,32 @@
  * @jest-environment ./jest/nodeEnvironment.cjs
  */
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
-import { HttpResponse, http } from 'msw'
-
-import { mswServer } from '#jest/mswServer'
 
 import { readEventStream } from './eventStream'
 import { anyOf } from './signals'
 
 afterEach(() => {
   jest.useRealTimers()
+  jest.restoreAllMocks()
 })
 
 it('abandona un canal SSE congelado y permite que el llamador reconecte', async () => {
-  // MSW espera con setImmediate y microtareas: no se falsean.
-  jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
+  jest.useFakeTimers()
+  // Un `fetch` falso, como el de Node: la señal de la petición corta el cuerpo.
+  // MSW 3 intercepta en el socket y no avisa al manejador cuando el cliente aborta.
   const cancel = jest.fn()
-  mswServer.use(http.get('*/api/v1/events', ({ request }) => {
+  const fetchSpy = jest.spyOn(globalThis, 'fetch').mockImplementation((_input, init) => {
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
         controller.enqueue(new TextEncoder().encode('event: ready\ndata: {}\n\n'))
-        request.signal.addEventListener('abort', () => {
+        init?.signal?.addEventListener('abort', () => {
           cancel()
           controller.error(new DOMException('Canal detenido', 'AbortError'))
         })
       },
     })
-    return new HttpResponse(stream)
-  }))
+    return Promise.resolve(new Response(stream))
+  })
   const onEvent = jest.fn()
   const reading = readEventStream({
     url: 'http://localhost/api/v1/events', token: 'local', signal: new AbortController().signal, onEvent,
@@ -43,6 +42,7 @@ it('abandona un canal SSE congelado y permite que el llamador reconecte', async 
   // `instanceof Error`: se compara por nombre.
   expect(await reading).toMatchObject({ name: 'AbortError' })
   expect(cancel).toHaveBeenCalled()
+  expect(fetchSpy).toHaveBeenCalledTimes(1)
 })
 
 describe('cualquieraDe sin AbortSignal.any (Safari antes de 17.4)', () => {

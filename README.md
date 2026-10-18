@@ -74,7 +74,7 @@ está en `jest/`.
   El canal de avisos (SSE) falso está en `#jest/channel` y los datos de prueba
   en `jest/fixtures/`.
 - La red de las pruebas es MSW (`jest/mswServer.ts`, `setupServer` de `msw/node`,
-  encendido en `jest/setupDom.ts` con `onUnhandledRequest: 'error'` y reseteado
+  encendido en `jest/setupDom.ts` con `onUnhandledFrame: 'error'` y reseteado
   tras cada prueba): se ejercita el cliente real (`openapi-fetch`,
   `src/services/api.ts`) y solo la red es falsa. El arnés, `answerAll` y el
   canal de avisos son manejadores de MSW. Para una respuesta tipada con el
