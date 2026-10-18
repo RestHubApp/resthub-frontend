@@ -4480,14 +4480,14 @@ export interface components {
         OpeningPeriodRequest: {
             /**
              * Closes
-             * Format: time
+             * @example 18:30
              */
             closes: string;
             /** Day */
             day: number;
             /**
              * Opens
-             * Format: time
+             * @example 18:30
              */
             opens: string;
         };
@@ -4500,14 +4500,14 @@ export interface components {
         OpeningPeriodResponse: {
             /**
              * Closes
-             * Format: time
+             * @example 18:30
              */
             closes: string;
             /** Day */
             day: number;
             /**
              * Opens
-             * Format: time
+             * @example 18:30
              */
             opens: string;
         };
