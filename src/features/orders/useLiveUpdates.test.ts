@@ -122,7 +122,10 @@ describe('useLiveUpdates', () => {
     await act(async () => {
       await jest.advanceTimersByTimeAsync(3000)
     })
-    expect(connections).toHaveLength(2)
+    // La reconexión llega a MSW después de unas vueltas de la red, no al instante.
+    await waitFor(() => {
+      expect(connections).toHaveLength(2)
+    })
     notice('ready')
     await waitFor(() => {
       expect(invalidated(['menu', 'pedidos'])).toBe(true)
