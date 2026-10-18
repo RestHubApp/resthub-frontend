@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { platformMutationKeys, updatePlatformRestaurant } from '@/api/platform'
@@ -23,9 +23,14 @@ export function useRestaurantSettings(restaurant: PlatformRestaurantDetail) {
   const saved = useMemo(() => settingsOf(restaurant), [restaurant])
   const { register, handleSubmit, formState, reset } = useForm<RestaurantSettingsValues>({
     resolver: zodResolver(restaurantSettingsSchema(restaurant.timezone)),
-    values: saved,
-    resetOptions: { keepDirtyValues: true },
+    defaultValues: saved,
   })
+  // Sigue a la ficha del caché sin perder lo que se está escribiendo. Con la
+  // opción `values` de useForm, ese reinicio podía llegar después del de
+  // `onSuccess` y devolver lo escrito antes de guardar.
+  useEffect(() => {
+    reset(saved, { keepDirtyValues: true })
+  }, [saved, reset])
   const save = useMutation({
     mutationKey: platformMutationKeys.updateRestaurant,
     mutationFn: (changes: UpdatePlatformRestaurantRequest) => updatePlatformRestaurant(restaurant.id, changes),
