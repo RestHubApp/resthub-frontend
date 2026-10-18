@@ -19,6 +19,20 @@ afterEach(() => {
   jest.useRealTimers()
 })
 
+// Adelanta el reloj falso y deja correr la red: MSW 3 responde en el socket de
+// Node a lo largo de varias vueltas de `setImmediate` (que no se falsea).
+// Los tipos del navegador no declaran `setImmediate`; el entorno lo toma de Node.
+const { setImmediate: nextTurn } = globalThis as unknown as { setImmediate: (callback: () => void) => void }
+
+async function advance(ms: number) {
+  await jest.advanceTimersByTimeAsync(ms)
+  for (let turn = 0; turn < 20; turn += 1) {
+    await new Promise<void>((resolve) => {
+      nextTurn(resolve)
+    })
+  }
+}
+
 describe('useServerEvent', () => {
   it('abre el canal con el token en la cabecera, nunca en la URL', async () => {
     const channel = noticesChannel()
@@ -57,56 +71,56 @@ describe('useServerEvent', () => {
   })
 
   it('si el canal se corta, reintenta a los tres segundos', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const channel = noticesChannel()
     setAuthToken('t')
     listen(ORDERS)
-    await jest.advanceTimersByTimeAsync(0)
+    await advance(0)
     expect(channel.connections).toHaveLength(1)
 
     channel.cut()
-    await jest.advanceTimersByTimeAsync(2999)
+    await advance(2999)
     expect(channel.connections).toHaveLength(1)
-    await jest.advanceTimersByTimeAsync(1)
+    await advance(1)
     expect(channel.connections).toHaveLength(2)
   })
 
   it('con 401 no reintenta: la credencial no va a mejorar sola', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const channel = noticesChannel()
     channel.respondWith(401, 'unauthenticated')
     setAuthToken('vencido')
     listen(ORDERS)
 
-    await jest.advanceTimersByTimeAsync(10_000)
+    await advance(10_000)
     expect(channel.connections).toHaveLength(1)
   })
 
   it('con `forbidden` tampoco reintenta, pero un error sin código de acceso sí', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const channel = noticesChannel()
     channel.respondWith(403, 'forbidden')
     setAuthToken('t')
     listen(ORDERS)
-    await jest.advanceTimersByTimeAsync(10_000)
+    await advance(10_000)
     expect(channel.connections).toHaveLength(1)
 
     channel.respondWith(503, 'database_unavailable')
-    await jest.advanceTimersByTimeAsync(0)
+    await advance(0)
     listen(ORDERS)
-    await jest.advanceTimersByTimeAsync(3001)
+    await advance(3001)
     expect(channel.connections.length).toBeGreaterThan(2)
   })
 
   it('al desmontarse cierra la conexión y no reintenta', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const channel = noticesChannel()
     setAuthToken('t')
     const { unmount } = listen(ORDERS)
-    await jest.advanceTimersByTimeAsync(0)
+    await advance(0)
 
     unmount()
-    await jest.advanceTimersByTimeAsync(10_000)
+    await advance(10_000)
     expect(channel.connections).toHaveLength(1)
   })
 })

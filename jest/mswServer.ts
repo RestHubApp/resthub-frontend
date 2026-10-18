@@ -2,7 +2,7 @@
 // que se ejercita el cliente real (`openapi-fetch` y `src/services/api.ts`) y
 // solo la red es falsa.
 //
-// Se enciende en `jest/setupDom.ts` con `onUnhandledRequest: 'error'` (una
+// Se enciende en `jest/setupDom.ts` con `onUnhandledFrame: 'error'` (una
 // petición sin manejador falla la prueba) y se resetea después de cada una.
 // Las pruebas declaran respuestas con `server()` de `#jest/harness` o, tipadas
 // con el contrato, con `apiHttp` de `#jest/apiHttp`.

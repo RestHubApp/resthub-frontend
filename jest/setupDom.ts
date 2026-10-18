@@ -14,7 +14,7 @@ configure({ asyncUtilTimeout: 15_000 })
 // MSW responde el API entero: una petición sin manejador falla la prueba en vez
 // de salir a la red, y los manejadores de una prueba no pasan a la siguiente.
 beforeAll(() => {
-  mswServer.listen({ onUnhandledRequest: 'error' })
+  mswServer.listen({ onUnhandledFrame: 'error' })
 })
 
 afterEach(() => {

@@ -11,8 +11,8 @@ const importMetaEnv = fileURLToPath(new URL('./jest/importMetaEnv.cjs', import.m
 // El entorno va con la ruta completa: Stryker lo carga sin expandir <rootDir>.
 const environmentJsdom = fileURLToPath(new URL('./jest/jsdomEnvironment.cjs', import.meta.url))
 
-// Dependencias que solo traen ESM: React Router 8 (y la que usa para cookies), TanStack Table 9 y las de MSW.
-const onlyEsm = ['react-router', 'cookie-es', '@tanstack/react-table', '@tanstack/table-core', 'rettime', 'until-async', '@open-draft/deferred-promise', 'openapi-msw']
+// Dependencias que solo traen ESM: React Router 8 (y las que usa para cookies y rutas), TanStack Table 9 y MSW 3 con las suyas.
+const onlyEsm = ['react-router', 'cookie-es', '@tanstack/react-table', '@tanstack/table-core', 'rettime', 'until-async', '@open-draft/deferred-promise', 'openapi-msw', 'msw', '@remix-run/route-pattern', '@mswjs/interceptors', '@msw/url', 'cookie', '@open-draft/until']
 
 /** @type {import('jest').Config} */
 export default {
@@ -45,6 +45,8 @@ export default {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // `cn` con las tablas del proyecto, como en vite.config.ts.
+    '^cn$': '<rootDir>/src/components/ui/cn.ts',
     '^#jest/(.*)$': '<rootDir>/jest/$1',
     '^virtual:pwa-register(/.*)?$': '<rootDir>/jest/pwaRegister.cjs',
     // Widget de accesibilidad de terceros: se importa por su efecto de montar
