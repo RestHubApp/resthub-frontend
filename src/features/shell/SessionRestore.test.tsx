@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 
-import { buildAccount, ErrorResponse, PERMISSIONS_WAITER, server } from '#jest/harness'
+import { buildAccount, ErrorResponse, PERMISSIONS_WAITER, server, withoutNetwork } from '#jest/harness'
 import { currentAuthToken, setAuthToken, setCookieSession } from '@/services/apiCredentials'
 import { queryClient } from '@/services/queryClient'
 import { useSession } from '@/store/session'
@@ -52,5 +52,16 @@ describe('recuperar la sesión de la cookie', () => {
 
     await waitFor(() => { expect(useSession.getState()).toMatchObject({ account: null, expired: true }) })
     expect(api.calls('post', REFRESH)).toHaveLength(0)
+  })
+
+  it('sin red no cierra la sesión: la cuenta sigue y se vuelve a intentar', async () => {
+    const api = server()
+    api.on('get', ME, withoutNetwork)
+    reloaded()
+
+    renderHook(() => { useSessionRenewal() }, { wrapper })
+
+    await waitFor(() => { expect(api.calls('get', ME).length).toBeGreaterThan(0) })
+    expect(useSession.getState()).toMatchObject({ token: null, account: WAITER, expired: false })
   })
 })
