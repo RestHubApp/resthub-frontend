@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { cn } from 'cn/vite'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -39,6 +40,8 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    // Las tablas de `cn` ajustadas a las clases de los fuentes (ver src/components/ui/cn.ts).
+    cn({ content: ['src/**/*.{ts,tsx}', 'index.html'], out: 'src/components/ui/cn-tables.mjs', css: false }),
     preloadSource(),
     handleSiennaSelfHosted(),
     boundConnections(),
@@ -107,12 +110,15 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: {
+    alias: [
       // shadcn/ui genera sus importaciones con este alias y lo exige para
       // funcionar. Se resuelve desde la URL del modulo y no con __dirname,
       // que no existe en un modulo ES.
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
+      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+      // `cn` con las tablas del proyecto en vez de las de todo Tailwind. Solo
+      // el nombre exacto: `cn/engine` sigue siendo el del paquete.
+      { find: /^cn$/, replacement: fileURLToPath(new URL('./src/components/ui/cn.ts', import.meta.url)) },
+    ],
   },
   build: {
     rolldownOptions: {

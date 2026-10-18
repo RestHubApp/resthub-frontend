@@ -45,6 +45,8 @@ export default {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // `cn` con las tablas del proyecto, como en vite.config.ts.
+    '^cn$': '<rootDir>/src/components/ui/cn.ts',
     '^#jest/(.*)$': '<rootDir>/jest/$1',
     '^virtual:pwa-register(/.*)?$': '<rootDir>/jest/pwaRegister.cjs',
     // Widget de accesibilidad de terceros: se importa por su efecto de montar

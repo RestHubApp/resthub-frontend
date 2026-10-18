@@ -154,7 +154,7 @@
       "name": "Bundle principal (armazón y router)",
       "path": "dist/assets/index-*.js",
       "gzip": true,
-      "limit": "112.0 kB"
+      "limit": "110.0 kB"
     },
     {
       "name": "Chunk de React",
