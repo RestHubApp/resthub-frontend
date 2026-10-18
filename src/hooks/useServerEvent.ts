@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
 
-import { currentAuthToken } from '@/services/apiCredentials'
+import { currentAuthToken, subscribeAuthToken } from '@/services/apiCredentials'
 import { isDenied } from '@/services/apiError'
 import { apiUrl } from '@/services/apiRouting'
 import { EventStreamError, readEventStream } from '@/services/eventStream'
@@ -17,7 +17,8 @@ const eventLogger = logger.child({ module: 'realtime' })
  *
  * Si el canal se corta, reintenta cada tres segundos; un 401 o 403 no se
  * reintenta porque la credencial no va a mejorar sola. `onEvent` puede
- * cambiar en cada render sin reabrir la conexión.
+ * cambiar en cada render sin reabrir la conexión. Se abre cuando hay token
+ * (tras recargar, al recuperarlo de la cookie) y se reabre con el renovado.
  */
 export function useServerEvent(topic: string, onEvent: (data: string) => void, enabled = true): void {
   const callback = useRef(onEvent)
@@ -25,12 +26,14 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
     callback.current = onEvent
   })
 
+  // La capa de hooks no puede leer el almacén de sesión: el token lo da el cliente HTTP.
+  const token = useSyncExternalStore(subscribeAuthToken, currentAuthToken)
+
   useEffect(() => {
-    // La capa de hooks no puede leer el almacén de sesión: el token lo da el cliente HTTP.
-    const token = currentAuthToken()
     if (!enabled || token === null) {
       return undefined
     }
+    const credential = token
     const controller = new AbortController()
     let timer: number | undefined
 
@@ -48,7 +51,7 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
     function connect(): void {
       readEventStream({
         url: apiUrl('/events'),
-        token: token ?? '',
+        token: credential,
         signal: controller.signal,
         onEvent: (event) => {
           if (event.type === topic) {
@@ -65,5 +68,5 @@ export function useServerEvent(topic: string, onEvent: (data: string) => void, e
       controller.abort()
       window.clearTimeout(timer)
     }
-  }, [topic, enabled])
+  }, [topic, enabled, token])
 }

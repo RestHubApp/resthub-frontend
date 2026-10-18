@@ -16,6 +16,10 @@ interface Credential {
   onPasswordChange: (() => void) | null
 }
 
+// Quienes siguen el token (el canal de avisos): tras recargar llega después,
+// cuando se recupera de la cookie, y cambia con cada renovación.
+const tokenListeners = new Set<() => void>()
+
 const credential: Credential = {
   token: null,
   cookie: false,
@@ -35,7 +39,18 @@ const credential: Credential = {
  * lugar y ninguna pantalla tiene que acordarse de adjuntarlo.
  */
 export function setAuthToken(token: string | null): void {
+  // eslint-disable-next-line security/detect-possible-timing-attacks -- solo evita avisar dos veces el mismo valor: el cliente no verifica credenciales
+  if (credential.token === token) return
   credential.token = token
+  for (const listener of tokenListeners) listener()
+}
+
+/** Avisa cada vez que cambia el token; devuelve cómo dejar de escuchar (forma de `useSyncExternalStore`). */
+export function subscribeAuthToken(listener: () => void): () => void {
+  tokenListeners.add(listener)
+  return () => {
+    tokenListeners.delete(listener)
+  }
 }
 
 /** El token abierto, para lo que no viaja por el cliente tipado (el canal de avisos). */
