@@ -8,7 +8,7 @@ import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import type { PlatformSession } from '@/api/types'
 
-const STORAGE_KEY = 'resthub.session.v2'
+const STORAGE_KEY = 'resthub.session.v3'
 
 function tokenThatExpires(secondsFromNow: number): string {
   const exp = Math.floor(Date.now() / 1000) + secondsFromNow
@@ -66,10 +66,10 @@ describe('sesión única: del personal o de plataforma', () => {
     const { storage, useSession } = await load()
     const token = tokenThatExpires(3600)
     useSession.getState().signIn(token, platformAccount(1))
-    expect(saved(storage)).toEqual({ token, account: platformAccount(1) })
+    expect(saved(storage)).toEqual({ tag: expect.any(String), expiresAt: expect.any(Number), account: platformAccount(1) })
 
     const again = fakeStorage()
-    again.data.set(STORAGE_KEY, JSON.stringify({ token, account: platformAccount(1) }))
+    again.data.set(STORAGE_KEY, JSON.stringify(saved(storage)))
     stubGlobal('localStorage', again)
     jest.resetModules()
     const reloaded = await import('./session')
@@ -79,9 +79,8 @@ describe('sesión única: del personal o de plataforma', () => {
 
   it('una sesión guardada antes de `kind` se lee como del personal', async () => {
     const storage = fakeStorage()
-    const token = tokenThatExpires(3600)
     const old = { user: { id: 3, role_id: 1 }, restaurant: { id: 1, timezone: 'America/Lima' }, permissions: [], preview: false }
-    storage.data.set(STORAGE_KEY, JSON.stringify({ token, account: old }))
+    storage.data.set(STORAGE_KEY, JSON.stringify({ tag: 'marca', expiresAt: Date.now() + 3_600_000, account: old }))
     stubGlobal('localStorage', storage)
     jest.resetModules()
     const { useSession } = await import('./session')

@@ -23,7 +23,7 @@ import { join } from 'node:path'
 import type { Locator, Page, Request, Route } from '@playwright/test'
 
 import { expect as expectBase, test as base } from '../support/fixtures'
-import { LOG, SAMPLE_RESTAURANT, OBSERVABILITY, RESTAURANTS } from './data'
+import { ACCESS_HISTORY, LOG, SAMPLE_RESTAURANT, OBSERVABILITY, RESTAURANTS } from './data'
 
 
 const STYLE = join(import.meta.dirname, 'capture.css')
@@ -48,7 +48,11 @@ const FIXED: Readonly<Record<string, unknown>> = {
   [`${API}/platform/restaurants`]: RESTAURANTS,
   [`${API}/platform/activity`]: LOG,
   [`${API}/platform/sandbox`]: SAMPLE_RESTAURANT,
+  [`${API}/auth/me/access-history`]: ACCESS_HISTORY,
 }
+
+/** Los accesos de otra persona, en Personal: los mismos datos fijos que los propios. */
+const STAFF_ACCESS_HISTORY = /^\/api\/v1\/staff\/\d+\/access-history$/u
 
 /** Los sufijos aleatorios de las cuentas y los locales de prueba, con su reemplazo fijo. */
 const SUFFIXES: readonly (readonly [RegExp, string])[] = [
@@ -111,7 +115,7 @@ function fixedData(route: string): unknown {
     const key = route.slice(OBS.length) as keyof typeof OBSERVABILITY
     return OBSERVABILITY[key]
   }
-  return FIXED[route]
+  return STAFF_ACCESS_HISTORY.test(route) ? ACCESS_HISTORY : FIXED[route]
 }
 
 async function respond(route: Route, request: Request): Promise<void> {

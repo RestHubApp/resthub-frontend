@@ -15,8 +15,9 @@ interface OwnersSectionProps {
 /**
  * Las cuentas con el rol Encargado del restaurante.
  *
- * Desde acá solo se agregan: el resto del personal, y editar o desactivar a
- * un encargado, lo hace el propio local desde «Personal».
+ * Desde acá se agregan y, si alguno no puede entrar, se le pone una
+ * contraseña temporal. El resto del personal, y editar o desactivar a un
+ * encargado, lo hace el propio local desde «Personal».
  */
 export function OwnersSection({ restaurant }: OwnersSectionProps) {
   const [isAdding, setIsAdding] = useState(false)
@@ -37,7 +38,7 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
         </Button>
       }
     >
-      <OwnersList owners={restaurant.owners} />
+      <OwnersList restaurantId={restaurant.id} owners={restaurant.owners} />
       <FormDialog
         open={isAdding}
         onOpenChange={setIsAdding}

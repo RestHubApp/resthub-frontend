@@ -1,13 +1,14 @@
 import type { StaffResponse } from '@/api/types'
 import { FormDialog } from '@/components/FormDialog'
 import { RoleOptionsGate } from './RoleOptionsGate'
+import { StaffAccessSheet } from './StaffAccessSheet'
 import { StaffDeactivateConfirm } from './StaffDeactivateConfirm'
 import { StaffEditForm } from './StaffEditForm'
 import { StaffPasswordForm } from './StaffPasswordForm'
 import { StaffSessionsSheet } from './StaffSessionsSheet'
 
 /** Qué ventana de la fila está abierta: editar la cuenta, restablecer su contraseña, confirmar la desactivación, sus sesiones o ninguna. */
-export type StaffDialog = 'editar' | 'contrasena' | 'desactivar' | 'sesiones' | null
+export type StaffDialog = 'editar' | 'contrasena' | 'desactivar' | 'sesiones' | 'accesos' | null
 
 interface StaffRowDialogsProps {
   readonly account: StaffResponse
@@ -43,6 +44,7 @@ export function StaffRowDialogs({ account, isSelf, dialog, onClose, onDeactivate
       </FormDialog>
       <StaffDeactivateConfirm account={account} open={dialog === 'desactivar'} onOpenChange={onChange} onDeactivate={onDeactivate} />
       <StaffSessionsSheet account={account} open={dialog === 'sesiones'} onClose={onClose} />
+      <StaffAccessSheet account={account} open={dialog === 'accesos'} onClose={onClose} />
     </>
   )
 }

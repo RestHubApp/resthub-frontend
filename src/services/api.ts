@@ -12,10 +12,21 @@
 // sin señal distinga un corte de un rechazo del servidor.
 import createClient, { type Client } from 'openapi-fetch'
 
-import { bearerFor, confirmIdentity, expireSession, lockOpenSession } from './apiCredentials'
+import {
+  bearerFor,
+  confirmIdentity,
+  csrfToken,
+  expireSession,
+  hasCookieSession,
+  lockOpenSession,
+  recoverCsrf,
+  requirePasswordChange,
+} from './apiCredentials'
 import {
   ApiError,
   errorMessage,
+  isCsrfInvalid,
+  isPasswordChangeRequired,
   isSessionEnded,
   isSessionLocked,
   isTransportFailure,
@@ -26,6 +37,7 @@ import { clearApiFailure, noteApiFailure } from './apiFailure'
 import { apiOrigin, tokenFor } from './apiRouting'
 import { logger } from './logger'
 import { anyOf } from './signals'
+import { isPreviewTab } from './tabStorage'
 
 /** El cliente tipado de un contrato OpenAPI (`openapi-typescript`). */
 export type ApiClient<TPaths extends object> = Client<TPaths>
@@ -34,6 +46,9 @@ export type ApiClient<TPaths extends object> = Client<TPaths>
 // y el servidor lo respeta, así un error de la consola y su línea en los logs
 // del servidor se encuentran buscando el mismo valor.
 const REQUEST_ID_HEADER = 'X-Request-ID'
+// La defensa contra CSRF de la sesión en cookie (S2): el mismo valor que la
+// cookie `resthub_csrf`, que otra página no puede leer ni poner.
+const CSRF_HEADER = 'X-CSRF-Token'
 
 const SERVER_ERROR = 500
 
@@ -65,9 +80,10 @@ export interface CallOptions {
   /**
    * Sale con este token en vez del de la sesión abierta, y su 401 no cierra
    * ninguna. Es para lo que se pide justo al descartar la sesión (avisar la
-   * salida): el token ya se capturó y la petición no depende de que siga abierta.
+   * salida): el token ya se capturó y la petición no depende de que siga abierta. Con `null`
+   * sale sin token, solo con la cookie de sesión.
    */
-  readonly credential?: string | undefined
+  readonly credential?: string | null | undefined
 }
 
 interface Success<TData> {
@@ -108,12 +124,42 @@ interface Exchange {
   readonly options: CallOptions
   readonly id: string
   readonly hasCredential: boolean
+  /** El token que llevó; `null` si viajó solo con la cookie. */
+  readonly bearer: string | null
   readonly started: number
 }
 
 function tokenOf(request: Request, options: CallOptions): string | null {
-  if (options.credential !== undefined) return tokenFor(request.url, options.credential)
+  if (options.credential !== undefined) return options.credential === null ? null : tokenFor(request.url, options.credential)
   return options.withoutCredential === true ? null : bearerFor(request.url)
+}
+
+function isRead(request: Request): boolean {
+  return request.method.toUpperCase() === 'GET'
+}
+
+/**
+ * Si la petición viaja con las cookies del API. La sesión vive en una cookie
+ * `HttpOnly` (S2) que el navegador solo guarda y manda en las peticiones con
+ * credenciales. Una vista previa no tiene cookie y no manda la de la sesión
+ * real del navegador.
+ */
+function credentialsOf(options: CallOptions): RequestCredentials {
+  return options.withoutCredential === true || isPreviewTab() ? 'omit' : 'include'
+}
+
+function addCsrf(request: Request, options: CallOptions): void {
+  const csrf = csrfToken()
+  if (csrf !== null && !isRead(request) && credentialsOf(options) === 'include' && tokenFor(request.url, csrf) !== null) {
+    request.headers.set(CSRF_HEADER, csrf)
+  }
+}
+
+// Sin token en memoria (recién recargada la página) la sesión igual viaja, en
+// la cookie: su 401 también la cierra.
+function carriesSession(token: string | null, options: CallOptions): boolean {
+  if (options.credential !== undefined) return false
+  return token !== null || (hasCookieSession() && credentialsOf(options) === 'include')
 }
 
 function prepare(request: Request, options: CallOptions): Exchange {
@@ -124,16 +170,14 @@ function prepare(request: Request, options: CallOptions): Exchange {
   if (token !== null) {
     request.headers.set('Authorization', `Bearer ${token}`)
   }
-  return { request, options, id, hasCredential: token !== null && options.credential === undefined, started: performance.now() }
+  addCsrf(request, options)
+  return { request, options, id, hasCredential: carriesSession(token, options), bearer: token, started: performance.now() }
 }
 
 function pathOf(request: Request): string {
   return new URL(request.url).pathname
 }
 
-function isRead(request: Request): boolean {
-  return request.method.toUpperCase() === 'GET'
-}
 
 // Solo las lecturas: una escritura que falla la avisa su propio formulario o
 // su aviso emergente, y recordarla dejaba el mensaje en el armazón después de
@@ -172,7 +216,8 @@ function rememberTransportFailure(current: Exchange, error: ApiError): void {
  * Un error de sesión (`unauthenticated`, `invalid_token`) de una petición que
  * llevaba credencial es una sesión vencida o revocada. Seguir mostrando pantallas vacías confunde: se cierra la sesión
  * y el acceso explica qué pasó. Una sesión bloqueada por inactividad (423)
- * muestra el desbloqueo. Un rechazo sin credencial, como una contraseña
+ * muestra el desbloqueo, y una contraseña temporal (403
+ * `password_change_required`), la pantalla para cambiarla. Un rechazo sin credencial, como una contraseña
  * equivocada al entrar (`invalid_credentials`), lo resuelve su propio formulario. Se cierra solo
  * la sesión.
  */
@@ -180,10 +225,13 @@ function fail(current: Exchange, error: ApiError): never {
   registerFailure(current, error)
   rememberTransportFailure(current, error)
   if (current.hasCredential && isSessionEnded(error)) {
-    expireSession()
+    expireSession(current.bearer)
   }
   if (current.hasCredential && isSessionLocked(error)) {
     lockOpenSession()
+  }
+  if (current.hasCredential && isPasswordChangeRequired(error)) {
+    requirePasswordChange()
   }
   throw error
 }
@@ -238,7 +286,7 @@ async function exchange(request: Request, options: CallOptions): Promise<Respons
   const current = prepare(request, options)
   const timer = startTimer(request.signal, options.timeout ?? TIMEOUT_MS)
   try {
-    return await settle(current, await fetch(request, { signal: timer.signal }))
+    return await settle(current, await fetch(request, { signal: timer.signal, credentials: credentialsOf(options) }))
   } catch (cause) {
     if (cause instanceof ApiError) throw cause
     return fail(current, errorOf(current, { reason: reasonOf(request, timer.hasExpired()), cause }))
@@ -262,6 +310,20 @@ async function runConfirmingIdentity<TResult>(attempt: () => Promise<TResult>): 
 }
 
 /**
+ * Corre la petición y, si el valor anti-CSRF ya no era el de la cookie (otra
+ * pestaña renovó la sesión, o la página se recargó sin él), lo relee y la
+ * repite una vez. El servidor la rechazó sin hacer nada.
+ */
+async function runRecoveringCsrf<TResult>(attempt: () => Promise<TResult>): Promise<TResult> {
+  try {
+    return await attempt()
+  } catch (error) {
+    if (!isCsrfInvalid(error) || !(await recoverCsrf())) throw error
+    return attempt()
+  }
+}
+
+/**
  * Hace una petición con el cliente tipado y devuelve su cuerpo de éxito.
  *
  * `run` recibe el cliente ya armado (dirección, cabeceras, credencial y plazo)
@@ -277,7 +339,7 @@ export async function call<TPaths extends object, TData, TError>(
     headers: { Accept: 'application/json' },
     fetch: (request) => exchange(request, options),
   })
-  const result = await runConfirmingIdentity(() => run(client))
+  const result = await runConfirmingIdentity(() => runRecoveringCsrf(() => run(client)))
   if (isSuccess(result)) {
     return result.data
   }

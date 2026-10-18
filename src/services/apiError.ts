@@ -130,6 +130,16 @@ export function isSessionLocked(error: unknown): boolean {
   return hasCode(error, 'session_locked')
 }
 
+/** Si la cuenta todavía tiene la contraseña temporal (403 `password_change_required`, RFS-20). */
+export function isPasswordChangeRequired(error: unknown): boolean {
+  return hasCode(error, 'password_change_required')
+}
+
+/** Si el valor anti-CSRF que viajó ya no es el de la cookie de sesión (403 `csrf_token_invalid`). */
+export function isCsrfInvalid(error: unknown): boolean {
+  return hasCode(error, 'csrf_token_invalid')
+}
+
 /** Si la acción pide confirmar la contraseña antes (403 `reauthentication_required`). */
 export function needsReauthentication(error: unknown): boolean {
   return hasCode(error, 'reauthentication_required')
@@ -178,7 +188,7 @@ export function isUnreachable(error: unknown): boolean {
  * Una sesión vencida la resuelve el cierre de sesión, no es un corte.
  */
 export function isTransportFailure(error: ApiError): boolean {
-  if (error.reason === 'canceled' || isSessionEnded(error) || isSessionLocked(error)) return false
+  if (error.reason === 'canceled' || isSessionEnded(error) || isSessionLocked(error) || isPasswordChangeRequired(error)) return false
   return isServerFault(error) || hasCode(error, ...CHANGED_CODES)
 }
 

@@ -41,7 +41,7 @@ function settle(fresh: string, origin: string | null): PasswordChangeOutcome {
  */
 export function followWithNewToken(response: Change, origin: string | null): PasswordChangeOutcome {
   const fresh = freshTokenOf(response)
-  if (origin !== null && fresh !== '') {
+  if (fresh !== '') {
     useSession.getState().renew(origin, fresh, staffSessionOf(response))
   }
   return settle(fresh, origin)

@@ -31,6 +31,7 @@ export const platformMutationKeys = {
   createRestaurant: [...platformRestaurantsQueryKey, 'create'],
   updateRestaurant: [...platformRestaurantsQueryKey, 'update'],
   addOwner: [...platformRestaurantsQueryKey, 'owners', 'add'],
+  resetOwnerPassword: [...platformRestaurantsQueryKey, 'owners', 'password'],
   resetSandbox: [...platformSandboxQueryKey, 'reset'],
   startPreview: [...platformQueryKey, 'preview'],
 } as const
@@ -95,6 +96,23 @@ export async function addPlatformOwner(
     client.POST('/api/v1/platform/restaurants/{restaurant_id}/owners', {
       params: { path: { restaurant_id: restaurantId } },
       body: payload,
+    }),
+  )
+}
+
+/**
+ * Una contraseña temporal para un encargado (RFS-04): la persona la cambia al
+ * entrar y sus sesiones abiertas se cierran.
+ */
+export async function resetPlatformOwnerPassword(
+  restaurantId: number,
+  ownerId: number,
+  newPassword: string,
+): Promise<PlatformOwner> {
+  return send((client) =>
+    client.POST('/api/v1/platform/restaurants/{restaurant_id}/owners/{owner_id}/password', {
+      params: { path: { restaurant_id: restaurantId, owner_id: ownerId } },
+      body: { new_password: newPassword },
     }),
   )
 }

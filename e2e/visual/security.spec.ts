@@ -1,6 +1,7 @@
 // Regresión visual de la seguridad de la cuenta: las sesiones abiertas, el PIN
 // y el bloqueo de la sesión, la verificación en dos pasos, «Confirma tu
-// contraseña» y, en Personal, las sesiones de otra persona y las cuentas sin uso.
+// contraseña» y, en Personal, las sesiones y los accesos de otra persona y las
+// cuentas sin uso.
 // El API de estas funciones se responde con datos fijos (`securityData.ts`).
 import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
@@ -79,9 +80,9 @@ test('VIS-27 activar la verificación en dos pasos y desactivarla', async ({ pag
   await disable.getByRole('button', { name: 'Cancelar' }).click()
 })
 
-test('VIS-28 las sesiones de otra persona y las cuentas sin uso, en Personal', async ({ page, local }) => {
+test('VIS-28 las sesiones y los accesos de otra persona y las cuentas sin uso, en Personal', async ({ page, local }) => {
   deadline(90_000)
-  covers('hoja:staff/StaffSessionsSheet', 'confirmacion:staff/UnusedStaffRow')
+  covers('hoja:staff/StaffSessionsSheet', 'confirmacion:staff/UnusedStaffRow', 'hoja:staff/StaffAccessSheet')
 
   const { user } = local.waiter.account
   const member = { ...user, is_active: true, must_change_password: false, deactivation_reason: '', created_at: '2026-07-01T15:00:00Z' }
@@ -102,4 +103,12 @@ test('VIS-28 las sesiones de otra persona y las cuentas sin uso, en Personal', a
   const sheet = page.getByRole('dialog', { name: `Sesiones de ${local.waiter.name}` })
   await expect(sheet).toContainText('Safari en iPhone')
   await captureWindow(sheet, 'hoja-sesiones-de-otra-persona')
+  await page.keyboard.press('Escape')
+  await expect(sheet).toBeHidden()
+
+  await page.getByRole('button', { name: `Más acciones de ${local.waiter.name}` }).click()
+  await page.getByRole('menuitem', { name: 'Accesos' }).click()
+  const accesses = page.getByRole('dialog', { name: `Accesos de ${local.waiter.name}` })
+  await expect(accesses).toContainText('Dispositivo nuevo')
+  await captureWindow(accesses, 'hoja-accesos-de-otra-persona')
 })

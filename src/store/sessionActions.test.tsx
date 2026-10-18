@@ -31,11 +31,11 @@ afterEach(() => {
 })
 
 describe('sesión de restaurante', () => {
-  it('entrar guarda el token y la cuenta, y el token viaja en cada petición', () => {
+  it('entrar guarda la cuenta sin el token, que viaja en cada petición desde memoria', () => {
     useSession.getState().signIn('t-1', WAITER)
 
     expect(useSession.getState()).toMatchObject({ token: 't-1', account: WAITER, expired: false })
-    expect(saved()).toEqual({ token: 't-1', account: WAITER })
+    expect(saved()).toEqual({ tag: expect.any(String), expiresAt: null, account: WAITER })
     expect(currentAuthToken()).toBe('t-1')
   })
 
@@ -58,7 +58,8 @@ describe('sesión de restaurante', () => {
     const renamed = buildAccount(PERMISSIONS_WAITER, { preview: false, user: { ...WAITER.user, full_name: 'Ana T.' } })
     useSession.getState().refresh(renamed)
     expect(currentStaff()?.user.full_name).toBe('Ana T.')
-    expect(saved()).toEqual({ token: 't-1', account: renamed })
+    expect(saved()).toMatchObject({ account: renamed })
+    expect(saved()).not.toHaveProperty('token')
   })
 
   it('una renovación que llega tarde, para otra sesión, se descarta', () => {

@@ -5,12 +5,31 @@ import { tokenFor } from './apiRouting'
 
 interface Credential {
   token: string | null
-  onExpire: (() => void) | null
+  /** Hay una sesión en la cookie `HttpOnly` del API (S2): sin token, la petición viaja con ella. */
+  cookie: boolean
+  /** El valor anti-CSRF de esa cookie: lo exige el servidor en lo que cambia algo. */
+  csrf: string | null
+  onCsrfLost: (() => Promise<boolean>) | null
+  onExpire: ((token: string | null) => void) | null
   onLock: (() => void) | null
   onReauthenticate: (() => Promise<boolean>) | null
+  onPasswordChange: (() => void) | null
 }
 
-const credential: Credential = { token: null, onExpire: null, onLock: null, onReauthenticate: null }
+// Quienes siguen el token (el canal de avisos): tras recargar llega después,
+// cuando se recupera de la cookie, y cambia con cada renovación.
+const tokenListeners = new Set<() => void>()
+
+const credential: Credential = {
+  token: null,
+  cookie: false,
+  csrf: null,
+  onCsrfLost: null,
+  onExpire: null,
+  onLock: null,
+  onReauthenticate: null,
+  onPasswordChange: null,
+}
 
 /**
  * Pone o quita la credencial que acompaña a cada petición.
@@ -20,7 +39,18 @@ const credential: Credential = { token: null, onExpire: null, onLock: null, onRe
  * lugar y ninguna pantalla tiene que acordarse de adjuntarlo.
  */
 export function setAuthToken(token: string | null): void {
+  // eslint-disable-next-line security/detect-possible-timing-attacks -- solo evita avisar dos veces el mismo valor: el cliente no verifica credenciales
+  if (credential.token === token) return
   credential.token = token
+  for (const listener of tokenListeners) listener()
+}
+
+/** Avisa cada vez que cambia el token; devuelve cómo dejar de escuchar (forma de `useSyncExternalStore`). */
+export function subscribeAuthToken(listener: () => void): () => void {
+  tokenListeners.add(listener)
+  return () => {
+    tokenListeners.delete(listener)
+  }
 }
 
 /** El token abierto, para lo que no viaja por el cliente tipado (el canal de avisos). */
@@ -28,8 +58,8 @@ export function currentAuthToken(): string | null {
   return credential.token
 }
 
-/** Qué hacer cuando el servidor rechaza la credencial de una petición. */
-export function setUnauthorizedHandler(handler: (() => void) | null): void {
+/** Qué hacer cuando el servidor rechaza la credencial de una petición: recibe el token que llevaba (`null`, la cookie). */
+export function setUnauthorizedHandler(handler: ((token: string | null) => void) | null): void {
   credential.onExpire = handler
 }
 
@@ -38,9 +68,9 @@ export function bearerFor(url: string): string | null {
   return tokenFor(url, credential.token)
 }
 
-/** Cierra la sesión: el servidor ya no acepta su credencial. */
-export function expireSession(): void {
-  credential.onExpire?.()
+/** El servidor ya no acepta la credencial `token` (`null`: la cookie). */
+export function expireSession(token: string | null): void {
+  credential.onExpire?.(token)
 }
 
 /** Qué hacer cuando el servidor dice que la sesión quedó bloqueada por inactividad (423). */
@@ -65,4 +95,50 @@ export function setReauthenticationHandler(handler: (() => Promise<boolean>) | n
 /** Pide la contraseña; `false` si no hay quién la pida o la persona desistió. */
 export async function confirmIdentity(): Promise<boolean> {
   return credential.onReauthenticate === null ? false : credential.onReauthenticate()
+}
+
+/** Qué hacer cuando el servidor pide cambiar la contraseña temporal (403 `password_change_required`). */
+export function setPasswordChangeHandler(handler: (() => void) | null): void {
+  credential.onPasswordChange = handler
+}
+
+/** La cuenta tiene que cambiar su contraseña temporal antes de seguir (RFS-20). */
+export function requirePasswordChange(): void {
+  credential.onPasswordChange?.()
+}
+
+/**
+ * Si la sesión abierta también vive en la cookie del API. La pone el almacén de
+ * sesión: tras recargar la página no hay token en memoria y las peticiones
+ * viajan con la cookie hasta recuperarlo.
+ */
+export function setCookieSession(isOpen: boolean): void {
+  credential.cookie = isOpen
+}
+
+/** Si una petición sin token igual lleva la sesión, en la cookie. */
+export function hasCookieSession(): boolean {
+  return credential.cookie
+}
+
+/** Anota el valor anti-CSRF que trajo una respuesta del acceso, de la renovación o de `GET /auth/me`. */
+export function setCsrfToken(value: string | null | undefined): void {
+  if (typeof value === 'string' && value !== '') {
+    credential.csrf = value
+  }
+}
+
+/** El valor anti-CSRF de la cookie de sesión, si ya se conoce. */
+export function csrfToken(): string | null {
+  return credential.csrf
+}
+
+/** Cómo volver a leer el valor anti-CSRF cuando el servidor dice que no coincide (otra pestaña renovó la cookie). */
+export function setCsrfRecovery(handler: (() => Promise<boolean>) | null): void {
+  credential.onCsrfLost = handler
+}
+
+/** Relee el valor anti-CSRF; `false` si no hay cómo o no se pudo. */
+export async function recoverCsrf(): Promise<boolean> {
+  return credential.onCsrfLost === null ? false : credential.onCsrfLost()
 }

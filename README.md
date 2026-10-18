@@ -277,7 +277,7 @@ celular del mesero nunca baja este código.
 - **Una sola sesión.** `store/session.ts` guarda la respuesta de `POST
   /auth/login` tal como viene, discriminada por `kind`: `staff` (usuario,
   restaurante, permisos del local, términos) o `platform` (administrador y sus
-  permisos `platform.*`), en `resthub.session.v2`. Un navegador tiene una sola
+  permisos `platform.*`), en `resthub.session.v3`. Un navegador tiene una sola
   cuenta abierta; entrar con otra reemplaza la anterior. Lo que es del
   restaurante (aceptar los términos, la cola sin señal y su precarga, el canal
   de avisos, el nombre del local, la zona horaria, cambiar la contraseña) corre
@@ -294,7 +294,21 @@ celular del mesero nunca baja este código.
 - El cliente HTTP manda el token de la sesión abierta a todo el API y a ningún
   otro origen; cuáles rutas acepta cada clase de cuenta lo decide el servidor
   (un token de plataforma no sirve en el restaurante ni al revés). Un 401
-  cierra la sesión y cerrarla vacía el caché y las mutaciones enteros. Las
+  cierra la sesión y cerrarla vacía el caché y las mutaciones enteros.
+- **El token no se guarda en el navegador (S2).** Vive en memoria; lo guardado
+  es la cuenta, una marca del inicio de sesión y cuándo vence. El servidor deja
+  además la sesión en una cookie `HttpOnly` (`resthub_session` o
+  `resthub_platform_session`) que un script no puede leer, y cada petición
+  viaja con credenciales (`credentials: 'include'`). Al recargar,
+  `useSessionRenewal` recupera el token: `GET /auth/me` con la cookie da el
+  valor anti-CSRF y `POST /auth/refresh` con `X-CSRF-Token`, un token nuevo.
+  Mientras tanto las pantallas leen con la cookie. Lo que cambia algo lleva
+  `X-CSRF-Token`; si el servidor responde `csrf_token_invalid` (otra pestaña
+  renovó la cookie) se relee y se repite una vez. Si el navegador bloquea la
+  cookie (cookies de terceros), la sesión dura lo que la pestaña: al recargar
+  pide entrar de nuevo. Un 401 al token de la pestaña (otra pestaña cambió la
+  contraseña y lo cortó) primero prueba la cookie; solo sin ella se cierra la
+  sesión. La vista previa no tiene cookie: guarda su token en su pestaña. Las
   mutaciones que llevan una contraseña (alta, nuevo encargado) salen del
   caché en cuanto nadie mira su resultado (`gcTime: 0`).
 - Vence y se renueva igual para las dos clases (`hooks/useTokenRenewal.ts`,
@@ -361,14 +375,14 @@ cargarse (`services/tabStorage.ts`):
 
 | Pestaña | Sesión | Cola sin señal |
 |---|---|---|
-| Normal | `localStorage`, `resthub.session.v2` | `localStorage`, `resthub.pedidos-sin-enviar.v2` |
+| Normal | `localStorage`, `resthub.session.v3` (sin el token) | `localStorage`, `resthub.pedidos-sin-enviar.v2` |
 | Vista previa | `sessionStorage`, `resthub.vista-previa.sesion.v1` | `sessionStorage`, misma clave de la cola |
 
 - Es de vista previa la pestaña cargada en `/vista-previa` o marcada con
   `resthub.vista-previa.pestana.v1` en su `sessionStorage` (se marca al abrir
   la sesión y se desmarca solo al salir a propósito, así una vista previa
   vencida no vuelve a leer la sesión real al recargar).
-- Una pestaña de vista previa nunca lee ni escribe `resthub.session.v2`: la
+- Una pestaña de vista previa nunca lee ni escribe `resthub.session.v3`: la
   sesión real del navegador (la de plataforma, por ejemplo, desde donde se
   abrió «Ver como…») sigue intacta en las demás pestañas, y un 401 del canje
   no cierra ninguna. Sin
