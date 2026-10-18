@@ -58,6 +58,13 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
   // El encargado nuevo entra por el acceso de siempre y ve su local.
   await page.goto('/acceso')
   await signInByForm(page, email, NEW_SECRET)
+  // La contraseña inicial la eligió otra persona: primero elige la suya (RFS-20).
+  const own = `propia-${suffix}`
+  await expect(page.getByRole('heading', { level: 1, name: 'Cambia tu contraseña' })).toBeVisible()
+  await page.getByLabel('Contraseña actual').fill(NEW_SECRET)
+  await page.getByLabel('Nueva contraseña', { exact: true }).fill(own)
+  await page.getByLabel('Repite la nueva contraseña').fill(own)
+  await page.getByRole('button', { name: 'Cambiar contraseña' }).click()
   // Su primer acceso: da dos consentimientos separados (Ley N.º 29733).
   await expect(page.getByRole('heading', { name: 'Antes de empezar' })).toBeVisible()
   await expect(page.getByRole('link', { name: /términos y condiciones/u })).toHaveAttribute('href', '/terminos')
