@@ -36,7 +36,7 @@ export function OpeningPeriodRow({ draft, onChange, onRemove }: OpeningPeriodRow
           <Label htmlFor={`${id}-cierra`}>Cierra</Label>
           <Input id={`${id}-cierra`} type="time" step="900" className="w-32" value={draft.closes} aria-invalid={problem !== undefined} aria-describedby={errorId} onChange={(event) => { onChange({ ...draft, closes: event.target.value }) }} />
         </div>
-        <Button type="button" variant="ghost" size="icon" aria-label={`Quitar el tramo del ${dayName.toLowerCase()}`} onClick={onRemove}>
+        <Button type="button" variant="ghost" size="icon" aria-label={`Quitar el tramo del ${dayName.toLowerCase()} de ${draft.opens} a ${draft.closes}`} onClick={onRemove}>
           <Icon name="delete" size={16} />
         </Button>
       </div>

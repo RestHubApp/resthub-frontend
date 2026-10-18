@@ -89,7 +89,7 @@ describe('seguridad del personal', () => {
 
     await user.clear(firstOf(closes))
     await user.type(firstOf(closes), '02:00')
-    await user.click(screen.getByRole('button', { name: 'Quitar el tramo del martes' }))
+    await user.click(screen.getByRole('button', { name: 'Quitar el tramo del martes de 12:00 a 23:00' }))
     await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
 
     await waitFor(() => {
