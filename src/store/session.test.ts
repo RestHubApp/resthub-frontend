@@ -8,11 +8,25 @@ import { stubGlobal, unstubAllGlobals } from '#jest/globals'
 
 import type { StaffSession } from '@/api/types'
 
-const STORAGE_KEY = 'resthub.session.v2'
+const STORAGE_KEY = 'resthub.session.v3'
 
 function tokenThatExpires(secondsFromNow: number): string {
   const exp = Math.floor(Date.now() / 1000) + secondsFromNow
   return `cabecera.${btoa(JSON.stringify({ exp }))}.firma`
+}
+
+function expiryOf(token: string): number {
+  return (JSON.parse(atob(token.split('.')[1] ?? '')) as { exp: number }).exp * 1000
+}
+
+// Lo que se guarda en una pestaña normal: la cuenta, su marca y cuándo vence; el token no.
+function record(token: string, owner: StaffSession) {
+  return { tag: expect.any(String), expiresAt: expiryOf(token), account: owner }
+}
+
+// Lo que dejó guardado una pestaña antes de recargar.
+function stored(token: string, owner: StaffSession, tag = 'marca-1'): string {
+  return JSON.stringify({ tag, expiresAt: expiryOf(token), account: owner })
 }
 
 // Solo lo que el almacén lee de la cuenta.
@@ -66,20 +80,10 @@ describe('sesión normal y ciclo de vida', () => {
     expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: false })
   })
 
-  it('restaura una sesión válida guardada', async () => {
-    const storage = fakeStorage()
-    const token = tokenThatExpires(3600)
-    storage.data.set(STORAGE_KEY, JSON.stringify({ token, account: account(1) }))
-    stubGlobal('localStorage', storage)
-    jest.resetModules()
-    const { useSession } = await import('./session')
-    expect(useSession.getState()).toMatchObject({ token, account: account(1), expired: false })
-  })
-
   it('marca expirada y limpia storage si la sesión guardada ya venció', async () => {
     const storage = fakeStorage()
     const token = tokenThatExpires(-10)
-    storage.data.set(STORAGE_KEY, JSON.stringify({ token, account: account(1) }))
+    storage.data.set(STORAGE_KEY, stored(token, account(1)))
     stubGlobal('localStorage', storage)
     jest.resetModules()
     const { useSession } = await import('./session')
@@ -87,17 +91,18 @@ describe('sesión normal y ciclo de vida', () => {
     expect(storage.data.has(STORAGE_KEY)).toBe(false)
   })
 
-  it('iniciar sesión guarda en storage y programa el vencimiento automático', async () => {
+  it('iniciar sesión guarda la cuenta sin el token y programa el vencimiento automático', async () => {
     const { storage, useSession } = await load()
     const token = tokenThatExpires(10)
     useSession.getState().signIn(token, account(1))
 
     expect(useSession.getState()).toMatchObject({ token, account: account(1), expired: false })
-    expect(saved(storage)).toEqual({ token, account: account(1) })
+    expect(saved(storage)).toEqual(record(token, account(1)))
+    expect(storage.data.get(STORAGE_KEY)).not.toContain(token)
 
+    // Al vencer suelta el token y prueba la cookie (otra pestaña pudo renovarla).
     jest.advanceTimersByTime(11_000)
-    expect(useSession.getState()).toMatchObject({ token: null, account: null, expired: true })
-    expect(storage.data.has(STORAGE_KEY)).toBe(false)
+    expect(useSession.getState()).toMatchObject({ token: null, account: account(1), expired: false })
   })
 
   it('cerrar sesión limpia la sesión y no marca expired', async () => {
@@ -119,7 +124,7 @@ describe('sesión normal y ciclo de vida', () => {
     useSession.getState().refresh(updated)
 
     expect(useSession.getState().account).toEqual(updated)
-    expect(saved(storage)).toEqual({ token, account: updated })
+    expect(saved(storage)).toEqual(record(token, updated))
   })
 
   it('refresh no hace nada si no hay sesión activa', async () => {
@@ -140,7 +145,7 @@ describe('renovación de la sesión del restaurante', () => {
     useSession.getState().renew(old, fresh, account(1))
 
     expect(useSession.getState().token).toBe(fresh)
-    expect(saved(storage)).toEqual({ token: fresh, account: account(1) })
+    expect(saved(storage)).toEqual(record(fresh, account(1)))
   })
 
   it('descarta la respuesta si mientras viajaba entró otra cuenta', async () => {
@@ -154,7 +159,7 @@ describe('renovación de la sesión del restaurante', () => {
     useSession.getState().renew(old, tokenThatExpires(7200), account(1))
 
     expect(useSession.getState()).toMatchObject({ token: other, account: account(2) })
-    expect(saved(storage)).toEqual({ token: other, account: account(2) })
+    expect(saved(storage)).toEqual(record(other, account(2)))
   })
 
   it('no revive una sesión que se cerró mientras viajaba', async () => {
@@ -181,7 +186,7 @@ function sampleAccount(): StaffSession {
 // Una pestaña recién abierta en `/vista-previa`, con una sesión real en localStorage.
 async function previewTab(route = '/vista-previa', initial: Record<string, string> = {}) {
   const local = fakeStorage()
-  local.data.set(STORAGE_KEY, JSON.stringify({ token: tokenThatExpires(3600), account: account(1) }))
+  local.data.set(STORAGE_KEY, stored(tokenThatExpires(3600), account(1)))
   const tab = fakeStorage()
   for (const [key, value] of Object.entries(initial)) {
     tab.data.set(key, value)
@@ -197,7 +202,7 @@ async function previewTab(route = '/vista-previa', initial: Record<string, strin
 describe('sesión de vista previa', () => {
   it('no lee la sesión real del navegador', async () => {
     const { useSession } = await previewTab()
-    expect(useSession.getState().token).toBeNull()
+    expect(useSession.getState()).toMatchObject({ token: null, account: null })
   })
 
   it('se guarda en la pestaña y deja intacta la sesión real', async () => {
@@ -208,7 +213,7 @@ describe('sesión de vista previa', () => {
     useSession.getState().startPreview(token, sampleAccount())
 
     expect(local.data.get(STORAGE_KEY)).toBe(real)
-    expect(JSON.parse(tab.data.get(PREVIEW) ?? 'null')).toEqual({ token, account: sampleAccount() })
+    expect(JSON.parse(tab.data.get(PREVIEW) ?? 'null')).toEqual({ ...record(token, sampleAccount()), token })
     expect(tab.data.get(MARK)).toBe('1')
   })
 
@@ -232,7 +237,7 @@ describe('sesión de vista previa', () => {
     const token = tokenThatExpires(1800)
     const { useSession } = await previewTab('/pedidos', {
       [MARK]: '1',
-      [PREVIEW]: JSON.stringify({ token, account: sampleAccount() }),
+      [PREVIEW]: JSON.stringify({ tag: 'vista', expiresAt: expiryOf(token), account: sampleAccount(), token }),
     })
     expect(useSession.getState().token).toBe(token)
   })
@@ -269,7 +274,7 @@ describe('sesión de vista previa', () => {
     useSession.getState().exitPreview()
 
     expect(useSession.getState().token).toBe(token)
-    expect(saved(storage)).toEqual({ token, account: account(1) })
+    expect(saved(storage)).toEqual(record(token, account(1)))
   })
 })
 
@@ -293,7 +298,7 @@ describe('cola de la vista previa', () => {
   it('al recargarse ya vencida tampoco guarda su cola', async () => {
     const { tab } = await previewTab('/pedidos', {
       [MARK]: '1',
-      [PREVIEW]: JSON.stringify({ token: tokenThatExpires(-10), account: sampleAccount() }),
+      [PREVIEW]: JSON.stringify({ tag: 'vista', expiresAt: Date.now() - 10_000, account: sampleAccount(), token: tokenThatExpires(-10) }),
       [QUEUE]: JSON.stringify([{ userId: 9, restaurantId: 1 }]),
     })
     expect(tab.data.has(QUEUE)).toBe(false)

@@ -1,7 +1,9 @@
 import type { PermissionCode } from '@/api/types'
 import { isPreviewTab } from '@/services/tabStorage'
 import { staffOf, useSession } from '@/store/session'
-import { PreviewEndedView } from './PreviewEndedView'
+import { PreviewEndedGate } from './PreviewEndedGate'
+import { LockGate } from './security/LockGate'
+import { type PasswordChangeView, TemporaryPasswordGate } from './security/TemporaryPasswordGate'
 import type { ShellScreen } from './shellScreens'
 import { SignedInShell } from './SignedInShell'
 import { SignedOutShell } from './SignedOutShell'
@@ -15,6 +17,8 @@ const WITHOUT_PERMISSIONS: readonly PermissionCode[] = []
 interface AppShellProps {
   /** Las pantallas del registro: de ellas salen el menú y lo que se adelanta al acercarse a un enlace. */
   readonly screens?: readonly ShellScreen[]
+  /** El cambio de la contraseña temporal (RFS-20), que tapa el armazón mientras haga falta. */
+  readonly passwordChange?: PasswordChangeView | undefined
 }
 
 /**
@@ -25,9 +29,10 @@ interface AppShellProps {
  * Con sesion hay dos disposiciones. En pantallas anchas, la laptop del
  * encargado, el menu va en una barra lateral. En el celular del mesero va en
  * una barra inferior, y arriba queda el nombre del restaurante; el contenido
- * reserva abajo el alto de esa barra para que nada quede tapado.
+ * reserva abajo el alto de esa barra para que nada quede tapado. Una sesión
+ * bloqueada por inactividad solo muestra el desbloqueo.
  */
-export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
+export function AppShell({ screens = WITHOUT_SCREENS, passwordChange }: AppShellProps) {
   const account = useSession((state) => state.account)
   useAccountRefresh()
   useSessionRenewal()
@@ -36,10 +41,16 @@ export function AppShell({ screens = WITHOUT_SCREENS }: AppShellProps) {
 
   // Una pestaña de vista previa sin sesión no ofrece el acceso normal.
   if (account === null && isPreviewTab()) {
-    return <PreviewEndedView />
+    return <PreviewEndedGate />
   }
   if (account === null) {
     return <SignedOutShell />
   }
-  return <SignedInShell account={account} screens={screens} />
+  return (
+    <TemporaryPasswordGate account={account} view={passwordChange}>
+      <LockGate account={account}>
+        <SignedInShell account={account} screens={screens} />
+      </LockGate>
+    </TemporaryPasswordGate>
+  )
 }

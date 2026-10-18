@@ -106,8 +106,8 @@ export function errorMessage(error: unknown, fallback: string): string {
   return (error instanceof ApiError ? detailOf(error.body) : undefined) ?? fallback
 }
 
-// Credencial ausente, vencida o revocada.
-const SESSION_CODES: readonly ErrorCode[] = ['unauthenticated', 'invalid_token']
+// Credencial ausente, vencida o revocada; o la sesión que el tercer PIN equivocado cerró.
+const SESSION_CODES: readonly ErrorCode[] = ['unauthenticated', 'invalid_token', 'unlock_attempts_exhausted']
 // El servidor no pudo atender: la base de datos o el plazo máximo de atención (503).
 const UNAVAILABLE_CODES: readonly ErrorCode[] = ['database_unavailable', 'request_timeout']
 // El estado cambió mientras tanto: otro pago entró, otro cambio del pedido.
@@ -123,6 +123,26 @@ export function isSessionCode(code: ErrorCode | undefined): boolean {
 /** Si el error es una sesión vencida o revocada. */
 export function isSessionEnded(error: unknown): boolean {
   return isSessionCode(errorCode(error))
+}
+
+/** Si la sesión está bloqueada por inactividad (423): se sigue al desbloquearla con el PIN. */
+export function isSessionLocked(error: unknown): boolean {
+  return hasCode(error, 'session_locked')
+}
+
+/** Si la cuenta todavía tiene la contraseña temporal (403 `password_change_required`, RFS-20). */
+export function isPasswordChangeRequired(error: unknown): boolean {
+  return hasCode(error, 'password_change_required')
+}
+
+/** Si el valor anti-CSRF que viajó ya no es el de la cookie de sesión (403 `csrf_token_invalid`). */
+export function isCsrfInvalid(error: unknown): boolean {
+  return hasCode(error, 'csrf_token_invalid')
+}
+
+/** Si la acción pide confirmar la contraseña antes (403 `reauthentication_required`). */
+export function needsReauthentication(error: unknown): boolean {
+  return hasCode(error, 'reauthentication_required')
 }
 
 /** Si el canal de avisos rechazó a la cuenta, y reconectar con la misma credencial no cambia nada. */
@@ -168,7 +188,7 @@ export function isUnreachable(error: unknown): boolean {
  * Una sesión vencida la resuelve el cierre de sesión, no es un corte.
  */
 export function isTransportFailure(error: ApiError): boolean {
-  if (error.reason === 'canceled' || isSessionEnded(error)) return false
+  if (error.reason === 'canceled' || isSessionEnded(error) || isSessionLocked(error) || isPasswordChangeRequired(error)) return false
   return isServerFault(error) || hasCode(error, ...CHANGED_CODES)
 }
 

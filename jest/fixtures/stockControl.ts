@@ -79,7 +79,7 @@ export function wasteApproval(changes: Partial<WasteApproval> = {}): WasteApprov
     status: 'pending_approval',
     status_label: 'Por aprobar',
     created_by: 7,
-    created_by_name: 'Mesero Prueba',
+    created_by_name: 'Ana Torres',
     created_at: CREATED,
     decided_by: null,
     decided_by_name: null,

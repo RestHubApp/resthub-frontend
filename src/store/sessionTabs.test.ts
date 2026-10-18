@@ -9,7 +9,7 @@ import { type TestStorage, notify, fakeStorage, readSaved, newTab, tokenThatExpi
 
 import type { StaffSession } from '@/api/types'
 
-const STORAGE_KEY = 'resthub.session.v2'
+const STORAGE_KEY = 'resthub.session.v3'
 const PREVIEW = 'resthub.vista-previa.sesion.v1'
 const MARK = 'resthub.vista-previa.pestana.v1'
 
@@ -25,12 +25,19 @@ function account(userId: number, changes: Partial<StaffSession> = {}): StaffSess
 async function openTab(local: TestStorage, route = '/') {
   const { window, tab } = newTab(local, route)
   const { useSession } = await import('./session')
-  const { currentAuthToken } = await import('@/services/apiCredentials')
-  return { window, tab, useSession, currentAuthToken }
+  const { currentAuthToken, expireSession } = await import('@/services/apiCredentials')
+  return { window, tab, useSession, currentAuthToken, expireSession }
+}
+
+// Una pestaña que se abre con la sesión ya guardada y recupera su token de la cookie.
+async function openRestored(local: TestStorage, token: string, owner: StaffSession) {
+  const opened = await openTab(local)
+  opened.useSession.getState().renew(null, token, owner)
+  return opened
 }
 
 function saved(local: TestStorage) {
-  return readSaved(local, STORAGE_KEY) as { token: string; account: StaffSession } | null
+  return readSaved(local, STORAGE_KEY) as { tag: string; expiresAt: number; account: StaffSession; token?: string } | null
 }
 
 beforeEach(() => {
@@ -52,21 +59,23 @@ describe('sesión de restaurante entre pestañas', () => {
     const tokenA = tokenThatExpires(3600, 'a')
     const one = await openTab(local)
     one.useSession.getState().signIn(tokenA, account(1))
-    const two = await openTab(local)
+    const two = await openRestored(local, tokenA, account(1))
     expect(two.useSession.getState().token).toBe(tokenA)
 
     one.useSession.getState().signOut()
     const tokenB = tokenThatExpires(3600, 'b')
     one.useSession.getState().signIn(tokenB, account(2))
+    const written = saved(local)
     two.useSession.getState().renew(tokenA, tokenThatExpires(7200, 'a2'), account(1))
 
-    expect(saved(local)).toEqual({ token: tokenB, account: account(2) })
+    expect(saved(local)).toEqual(written)
+    expect(written?.account).toEqual(account(2))
     // La pestaña vieja deja de ser A.
     expect(two.useSession.getState()).toMatchObject({ token: null, account: null })
     expect(two.currentAuthToken()).toBeNull()
     // Al recargar, el navegador sigue con B.
     const reload = await openTab(local)
-    expect(reload.useSession.getState()).toMatchObject({ token: tokenB, account: account(2) })
+    expect(reload.useSession.getState()).toMatchObject({ token: null, account: account(2) })
   })
 
   it('una pestaña que no se enteró del cierre no lo revierte al releer la cuenta', async () => {
@@ -80,7 +89,7 @@ describe('sesión de restaurante entre pestañas', () => {
     two.useSession.getState().refresh(account(1, { permissions: ['orders.take'] }))
 
     expect(local.data.has(STORAGE_KEY)).toBe(false)
-    expect(two.useSession.getState().token).toBeNull()
+    expect(two.useSession.getState()).toMatchObject({ token: null, account: null })
   })
 
 })
@@ -110,58 +119,42 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
     one.useSession.getState().signIn(tokenB, account(2))
     notify(two.window, local, STORAGE_KEY)
 
-    expect(two.useSession.getState().token).toBeNull()
-    expect(saved(local)).toEqual({ token: tokenB, account: account(2) })
+    expect(two.useSession.getState()).toMatchObject({ token: null, account: null })
+    expect(saved(local)?.account).toEqual(account(2))
   })
 
-  it('adopta el token que renovó otra pestaña de la misma cuenta', async () => {
+  it('la renovación de otra pestaña de la misma cuenta no cambia el token de esta', async () => {
     const local = fakeStorage()
     const old = tokenThatExpires(3600, 'a')
     const one = await openTab(local)
     one.useSession.getState().signIn(old, account(1))
-    const two = await openTab(local)
-    const fresh = tokenThatExpires(7200, 'a2')
+    const two = await openRestored(local, tokenThatExpires(3600, 'b'), account(1))
+    const tag = saved(local)?.tag
 
-    one.useSession.getState().renew(old, fresh, account(1))
+    one.useSession.getState().renew(old, tokenThatExpires(7200, 'a2'), account(1))
     notify(two.window, local, STORAGE_KEY)
 
-    expect(two.useSession.getState()).toMatchObject({ token: fresh, account: account(1) })
-    expect(two.currentAuthToken()).toBe(fresh)
-    // Si su propia renovación llega tarde, ya no es la sesión de esa respuesta.
-    two.useSession.getState().renew(old, tokenThatExpires(7300, 'tarde'), account(1))
-    expect(saved(local)?.token).toBe(fresh)
+    expect(saved(local)?.tag).toBe(tag)
+    expect(two.useSession.getState()).toMatchObject({ token: tokenThatExpires(3600, 'b'), account: account(1) })
   })
 
-  it('tras cambiar la contraseña, la otra pestaña adopta el token nuevo y no se queda con el revocado', async () => {
+  it('tras cambiar la contraseña en otra pestaña, esta suelta su token cortado y sigue con la cookie', async () => {
     const local = fakeStorage()
     const old = tokenThatExpires(3600, 'a')
     const one = await openTab(local)
     one.useSession.getState().signIn(old, account(1))
-    const two = await openTab(local)
-    const fresh = tokenThatExpires(3600, 'clave-nueva')
+    const mine = tokenThatExpires(3600, 'b')
+    const two = await openRestored(local, mine, account(1))
 
     // La pestaña que cambia la clave renueva con el token de la respuesta.
-    one.useSession.getState().renew(old, fresh, account(1))
-    expect(saved(local)?.token).toBe(fresh)
-    notify(two.window, local, STORAGE_KEY)
+    one.useSession.getState().renew(old, tokenThatExpires(3600, 'clave-nueva'), account(1))
+    // El servidor cortó el token de la otra: su 401 no cierra la sesión del navegador.
+    two.expireSession(mine)
 
-    expect(two.useSession.getState()).toMatchObject({ token: fresh, account: account(1) })
-    expect(two.currentAuthToken()).toBe(fresh)
-  })
-
-  it('si otra pestaña ya renovó y esta no se enteró, adopta lo guardado en vez de pisarlo', async () => {
-    const local = fakeStorage()
-    const old = tokenThatExpires(3600, 'a')
-    const one = await openTab(local)
-    one.useSession.getState().signIn(old, account(1))
-    const two = await openTab(local)
-    const fresh = tokenThatExpires(7200, 'a2')
-
-    one.useSession.getState().renew(old, fresh, account(1))
-    two.useSession.getState().renew(old, tokenThatExpires(7300, 'a3'), account(1))
-
-    expect(saved(local)?.token).toBe(fresh)
-    expect(two.useSession.getState()).toMatchObject({ token: fresh, account: account(1) })
+    expect(two.useSession.getState()).toMatchObject({ token: null, account: account(1), expired: false })
+    expect(two.currentAuthToken()).toBeNull()
+    expect(saved(local)?.account).toEqual(account(1))
+    expect(one.useSession.getState().account).toEqual(account(1))
   })
 
 })
@@ -176,7 +169,8 @@ describe('sesión de restaurante: casos de borde', () => {
     one.useSession.getState().signIn(token, account(1))
     notify(two.window, local, STORAGE_KEY)
 
-    expect(two.useSession.getState()).toMatchObject({ token, account: account(1), expired: false })
+    // El token lo recupera de la cookie, como al recargar.
+    expect(two.useSession.getState()).toMatchObject({ token: null, account: account(1), expired: false })
   })
 
   it('vaciar todo el almacenamiento (key null) también cierra la sesión', async () => {
@@ -188,7 +182,7 @@ describe('sesión de restaurante: casos de borde', () => {
     local.data.clear()
     notify(two.window, local, null)
 
-    expect(two.useSession.getState().token).toBeNull()
+    expect(two.useSession.getState()).toMatchObject({ token: null, account: null })
   })
 
   it('ignora los cambios de otras claves y de otro almacenamiento', async () => {
@@ -202,7 +196,7 @@ describe('sesión de restaurante: casos de borde', () => {
     notify(two.window, local, 'resthub.pedidos-sin-enviar.v2')
     notify(two.window, fakeStorage(), STORAGE_KEY)
 
-    expect(two.useSession.getState().token).toBe(token)
+    expect(two.useSession.getState().account).toMatchObject(account(1))
   })
 
   it('una pestaña de vista previa no se entera ni se cierra por la sesión real del navegador', async () => {

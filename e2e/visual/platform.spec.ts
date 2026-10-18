@@ -25,6 +25,7 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
     'ruta:/plataforma/restaurantes/nuevo',
     'ruta:/plataforma/restaurantes/:restaurantId',
     'dialogo:platform/OwnersSection',
+    'dialogo:platform/OwnerRow',
     'confirmacion:platform/RestaurantStatusButton',
     'ruta:/plataforma/bitacora',
     'ruta:/plataforma/observabilidad',
@@ -50,6 +51,12 @@ test('VIS-13 restaurantes, alta, detalle, bitácora, observabilidad y vista prev
   await captureWindow(owner, 'dialogo-agregar-encargado')
   await page.keyboard.press('Escape')
   await expect(owner).toBeHidden()
+
+  await page.getByRole('button', { name: `Restablecer la contraseña de ${local.owner.name}` }).click()
+  const ownerPassword = page.getByRole('dialog', { name: `Restablecer la contraseña de ${local.owner.name}` })
+  await captureWindow(ownerPassword, 'dialogo-restablecer-contrasena-encargado')
+  await page.keyboard.press('Escape')
+  await expect(ownerPassword).toBeHidden()
 
   await page.getByRole('button', { name: 'Desactivar restaurante' }).click()
   const deactivate = page.getByRole('alertdialog', { name: '¿Desactivar Restaurante E2E?' })

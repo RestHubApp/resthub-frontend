@@ -71,7 +71,10 @@ for (const status of statuses) {
     }
     for (let i = runs.length > 0 ? repeat : 0; i < repeat; i += 1) {
       const page = await browser.newPage()
-      if (status.account) await page.evaluateOnNewDocument(sessionScript(stores.get(status.account)))
+      if (status.account) {
+        await page.setCookie(...(stores.get(status.account).cookies ?? []))
+        await page.evaluateOnNewDocument(sessionScript(stores.get(status.account)))
+      }
       try {
         const load = loadavg()[0]
         const result = await lighthouse(url, { port: chrome.port, output: ['html', 'json'], logLevel: 'error', onlyCategories: CATEGORIES }, PRESETS[preset], page)

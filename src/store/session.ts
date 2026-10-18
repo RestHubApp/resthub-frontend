@@ -1,24 +1,22 @@
 import { create } from 'zustand'
 
-import { setAuthToken, setUnauthorizedHandler } from '@/services/apiCredentials'
+import { setAuthToken, setCookieSession, setLockHandler, setUnauthorizedHandler } from '@/services/apiCredentials'
 import { DEFAULT_TIME_ZONE } from '@/services/format'
 import { logger } from '@/services/logger'
-import { expiryTimer, isTokenExpired } from '@/services/tokenExpiry'
+import { expiryTimer } from '@/services/tokenExpiry'
 import { clearQueries } from '@/services/queryClient'
 import { isPreviewTab, setPreviewTabMark } from '@/services/tabStorage'
 import { discardPreviewQueue } from './offlineQueue'
-import {
-  forgetOldSessions,
-  persistence,
-  readSaved,
-  STORAGE,
-  STORAGE_KEY,
-  type StoredSession,
-  writeStoredSession,
-} from './sessionStorageAccess'
+import { adoptRecord, canAdoptStoredSession, isCurrent, logSignedIn, noteExpiry, opened, openRecord, otherTabChange, recordOf } from './sessionRecord'
+import { forgetOldSessions, persistence, readSaved, STORAGE, STORAGE_KEY, writeStoredSession } from './sessionStorageAccess'
 import type { AnyPermissionCode, PermissionCode, Session, StaffSession } from '@/api/types'
 
 interface SessionState {
+  /**
+   * El token de esta pestaña, solo en memoria (S2). Tras recargar la página
+   * falta hasta recuperarlo de la cookie del API; mientras, las peticiones
+   * viajan con la cookie.
+   */
   token: string | null
   /**
    * La sesión tal como la da `GET /auth/me`: la del personal de un restaurante
@@ -35,12 +33,18 @@ interface SessionState {
   /**
    * Cambia el token `origin` por uno renovado sin cerrar la sesion. Si la
    * sesion ya no es la de `origin` (se cerro o entro otra cuenta mientras
-   * viajaba la renovacion), la respuesta se descarta.
+   * viajaba la renovacion), la respuesta se descarta. Con `origin` en `null`
+   * es el token recuperado de la cookie tras recargar.
    */
-  renew: (origin: string, token: string, account: Session) => void
+  renew: (origin: string | null, token: string, account: Session) => void
   signOut: () => void
-  /** Cierra la sesion porque el servidor ya no acepta el token. */
+  /** Cierra la sesion porque el servidor ya no la acepta. */
   expire: () => void
+  /**
+   * Bloquea o desbloquea la sesión del personal por inactividad (RFS-29). El
+   * servidor es quien bloquea de verdad (423); esto solo decide qué se muestra.
+   */
+  setLocked: (isLocked: boolean) => void
   /**
    * Cierra la sesion despues de cambiar la contraseña propia cuando no se pudo
    * seguir con el token nuevo: el servidor ya revoco el que habia y usarlo solo
@@ -61,30 +65,16 @@ interface SessionState {
   exitPreview: () => void
 }
 
-/**
- * Si otra pestana cambio la sesion guardada despues de que esta guardo `token`:
- * la cerro, entro otra cuenta o ya la renovo. Entonces esta pestana no debe
- * escribir encima; lo guardado manda. Una vista previa vive en su propia
- * pestana y ninguna otra la toca.
- */
-function otherTabChange(token: string): boolean {
-  // Compara tokens para saber cuál sesión escribió esta pestaña, no para verificar un secreto.
-  const wasWrittenByThis = persistence.token === token
-  if (isPreviewTab() || !wasWrittenByThis) {
-    return false
-  }
-  const read = readSaved()
-  return read.ok && read.session?.token !== token
-}
-
 // Cierra la sesion en el momento en que vence su token.
 const scheduleExpiry = expiryTimer(() => {
-  useSession.getState().expire()
+  rejectCredential(useSession.getState().token)
 })
 
 function cleanSession(): void {
   setAuthToken(null)
+  setCookieSession(false)
   writeStoredSession(null)
+  adoptRecord(null)
   scheduleExpiry(null)
   // Nada de la cuenta anterior queda en el cache para la siguiente.
   clearQueries()
@@ -99,62 +89,89 @@ function cleanSession(): void {
  */
 function dropSession(): void {
   setAuthToken(null)
-  persistence.token = null
+  setCookieSession(false)
+  persistence.tag = null
+  adoptRecord(null)
   scheduleExpiry(null)
   clearQueries()
-}
-
-/** Si lo guardado se puede seguir usando: vigente y, en una vista previa, marcado como tal. */
-function current(session: StoredSession | null): session is StoredSession {
-  return session !== null && !isTokenExpired(session.token) && (!isPreviewTab() || session.account.preview)
 }
 
 forgetOldSessions()
 const initialRead = readSaved()
 const saved = initialRead.ok ? initialRead.session : null
-const restored = current(saved) ? saved : null
+const restored = isCurrent(saved) ? saved : null
 if (saved !== null && restored === null) {
   writeStoredSession(null)
 }
-persistence.token = restored?.token ?? null
+persistence.tag = restored?.tag ?? null
+adoptRecord(restored)
 // Una vista previa que se recarga ya vencida tampoco guarda su cola.
 if (restored === null) {
   discardPreviewQueue()
 }
 setAuthToken(restored?.token ?? null)
+setCookieSession(restored !== null && !isPreviewTab())
+
+/** Guarda el token en memoria y la sesión en el navegador, y programa su vencimiento. */
+function keepToken(token: string, account: Session): void {
+  setAuthToken(token)
+  const expiry = noteExpiry(token)
+  writeStoredSession(recordOf(account, token))
+  scheduleExpiry(expiry)
+}
 
 /** Aplica una lectura nueva de `GET /auth/me` sin tocar el token. */
 function refreshSession(account: Session): void {
-  const { token } = useSession.getState()
-  // eslint-disable-next-line security/detect-possible-timing-attacks -- compara con null, no con un secreto: el cliente no verifica credenciales
-  if (token === null) {
+  const { token, account: actual } = useSession.getState()
+  if (actual === null) {
     return
   }
-  if (otherTabChange(token)) {
+  if (otherTabChange()) {
     syncWithStoredSession()
     return
   }
-  writeStoredSession({ token, account })
+  writeStoredSession(recordOf(account, token))
   useSession.setState({ account })
 }
 
 /** Cambia el token `origin` por el renovado, salvo que la sesión ya no sea la de `origin`. */
-function renewSession(origin: string, token: string, account: Session): void {
-  if (useSession.getState().token !== origin) {
+function renewSession(origin: string | null, token: string, account: Session): void {
+  const state = useSession.getState()
+  if (state.token !== origin || state.account === null) {
     return
   }
   // Otra pestana cerro la sesion o entro otra cuenta mientras esta renovaba:
   // escribir el token renovado resucitaria la sesion cerrada o pisaria la
   // de la otra cuenta. Esta pestana se pone al dia con lo guardado.
-  if (otherTabChange(origin)) {
+  if (otherTabChange()) {
     syncWithStoredSession()
     return
   }
-  setAuthToken(token)
-  writeStoredSession({ token, account })
+  keepToken(token, account)
   useSession.setState({ token, account })
-  scheduleExpiry(token)
   logger.info('auth.renewed')
+}
+
+/**
+ * El servidor rechazó la sesión (401) o venció el token `used`. Si ya no es el
+ * de esta pestaña (se renovó mientras tanto), no cambia nada. Si lo era y la
+ * sesión sigue en la cookie (otra pestaña la renovó o cambió la contraseña,
+ * y eso cortó este token), la pestaña lo suelta y la recupera de ahí. Sin
+ * token que soltar (ya se probó la cookie) o en una vista previa, la cierra.
+ */
+function rejectCredential(used: string | null): void {
+  const { token } = useSession.getState()
+  if (used !== null && used !== token) {
+    return
+  }
+  if (used === null || isPreviewTab()) {
+    useSession.getState().expire()
+    return
+  }
+  setAuthToken(null)
+  scheduleExpiry(null)
+  useSession.setState({ token: null })
+  logger.info('auth.token_dropped')
 }
 
 /** Abre la sesión de vista previa, solo en su propia pestaña y con una cuenta `preview`. */
@@ -180,14 +197,6 @@ function exitPreviewSession(): void {
   logger.info('auth.preview_exited')
 }
 
-function logSignedIn(account: Session): void {
-  if (account.kind === 'platform') {
-    logger.info({ adminId: account.admin.id }, 'auth.signed_in')
-    return
-  }
-  logger.info({ userId: account.user.id, roleId: account.user.role_id, restaurantId: account.restaurant.id }, 'auth.signed_in')
-}
-
 export const useSession = create<SessionState>((set, get) => ({
   token: restored?.token ?? null,
   account: restored?.account ?? null,
@@ -195,10 +204,10 @@ export const useSession = create<SessionState>((set, get) => ({
   passwordChanged: false,
 
   signIn: (token, account) => {
-    setAuthToken(token)
-    writeStoredSession({ token, account })
+    openRecord()
+    setCookieSession(!account.preview)
+    keepToken(token, account)
     set({ token, account, expired: false, passwordChanged: false })
-    scheduleExpiry(token)
     logSignedIn(account)
   },
 
@@ -219,7 +228,7 @@ export const useSession = create<SessionState>((set, get) => ({
   },
 
   expire: () => {
-    if (get().token === null) {
+    if (get().account === null) {
       return
     }
     cleanSession()
@@ -227,36 +236,28 @@ export const useSession = create<SessionState>((set, get) => ({
     logger.warn('auth.session_expired')
   },
 
+  setLocked: (isLocked) => {
+    const account = staffOf(get().account)
+    if (account === null || account.session_locked === isLocked) return
+    refreshSession({ ...account, session_locked: isLocked })
+    logger.info(isLocked ? 'auth.session_locked' : 'auth.session_unlocked')
+  },
+
 }))
 
-scheduleExpiry(restored?.token ?? null)
-setUnauthorizedHandler(() => {
-  useSession.getState().expire()
+scheduleExpiry(restored?.expiresAt ?? null)
+setUnauthorizedHandler(rejectCredential)
+setLockHandler(() => {
+  useSession.getState().setLocked(true)
 })
-
-function accountId(account: Session): number {
-  return account.kind === 'platform' ? account.admin.id : account.user.id
-}
-
-/** Si la sesión guardada es de la misma cuenta (y, en el personal, del mismo local) que esta pestaña. */
-function isSameAccount(stored: StoredSession, account: Session): boolean {
-  if (stored.account.kind === 'platform' || account.kind === 'platform') {
-    return stored.account.kind === account.kind && accountId(stored.account) === accountId(account)
-  }
-  return accountId(stored.account) === accountId(account) && stored.account.restaurant.id === account.restaurant.id
-}
-
-/** Si lo guardado se puede adoptar: sigue vigente y es de la misma cuenta (o esta pestaña no tenía ninguna). */
-function canAdoptStoredSession(stored: StoredSession | null, account: Session | null): stored is StoredSession {
-  return current(stored) && (account === null || isSameAccount(stored, account))
-}
 
 /**
  * Pone esta pestana al dia con la sesion guardada en el navegador, que otra
  * pestana (o la ventana de la PWA) acaba de cambiar.
  *
- * - La misma cuenta con otro token (otra pestana la renovo o releyo sus
- *   permisos), o una sesion nueva cuando esta pestana no tenia ninguna: se adopta.
+ * - La misma cuenta que volvio a entrar en otra pestana, o una sesion nueva
+ *   cuando esta pestana no tenia ninguna: se adopta. Esta pestana sigue con
+ *   su token, o recupera uno de la cookie si no tenia.
  * - Nada guardado, una sesion vencida u otra cuenta: esta pestana cierra la
  *   suya sin borrar lo guardado. Seguir con la cuenta anterior dejaria a quien
  *   usa el celular despues operando con la identidad de otro.
@@ -274,18 +275,19 @@ function syncWithStoredSession(): void {
   }
   const actual = read.session
   const status = useSession.getState()
-  if (actual !== null && actual.token === status.token) {
+  if (actual !== null && actual.tag === opened.tag) {
     return
   }
   if (canAdoptStoredSession(actual, status.account)) {
-    setAuthToken(actual.token)
-    persistence.token = actual.token
-    scheduleExpiry(actual.token)
-    useSession.setState({ token: actual.token, account: actual.account, expired: false, passwordChanged: false })
+    persistence.tag = actual.tag
+    adoptRecord(actual)
+    setCookieSession(true)
+    scheduleExpiry(actual.expiresAt)
+    useSession.setState({ account: actual.account, expired: false, passwordChanged: false })
     logger.info('auth.synced_from_other_tab')
     return
   }
-  if (status.token === null) {
+  if (status.account === null) {
     return
   }
   dropSession()

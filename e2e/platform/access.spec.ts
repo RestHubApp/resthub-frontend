@@ -153,7 +153,7 @@ test('ACC-06 cerrar sesión lleva al acceso y, al volver a entrar, a la pantalla
   await expect(page.getByRole('heading', { name: 'Tablero', level: 1 })).toBeVisible()
   await page.getByRole('button', { name: 'Cerrar sesión' }).click()
   await expect(page).toHaveURL(/\/acceso$/u)
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('resthub.session.v2'))).toBeNull()
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('resthub.session.v3'))).toBeNull()
   // Sin sesión, una pantalla privada lleva al acceso y recuerda a dónde se iba.
   await page.goto('/inventario')
   await expect(page).toHaveURL(/\/acceso$/u)

@@ -40,3 +40,9 @@ serviceworker
 unstub
 weighable
 pisco
+
+# Seguridad de la cuenta (RFS-21, RFS-22).
+reauthentication
+totp
+otpauth
+reauthenticated

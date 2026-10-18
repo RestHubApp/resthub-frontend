@@ -22,7 +22,7 @@ interface MenuItemsOptions {
   readonly seeActivity: () => void
 }
 
-/** «Ver movimientos» para todas; contraseña y activar o desactivar no existen para la cuenta propia. */
+/** «Ver movimientos» para todas; sesiones, contraseña y activar o desactivar no existen para la cuenta propia (las suyas están en Mi perfil). */
 function menuItems({ account, isSelf, open, activate, canSeeActivity, seeActivity }: MenuItemsOptions): ActionsMenuItem[] {
   const movements: ActionsMenuItem[] = canSeeActivity
     ? [{ label: 'Ver movimientos', icon: 'schedule', onSelect: seeActivity }]
@@ -32,6 +32,8 @@ function menuItems({ account, isSelf, open, activate, canSeeActivity, seeActivit
   }
   return [
     ...movements,
+    { label: 'Sesiones abiertas', icon: 'deviceMode', onSelect: () => { open('sesiones') } },
+    { label: 'Accesos', icon: 'history', onSelect: () => { open('accesos') } },
     { label: 'Contraseña', icon: 'key', onSelect: () => { open('contrasena') } },
     account.is_active
       ? { label: 'Desactivar', icon: 'turnOn', onSelect: () => { open('desactivar') }, isDestructive: true }
@@ -119,8 +121,8 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
         isSelf={isSelf}
         dialog={dialog}
         onClose={close}
-        onDeactivate={() => {
-          status.mutate()
+        onDeactivate={(reason) => {
+          status.mutate(reason)
         }}
       />
     </div>

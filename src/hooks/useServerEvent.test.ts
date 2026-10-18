@@ -50,7 +50,7 @@ describe('useServerEvent', () => {
   it('sin sesión o desactivado no abre ninguna conexión', () => {
     const channel = noticesChannel()
     setAuthToken(null)
-    listen(ORDERS)
+    listen(ORDERS).unmount()
     setAuthToken('t')
     listen(ORDERS, false)
     expect(channel.connections).toHaveLength(0)
@@ -108,5 +108,20 @@ describe('useServerEvent', () => {
     unmount()
     await jest.advanceTimersByTimeAsync(10_000)
     expect(channel.connections).toHaveLength(1)
+  })
+})
+
+describe('useServerEvent tras recargar', () => {
+  it('se abre cuando llega el token: tras recargar, al recuperarlo de la cookie', async () => {
+    const channel = noticesChannel()
+    setAuthToken(null)
+    listen(ORDERS)
+    expect(channel.connections).toHaveLength(0)
+
+    setAuthToken('token-recuperado')
+
+    await waitFor(() => {
+      expect(channel.connections).toEqual([{ url: 'http://localhost/api/v1/events', authorization: 'Bearer token-recuperado' }])
+    })
   })
 })

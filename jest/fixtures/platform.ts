@@ -180,7 +180,7 @@ export function restaurantSummary(changes: Partial<PlatformRestaurantSummary> = 
 export function restaurantCard(changes: Partial<PlatformRestaurantDetail> = {}): PlatformRestaurantDetail {
   return {
     ...restaurantSummary(),
-    owners: [{ id: 30, full_name: 'Lucho Ramos', email: 'lucho@esquina.pe', is_active: true }],
+    owners: [{ id: 30, full_name: 'Lucho Ramos', email: 'lucho@esquina.pe', is_active: true, must_change_password: false }],
     ...changes,
   }
 }

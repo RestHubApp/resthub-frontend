@@ -22,6 +22,18 @@ export type PlatformSession = components['schemas']['PlatformAdminSessionRespons
 /** Lo que devuelve `GET /auth/me`: una u otra, según `kind`. */
 export type Session = StaffSession | PlatformSession
 export type AcceptTermsRequest = components['schemas']['AcceptTermsRequest']
+
+// Seguridad de la cuenta: sesiones por dispositivo, contraseña confirmada, PIN y verificación en dos pasos.
+/** Una sesión abierta en un dispositivo; `id` es su referencia pública, no la credencial. */
+export type DeviceSession = components['schemas']['DeviceSessionResponse']
+export type UnusedStaff = components['schemas']['UnusedStaffResponse']
+export type UnlockRequest = components['schemas']['UnlockRequest']
+export type TwoFactorStatus = components['schemas']['TwoFactorStatusResponse']
+export type TwoFactorSetup = components['schemas']['TwoFactorSetupResponse']
+/** Un acceso (correcto, fallido, frenado o bloqueado) de una cuenta, con su dispositivo y lugar (RFS-15). */
+export type AccessEntry = components['schemas']['AccessEntryResponse']
+export type AccessHistoryPage = components['schemas']['AccessHistoryPageResponse']
+export type AccessOutcome = components['schemas']['AccessOutcome']
 export type CustomerExport = components['schemas']['CustomerExportResponse']
 export type PermissionCode = components['schemas']['Permission']
 export type PlatformPermissionCode = components['schemas']['PlatformPermission']
