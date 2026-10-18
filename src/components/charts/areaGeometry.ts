@@ -7,7 +7,8 @@ export interface SeriesPoint {
   readonly value: number
 }
 
-export const AREA_MARGIN = { top: 28, right: 16, bottom: 28, left: 64 } as const
+// A la izquierda caben las cifras del eje con el texto más chico (12 px): «S/ 125.0 K» mide unos 57 px.
+export const AREA_MARGIN = { top: 28, right: 16, bottom: 28, left: 68 } as const
 
 export interface AreaGeometry {
   readonly ticks: readonly number[]
