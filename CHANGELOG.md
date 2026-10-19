@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0](https://github.com/RestHubApp/resthub-frontend/compare/v0.2.0...v0.3.0) (2026-10-19)
+
+
+### Funcionalidades
+
+* **facturacion:** régimen tributario del local ([4955321](https://github.com/RestHubApp/resthub-frontend/commit/4955321b51f477b555815b32998014f541258b2d))
+* **facturacion:** régimen tributario del local y facturas según el régimen ([301feed](https://github.com/RestHubApp/resthub-frontend/commit/301feed56d2bebf50c80f8de2588bb9b10bae970))
+* **menu:** fotos de los platos y opción para ocultarlas ([373f079](https://github.com/RestHubApp/resthub-frontend/commit/373f0794dffb9505cbf8fbb9415f5c3488007ad6))
+* **menu:** fotos de los platos y opción para ocultarlas ([f9d60c8](https://github.com/RestHubApp/resthub-frontend/commit/f9d60c860b2b0ddabd640ffa8a1ea86458eded12))
+
+
+### Correcciones
+
+* **menu:** sin photo_version no hay foto, para no mostrar recuadros con un servidor anterior ([50e43b9](https://github.com/RestHubApp/resthub-frontend/commit/50e43b9f5c82fddb4cf8a09898ec27f7151d3b98))
+
 ## [0.2.0](https://github.com/RestHubApp/resthub-frontend/compare/v0.1.0...v0.2.0) (2026-10-19)
 
 
