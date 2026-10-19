@@ -41,10 +41,18 @@ describe('parseAppearance', () => {
       font: 'lexend',
       textSize: 'largest',
       density: 'compact',
+      showDishPhotos: false,
       menu: { order: ['/cocina', '/pedidos'], bottom: ['/cocina'] },
     }
 
     expect(parseAppearance(serializeAppearance(appearance))).toEqual(appearance)
+  })
+
+  it('las fotos de la carta se muestran salvo que se hayan apagado a propósito', () => {
+    expect(parseAppearance(stored({ showDishPhotos: false })).showDishPhotos).toBe(false)
+    expect(parseAppearance(stored({ showDishPhotos: true })).showDishPhotos).toBe(true)
+    expect(parseAppearance(stored({})).showDishPhotos).toBe(true)
+    expect(parseAppearance(stored({ showDishPhotos: 'no' })).showDishPhotos).toBe(true)
   })
 
   it('quien tenía alto contraste con un color en la versión 2 lo conserva junto con el color', () => {

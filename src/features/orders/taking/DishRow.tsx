@@ -38,6 +38,8 @@ export function DishRow({ item, quantity, onAdd, onChange }: DishRowProps) {
   return (
     <li className={`flex items-center gap-2 rounded-xl pr-2 ring-1 ${rowTone(quantity > 0, reason !== null)}`}>
       <DishRowButton
+        itemId={item.id}
+        photoVersion={item.photo_version}
         name={item.name}
         price={item.price}
         hasOptions={item.modifier_groups.length > 0}

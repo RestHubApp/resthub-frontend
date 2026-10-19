@@ -1,6 +1,6 @@
 // Las preferencias de apariencia de una cuenta: modo (claro, oscuro o automático),
-// color de acento, alto contraste, letra, tamaño del texto, densidad y orden del
-// menú. Es lo que se guarda en este celular o computadora (`appearanceStorage`) y
+// color de acento, alto contraste, letra, tamaño del texto, densidad, fotos de la
+// carta y orden del menú. Es lo que se guarda en este celular o computadora (`appearanceStorage`) y
 // lo que se aplica a la página (`applyAppearance`).
 //
 // Nada de esto es un dato del restaurante ni de la cuenta: son gustos de quien
@@ -122,6 +122,8 @@ export interface Appearance {
   readonly font: FontId
   readonly textSize: TextSizeId
   readonly density: DensityId
+  /** Si la carta muestra la foto de cada plato. Apagarlo es una ayuda: menos que mirar y menos datos. */
+  readonly showDishPhotos: boolean
   readonly menu: MenuPreference
 }
 
@@ -134,6 +136,7 @@ export const DEFAULT_APPEARANCE: Appearance = {
   font: 'geist',
   textSize: 'normal',
   density: 'comfortable',
+  showDishPhotos: true,
   menu: DEFAULT_MENU,
 }
 
@@ -250,6 +253,8 @@ export function parseAppearance(raw: string | null): Appearance {
     font: pick(FONTS, parsed['font'], DEFAULT_APPEARANCE.font),
     textSize: pick(TEXT_SIZES, parsed['textSize'], DEFAULT_APPEARANCE.textSize),
     density: pick(DENSITIES, parsed['density'], DEFAULT_APPEARANCE.density),
+    // Solo un `false` explícito las oculta: lo guardado antes de esta opción las sigue mostrando.
+    showDishPhotos: parsed['showDishPhotos'] !== false,
     menu: menuOf(parsed['menu']),
   }
 }

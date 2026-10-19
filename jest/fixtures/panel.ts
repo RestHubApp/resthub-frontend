@@ -17,6 +17,8 @@ export function taxSettings(changes: Partial<BillingSettings> = {}): BillingSett
     legal_name: 'La Picantería S.A.C.',
     address: 'Av. Larco 123, Miraflores',
     igv_rate: '18.00',
+    tax_regime: 'general',
+    allows_tax_invoice: true,
     boleta_series: 'B001',
     factura_series: 'F001',
     boleta_credit_note_series: 'BC01',

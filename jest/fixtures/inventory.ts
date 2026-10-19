@@ -196,6 +196,7 @@ export function dish(changes: Partial<MenuItem> = {}): MenuItem {
     is_available: true,
     out_of_stock: false,
     modifier_groups: [],
+    photo_version: null,
     created_at: CREATED,
     ...changes,
   }
