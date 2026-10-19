@@ -7,6 +7,8 @@ import { randomBytes } from 'node:crypto'
 import { API_ORIGIN, createRestaurant, signInPlatformByApi, newHttp, type Local, type Session, type SessionPlatform } from './api'
 
 const SESSION = 'resthub.session.v3'
+// Una dirección que la aplicación no sirve: la prueba la responde con una página vacía.
+const BLANK = '/__e2e/sesion'
 
 interface Accessories {
   /** Un restaurante recién dado de alta, solo para esta prueba. */
@@ -59,13 +61,21 @@ export async function openAs(page: Page, session: Session | SessionPlatform, des
     { name: 'resthub_csrf', value: randomBytes(24).toString('base64url'), url: API_ORIGIN, httpOnly: true },
   ])
   const saved = { tag: randomBytes(8).toString('hex'), expiresAt: expiryOf(session.token), account: session.account }
-  await page.goto('/acceso')
-  await page.evaluate(
-    ([key, value]) => {
-      localStorage.setItem(key, value)
-    },
-    [SESSION, JSON.stringify(saved)] as const,
-  )
+  // La sesión se escribe desde una página vacía del mismo origen, sin la
+  // aplicación: abierta en `/acceso`, la aplicación arrancaba con la cuenta
+  // anterior y podía volver a guardarla después de escribir la nueva.
+  await page.route(BLANK, (route) => route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>e2e</title>' }))
+  try {
+    await page.goto(BLANK)
+    await page.evaluate(
+      ([key, value]) => {
+        localStorage.setItem(key, value)
+      },
+      [SESSION, JSON.stringify(saved)] as const,
+    )
+  } finally {
+    await page.unroute(BLANK)
+  }
   await page.goto(destination)
 }
 
