@@ -1,6 +1,14 @@
 import { z } from 'zod'
 
-import type { BillingSettings, BillingSettingsRequest } from '@/api/types'
+import type { BillingSettings, BillingSettingsRequest, TaxRegime } from '@/api/types'
+
+/** Los regímenes tributarios, con el texto que ve el encargado. El Nuevo RUS solo emite boletas. */
+export const TAX_REGIMES = [
+  { id: 'general', label: 'Régimen general' },
+  { id: 'special', label: 'Régimen especial (RER)' },
+  { id: 'mype', label: 'Régimen MYPE tributario (RMT)' },
+  { id: 'new_rus', label: 'Nuevo RUS (solo boletas)' },
+] as const satisfies readonly { readonly id: TaxRegime; readonly label: string }[]
 
 const SOL_USER = /^[A-Z0-9]{3,20}$/u
 
@@ -24,6 +32,7 @@ export function settingsSchema(saved: BillingSettings) {
       address: z.string().trim().max(200, 'Usa como máximo 200 caracteres'),
       // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
       igv_rate: z.string().trim().regex(/^\d{1,2}(?:[.,]\d{1,2})?$/u, 'Escribe un porcentaje como 18 o 10.5'),
+      tax_regime: z.enum(['general', 'special', 'mype', 'new_rus']),
       boleta_series: series('B'),
       factura_series: series('F'),
       boleta_credit_note_series: series('B'),
@@ -89,6 +98,7 @@ export function valuesOf(settings: BillingSettings): SettingsValues {
     legal_name: settings.legal_name,
     address: settings.address,
     igv_rate: settings.igv_rate,
+    tax_regime: settings.tax_regime,
     boleta_series: settings.boleta_series,
     factura_series: settings.factura_series,
     boleta_credit_note_series: settings.boleta_credit_note_series,

@@ -1,3 +1,6 @@
+import { useQuery } from '@tanstack/react-query'
+
+import { billingCapabilitiesQuery } from '@/api/billing'
 import type { Invoice, IssueInvoiceRequest } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { InvoiceDraftFields } from './InvoiceDraftFields'
@@ -18,7 +21,9 @@ interface ReissueStepProps {
  * omisión propone el otro tipo: lo común es que pidan factura en vez de boleta.
  */
 export function ReissueStep({ invoice, isPending, isVoided, onBack, onIssue, children }: ReissueStepProps) {
-  const draft = useInvoiceDraft(invoice.total, invoice.kind === 'boleta' ? 'factura' : 'boleta')
+  const capabilities = useQuery(billingCapabilitiesQuery)
+  const isTaxInvoiceAllowed = capabilities.data?.tax_invoice_enabled !== false
+  const draft = useInvoiceDraft(invoice.total, invoice.kind === 'boleta' && isTaxInvoiceAllowed ? 'factura' : 'boleta')
 
   return (
     <>

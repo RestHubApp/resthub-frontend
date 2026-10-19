@@ -9,6 +9,7 @@ import { onSubmit } from '@/hooks/formSubmit'
 import { billingErrorMessage } from '@/services/billingErrors'
 import { settingsSchema, valuesOf, type SettingsValues } from './billingSettingsSchema'
 import { SolCredentialsFields } from './SolCredentialsFields'
+import { TaxRegimeField } from './TaxRegimeField'
 import { useSaveBillingSettings } from './useSaveBillingSettings'
 
 interface BillingSettingsFormProps {
@@ -41,6 +42,7 @@ export function BillingSettingsForm({ settings, onSaved }: BillingSettingsFormPr
         <TextField id="fiscal-razon" label="Razón social" field={register('legal_name')} error={errorOf('legal_name')} />
       </div>
       <TextField id="fiscal-direccion" label="Dirección fiscal" field={register('address')} error={errorOf('address')} />
+      <TaxRegimeField field={register('tax_regime')} error={errorOf('tax_regime')} />
       <div className="grid gap-4 sm:grid-cols-3">
         <TextField id="fiscal-igv" label="IGV (%)" inputMode="decimal" hint="18 en el régimen general; la tasa reducida si el local es MYPE de restaurantes." field={register('igv_rate')} error={errorOf('igv_rate')} />
         <TextField id="fiscal-serie-b" label="Serie de boletas" field={register('boleta_series')} error={errorOf('boleta_series')} />
