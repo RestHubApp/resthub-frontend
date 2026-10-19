@@ -3030,6 +3030,8 @@ export interface components {
             email_enabled: boolean;
             /** Email Max Per Hour */
             email_max_per_hour: number;
+            /** Tax Invoice Enabled */
+            tax_invoice_enabled: boolean;
         };
         /** BillingSettingsRequest */
         BillingSettingsRequest: {
@@ -3062,11 +3064,14 @@ export interface components {
             sol_password?: string | null;
             /** Sol User */
             sol_user?: string | null;
+            tax_regime?: components["schemas"]["TaxRegime"] | null;
         };
         /** BillingSettingsResponse */
         BillingSettingsResponse: {
             /** Address */
             address: string;
+            /** Allows Tax Invoice */
+            allows_tax_invoice: boolean;
             /** Boleta Credit Note Series */
             boleta_credit_note_series: string;
             /** Boleta Series */
@@ -3089,6 +3094,7 @@ export interface components {
             legal_name: string;
             /** Ruc */
             ruc: string;
+            tax_regime: components["schemas"]["TaxRegime"];
         };
         /** CancelOrderRequest */
         CancelOrderRequest: {
@@ -6101,6 +6107,15 @@ export interface components {
          * @enum {string}
          */
         TableStatus: "free" | "occupied";
+        /**
+         * TaxRegime
+         * @description El régimen tributario del local: decide qué comprobantes puede emitir.
+         *
+         *     El Nuevo RUS solo emite boletas de venta; los demás regímenes emiten boletas
+         *     y facturas. La tasa de IGV es un dato aparte (`igv_rate`).
+         * @enum {string}
+         */
+        TaxRegime: "general" | "special" | "mype" | "new_rus";
         /** TimePointResponse */
         TimePointResponse: {
             /** Errors 5Xx */
