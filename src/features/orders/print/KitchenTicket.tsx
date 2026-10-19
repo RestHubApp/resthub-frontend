@@ -1,6 +1,7 @@
 import type { OrderResponse } from '@/api/types'
 import { formatDateTime } from '@/services/format'
 import { deliveryLines, orderPlace } from '@/features/orders/orderLabels'
+import { liveItems } from '@/features/orders/kitchenRounds'
 
 interface KitchenTicketProps {
   readonly order: OrderResponse
@@ -27,7 +28,7 @@ export function KitchenTicket({ order, timeZone }: KitchenTicketProps) {
       </p>
       <hr className="my-1 border-dashed border-black" />
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {order.items.map((item) => (
+        {liveItems(order).map((item) => (
           <li key={item.id}>
             <p className="m-0 text-lg font-bold">
               {item.quantity} × {item.name}

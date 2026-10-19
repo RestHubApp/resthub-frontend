@@ -1,7 +1,8 @@
-import type { Ingredient, IngredientUnit } from '@/api/types'
+import type { Ingredient, PurchaseRequest } from '@/api/types'
 import type { PurchaseValues } from './inventorySchema'
-import { findInputUnit, fromBase, inputUnits, parseDecimal, priceUnit, toBaseCost, toBaseQuantity } from './units'
-import { formatMoney } from '@/services/format'
+import { PACKAGE_UNIT, packageUnit, roundQuantity } from './packaging'
+import { fromBase, type InputUnit, inputUnits, parseDecimal, priceUnit, toBaseCost, toBaseQuantity } from './units'
+import { formatMoney, formatQuantity } from '@/services/format'
 
 function positive(number: number): boolean {
   return Number.isFinite(number) && number > 0
@@ -21,9 +22,10 @@ export interface PurchaseMath {
  * Se puede escribir el costo por kilo o lo que se pagó en total: el otro sale
  * de la cantidad. `null` mientras falte un dato o no sea un número.
  */
-export function purchaseMath(values: PurchaseValues, unit: IngredientUnit): PurchaseMath | null {
-  const factor = findInputUnit(unit, values.quantity_unit).factor
-  const quantity = parseDecimal(values.quantity) * factor
+export function purchaseMath(values: PurchaseValues, ingredient: Ingredient): PurchaseMath | null {
+  const { unit } = ingredient
+  const factor = purchaseUnit(ingredient, values.quantity_unit).factor
+  const quantity = roundQuantity(parseDecimal(values.quantity) * factor)
   const cost = parseDecimal(values.cost)
   if (!positive(quantity) || !positive(cost)) {
     return null
@@ -35,16 +37,49 @@ export function purchaseMath(values: PurchaseValues, unit: IngredientUnit): Purc
   return { baseQuantity: quantity, pricePerUnit: (cost / quantity) * price, total: cost }
 }
 
-/** El cuerpo de `POST /inventory/purchases`, en la unidad base. */
-export function purchasePayload(ingredientId: number, values: PurchaseValues, unit: IngredientUnit) {
-  const factor = findInputUnit(unit, values.quantity_unit).factor
-  const quantity = toBaseQuantity(values.quantity, factor)
+/** Las unidades en que se escribe una compra: kg y g (o L y ml) y, si tiene presentación, el envase. */
+export function purchaseUnits(ingredient: Ingredient): readonly InputUnit[] {
+  const units = inputUnits(ingredient.unit)
+  return ingredient.packaging === null ? units : [...units, packageUnit(ingredient.packaging)]
+}
+
+function purchaseUnit(ingredient: Ingredient, value: string): InputUnit {
+  return purchaseUnits(ingredient).find((option) => option.value === value) ?? { value, label: value, factor: 1 }
+}
+
+/**
+ * El cuerpo de `POST /inventory/purchases`.
+ *
+ * En envases, `quantity` es cuántos y el backend la multiplica por el tamaño;
+ * si no, va en la unidad base. El costo va siempre por unidad base: S/ 30 la
+ * botella de 750 ml son S/ 0.04 el mililitro.
+ */
+export function purchasePayload(values: PurchaseValues, ingredient: Ingredient): PurchaseRequest {
+  const isPackages = values.quantity_unit === PACKAGE_UNIT
+  const factor = purchaseUnit(ingredient, values.quantity_unit).factor
+  const baseQuantity = toBaseQuantity(values.quantity, factor)
   const cost = parseDecimal(values.cost)
   const unitCost =
     values.cost_mode === 'unit'
-      ? toBaseCost(cost, priceUnit(unit).factor)
-      : toBaseCost(cost, Number(quantity))
-  return { ingredient_id: ingredientId, quantity: quantity, unit_cost: unitCost, reason: values.reason }
+      ? toBaseCost(cost, priceUnit(ingredient.unit).factor)
+      : toBaseCost(cost, Number(baseQuantity))
+  return {
+    ingredient_id: ingredient.id,
+    entry_mode: isPackages ? 'packages' : 'base',
+    quantity: isPackages ? toBaseQuantity(values.quantity, 1) : baseQuantity,
+    unit_cost: unitCost,
+    reason: values.reason,
+  }
+}
+
+/** «4 × botella = 3 L», mientras se compra en envases; nada en kg o g. */
+export function packageHint(values: PurchaseValues, ingredient: Ingredient): string | undefined {
+  const count = parseDecimal(values.quantity)
+  if (values.quantity_unit !== PACKAGE_UNIT || ingredient.packaging === null || !positive(count)) {
+    return undefined
+  }
+  const unit = packageUnit(ingredient.packaging)
+  return `${fromBase(count, 1)} × ${unit.label} de ${formatQuantity(unit.factor, ingredient.unit)} = ${formatQuantity(roundQuantity(count * unit.factor), ingredient.unit)}`
 }
 
 /** Se propone el costo que ya tiene el insumo: casi siempre se repite. */

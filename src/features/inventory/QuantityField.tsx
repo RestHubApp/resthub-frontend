@@ -16,7 +16,7 @@ interface QuantityFieldProps {
   readonly unit: UseFormRegisterReturn
   readonly units: readonly InputUnit[]
   readonly error?: string | undefined
-  readonly hint?: string
+  readonly hint?: string | undefined
 }
 
 /**

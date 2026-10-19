@@ -1,6 +1,7 @@
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { useDeferredAction } from '@/components/useDeferredAction'
 import type { NavEntry } from '@/features/shell/navigation'
 import { menuActionsId } from './menuActionsId'
 
@@ -14,19 +15,13 @@ interface MenuRowActionsProps {
   readonly onToggleBar: (path: string) => void
 }
 
-/**
- * La acción espera a que el menú se cierre y devuelva el foco a su botón: si la
- * fila cambia de lugar antes, el navegador suelta el foco a media animación (es
- * lo mismo que hace `ActionsMenu`).
- */
-function afterClosing(action: () => void): () => void {
-  return () => {
-    window.setTimeout(action, 0)
-  }
-}
-
 /** El «⋯» de una pantalla del menú: Subir, Bajar y poner o sacar de la barra de abajo (la barra admite cuatro). */
 export function MenuRowActions({ entry, index, count, isInBar, isBarFull, onStep, onToggleBar }: MenuRowActionsProps) {
+  // La acción espera a que el menú se cierre y devuelva el foco a su botón: si
+  // la fila cambia de lugar antes, el navegador suelta el foco a media
+  // animación (como en `ActionsMenu`).
+  const { choose, onCloseAutoFocus } = useDeferredAction()
+
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
@@ -34,30 +29,36 @@ export function MenuRowActions({ entry, index, count, isInBar, isBarFull, onStep
           <Icon name="more" size={18} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" onCloseAutoFocus={onCloseAutoFocus}>
         <DropdownMenuItem
           disabled={index === 0}
-          onSelect={afterClosing(() => {
+          onSelect={() => {
+            choose(() => {
               onStep(index, -1)
-            })}
+            })
+          }}
         >
           <Icon name="up" size={16} />
           <span>Subir</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={index === count - 1}
-          onSelect={afterClosing(() => {
+          onSelect={() => {
+            choose(() => {
               onStep(index, 1)
-            })}
+            })
+          }}
         >
           <Icon name="down" size={16} />
           <span>Bajar</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={!isInBar && isBarFull}
-          onSelect={afterClosing(() => {
+          onSelect={() => {
+            choose(() => {
               onToggleBar(entry.to)
-            })}
+            })
+          }}
         >
           <span>{isInBar ? 'Quitar de la barra de abajo' : 'Poner en la barra de abajo'}</span>
         </DropdownMenuItem>

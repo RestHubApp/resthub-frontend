@@ -6,6 +6,7 @@ import { BASE_URL, sessionScript, launch, REPORTS, session } from './common.mjs'
 const browser = await launch()
 const storage = await session(browser, 'platform')
 const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+await context.addCookies(storage.cookies ?? [])
 await context.addInitScript(sessionScript(storage))
 const page = await context.newPage()
 await page.goto(`${BASE_URL}/plataforma/observabilidad`)

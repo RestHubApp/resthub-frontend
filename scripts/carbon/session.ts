@@ -3,9 +3,10 @@ import type { BrowserContext } from '@playwright/test'
 import type { Route } from './routes.ts'
 
 // La sesión de un mesero sin pasar por el acceso ni por un backend: se guarda
-// donde la aplicación la guarda y las llamadas al API se responden aquí. Los
-// bytes del API no se cuentan (los datos reales dependen del local).
-const SESSION_KEY = 'resthub.session.v2'
+// donde la aplicación la guarda y las llamadas al API se responden aquí (la
+// recuperación del token, `/auth/me` y `/auth/refresh`, también). Los bytes del
+// API no se cuentan (los datos reales dependen del local).
+const SESSION_KEY = 'resthub.session.v3'
 const A_YEAR_S = 365 * 24 * 60 * 60
 
 const WAITER_PERMISSIONS = ['menu.read', 'tables.read', 'orders.take', 'orders.charge', 'customers.read', 'reservations.read']
@@ -14,7 +15,7 @@ const WAITER_ACCOUNT = {
   kind: 'staff',
   permissions: WAITER_PERMISSIONS,
   preview: false,
-  terms_version: '2026-10-12',
+  terms_version: '2026-10-15',
   terms_accepted: true,
   privacy_version: '2026-10',
   privacy_accepted: true,
@@ -49,7 +50,7 @@ function bodyFor(path: string): unknown {
 
 /** Abre la sesión del mesero en el contexto y responde al API con datos vacíos. */
 export async function signInWaiter(context: BrowserContext): Promise<void> {
-  const saved = JSON.stringify({ token: waiterToken(), account: WAITER_ACCOUNT })
+  const saved = JSON.stringify({ tag: 'medicion', expiresAt: Date.now() + A_YEAR_S * 1000, account: WAITER_ACCOUNT })
   await context.addInitScript(
     ([key, value]) => {
       localStorage.setItem(key, value)

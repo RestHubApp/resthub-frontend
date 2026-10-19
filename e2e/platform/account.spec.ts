@@ -95,3 +95,32 @@ test('ACC-14 las opciones del menú de accesibilidad se anuncian con el texto qu
   }
   await evidence(page, 'acc-14-opciones-en-espanol')
 })
+
+test('ACC-15 en el celular, el mesero abre el menú de accesibilidad desde «Cuenta», aplica una opción y lo vuelve a abrir @only-mobile', async ({ page, local }) => {
+  covers('funcion:shell.mas-accesibilidad', 'funcion:accesibilidad.opcion')
+  await openAs(page, local.waiter, '/pedidos')
+  const account = page.getByRole('navigation').getByRole('button', { name: 'Cuenta' })
+  const close = page.getByRole('button', { name: CLOSE_WIDGET })
+  await expect(page.locator('.asw-menu-btn, .a11y-launcher')).toHaveCount(0)
+
+  await account.click()
+  await page.getByRole('dialog', { name: 'Cuenta' }).getByRole('button', { name: OPEN_WIDGET }).click()
+  await expect(close).toBeVisible()
+  await page.getByRole('button', { name: 'Alto contraste', exact: true }).tap()
+  await expect(page.locator('html')).toHaveClass(FILTER)
+  await evidence(page, 'acc-15-celular-alto-contraste')
+  await close.tap()
+  await expect(close).toBeHidden()
+  // La opción sigue puesta con el menú cerrado y el botón flotante sigue oculto.
+  await expect(page.locator('html')).toHaveClass(FILTER)
+  await expect(page.locator('.asw-menu-btn')).toBeHidden()
+
+  // Una segunda vez abre el mismo menú, que restablece lo elegido.
+  await account.click()
+  await page.getByRole('dialog', { name: 'Cuenta' }).getByRole('button', { name: OPEN_WIDGET }).click()
+  await expect(close).toBeVisible()
+  await page.getByRole('button', { name: /^Restablecer/u }).tap()
+  await expect(page.locator('html')).not.toHaveClass(FILTER)
+  await close.tap()
+  await expect(close).toBeHidden()
+})

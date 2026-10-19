@@ -1,9 +1,13 @@
+import { Suspense } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router'
 
 import type { AnyPermissionCode } from '@/api/types'
 import { paths } from '@/services/paths'
+import { lazyNamed } from '@/components/lazyNamed'
 import { hasPermission, useSession } from '@/store/session'
-import { TermsGate } from './TermsGate'
+
+// Se ve una vez por cuenta (o al cambiar los términos): no viaja en el paquete principal.
+const TermsGate = lazyNamed(() => import('./TermsGate'), 'TermsGate')
 
 interface RequireSessionProps {
   /** Permiso que exige la ruta. Sin el, basta con estar autenticado. */
@@ -31,7 +35,11 @@ export function RequireSession({ permission }: RequireSessionProps) {
   // previa no los acepta: quien mira no es el dueño de la cuenta.
   // La administración del sistema no trabaja con datos de clientes: no los acepta.
   if (account.kind === 'staff' && (!account.terms_accepted || !account.privacy_accepted) && !account.preview) {
-    return <TermsGate account={account} />
+    return (
+      <Suspense fallback={null}>
+        <TermsGate account={account} />
+      </Suspense>
+    )
   }
   if (permission !== undefined && !hasPermission(account, permission)) {
     return <Navigate to={paths.home} replace />

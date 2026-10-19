@@ -20,6 +20,9 @@ async function call(token, method, route, body) {
 
 async function token(account) {
   const r = await call(null, 'POST', '/auth/login', { email: ACCOUNTS[account].email, password: PASSWORD })
+  // Los datos fiscales y los roles piden la contraseña confirmada (RFS-21). Un
+  // backend sin esa ruta responde 404 y se sigue.
+  await call(r.access_token, 'POST', '/auth/me/reauthenticate', { password: PASSWORD }).catch(() => undefined)
   return r.access_token
 }
 
@@ -62,6 +65,11 @@ async function prepareCash(t) {
 export async function prepareData() {
   await acceptTerms()
   const t = await token('owner')
+  // La revisión usa la sesión de cada cuenta durante toda la corrida: con el
+  // bloqueo por inactividad (RFS-29), una cuenta que pasa diez minutos sin
+  // pedir nada mostraría el desbloqueo en vez de su pantalla. Un backend sin
+  // ese ajuste lo ignora.
+  await call(t, 'PATCH', '/restaurant', { idle_lock_minutes: 0 })
   await prepareCash(t)
   await accountWithoutTerms(t)
   const ids = {}
@@ -111,7 +119,7 @@ export async function prepareData() {
   // Datos fiscales, un pedido cobrado con comprobante y uno servido por cobrar.
   await call(t, 'PUT', '/billing/settings', {
     ruc: '20123456789', legal_name: 'Restaurante Demo S.A.C.', address: 'Jr. Lima 456, Lima',
-    igv_rate: '18.00', boleta_series: 'B001', factura_series: 'F001', provider_url: '', provider_token: null,
+    igv_rate: '18.00', boleta_series: 'B001', factura_series: 'F001',
   })
   const menu = await call(t, 'GET', '/menu')
   const dishes = menu.categories.flatMap((c) => c.items ?? [])
@@ -179,6 +187,18 @@ export async function prepareData() {
     withoutInvoice = order
   }
   ids.orderWithoutInvoice = withoutInvoice.id
+
+  // Un conteo físico cerrado, para su reporte de diferencias y la tendencia de un insumo.
+  const counts = await call(t, 'GET', '/inventory/stock-counts?status=closed&limit=1')
+  let closedCount = counts.items[0]
+  if (!closedCount) {
+    const [first] = await call(t, 'GET', '/inventory/ingredients')
+    const opened = await call(t, 'POST', '/inventory/stock-counts', { scope: 'selected', ingredient_ids: [first.id], note: 'Pruebas a11y' })
+    const counted = Math.max(0, Number(first.stock) - 1).toFixed(3)
+    await call(t, 'PUT', `/inventory/stock-counts/${opened.id}/lines`, { lines: [{ ingredient_id: first.id, mode: 'base', quantity: counted, full_packages: '0' }] })
+    closedCount = await call(t, 'POST', `/inventory/stock-counts/${opened.id}/close`)
+  }
+  ids.stockCount = closedCount.id
 
   // Un rol sin personas y una categoría vacía: solo esos se pueden eliminar.
   const roles = await call(t, 'GET', '/roles')

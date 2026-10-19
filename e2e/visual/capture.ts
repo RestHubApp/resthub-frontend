@@ -23,7 +23,7 @@ import { join } from 'node:path'
 import type { Locator, Page, Request, Route } from '@playwright/test'
 
 import { expect as expectBase, test as base } from '../support/fixtures'
-import { LOG, SAMPLE_RESTAURANT, OBSERVABILITY, RESTAURANTS } from './data'
+import { ACCESS_HISTORY, LOG, SAMPLE_RESTAURANT, OBSERVABILITY, RESTAURANTS } from './data'
 
 
 const STYLE = join(import.meta.dirname, 'capture.css')
@@ -48,7 +48,11 @@ const FIXED: Readonly<Record<string, unknown>> = {
   [`${API}/platform/restaurants`]: RESTAURANTS,
   [`${API}/platform/activity`]: LOG,
   [`${API}/platform/sandbox`]: SAMPLE_RESTAURANT,
+  [`${API}/auth/me/access-history`]: ACCESS_HISTORY,
 }
+
+/** Los accesos de otra persona, en Personal: los mismos datos fijos que los propios. */
+const STAFF_ACCESS_HISTORY = /^\/api\/v1\/staff\/\d+\/access-history$/u
 
 /** Los sufijos aleatorios de las cuentas y los locales de prueba, con su reemplazo fijo. */
 const SUFFIXES: readonly (readonly [RegExp, string])[] = [
@@ -90,12 +94,28 @@ function normalize(route: string, text: string): string {
   return LISTS_WITH_HOUR.some((list) => list.test(route)) ? withoutSuffixes.replaceAll(INSTANT, '"$1T17:00:00Z"') : withoutSuffixes
 }
 
+/**
+ * Campos que se fijan en respuestas reales: el bloqueo de la sesión (RFS-29)
+ * depende de la versión del backend y su texto se ve en Mi perfil y Personal.
+ */
+const MERGED: Readonly<Record<string, object>> = {
+  [`${API}/auth/me`]: { idle_lock_minutes: 10, has_pin: false, session_locked: false },
+  [`${API}/restaurant`]: { idle_lock_minutes: 10 },
+}
+
+function withMerged(route: string, text: string): string {
+  const fields = MERGED[route]
+  if (fields === undefined) return text
+  const data: unknown = JSON.parse(text)
+  return typeof data === 'object' && data !== null ? JSON.stringify({ ...data, ...fields }) : text
+}
+
 function fixedData(route: string): unknown {
   if (route.startsWith(OBS)) {
     const key = route.slice(OBS.length) as keyof typeof OBSERVABILITY
     return OBSERVABILITY[key]
   }
-  return FIXED[route]
+  return STAFF_ACCESS_HISTORY.test(route) ? ACCESS_HISTORY : FIXED[route]
 }
 
 async function respond(route: Route, request: Request): Promise<void> {
@@ -114,7 +134,7 @@ async function respond(route: Route, request: Request): Promise<void> {
   // aun así se corta, se intenta una vez más.
   const options = { headers: { ...request.headers(), connection: 'close' } }
   const response = await route.fetch(options).catch(async () => route.fetch(options))
-  await route.fulfill({ response, body: normalize(pathname, await response.text()) })
+  await route.fulfill({ response, body: withMerged(pathname, normalize(pathname, await response.text())) })
 }
 
 function esApi(url: URL): boolean {

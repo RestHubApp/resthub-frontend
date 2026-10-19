@@ -16,6 +16,9 @@ function item(id: number, subtotal: string, extra: Partial<OrderItemResponse> = 
     is_courtesy: false,
     courtesy_reason: '',
     is_paid: false,
+    kitchen_round: 1,
+    voided_at: null,
+    void_reason: null,
     created_at: '2026-09-25T20:00:00Z',
     ...extra,
   }
@@ -61,6 +64,14 @@ describe('itemsCents', () => {
     const sampleOrder = order([item(1, '20.00', { is_paid: true }), item(2, '15.50')], '15.50')
     expect(unpaidItems(sampleOrder).map((dish) => dish.id)).toEqual([2])
     expect(itemsCents(sampleOrder, [1])).toBe(0)
+  })
+
+  it('un plato anulado no se cobra por platos: elegir los vigentes cierra la cuenta', () => {
+    const voided = item(1, '20.00', { voided_at: '2026-09-25T20:30:00Z', void_reason: 'Sin insumo' })
+    const sampleOrder = order([voided, item(2, '15.50')], '15.50')
+    expect(unpaidItems(sampleOrder).map((dish) => dish.id)).toEqual([2])
+    expect(itemsCents(sampleOrder, [1])).toBe(0)
+    expect(itemsCents(sampleOrder, [2])).toBe(1550)
   })
 })
 

@@ -17,6 +17,8 @@ export function StaffTeamCard() {
   const granted = usePermissions()
   const ownId = useSession((state) => staffOf(state.account)?.user.id)
   const canManage = (account: StaffResponse) => canManageAccount(account, roles.data, granted)
+  const team = staff.data?.items ?? []
+  const nameOf = (userId: number) => team.find((member) => member.id === userId)?.full_name
 
   return (
     <SectionCard title="Equipo">
@@ -25,7 +27,7 @@ export function StaffTeamCard() {
       ) : (
         <DataTable
           label="Personal"
-          columns={staffColumns({ ownId, canManage })}
+          columns={staffColumns({ ownId, canManage, nameOf })}
           data={staff.data?.items ?? []}
           isLoading={staff.isPending}
           emptyMessage="Todavía no hay cuentas registradas."

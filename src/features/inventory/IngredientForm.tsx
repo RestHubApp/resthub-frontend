@@ -2,6 +2,8 @@ import type { Ingredient, IngredientUnit } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { InventoryFailure } from './InventoryFailure'
+import { IngredientPackagingFields } from './IngredientPackagingFields'
 import { IngredientStockFields } from './IngredientStockFields'
 import { IngredientUnitField } from './IngredientUnitField'
 import { inputUnits } from './units'
@@ -32,16 +34,19 @@ export function IngredientForm({ ingredient, onDone }: IngredientFormProps) {
         ingredient={ingredient}
         field={register('unit', {
           onChange: (event: { target: { value: IngredientUnit } }) => {
-            setValue('min_stock_unit', inputUnits(event.target.value)[0]?.value ?? '')
+            const units = inputUnits(event.target.value)
+            setValue('min_stock_unit', units[0]?.value ?? '')
+            setValue('packaging_size_unit', units.at(-1)?.value ?? '')
           },
         })}
         error={errors.unit?.message}
       />
       <IngredientStockFields register={register} errors={errors} unit={unit} />
+      <IngredientPackagingFields register={register} errors={errors} unit={unit} />
 
+      <InventoryFailure mutation={change} fallback="No se pudo guardar el insumo." />
       <FormFooter
         mutation={change}
-        failureText="No se pudo guardar el insumo."
         onCancel={onDone}
         submit={{ label: isNew ? 'Crear insumo' : 'Guardar', icon: isNew ? 'add' : 'confirm' }}
       />

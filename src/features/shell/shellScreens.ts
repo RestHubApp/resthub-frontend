@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react'
+import { type ComponentType, createContext, useContext } from 'react'
 
 import type { AnyPermissionCode } from '@/api/types'
 import type { ShellIconName } from './ShellIcon'
@@ -15,6 +15,11 @@ export interface ScreenNav {
    * marca en su ruta y en las que cuelgan de ella.
    */
   readonly activeOn?: readonly string[]
+  /**
+   * Un contador junto a la etiqueta (lo que espera ahí, como las mermas por
+   * aprobar). Es perezoso: se baja con la pantalla de la cuenta que lo ve.
+   */
+  readonly badge?: ComponentType
 }
 
 /**

@@ -10,7 +10,7 @@ import { paths } from '@/services/paths'
 // sola vez, al cargar la página, y no cambia mientras la pestaña siga abierta.
 
 /** La sesión del navegador (personal o plataforma), en `localStorage`. */
-export const RESTAURANT_SESSION_KEY = 'resthub.session.v2'
+export const RESTAURANT_SESSION_KEY = 'resthub.session.v3'
 /** La sesión de vista previa, en el `sessionStorage` de su pestaña. */
 export const PREVIEW_SESSION_KEY = 'resthub.vista-previa.sesion.v1'
 /**

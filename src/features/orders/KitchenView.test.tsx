@@ -79,4 +79,24 @@ describe('KitchenView', () => {
     mountScreen(<KitchenView />)
     expect(await screen.findByText('Error del servidor')).toBeInTheDocument()
   })
+
+  it('lo agregado después va aparte con «Nuevo»; lo ya enviado, plegado, y lo anulado, tachado con su motivo', async () => {
+    const second = order({
+      kitchen_round: 2,
+      items: [
+        orderItem({ kitchen_round: 1 }),
+        orderItem({ id: 103, name: 'Ceviche', kitchen_round: 2 }),
+        orderItem({ id: 104, name: 'Arroz con pato', kitchen_round: 2, voided_at: '2026-09-26T17:40:00Z', void_reason: 'Sin insumo' }),
+      ],
+    })
+    open(PERMISSIONS_OWNER, [second])
+
+    const card = await screen.findByRole('article', { name: 'Pedido 12' })
+    const added = within(card).getByRole('region', { name: 'Agregado (ronda 2) Nuevo' })
+    expect(within(added).getByText('Ceviche')).toBeInTheDocument()
+    expect(within(added).getByText('Anulado: Sin insumo')).toBeInTheDocument()
+    expect(within(added).queryByText('Lomo saltado')).not.toBeInTheDocument()
+    expect(within(card).getByText('Ya enviados (1)')).toBeInTheDocument()
+    expect(within(card).getByText('Lomo saltado')).not.toBeVisible()
+  })
 })

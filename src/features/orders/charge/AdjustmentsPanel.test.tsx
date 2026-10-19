@@ -123,4 +123,16 @@ describe('cortesías', () => {
 
     expect(api.calls('delete', COURTESY)).toHaveLength(1)
   })
+
+  it('un plato anulado no aparece entre los que se pueden invitar', async () => {
+    const voided = dish({ voided_at: '2026-09-26T17:40:00Z', void_reason: 'Sin insumo' })
+    const chicha = dish({ id: 2, name: 'Chicha morada' })
+    const { user } = adjust(buildOrder({ items: [voided, chicha] }), PERMISSIONS_OWNER)
+
+    await user.click(screen.getByText(INVITE_DISH))
+
+    expect(screen.getAllByRole('button', { name: 'Invitar' })).toHaveLength(1)
+    expect(screen.getByText(/Chicha morada/u)).toBeInTheDocument()
+    expect(screen.queryByText(/Lomo saltado/u)).not.toBeInTheDocument()
+  })
 })

@@ -174,8 +174,9 @@ export class FakeServer {
   })
 }
 
-/** La respuesta HTTP de lo que declaró la prueba: un error del API, un valor JSON o nada. */
+/** La respuesta HTTP de lo que declaró la prueba: un error del API, un valor JSON, una `Response` armada (un archivo) o nada. */
 function responseOf(value: unknown, routeStatus: number): Response {
+  if (value instanceof Response) return value
   const status = value instanceof ErrorResponse ? value.status : routeStatus
   const data = value instanceof ErrorResponse ? { detail: value.detail, code: value.code } : value
   if (status === 204 || data === undefined) {
@@ -206,7 +207,7 @@ export const PERMISSIONS_OWNER: readonly PermissionCode[] = [
   'menu.read', 'menu.manage', 'tables.read', 'tables.manage', 'orders.take', 'orders.read_all',
   'orders.manage', 'orders.charge', 'orders.discount_any', 'cash.manage', 'billing.issue',
   'billing.manage', 'customers.read', 'customers.manage', 'customers.erase', 'reservations.read', 'reservations.manage',
-  'inventory.read', 'inventory.manage', 'staff.manage', 'restaurant.manage', 'insights.read',
+  'inventory.read', 'inventory.manage', 'inventory.approve_waste', 'staff.manage', 'restaurant.manage', 'insights.read',
   'activity.read', 'roles.manage',
 ]
 
@@ -221,10 +222,11 @@ export function buildAccount(permissions: readonly PermissionCode[], changes: Pa
     kind: 'staff',
     permissions: [...permissions],
     preview: false,
-    terms_version: '2026-10-12',
+    terms_version: '2026-10-15',
     terms_accepted: true,
     privacy_version: '2026-10',
     privacy_accepted: true,
+    must_change_password: false, idle_lock_minutes: 10, has_pin: false, session_locked: false,
     restaurant: { id: 1, name: 'La Picantería', slug: 'la-picanteria', timezone: 'America/Lima' },
     user: { id: 7, email: 'ana@resthub.dev', full_name: 'Ana Torres', role_id: 1, role_label: 'Encargado' },
     ...changes,

@@ -20,11 +20,16 @@ export function saveRestaurant(queryClient: QueryClient, restaurant: PlatformRes
   reread(queryClient)
 }
 
-/** Suma a la ficha el encargado que devolvió el servidor. */
+/** Pone en la ficha el encargado que devolvió el servidor: en su lugar si ya estaba, al final si es nuevo. */
 export function saveOwner(queryClient: QueryClient, restaurantId: number, owner: PlatformOwner): void {
   queryClient.setQueryData<PlatformRestaurantDetail>(
     platformRestaurantQueryKey(restaurantId),
-    (card) => card && { ...card, owners: [...card.owners.filter((other) => other.id !== owner.id), owner] },
+    (card) => {
+      if (card === undefined) return card
+      const isKnown = card.owners.some((other) => other.id === owner.id)
+      const owners = isKnown ? card.owners.map((other) => (other.id === owner.id ? owner : other)) : [...card.owners, owner]
+      return { ...card, owners }
+    },
   )
   reread(queryClient)
 }

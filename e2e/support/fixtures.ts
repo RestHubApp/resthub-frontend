@@ -2,9 +2,11 @@
 // la forma de abrir la aplicación con una sesión ya iniciada.
 import { test as base, expect as expectBase, type Page } from '@playwright/test'
 
-import { createRestaurant, signInPlatformByApi, newHttp, type Local, type Session, type SessionPlatform } from './api'
+import { randomBytes } from 'node:crypto'
 
-const SESSION = 'resthub.session.v2'
+import { API_ORIGIN, createRestaurant, signInPlatformByApi, newHttp, type Local, type Session, type SessionPlatform } from './api'
+
+const SESSION = 'resthub.session.v3'
 
 interface Accessories {
   /** Un restaurante recién dado de alta, solo para esta prueba. */
@@ -35,18 +37,34 @@ export const test = base.extend<Accessories>({
 /** El `expect` de Playwright: las pruebas importan de un solo módulo. */
 export const expect = expectBase
 
+/** Cuándo vence el token, en milisegundos, leído de su `exp`. */
+function expiryOf(token: string): number {
+  const load = JSON.parse(Buffer.from(token.split('.')[1] ?? '', 'base64url').toString()) as { exp: number }
+  return load.exp * 1000
+}
+
 /**
  * Abre la aplicación con la sesión de una cuenta ya iniciada, como si hubiera
  * entrado antes en ese navegador. El acceso por el formulario tiene sus
  * propias pruebas; las demás no necesitan repetirlo.
+ *
+ * Deja lo que dejaría el acceso: la cookie de sesión del API con su valor
+ * anti-CSRF y la cuenta guardada sin el token. Al cargar, la aplicación
+ * recupera el token de la cookie, como tras recargar.
  */
 export async function openAs(page: Page, session: Session | SessionPlatform, destination = '/'): Promise<void> {
+  const cookie = session.account.kind === 'platform' ? 'resthub_platform_session' : 'resthub_session'
+  await page.context().addCookies([
+    { name: cookie, value: session.token, url: API_ORIGIN, httpOnly: true },
+    { name: 'resthub_csrf', value: randomBytes(24).toString('base64url'), url: API_ORIGIN, httpOnly: true },
+  ])
+  const saved = { tag: randomBytes(8).toString('hex'), expiresAt: expiryOf(session.token), account: session.account }
   await page.goto('/acceso')
   await page.evaluate(
     ([key, value]) => {
       localStorage.setItem(key, value)
     },
-    [SESSION, JSON.stringify({ token: session.token, account: session.account })] as const,
+    [SESSION, JSON.stringify(saved)] as const,
   )
   await page.goto(destination)
 }

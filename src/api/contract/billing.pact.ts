@@ -1,10 +1,11 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { fetchOrderInvoice, issueInvoice } from '@/api/billing'
+import { fetchOrderInvoice, issueInvoice, voidInvoice } from '@/api/billing'
 import type { IssueInvoiceRequest } from '@/api/types'
 import {
   API_PREFIX,
   bearer,
+  boolean,
   connectTo,
   eachLike,
   fromProviderState,
@@ -33,8 +34,10 @@ const SALES_RECEIPT: IssueInvoiceRequest = {
   customer_address: '',
 }
 const INVOICE_STATUSES = ['accepted', 'pending', 'rejected', 'simulated'] as const
+const EXAMPLE_INVOICE = 41
+const VOID_REASON = 'El cliente pidió factura'
 
-function invoiceShape() {
+function invoiceShape(isVoided = false) {
   return like({
     id: integer(1),
     order_id: fromProviderState('${orderId}', EXAMPLE_ORDER),
@@ -51,6 +54,7 @@ function invoiceShape() {
       quantity: integer(2),
       unit_price: money('15.00'),
       total: money('30.00'),
+      is_courtesy: boolean(false),
     }),
     discount: money('0.00'),
     taxable: money('25.42'),
@@ -60,14 +64,22 @@ function invoiceShape() {
     status: oneOf(INVOICE_STATUSES, 'simulated'),
     status_label: string('Sin enviar (sin proveedor)'),
     provider_message: string(''),
-    pdf_url: string(''),
-    xml_url: string(''),
-    cdr_url: string(''),
+    // Los archivos los sirve RestHub con la sesión; el comprobante solo dice cuáles existen.
+    has_pdf: boolean(false),
+    has_xml: boolean(false),
+    has_cdr: boolean(false),
     archive_status: oneOf(['disabled', 'pending', 'done', 'failed'], 'disabled'),
     archive_status_label: string('Respaldo apagado'),
     archive_message: string(''),
     archived_at: like(null),
     issued_at: isoDatetime(),
+    // Anulación: sin Lycet el comprobante queda simulado y se anula sin nota de crédito.
+    is_voided: boolean(isVoided),
+    voided_at: isVoided ? isoDatetime() : like(null),
+    void_reason: string(isVoided ? VOID_REASON : ''),
+    credit_note_id: like(null),
+    credit_note: like(null),
+    replaces_invoice_id: like(null),
   })
 }
 
@@ -104,6 +116,23 @@ describe('Contrato: comprobantes', () => {
         connectTo(mockServer)
         const invoice = await fetchOrderInvoice(EXAMPLE_ORDER)
         expect(invoice?.total).toMatch(/^\d+\.\d{2}$/u)
+      })
+  })
+
+  it('anula la boleta simulada de un pedido, sin nota de crédito', async () => {
+    await pact
+      .addInteraction()
+      .given(STATE.invoicedOrder)
+      .uponReceiving('la anulación de la boleta simulada de un pedido')
+      .withRequest('POST', statePath('/billing/invoices/${invoiceId}/void', `/billing/invoices/${String(EXAMPLE_INVOICE)}/void`), (req) =>
+        req.headers({ ...bearer(), ...JSON_HEADERS }).jsonBody({ reason: VOID_REASON }),
+      )
+      .willRespondWith(200, (res) => res.jsonBody(invoiceShape(true)))
+      .executeTest(async (mockServer) => {
+        connectTo(mockServer)
+        const invoice = await voidInvoice(EXAMPLE_INVOICE, VOID_REASON)
+        expect(invoice.is_voided).toBe(true)
+        expect(invoice.credit_note).toBeNull()
       })
   })
 })

@@ -2,6 +2,7 @@ import type { Customer } from '@/api/types'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/services/format'
+import { CustomerConsentRequest } from './CustomerConsentRequest'
 import { CustomerRecentOrders } from './CustomerRecentOrders'
 
 interface CustomerDetailProps {
@@ -11,7 +12,10 @@ interface CustomerDetailProps {
   readonly onEdit: () => void
 }
 
-/** Las cifras de un cliente, su dirección, sus notas y sus últimos pedidos. */
+/**
+ * Las cifras de un cliente, su dirección, sus notas y sus últimos pedidos; si se
+ * guardó antes de pedirle el consentimiento, la casilla para anotarlo.
+ */
 export function CustomerDetail({ customer, timeZone, canEdit, onEdit }: CustomerDetailProps) {
   const figures = [
     { label: 'Visitas', value: String(customer.visits) },
@@ -33,15 +37,18 @@ export function CustomerDetail({ customer, timeZone, canEdit, onEdit }: Customer
         ))}
       </dl>
       {customer.is_frequent ? <StatusBadge label="Cliente frecuente" tone="completed" /> : null}
-      {/* Guardado antes de pedir el consentimiento: al editarlo se puede anotar. */}
+      {/* Guardado antes de pedir el consentimiento: la ficha ofrece la casilla para anotarlo. */}
       {customer.consent_at === null ? <StatusBadge label="Sin consentimiento registrado" tone="pending" /> : null}
       {address.length > 0 ? <p className="m-0 text-sm">{address.join(' · ')}</p> : null}
       {customer.notes === '' ? null : <p className="m-0 rounded-md bg-muted p-3 text-sm">{customer.notes}</p>}
       <CustomerRecentOrders orders={customer.recent_orders} timeZone={timeZone} />
       {canEdit ? (
-        <Button type="button" variant="outline" onClick={onEdit}>
-          Editar datos
-        </Button>
+        <>
+          <Button type="button" variant="outline" onClick={onEdit}>
+            Editar datos
+          </Button>
+          <CustomerConsentRequest customer={customer} />
+        </>
       ) : null}
     </>
   )

@@ -3,7 +3,7 @@ import { asDefault } from '@/components/lazyNamed'
 import { routePatterns } from '@/services/paths'
 import { prefetchOf, type Screen } from './screenTypes'
 
-/** Las pantallas de menú, mesas e inventario. */
+/** Las pantallas de menú y mesas. */
 export const CATALOG_SCREENS: readonly Screen[] = [
   {
     path: routePatterns.menu,
@@ -19,12 +19,4 @@ export const CATALOG_SCREENS: readonly Screen[] = [
     load: asDefault(() => import('@/features/tables/TablesView'), 'TablesView'),
     prefetch: prefetchOf(() => import('@/features/tables/prefetchTables'), 'prefetchTables'),
   },
-  {
-    path: routePatterns.inventory,
-    permission: PERMISSION.inventoryRead,
-    nav: { label: 'Inventario', icon: 'inventory', description: 'Insumos, compras, mermas, recetas y stock bajo.' },
-    load: asDefault(() => import('@/features/inventory/InventoryView'), 'InventoryView'),
-    prefetch: prefetchOf(() => import('@/features/inventory/prefetchInventory'), 'prefetchInventory'),
-  },
-  { path: routePatterns.recipeEditor, permission: PERMISSION.inventoryRead, load: asDefault(() => import('@/features/inventory/RecipeEditorView'), 'RecipeEditorView') },
 ]

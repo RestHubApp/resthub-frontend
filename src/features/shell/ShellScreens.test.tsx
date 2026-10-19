@@ -81,12 +81,12 @@ describe('RequireSession', () => {
     expect(screen.queryByText(BEFORE_STARTING)).not.toBeInTheDocument()
   })
 
-  it('una cuenta del personal con los términos sin aceptar sigue viendo la puerta de los términos', () => {
+  it('una cuenta del personal con los términos sin aceptar sigue viendo la puerta de los términos', async () => {
     server()
     signInAs(['cash.manage'], { terms_accepted: false })
     openProtected()
 
-    expect(screen.getByText(BEFORE_STARTING)).toBeInTheDocument()
+    expect(await screen.findByText(BEFORE_STARTING)).toBeInTheDocument()
   })
 
   it('sin sesión va al acceso recordando adónde se quería ir', async () => {
@@ -186,7 +186,7 @@ describe('RequireSession: términos y privacidad', () => {
     await user.click(proceed)
 
     expect(await screen.findByText('Pedidos')).toBeInTheDocument()
-    expect(api.calls('post', TERMS)[0]?.body).toEqual({ terms_version: '2026-10-12', privacy_version: '2026-10' })
+    expect(api.calls('post', TERMS)[0]?.body).toEqual({ terms_version: '2026-10-15', privacy_version: '2026-10' })
   })
 
   it('si solo falta el tratamiento de datos, igual se pide la puerta', () => {

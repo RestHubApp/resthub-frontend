@@ -11,6 +11,10 @@ const ISSUED = '/billing/invoices'
 const RUC = 'RUC del local'
 const SAVE = { name: 'Guardar datos fiscales' }
 const FISCAL = { name: /Datos fiscales/u }
+const SOL_USER = 'Usuario SOL'
+const SOL_PASSWORD = 'Clave SOL'
+const SAVED = 'Datos fiscales guardados.'
+const CREDENTIALS_REJECTED = 'SUNAT no aceptó el usuario SOL, la clave o el certificado. Revísalos y vuelve a guardar.'
 
 function open(settings: BillingSettings = taxSettings(), issued: Invoice[] = [], at = '/') {
   const api = server().on('get', SETTINGS, settings).on('get', ISSUED, { items: issued, total: issued.length })
@@ -26,14 +30,26 @@ describe('BillingView: datos fiscales', () => {
     expect(screen.queryByText('Falta completar')).not.toBeInTheDocument()
   })
 
-  it('si falta algo para enviar a SUNAT lo dice en el botón y la hoja avisa que falta el token', async () => {
-    const { user } = open(taxSettings({ is_ready: false, has_provider_token: false }))
+  it('si falta algo para enviar a SUNAT lo dice en el botón y la hoja dice qué falta', async () => {
+    const { user } = open(taxSettings({ is_ready: false, has_sol_credentials: false, has_certificate: false, certificate_expires_at: null }))
     expect(await screen.findByText('Falta completar')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', FISCAL))
 
-    expect(await screen.findByRole('dialog', FISCAL)).toBeInTheDocument()
-    expect(screen.getByText('Todavía no cargado.')).toBeInTheDocument()
+    const sheet = within(await screen.findByRole('dialog', FISCAL))
+    expect(sheet.getByText(/Falta el usuario y la clave SOL y el certificado digital\./u)).toBeInTheDocument()
+    expect(sheet.getByLabelText(SOL_USER)).toBeInTheDocument()
+    expect(sheet.getByText('Todavía no hay un certificado cargado.')).toBeInTheDocument()
+  })
+
+  it('con todo cargado dice que está listo y no muestra las credenciales SOL', async () => {
+    const { user } = open()
+    await user.click(await screen.findByRole('button', FISCAL))
+
+    expect(await screen.findByText(/Listo para emitir/u)).toBeInTheDocument()
+    expect(screen.getByText('Usuario y clave SOL cargados.')).toBeInTheDocument()
+    expect(screen.queryByLabelText(SOL_USER)).not.toBeInTheDocument()
+    expect(screen.getByText(/Certificado cargado\. Vence el/u)).toBeInTheDocument()
   })
 
   it('se abre sola desde la dirección con ?accion=datos-fiscales y la limpia', async () => {
@@ -42,7 +58,7 @@ describe('BillingView: datos fiscales', () => {
     expect(await screen.findByLabelText(RUC)).toBeInTheDocument()
   })
 
-  it('guarda con la tasa en punto decimal, series en mayúsculas y sin tocar el token vacío', async () => {
+  it('guarda con la tasa en punto decimal, series en mayúsculas y sin mandar credenciales SOL que no se tocaron', async () => {
     const { api, user } = open(taxSettings({ is_ready: false }))
     api.on('put', SETTINGS, taxSettings())
     await user.click(await screen.findByRole('button', FISCAL))
@@ -54,14 +70,12 @@ describe('BillingView: datos fiscales', () => {
     await user.type(screen.getByLabelText('Serie de boletas'), 'b002')
     await user.click(screen.getByRole('button', SAVE))
 
-    expect(await screen.findByText('Datos fiscales guardados.')).toBeInTheDocument()
+    expect(await screen.findByText(SAVED)).toBeInTheDocument()
     expect(screen.queryByLabelText(RUC)).not.toBeInTheDocument()
-    expect(api.calls('put', SETTINGS)[0]?.body).toMatchObject({
-      igv_rate: '10.5',
-      boleta_series: 'B002',
-      factura_series: 'F001',
-      provider_token: null,
-    })
+    const body = api.calls('put', SETTINGS)[0]?.body
+    expect(body).toMatchObject({ igv_rate: '10.5', boleta_series: 'B002', factura_series: 'F001' })
+    expect(body).not.toHaveProperty('sol_user')
+    expect(body).not.toHaveProperty('sol_password')
   })
 
   it('valida el RUC y las series antes de enviar', async () => {
@@ -79,17 +93,141 @@ describe('BillingView: datos fiscales', () => {
     expect(screen.getByText('Cuatro caracteres, empieza con F')).toBeInTheDocument()
     expect(api.calls('put', SETTINGS)).toHaveLength(0)
   })
+})
 
-  it('un error del servidor al guardar se muestra en el formulario', async () => {
+describe('BillingView: series de notas de crédito', () => {
+  it('las series de notas de crédito vienen con BC01 y FC01, y no pueden repetir la del comprobante', async () => {
     const { api, user } = open(taxSettings({ is_ready: false }))
-    api.on('put', SETTINGS, new ErrorResponse(422, 'El proveedor rechazó el token'))
-
     await user.click(await screen.findByRole('button', FISCAL))
-    await user.type(await screen.findByLabelText('Token del proveedor'), 'secreto')
+    const boletaNotes = await screen.findByLabelText('Serie de notas de crédito de boletas')
+    const facturaNotes = screen.getByLabelText('Serie de notas de crédito de facturas')
+    expect(boletaNotes).toHaveValue('BC01')
+    expect(facturaNotes).toHaveValue('FC01')
+
+    await user.clear(facturaNotes)
+    await user.type(facturaNotes, 'BC02')
+    await user.click(screen.getByRole('button', SAVE))
+    expect(await screen.findByText('Cuatro caracteres, empieza con F')).toBeInTheDocument()
+
+    await user.clear(facturaNotes)
+    await user.type(facturaNotes, 'FC01')
+    await user.clear(boletaNotes)
+    await user.type(boletaNotes, 'b001')
+    await user.click(screen.getByRole('button', SAVE))
+    expect(await screen.findByText('Usa una serie distinta a la del comprobante')).toBeInTheDocument()
+    expect(api.calls('put', SETTINGS)).toHaveLength(0)
+
+    api.on('put', SETTINGS, taxSettings({ boleta_credit_note_series: 'BC02', factura_credit_note_series: 'FC02' }))
+    await user.clear(boletaNotes)
+    await user.type(boletaNotes, 'bc02')
+    await user.clear(facturaNotes)
+    await user.type(facturaNotes, 'fc02')
     await user.click(screen.getByRole('button', SAVE))
 
-    expect(await screen.findByText('El proveedor rechazó el token')).toBeInTheDocument()
-    expect(api.calls('put', SETTINGS)[0]?.body).toMatchObject({ provider_token: 'secreto' })
+    expect(await screen.findByText(SAVED)).toBeInTheDocument()
+    expect(api.calls('put', SETTINGS)[0]?.body).toMatchObject({ boleta_credit_note_series: 'BC02', factura_credit_note_series: 'FC02' })
+  })
+})
+
+async function openSheet(settings: BillingSettings) {
+  const opened = open(settings)
+  await opened.user.click(await screen.findByRole('button', FISCAL))
+  await screen.findByLabelText(RUC)
+  return opened
+}
+
+describe('BillingView: credenciales SOL', () => {
+  it('«Reemplazar» muestra los campos vacíos y manda usuario y clave juntos, el usuario en mayúsculas', async () => {
+    const { api, user } = await openSheet(taxSettings())
+    api.on('put', SETTINGS, taxSettings())
+
+    await user.click(screen.getByRole('button', { name: 'Reemplazar' }))
+    expect(screen.getByLabelText(SOL_USER)).toHaveValue('')
+    expect(screen.getByLabelText(SOL_PASSWORD)).toHaveAttribute('type', 'password')
+    await user.type(screen.getByLabelText(SOL_USER), 'moddatos')
+    await user.type(screen.getByLabelText(SOL_PASSWORD), 'Clave Sol 1')
+    await user.click(screen.getByRole('button', SAVE))
+
+    expect(await screen.findByText(SAVED)).toBeInTheDocument()
+    expect(api.calls('put', SETTINGS)[0]?.body).toMatchObject({ sol_user: 'MODDATOS', sol_password: 'Clave Sol 1' })
+  })
+
+  it('«Conservar las cargadas» vuelve al indicador sin mandar nada de SOL', async () => {
+    const { api, user } = await openSheet(taxSettings())
+    api.on('put', SETTINGS, taxSettings())
+
+    await user.click(screen.getByRole('button', { name: 'Reemplazar' }))
+    await user.type(screen.getByLabelText(SOL_USER), 'OTRO')
+    await user.click(screen.getByRole('button', { name: 'Conservar las cargadas' }))
+    await user.click(screen.getByRole('button', SAVE))
+
+    expect(await screen.findByText(SAVED)).toBeInTheDocument()
+    expect(api.calls('put', SETTINGS)[0]?.body).not.toHaveProperty('sol_user')
+  })
+
+  it('pide el usuario y la clave juntos y con el formato de SUNAT', async () => {
+    const { api, user } = await openSheet(taxSettings({ has_sol_credentials: false, is_ready: false }))
+
+    await user.type(screen.getByLabelText(SOL_USER), 'MOD DATOS')
+    await user.click(screen.getByRole('button', SAVE))
+    expect(await screen.findByText('De 3 a 20 letras o números, sin el RUC delante')).toBeInTheDocument()
+
+    await user.clear(screen.getByLabelText(SOL_USER))
+    await user.type(screen.getByLabelText(SOL_USER), 'MODDATOS')
+    await user.click(screen.getByRole('button', SAVE))
+    expect(await screen.findByText('Escribe también la clave SOL')).toBeInTheDocument()
+    expect(api.calls('put', SETTINGS)).toHaveLength(0)
+  })
+
+  it('con otro RUC pide volver a escribir las credenciales', async () => {
+    const { api, user } = await openSheet(taxSettings())
+    const ruc = screen.getByLabelText(RUC)
+
+    await user.clear(ruc)
+    await user.type(ruc, '20999999999')
+    expect(screen.queryByRole('button', { name: 'Conservar las cargadas' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', SAVE))
+
+    expect(await screen.findByText('Con otro RUC, vuelve a escribir el usuario y la clave SOL')).toBeInTheDocument()
+    expect(api.calls('put', SETTINGS)).toHaveLength(0)
+  })
+
+  it('si el servicio de facturación no responde (502) lo dice en palabras simples', async () => {
+    const { api, user } = await openSheet(taxSettings({ has_sol_credentials: false, is_ready: false }))
+    api.on('put', SETTINGS, new ErrorResponse(502, 'No se pudo conectar con el servicio de facturación.', 'billing_provider'))
+
+    await user.type(screen.getByLabelText(SOL_USER), 'MODDATOS')
+    await user.type(screen.getByLabelText(SOL_PASSWORD), 'moddatos')
+    await user.click(screen.getByRole('button', SAVE))
+
+    expect(await screen.findByText('El servicio de facturación no está disponible, intenta en unos minutos.')).toBeInTheDocument()
+  })
+
+  it('si el servicio de facturación rechaza las credenciales (422) pide revisarlas, distinto de «no disponible»', async () => {
+    const { api, user } = await openSheet(taxSettings({ has_sol_credentials: false, is_ready: false }))
+    api.on('put', SETTINGS, new ErrorResponse(422, 'No aceptó las credenciales.', 'invalid_billing_credentials'))
+
+    await user.type(screen.getByLabelText(SOL_USER), 'MODDATOS')
+    await user.type(screen.getByLabelText(SOL_PASSWORD), 'moddatos')
+    await user.click(screen.getByRole('button', SAVE))
+
+    expect(await screen.findByText(CREDENTIALS_REJECTED)).toBeInTheDocument()
+    expect(screen.queryByText(/no está disponible/u)).not.toBeInTheDocument()
+  })
+
+  it('avisa que SUNAT valida las credenciales al emitir el primer comprobante', async () => {
+    await openSheet(taxSettings())
+
+    expect(screen.getByText(/SUNAT valida el usuario y la clave SOL al emitir el primer comprobante/u)).toBeInTheDocument()
+  })
+
+  it('un error del servidor al guardar se muestra en el formulario', async () => {
+    const { api, user } = await openSheet(taxSettings())
+    api.on('put', SETTINGS, new ErrorResponse(422, 'La serie ya está en uso', 'invalid_billing_settings'))
+
+    await user.click(screen.getByRole('button', SAVE))
+
+    expect(await screen.findByText('La serie ya está en uso')).toBeInTheDocument()
   })
 })
 
@@ -121,14 +259,26 @@ describe('BillingView: emitidos', () => {
     expect(await screen.findByText('F001-3: Aceptado por SUNAT.')).toBeInTheDocument()
   })
 
+  it('un comprobante rechazado muestra el motivo de SUNAT tal cual, también al reenviarlo', async () => {
+    const reason = '0102 - Usuario o contraseña incorrectos'
+    const rejected = invoice({ id: 8, code: 'B001-20', status: 'rejected', status_label: 'Rechazado', provider_message: reason })
+    const { api, user } = open(taxSettings(), [rejected])
+    api.on('post', '/billing/invoices/8/resend', rejected)
+
+    expect(await screen.findByText(reason)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Reenviar' }))
+
+    expect(await screen.findByText(`B001-20: Rechazado. ${reason}`)).toBeInTheDocument()
+  })
+
   it('si el reenvío falla lo avisa', async () => {
     const pending = invoice({ id: 7, status: 'pending', status_label: 'Sin enviar' })
     const { api, user } = open(taxSettings(), [pending])
-    api.on('post', '/billing/invoices/7/resend', new ErrorResponse(502, 'El proveedor no responde'))
+    api.on('post', '/billing/invoices/7/resend', new ErrorResponse(502, 'Sin conexión', 'billing_provider'))
 
     await user.click(await screen.findByRole('button', { name: 'Reenviar' }))
 
-    expect(await screen.findByText('El proveedor no responde')).toBeInTheDocument()
+    expect(await screen.findByText('El servicio de facturación no está disponible, intenta en unos minutos.')).toBeInTheDocument()
   })
 
   it('pagina de a 25 comprobantes', async () => {

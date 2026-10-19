@@ -91,7 +91,7 @@ describe('RestaurantDetailView', () => {
 describe('RestaurantDetailView: encargados y errores', () => {
   it('agrega otro encargado y lo suma a la lista', async () => {
     const { api, save, user } = openCard()
-    const marta = { id: 31, full_name: MARTA_RIOS, email: MARTA_ESQUINA_PE, is_active: true }
+    const marta = { id: 31, full_name: MARTA_RIOS, email: MARTA_ESQUINA_PE, is_active: true, must_change_password: false }
     api.on('post', `${CARD}/owners`, () => {
       const card = restaurantCard()
       save({ ...card, owners: [...card.owners, marta] })

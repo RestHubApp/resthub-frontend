@@ -6,8 +6,10 @@ import { RequireSession } from '@/features/shell/RequireSession'
 import { paths, routePatterns } from '@/services/paths'
 import { lazyRoute } from './lazyRoute'
 import { PREVIEW } from './previewRoute'
+
 import { RouteError } from './RouteError'
 import { SCREENS } from './screens'
+import { SETUP_VIEWS } from './setupViews'
 import type { Screen } from './screens/screenTypes'
 
 /**
@@ -29,7 +31,7 @@ export const router = createBrowserRouter(
     { ...PREVIEW, ErrorBoundary: RouteError },
     {
       path: routePatterns.home,
-      element: <AppShell screens={SCREENS} />,
+      element: <AppShell screens={SCREENS} setupViews={SETUP_VIEWS} />,
       ErrorBoundary: RouteError,
       children: [
         { index: true, Component: HomeRedirect },

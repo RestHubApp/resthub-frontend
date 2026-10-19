@@ -111,6 +111,74 @@
     "description": "Encender o apagar, en la hoja «Reglas de stock», la regla que agota solos los platos sin insumos"
   },
   {
+    "id": "funcion:inventario.envase",
+    "description": "Dar a un insumo su envase («botella de 750 ml») con los pesos lleno y vacío, validando que vayan juntos"
+  },
+  {
+    "id": "funcion:inventario.compra-en-envases",
+    "description": "Registrar una compra en envases con la conversión a la unidad del insumo a la vista"
+  },
+  {
+    "id": "funcion:inventario.merma-por-aprobar",
+    "description": "Una merma que pasa el monto del local se anticipa y queda por aprobar sin mover el stock"
+  },
+  {
+    "id": "funcion:inventario.monto-aprobacion",
+    "description": "Cambiar en «Reglas de stock» el monto desde el que una merma pide aprobación, o apagarlo"
+  },
+  {
+    "id": "funcion:conteo.iniciar",
+    "description": "Iniciar un conteo físico de todos los insumos o de una selección"
+  },
+  {
+    "id": "funcion:conteo.contar",
+    "description": "Contar en la unidad, en envases o por peso, con la conversión en vivo y guardado por línea"
+  },
+  {
+    "id": "funcion:conteo.buscar",
+    "description": "Buscar un insumo en la lista para contar y ver solo los pendientes"
+  },
+  {
+    "id": "funcion:conteo.cerrar",
+    "description": "Cerrar el conteo con confirmación que dice cuántos quedan sin contar; el stock queda ajustado"
+  },
+  {
+    "id": "funcion:conteo.cancelar",
+    "description": "Cancelar un conteo en curso sin tocar el stock"
+  },
+  {
+    "id": "funcion:conteo.reporte",
+    "description": "El reporte de un conteo cerrado: total valorizado, orden por pérdida y diferencias grandes con aviso"
+  },
+  {
+    "id": "funcion:conteo.tendencia",
+    "description": "La tendencia de las diferencias de un insumo en sus últimos conteos"
+  },
+  {
+    "id": "funcion:conteo.historial",
+    "description": "El historial de conteos con su estado y su avance"
+  },
+  {
+    "id": "funcion:conteo.sin-permiso",
+    "description": "Quien solo lee el inventario no puede iniciar ni cerrar conteos"
+  },
+  {
+    "id": "funcion:mermas.aprobar",
+    "description": "Aprobar una merma grande con confirmación: recién ahí baja el stock"
+  },
+  {
+    "id": "funcion:mermas.rechazar",
+    "description": "Rechazar una merma grande con su motivo: el stock no cambia"
+  },
+  {
+    "id": "funcion:mermas.insignia",
+    "description": "El menú cuenta las mermas que esperan aprobación"
+  },
+  {
+    "id": "funcion:mermas.sin-permiso",
+    "description": "Sin inventory.approve_waste no se ve la bandeja de mermas por aprobar"
+  },
+  {
     "id": "estado:inventario.sin-resultados",
     "type": "estado",
     "description": "Una búsqueda sin coincidencias lo dice"
@@ -713,5 +781,22 @@
   {
     "id": "funcion:comprobantes.enviar-correo",
     "description": "Enviar el comprobante emitido por correo desde su ventana, si el restaurante tiene el correo activo"
+  },
+  {
+    "id": "funcion:comprobantes.anular-sin-nota",
+    "description": "Anular un comprobante simulado o rechazado: se anula sin nota de crédito porque nunca fue válido ante SUNAT"
+  },
+  {
+    "id": "funcion:comprobantes.cambiar",
+    "description": "Cambiar una boleta por una factura: se anula la boleta, se emite la factura y la nueva dice a cuál reemplaza"
+  },
+  {
+    "id": "funcion:comprobantes.series-nota-credito",
+    "description": "Las series de notas de crédito (BC01 y FC01) no pueden repetir la del comprobante"
+  },
+  {
+    "id": "estado:comprobante.anulado",
+    "type": "estado",
+    "description": "El comprobante anulado muestra su motivo y el pedido vuelve a ofrecer emitir boleta o factura"
   }
 ]

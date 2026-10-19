@@ -22,6 +22,18 @@ export type PlatformSession = components['schemas']['PlatformAdminSessionRespons
 /** Lo que devuelve `GET /auth/me`: una u otra, según `kind`. */
 export type Session = StaffSession | PlatformSession
 export type AcceptTermsRequest = components['schemas']['AcceptTermsRequest']
+
+// Seguridad de la cuenta: sesiones por dispositivo, contraseña confirmada, PIN y verificación en dos pasos.
+/** Una sesión abierta en un dispositivo; `id` es su referencia pública, no la credencial. */
+export type DeviceSession = components['schemas']['DeviceSessionResponse']
+export type UnusedStaff = components['schemas']['UnusedStaffResponse']
+export type UnlockRequest = components['schemas']['UnlockRequest']
+export type TwoFactorStatus = components['schemas']['TwoFactorStatusResponse']
+export type TwoFactorSetup = components['schemas']['TwoFactorSetupResponse']
+/** Un acceso (correcto, fallido, frenado o bloqueado) de una cuenta, con su dispositivo y lugar (RFS-15). */
+export type AccessEntry = components['schemas']['AccessEntryResponse']
+export type AccessHistoryPage = components['schemas']['AccessHistoryPageResponse']
+export type AccessOutcome = components['schemas']['AccessOutcome']
 export type CustomerExport = components['schemas']['CustomerExportResponse']
 export type PermissionCode = components['schemas']['Permission']
 export type PlatformPermissionCode = components['schemas']['PlatformPermission']
@@ -66,6 +78,7 @@ export type NewItemRequest = components['schemas']['NewItemRequest']
 export type ChangeItemRequest = components['schemas']['ChangeItemRequest']
 export type PaymentRequest = components['schemas']['PaymentRequest']
 export type PaymentResponse = components['schemas']['PaymentResponse']
+export type VoidedPaymentResponse = components['schemas']['VoidedPaymentResponse']
 export type DiscountRequest = components['schemas']['DiscountRequest']
 
 // Caja: el turno abierto, su arqueo y los turnos anteriores.
@@ -111,6 +124,30 @@ export type StockChange = components['schemas']['StockChangeResponse']
 export type DishCost = components['schemas']['DishCostResponse']
 export type Recipe = components['schemas']['RecipeResponse']
 export type ReplaceRecipeRequest = components['schemas']['ReplaceRecipeRequest']
+export type Packaging = components['schemas']['PackagingResponse']
+export type PackagingRequest = components['schemas']['PackagingRequest']
+export type EntryMode = components['schemas']['EntryMode']
+
+// Conteos físicos: el stock contado contra el del sistema, y sus diferencias.
+export type StockCount = components['schemas']['StockCountResponse']
+export type StockCountSummary = components['schemas']['StockCountSummaryResponse']
+export type StockCountLine = components['schemas']['StockCountLineResponse']
+export type StockCountPage = components['schemas']['StockCountPageResponse']
+export type StockCountStatus = components['schemas']['StockCountStatus']
+export type StockCountListParams = NonNullable<
+  operations['list_stock_counts_api_v1_inventory_stock_counts_get']['parameters']['query']
+>
+export type OpenStockCountRequest = components['schemas']['OpenStockCountRequest']
+export type CountLineRequest = components['schemas']['CountLineRequest']
+export type CountDifferences = components['schemas']['CountDifferencesResponse']
+export type CountDifference = components['schemas']['CountDifferenceResponse']
+export type IngredientCountHistory = components['schemas']['IngredientCountHistoryResponse']
+export type CountHistoryItem = components['schemas']['CountHistoryItemResponse']
+
+// Mermas grandes que esperan la aprobación del encargado.
+export type WasteApproval = components['schemas']['WasteApprovalResponse']
+export type WasteApprovalPage = components['schemas']['WasteApprovalPageResponse']
+export type WasteApprovalStatus = components['schemas']['WasteApprovalStatus']
 
 // Panel BI e IA (`/insights`).
 export type InsightsPeriod = components['schemas']['PeriodResponse']
@@ -159,7 +196,11 @@ export type PurchaseSuggestion = components['schemas']['PurchaseSuggestionRespon
 // Comprobantes electrónicos: datos fiscales, boletas y facturas.
 export type BillingSettings = components['schemas']['BillingSettingsResponse']
 export type BillingSettingsRequest = components['schemas']['BillingSettingsRequest']
+export type CertificateUploadRequest = components['schemas']['CertificateUploadRequest']
+/** Los archivos de un comprobante que sirve RestHub: el PDF, el XML firmado y la constancia de SUNAT (CDR). */
+export type InvoiceDocumentFormat = components['schemas']['DocumentFormat']
 export type Invoice = components['schemas']['InvoiceResponse']
+export type CreditNote = components['schemas']['CreditNoteResponse']
 export type BillingCapabilities = components['schemas']['BillingCapabilitiesResponse']
 export type SendInvoiceEmailRequest = components['schemas']['SendInvoiceEmailRequest']
 export type SendInvoiceEmailResponse = components['schemas']['SendInvoiceEmailResponse']
@@ -236,3 +277,5 @@ export type ObsWindowParams = ObsQuery<'read_summary_api_v1_platform_observabili
 export type ObsRoutesParams = ObsQuery<'read_routes_api_v1_platform_observability_routes_get'>
 export type ObsLogsParams = ObsQuery<'search_logs_api_v1_platform_observability_logs_get'>
 export type ObsRequestsParams = ObsQuery<'search_requests_api_v1_platform_observability_requests_get'>
+export type OpeningPeriod = components['schemas']['OpeningPeriodResponse']
+export type SecurityAlert = components['schemas']['SecurityAlertResponse']

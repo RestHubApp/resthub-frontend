@@ -1,29 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ErrorMessage } from '@/components/ErrorMessage'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 
-import { billingQueryKey, billingSettingsQueryKey, updateBillingSettings } from '@/api/billing'
 import type { BillingSettings } from '@/api/types'
+import { FormMessage } from '@/components/FormMessage'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
-import { useNotifications } from '@/store/notifications'
-
-const schema = z.object({
-  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-  ruc: z.string().trim().regex(/^(?:(?:10|15|17|20)\d{9})?$/u, 'El RUC tiene 11 dígitos y empieza en 10 o 20'),
-  legal_name: z.string().trim().max(100, 'Usa como máximo 100 caracteres'),
-  address: z.string().trim().max(200, 'Usa como máximo 200 caracteres'),
-  // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-  igv_rate: z.string().trim().regex(/^\d{1,2}(?:[.,]\d{1,2})?$/u, 'Escribe un porcentaje como 18 o 10.5'),
-  boleta_series: z.string().trim().toUpperCase().regex(/^B[A-Z0-9]{3}$/u, 'Cuatro caracteres, empieza con B'),
-  factura_series: z.string().trim().toUpperCase().regex(/^F[A-Z0-9]{3}$/u, 'Cuatro caracteres, empieza con F'),
-  provider_url: z.string().trim().max(300),
-  provider_token: z.string().trim().max(300),
-})
-type Values = z.infer<typeof schema>
+import { billingErrorMessage } from '@/services/billingErrors'
+import { settingsSchema, valuesOf, type SettingsValues } from './billingSettingsSchema'
+import { SolCredentialsFields } from './SolCredentialsFields'
+import { useSaveBillingSettings } from './useSaveBillingSettings'
 
 interface BillingSettingsFormProps {
   readonly settings: BillingSettings
@@ -31,68 +17,41 @@ interface BillingSettingsFormProps {
   readonly onSaved?: (() => void) | undefined
 }
 
-function valuesOf(settings: BillingSettings): Values {
-  return {
-    ruc: settings.ruc,
-    legal_name: settings.legal_name,
-    address: settings.address,
-    igv_rate: settings.igv_rate,
-    boleta_series: settings.boleta_series,
-    factura_series: settings.factura_series,
-    provider_url: settings.provider_url,
-    provider_token: '',
-  }
-}
-
 /**
- * Los datos fiscales del local y la conexión con el proveedor autorizado.
+ * Los datos fiscales del local y sus credenciales SOL de SUNAT.
  *
- * El token del proveedor no se muestra nunca: el campo vacío lo deja como
- * estaba. Sin RUC, razón social, ruta y token los comprobantes quedan «sin
- * enviar» y se reenvían después.
+ * El usuario y la clave SOL no se muestran nunca: si están cargados solo se
+ * ofrece reemplazarlos, y sin escribirlos el servidor conserva los que tenía.
  */
 export function BillingSettingsForm({ settings, onSaved }: BillingSettingsFormProps) {
-  const queryClient = useQueryClient()
-  const push = useNotifications((state) => state.push)
-  const { register, handleSubmit, formState } = useForm<Values>({
-    resolver: zodResolver(schema),
+  const form = useForm<SettingsValues>({
+    resolver: zodResolver(settingsSchema(settings)),
     defaultValues: valuesOf(settings),
   })
-  const errorDe = (field: keyof Values): string | undefined => formState.errors[field]?.message
-  const save = useMutation({
-    mutationFn: (values: Values) =>
-      updateBillingSettings({
-        ...values,
-        igv_rate: values.igv_rate.replace(',', '.'),
-        provider_token: values.provider_token === '' ? null : values.provider_token,
-      }),
-    onSuccess: (saved) => {
-      queryClient.setQueryData(billingSettingsQueryKey, saved)
-      void queryClient.invalidateQueries({ queryKey: billingQueryKey })
-      push({ tone: 'info', message: 'Datos fiscales guardados.' })
-      onSaved?.()
-    },
-  })
+  const { register, handleSubmit, formState } = form
+  const errorOf = (field: keyof SettingsValues): string | undefined => formState.errors[field]?.message
+  const save = useSaveBillingSettings(onSaved)
 
   return (
     <form noValidate className="flex flex-col gap-4" onSubmit={onSubmit(handleSubmit((values) => {
       save.mutate(values)
     }))}>
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField id="fiscal-ruc" label="RUC del local" inputMode="numeric" field={register('ruc')} error={errorDe('ruc')} />
-        <TextField id="fiscal-razon" label="Razón social" field={register('legal_name')} error={errorDe('legal_name')} />
+        <TextField id="fiscal-ruc" label="RUC del local" inputMode="numeric" field={register('ruc')} error={errorOf('ruc')} />
+        <TextField id="fiscal-razon" label="Razón social" field={register('legal_name')} error={errorOf('legal_name')} />
       </div>
-      <TextField id="fiscal-direccion" label="Dirección fiscal" field={register('address')} error={errorDe('address')} />
+      <TextField id="fiscal-direccion" label="Dirección fiscal" field={register('address')} error={errorOf('address')} />
       <div className="grid gap-4 sm:grid-cols-3">
-        <TextField id="fiscal-igv" label="IGV (%)" inputMode="decimal" hint="18 en el régimen general; la tasa reducida si el local es MYPE de restaurantes." field={register('igv_rate')} error={errorDe('igv_rate')} />
-        <TextField id="fiscal-serie-b" label="Serie de boletas" field={register('boleta_series')} error={errorDe('boleta_series')} />
-        <TextField id="fiscal-serie-f" label="Serie de facturas" field={register('factura_series')} error={errorDe('factura_series')} />
+        <TextField id="fiscal-igv" label="IGV (%)" inputMode="decimal" hint="18 en el régimen general; la tasa reducida si el local es MYPE de restaurantes." field={register('igv_rate')} error={errorOf('igv_rate')} />
+        <TextField id="fiscal-serie-b" label="Serie de boletas" field={register('boleta_series')} error={errorOf('boleta_series')} />
+        <TextField id="fiscal-serie-f" label="Serie de facturas" field={register('factura_series')} error={errorOf('factura_series')} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField id="fiscal-url" label="Ruta del proveedor (Nubefact)" placeholder="https://api.nubefact.com/api/v1/…" field={register('provider_url')} error={errorDe('provider_url')} />
-        <TextField id="fiscal-token" label="Token del proveedor" type="password" autoComplete="off" hint={settings.has_provider_token ? 'Cargado. Déjalo vacío para no cambiarlo.' : 'Todavía no cargado.'} field={register('provider_token')} error={errorDe('provider_token')} />
+        <TextField id="fiscal-serie-nc-b" label="Serie de notas de crédito de boletas" hint="Las que anulan una boleta, como BC01." field={register('boleta_credit_note_series')} error={errorOf('boleta_credit_note_series')} />
+        <TextField id="fiscal-serie-nc-f" label="Serie de notas de crédito de facturas" hint="Las que anulan una factura, como FC01." field={register('factura_credit_note_series')} error={errorOf('factura_credit_note_series')} />
       </div>
-      <ErrorMessage isError={save.isError} error={save.error} fallback="No se pudieron guardar los datos." />
+      <SolCredentialsFields form={form} hasCredentials={settings.has_sol_credentials} savedRuc={settings.ruc} />
+      {save.isError ? <FormMessage tone="error">{billingErrorMessage(save.error, 'No se pudieron guardar los datos.')}</FormMessage> : null}
       <Button type="submit" className="self-end" disabled={save.isPending}>
         {save.isPending ? 'Guardando…' : 'Guardar datos fiscales'}
       </Button>

@@ -12,17 +12,17 @@ const NAME = 'La Esquina'
 
 describe('OwnersList', () => {
   it('sin encargados avisa que no hay ninguno', () => {
-    mountScreen(<OwnersList owners={[]} />)
+    mountScreen(<OwnersList restaurantId={1} owners={[]} />)
 
     expect(screen.getByText('Este restaurante no tiene encargados.')).toBeInTheDocument()
   })
 
   it('lista cada encargado con su estado', () => {
     const owners = [
-      { id: 1, full_name: 'Lucho Ramos', email: 'lucho@esquina.pe', is_active: true },
-      { id: 2, full_name: 'Ana Paz', email: 'ana@esquina.pe', is_active: false },
+      { id: 1, full_name: 'Lucho Ramos', email: 'lucho@esquina.pe', is_active: true, must_change_password: false },
+      { id: 2, full_name: 'Ana Paz', email: 'ana@esquina.pe', is_active: false, must_change_password: false },
     ]
-    mountScreen(<OwnersList owners={owners} />)
+    mountScreen(<OwnersList restaurantId={1} owners={owners} />)
 
     expect(screen.getAllByRole('listitem')).toHaveLength(2)
     expect(screen.getByText('Activa')).toBeInTheDocument()

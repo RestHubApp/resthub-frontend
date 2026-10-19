@@ -64,6 +64,8 @@ export const ROUTES = [
   { id: 'mesas', name: 'Mesas', route: '/mesas', pattern: '/mesas', account: 'owner' },
   { id: 'inventario', name: 'Inventario', route: '/inventario', pattern: '/inventario', account: 'owner' },
   { id: 'receta', name: 'Editor de receta', route: '/inventario/recetas/:dish', pattern: '/inventario/recetas/:menuItemId', account: 'owner' },
+  { id: 'conteo', name: 'Conteo físico cerrado: reporte de diferencias', route: '/inventario/conteos/:stockCount', pattern: '/inventario/conteos/:countId', account: 'owner' },
+  { id: 'mermas-por-aprobar', name: 'Mermas por aprobar', route: '/mermas-por-aprobar', pattern: '/mermas-por-aprobar', account: 'owner' },
   { id: 'personal', name: 'Personal', route: '/personal', pattern: '/personal', account: 'owner' },
   { id: 'roles', name: 'Roles y permisos', route: '/roles', pattern: '/roles', account: 'owner' },
   { id: 'bitacora', name: 'Bitácora del restaurante', route: '/bitacora', pattern: '/bitacora', account: 'owner' },
@@ -93,6 +95,9 @@ export const OVERLAYS = [
   { id: 'o-paleta', name: 'Diálogo «Buscar o ir a…» (paleta de comandos)', type: 'Dialog', route: '/pedidos', account: 'owner', steps: [{ button: 'Buscar o ir a…' }] },
   { id: 'o-apariencia-rapida', name: 'Hoja «Apariencia rápida»', type: 'Sheet', route: '/pedidos', account: 'owner', steps: [{ button: 'Apariencia rápida' }] },
   { id: 'o-clave-propia', name: 'Diálogo «Cambiar contraseña»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Cambiar contraseña' }] },
+  { id: 'o-pin', name: 'Diálogo «Elegir un PIN»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Elegir un PIN' }] },
+  // Activar la verificación en dos pasos pide antes la contraseña (RFS-21): la sesión del navegador no la confirmó.
+  { id: 'o-confirmar-clave', name: 'Diálogo «Confirma tu contraseña»', type: 'Dialog', route: '/perfil', account: 'waiter', steps: [{ button: 'Activar' }] },
   { id: 'o-widget', name: 'Menú del widget de accesibilidad desde la barra lateral', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['desktop'], steps: [{ button: 'Accesibilidad' }], wait: '.asw-menu' },
   { id: 'o-widget-movil', name: 'Menú del widget de accesibilidad desde «Cuenta»', type: 'Widget', route: '/pedidos', account: 'waiter', views: ['mobile'], steps: [{ button: 'Cuenta' }, { button: 'Accesibilidad' }], wait: '.asw-menu' },
   { id: 'o-salir-pendientes', name: 'Confirmar salir con pedidos sin enviar', type: 'AlertDialog', route: '/pedidos', account: 'waiter', queue: true, steps: [{ button: 'Cerrar sesión' }], views: ['desktop'] },
@@ -125,6 +130,8 @@ export const OVERLAYS = [
   { id: 'o-turno', name: 'Diálogo del turno de caja', type: 'Dialog', route: '/caja', account: 'owner', steps: [{ button: /Cerró/ }] },
   { id: 'd-descuentos', name: 'Caja: «Descuentos del mesero» desplegado', type: 'Desplegable', route: '/caja', account: 'owner', steps: [{ button: 'Descuentos del mesero' }], wait: 'main' },
   { id: 'o-datos-fiscales', name: 'Hoja «Datos fiscales»', type: 'Sheet', route: '/comprobantes', account: 'owner', steps: [{ button: /^Datos fiscales/ }] },
+  { id: 'o-cambiar-comprobante', name: 'Diálogo «Cambiar comprobante»: el motivo', type: 'Dialog', route: '/comprobantes', account: 'owner', steps: [{ button: 'Cambiar comprobante' }] },
+  { id: 'o-cambiar-comprobante-nuevo', name: 'Diálogo «Cambiar comprobante»: los datos del nuevo', type: 'Dialog', route: '/comprobantes', account: 'owner', steps: [{ button: 'Cambiar comprobante' }, { button: 'El cliente pidió factura' }, { button: 'Siguiente' }] },
 
   // Menú.
   { id: 'o-nueva-categoria', name: 'Diálogo «Nueva categoría»', type: 'Dialog', route: '/menu', account: 'owner', steps: [{ button: 'Nueva categoría' }] },
@@ -142,6 +149,7 @@ export const OVERLAYS = [
 
   // Inventario.
   { id: 't-movimientos', name: 'Inventario: pestaña Movimientos', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Movimientos' }], wait: TAB },
+  { id: 't-conteos', name: 'Inventario: pestaña Conteos', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Conteos' }], wait: TAB },
   { id: 't-recetas', name: 'Inventario: pestaña Recetas', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Recetas' }], wait: TAB },
   { id: 't-compras', name: 'Inventario: pestaña Compras', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }], wait: TAB },
   { id: 't-proveedores', name: 'Inventario: pestaña Proveedores', type: 'Tabs', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }], wait: TAB },
@@ -153,6 +161,8 @@ export const OVERLAYS = [
   { id: 'o-editar-insumo', name: 'Diálogo «Editar insumo»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ button: 'Más acciones de Aceite vegetal' }, { menuitem: 'Editar' }] },
   { id: 'o-nueva-orden', name: 'Diálogo «Nueva orden de compra»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }, { button: 'Nueva orden' }] },
   { id: 'o-recibir-orden', name: 'Diálogo «Recibir la orden»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }, { button: 'Recibir' }] },
+  { id: 'o-iniciar-conteo', name: 'Diálogo «Iniciar conteo físico»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Conteos' }, { button: 'Iniciar conteo' }] },
+  { id: 'o-tendencia-conteo', name: 'Hoja «Tendencia» de un insumo contado', type: 'Sheet', route: '/inventario/conteos/:stockCount', account: 'owner', steps: [{ button: /^Tendencia de/ }] },
   { id: 'o-nuevo-proveedor', name: 'Diálogo «Nuevo proveedor»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }, { button: 'Nuevo proveedor' }] },
   { id: 'o-editar-proveedor', name: 'Diálogo «Editar proveedor»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }, { button: 'Editar' }] },
 
@@ -161,6 +171,7 @@ export const OVERLAYS = [
   { id: 'o-editar-cuenta', name: 'Diálogo «Editar cuenta»', type: 'Dialog', route: '/personal', account: 'owner', steps: [{ button: 'Editar' }] },
   { id: 'o-clave-cuenta', name: 'Diálogo «Contraseña» de una cuenta', type: 'Dialog', route: '/personal', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Contraseña' }] },
   { id: 'o-desactivar-cuenta', name: 'Confirmar desactivar cuenta', type: 'AlertDialog', route: '/personal', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Desactivar' }] },
+  { id: 'o-sesiones-cuenta', name: 'Hoja «Sesiones» de una cuenta', type: 'Sheet', route: '/personal', account: 'owner', steps: [{ button: /^Más acciones de/ }, { menuitem: 'Sesiones abiertas' }] },
   { id: 'o-nuevo-rol', name: 'Hoja «Nuevo rol»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Nuevo rol' }] },
   { id: 'o-editar-rol', name: 'Hoja «Editar el rol Mesero»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Editar el rol Mesero' }] },
   { id: 'o-ver-rol', name: 'Hoja «Permisos del rol Encargado»', type: 'Sheet', route: '/roles', account: 'owner', steps: [{ button: 'Ver permisos del rol Encargado' }] },
@@ -200,7 +211,7 @@ export const ROUTER_ROUTES = [
   '/', '/acceso', '/pedidos', '/pedidos/nuevo', '/pedidos/:orderId', '/pedidos/:orderId/agregar',
   '/perfil', '/perfil/apariencia', '/tablero', '/tablero/historial', '/cocina', '/imprimir/:orderId/:kind', '/comprobantes',
   '/comprobantes/:invoiceId/imprimir', '/reservas', '/clientes', '/caja', '/menu', '/mesas', '/inventario',
-  '/inventario/recetas/:menuItemId', '/personal', '/roles', '/bitacora', '/panel', '/panel/reposicion', '/panel/ia', '*',
+  '/inventario/recetas/:menuItemId', '/inventario/conteos/:countId', '/mermas-por-aprobar', '/personal', '/roles', '/bitacora', '/panel', '/panel/reposicion', '/panel/ia', '*',
   '/plataforma/acceso', '/plataforma', '/plataforma/restaurantes/nuevo', '/plataforma/restaurantes/:restaurantId',
   '/plataforma/bitacora', '/plataforma/vista-previa', '/plataforma/observabilidad', '/vista-previa', '/privacidad', '/terminos',
 ]

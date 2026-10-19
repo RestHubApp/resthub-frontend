@@ -1,6 +1,7 @@
 import type { StaffResponse } from '@/api/types'
 import type { DataColumn } from '@/components/DataTable'
 import { StatusBadge } from '@/components/StatusBadge'
+import { DeactivationNote } from './DeactivationNote'
 import { StaffRowActions } from './StaffRowActions'
 
 // Una columna que en el celular se lee bajo el nombre.
@@ -11,10 +12,12 @@ interface StaffColumnsOptions {
   readonly ownId: number | undefined
   /** Si quien mira puede cambiar la cuenta. */
   readonly canManage: (account: StaffResponse) => boolean
+  /** El nombre de una cuenta de la lista, para decir quién desactivó a otra. */
+  readonly nameOf: (userId: number) => string | undefined
 }
 
 /** Las columnas de la tabla del equipo. */
-export function staffColumns({ ownId, canManage }: StaffColumnsOptions): DataColumn<StaffResponse>[] {
+export function staffColumns({ ownId, canManage, nameOf }: StaffColumnsOptions): DataColumn<StaffResponse>[] {
   return [
     {
       id: 'nombre',
@@ -27,6 +30,7 @@ export function staffColumns({ ownId, canManage }: StaffColumnsOptions): DataCol
           <span className="text-xs break-all text-muted-foreground sm:hidden">
             {account.email} · {account.role_label} · {account.is_active ? 'Activa' : 'Inactiva'}
           </span>
+          <DeactivationNote account={account} nameOf={nameOf} />
         </span>
       ),
     },

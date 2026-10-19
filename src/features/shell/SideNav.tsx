@@ -1,14 +1,13 @@
 import type { Session } from '@/api/types'
 import { paths } from '@/services/paths'
-import { AccessibilityRow } from './AccessibilityRow'
 import { scopeName, spokenScope } from './accountLabels'
 import { Brand } from '@/components/Brand'
 import type { NavEntry } from './navigation'
 import { NavList } from './NavList'
-import { QuickAppearanceButton } from './quick/QuickAppearanceButton'
 import { QuickSearchField } from './quick/QuickSearchField'
 import { ScopeName } from './ScopeName'
 import { SessionActions } from './SessionActions'
+import { SideNavTiles } from './SideNavTiles'
 
 interface SideNavProps {
   readonly entries: readonly NavEntry[]
@@ -27,11 +26,10 @@ export function SideNav({ entries, account }: SideNavProps) {
         </div>
         <ScopeName name={scopeName(account)} variant="sidebar" spokenLabel={spokenScope(account)} />
         <QuickSearchField />
-        <nav aria-label="Navegación principal" className="scroll-shadow -mx-1 flex-1 overflow-y-auto px-1">
+        <nav aria-label="Navegación principal" className="scroll-shadow -mx-1 min-h-0 flex-1 overflow-y-auto px-1">
           <NavList entries={entries} />
         </nav>
-        <QuickAppearanceButton variant="row" />
-        <AccessibilityRow />
+        <SideNavTiles />
         <SessionActions account={account} />
       </aside>
     </div>

@@ -7,7 +7,9 @@ import type {
   BillingCapabilities,
   BillingSettings,
   BillingSettingsRequest,
+  CertificateUploadRequest,
   Invoice,
+  InvoiceDocumentFormat,
   InvoicePage,
   IssueInvoiceRequest,
   SendInvoiceEmailRequest,
@@ -39,6 +41,29 @@ export const billingSettingsQuery = queryOptions({
 
 export async function updateBillingSettings(payload: BillingSettingsRequest): Promise<BillingSettings> {
   return send((client) => client.PUT('/api/v1/billing/settings', { body: payload }))
+}
+
+/** Sube o reemplaza el certificado digital del local; devuelve los datos fiscales con su vencimiento. */
+export async function uploadCertificate(payload: CertificateUploadRequest): Promise<BillingSettings> {
+  return send((client) => client.PUT('/api/v1/billing/settings/certificate', { body: payload }), { timeout: SLOW_TIMEOUT_MS })
+}
+
+/** Un PDF, un XML o un ZIP: se recibe tal cual, como archivo. */
+const AS_FILE = { headers: { Accept: '*/*' }, parseAs: 'blob' } as const
+
+/**
+ * Un archivo del comprobante (PDF, XML o CDR), pedido con la sesión: ya no hay
+ * enlaces públicos. Si todavía no existe, rechaza con `invoice_document_unavailable`.
+ */
+export async function downloadInvoiceDocument(invoiceId: number, format: InvoiceDocumentFormat): Promise<Blob> {
+  return send(
+    (client) =>
+      client.GET('/api/v1/billing/invoices/{invoice_id}/{document_format}', {
+        params: { path: { invoice_id: invoiceId, document_format: format } },
+        ...AS_FILE,
+      }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
 }
 
 async function fetchInvoices(offset = 0): Promise<InvoicePage> {
@@ -78,6 +103,40 @@ export async function resendInvoice(invoiceId: number): Promise<Invoice> {
   return send(
     (client) =>
       client.POST('/api/v1/billing/invoices/{invoice_id}/resend', { params: { path: { invoice_id: invoiceId } } }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
+}
+
+/**
+ * Anula el comprobante. Si SUNAT lo había aceptado, el servidor emite la nota
+ * de crédito y responde cuando el proveedor contesta; si la nota no quedó
+ * aceptada, el comprobante sigue vigente con `credit_note` en curso.
+ */
+export async function voidInvoice(invoiceId: number, reason: string): Promise<Invoice> {
+  return send(
+    (client) =>
+      client.POST('/api/v1/billing/invoices/{invoice_id}/void', { params: { path: { invoice_id: invoiceId } }, body: { reason } }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
+}
+
+/** Reenvía la nota de crédito; responde con el comprobante que anula, ya al día. */
+export async function resendCreditNote(creditNoteId: number): Promise<Invoice> {
+  return send(
+    (client) =>
+      client.POST('/api/v1/billing/credit-notes/{credit_note_id}/resend', { params: { path: { credit_note_id: creditNoteId } } }),
+    { timeout: SLOW_TIMEOUT_MS },
+  )
+}
+
+/** Un archivo de la nota de crédito, con la misma regla que los del comprobante. */
+export async function downloadCreditNoteDocument(creditNoteId: number, format: InvoiceDocumentFormat): Promise<Blob> {
+  return send(
+    (client) =>
+      client.GET('/api/v1/billing/credit-notes/{credit_note_id}/{document_format}', {
+        params: { path: { credit_note_id: creditNoteId, document_format: format } },
+        ...AS_FILE,
+      }),
     { timeout: SLOW_TIMEOUT_MS },
   )
 }

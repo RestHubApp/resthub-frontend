@@ -162,6 +162,18 @@
     "description": "Detalle: el mesero no ve «Cancelar pedido»"
   },
   {
+    "id": "funcion:pedido.anular-plato",
+    "description": "Pedido: el encargado o la cocina anulan un plato ya enviado, con motivo obligatorio o rápido; queda tachado con «Anulado: <motivo>» y fuera del total"
+  },
+  {
+    "id": "funcion:pedido.anular-sin-permiso",
+    "description": "Pedido: el mesero no ve «Anular» en los platos ya enviados"
+  },
+  {
+    "id": "funcion:cocina.rondas",
+    "description": "Tablero y cocina: lo agregado a un pedido ya enviado va bajo «Agregado (ronda N)» con «Nuevo»; lo anterior, plegado en «Ya enviados»"
+  },
+  {
     "id": "funcion:pedido.cambiar-mesa",
     "description": "Detalle: cambiar el pedido a una mesa libre"
   },

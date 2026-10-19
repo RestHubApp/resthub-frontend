@@ -102,3 +102,11 @@ export function obsRequestsQuery(params: Omit<ObsRequestsParams, 'before_id' | '
     getNextPageParam: (last) => last.next_before_id,
   })
 }
+
+/** Los últimos picos de accesos fallidos, bloqueos o 403 que pasaron su umbral (RFS-31). */
+export function obsSecurityAlertsQuery() {
+  return queryOptions({
+    queryKey: [...platformObservabilityQueryKey, 'security-alerts'],
+    queryFn: () => send((client) => client.GET('/api/v1/platform/observability/security-alerts')),
+  })
+}

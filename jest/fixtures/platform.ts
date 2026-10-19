@@ -123,7 +123,13 @@ export function signInToPlatform(
   permissions: readonly PlatformPermissionCode[] = PERMISSIONS_PLATFORM,
   admin: PlatformAdmin = ADMIN,
 ): PlatformSession {
-  const account: PlatformSession = { kind: 'platform', admin, permissions: [...permissions], preview: false }
+  const account: PlatformSession = {
+    kind: 'platform',
+    admin,
+    permissions: [...permissions],
+    preview: false,
+    two_factor_setup_required: false,
+  }
   setAuthToken('token-de-plataforma')
   useSession.setState({ token: 'token-de-plataforma', account, expired: false, passwordChanged: false })
   return account
@@ -180,7 +186,7 @@ export function restaurantSummary(changes: Partial<PlatformRestaurantSummary> = 
 export function restaurantCard(changes: Partial<PlatformRestaurantDetail> = {}): PlatformRestaurantDetail {
   return {
     ...restaurantSummary(),
-    owners: [{ id: 30, full_name: 'Lucho Ramos', email: 'lucho@esquina.pe', is_active: true }],
+    owners: [{ id: 30, full_name: 'Lucho Ramos', email: 'lucho@esquina.pe', is_active: true, must_change_password: false }],
     ...changes,
   }
 }

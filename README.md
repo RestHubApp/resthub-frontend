@@ -74,7 +74,7 @@ está en `jest/`.
   El canal de avisos (SSE) falso está en `#jest/channel` y los datos de prueba
   en `jest/fixtures/`.
 - La red de las pruebas es MSW (`jest/mswServer.ts`, `setupServer` de `msw/node`,
-  encendido en `jest/setupDom.ts` con `onUnhandledRequest: 'error'` y reseteado
+  encendido en `jest/setupDom.ts` con `onUnhandledFrame: 'error'` y reseteado
   tras cada prueba): se ejercita el cliente real (`openapi-fetch`,
   `src/services/api.ts`) y solo la red es falsa. El arnés, `answerAll` y el
   canal de avisos son manejadores de MSW. Para una respuesta tipada con el
@@ -251,6 +251,10 @@ Lo que mantiene la primera visita liviana:
   tiene el rol le llega el aviso `permissions`, que relee su sesión mientras
   mira una pantalla en vivo (pedidos, tablero, cocina); en las demás, la
   sesión se relee cada cinco minutos.
+- «Personal» también tiene el horario de atención del local (RFS-32,
+  `restaurant.manage`): tramos por día en la hora del local; un cierre antes de
+  la apertura es de madrugada. Los accesos fuera de él se marcan «Fuera de
+  horario» en el historial de accesos. Sin tramos no se marca nada.
 
 ## Administración del sistema (`/plataforma`)
 
@@ -277,7 +281,7 @@ celular del mesero nunca baja este código.
 - **Una sola sesión.** `store/session.ts` guarda la respuesta de `POST
   /auth/login` tal como viene, discriminada por `kind`: `staff` (usuario,
   restaurante, permisos del local, términos) o `platform` (administrador y sus
-  permisos `platform.*`), en `resthub.session.v2`. Un navegador tiene una sola
+  permisos `platform.*`), en `resthub.session.v3`. Un navegador tiene una sola
   cuenta abierta; entrar con otra reemplaza la anterior. Lo que es del
   restaurante (aceptar los términos, la cola sin señal y su precarga, el canal
   de avisos, el nombre del local, la zona horaria, cambiar la contraseña) corre
@@ -294,9 +298,29 @@ celular del mesero nunca baja este código.
 - El cliente HTTP manda el token de la sesión abierta a todo el API y a ningún
   otro origen; cuáles rutas acepta cada clase de cuenta lo decide el servidor
   (un token de plataforma no sirve en el restaurante ni al revés). Un 401
-  cierra la sesión y cerrarla vacía el caché y las mutaciones enteros. Las
+  cierra la sesión y cerrarla vacía el caché y las mutaciones enteros.
+- **El token no se guarda en el navegador (S2).** Vive en memoria; lo guardado
+  es la cuenta, una marca del inicio de sesión y cuándo vence. El servidor deja
+  además la sesión en una cookie `HttpOnly` (`resthub_session` o
+  `resthub_platform_session`) que un script no puede leer, y cada petición
+  viaja con credenciales (`credentials: 'include'`). Al recargar,
+  `useSessionRenewal` recupera el token: `GET /auth/me` con la cookie da el
+  valor anti-CSRF y `POST /auth/refresh` con `X-CSRF-Token`, un token nuevo.
+  Mientras tanto las pantallas leen con la cookie. Lo que cambia algo lleva
+  `X-CSRF-Token`; si el servidor responde `csrf_token_invalid` (otra pestaña
+  renovó la cookie) se relee y se repite una vez. Si el navegador bloquea la
+  cookie (cookies de terceros), la sesión dura lo que la pestaña: al recargar
+  pide entrar de nuevo. Un 401 al token de la pestaña (otra pestaña cambió la
+  contraseña y lo cortó) primero prueba la cookie; solo sin ella se cierra la
+  sesión. La vista previa no tiene cookie: guarda su token en su pestaña. Las
   mutaciones que llevan una contraseña (alta, nuevo encargado) salen del
   caché en cuanto nadie mira su resultado (`gcTime: 0`).
+- **Dos pasos obligatorio en la plataforma (RFS-22).** Si `GET /auth/me` trae
+  `two_factor_setup_required` (o cualquier petición responde 403
+  `two_factor_setup_required`), el armazón solo muestra el alta de la
+  verificación (`TwoFactorSetupView`, en `AccountSetupGate` junto a la
+  contraseña temporal); al confirmar el primer código la plataforma se abre.
+  Para la administración no se ofrece desactivarla.
 - Vence y se renueva igual para las dos clases (`hooks/useTokenRenewal.ts`,
   `POST /auth/refresh` cinco minutos antes) y se relee con `GET /auth/me`.
 - **Identificador (slug):** se sugiere del nombre (minúsculas, sin tildes,
@@ -361,14 +385,14 @@ cargarse (`services/tabStorage.ts`):
 
 | Pestaña | Sesión | Cola sin señal |
 |---|---|---|
-| Normal | `localStorage`, `resthub.session.v2` | `localStorage`, `resthub.pedidos-sin-enviar.v2` |
+| Normal | `localStorage`, `resthub.session.v3` (sin el token) | `localStorage`, `resthub.pedidos-sin-enviar.v2` |
 | Vista previa | `sessionStorage`, `resthub.vista-previa.sesion.v1` | `sessionStorage`, misma clave de la cola |
 
 - Es de vista previa la pestaña cargada en `/vista-previa` o marcada con
   `resthub.vista-previa.pestana.v1` en su `sessionStorage` (se marca al abrir
   la sesión y se desmarca solo al salir a propósito, así una vista previa
   vencida no vuelve a leer la sesión real al recargar).
-- Una pestaña de vista previa nunca lee ni escribe `resthub.session.v2`: la
+- Una pestaña de vista previa nunca lee ni escribe `resthub.session.v3`: la
   sesión real del navegador (la de plataforma, por ejemplo, desde donde se
   abrió «Ver como…») sigue intacta en las demás pestañas, y un 401 del canje
   no cierra ninguna. Sin
@@ -400,6 +424,10 @@ backend guarda de sí mismo (`/platform/observability/*`, con el permiso
 sin servicios externos). Vive en `features/platform/observability` y se
 descarga aparte, como el resto del área.
 
+- **Alertas de seguridad (RFS-31).** Arriba van los últimos picos de accesos
+  fallidos, bloqueos o 403 que el servidor detectó solo
+  (`GET /platform/observability/security-alerts`), con su cuenta, su umbral y
+  su ventana.
 - **Ventana y restaurante.** 1 h, 6 h, 24 h (por omisión) o 7 d hasta ahora, y
   un restaurante o todos (la lista son los 100 más nuevos de
   `GET /platform/restaurants`). Acá el cliente sí manda `restaurant_id`: es un
@@ -441,10 +469,14 @@ descarga aparte, como el resto del área.
 
 - Con el pedido pagado, el recibo del cobro y el detalle del pedido ofrecen
   «Emitir boleta o factura» (`features/orders/invoice`). Ya emitido, muestran
-  el número, el estado ante SUNAT, el PDF del proveedor e «Imprimir».
+  el número, el estado ante SUNAT, «Descargar PDF / XML / CDR» (los sirve
+  RestHub con la sesión: se piden con el cliente del API y se guardan como
+  archivo, sin enlaces públicos) e «Imprimir».
 - «Comprobantes» (`features/billing`, `billing.manage`): datos fiscales del
-  local (el token del proveedor nunca se muestra), lo emitido y el reenvío de
-  lo pendiente o rechazado. `/comprobantes/:id/imprimir` es la representación
+  local, si ya puede emitir y qué le falta, el usuario y la clave SOL (nunca se
+  muestran: solo «cargados» y «Reemplazar»), el certificado digital (.pfx,
+  .p12 o .pem de hasta 64 KB, leído en el navegador, con aviso de vencimiento),
+  lo emitido y el reenvío de lo pendiente o rechazado. `/comprobantes/:id/imprimir` es la representación
   impresa en 80 mm con base imponible, IGV y total.
 
 ## Opciones de platos y compras
@@ -483,6 +515,11 @@ descarga aparte, como el resto del área.
   arqueo en vivo (escucha los avisos `orders` y `cash`), el historial de
   turnos y el tope de descuento del mesero. Sin caja abierta, el cobro lo
   avisa y no deja confirmar.
+- Un cobro mal hecho se anula desde el detalle del pedido (RFS-25): «Anular»
+  junto a cada pago, solo con `cash.manage` y en un pedido servido o pagado,
+  pide un motivo (`POST /orders/{id}/payments/{payment_id}/void`). El cobro
+  queda tachado en «Cobros anulados» con quién y por qué, sale de la caja y el
+  pedido vuelve a deber ese monto. Dentro de la ventana de cobro no se ofrece.
 
 ## Delivery, clientes y reservas
 

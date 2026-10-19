@@ -107,7 +107,7 @@ describe('useLiveUpdates', () => {
   })
 
   it('si el canal se corta, reintenta y al reconectar vuelve a pedir todo', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     const { result } = listen()
     await waitFor(() => {
       expect(connections).toHaveLength(1)
@@ -122,7 +122,10 @@ describe('useLiveUpdates', () => {
     await act(async () => {
       await jest.advanceTimersByTimeAsync(3000)
     })
-    expect(connections).toHaveLength(2)
+    // La reconexión llega a MSW después de unas vueltas de la red, no al instante.
+    await waitFor(() => {
+      expect(connections).toHaveLength(2)
+    })
     notice('ready')
     await waitFor(() => {
       expect(invalidated(['menu', 'pedidos'])).toBe(true)
@@ -131,7 +134,7 @@ describe('useLiveUpdates', () => {
   })
 
   it('un 401 no se reintenta: la credencial ya no vale', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick', 'queueMicrotask'] })
     responseStatus = 401
     responseCode = 'unauthenticated'
     const { result } = listen()

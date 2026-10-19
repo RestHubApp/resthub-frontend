@@ -1,5 +1,6 @@
 import { ShellIcon } from './ShellIcon'
 import type { NavEntry } from './navigation'
+import { EntryBadge } from './EntryBadge'
 import { EntryLink } from './EntryLink'
 
 interface NavListProps {
@@ -32,6 +33,7 @@ export function NavList({ entries, onNavigate }: NavListProps) {
           <EntryLink entry={entry} className={linkClass} onClick={onNavigate}>
             <ShellIcon name={entry.icon} size={18} />
             <span>{entry.label}</span>
+            <EntryBadge entry={entry} />
           </EntryLink>
         </li>
       ))}

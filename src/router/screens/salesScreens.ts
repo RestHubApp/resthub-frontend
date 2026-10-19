@@ -36,7 +36,7 @@ export const SALES_SCREENS: readonly Screen[] = [
       icon: 'recipe',
       description: 'Boletas y facturas electrónicas, los datos fiscales y lo que falta enviar a SUNAT.',
     },
-    load: asDefault(() => import('@/features/billing/BillingView'), 'BillingView'),
+    load: asDefault(() => import('./BillingScreen'), 'BillingScreen'),
   },
   { path: routePatterns.invoicePrint, permission: PERMISSION.billingIssue, load: asDefault(() => import('@/features/billing/InvoicePrintView'), 'InvoicePrintView') },
 ]

@@ -19,8 +19,11 @@ export function taxSettings(changes: Partial<BillingSettings> = {}): BillingSett
     igv_rate: '18.00',
     boleta_series: 'B001',
     factura_series: 'F001',
-    provider_url: 'https://api.nubefact.com/api/v1/abc',
-    has_provider_token: true,
+    boleta_credit_note_series: 'BC01',
+    factura_credit_note_series: 'FC01',
+    has_sol_credentials: true,
+    has_certificate: true,
+    certificate_expires_at: '2027-09-30T05:00:00Z',
     is_ready: true,
     ...changes,
   }
@@ -28,6 +31,12 @@ export function taxSettings(changes: Partial<BillingSettings> = {}): BillingSett
 
 export function invoice(changes: Partial<Invoice> = {}): Invoice {
   return {
+    credit_note: null,
+    credit_note_id: null,
+    replaces_invoice_id: null,
+    is_voided: false,
+    voided_at: null,
+    void_reason: '',
     id: 5,
     order_id: 40,
     kind: 'boleta',
@@ -38,9 +47,9 @@ export function invoice(changes: Partial<Invoice> = {}): Invoice {
     status: 'accepted',
     status_label: 'Aceptado por SUNAT',
     provider_message: '',
-    pdf_url: '',
-    xml_url: '',
-    cdr_url: '',
+    has_pdf: true,
+    has_xml: true,
+    has_cdr: true,
     archive_status: 'disabled',
     archive_status_label: 'Respaldo apagado',
     archive_message: '',
@@ -55,7 +64,7 @@ export function invoice(changes: Partial<Invoice> = {}): Invoice {
     igv: '9.15',
     igv_rate: '18.00',
     total: '60.00',
-    lines: [{ description: 'Ceviche', quantity: 2, unit_price: '30.00', total: '60.00' }],
+    lines: [{ description: 'Ceviche', quantity: 2, unit_price: '30.00', total: '60.00', is_courtesy: false }],
     ...changes,
   }
 }

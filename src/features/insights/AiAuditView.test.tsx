@@ -118,6 +118,7 @@ describe('AiAuditView: IA externa', () => {
     is_active: true,
     auto_out_of_stock: true,
     max_waiter_discount_percent: '10.00',
+    waste_approval_threshold: '50.00',
     external_ai_enabled: active,
     created_at: '2026-09-26T13:00:00Z',
   })

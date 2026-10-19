@@ -7,6 +7,7 @@ import type { OrderResponse } from '../../src/api/types'
 import { Customer, type Local } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
+import { enqueueOrders, ownerOf, savedQueue, withoutOrdersSending } from '../support/platform'
 
 async function tableOrders(local: Local, tableId: number) {
   const active = await new Customer(local.http, local.owner.token).list<OrderResponse>('/orders/active')
@@ -92,4 +93,42 @@ test('OFF-02 si el pedido llegó pero la respuesta se perdió, el reintento no l
   const orders = await tableOrders(local, local.table('1').id)
   expect(orders).toHaveLength(1)
   expect(orders[0]?.status).toBe('in_kitchen')
+})
+
+test('OFF-03 el indicador «Conexión en vivo» de la barra lateral muestra el estado y reintenta la cola a mano', async ({
+  page,
+  context,
+  local,
+}) => {
+  covers('hoja:shell/connection/ConnectionButton')
+  // En «Mi perfil» no corre el envío automático de la pantalla de pedidos: la
+  // cola sale solo con «Reintentar ahora».
+  await withoutOrdersSending(page)
+  await openAs(page, local.waiter, '/perfil')
+  await enqueueOrders(page, ownerOf(local.waiter), [{ table: local.table('2'), dish: local.dish('Lomo saltado') }])
+  await page.reload()
+  await expect(page.getByRole('heading', { level: 1, name: 'Mi perfil' })).toBeVisible()
+
+  await context.setOffline(true)
+  await expect(page.getByRole('button', { name: 'Conexión en vivo: sin conexión. 1 pedido sin enviar' })).toBeVisible()
+  await context.setOffline(false)
+
+  await page.getByRole('button', { name: 'Conexión en vivo: en línea. 1 pedido sin enviar' }).click()
+  const sheet = page.getByRole('dialog', { name: 'Conexión en vivo' })
+  await expect(sheet.getByRole('status')).toHaveText('En línea')
+  await expect(sheet.getByText('1 pedido sin enviar: Mesa 2.')).toBeVisible()
+  await evidence(page, 'off-03-1-panel-con-cola')
+
+  // Sin señal en el envío, el pedido se queda en la cola.
+  await sheet.getByRole('button', { name: 'Reintentar ahora' }).click()
+  await expect(sheet.getByRole('button', { name: 'Reintentar ahora' })).toBeEnabled()
+  expect(await savedQueue(page)).toBe(1)
+
+  await page.unroute('**/api/v1/orders')
+  await sheet.getByRole('button', { name: 'Reintentar ahora' }).click()
+  await expect(page.getByText(/Mesa 2: pedido #\d+ enviado a cocina/u)).toBeVisible()
+  await expect(sheet.getByRole('button', { name: 'Reintentar ahora' })).toBeHidden()
+  expect(await savedQueue(page)).toBe(0)
+  await evidence(page, 'off-03-2-cola-enviada')
+  expect((await tableOrders(local, local.table('2').id)).map((order) => order.status)).toEqual(['in_kitchen'])
 })
