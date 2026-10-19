@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
+import { imageDataUrl } from '@/services/imageDataUrl'
 import { send } from './client'
 import type {
   CreateCategoryRequest,
@@ -95,4 +96,46 @@ export async function setAvailability(itemId: number, isAvailable: boolean): Pro
       body: { is_available: isAvailable },
     }),
   )
+}
+
+const PHOTO_PATH = '/api/v1/menu/items/{item_id}/photo'
+
+/** Sube o reemplaza la foto de un plato: la imagen (JPEG, PNG o WebP) en base64. */
+export async function uploadMenuPhoto(itemId: number, dataBase64: string): Promise<MenuItem> {
+  return send((client) =>
+    client.PUT(PHOTO_PATH, {
+      params: { path: { item_id: itemId } },
+      body: { data: dataBase64 },
+    }),
+  )
+}
+
+export async function removeMenuPhoto(itemId: number): Promise<MenuItem> {
+  return send((client) =>
+    client.DELETE(PHOTO_PATH, { params: { path: { item_id: itemId } } }),
+  )
+}
+
+/** La imagen del plato como dirección `data:`. `version` es la `photo_version` del plato: separa la caché del navegador. */
+async function fetchMenuPhoto(itemId: number, version: number): Promise<string> {
+  const photo = await send((client) =>
+    client.GET(PHOTO_PATH, {
+      params: { path: { item_id: itemId }, query: { v: version } },
+      parseAs: 'arrayBuffer',
+    }),
+  )
+  return imageDataUrl(photo)
+}
+
+// La foto de un plato no cambia mientras su versión sea la misma: se pide una vez.
+const PHOTO_KEPT_MS = 30 * 60 * 1000
+
+export function dishPhotoQuery(itemId: number, version: number) {
+  return queryOptions({
+    queryKey: ['dish-photo', itemId, version] as const,
+    queryFn: () => fetchMenuPhoto(itemId, version),
+    staleTime: Infinity,
+    gcTime: PHOTO_KEPT_MS,
+    retry: false,
+  })
 }

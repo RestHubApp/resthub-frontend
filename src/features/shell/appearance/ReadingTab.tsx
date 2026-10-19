@@ -1,12 +1,17 @@
 import { SectionHeading } from '@/components/SectionHeading'
 import { openAccessibilityMenu } from '@/components/accessibilityMenu'
+import { SettingToggle } from '@/components/SettingToggle'
 import { Button } from '@/components/ui/button'
+import { useAppearance } from '@/store/appearance'
 import { DensityPicker } from './DensityPicker'
 import { FontPicker } from './FontPicker'
 import { TextSizePicker } from './TextSizePicker'
 
-/** La pestaña «Lectura»: tamaño del texto, letra y, con ratón, la densidad. */
+/** La pestaña «Lectura»: tamaño del texto, letra, fotos de la carta y, con ratón, la densidad. */
 export function ReadingTab() {
+  const shouldShowPhotos = useAppearance((state) => state.appearance.showDishPhotos)
+  const change = useAppearance((state) => state.change)
+
   return (
     <div className="flex flex-col gap-5">
       <section className="flex flex-col gap-2">
@@ -17,6 +22,16 @@ export function ReadingTab() {
         <SectionHeading>Letra</SectionHeading>
         <FontPicker />
       </section>
+      <SettingToggle
+        id="fotos-carta"
+        title="Mostrar las fotos de los platos"
+        detail="Apágalo para ver solo nombre y precio: la carta se lee más rápido y gasta menos datos."
+        isChecked={shouldShowPhotos}
+        isPending={false}
+        onChange={(isChecked) => {
+          change({ showDishPhotos: isChecked })
+        }}
+      />
       <DensityPicker />
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted px-4 py-3 text-sm">
         <p className="m-0 max-w-prose text-muted-foreground">

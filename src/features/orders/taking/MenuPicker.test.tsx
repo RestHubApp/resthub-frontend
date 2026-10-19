@@ -4,6 +4,7 @@ import { act, renderHook, screen, within } from '@testing-library/react'
 import { buildMenu, order, dish, section, lastBody } from '#jest/fixtures/orders'
 import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
 import type { OpenOrderRequest } from '@/api/types'
+import { useAppearance } from '@/store/appearance'
 import { NewOrderView } from '@/features/orders/NewOrderView'
 import { useDraftActions } from './useOrderDraft'
 
@@ -33,6 +34,28 @@ afterEach(() => {
 })
 
 describe('la carta para tomar el pedido', () => {
+  it('muestra la foto de cada plato que la tiene y la oculta si la cuenta apagó las fotos', async () => {
+    const photo = new Response(new Uint8Array([0x89, 0x50, 0x4e, 0x47]), { status: 200, headers: { 'Content-Type': 'image/png' } })
+    const menu = buildMenu()
+    const first = menu.categories[0]
+    if (first === undefined) {
+      throw new Error('La carta de prueba no tiene categorías')
+    }
+    menu.categories[0] = { ...first, items: [dish({ photo_version: 1700 }), ...first.items.slice(1)] }
+    const { api } = openMenu(menu)
+    api.on('get', '/menu/items/11/photo', () => photo)
+
+    expect(await screen.findByTestId('dish-photo')).toBeInTheDocument()
+
+    act(() => {
+      useAppearance.getState().change({ showDishPhotos: false })
+    })
+    expect(screen.queryByTestId('dish-photo')).not.toBeInTheDocument()
+    act(() => {
+      useAppearance.getState().reset()
+    })
+  })
+
   it('la búsqueda encuentra el plato sin tildes y avisa si nada coincide', async () => {
     const { user } = openMenu()
     await user.type(await screen.findByLabelText(SEARCH), 'aji')
