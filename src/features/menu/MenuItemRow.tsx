@@ -2,7 +2,9 @@ import { cn } from 'cn'
 import { useState } from 'react'
 
 import type { DishCost, MenuItem, MenuSection } from '@/api/types'
+import { DishPhoto } from '@/components/DishPhoto'
 import { formatPercent } from '@/services/format'
+import { useAppearance } from '@/store/appearance'
 import { AvailabilityToggle } from './AvailabilityToggle'
 import { DishRowInfo } from './DishRowInfo'
 import { DishSheet } from './DishSheet'
@@ -29,6 +31,7 @@ interface MenuItemRowProps {
 export function MenuItemRow({ item, cost, category, categories, isFirst, isLast, onMove }: MenuItemRowProps) {
   const [isOpen, setIsOpen] = useState(false)
   const marginPercent = cost?.margin_percent ?? null
+  const shouldShowPhotos = useAppearance((state) => state.appearance.showDishPhotos)
 
   return (
     <li
@@ -46,7 +49,10 @@ export function MenuItemRow({ item, cost, category, categories, isFirst, isLast,
             setIsOpen(true)
           }}
         />
-        <DishRowInfo item={item} />
+        <div className="flex items-center gap-3">
+          <DishPhoto itemId={item.id} version={item.photo_version} isVisible={shouldShowPhotos} />
+          <DishRowInfo item={item} />
+        </div>
       </div>
       {marginPercent === null ? null : (
         <span className="hidden text-sm text-muted-foreground tabular-nums lg:block">Margen {formatPercent(marginPercent)}</span>

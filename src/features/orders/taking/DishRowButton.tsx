@@ -1,7 +1,12 @@
+import { DishPhoto } from '@/components/DishPhoto'
 import { Icon } from '@/components/Icon'
 import { formatMoney } from '@/services/format'
+import { useAppearance } from '@/store/appearance'
 
 interface DishRowButtonProps {
+  readonly itemId: number
+  /** La versión de su foto; `null`, sin foto. */
+  readonly photoVersion: number | null
   readonly name: string
   readonly price: string
   /** Si el plato tiene opciones, el precio lo avisa. */
@@ -13,8 +18,9 @@ interface DishRowButtonProps {
 }
 
 /** El renglon entero como boton: nombre, precio y la etiqueta o el "+" del costado. */
-export function DishRowButton({ name, price, hasOptions, reason, isSelected, onAdd }: DishRowButtonProps) {
+export function DishRowButton({ itemId, photoVersion, name, price, hasOptions, reason, isSelected, onAdd }: DishRowButtonProps) {
   const isOutOfStock = reason !== null
+  const shouldShowPhotos = useAppearance((state) => state.appearance.showDishPhotos)
 
   return (
     <button
@@ -23,6 +29,7 @@ export function DishRowButton({ name, price, hasOptions, reason, isSelected, onA
       onClick={onAdd}
       className="flex min-h-16 flex-1 items-center gap-3 rounded-xl px-4 py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed"
     >
+      <DishPhoto itemId={itemId} version={photoVersion} isVisible={shouldShowPhotos} className={`size-12 rounded-lg ${isOutOfStock ? 'opacity-50' : ''}`} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className={`font-medium ${isOutOfStock ? 'text-muted-foreground line-through decoration-1' : ''}`}>{name}</span>
         <span className="text-sm text-muted-foreground tabular-nums">

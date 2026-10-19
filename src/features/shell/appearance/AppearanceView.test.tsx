@@ -180,6 +180,22 @@ describe('AppearanceView: pestaña Lectura', () => {
     expect(JSON.parse(localStorage.getItem(KEY) ?? 'null')).toMatchObject({ density: 'compact' })
   })
 
+  it('las fotos de los platos se pueden ocultar y volver a mostrar, y la elección se guarda', async () => {
+    const { user } = openAppearance()
+    await openTab(user, 'Lectura')
+    const toggle = screen.getByRole('checkbox', { name: 'Mostrar las fotos de los platos' })
+
+    expect(toggle).toBeChecked()
+    await user.click(toggle)
+
+    expect(toggle).not.toBeChecked()
+    expect(useAppearance.getState().appearance.showDishPhotos).toBe(false)
+    expect(JSON.parse(localStorage.getItem(KEY) ?? 'null')).toMatchObject({ showDishPhotos: false })
+
+    await user.click(toggle)
+    expect(JSON.parse(localStorage.getItem(KEY) ?? 'null')).toMatchObject({ showDishPhotos: true })
+  })
+
   it('hay un solo control de tamaño de texto y un acceso a los demás ajustes de accesibilidad', async () => {
     const { user } = openAppearance()
     await openTab(user, 'Lectura')
