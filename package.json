@@ -1,7 +1,7 @@
 {
   "name": "resthub-frontend",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Frontend de RestHub: sistema de información para restaurantes pequeños.",
   "type": "module",
   "imports": {
