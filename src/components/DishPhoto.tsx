@@ -1,6 +1,6 @@
 import { cn } from 'cn'
 
-import { useDishPhoto } from '@/hooks/useDishPhoto'
+import { hasPhoto, useDishPhoto } from '@/hooks/useDishPhoto'
 
 interface DishPhotoProps {
   readonly itemId: number
@@ -21,7 +21,7 @@ interface DishPhotoProps {
 export function DishPhoto({ itemId, version, isVisible, className = 'size-14 rounded-lg' }: DishPhotoProps) {
   const { url, isFailed } = useDishPhoto(itemId, version, isVisible)
 
-  if (version === null || !isVisible || isFailed) {
+  if (!hasPhoto(version) || !isVisible || isFailed) {
     return null
   }
   const shape = cn('block shrink-0', className)

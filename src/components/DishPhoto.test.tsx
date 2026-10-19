@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 
 import { mountScreen, server, signInAs } from '#jest/harness'
+import { hasPhoto } from '@/hooks/useDishPhoto'
 import { DishPhoto } from './DishPhoto'
 
 const PHOTO = '/menu/items/10/photo'
@@ -69,5 +70,13 @@ describe('DishPhoto', () => {
       expect(screen.queryByTestId(LOADING)).not.toBeInTheDocument()
     })
     expect(screen.queryByTestId(IMAGE)).not.toBeInTheDocument()
+  })
+})
+
+describe('hasPhoto', () => {
+  it('solo un número es una foto: un servidor anterior no manda la versión', () => {
+    expect(hasPhoto(1700)).toBe(true)
+    expect(hasPhoto(null)).toBe(false)
+    expect(hasPhoto(undefined)).toBe(false)
   })
 })
