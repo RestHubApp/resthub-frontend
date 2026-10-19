@@ -108,7 +108,10 @@ describe('useServerEvent', () => {
     channel.respondWith(503, 'database_unavailable')
     await advance(0)
     listen(ORDERS)
-    await advance(3001)
+    // Primero llega el 503 y programa el reintento; recién entonces corre el reloj.
+    await advance(0)
+    expect(channel.connections).toHaveLength(2)
+    await advance(3000)
     expect(channel.connections.length).toBeGreaterThan(2)
   })
 
