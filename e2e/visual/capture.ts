@@ -86,9 +86,14 @@ const INSTANT = /"(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:
 // lo que sigue. Se fija el instante entero (la ficha no calcula tiempos).
 const CARD_WITH_REGISTRATION = /^\/api\/v1\/platform\/restaurants\/\d+$/u
 
+// En el historial de pedidos la columna «Abierto» muestra la fecha entera: el
+// día («11» o «20») también cambia su ancho y movía las demás columnas. Se
+// fija el instante entero (el historial no calcula tiempos).
+const ORDER_HISTORY = /^\/api\/v1\/orders$/u
+
 function normalize(route: string, text: string): string {
   const withoutSuffixes = SUFFIXES.reduce((actual, [pattern, replacement]) => actual.replace(pattern, replacement), text)
-  if (CARD_WITH_REGISTRATION.test(route)) {
+  if (CARD_WITH_REGISTRATION.test(route) || ORDER_HISTORY.test(route)) {
     return withoutSuffixes.replaceAll(INSTANT, '"2026-09-27T17:00:00Z"')
   }
   return LISTS_WITH_HOUR.some((list) => list.test(route)) ? withoutSuffixes.replaceAll(INSTANT, '"$1T17:00:00Z"') : withoutSuffixes
