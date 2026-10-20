@@ -15,6 +15,11 @@ type Outcome = 'confirmed' | 'code-required'
  * no muestra su aviso de respaldo); un código equivocado
  * (`invalid_two_factor_code`) sí, con el mensaje del servidor.
  */
+/**
+ * Verifica la contraseña (y el código, si va) sin cambiar nada guardado en
+ * caché: la sesión sigue siendo la misma, solo se abre la ventana de unos
+ * minutos para las acciones críticas.
+ */
 async function verifyPassword(password: string, code: string | undefined): Promise<Outcome> {
   try {
     await reauthenticate(password, code)
