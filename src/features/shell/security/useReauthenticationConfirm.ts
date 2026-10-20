@@ -15,19 +15,21 @@ type Outcome = 'confirmed' | 'code-required'
  * no muestra su aviso de respaldo); un código equivocado
  * (`invalid_two_factor_code`) sí, con el mensaje del servidor.
  */
+async function verifyPassword(password: string, code: string | undefined): Promise<Outcome> {
+  try {
+    await reauthenticate(password, code)
+    return 'confirmed'
+  } catch (error) {
+    if (hasCode(error, 'two_factor_required')) return 'code-required'
+    throw error
+  }
+}
+
 export function useReauthenticationConfirm(onConfirmed: () => void) {
   const [code, setCode] = useState('')
   const [isAskingCode, setIsAskingCode] = useState(false)
   const confirm = useMutation({
-    mutationFn: async (values: CurrentPasswordValues): Promise<Outcome> => {
-      try {
-        await reauthenticate(values.password, isAskingCode && code !== '' ? code : undefined)
-        return 'confirmed'
-      } catch (error) {
-        if (hasCode(error, 'two_factor_required')) return 'code-required'
-        throw error
-      }
-    },
+    mutationFn: (values: CurrentPasswordValues) => verifyPassword(values.password, isAskingCode && code !== '' ? code : undefined),
     onSuccess: (outcome) => {
       if (outcome === 'confirmed') onConfirmed()
       else setIsAskingCode(true)

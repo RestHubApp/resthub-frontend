@@ -14,7 +14,7 @@ import { useLogin } from './useLogin'
  * La contraseña temporal venció (401 `temporary_password_expired`, ASVS 6.4.1):
  * volver a probarla no sirve, hay que pedir otra a quien la dio.
  */
-const EXPIRED_TEMPORARY_PASSWORD =
+const EXPIRED_TEMPORARY_NOTICE =
   'Tu contraseña temporal venció. Pide una nueva a quien te creó la cuenta: el encargado de tu local o, si administras el sistema, otra persona de la administración.'
 
 interface LoginFormProps {
@@ -46,7 +46,7 @@ export function LoginForm({ destination }: LoginFormProps) {
       {isAskingCode ? <TwoFactorCodeField onChange={setCode} /> : null}
 
       {hasFailed && hasCode(access.error, 'temporary_password_expired') ? (
-        <FormMessage tone="error">{EXPIRED_TEMPORARY_PASSWORD}</FormMessage>
+        <FormMessage tone="error">{EXPIRED_TEMPORARY_NOTICE}</FormMessage>
       ) : null}
       {hasFailed && !hasCode(access.error, 'temporary_password_expired') ? (
         <ErrorMessage error={access.error} fallback="No se pudo iniciar sesión. Inténtalo de nuevo." />
