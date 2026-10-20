@@ -25,7 +25,9 @@ export const ACCOUNTS = {
   kitchen: { email: 'cocina@resthub.dev', access: '/acceso' },
   platform: { email: 'plataforma@resthub.dev', access: '/acceso' },
   // Un mesero que todavía no aceptó los términos: ve la puerta «Antes de empezar».
-  'sin-terminos': { email: 'nuevo-a11y@resthub.dev', access: '/acceso' },
+  // La crea `data.mjs` y el backend rechaza una contraseña con «RestHub»
+  // (ASVS V6.2.11): lleva una propia.
+  'sin-terminos': { email: 'nuevo-a11y@resthub.dev', access: '/acceso', password: 'tunki-quinua-48173' },
   // La pestaña que abre «Ver como…» desde el área de plataforma.
   'vp-encargado': { preview: 'owner' },
   'vp-mesero': { preview: 'waiter' },
@@ -132,7 +134,7 @@ export async function signIn(browser, account) {
   } else {
     await page.goto(`${BASE_URL}${dataAccount.access}`)
     await page.getByLabel('Correo').fill(dataAccount.email)
-    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByLabel('Contraseña', { exact: true }).fill(dataAccount.password ?? PASSWORD)
     await page.getByRole('button', { name: 'Entrar' }).click()
     await page.waitForURL((url) => !url.pathname.endsWith('/acceso'), { timeout: 20_000 })
   }
