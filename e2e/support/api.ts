@@ -228,7 +228,7 @@ async function platformSignIn(http: APIRequestContext): Promise<SessionPlatform>
   }
   await confirmPassword(http, data.access_token, SECRET)
   const { admin, permissions, preview } = data
-  const account = { kind: 'platform', admin, permissions, preview, two_factor_setup_required: false } as const
+  const account = { kind: 'platform', admin, permissions, preview, two_factor_setup_required: false, must_change_password: data.must_change_password } as const
   return { token: data.access_token, account }
 }
 
