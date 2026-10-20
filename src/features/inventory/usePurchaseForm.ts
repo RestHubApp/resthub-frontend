@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 
 import { registerPurchase } from '@/api/inventory'
 import type { Ingredient } from '@/api/types'
+import { useAppForm } from '@/hooks/useAppForm'
 import { formatQuantity } from '@/services/format'
 import { purchaseSchema, type PurchaseValues } from './inventorySchema'
 import { packageHint, purchaseDefaults, purchaseMath, purchasePayload } from './purchaseMath'
@@ -10,7 +11,7 @@ import { useInventoryChange } from './useInventoryChange'
 
 /** El estado del formulario de compra: campos, cuentas en vivo (cantidad base y costo) y envío. */
 export function usePurchaseForm(ingredient: Ingredient, onDone: () => void) {
-  const { register, handleSubmit, formState, control } = useForm<PurchaseValues>({
+  const { register, handleSubmit, formState, control } = useAppForm<PurchaseValues>({
     resolver: zodResolver(purchaseSchema),
     defaultValues: purchaseDefaults(ingredient),
   })

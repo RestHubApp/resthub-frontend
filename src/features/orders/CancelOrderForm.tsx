@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { cancelOrder } from '@/api/orders'
@@ -8,6 +7,7 @@ import { FormFooter } from '@/components/FormFooter'
 import { textRequired } from '@/components/formRules'
 import { TextareaField } from '@/components/TextareaField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { useOrderAction } from './useOrderAction'
 
 // El mismo tope que el servidor.
@@ -22,7 +22,7 @@ interface CancelOrderFormProps {
 
 /** El formulario del motivo de cancelacion; al cancelar con exito se limpia y cierra la ventana. */
 export function CancelOrderForm({ order, onClose }: CancelOrderFormProps) {
-  const { register, handleSubmit, formState, reset } = useForm<Values>({
+  const { register, handleSubmit, formState, reset } = useAppForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { reason: '' },
   })

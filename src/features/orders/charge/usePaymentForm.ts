@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
 
 import { addPayment } from '@/api/orders'
 import type { OrderResponse, PaymentRequest } from '@/api/types'
 import { decimalForApi } from '@/components/formRules'
+import { useAppForm } from '@/hooks/useAppForm'
 import { centsToApi, formatMoney } from '@/services/format'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { balanceCents, chargeCents, type SplitMode } from './chargeMath'
@@ -57,7 +57,7 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
   const [personas, setPersonas] = useState(INITIAL_PERSONAS)
   const [dishes, setDishes] = useState<number[]>([])
   const part = chargeCents({ order, mode, remaining: personas, itemIds: dishes })
-  const form = useForm<ChargeValues>({
+  const form = useAppForm<ChargeValues>({
     resolver: zodResolver(chargeSchema(part)),
     defaultValues: { payment_method: 'cash', amount_received: '', tip: '' },
   })

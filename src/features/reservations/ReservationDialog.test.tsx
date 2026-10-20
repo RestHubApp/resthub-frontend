@@ -1,5 +1,5 @@
-import { describe, expect, it } from '@jest/globals'
-import { fireEvent, screen, within } from '@testing-library/react'
+import { describe, expect, it, jest } from '@jest/globals'
+import { act, fireEvent, screen, within } from '@testing-library/react'
 
 import { table, reservation } from '#jest/fixtures/panel'
 import { signInAs, mountScreen, ErrorResponse, server } from '#jest/harness'
@@ -14,6 +14,8 @@ const TERRACE = 'Terraza'
 const DAY = '2026-09-25'
 const SAVE = { name: 'Guardar' }
 const PERSONAS = 'Personas'
+const PHONE = 'Teléfono (opcional)'
+const QUISPE = 'Familia Quispe'
 
 function open() {
   const api = server()
@@ -28,6 +30,14 @@ function open() {
 async function fresh(user: ReturnType<typeof open>['user']) {
   await user.click(screen.getByRole('button', { name: 'Nueva reserva' }))
   return screen.findByRole('dialog', { name: 'Nueva reserva' })
+}
+
+// Termina lo que el formulario dejó en promesas (la validación con zod), sin
+// adelantar ningún temporizador.
+async function settle() {
+  await act(async () => {
+    await Promise.resolve()
+  })
 }
 
 describe('ReservationDialog', () => {
@@ -121,5 +131,42 @@ describe('ReservationDialog', () => {
     expect(await window.findByText('La mesa ya está reservada a esa hora')).toBeInTheDocument()
     await user.click(window.getByRole('button', { name: 'Cancelar' }))
     expect(dialog).not.toBeInTheDocument()
+  })
+})
+
+describe('ReservationDialog tras un intento con errores', () => {
+  it('GES-23: tras un intento con errores, el foco no se va del teléfono mientras se escribe y la reserva viaja con él', async () => {
+    const { api, user } = open()
+    api.on('post', LIST, reservation({ id: 22, customer_name: QUISPE }))
+    const window = within(await fresh(user))
+    await window.findByRole('option', { name: TERRACE })
+    fireEvent.input(window.getByLabelText(PERSONAS), { target: { value: '0' } })
+
+    // Lo que el envío deje para después espera hasta que el teléfono tenga el foco,
+    // como cuando la máquina va lenta.
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'queueMicrotask'] })
+    try {
+      fireEvent.click(window.getByRole('button', SAVE))
+      await settle()
+      expect(window.getByText('Entre 1 y 50')).toBeInTheDocument()
+      expect(window.getByLabelText(TO_NAME)).toHaveFocus()
+      fireEvent.input(window.getByLabelText(TO_NAME), { target: { value: QUISPE } })
+      await settle()
+      window.getByLabelText(PHONE).focus()
+      act(() => {
+        jest.runOnlyPendingTimers()
+      })
+    } finally {
+      jest.useRealTimers()
+    }
+
+    expect(window.getByLabelText(PHONE)).toHaveFocus()
+    await user.keyboard('987111222')
+    await user.clear(window.getByLabelText(PERSONAS))
+    await user.type(window.getByLabelText(PERSONAS), '4')
+    await user.click(window.getByRole('button', SAVE))
+
+    expect(await screen.findByText(`Reserva de ${QUISPE} guardada.`)).toBeInTheDocument()
+    expect(api.calls('post', LIST)[0]?.body).toMatchObject({ customer_name: QUISPE, phone: '987111222', party_size: 4 })
   })
 })

@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import type { BillingSettings } from '@/api/types'
@@ -7,6 +6,7 @@ import { FormMessage } from '@/components/FormMessage'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { billingErrorMessage } from '@/services/billingErrors'
 import { CERTIFICATE_EXTENSIONS, certificateFileProblem } from './certificateFile'
 import { CertificateStatus } from './CertificateStatus'
@@ -34,7 +34,7 @@ interface CertificateFormProps {
  * contraseña solo sirve para abrirlo y el servidor no la guarda.
  */
 export function CertificateForm({ settings, now }: CertificateFormProps) {
-  const { register, handleSubmit, formState, reset } = useForm<Values>({
+  const { register, handleSubmit, formState, reset } = useAppForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { password: '' },
   })

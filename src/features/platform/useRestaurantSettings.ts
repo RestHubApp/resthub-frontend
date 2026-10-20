@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
 
 import { platformMutationKeys, updatePlatformRestaurant } from '@/api/platform'
 import type { PlatformRestaurantDetail, UpdatePlatformRestaurantRequest } from '@/api/types'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import {
   restaurantSettingsSchema,
   type RestaurantSettingsValues,
@@ -21,7 +21,7 @@ import { saveRestaurant } from './restaurantCache'
 export function useRestaurantSettings(restaurant: PlatformRestaurantDetail) {
   const queryClient = useQueryClient()
   const saved = useMemo(() => settingsOf(restaurant), [restaurant])
-  const { register, handleSubmit, formState, reset } = useForm<RestaurantSettingsValues>({
+  const { register, handleSubmit, formState, reset } = useAppForm<RestaurantSettingsValues>({
     resolver: zodResolver(restaurantSettingsSchema(restaurant.timezone)),
     defaultValues: saved,
   })

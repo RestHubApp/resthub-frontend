@@ -1,5 +1,5 @@
-import { describe, expect, it } from '@jest/globals'
-import { screen, waitFor, within } from '@testing-library/react'
+import { describe, expect, it, jest } from '@jest/globals'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 
 import { buildAccount, signInAs, mountScreen, PERMISSIONS_WAITER, firstOf, ErrorResponse, server } from '#jest/harness'
 import { currentAuthToken } from '@/services/apiCredentials'
@@ -151,5 +151,48 @@ describe('ProfileView: ventana de contraseña', () => {
     await user.click(firstOf(screen.getAllByRole('button', { name: /mostrar/i })))
 
     expect(field).toHaveAttribute('type', 'text')
+  })
+})
+
+// Termina lo que el formulario dejó en promesas (la validación), sin adelantar
+// ningún temporizador.
+async function settle() {
+  await act(async () => {
+    await Promise.resolve()
+  })
+}
+
+describe('ProfileView: contraseña tras un intento con errores', () => {
+  it('GES-31: corregir la nueva contraseña no termina escrito en «Repite…» y llega el aviso de que repite la actual', async () => {
+    const { api, user } = openProfile()
+    await user.click(screen.getByRole('button', CHANGE))
+    const dialog = within(screen.getByRole('dialog'))
+    fireEvent.input(screen.getByLabelText(ACTUAL), { target: { value: NEW_SECRET } })
+    fireEvent.input(screen.getByLabelText(NEW), { target: { value: 'otra-clave-larga' } })
+    fireEvent.input(screen.getByLabelText(REPEAT), { target: { value: 'otra-cosa-distinta' } })
+
+    // Lo que el envío deje para después espera hasta que «Nueva contraseña» tenga el foco.
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'queueMicrotask'] })
+    try {
+      fireEvent.click(dialog.getByRole('button', CHANGE))
+      await settle()
+      expect(screen.getByText('Las dos contraseñas no coinciden')).toBeInTheDocument()
+      screen.getByLabelText(NEW).focus()
+      act(() => {
+        jest.runOnlyPendingTimers()
+      })
+    } finally {
+      jest.useRealTimers()
+    }
+
+    expect(screen.getByLabelText(NEW)).toHaveFocus()
+    await user.clear(screen.getByLabelText(NEW))
+    await user.type(screen.getByLabelText(NEW), NEW_SECRET)
+    await user.clear(screen.getByLabelText(REPEAT))
+    await user.type(screen.getByLabelText(REPEAT), NEW_SECRET)
+    await user.click(dialog.getByRole('button', CHANGE))
+
+    expect(await screen.findByText('La nueva contraseña tiene que ser distinta de la actual')).toBeInTheDocument()
+    expect(api.calls('post', CHANGE_PASSWORD_URL)).toHaveLength(0)
   })
 })

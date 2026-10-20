@@ -23,6 +23,29 @@ import tseslint from 'typescript-eslint'
 import { readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
+// Importaciones que tienen un envoltorio propio en src (ver el bloque de los
+// iconos y las primitivas, más abajo).
+const UI_IMPORTS = [
+  {
+    name: 'lucide-react',
+    message:
+      'Los iconos salen del registro unico: usa <Icon name="..." /> y agrega el trazo en src/components/icons.ts.',
+  },
+  {
+    name: 'radix-ui',
+    message:
+      'Usa el componente de src/components/ui, que ya envuelve la primitiva con el tema. Si no existe, agregalo con `shadcn add`.',
+  },
+]
+// react-hook-form vuelve a enfocar el primer error en un setTimeout y desvía
+// lo que se está escribiendo a otro campo (GES-23).
+const FORM_IMPORT = {
+  name: 'react-hook-form',
+  importNames: ['useForm'],
+  message:
+    'Usa useAppForm de src/hooks/useAppForm.ts: enfoca el primer error una sola vez y no desvía lo que se escribe a otro campo.',
+}
+
 // ---------------------------------------------------------------------
 // Fuentes unicas por sintaxis (no-restricted-syntax).
 //
@@ -323,26 +346,13 @@ export default tseslint.config(
       'src/components/*.{ts,tsx}',
       'src/main.tsx',
     ],
-    ignores: ['src/components/icons.ts', 'src/features/shell/ShellIcon.tsx'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            {
-              name: 'lucide-react',
-              message:
-                'Los iconos salen del registro unico: usa <Icon name="..." /> y agrega el trazo en src/components/icons.ts.',
-            },
-            {
-              name: 'radix-ui',
-              message:
-                'Usa el componente de src/components/ui, que ya envuelve la primitiva con el tema. Si no existe, agregalo con `shadcn add`.',
-            },
-          ],
-        },
-      ],
-    },
+    ignores: ['src/components/icons.ts', 'src/features/shell/ShellIcon.tsx', 'src/hooks/useAppForm.ts'],
+    rules: { 'no-restricted-imports': ['error', { paths: [...UI_IMPORTS, FORM_IMPORT] }] },
+  },
+  // El envoltorio es el único que llama a `useForm`.
+  {
+    files: ['src/hooks/useAppForm.ts'],
+    rules: { 'no-restricted-imports': ['error', { paths: UI_IMPORTS }] },
   },
 
   // ---------------------------------------------------------------------

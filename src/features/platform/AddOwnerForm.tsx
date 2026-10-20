@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
 
 import { addPlatformOwner, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } from '@/api/platform'
 import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { OwnerFields } from './OwnerFields'
 import { EMPTY_OWNER, ownerSchema, type OwnerValues } from './platformSchema'
 import { saveOwner } from './restaurantCache'
@@ -18,7 +18,7 @@ interface AddOwnerFormProps {
 /** Otra cuenta con el rol Encargado del restaurante. Un correo ya usado lo rechaza el servidor (409). */
 export function AddOwnerForm({ restaurantId, onDone }: AddOwnerFormProps) {
   const queryClient = useQueryClient()
-  const { register, handleSubmit, formState } = useForm<OwnerValues>({
+  const { register, handleSubmit, formState } = useAppForm<OwnerValues>({
     resolver: zodResolver(ownerSchema),
     defaultValues: EMPTY_OWNER,
   })

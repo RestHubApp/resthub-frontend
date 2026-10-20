@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import { voidOrderItem } from '@/api/orders'
 import type { OrderItemResponse, OrderResponse } from '@/api/types'
@@ -11,6 +10,7 @@ import { QuickReasons } from '@/features/orders/QuickReasons'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { QUICK_VOID_REASONS, voidErrorMessage } from './voidItemMessages'
 import { MAX_VOID_REASON, type VoidItemValues, voidItemSchema } from '@/features/orders/voidItemSchema'
+import { useAppForm } from '@/hooks/useAppForm'
 
 interface VoidItemFormProps {
   readonly order: OrderResponse
@@ -22,7 +22,7 @@ interface VoidItemFormProps {
 
 /** El motivo de la anulación, escrito o elegido entre los rápidos. */
 export function VoidItemForm({ order, item, onClose, onVoided }: VoidItemFormProps) {
-  const { register, handleSubmit, formState, setValue } = useForm<VoidItemValues>({
+  const { register, handleSubmit, formState, setValue } = useAppForm<VoidItemValues>({
     resolver: zodResolver(voidItemSchema),
     defaultValues: { reason: '' },
   })

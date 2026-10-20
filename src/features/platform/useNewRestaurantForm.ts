@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { type FieldErrors, useForm } from 'react-hook-form'
+import { type FieldErrors } from 'react-hook-form'
 
 import { createPlatformRestaurant, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } from '@/api/platform'
 import type { PlatformRestaurantDetail } from '@/api/types'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import {
   createRestaurantPayload,
   createRestaurantSchema,
@@ -30,7 +31,7 @@ export function ownerErrors(errors: FieldErrors<CreateRestaurantValues>['owner']
  */
 export function useNewRestaurantForm(onCreated: (restaurant: PlatformRestaurantDetail) => void) {
   const queryClient = useQueryClient()
-  const { register, handleSubmit, formState, getValues, setValue } = useForm<CreateRestaurantValues>({
+  const { register, handleSubmit, formState, getValues, setValue } = useAppForm<CreateRestaurantValues>({
     resolver: zodResolver(createRestaurantSchema),
     defaultValues: EMPTY_RESTAURANT,
   })

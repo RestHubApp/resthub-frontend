@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import { applyDiscount } from '@/api/orders'
 import type { DiscountRequest, OrderResponse } from '@/api/types'
 import { decimalForApi } from '@/components/formRules'
+import { useAppForm } from '@/hooks/useAppForm'
 import { formatPercent } from '@/services/format'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { discountSchema, type DiscountValues } from './discountSchema'
@@ -14,7 +14,7 @@ import { discountSchema, type DiscountValues } from './discountSchema'
  * Al aplicarse, llama a `onDone` para que quien lo muestra lo cierre.
  */
 export function useDiscountForm(order: OrderResponse, onDone: () => void) {
-  const { register, handleSubmit, formState } = useForm<DiscountValues>({
+  const { register, handleSubmit, formState } = useAppForm<DiscountValues>({
     resolver: zodResolver(discountSchema),
     defaultValues: { percent: '', reason: '' },
   })

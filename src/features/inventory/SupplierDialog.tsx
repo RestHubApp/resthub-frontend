@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import { saveSupplier } from '@/api/purchasing'
 import type { Supplier, SupplierRequest } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { SupplierFields } from './SupplierFields'
 import { supplierSchema, supplierValuesOf, type SupplierValues } from './supplierSchema'
 import { usePurchasingMutation } from './usePurchasingMutation'
@@ -19,7 +19,7 @@ interface SupplierDialogProps {
 
 /** Alta o edición de un proveedor: nombre, contacto, teléfono y una nota. */
 export function SupplierDialog({ open, supplier, onClose }: SupplierDialogProps) {
-  const { register, handleSubmit, formState, reset } = useForm<SupplierValues>({
+  const { register, handleSubmit, formState, reset } = useAppForm<SupplierValues>({
     resolver: zodResolver(supplierSchema),
     values: supplierValuesOf(supplier),
   })
