@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import type { Role } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import type { PermissionGroup } from './permissionGroups'
 import { RoleNameField } from './RoleNameField'
 import { RolePermissionsField } from './RolePermissionsField'
@@ -22,7 +22,7 @@ interface RoleFormProps {
 
 /** El formulario de un rol: su nombre, sus permisos y los botones de guardar. */
 export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
-  const { register, handleSubmit, formState, control } = useForm<RoleValues>({
+  const { register, handleSubmit, formState, control } = useAppForm<RoleValues>({
     resolver: zodResolver(roleSchema),
     defaultValues: valuesOf(role),
   })

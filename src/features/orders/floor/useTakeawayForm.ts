@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
+import { useAppForm } from '@/hooks/useAppForm'
 import { errorMessage } from '@/services/apiError'
 import { withCustomer } from './takeawayCustomer'
 import { EMPTY_TAKEAWAY, newOrderPath, takeawaySchema, type TakeawayValues } from './takeawaySchema'
@@ -16,7 +17,7 @@ import { EMPTY_TAKEAWAY, newOrderPath, takeawaySchema, type TakeawayValues } fro
 export function useTakeawayForm() {
   const [failure, setFailure] = useState<string | null>(null)
   const navigate = useNavigate()
-  const form = useForm<TakeawayValues>({ resolver: zodResolver(takeawaySchema), defaultValues: EMPTY_TAKEAWAY })
+  const form = useAppForm<TakeawayValues>({ resolver: zodResolver(takeawaySchema), defaultValues: EMPTY_TAKEAWAY })
   const mode = useWatch({ control: form.control, name: 'mode' })
   const submit = form.handleSubmit(async (values) => {
     setFailure(null)

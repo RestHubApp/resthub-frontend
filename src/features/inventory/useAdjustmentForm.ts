@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 
 import { registerAdjustment } from '@/api/inventory'
 import type { Ingredient } from '@/api/types'
+import { useAppForm } from '@/hooks/useAppForm'
 import { formatQuantity, formatSignedQuantity } from '@/services/format'
 import { adjustmentDelta, adjustmentPayload } from './adjustmentMath'
 import { adjustmentSchema, type AdjustmentValues } from './inventorySchema'
@@ -17,7 +18,7 @@ import { useInventoryChange } from './useInventoryChange'
  */
 export function useAdjustmentForm(ingredient: Ingredient, onDone: () => void) {
   const units = inputUnits(ingredient.unit)
-  const { register, handleSubmit, formState, control } = useForm<AdjustmentValues>({
+  const { register, handleSubmit, formState, control } = useAppForm<AdjustmentValues>({
     resolver: zodResolver(adjustmentSchema),
     defaultValues: {
       mode: 'count',

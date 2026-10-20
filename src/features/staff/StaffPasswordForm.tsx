@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
 
 import { resetStaffPassword } from '@/api/staff'
 import type { StaffResponse } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { MIN_PASSWORD } from '@/services/fieldLimits'
 import { useNotifications } from '@/store/notifications'
 import { type ResetPasswordValues, resetPasswordSchema } from './staffSchema'
@@ -23,7 +23,7 @@ interface StaffPasswordFormProps {
  * nueva, que se la dicta en persona.
  */
 export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
-  const { register, handleSubmit, formState } = useForm<ResetPasswordValues>({
+  const { register, handleSubmit, formState } = useAppForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: { new_password: '' },
   })

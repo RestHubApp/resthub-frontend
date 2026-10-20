@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
 
 import { reauthenticate } from '@/api/accountSecurity'
 import { FormDialog } from '@/components/FormDialog'
 import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { useReauthentication } from '@/store/reauthentication'
 import { type CurrentPasswordValues, currentPasswordSchema } from '@/services/securityRules'
 
@@ -20,7 +20,7 @@ import { type CurrentPasswordValues, currentPasswordSchema } from '@/services/se
  */
 export function ReauthenticationDialog() {
   const settle = useReauthentication((state) => state.settle)
-  const { register, handleSubmit, formState } = useForm<CurrentPasswordValues>({
+  const { register, handleSubmit, formState } = useAppForm<CurrentPasswordValues>({
     resolver: zodResolver(currentPasswordSchema),
     defaultValues: { password: '' },
   })

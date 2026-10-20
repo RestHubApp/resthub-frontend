@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { FormFooter } from '@/components/FormFooter'
@@ -7,6 +6,7 @@ import { FormDialog } from '@/components/FormDialog'
 import { textOptional } from '@/components/formRules'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 
 // El mismo tope que el servidor.
 const MAX_NOTE = 200
@@ -31,7 +31,7 @@ export function ItemNoteDialog({
   pending,
   onSave,
 }: ItemNoteDialogProps) {
-  const { register, handleSubmit, formState } = useForm<Values>({
+  const { register, handleSubmit, formState } = useAppForm<Values>({
     resolver: zodResolver(schema),
     values: { notes },
   })

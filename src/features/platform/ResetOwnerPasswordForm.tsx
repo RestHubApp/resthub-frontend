@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { PASSWORD_MUTATION_GC_TIME, platformMutationKeys, resetPlatformOwnerPassword } from '@/api/platform'
@@ -8,6 +7,7 @@ import type { PlatformOwner } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { MIN_PASSWORD } from '@/services/fieldLimits'
 import { passwordRule } from '@/services/fieldRules'
 import { saveOwner } from './restaurantCache'
@@ -29,7 +29,7 @@ interface ResetOwnerPasswordFormProps {
  */
 export function ResetOwnerPasswordForm({ restaurantId, owner, onDone }: ResetOwnerPasswordFormProps) {
   const queryClient = useQueryClient()
-  const { register, handleSubmit, formState } = useForm<ResetValues>({ resolver: zodResolver(schema), defaultValues: { new_password: '' } })
+  const { register, handleSubmit, formState } = useAppForm<ResetValues>({ resolver: zodResolver(schema), defaultValues: { new_password: '' } })
   const reset = useMutation({
     mutationKey: platformMutationKeys.resetOwnerPassword,
     mutationFn: (values: ResetValues) => resetPlatformOwnerPassword(restaurantId, owner.id, values.new_password),

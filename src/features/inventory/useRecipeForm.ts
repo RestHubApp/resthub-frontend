@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useFieldArray, useForm, useWatch } from 'react-hook-form'
+import { useFieldArray, useWatch } from 'react-hook-form'
 
 import type { Ingredient, Recipe } from '@/api/types'
+import { useAppForm } from '@/hooks/useAppForm'
 import { recipeSchema, type RecipeValues } from './inventorySchema'
 import { availableIngredients, recipeCatalog, recipeValuesOf } from './recipeMath'
 import { useSaveRecipe } from './useSaveRecipe'
@@ -13,7 +14,7 @@ import { useSaveRecipe } from './useSaveRecipe'
  */
 export function useRecipeForm(recipe: Recipe, ingredients: readonly Ingredient[]) {
   const catalog = recipeCatalog(ingredients, recipe)
-  const { register, handleSubmit, formState, control, reset } = useForm<RecipeValues>({
+  const { register, handleSubmit, formState, control, reset } = useAppForm<RecipeValues>({
     resolver: zodResolver(recipeSchema),
     defaultValues: recipeValuesOf(recipe),
   })

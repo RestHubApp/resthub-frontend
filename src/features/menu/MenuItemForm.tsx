@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import type { MenuItem, MenuSection } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { MenuItemFields } from './MenuItemFields'
 import { ModifierGroupsEditor } from './ModifierGroupsEditor'
 import {
@@ -30,7 +30,7 @@ export function MenuItemForm({
   defaultCategoryId,
   onDone,
 }: MenuItemFormProps) {
-  const { register, handleSubmit, formState } = useForm<MenuItemValues>({
+  const { register, handleSubmit, formState } = useAppForm<MenuItemValues>({
     resolver: zodResolver(menuItemSchema),
     defaultValues: item === undefined ? emptyMenuItem(defaultCategoryId) : menuItemValuesOf(item),
   })

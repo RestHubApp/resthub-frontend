@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
 
 import { tablesQuery } from '@/api/tables'
 import type { Reservation } from '@/api/types'
 import { SaveFormDialog } from '@/components/SaveFormDialog'
-import { focusFirstError } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { useTimeZone } from '@/store/session'
 import { ReservationFields } from './ReservationFields'
 import { reservationDefaults, reservationRequest, reservationSchema, type ReservationValues } from './reservationSchema'
@@ -28,13 +27,9 @@ interface ReservationDialogProps {
 export function ReservationDialog({ open, reservation, day, onClose: handleClose }: ReservationDialogProps) {
   const timeZone = useTimeZone()
   const tables = useQuery({ ...tablesQuery(false), enabled: open })
-  const form = useForm<ReservationValues>({
+  const form = useAppForm<ReservationValues>({
     resolver: zodResolver(reservationSchema),
     values: reservationDefaults(reservation, day, timeZone),
-    // El foco del primer error lo pone `focusFirstError`, una sola vez: el
-    // segundo intento de react-hook-form llegaba cuando ya se escribía el
-    // teléfono y lo mandaba a «Personas» (GES-23).
-    shouldFocusError: false,
   })
   // Al guardar, la ventana se cierra sin pasar por `onOpenChange` y el
   // formulario conservaba lo escrito: «Nueva reserva» volvía a abrir con el
@@ -54,7 +49,7 @@ export function ReservationDialog({ open, reservation, day, onClose: handleClose
       onClose={onClose}
       save={save}
       failureText="No se pudo guardar la reserva."
-      handleSubmit={form.handleSubmit((values) => save.mutateAsync(reservationRequest(values, timeZone)).catch(() => undefined), focusFirstError)}
+      handleSubmit={form.handleSubmit((values) => save.mutateAsync(reservationRequest(values, timeZone)).catch(() => undefined))}
     >
       <ReservationFields form={form} tables={tables.data ?? []} />
     </SaveFormDialog>

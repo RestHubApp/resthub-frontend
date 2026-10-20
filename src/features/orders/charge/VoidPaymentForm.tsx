@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import { voidPayment } from '@/api/orders'
 import type { OrderResponse, PaymentResponse } from '@/api/types'
@@ -10,6 +9,7 @@ import { onSubmit } from '@/hooks/formSubmit'
 import { QuickReasons } from '@/features/orders/QuickReasons'
 import { MAX_VOID_REASON, type VoidItemValues, voidItemSchema } from '@/features/orders/voidItemSchema'
 import { useOrderAction } from '@/features/orders/useOrderAction'
+import { useAppForm } from '@/hooks/useAppForm'
 import { QUICK_PAYMENT_VOID_REASONS, voidedPaymentMessage, voidPaymentErrorMessage } from './voidPaymentMessages'
 
 interface VoidPaymentFormProps {
@@ -20,7 +20,7 @@ interface VoidPaymentFormProps {
 
 /** El motivo de anular un cobro, escrito o elegido entre los rápidos. */
 export function VoidPaymentForm({ order, payment, onClose }: VoidPaymentFormProps) {
-  const { register, handleSubmit, formState, setValue } = useForm<VoidItemValues>({
+  const { register, handleSubmit, formState, setValue } = useAppForm<VoidItemValues>({
     resolver: zodResolver(voidItemSchema),
     defaultValues: { reason: '' },
   })

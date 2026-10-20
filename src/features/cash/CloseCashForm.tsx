@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 
 import type { CashSession } from '@/api/types'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { toCents } from '@/services/format'
 import { cashAmountForApi, closeCashSchema, type CloseCashValues } from './cashSchema'
 import { CashDifferenceBar } from './CashDifferenceBar'
@@ -28,7 +29,7 @@ const AMOUNT = /^\d{1,8}(?:[.,]\d{1,2})?$/u
  */
 export function CloseCashForm({ session, onClosed }: CloseCashFormProps) {
   const expected = toCents(session.summary?.expected_cash ?? '0')
-  const { register, handleSubmit, formState, control } = useForm<CloseCashValues>({
+  const { register, handleSubmit, formState, control } = useAppForm<CloseCashValues>({
     resolver: zodResolver(closeCashSchema),
     defaultValues: { counted_cash: '', notes: '' },
   })

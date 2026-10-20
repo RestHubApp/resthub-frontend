@@ -20,26 +20,22 @@ export function onSubmit(
   }
 }
 
+// Los campos que se pueden enfocar, en el orden en que se ven.
+const FIELDS = 'input[name]:not([type=hidden]), select[name], textarea[name]'
+
 /**
  * Enfoca el primer campo con error, en el orden en que se ven, una sola vez.
  *
- * Va como `onInvalid` de `handleSubmit`, con `shouldFocusError: false` en
- * `useForm`. react-hook-form, por su cuenta, enfoca el primer campo con error
- * y vuelve a hacerlo en un `setTimeout`. Si para entonces la persona ya corrigió
- * ese campo y pasó al siguiente, el segundo intento le quita el foco y lo manda
- * a otro campo con error: lo que escribía cae ahí (GES-23: el teléfono terminaba
- * en «Personas» y la reserva se guardaba sin él).
+ * La usa `useAppForm` como `onInvalid` de `handleSubmit`; ver ahí por qué
+ * react-hook-form no se encarga. Busca dentro del formulario enviado; si el
+ * envío no vino de un evento, en toda la página.
  */
 export function focusFirstError(errors: FieldErrors, event?: BaseSyntheticEvent): void {
-  const form: unknown = event?.target
-  if (!(form instanceof HTMLFormElement)) {
-    return
-  }
-  const first = Array.from(form.elements).find((element) => {
+  const target: unknown = event?.target
+  const scope: ParentNode = target instanceof HTMLFormElement ? target : document
+  const first = Array.from(scope.querySelectorAll<HTMLElement>(FIELDS)).find((element) => {
     const name = element.getAttribute('name')
     return name !== null && get(errors, name) !== undefined
   })
-  if (first instanceof HTMLElement) {
-    first.focus()
-  }
+  first?.focus()
 }

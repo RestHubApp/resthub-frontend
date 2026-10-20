@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useWatch } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 
 import { createIngredient, updateIngredient } from '@/api/inventory'
 import type { Ingredient } from '@/api/types'
+import { useAppForm } from '@/hooks/useAppForm'
 import { EMPTY_INGREDIENT, ingredientNumbers, ingredientValuesOf, packagingRequest } from './ingredientValues'
 import { ingredientSchema, type IngredientValues } from './inventorySchema'
 import { useInventoryChange } from './useInventoryChange'
@@ -20,7 +21,7 @@ function save(ingredient: Ingredient | undefined, values: IngredientValues) {
 
 /** El estado del formulario de un insumo: campos, unidad elegida y envío (alta o edición). */
 export function useIngredientForm(ingredient: Ingredient | undefined, onDone: () => void) {
-  const { register, handleSubmit, formState, control, setValue } = useForm<IngredientValues>({
+  const { register, handleSubmit, formState, control, setValue } = useAppForm<IngredientValues>({
     resolver: zodResolver(ingredientSchema),
     defaultValues: ingredient === undefined ? EMPTY_INGREDIENT : ingredientValuesOf(ingredient),
   })

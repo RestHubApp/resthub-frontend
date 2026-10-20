@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import { tableName } from '@/api/tables'
 import type { TableState } from '@/api/types'
@@ -7,6 +6,7 @@ import { FormDialog } from '@/components/FormDialog'
 import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { MAX_LABEL, tableSchema, type TableValues } from './tableSchema'
 import { TABLE_SAVE_FAILURE, useTableSave } from './useTableSave'
 
@@ -19,7 +19,7 @@ interface TableFormDialogProps {
 
 /** Crear una mesa o cambiarle el nombre. */
 export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogProps) {
-  const { register, handleSubmit, formState, reset } = useForm<TableValues>({
+  const { register, handleSubmit, formState, reset } = useAppForm<TableValues>({
     resolver: zodResolver(tableSchema),
     values: { label: table?.label ?? '' },
   })
