@@ -23,9 +23,14 @@ import type {
 export const API_ORIGIN = process.env['E2E_API_URL'] ?? 'http://localhost:8201'
 const API = `${API_ORIGIN}/api/v1`
 
-/** La contraseña de la semilla y de las cuentas que crean las pruebas. */
+/** La contraseña de las cuentas de la semilla (la semilla no pasa por las reglas de contraseñas). */
 export const SECRET = 'resthub123'
-export const NEW_SECRET = 'resthub-e2e-12345'
+/**
+ * La de las cuentas que crean las pruebas. El backend rechaza una contraseña
+ * con «RestHub», el nombre del local o el nombre o el correo de la persona
+ * (422 `weak_password`): esta no lleva ninguna de esas palabras.
+ */
+export const NEW_SECRET = 'kawsay-e2e-48173'
 
 export const SEED = {
   owner: 'admin@resthub.dev',
