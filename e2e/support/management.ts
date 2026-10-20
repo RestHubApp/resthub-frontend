@@ -135,7 +135,7 @@ export async function issueSalesReceipt(local: Local, orderId: number): Promise<
 export async function newAccount(local: Local, name: string, roleId: number): Promise<Session> {
   const email = `cuenta-${unique()}@e2e.resthub.dev`
   await api(local).post('/staff', { email, full_name: name, role_id: roleId, password: NEW_SECRET })
-  return signInByApi(local.http, email, NEW_SECRET)
+  return signInByApi(email, NEW_SECRET)
 }
 
 /** Si una cuenta puede entrar con esa contraseña (el código del acceso). */
@@ -157,7 +157,7 @@ export interface RestaurantEmpty {
 
 async function createRestaurantEmpty(): Promise<RestaurantEmpty> {
   const http = await newHttp()
-  const platform = await signInPlatformByApi(http)
+  const platform = await signInPlatformByApi()
   const suffix = unique()
   const email = `vacio-${suffix}@e2e.resthub.dev`
   await new ApiManagement(http, platform.token).post('/platform/restaurants', {
@@ -166,7 +166,7 @@ async function createRestaurantEmpty(): Promise<RestaurantEmpty> {
     timezone: 'America/Lima',
     owner: { full_name: 'Encargado Nuevo', email, password: NEW_SECRET },
   })
-  return { owner: await signInByApi(http, email, NEW_SECRET), http }
+  return { owner: await signInByApi(email, NEW_SECRET), http }
 }
 
 /** Los accesorios comunes más el restaurante vacío, para los estados vacíos. */

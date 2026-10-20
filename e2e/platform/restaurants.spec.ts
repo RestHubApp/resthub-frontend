@@ -190,7 +190,7 @@ test('PLA-05 el administrador agrega otro encargado y rechaza un correo ya usado
   await expect(owners).toContainText('Carmen Salas')
   await expect(owners).toContainText('Activa')
   await evidence(page, 'pla-05-encargado-agregado')
-  const session = await signInByApi(local.http, email, NEW_SECRET)
+  const session = await signInByApi(email, NEW_SECRET)
   expect(session.account).toMatchObject({ user: { role_label: 'Encargado' }, restaurant: { id: local.id } })
 })
 
