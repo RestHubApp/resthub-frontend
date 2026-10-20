@@ -15,6 +15,8 @@
 // - Las pantallas de plataforma que muestran lo de todas las pruebas a la vez
 //   (restaurantes, bitácora, local de muestra, observabilidad) reciben datos
 //   fijos (`datos.ts`).
+// - En las listas con fecha y hora en una columna se fija la hora (o el
+//   instante entero, si también se ve el día): su largo movía las columnas.
 //
 // Lo que depende de la hora (fechas, horas, minutos transcurridos, cuentas
 // regresivas) se enmascara en cada captura con `volatiles(page)`.
