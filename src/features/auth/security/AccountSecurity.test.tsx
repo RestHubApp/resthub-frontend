@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
 import { mountScreen, PERMISSIONS_WAITER, server, signInAs } from '#jest/harness'
@@ -9,8 +9,10 @@ const SESSIONS = '/auth/me/sessions'
 const TWO_FACTOR = '/auth/me/two-factor'
 const THIS_DEVICE = { id: 'aa11', device: 'Chrome en Windows', network: '190.42.17.x', city: 'Lima', country: 'PE', created_at: '2026-10-17T13:00:00Z', last_seen_at: '2026-10-17T15:00:00Z', current: true }
 const PHONE = { ...THIS_DEVICE, id: 'bb22', device: 'Safari en iPhone', city: '', country: '', current: false }
-const OFF = { enabled: false, pending: false, recovery_codes_left: 0 }
-const CODES = ['abcdefghjk', 'mnpqrstuvw']
+const OFF = { enabled: false, pending: false, recovery_codes_left: 0, recovery_codes_outdated: false }
+const ON = { enabled: true, pending: false, recovery_codes_left: 10, recovery_codes_outdated: false }
+// Como los manda el servidor: 24 caracteres en seis grupos de cuatro, en minúsculas.
+const CODES = ['k7m2-pqrs-4tw8-x3yz-5abc-d6e9', 'fghj-2kn4-p7qr-s3tu-v5w8-xyz2']
 
 const ACCESSES = '/auth/me/access-history'
 const ACCESS = { id: 1, occurred_at: '2026-10-17T15:00:00Z', outcome: 'succeeded', device: 'Chrome en Windows', network: '190.42.17.x', city: 'Lima', country: 'PE', new_device: false, new_country: true, outside_hours: false }
@@ -62,7 +64,8 @@ describe('seguridad de la cuenta en Mi perfil', () => {
     await user.click(within(sheet).getByRole('button', { name: 'Activar' }))
 
     const codes = await within(sheet).findByRole('list', { name: 'Códigos de recuperación' })
-    expect(within(codes).getByText('abcde-fghjk')).toBeInTheDocument()
+    // Tal como llegan: sin volver a agruparlos.
+    expect(within(codes).getAllByRole('listitem').map((item) => item.textContent)).toEqual(CODES)
     expect(api.calls('post', `${TWO_FACTOR}/confirm`)[0]?.body).toEqual({ code: '123456' })
   })
 
@@ -102,5 +105,33 @@ describe('seguridad de la cuenta en Mi perfil', () => {
     await waitFor(() => {
       expect(api.calls('get', ACCESSES).at(-1)?.params).toEqual({ limit: '20', offset: '0' })
     })
+  })
+})
+
+describe('códigos de recuperación en Mi perfil (RFS-22)', () => {
+  it('copia los códigos tal como los mandó el servidor, uno por línea', async () => {
+    const { api, user } = openSecurity(ON)
+    api.on('post', `${TWO_FACTOR}/recovery-codes`, { recovery_codes: CODES })
+    const writeText = jest.spyOn(navigator.clipboard, 'writeText')
+
+    await user.click(await screen.findByRole('button', { name: 'Nuevos códigos de recuperación' }))
+    const sheet = await screen.findByRole('dialog')
+    await within(sheet).findByRole('list', { name: 'Códigos de recuperación' })
+    await user.click(within(sheet).getByRole('button', { name: 'Copiar' }))
+
+    expect(writeText).toHaveBeenCalledWith(CODES.join('\n'))
+  })
+
+  it('con códigos del formato anterior propone generar unos nuevos', async () => {
+    openSecurity({ ...ON, recovery_codes_outdated: true })
+
+    expect(await screen.findByText(/Son del formato anterior, más corto: genera unos nuevos/u)).toBeInTheDocument()
+  })
+
+  it('con los códigos al día no dice nada del formato', async () => {
+    openSecurity(ON)
+
+    expect(await screen.findByText(/Te quedan 10 códigos de recuperación\.$/u)).toBeInTheDocument()
+    expect(screen.queryByText(/formato anterior/u)).not.toBeInTheDocument()
   })
 })

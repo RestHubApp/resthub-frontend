@@ -44,7 +44,7 @@ async function acceptTerms() {
 async function accountWithoutTerms(t) {
   const waiter = await call(null, 'POST', '/auth/login', { email: ACCOUNTS.waiter.email, password: PASSWORD })
   await call(t, 'POST', '/staff', {
-    email: ACCOUNTS['sin-terminos'].email, full_name: 'Mesero nuevo (pruebas a11y)', password: PASSWORD, role_id: waiter.user.role_id,
+    email: ACCOUNTS['sin-terminos'].email, full_name: 'Mesero nuevo (pruebas a11y)', password: ACCOUNTS['sin-terminos'].password, role_id: waiter.user.role_id,
   }).catch((error) => {
     if (!String(error.message).includes('409')) throw error
   })

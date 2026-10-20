@@ -23,9 +23,14 @@ import type {
 export const API_ORIGIN = process.env['E2E_API_URL'] ?? 'http://localhost:8201'
 const API = `${API_ORIGIN}/api/v1`
 
-/** La contraseña de la semilla y de las cuentas que crean las pruebas. */
+/** La contraseña de las cuentas de la semilla (la semilla no pasa por las reglas de contraseñas). */
 export const SECRET = 'resthub123'
-export const NEW_SECRET = 'resthub-e2e-12345'
+/**
+ * La de las cuentas que crean las pruebas. El backend rechaza una contraseña
+ * con «RestHub», el nombre del local o el nombre o el correo de la persona
+ * (422 `weak_password`): esta no lleva ninguna de esas palabras.
+ */
+export const NEW_SECRET = 'kawsay-e2e-48173'
 
 export const SEED = {
   owner: 'admin@resthub.dev',
@@ -153,7 +158,31 @@ async function keptPassword(http: APIRequestContext, email: string, password: st
   )
 }
 
-export async function signInByApi(http: APIRequestContext, email: string, password = SECRET): Promise<Session> {
+/**
+ * Corre `steps` con un contexto HTTP propio, que se descarta al terminar.
+ *
+ * Un acceso deja la cookie de sesión en el contexto que lo pidió, y el backend
+ * cierra la sesión de esa cookie en el acceso siguiente (ASVS V7.2.4: un
+ * navegador no deja abierta la sesión anterior al entrar otra vez). Las
+ * pruebas usan el token (`Authorization: Bearer`) de varias cuentas con un
+ * mismo contexto: cada acceso sale de uno limpio para no cerrar la sesión de
+ * la cuenta que entró antes.
+ */
+async function withOwnContext<T>(steps: (http: APIRequestContext) => Promise<T>): Promise<T> {
+  const own = await newHttp()
+  try {
+    return await steps(own)
+  } finally {
+    await own.dispose()
+  }
+}
+
+/** Entra por el API con una cuenta del personal, desde un contexto propio (ver `withOwnContext`). */
+export async function signInByApi(email: string, password = SECRET): Promise<Session> {
+  return withOwnContext((http) => staffSignIn(http, email, password))
+}
+
+async function staffSignIn(http: APIRequestContext, email: string, password: string): Promise<Session> {
   const access = await keptPassword(http, email, password)
   if (access.kind !== 'staff') {
     throw new Error(`${email} no es una cuenta del personal.`)
@@ -184,7 +213,12 @@ export async function signInByApi(http: APIRequestContext, email: string, passwo
   }
 }
 
-export async function signInPlatformByApi(http: APIRequestContext): Promise<SessionPlatform> {
+/** Entra por el API con la cuenta de plataforma de la semilla, desde un contexto propio (ver `withOwnContext`). */
+export async function signInPlatformByApi(): Promise<SessionPlatform> {
+  return withOwnContext(platformSignIn)
+}
+
+async function platformSignIn(http: APIRequestContext): Promise<SessionPlatform> {
   const data = await body<AccessTokenResponse>(
     await http.post(`${API}/auth/login`, { data: { email: SEED.platform, password: SECRET } }),
     'acceso de plataforma',
@@ -194,7 +228,7 @@ export async function signInPlatformByApi(http: APIRequestContext): Promise<Sess
   }
   await confirmPassword(http, data.access_token, SECRET)
   const { admin, permissions, preview } = data
-  const account = { kind: 'platform', admin, permissions, preview, two_factor_setup_required: false } as const
+  const account = { kind: 'platform', admin, permissions, preview, two_factor_setup_required: false, must_change_password: data.must_change_password } as const
   return { token: data.access_token, account }
 }
 
@@ -275,7 +309,7 @@ async function createIngredients(api: Customer, lomo: Dish): Promise<Ingredient[
   return ingredients
 }
 
-async function createStaff(http: APIRequestContext, api: Customer, suffix: string) {
+async function createStaff(api: Customer, suffix: string) {
   const roles = await api.list<Role>('/roles')
   const roleWaiter = roles.find((role) => role.kind === 'waiter')
   const cook = await api.post<Role>('/roles', {
@@ -290,8 +324,8 @@ async function createStaff(http: APIRequestContext, api: Customer, suffix: strin
     await api.post('/staff', { ...account, password: NEW_SECRET })
   }
   return {
-    waiter: await signInByApi(http, accounts.waiter.email, NEW_SECRET),
-    kitchen: await signInByApi(http, accounts.kitchen.email, NEW_SECRET),
+    waiter: await signInByApi(accounts.waiter.email, NEW_SECRET),
+    kitchen: await signInByApi(accounts.kitchen.email, NEW_SECRET),
   }
 }
 
@@ -304,7 +338,7 @@ export interface OptionsRestaurant {
 /** Da de alta un restaurante con su personal, su carta, sus mesas y un poco de inventario. */
 export async function createRestaurant(options: OptionsRestaurant = {}): Promise<Local> {
   const http = await newHttp()
-  const platform = await signInPlatformByApi(http)
+  const platform = await signInPlatformByApi()
   const suffix = unique()
   const slug = `e2e-${suffix}`
   const name = options.name ?? 'Restaurante E2E'
@@ -315,7 +349,7 @@ export async function createRestaurant(options: OptionsRestaurant = {}): Promise
     timezone: 'America/Lima',
     owner: { full_name: 'Encargada Prueba', email: emailOwner, password: NEW_SECRET },
   })
-  const owner = await signInByApi(http, emailOwner, NEW_SECRET)
+  const owner = await signInByApi(emailOwner, NEW_SECRET)
   const api = new Customer(http, owner.token)
   const dishes = await createMenu(api)
   const tables: Table[] = []
@@ -328,7 +362,7 @@ export async function createRestaurant(options: OptionsRestaurant = {}): Promise
     throw new Error('La carta de prueba está vacía')
   }
   const ingredients = await createIngredients(api, lomo)
-  const { waiter, kitchen } = await createStaff(http, api, suffix)
+  const { waiter, kitchen } = await createStaff(api, suffix)
   if (options.openCashRegister === true) {
     await api.post('/cash/open', { opening_amount: '100.00', notes: '' })
   }

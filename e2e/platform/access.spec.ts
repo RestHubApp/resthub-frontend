@@ -3,7 +3,7 @@
 // Las cuentas de la semilla entran por el formulario de verdad (HU01). Los
 // errores de contraseña se prueban con cuentas del restaurante propio de cada
 // prueba, para no acercarse al límite de intentos fallidos de la semilla.
-import { SECRET, signInByApi, newHttp, SEED } from '../support/api'
+import { SECRET, signInByApi, SEED } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 import {
@@ -20,11 +20,9 @@ import {
 // la navegación por rol y no dependen de cuál entra primero. La pantalla de
 // términos se prueba con el encargado recién creado (PLA-01).
 test.beforeAll(async () => {
-  const http = await newHttp()
   for (const email of [SEED.owner, SEED.waiter, SEED.kitchen]) {
-    await signInByApi(http, email, SECRET)
+    await signInByApi(email, SECRET)
   }
-  await http.dispose()
 })
 
 const ALL = [

@@ -129,6 +129,7 @@ export function signInToPlatform(
     permissions: [...permissions],
     preview: false,
     two_factor_setup_required: false,
+    must_change_password: false,
   }
   setAuthToken('token-de-plataforma')
   useSession.setState({ token: 'token-de-plataforma', account, expired: false, passwordChanged: false })

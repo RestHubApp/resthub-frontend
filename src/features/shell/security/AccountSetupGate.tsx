@@ -1,12 +1,12 @@
 import { type ComponentType, type ReactElement, Suspense } from 'react'
 
-import type { PlatformSession, Session, StaffSession } from '@/api/types'
+import type { PlatformSession, Session } from '@/api/types'
 import '@/store/accountSetup'
 
 /** Las pantallas que tapan el armazón hasta completar la cuenta; las pasa el router (viven en `features/auth`). */
 export interface AccountSetupViews {
-  /** Cambiar la contraseña temporal (RFS-20). */
-  readonly passwordChange?: ComponentType<{ readonly account: StaffSession }> | undefined
+  /** Cambiar la contraseña temporal (RFS-20), del personal o de la administración del sistema. */
+  readonly passwordChange?: ComponentType<{ readonly account: Session }> | undefined
   /** Activar la verificación en dos pasos, obligatoria para la administración del sistema (RFS-22). */
   readonly twoFactorSetup?: ComponentType<{ readonly account: PlatformSession }> | undefined
 }
@@ -19,7 +19,8 @@ interface AccountSetupGateProps {
 
 function pendingView(account: Session, views: AccountSetupViews): ReactElement | null {
   if (account.preview) return null
-  if (account.kind === 'staff' && account.must_change_password && views.passwordChange !== undefined) {
+  // Primero la contraseña: hasta cambiar la temporal, el servidor tampoco deja activar los dos pasos.
+  if (account.must_change_password && views.passwordChange !== undefined) {
     return <views.passwordChange account={account} />
   }
   if (account.kind === 'platform' && account.two_factor_setup_required && views.twoFactorSetup !== undefined) {

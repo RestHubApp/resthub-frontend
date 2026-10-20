@@ -35,10 +35,8 @@ async function signInByForm(page: Page, session: Session): Promise<void> {
 
 test('SEG-01 la cuenta ve sus sesiones abiertas, cierra la de otro dispositivo y luego las demás', async ({ page, local }) => {
   covers('confirmacion:auth/security/OwnSessionsCard')
-  const http = await newHttp()
-  const phone = await signInByApi(http, local.waiter.email, local.waiter.password)
-  const laptop = await signInByApi(http, local.waiter.email, local.waiter.password)
-  await http.dispose()
+  const phone = await signInByApi(local.waiter.email, local.waiter.password)
+  const laptop = await signInByApi(local.waiter.email, local.waiter.password)
 
   await openAs(page, local.waiter, '/perfil')
   const list = page.getByRole('list', { name: 'Sesiones abiertas' })

@@ -9,7 +9,7 @@ import { mkdirSync, rmSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import type { APIRequestContext, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import {
   API_ORIGIN,
@@ -193,10 +193,10 @@ export async function restaurantsWithPages(platform: Customer): Promise<void> {
 }
 
 /** Que la bitácora de plataforma tenga más de una página: cada acceso deja una entrada. */
-export async function logWithPages(http: APIRequestContext, platform: Customer): Promise<number> {
+export async function logWithPages(platform: Customer): Promise<number> {
   let total = (await platform.get<PlatformActivityPage>('/platform/activity?limit=1&offset=0')).total
   while (total <= PAGE_PLATFORM) {
-    await signInPlatformByApi(http)
+    await signInPlatformByApi()
     total = (await platform.get<PlatformActivityPage>('/platform/activity?limit=1&offset=0')).total
   }
   return total

@@ -42,7 +42,13 @@ export interface paths {
          *
          *     Con la verificación en dos pasos (RFS-22), la contraseña correcta sin
          *     `otp_code` responde 401 `two_factor_required`, y un código equivocado, 401
-         *     `invalid_two_factor_code`, que cuenta como intento fallido.
+         *     `invalid_two_factor_code`, que cuenta como intento fallido. Una contraseña
+         *     temporal que pasó `TEMPORARY_PASSWORD_HOURS` responde 401
+         *     `temporary_password_expired` (ASVS 6.4.1), también contado como fallido.
+         *
+         *     Un acceso correcto cierra la sesión que ese navegador traía en su cookie
+         *     (ASVS V7.2.4): entrar otra vez, con la misma cuenta o con otra, no deja
+         *     abierta la anterior.
          */
         post: operations["login_api_v1_auth_login_post"];
         delete?: never;
@@ -66,7 +72,8 @@ export interface paths {
          *
          *     Solo esta: las de los demás dispositivos siguen abiertas. Sirve a las dos
          *     clases de cuenta, también con la contraseña temporal o la sesión bloqueada.
-         *     Una vista previa no deja asiento: sus entradas y salidas son de la plataforma.
+         *     Una vista previa cierra su sesión (su token deja de valer) y no deja asiento:
+         *     sus entradas y salidas son de la plataforma.
          */
         post: operations["logout_api_v1_auth_logout_post"];
         delete?: never;
@@ -151,14 +158,18 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cambiar la contraseña propia
+         * Cambiar la contraseña propia (personal o administración del sistema)
          * @description Cambia la contraseña, cierra las demás sesiones y devuelve una nueva.
          *
-         *     No desde una sesión bloqueada por inactividad: primero se desbloquea.
+         *     Sirve a las dos clases de cuenta y responde la variante que corresponda
+         *     (`kind`), con la forma del login. Pasa también con la contraseña temporal,
+         *     que es para lo que está. No desde una sesión bloqueada por inactividad:
+         *     primero se desbloquea.
          *
          *     El cambio corta todos los tokens emitidos antes, el de esta petición
-         *     incluido. La respuesta trae el token nuevo y la sesión, con la forma del
-         *     login, para que quien cambió la contraseña siga dentro sin volver a entrar.
+         *     incluido. La respuesta trae el token nuevo y la sesión, para que quien
+         *     cambió la contraseña siga dentro sin volver a entrar. 400
+         *     `wrong_current_password`, 422 `weak_password`, 401 `temporary_password_expired`.
          */
         post: operations["change_own_password_api_v1_auth_me_password_post"];
         delete?: never;
@@ -208,6 +219,16 @@ export interface paths {
          *     cuentas o locales piden la contraseña de nuevo. Vale cinco minutos y solo en
          *     esta sesión. Los intentos fallidos cuentan como los del acceso: tras varios
          *     seguidos responde 429.
+         *
+         *     Con la verificación en dos pasos activa (ASVS V7.5.1), la contraseña sola no
+         *     alcanza: igual que el acceso, sin `otp_code` responde 401
+         *     `two_factor_required` y con un código equivocado, 401
+         *     `invalid_two_factor_code`, que cuenta como intento fallido. Sirve el código de
+         *     la aplicación o uno de recuperación.
+         *
+         *     Con `rotate_session: true` la sesión cambia de identificador (ASVS V7.2.4):
+         *     la respuesta trae `access_token`, `expires_in` y `csrf_token` nuevos, deja
+         *     la cookie nueva y el token de esta petición deja de valer.
          */
         post: operations["reauthenticate_api_v1_auth_me_reauthenticate_post"];
         delete?: never;
@@ -233,6 +254,9 @@ export interface paths {
         /**
          * Cerrar las sesiones de los demás dispositivos
          * @description Deja abierta solo la sesión de esta petición.
+         *
+         *     Pide la contraseña confirmada hace poco (403 `reauthentication_required`,
+         *     ASVS V7.5.2), como las demás acciones críticas.
          */
         delete: operations["close_other_sessions_api_v1_auth_me_sessions_delete"];
         options?: never;
@@ -254,7 +278,10 @@ export interface paths {
          * Cerrar una sesión propia
          * @description Cierra la sesión de un dispositivo (el celular perdido) sin tocar las demás.
          *
-         *     Si es la de esta petición, equivale a salir.
+         *     Cerrar la de otro dispositivo pide la contraseña confirmada hace poco (403
+         *     `reauthentication_required`, ASVS V7.5.2): quien encuentra una sesión
+         *     abierta no echa al dueño de las suyas. Si es la de esta petición, equivale
+         *     a salir y no la pide.
          */
         delete: operations["close_own_session_api_v1_auth_me_sessions__session_ref__delete"];
         options?: never;
@@ -300,6 +327,8 @@ export interface paths {
         /**
          * Desactivar la verificación en dos pasos
          * @description La administración del sistema no puede quedarse sin ella: la cambia renovándola.
+         *
+         *     Cierra las demás sesiones de la cuenta (ASVS V7.4.3), como al activarla.
          */
         delete: operations["disable_two_factor_api_v1_auth_me_two_factor_delete"];
         options?: never;
@@ -319,6 +348,9 @@ export interface paths {
         /**
          * Activar la verificación en dos pasos con el primer código
          * @description Responde los diez códigos de recuperación: no se vuelven a mostrar.
+         *
+         *     Cierra las demás sesiones de la cuenta (ASVS V7.4.3): las abiertas solo con
+         *     la contraseña tienen que volver a entrar con el segundo paso.
          */
         post: operations["confirm_two_factor_api_v1_auth_me_two_factor_confirm_post"];
         delete?: never;
@@ -379,6 +411,11 @@ export interface paths {
         /**
          * Desbloquear la sesión con el PIN o la contraseña
          * @description Un PIN equivocado responde 400 con los intentos que quedan; el tercero cierra la sesión.
+         *
+         *     Con `rotate_session: true`, desbloquear responde 200 con un token nuevo (otro
+         *     `sid`, ASVS V7.2.4) y la sesión, como `POST /auth/refresh`; el token de esta
+         *     petición deja de valer. Una sesión que no estaba bloqueada responde 204 y
+         *     conserva su token.
          */
         post: operations["unlock_own_session_api_v1_auth_me_unlock_post"];
         delete?: never;
@@ -3784,7 +3821,7 @@ export interface components {
          * @description Código estable de un error del API (ver `resthub.core.error_codes`).
          * @enum {string}
          */
-        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "login_throttled" | "csrf_token_invalid" | "password_change_required" | "session_locked" | "two_factor_required" | "invalid_two_factor_code" | "two_factor_setup_required" | "two_factor_state_conflict" | "unlock_attempts_exhausted" | "session_not_found" | "reauthentication_required" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invalid_idle_lock" | "invalid_opening_hours" | "invalid_pin" | "wrong_pin" | "pin_not_set" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "payment_not_found" | "payment_not_voidable" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "owner_not_found" | "invalid_deactivation_reason" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
+        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "request_too_large" | "login_throttled" | "csrf_token_invalid" | "password_change_required" | "temporary_password_expired" | "session_locked" | "two_factor_required" | "invalid_two_factor_code" | "two_factor_setup_required" | "two_factor_state_conflict" | "unlock_attempts_exhausted" | "session_not_found" | "reauthentication_required" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invalid_idle_lock" | "invalid_opening_hours" | "invalid_pin" | "wrong_pin" | "pin_not_set" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "payment_not_found" | "payment_not_voidable" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "owner_not_found" | "invalid_deactivation_reason" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
         /**
          * ErrorResponse
          * @description Un error del API: el texto para la persona y el código estable.
@@ -4904,6 +4941,11 @@ export interface components {
              * @enum {string}
              */
             kind: "platform";
+            /**
+             * Must Change Password
+             * @default false
+             */
+            must_change_password: boolean;
             /** Permissions */
             permissions: components["schemas"]["PlatformPermission"][];
             /**
@@ -4947,6 +4989,11 @@ export interface components {
              * @enum {string}
              */
             kind: "platform";
+            /**
+             * Must Change Password
+             * @default false
+             */
+            must_change_password: boolean;
             /** Permissions */
             permissions: components["schemas"]["PlatformPermission"][];
             /**
@@ -5158,19 +5205,37 @@ export interface components {
         };
         /** ReauthenticateRequest */
         ReauthenticateRequest: {
+            /** Otp Code */
+            otp_code?: string | null;
             /** Password */
             password: string;
+            /**
+             * Rotate Session
+             * @default false
+             */
+            rotate_session: boolean;
         };
         /**
          * ReauthenticationResponse
          * @description Hasta cuándo valen las acciones críticas en esta sesión (RFS-21).
+         *
+         *     Con `rotate_session`, además el token nuevo (con la forma del acceso) y su
+         *     valor anti-CSRF; sin él, esos campos van en `null`.
          */
         ReauthenticationResponse: {
+            /** Access Token */
+            access_token?: string | null;
+            /** Csrf Token */
+            csrf_token?: string | null;
+            /** Expires In */
+            expires_in?: number | null;
             /**
              * Reauthenticated At
              * Format: date-time
              */
             reauthenticated_at: string;
+            /** Token Type */
+            token_type?: string | null;
             /**
              * Valid Until
              * Format: date-time
@@ -5241,6 +5306,10 @@ export interface components {
         /**
          * RecoveryCodesResponse
          * @description Se muestran una sola vez: cada uno sirve para entrar sin el celular.
+         *
+         *     Cada código viene ya agrupado (`K7QM-4XWP-9RTA-...`, 29 caracteres): se
+         *     muestra tal cual. Al entrar se aceptan con o sin guiones y espacios, en
+         *     mayúsculas o minúsculas.
          */
         RecoveryCodesResponse: {
             /** Recovery Codes */
@@ -6179,6 +6248,11 @@ export interface components {
             pending: boolean;
             /** Recovery Codes Left */
             recovery_codes_left: number;
+            /**
+             * Recovery Codes Outdated
+             * @default false
+             */
+            recovery_codes_outdated: boolean;
         };
         /**
          * Unit
@@ -6194,6 +6268,11 @@ export interface components {
             password?: string | null;
             /** Pin */
             pin?: string | null;
+            /**
+             * Rotate Session
+             * @default false
+             */
+            rotate_session: boolean;
         };
         /**
          * UnusedStaffResponse
@@ -6599,6 +6678,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -6688,6 +6776,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6785,6 +6882,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -6861,6 +6967,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6947,6 +7062,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7044,6 +7168,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -7083,7 +7216,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StaffAccessTokenResponse"];
+                    "application/json": components["schemas"]["StaffAccessTokenResponse"] | components["schemas"]["PlatformAdminAccessTokenResponse"];
                 };
             };
             /** @description La petición no se puede atender tal como llegó. */
@@ -7124,6 +7257,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7225,6 +7367,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -7315,6 +7466,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -7395,6 +7555,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7494,6 +7663,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -7568,6 +7746,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7651,6 +7838,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7754,6 +7950,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -7846,6 +8051,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -7920,6 +8134,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8007,6 +8230,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8106,6 +8338,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -8189,6 +8430,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -8222,6 +8472,15 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Desbloqueada con `rotate_session`: el token nuevo y la sesión. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffAccessTokenResponse"];
+                };
+            };
             /** @description Successful Response */
             204: {
                 headers: {
@@ -8267,6 +8526,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8370,6 +8638,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -8462,6 +8739,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -8538,6 +8824,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8623,6 +8918,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8720,6 +9024,15 @@ export interface operations {
             };
             /** @description `invoice_document_unavailable`: el comprobante todavía no tiene ese documento (el PDF solo existe para uno aceptado por SUNAT). */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8834,6 +9147,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -8923,6 +9245,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9024,6 +9355,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -9111,6 +9451,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9216,6 +9565,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -9303,6 +9661,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9408,6 +9775,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description `invalid_invoice`: falta el motivo o pasa de 200 caracteres. */
             422: {
                 headers: {
@@ -9498,6 +9874,15 @@ export interface operations {
             };
             /** @description `invoice_document_unavailable`: el comprobante todavía no tiene ese documento (el PDF solo existe para uno aceptado por SUNAT). */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9608,6 +9993,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -9700,6 +10094,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -9780,6 +10183,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9892,6 +10304,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description `invalid_certificate` (el archivo no abre, la contraseña no corresponde, no es RSA, pesa más de 64 KB o está vencido) o `invalid_billing_credentials` (el servicio de facturación lo rechazó). */
             422: {
                 headers: {
@@ -9997,6 +10418,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -10089,6 +10519,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -10169,6 +10608,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10271,6 +10719,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -10358,6 +10815,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10462,6 +10928,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -10558,6 +11033,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -10645,6 +11129,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10750,6 +11243,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -10835,6 +11337,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10936,6 +11447,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -11023,6 +11543,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11122,6 +11651,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -11198,6 +11736,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11304,6 +11851,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -11394,6 +11950,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11499,6 +12064,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -11591,6 +12165,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -11670,6 +12253,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11769,6 +12361,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -11850,6 +12451,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11949,6 +12559,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -12025,6 +12644,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12113,6 +12741,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12217,6 +12854,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -12307,6 +12953,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12411,6 +13066,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -12501,6 +13165,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12600,6 +13273,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -12680,6 +13362,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12779,6 +13470,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -12857,6 +13557,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12960,6 +13669,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -13047,6 +13765,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13152,6 +13879,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -13241,6 +13977,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13347,6 +14092,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -13437,6 +14191,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13540,6 +14303,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -13627,6 +14399,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13732,6 +14513,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -13819,6 +14609,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13924,6 +14723,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -14011,6 +14819,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14110,6 +14927,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -14190,6 +15016,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14289,6 +15124,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -14367,6 +15211,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14472,6 +15325,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -14561,6 +15423,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14664,6 +15535,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -14751,6 +15631,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14852,6 +15741,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -14946,6 +15844,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -15033,6 +15940,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -15138,6 +16054,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -15230,6 +16155,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -15310,6 +16244,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -15408,6 +16351,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -15520,6 +16472,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -15616,6 +16577,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -15703,6 +16673,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -15808,6 +16787,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -15895,6 +16883,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -15996,6 +16993,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -16088,6 +17094,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -16167,6 +17182,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16270,6 +17294,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -16366,6 +17399,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -16451,6 +17493,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16556,6 +17607,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -16647,6 +17707,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16750,6 +17819,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -16837,6 +17915,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -16942,6 +18029,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -17033,6 +18129,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -17139,6 +18244,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -17237,6 +18351,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -17324,6 +18447,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -17435,6 +18567,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -17524,6 +18665,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -17623,6 +18773,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -17701,6 +18860,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -17806,6 +18974,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -17897,6 +19074,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -18002,6 +19188,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -18093,6 +19288,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -18198,6 +19402,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -18286,6 +19499,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -18392,6 +19614,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -18491,6 +19722,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -18579,6 +19819,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -18685,6 +19934,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -18776,6 +20034,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -18881,6 +20148,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -18972,6 +20248,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -19078,6 +20363,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -19165,6 +20459,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -19266,6 +20569,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -19353,6 +20665,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -19452,6 +20773,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -19531,6 +20861,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -19634,6 +20973,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -19726,6 +21074,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -19802,6 +21159,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -19903,6 +21269,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -19990,6 +21365,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -20101,6 +21485,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -20200,6 +21593,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -20292,6 +21694,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -20373,6 +21784,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -20477,6 +21897,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -20574,6 +22003,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -20663,6 +22101,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -20767,6 +22214,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -20863,6 +22319,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -20950,6 +22415,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21055,6 +22529,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -21146,6 +22629,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21252,6 +22744,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -21344,6 +22845,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -21420,6 +22930,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21506,6 +23025,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21602,6 +23130,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21707,6 +23244,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -21796,6 +23342,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21895,6 +23450,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -21975,6 +23539,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -22074,6 +23647,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description La sesión está bloqueada por inactividad: se desbloquea con el PIN. */
             423: {
                 headers: {
@@ -22154,6 +23736,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -22259,6 +23850,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -22344,6 +23944,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -22454,6 +24063,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -22543,6 +24161,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -22644,6 +24271,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -22731,6 +24367,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -22836,6 +24481,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -22926,6 +24580,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -23029,6 +24692,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -23116,6 +24788,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -23215,6 +24896,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -23301,6 +24991,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -23406,6 +25105,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -23494,6 +25202,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -23597,6 +25314,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -23686,6 +25412,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -23784,6 +25519,15 @@ export interface operations {
             };
             /** @description El estado actual no permite la operación. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description El cuerpo de la petición pasa del tamaño máximo. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };

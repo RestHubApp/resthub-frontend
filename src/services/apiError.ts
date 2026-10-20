@@ -101,9 +101,24 @@ function detailOf(body: unknown): string | undefined {
   return typeof message === 'string' ? message : undefined
 }
 
+const CONTENT_TOO_LARGE = 413
+
+/**
+ * El cuerpo pasó el tope del servidor (413 `request_too_large`, 1 MiB): su
+ * propio texto solo dice que es demasiado grande. Puede responderlo también el
+ * proxy de delante, sin cuerpo ni código: se reconoce por el estado.
+ */
+const TOO_LARGE_MESSAGE = 'Lo que intentas guardar pesa demasiado para el servidor. Si lleva una foto o un archivo, elige uno más liviano.'
+
+function isTooLarge(error: ApiError): boolean {
+  return error.code === 'request_too_large' || (!hasOwnCode(error) && error.status === CONTENT_TOO_LARGE)
+}
+
 /** El mensaje del servidor para una petición que falló, o `fallback` si no trae uno. */
 export function errorMessage(error: unknown, fallback: string): string {
-  return (error instanceof ApiError ? detailOf(error.body) : undefined) ?? fallback
+  if (!(error instanceof ApiError)) return fallback
+  if (isTooLarge(error)) return TOO_LARGE_MESSAGE
+  return detailOf(error.body) ?? fallback
 }
 
 // Credencial ausente, vencida o revocada; o la sesión que el tercer PIN equivocado cerró.

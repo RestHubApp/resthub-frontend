@@ -6,7 +6,8 @@ import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
 import { tryAccess } from '../support/management'
 
-const NEW = 'mesero-nueva-clave-2026'
+// Sin el nombre ni el correo del mesero: el backend rechaza esas palabras (422 `weak_password`).
+const NEW = 'nueva-clave-e2e-2026'
 
 // Cada prueba es un recorrido largo de la pantalla con datos preparados por el
 // API; con la máquina compartida por otras suites pasan de los 45 s por omisión.

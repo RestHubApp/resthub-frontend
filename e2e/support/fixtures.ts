@@ -4,7 +4,7 @@ import { test as base, expect as expectBase, type Page } from '@playwright/test'
 
 import { randomBytes } from 'node:crypto'
 
-import { API_ORIGIN, createRestaurant, signInPlatformByApi, newHttp, type Local, type Session, type SessionPlatform } from './api'
+import { API_ORIGIN, createRestaurant, signInPlatformByApi, type Local, type Session, type SessionPlatform } from './api'
 
 const SESSION = 'resthub.session.v3'
 // Una dirección que la aplicación no sirve: la prueba la responde con una página vacía.
@@ -30,9 +30,7 @@ export const test = base.extend<Accessories>({
     await local.http.dispose()
   },
   platform: async ({}, provide) => {
-    const http = await newHttp()
-    await provide(await signInPlatformByApi(http))
-    await http.dispose()
+    await provide(await signInPlatformByApi())
   },
 })
 

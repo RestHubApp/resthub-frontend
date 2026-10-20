@@ -23,6 +23,7 @@ function platformAccount(adminId: number): PlatformSession {
     permissions: ['platform.restaurants.read'],
     preview: false,
     two_factor_setup_required: false,
+    must_change_password: false,
   }
 }
 
