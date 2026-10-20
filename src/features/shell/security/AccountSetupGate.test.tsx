@@ -10,6 +10,7 @@ import { AccountSetupGate } from './AccountSetupGate'
 
 const CONTENT = 'Pedidos del salón'
 const SETUP_TWO_FACTOR = 'Activa los dos pasos, Equipo RestHub'
+const PLATFORM_PASSWORD = 'Cambia tu contraseña, Equipo RestHub'
 
 /** Como en el armazón: la cuenta sale del almacén de sesión. */
 function Gate() {
@@ -69,5 +70,28 @@ describe('verificación en dos pasos obligatoria en la plataforma (RFS-22)', () 
     await expect(send((client) => client.GET('/api/v1/platform/restaurants'))).rejects.toMatchObject({ code: 'two_factor_setup_required' })
 
     expect(await screen.findByRole('heading', { name: SETUP_TWO_FACTOR })).toBeInTheDocument()
+  })
+})
+
+describe('contraseña temporal de la plataforma (ASVS 6.2.2)', () => {
+  it('con la contraseña del alta solo se ve el cambio, antes que los dos pasos', async () => {
+    server()
+    useSession.setState({ account: { ...signInToPlatform(), must_change_password: true, two_factor_setup_required: true } })
+    mountScreen(<Gate />)
+
+    expect(await screen.findByRole('heading', { name: PLATFORM_PASSWORD })).toBeInTheDocument()
+    expect(screen.queryByText(CONTENT)).not.toBeInTheDocument()
+  })
+
+  it('un 403 password_change_required de la plataforma lleva al cambio', async () => {
+    server().on('get', '/platform/restaurants', new ErrorResponse(403, 'Cambia la contraseña antes de seguir.', 'password_change_required'))
+    signInToPlatform()
+    mountScreen(<Gate />)
+    expect(screen.getByText(CONTENT)).toBeInTheDocument()
+
+    await expect(send((client) => client.GET('/api/v1/platform/restaurants'))).rejects.toMatchObject({ code: 'password_change_required' })
+
+    expect(await screen.findByRole('heading', { name: PLATFORM_PASSWORD })).toBeInTheDocument()
+    expect(useSession.getState().account).toMatchObject({ kind: 'platform', must_change_password: true })
   })
 })

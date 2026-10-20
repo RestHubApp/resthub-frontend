@@ -21,6 +21,19 @@ function accessResponse() {
   return { access_token: 'token-nuevo', token_type: 'bearer', expires_in: 3600, kind, user, restaurant, permissions, preview: isPreview }
 }
 
+function platformAccess(changes: { must_change_password?: boolean } = {}) {
+  return {
+    access_token: 'token-plataforma',
+    token_type: 'bearer',
+    expires_in: 3600,
+    kind: 'platform',
+    admin: { id: 1, email: PLATFORM_EMAIL, full_name: 'Equipo RestHub' },
+    permissions: ['platform.restaurants.read'],
+    preview: false,
+    ...changes,
+  }
+}
+
 function openAccess(status?: { from: string }) {
   const api = server()
   const mount = mountScreen(<LoginView />, { path: '/acceso' })
@@ -94,15 +107,7 @@ describe('LoginView', () => {
 
   it('una cuenta de plataforma entra por el mismo formulario y abre su sesión', async () => {
     const { api, user } = openAccess()
-    api.on('post', LOGIN, {
-      access_token: 'token-plataforma',
-      token_type: 'bearer',
-      expires_in: 3600,
-      kind: 'platform',
-      admin: { id: 1, email: PLATFORM_EMAIL, full_name: 'Equipo RestHub' },
-      permissions: ['platform.restaurants.read'],
-      preview: false,
-    })
+    api.on('post', LOGIN, platformAccess())
 
     await user.type(screen.getByLabelText(EMAIL), PLATFORM_EMAIL)
     await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
@@ -111,6 +116,32 @@ describe('LoginView', () => {
     expect(await screen.findByRole('status', WHERE)).toHaveTextContent(/^\/$/u)
     expect(useSession.getState().token).toBe('token-plataforma')
     expect(useSession.getState().account).toMatchObject({ kind: 'platform', permissions: ['platform.restaurants.read'] })
+  })
+})
+
+describe('LoginView con una contraseña temporal', () => {
+  it('la cuenta de plataforma con la contraseña del alta queda marcada para cambiarla', async () => {
+    const { api, user } = openAccess()
+    api.on('post', LOGIN, platformAccess({ must_change_password: true }))
+
+    await user.type(screen.getByLabelText(EMAIL), PLATFORM_EMAIL)
+    await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
+    await user.click(screen.getByRole('button', SIGN_IN))
+
+    expect(await screen.findByRole('status', WHERE)).toHaveTextContent(/^\/$/u)
+    expect(useSession.getState().account).toMatchObject({ kind: 'platform', must_change_password: true })
+  })
+
+  it('una contraseña temporal vencida dice que hay que pedir otra y no abre sesión', async () => {
+    const { api, user } = openAccess()
+    api.on('post', LOGIN, new ErrorResponse(401, 'La contraseña temporal venció: pide que te asignen una nueva.', 'temporary_password_expired'))
+
+    await user.type(screen.getByLabelText(EMAIL), WAITER_EMAIL)
+    await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
+    await user.click(screen.getByRole('button', SIGN_IN))
+
+    expect(await screen.findByText(/Tu contraseña temporal venció\. Pide una nueva a quien te creó la cuenta: el encargado de tu local/u)).toBeInTheDocument()
+    expect(useSession.getState().token).toBeNull()
   })
 })
 

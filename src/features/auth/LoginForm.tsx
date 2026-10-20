@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { ErrorMessage } from '@/components/ErrorMessage'
+import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { TwoFactorCodeField } from '@/components/TwoFactorCodeField'
 import { Button } from '@/components/ui/button'
@@ -8,6 +9,13 @@ import { useCredentialsForm } from '@/hooks/useCredentialsForm'
 import { hasCode } from '@/services/apiError'
 import { LoginFields } from './LoginFields'
 import { useLogin } from './useLogin'
+
+/**
+ * La contraseña temporal venció (401 `temporary_password_expired`, ASVS 6.4.1):
+ * volver a probarla no sirve, hay que pedir otra a quien la dio.
+ */
+const EXPIRED_TEMPORARY_PASSWORD =
+  'Tu contraseña temporal venció. Pide una nueva a quien te creó la cuenta: el encargado de tu local o, si administras el sistema, otra persona de la administración.'
 
 interface LoginFormProps {
   /** Ruta a la que se va después de entrar. */
@@ -37,7 +45,10 @@ export function LoginForm({ destination }: LoginFormProps) {
       <LoginFields bind={bind} errors={errors} />
       {isAskingCode ? <TwoFactorCodeField onChange={setCode} /> : null}
 
-      {hasFailed ? (
+      {hasFailed && hasCode(access.error, 'temporary_password_expired') ? (
+        <FormMessage tone="error">{EXPIRED_TEMPORARY_PASSWORD}</FormMessage>
+      ) : null}
+      {hasFailed && !hasCode(access.error, 'temporary_password_expired') ? (
         <ErrorMessage error={access.error} fallback="No se pudo iniciar sesión. Inténtalo de nuevo." />
       ) : null}
 
