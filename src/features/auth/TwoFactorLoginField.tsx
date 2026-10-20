@@ -29,7 +29,8 @@ export function TwoFactorLoginField({ onChange }: TwoFactorLoginFieldProps) {
       hint="Los 6 dígitos de tu aplicación, o uno de tus códigos de recuperación."
       icon="key"
       autoComplete="one-time-code"
-      maxLength={32}
+      // Lo mismo que acepta el servidor: un código de recuperación mide 29 con guiones y se puede escribir con espacios.
+      maxLength={64}
       spellCheck={false}
       field={field}
     />
