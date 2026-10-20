@@ -13,8 +13,8 @@ export const DEVICE_SESSIONS = [
   { id: 'd4e5f6', device: 'Safari en iPhone', network: '181.65.2.x', city: 'Arequipa', country: 'PE', created_at: SEEN, last_seen_at: SEEN, current: false },
 ]
 
-export const TWO_FACTOR_OFF = { enabled: false, pending: false, recovery_codes_left: 0 }
-export const TWO_FACTOR_ON = { enabled: true, pending: false, recovery_codes_left: 10 }
+export const TWO_FACTOR_OFF = { enabled: false, pending: false, recovery_codes_left: 0, recovery_codes_outdated: false }
+export const TWO_FACTOR_ON = { enabled: true, pending: false, recovery_codes_left: 10, recovery_codes_outdated: false }
 
 // Una clave de ejemplo, no la de ninguna cuenta.
 const EXAMPLE_KEY = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP'
@@ -24,7 +24,19 @@ export const TWO_FACTOR_SETUP = {
   otpauth_uri: `otpauth://totp/RestHub%3Amesero%40e2e.resthub.dev?secret=${EXAMPLE_KEY}&issuer=RestHub&digits=6&period=30`,
 }
 
-export const RECOVERY_CODES = ['k7m2pqrs4t', 'w8x3yz5abc', 'd6e9fghj2k', 'n4p7qrs3tu', 'v5w8xyz2ab', 'c3d6efg9hj', 'm2n5pqr8st', 'u4v7wxy3za', 'b6c9def2gh', 'j5k8mnp4qr']
+// Con la forma de los del servidor: 24 caracteres en seis grupos de cuatro.
+export const RECOVERY_CODES = [
+  'm9ep-xbc5-udnv-b8tg-bcqq-chcu',
+  'qb5v-d9hx-xv9b-vvpb-hbu6-ekqe',
+  'udvk-u5yf-dvvx-gndu-zcvb-wgsy',
+  'uq3m-rv8r-nkh4-fz3h-cvkt-s7m2',
+  'rkwc-dtqf-3me8-sqb9-yc3u-v475',
+  'mmzn-wsv4-rc5c-9jsz-ycb2-zkxv',
+  'y5rk-zp7y-na9r-nfwd-sbg3-ke2h',
+  'pp86-scfr-puj7-e5q6-ujzq-ny7p',
+  '9hec-fehy-has5-vfjk-aequ-nwvm',
+  '9ez6-t9wx-y2br-7639-6y4u-pppp',
+]
 
 /** Responde siempre lo mismo a esa ruta del API. */
 export async function answer(page: Page, path: string, body: unknown, status = 200): Promise<void> {

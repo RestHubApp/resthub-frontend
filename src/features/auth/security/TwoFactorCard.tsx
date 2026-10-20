@@ -14,7 +14,10 @@ function statusText(status: TwoFactorStatus): string {
   if (!status.enabled) return 'Al entrar, además de la contraseña, se pide un código de tu celular. Así nadie entra solo con tu contraseña.'
   const left = status.recovery_codes_left
   const remaining = left === 1 ? 'queda 1 código' : 'quedan ' + String(left) + ' códigos'
-  return `Al entrar se pide el código de tu aplicación. Te ${remaining} de recuperación.`
+  const base = `Al entrar se pide el código de tu aplicación. Te ${remaining} de recuperación.`
+  // Los del formato anterior, más cortos, siguen sirviendo pero se adivinan antes: conviene cambiarlos.
+  if (status.recovery_codes_outdated) return `${base} Son del formato anterior, más corto: genera unos nuevos con «Nuevos códigos de recuperación».`
+  return base
 }
 
 /**

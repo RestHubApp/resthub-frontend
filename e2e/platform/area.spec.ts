@@ -22,7 +22,7 @@ test('PLA-07 la bitácora registra lo que hace el administrador y se pagina', as
   const api = new Customer(local.http, platform.token)
   const name = `Bitácora ${unique()}`
   await api.patch(`/platform/restaurants/${String(local.id)}`, { name })
-  await logWithPages(local.http, api)
+  await logWithPages(api)
   await openAsPlatform(page, platform, '/plataforma')
   await navigation(page).getByRole('link', { name: 'Bitácora' }).click()
   await expect(page).toHaveURL(/\/plataforma\/bitacora$/u)

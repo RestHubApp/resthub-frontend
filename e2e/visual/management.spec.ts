@@ -1,7 +1,7 @@
 // Regresión visual de lo que el encargado ve del día: el tablero, el
 // historial, la cancelación, la caja, los comprobantes, las reservas y los
 // clientes.
-import { api, countPrints, dayFromToday, issueSalesReceipt, id, sell } from '../support/management'
+import { api, countPrints, issueSalesReceipt, id, sell } from '../support/management'
 import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
 import { capture, captureWindow, expect, deadline, test } from './capture'
@@ -116,15 +116,17 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
     'hoja:customers/CustomerSheet',
     'confirmacion:customers/CustomerRights',
   )
-  // Mañana y no hoy: una reserva de hoy a las 20:00 ya pasó si la prueba corre de noche.
-  const tomorrow = dayFromToday(1)
+  // Un día fijo y lejano: una reserva de hoy a las 20:00 ya pasó si la prueba
+  // corre de noche, y con «mañana» el día que muestra la pantalla («martes 21»,
+  // «miércoles 22») cambiaba de largo y movía la captura en el celular.
+  const day = '2030-01-15'
   await api(local).post('/reservations', {
     customer_name: 'Lucía Paredes',
     phone: '987111222',
     party_size: 4,
     duration_minutes: 90,
     notes: 'Cumpleaños',
-    reserved_for: `${tomorrow}T20:00:00-05:00`,
+    reserved_for: `${day}T20:00:00-05:00`,
     table_id: local.table('2').id,
   })
   await api(local).post('/customers', {
@@ -138,7 +140,7 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
   })
 
   await openAs(page, local.owner, '/reservas')
-  await page.getByRole('main').getByLabel('Día', { exact: true }).fill(tomorrow)
+  await page.getByRole('main').getByLabel('Día', { exact: true }).fill(day)
   await expect(page.getByText('Lucía Paredes')).toBeVisible()
   await capture(page, 'reservas', { mask: [page.getByLabel('Día')] })
 

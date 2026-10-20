@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ErrorMessage } from '@/components/ErrorMessage'
-import { useForm } from 'react-hook-form'
 
+import { ErrorMessage } from '@/components/ErrorMessage'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { ChangePasswordFields } from './ChangePasswordFields'
 import {
   type ChangePasswordForm as Form,
@@ -21,7 +21,7 @@ import { useChangePassword } from './useChangePassword'
  * laptop sin bloquear no deberian alcanzar para quedarse con la cuenta.
  */
 export function ChangePasswordForm() {
-  const { register, handleSubmit, formState, reset } = useForm<Form>({
+  const { register, handleSubmit, formState, reset } = useAppForm<Form>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: EMPTY_CHANGE_PASSWORD,
   })

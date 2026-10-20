@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import type { Reservation, ReservationRequest } from '@/api/types'
-import { textOptional } from '@/components/formRules'
+import { phoneOptional, textOptional } from '@/components/formRules'
 import { wallClockIn, zonedInstant } from '@/services/format'
 
 // Los topes repiten los del backend (`reservations/domain/reservations.py`).
@@ -17,7 +17,7 @@ const integer = (min: number, max: number, that: string) =>
 
 export const reservationSchema = z.object({
   customer_name: z.string().trim().min(1, 'Escribe a nombre de quién').max(LIMITS.name, `Usa como máximo ${String(LIMITS.name)} caracteres`),
-  phone: textOptional(LIMITS.phone),
+  phone: phoneOptional(LIMITS.phone),
   party_size: integer(1, LIMITS.party, 'cuántos vienen'),
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, 'Elige el día'),
   time: z.string().regex(/^\d{2}:\d{2}$/u, 'Elige la hora'),

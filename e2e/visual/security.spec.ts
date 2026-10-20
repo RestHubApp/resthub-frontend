@@ -70,7 +70,7 @@ test('VIS-27 activar la verificación en dos pasos y desactivarla', async ({ pag
   await profileSecurity(page, TWO_FACTOR_ON)
   await sheet.getByRole('button', { name: 'Activar' }).click()
   const codes = page.getByRole('dialog', { name: 'Códigos de recuperación' })
-  await expect(codes.getByRole('list', { name: 'Códigos de recuperación' })).toContainText('k7m2p-qrs4t')
+  await expect(codes.getByRole('list', { name: 'Códigos de recuperación' })).toContainText('m9ep-xbc5-udnv-b8tg-bcqq-chcu')
   await captureWindow(codes, 'hoja-codigos-de-recuperacion')
   await codes.getByRole('button', { name: 'Ya los guardé' }).click()
 

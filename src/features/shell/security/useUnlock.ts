@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { unlockOwnSession } from '@/api/accountSecurity'
-import type { UnlockRequest } from '@/api/types'
+import { type UnlockCredential, unlockOwnSession } from '@/api/accountSecurity'
 import { useSession } from '@/store/session'
 
 /**
@@ -15,7 +14,7 @@ export function useUnlock() {
   const queryClient = useQueryClient()
   const setLocked = useSession((state) => state.setLocked)
   return useMutation({
-    mutationFn: (payload: UnlockRequest) => unlockOwnSession(payload),
+    mutationFn: (payload: UnlockCredential) => unlockOwnSession(payload),
     onSuccess: () => {
       setLocked(false)
       void queryClient.invalidateQueries()

@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { FormFooter } from '@/components/FormFooter'
@@ -7,6 +6,7 @@ import type { FooterSubmit } from '@/components/FormSubmitButton'
 import { TextareaField } from '@/components/TextareaField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { QuickReasons } from '@/features/orders/QuickReasons'
+import { useAppForm } from '@/hooks/useAppForm'
 import { MAX_INVOICE_VOID_REASON, MIN_INVOICE_VOID_REASON, QUICK_INVOICE_VOID_REASONS } from './invoiceVoid'
 
 const reasonSchema = z.object({
@@ -29,7 +29,7 @@ interface VoidReasonStepProps {
 
 /** El motivo de la anulación, escrito o elegido entre los rápidos. Va a SUNAT en la nota de crédito. */
 export function VoidReasonStep({ reason, isPending, submit, onCancel, onReason, children }: VoidReasonStepProps) {
-  const { register, handleSubmit, formState, setValue } = useForm<ReasonValues>({
+  const { register, handleSubmit, formState, setValue } = useAppForm<ReasonValues>({
     resolver: zodResolver(reasonSchema),
     defaultValues: { reason },
   })

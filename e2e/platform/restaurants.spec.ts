@@ -59,7 +59,8 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
   await page.goto('/acceso')
   await signInByForm(page, email, NEW_SECRET)
   // La contraseña inicial la eligió otra persona: primero elige la suya (RFS-20).
-  const own = `propia-${suffix}`
+  // Sin el sufijo de la prueba, que va en su correo y en el identificador del local (422 `weak_password`).
+  const own = 'quinua-propia-7742'
   await expect(page.getByRole('heading', { level: 1, name: 'Cambia tu contraseña' })).toBeVisible()
   await page.getByLabel('Contraseña actual').fill(NEW_SECRET)
   await page.getByLabel('Nueva contraseña', { exact: true }).fill(own)
@@ -190,7 +191,7 @@ test('PLA-05 el administrador agrega otro encargado y rechaza un correo ya usado
   await expect(owners).toContainText('Carmen Salas')
   await expect(owners).toContainText('Activa')
   await evidence(page, 'pla-05-encargado-agregado')
-  const session = await signInByApi(local.http, email, NEW_SECRET)
+  const session = await signInByApi(email, NEW_SECRET)
   expect(session.account).toMatchObject({ user: { role_label: 'Encargado' }, restaurant: { id: local.id } })
 })
 

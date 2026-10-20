@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
 
 import { customersQueryKey, saveCustomer } from '@/api/customers'
 import type { Customer } from '@/api/types'
 import { SaveFormDialog } from '@/components/SaveFormDialog'
 import { TextareaField } from '@/components/TextareaField'
 import { TextField } from '@/components/TextField'
+import { useAppForm } from '@/hooks/useAppForm'
 import { useNotifications } from '@/store/notifications'
 import { CustomerConsent } from './CustomerConsent'
 import { customerDefaults, customerRequest, customerSchema, type CustomerValues, LIMITS } from './customerSchema'
@@ -24,7 +24,7 @@ export function CustomerDialog({ open, customer, onClose: handleClose }: Custome
   const push = useNotifications((state) => state.push)
   // El alta exige el consentimiento; un cliente guardado antes de pedirlo
   // puede darlo al editarse; uno que ya lo dio no lo vuelve a dar.
-  const { register, handleSubmit, formState, reset, control } = useForm<CustomerValues>({
+  const { register, handleSubmit, formState, reset, control } = useAppForm<CustomerValues>({
     resolver: zodResolver(customerSchema(customer === null)),
     values: customerDefaults(customer),
   })

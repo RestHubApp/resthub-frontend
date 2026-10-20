@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import type { Role } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { MIN_PASSWORD } from '@/services/fieldLimits'
 import { defaultRoleId } from './roleOptions'
 import { StaffFields } from './StaffFields'
@@ -24,7 +24,7 @@ interface StaffCreateFormProps {
 
 /** El formulario para dar de alta una cuenta del personal con su contraseña inicial. */
 export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
-  const { register, handleSubmit, formState } = useForm<CreateStaffValues>({
+  const { register, handleSubmit, formState } = useAppForm<CreateStaffValues>({
     resolver: zodResolver(createStaffSchema),
     defaultValues: emptyCreateStaff(defaultRoleId(roles)),
   })

@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import type { BillingSettings } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { billingErrorMessage } from '@/services/billingErrors'
 import { settingsSchema, valuesOf, type SettingsValues } from './billingSettingsSchema'
 import { SolCredentialsFields } from './SolCredentialsFields'
@@ -25,7 +25,7 @@ interface BillingSettingsFormProps {
  * ofrece reemplazarlos, y sin escribirlos el servidor conserva los que tenía.
  */
 export function BillingSettingsForm({ settings, onSaved }: BillingSettingsFormProps) {
-  const form = useForm<SettingsValues>({
+  const form = useAppForm<SettingsValues>({
     resolver: zodResolver(settingsSchema(settings)),
     defaultValues: valuesOf(settings),
   })

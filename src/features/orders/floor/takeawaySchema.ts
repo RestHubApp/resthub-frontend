@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { textOptional } from '@/components/formRules'
+import { phoneOptional, textOptional } from '@/components/formRules'
 import type { Customer } from '@/api/types'
 import { paths } from '@/services/paths'
 
@@ -14,7 +14,7 @@ export const takeawaySchema = z
   .object({
     mode: z.enum(['takeaway', 'delivery']),
     customer_name: textOptional(MAX_CUSTOMER),
-    phone: textOptional(MAX_PHONE),
+    phone: phoneOptional(MAX_PHONE),
     address: textOptional(MAX_ADDRESS),
     reference: textOptional(MAX_REFERENCE),
     customer_id: z.number().int().positive().nullable(),
@@ -32,7 +32,9 @@ export const takeawaySchema = z
       ['address', 'Escribe la dirección de entrega'],
     ]
     for (const [field, message] of missing) {
-      if (values[field] === '') {
+      // El teléfono de un cliente de la libreta lo completa el servidor si queda vacío.
+      const isFromNotebook = field === 'phone' && values.customer_id !== null
+      if (values[field] === '' && !isFromNotebook) {
         ctx.addIssue({ code: 'custom', path: [field], message })
       }
     }
@@ -50,12 +52,16 @@ export const EMPTY_TAKEAWAY: TakeawayValues = {
   consent: false,
 }
 
-/** Los datos de un cliente de la libreta, listos para el formulario. */
+/**
+ * Los datos de un cliente de la libreta, listos para el formulario. Quien no
+ * gestiona clientes los recibe enmascarados («987•••321»): ese teléfono no se
+ * copia, el pedido sale con el de la libreta (lo completa el servidor).
+ */
 export function fromCustomer(customer: Customer, mode: TakeawayValues['mode']): TakeawayValues {
   return {
     mode,
     customer_name: customer.name,
-    phone: customer.phone,
+    phone: customer.masked ? '' : customer.phone,
     address: customer.address,
     reference: customer.reference,
     customer_id: customer.id,

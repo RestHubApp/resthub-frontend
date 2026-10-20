@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
 
 import { tablesQuery } from '@/api/tables'
 import type { Reservation } from '@/api/types'
 import { SaveFormDialog } from '@/components/SaveFormDialog'
+import { useAppForm } from '@/hooks/useAppForm'
 import { useTimeZone } from '@/store/session'
 import { ReservationFields } from './ReservationFields'
 import { reservationDefaults, reservationRequest, reservationSchema, type ReservationValues } from './reservationSchema'
@@ -27,7 +27,7 @@ interface ReservationDialogProps {
 export function ReservationDialog({ open, reservation, day, onClose: handleClose }: ReservationDialogProps) {
   const timeZone = useTimeZone()
   const tables = useQuery({ ...tablesQuery(false), enabled: open })
-  const form = useForm<ReservationValues>({
+  const form = useAppForm<ReservationValues>({
     resolver: zodResolver(reservationSchema),
     values: reservationDefaults(reservation, day, timeZone),
   })

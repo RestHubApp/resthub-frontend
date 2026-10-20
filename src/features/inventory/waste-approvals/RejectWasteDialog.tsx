@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import type { WasteApproval } from '@/api/types'
 import { rejectWaste } from '@/api/wasteApprovals'
@@ -8,6 +7,7 @@ import { FormFooter } from '@/components/FormFooter'
 import { TextareaField } from '@/components/TextareaField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { InventoryFailure } from '@/features/inventory/InventoryFailure'
+import { useAppForm } from '@/hooks/useAppForm'
 import { MAX_REJECTION, rejectWasteSchema, type RejectWasteValues } from './rejectWasteSchema'
 import { useWasteDecision } from './useWasteDecision'
 
@@ -19,7 +19,7 @@ interface RejectWasteDialogProps {
 
 /** Rechazar una merma con su motivo: el stock no cambia. */
 export function RejectWasteDialog({ approval, onClose }: RejectWasteDialogProps) {
-  const { register, handleSubmit, formState, reset } = useForm<RejectWasteValues>({
+  const { register, handleSubmit, formState, reset } = useAppForm<RejectWasteValues>({
     resolver: zodResolver(rejectWasteSchema),
     defaultValues: { reason: '' },
   })

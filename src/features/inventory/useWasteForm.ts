@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { QueryClient } from '@tanstack/react-query'
-import { useForm, useWatch } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 
 import { registerWaste } from '@/api/inventory'
 import type { Ingredient, StockChange, WasteApproval } from '@/api/types'
 import { wasteApprovalsQueryKey } from '@/api/wasteApprovals'
+import { useAppForm } from '@/hooks/useAppForm'
 import { formatMoney, formatQuantity } from '@/services/format'
 import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 import { saveIngredient } from './ingredientCache'
@@ -35,7 +36,7 @@ function updateCache(queryClient: QueryClient, result: WasteResult): void {
 
 /** El estado del formulario de merma: campos, cantidad base que se pierde y envío. */
 export function useWasteForm(ingredient: Ingredient, onDone: () => void) {
-  const { register, handleSubmit, formState, control } = useForm<WasteValues>({
+  const { register, handleSubmit, formState, control } = useAppForm<WasteValues>({
     resolver: zodResolver(wasteSchema),
     // Una merma suele ser poca cosa: se propone la unidad chica.
     defaultValues: { quantity: '', quantity_unit: ingredient.unit, reason: '' },

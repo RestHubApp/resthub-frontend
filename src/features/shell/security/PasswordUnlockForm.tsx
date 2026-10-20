@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import { PasswordField } from '@/components/PasswordField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { type CurrentPasswordValues, currentPasswordSchema } from '@/services/securityRules'
 import { UnlockFooter } from './UnlockFooter'
 import { useUnlock } from './useUnlock'
@@ -10,7 +10,7 @@ import { useUnlock } from './useUnlock'
 /** Desbloquear con la contraseña: sin PIN elegido, o si se olvidó. */
 export function PasswordUnlockForm() {
   const unlock = useUnlock()
-  const { register, handleSubmit, formState } = useForm<CurrentPasswordValues>({
+  const { register, handleSubmit, formState } = useAppForm<CurrentPasswordValues>({
     resolver: zodResolver(currentPasswordSchema),
     defaultValues: { password: '' },
   })

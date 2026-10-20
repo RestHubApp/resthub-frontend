@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { onlyDigits, type TotpValues, totpSchema } from '@/services/securityRules'
 
 interface TwoFactorCodeFormProps {
@@ -13,7 +13,7 @@ interface TwoFactorCodeFormProps {
 
 /** El primer código de la aplicación, que confirma que quedó bien configurada. */
 export function TwoFactorCodeForm({ mutation, onCancel }: TwoFactorCodeFormProps) {
-  const { register, handleSubmit, formState } = useForm<TotpValues>({ resolver: zodResolver(totpSchema), defaultValues: { code: '' } })
+  const { register, handleSubmit, formState } = useAppForm<TotpValues>({ resolver: zodResolver(totpSchema), defaultValues: { code: '' } })
   return (
     <form noValidate className="flex flex-col gap-4" onSubmit={onSubmit(handleSubmit((values) => { mutation.mutate(values.code) }))}>
       <TextField

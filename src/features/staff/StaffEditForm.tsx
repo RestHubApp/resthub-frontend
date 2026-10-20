@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
 
 import { updateStaff } from '@/api/staff'
 import type { Role, StaffResponse } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { StaffFields } from './StaffFields'
 import { saveStaffMember } from './staffList'
 import {
@@ -26,7 +26,7 @@ interface StaffEditFormProps {
 
 export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormProps) {
   const queryClient = useQueryClient()
-  const { register, handleSubmit, formState } = useForm<StaffIdentityValues>({
+  const { register, handleSubmit, formState } = useAppForm<StaffIdentityValues>({
     resolver: zodResolver(staffIdentitySchema),
     defaultValues: identityOf(account),
   })

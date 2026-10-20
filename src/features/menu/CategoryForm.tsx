@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 
 import type { MenuCategory } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
+import { useAppForm } from '@/hooks/useAppForm'
 import { type CategoryValues, categorySchema } from './menuSchema'
 import { useSaveCategory } from './useSaveCategory'
 
@@ -15,7 +15,7 @@ interface CategoryFormProps {
 }
 
 export function CategoryForm({ category, onDone }: CategoryFormProps) {
-  const { register, handleSubmit, formState } = useForm<CategoryValues>({
+  const { register, handleSubmit, formState } = useAppForm<CategoryValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: { name: category?.name ?? '' },
   })

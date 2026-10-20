@@ -20,6 +20,25 @@ describe('takeawaySchema', () => {
   })
 })
 
+describe('takeawaySchema: el teléfono del delivery', () => {
+  const delivery = { ...EMPTY_TAKEAWAY, mode: 'delivery' as const, customer_name: 'Ana', address: 'Calle 1' }
+
+  it('sigue la regla del servidor: solo números y espacios', () => {
+    const result = takeawaySchema.safeParse({ ...delivery, phone: '987-654-321' })
+    expect(result.error?.issues.map((issue) => issue.path[0])).toEqual(['phone'])
+    expect(takeawaySchema.safeParse({ ...delivery, phone: '987 654 321' }).success).toBe(true)
+  })
+
+  it('con un cliente de la libreta puede ir vacío: lo completa el servidor', () => {
+    expect(takeawaySchema.safeParse({ ...delivery, phone: '', customer_id: 40 }).success).toBe(true)
+  })
+
+  it('el teléfono enmascarado de la libreta no se copia al formulario', () => {
+    expect(fromCustomer(customer({ phone: '987•••321', masked: true }), 'delivery').phone).toBe('')
+    expect(fromCustomer(customer(), 'delivery').phone).toBe('987654321')
+  })
+})
+
 describe('newOrderPath', () => {
   it('para llevar lleva el tipo y el cliente en la dirección', () => {
     expect(newOrderPath({ ...EMPTY_TAKEAWAY, customer_name: 'Ana' })).toBe('/pedidos/nuevo?tipo=llevar&cliente=Ana')

@@ -22,6 +22,14 @@ describe('mensajes de error del API', () => {
     expect(errorMessage(error, FAILURE)).toBe('El RUC tiene 11 dígitos')
   })
 
+  it('un cuerpo demasiado grande (413) dice qué hacer, lo responda el API o el proxy', () => {
+    const tooLarge = /^Lo que intentas guardar pesa demasiado para el servidor\. Si lleva una foto o un archivo, elige uno más liviano\.$/u
+    expect(errorMessage(apiError(413, { detail: 'La petición es demasiado grande.', code: 'request_too_large' }), FAILURE)).toMatch(tooLarge)
+    expect(errorMessage(apiError(413, undefined), FAILURE)).toMatch(tooLarge)
+    expect(isTransportFailure(apiError(413, { detail: 'La petición es demasiado grande.', code: 'request_too_large' }))).toBe(false)
+    expect(shouldRetry(0, apiError(413, undefined))).toBe(false)
+  })
+
   it('sin detalle, o si no es un error del API, usa el mensaje de la pantalla', () => {
     expect(errorMessage(apiError(500, {}), FAILURE)).toBe(FAILURE)
     expect(errorMessage(apiError(500, undefined), FAILURE)).toBe(FAILURE)

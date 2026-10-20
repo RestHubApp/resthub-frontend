@@ -37,10 +37,10 @@ export function sessionOf(response: AccessTokenResponse): Session {
   if (response.kind === 'staff') {
     return staffSessionOf(response)
   }
-  const { admin, permissions, preview: isPreview } = response
+  const { admin, permissions, preview: isPreview, must_change_password } = response
   // El acceso no dice si falta la verificación en dos pasos: lo dicen `GET
   // /auth/me` y el primer 403 `two_factor_setup_required` (RFS-22).
-  return { kind: 'platform', admin, permissions, preview: isPreview, two_factor_setup_required: false }
+  return { kind: 'platform', admin, permissions, preview: isPreview, two_factor_setup_required: false, must_change_password }
 }
 
 /**
@@ -115,11 +115,12 @@ export async function acceptTerms(versions: AcceptTermsRequest): Promise<StaffSe
 }
 
 /**
- * Cambia la contraseña propia. El servidor corta todos los tokens anteriores,
- * el de esta petición incluido, y devuelve el único válido con la sesión (la
- * misma forma que el acceso).
+ * Cambia la contraseña propia, del personal o de la administración del
+ * sistema. El servidor corta todos los tokens anteriores, el de esta petición
+ * incluido, y devuelve el único válido con la sesión: la misma forma que el
+ * acceso, distinguida por `kind`.
  */
-export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<StaffAccessTokenResponse> {
+export async function changeOwnPassword(payload: ChangeOwnPasswordRequest): Promise<AccessTokenResponse> {
   return withCsrf(await send((client) => client.POST('/api/v1/auth/me/password', { body: payload })))
 }
 

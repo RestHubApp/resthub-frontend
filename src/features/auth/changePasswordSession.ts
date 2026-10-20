@@ -1,4 +1,4 @@
-import { type changeOwnPassword, staffSessionOf } from '@/api/auth'
+import { type changeOwnPassword, sessionOf } from '@/api/auth'
 import { useSession } from '@/store/session'
 
 type Change = Awaited<ReturnType<typeof changeOwnPassword>>
@@ -42,7 +42,7 @@ function settle(fresh: string, origin: string | null): PasswordChangeOutcome {
 export function followWithNewToken(response: Change, origin: string | null): PasswordChangeOutcome {
   const fresh = freshTokenOf(response)
   if (fresh !== '') {
-    useSession.getState().renew(origin, fresh, staffSessionOf(response))
+    useSession.getState().renew(origin, fresh, sessionOf(response))
   }
   return settle(fresh, origin)
 }

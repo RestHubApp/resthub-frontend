@@ -39,7 +39,7 @@ test('ACC-11 el perfil muestra los datos de la cuenta y cambia la contraseña @m
   await change.click()
   await expect(page.getByText('La contraseña actual no es correcta.')).toBeVisible()
   await evidence(page, 'acc-11-contrasena-error')
-  await expect(signInByApi(local.http, local.waiter.email, local.waiter.password)).resolves.toMatchObject({ email: local.waiter.email })
+  await expect(signInByApi(local.waiter.email, local.waiter.password)).resolves.toMatchObject({ email: local.waiter.email })
 
   await actual.fill(local.waiter.password)
   await change.click()
@@ -47,8 +47,8 @@ test('ACC-11 el perfil muestra los datos de la cuenta y cambia la contraseña @m
   await expect(actual).toBeEmpty()
   await evidence(page, 'acc-11-contrasena-cambiada')
   // Con la nueva entra; con la anterior, ya no.
-  await expect(signInByApi(local.http, local.waiter.email, NEW)).resolves.toMatchObject({ email: local.waiter.email })
-  await expect(signInByApi(local.http, local.waiter.email, local.waiter.password)).rejects.toThrow(/401/u)
+  await expect(signInByApi(local.waiter.email, NEW)).resolves.toMatchObject({ email: local.waiter.email })
+  await expect(signInByApi(local.waiter.email, local.waiter.password)).rejects.toThrow(/401/u)
 })
 
 test('ACC-12 «Saltar al contenido» lleva el foco al contenido principal', async ({ page, local }) => {

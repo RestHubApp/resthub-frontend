@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 
 import { fieldIds } from './fieldIds'
-import { decimalForApi, decimalRule, textRequired, textOptional } from './formRules'
+import { decimalForApi, decimalRule, phoneOptional, textRequired, textOptional } from './formRules'
 
 function error(rule: { safeParse: (v: string) => { error?: { issues: { message: string }[] } } }, value: string) {
   return rule.safeParse(value).error?.issues[0]?.message
@@ -50,5 +50,26 @@ describe('fieldIds', () => {
     })
     expect(fieldIds('precio', 'En soles').describedBy).toBe('precio-ayuda')
     expect(fieldIds('precio').describedBy).toBeUndefined()
+  })
+})
+
+describe('teléfono de contacto (la regla del backend)', () => {
+  const phone = phoneOptional(20)
+  const WRONG = 'Escribe solo números y espacios, con + al inicio si hace falta (de 6 a 20), como 987 654 321'
+
+  it('acepta vacío, dígitos con espacios y el + del código de país', () => {
+    for (const value of ['', '   ', '987654321', '987 654 321', '+51 987 654 321', '012345']) {
+      expect(phone.safeParse(value).success).toBe(true)
+    }
+  })
+
+  it('rechaza guiones, letras, el enmascarado y lo que no llega a 6 caracteres', () => {
+    for (const value of ['987-654-321', '98765a321', '987•••321', '12345', '+51+987654321']) {
+      expect(error(phone, value)).toBe(WRONG)
+    }
+  })
+
+  it('el tope del campo sigue avisando primero con su propio mensaje', () => {
+    expect(error(phone, '1'.repeat(21))).toBe('Usa como máximo 20 caracteres')
   })
 })

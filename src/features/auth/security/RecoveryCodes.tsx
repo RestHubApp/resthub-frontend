@@ -8,18 +8,18 @@ interface RecoveryCodesProps {
   readonly onDone: () => void
 }
 
-/** `abcde-fghjk`: en dos grupos se copian a mano sin perderse. */
-function grouped(code: string): string {
-  return code.length > 5 ? `${code.slice(0, 5)}-${code.slice(5)}` : code
-}
-
 /**
  * Los códigos de recuperación, que se muestran una sola vez (RFS-22). Cada uno
  * sirve para entrar una vez sin el celular; hay que guardarlos fuera de RestHub.
+ *
+ * Se muestran tal como los manda el servidor, que ya los parte en grupos
+ * (`XXXX-XXXX-…`): reagruparlos aquí cambiaría lo que la persona copia. Son
+ * largos (29 caracteres): van en una sola columna salvo que quepan dos enteros,
+ * y en la pantalla más angosta un código se parte antes que salirse.
  */
 export function RecoveryCodes({ codes, onDone }: RecoveryCodesProps) {
   const push = useNotifications((state) => state.push)
-  const text = codes.map((code) => grouped(code)).join('\n')
+  const text = codes.join('\n')
   const copy = () => {
     void navigator.clipboard.writeText(text).then(
       () => { push({ tone: 'info', message: 'Códigos copiados.' }) },
@@ -32,8 +32,8 @@ export function RecoveryCodes({ codes, onDone }: RecoveryCodesProps) {
       <p className="m-0">
         Guarda estos códigos en un lugar seguro, fuera de este dispositivo. Si pierdes el celular, cada uno te deja entrar una vez. No se vuelven a mostrar.
       </p>
-      <ul aria-label="Códigos de recuperación" className="m-0 grid list-none grid-cols-2 gap-2 rounded-md bg-muted p-3 font-mono text-base">
-        {codes.map((code) => <li key={code}>{grouped(code)}</li>)}
+      <ul aria-label="Códigos de recuperación" className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-2 rounded-md bg-muted p-3 font-mono text-base break-all">
+        {codes.map((code) => <li key={code}>{code}</li>)}
       </ul>
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" onClick={copy}>
