@@ -30,9 +30,15 @@ export async function closeOtherSessions(): Promise<void> {
   await send((client) => client.DELETE('/api/v1/auth/me/sessions'))
 }
 
-/** Confirma la contraseña: las acciones críticas quedan habilitadas unos minutos en este dispositivo. */
-export async function reauthenticate(password: string): Promise<void> {
-  await send((client) => client.POST('/api/v1/auth/me/reauthenticate', { body: { password, rotate_session: false } }))
+/**
+ * Confirma la contraseña: las acciones críticas quedan habilitadas unos minutos
+ * en este dispositivo. Con la verificación en dos pasos activa, el servidor
+ * pide también el código (`otpCode`): sin él responde 401 `two_factor_required`.
+ * La sesión no cambia de token (`rotate_session: false`).
+ */
+export async function reauthenticate(password: string, otpCode?: string): Promise<void> {
+  const body = otpCode === undefined ? { password, rotate_session: false } : { password, otp_code: otpCode, rotate_session: false }
+  await send((client) => client.POST('/api/v1/auth/me/reauthenticate', { body }))
 }
 
 export function staffSessionsQueryKey(userId: number) {

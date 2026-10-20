@@ -1,18 +1,18 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
-import { TextField } from '@/components/TextField'
+import { TextField } from './TextField'
 
-interface TwoFactorLoginFieldProps {
+interface TwoFactorCodeFieldProps {
   readonly onChange: (code: string) => void
 }
 
 /**
- * El segundo paso del acceso (RFS-22): el código de la aplicación de
- * verificación o, sin el celular, uno de los códigos de recuperación. Aparece
- * recién cuando el servidor dice que la cuenta lo usa.
+ * El segundo paso del acceso y de «Confirma tu contraseña» (RFS-22): el código
+ * de la aplicación de verificación o, sin el celular, uno de los códigos de
+ * recuperación. Aparece recién cuando el servidor dice que la cuenta lo usa.
  */
-export function TwoFactorLoginField({ onChange }: TwoFactorLoginFieldProps) {
-  // Con la forma de `register(...)`, que es lo que espera el campo; el acceso no usa React Hook Form.
+export function TwoFactorCodeField({ onChange }: TwoFactorCodeFieldProps) {
+  // Con la forma de `register(...)`, que es lo que espera el campo; el código no pasa por React Hook Form.
   const field: UseFormRegisterReturn = {
     name: 'otp_code',
     ref: () => undefined,

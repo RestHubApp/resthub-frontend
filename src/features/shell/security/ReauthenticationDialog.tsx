@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
 
-import { reauthenticate } from '@/api/accountSecurity'
 import { FormDialog } from '@/components/FormDialog'
 import { FormFooter } from '@/components/FormFooter'
 import { PasswordField } from '@/components/PasswordField'
+import { TwoFactorCodeField } from '@/components/TwoFactorCodeField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { useReauthentication } from '@/store/reauthentication'
 import { type CurrentPasswordValues, currentPasswordSchema } from '@/services/securityRules'
+import { useReauthenticationConfirm } from './useReauthenticationConfirm'
 
 /**
  * «Confirma tu contraseña» antes de una acción crítica (RFS-21).
@@ -17,6 +17,10 @@ import { type CurrentPasswordValues, currentPasswordSchema } from '@/services/se
  * que se estaba guardando se repite sola. Vale unos minutos y solo en este
  * dispositivo: alguien que encuentra la sesión abierta no puede cambiar los
  * datos fiscales, los roles ni desactivar cuentas.
+ *
+ * Si la cuenta usa la verificación en dos pasos, el servidor pide también el
+ * código (ver `useReauthenticationConfirm`): aparece el mismo campo que en el
+ * acceso y se vuelve a mandar la contraseña con él.
  */
 export function ReauthenticationDialog() {
   const settle = useReauthentication((state) => state.settle)
@@ -24,11 +28,8 @@ export function ReauthenticationDialog() {
     resolver: zodResolver(currentPasswordSchema),
     defaultValues: { password: '' },
   })
-  const confirm = useMutation({
-    mutationFn: (values: CurrentPasswordValues) => reauthenticate(values.password),
-    onSuccess: () => {
-      settle(true)
-    },
+  const { confirm, isAskingCode, setCode } = useReauthenticationConfirm(() => {
+    settle(true)
   })
   const cancel = () => {
     settle(false)
@@ -59,6 +60,7 @@ export function ReauthenticationDialog() {
           field={register('password')}
           error={formState.errors.password?.message}
         />
+        {isAskingCode ? <TwoFactorCodeField onChange={setCode} /> : null}
         <FormFooter
           mutation={confirm}
           failureText="No se pudo confirmar la contraseña."

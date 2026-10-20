@@ -2,11 +2,11 @@ import { useState } from 'react'
 
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
+import { TwoFactorCodeField } from '@/components/TwoFactorCodeField'
 import { Button } from '@/components/ui/button'
 import { useCredentialsForm } from '@/hooks/useCredentialsForm'
 import { hasCode } from '@/services/apiError'
 import { LoginFields } from './LoginFields'
-import { TwoFactorLoginField } from './TwoFactorLoginField'
 import { useLogin } from './useLogin'
 
 interface LoginFormProps {
@@ -35,7 +35,7 @@ export function LoginForm({ destination }: LoginFormProps) {
   return (
     <form noValidate className="flex flex-col gap-5" onSubmit={submit}>
       <LoginFields bind={bind} errors={errors} />
-      {isAskingCode ? <TwoFactorLoginField onChange={setCode} /> : null}
+      {isAskingCode ? <TwoFactorCodeField onChange={setCode} /> : null}
 
       {hasFailed ? (
         <ErrorMessage error={access.error} fallback="No se pudo iniciar sesión. Inténtalo de nuevo." />
