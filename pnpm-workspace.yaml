@@ -57,4 +57,5 @@ auditConfig:
     # y fast-glob dentro de eslint-plugin-boundaries, eslint-plugin-check-file y
     # la CLI de shadcn, sobre patrones del propio repositorio. Quitar en cuanto
     # salga la corrección.
+    # Excepción hasta 2026-11-04, ver SECURITY.md.
     - GHSA-vfj7-8cjw-p6xm
