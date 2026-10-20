@@ -170,3 +170,17 @@ describe('ReservationDialog tras un intento con errores', () => {
     expect(api.calls('post', LIST)[0]?.body).toMatchObject({ customer_name: QUISPE, phone: '987111222', party_size: 4 })
   })
 })
+
+describe('ReservationDialog: el teléfono', () => {
+  it('el teléfono sigue la regla del servidor y no se envía con guiones', async () => {
+    const { api, user } = open()
+    const window = within(await fresh(user))
+
+    await user.type(window.getByLabelText(TO_NAME), 'Carlos')
+    await user.type(window.getByLabelText(PHONE), '987-111-222')
+    await user.click(window.getByRole('button', SAVE))
+
+    expect(await window.findByText(/^Escribe solo números y espacios, con \+ al inicio si hace falta/u)).toBeInTheDocument()
+    expect(api.calls('post', LIST)).toHaveLength(0)
+  })
+})

@@ -22,6 +22,19 @@ export function textOptional(max: number) {
   return z.string().trim().max(max, maxMessage(max))
 }
 
+// La regla del teléfono de contacto del backend (`PHONE_PATTERN`): dígitos y
+// espacios, con un `+` inicial, de 6 a 20 caracteres. La comparten el cliente
+// de la libreta, el delivery y la reserva.
+const CONTACT_PHONE = /^\+?[\d ]{6,20}$/u
+
+/** Un teléfono de contacto opcional: vacío, o con la forma que acepta el servidor. */
+export function phoneOptional(max: number) {
+  return textOptional(max).refine(
+    (value) => value === '' || CONTACT_PHONE.test(value),
+    'Escribe solo números y espacios, con + al inicio si hace falta (de 6 a 20), como 987 654 321',
+  )
+}
+
 interface NumberDecimal {
   readonly max: number
   readonly decimals: number
