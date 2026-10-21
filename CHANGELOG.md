@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/RestHubApp/resthub-frontend/compare/v0.3.0...v0.4.0) (2026-10-20)
+
+
+### Funcionalidades
+
+* **seguridad:** adaptar el frontend al backend endurecido (OWASP ASVS 5.0) ([#93](https://github.com/RestHubApp/resthub-frontend/issues/93)) ([d5a2cbe](https://github.com/RestHubApp/resthub-frontend/commit/d5a2cbed6e1bdeaf1e327391463da6ab2b2b0582))
+
+
+### Correcciones
+
+* **formularios:** un solo foco al primer error para no desviar lo que se escribe ([#92](https://github.com/RestHubApp/resthub-frontend/issues/92)) ([fbf98c1](https://github.com/RestHubApp/resthub-frontend/commit/fbf98c1a2fb57bbcad6440286339f8615c7650bf))
+
 ## [0.3.0](https://github.com/RestHubApp/resthub-frontend/compare/v0.2.0...v0.3.0) (2026-10-19)
 
 
