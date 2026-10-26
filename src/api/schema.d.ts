@@ -304,9 +304,7 @@ export interface paths {
          *
          *     La cuenta acepta los términos y condiciones y, aparte, el tratamiento de sus
          *     datos personales. Responde la sesión ya al día. Si alguna versión leída no es
-         *     la vigente, 409: la interfaz vuelve a mostrar el texto nuevo. Quien administra
-         *     el personal los acepta antes de activar la verificación en dos pasos, así que
-         *     no se le exige todavía.
+         *     la vigente, 409: la interfaz vuelve a mostrar el texto nuevo.
          */
         post: operations["accept_terms_api_v1_auth_me_terms_post"];
         delete?: never;
@@ -328,9 +326,7 @@ export interface paths {
         post?: never;
         /**
          * Desactivar la verificación en dos pasos
-         * @description Quien está obligado a usarla no puede quitársela: la cambia renovándola.
-         *
-         *     Es la administración del sistema y quien administra el personal de un local.
+         * @description La administración del sistema no puede quedarse sin ella: la cambia renovándola.
          *
          *     Cierra las demás sesiones de la cuenta (ASVS V7.4.3), como al activarla.
          */
@@ -5882,11 +5878,6 @@ export interface components {
              * @default bearer
              */
             token_type: string;
-            /**
-             * Two Factor Setup Required
-             * @default false
-             */
-            two_factor_setup_required: boolean;
             user: components["schemas"]["SessionUserResponse"];
         };
         /** StaffMemberResponse */
@@ -5975,11 +5966,6 @@ export interface components {
             terms_accepted: boolean;
             /** Terms Version */
             terms_version: string;
-            /**
-             * Two Factor Setup Required
-             * @default false
-             */
-            two_factor_setup_required: boolean;
             user: components["schemas"]["SessionUserResponse"];
         };
         /** StatusCountResponse */

@@ -200,7 +200,7 @@ async function staffSignIn(http: APIRequestContext, email: string, password: str
     `términos de ${email}`,
   )
   const { user, restaurant, permissions, preview, terms_version, terms_accepted, privacy_version, privacy_accepted } = data
-  const { must_change_password, idle_lock_minutes, has_pin, session_locked, two_factor_setup_required } = data
+  const { must_change_password, idle_lock_minutes, has_pin, session_locked } = data
   return {
     email,
     password,
@@ -208,7 +208,7 @@ async function staffSignIn(http: APIRequestContext, email: string, password: str
     token,
     account: {
       kind: 'staff', user, restaurant, permissions, preview, terms_version, terms_accepted, privacy_version, privacy_accepted,
-      must_change_password, idle_lock_minutes, has_pin, session_locked, two_factor_setup_required,
+      must_change_password, idle_lock_minutes, has_pin, session_locked,
     },
   }
 }

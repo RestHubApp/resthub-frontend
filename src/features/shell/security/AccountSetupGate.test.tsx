@@ -73,36 +73,6 @@ describe('verificación en dos pasos obligatoria en la plataforma (RFS-22)', () 
   })
 })
 
-describe('verificación en dos pasos obligatoria para quien administra el personal (RFS-22)', () => {
-  it('sin activarla solo se ve el alta', async () => {
-    server()
-    signInAs(undefined, { two_factor_setup_required: true })
-    mountScreen(<Gate />)
-
-    expect(await screen.findByRole('heading', { name: 'Activa los dos pasos, Ana Torres' })).toBeInTheDocument()
-    expect(screen.queryByText(CONTENT)).not.toBeInTheDocument()
-  })
-
-  it('un 403 two_factor_setup_required de cualquier petición lleva al alta', async () => {
-    server().on('get', '/staff', new ErrorResponse(403, 'Activa la verificación en dos pasos.', 'two_factor_setup_required'))
-    signInAs()
-    mountScreen(<Gate />)
-    expect(screen.getByText(CONTENT)).toBeInTheDocument()
-
-    await expect(send((client) => client.GET('/api/v1/staff'))).rejects.toMatchObject({ code: 'two_factor_setup_required' })
-
-    expect(await screen.findByRole('heading', { name: 'Activa los dos pasos, Ana Torres' })).toBeInTheDocument()
-  })
-
-  it('la vista previa nunca la pide', () => {
-    server()
-    signInAs(undefined, { two_factor_setup_required: true, preview: true })
-    mountScreen(<Gate />)
-
-    expect(screen.getByText(CONTENT)).toBeInTheDocument()
-  })
-})
-
 describe('contraseña temporal de la plataforma (ASVS 6.2.2)', () => {
   it('con la contraseña del alta solo se ve el cambio, antes que los dos pasos', async () => {
     server()

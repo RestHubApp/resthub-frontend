@@ -11,10 +11,10 @@ function markPasswordChangeRequired(): void {
   refresh({ ...account, must_change_password: true })
 }
 
-/** Marca que la cuenta (de plataforma, o quien administra el personal) tiene que activar la verificación en dos pasos. */
+/** Marca que la cuenta de plataforma tiene que activar la verificación en dos pasos. */
 function markTwoFactorSetupRequired(): void {
   const { account, refresh } = useSession.getState()
-  if (account === null || account.preview || account.two_factor_setup_required) return
+  if (account?.kind !== 'platform' || account.two_factor_setup_required) return
   refresh({ ...account, two_factor_setup_required: true })
 }
 

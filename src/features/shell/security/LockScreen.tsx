@@ -1,11 +1,9 @@
 import { useState } from 'react'
 
 import type { StaffSession } from '@/api/types'
-import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { pendingOrdersNotice, useSignOut } from '@/features/shell/useSignOut'
-import { hasCustomerData } from '@/store/offlineQueue'
+import { useSignOut } from '@/features/shell/useSignOut'
 import { PasswordUnlockForm } from './PasswordUnlockForm'
 import { PinUnlockForm } from './PinUnlockForm'
 
@@ -20,13 +18,7 @@ export function LockScreen({ account }: { readonly account: StaffSession }) {
   // Sin PIN solo queda la contraseña; con PIN, la persona elige.
   const [hasSwitched, setHasSwitched] = useState(false)
   const isUsingPassword = !account.has_pin || hasSwitched
-  const { pending, signOut } = useSignOut()
-  const notice = pendingOrdersNotice(pending)
-  const exit = (onClick?: () => void) => (
-    <Button type="button" variant="outline" onClick={onClick}>
-      Salir
-    </Button>
-  )
+  const { signOut } = useSignOut()
 
   return (
     <main id="contenido" className="flex min-h-dvh items-center justify-center bg-background px-4 py-8">
@@ -46,19 +38,10 @@ export function LockScreen({ account }: { readonly account: StaffSession }) {
               {isUsingPassword ? 'Usar mi PIN' : 'Usar mi contraseña'}
             </Button>
           ) : null}
-          {/* Salir descarta los pedidos en cola con datos del cliente: se avisa antes. */}
-          {pending.some(hasCustomerData) ? (
-            <ConfirmDialog
-              trigger={exit()}
-              title={notice.title}
-              description={notice.description}
-              confirmLabel="Salir"
-              confirmVariant="default"
-              onConfirm={signOut}
-            />
-          ) : (
-            exit(signOut)
-          )}
+          {/* Sale como si la sesión hubiera vencido: la cola sin conexión se conserva entera. */}
+          <Button type="button" variant="outline" onClick={() => { signOut({ discardCustomerData: false }) }}>
+            Salir
+          </Button>
         </CardFooter>
       </Card>
     </main>

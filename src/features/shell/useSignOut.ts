@@ -36,7 +36,8 @@ export function pendingOrdersNotice(pending: readonly QueuedOrder[]): { readonly
  *
  * `pending` son los pedidos de esta cuenta que esperan señal; quien ofrece la
  * salida los avisa antes (`pendingOrdersNotice`). Salir descarta los que guardan
- * datos del cliente (`discardCustomerDataOf`). `signOut` vacía la sesión y
+ * datos del cliente (`discardCustomerDataOf`), salvo desde la sesión bloqueada,
+ * que sale como si la sesión hubiera vencido. `signOut` vacía la sesión y
  * va al acceso en el mismo evento: React aplica los dos cambios juntos, así que
  * ninguna pantalla privada llega a dibujarse sin cuenta. Antes avisa la salida
  * al servidor (`reportSignOut`), que cierra la sesión de este dispositivo, sin
@@ -49,14 +50,16 @@ export function useSignOut() {
 
   return {
     pending,
-    signOut: () => {
+    signOut: (options: { readonly discardCustomerData: boolean } = { discardCustomerData: true }) => {
       // Salir cierra la sesión de este dispositivo en el servidor (y, en el
       // personal, deja asiento en la bitácora). La vista previa no tiene una.
       const { token, account } = useSession.getState()
       if (account !== null && !account.preview) {
         void reportSignOut(token)
       }
-      discardCustomerDataOf(ownerOf(staffOf(account)))
+      if (options.discardCustomerData) {
+        discardCustomerDataOf(ownerOf(staffOf(account)))
+      }
       clearSession()
       void navigate(paths.login, { replace: true })
     },
