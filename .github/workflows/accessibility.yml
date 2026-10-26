@@ -13,6 +13,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Dentro de un contenedor, `run` usa `sh -e` en vez de `bash -eo pipefail`: sin
+# esto, una tubería que falla pasa por buena y la trampa EXIT de dash cambia el
+# código de salida del paso.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   axe:
     name: axe-core (pantallas sin sesión)
