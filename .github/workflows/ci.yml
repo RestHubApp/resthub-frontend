@@ -219,8 +219,22 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
+      # Los binarios de Chromium se guardan entre corridas; las librerías del sistema
+      # que pide (`install-deps`) se instalan igual, porque no viven en esa carpeta.
+      - name: Caché de Chromium de Playwright
+        id: chromium
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Instalar Chromium de Playwright
+        if: steps.chromium.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Instalar las dependencias del sistema de Chromium
+        if: steps.chromium.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Medir la primera visita de cada ruta
         run: pnpm carbon:browser --verbose --json carbon.json
@@ -236,10 +250,18 @@ jobs:
   # Pruebas de extremo a extremo con Playwright (solo Chromium) contra el
   # backend de develop, con una base SQLite propia migrada y sembrada. La
   # regresión visual corre en el job `visual`, dentro de la imagen de Playwright.
+  #
+  # Se reparten en tres máquinas (`--shard`), cada una con su propio backend y su
+  # propia base: así no compiten por la CPU ni por SQLite. El job `e2e-report`
+  # junta sus reportes y es el que lleva el nombre «E2E (Playwright)».
   e2e:
-    name: E2E (Playwright)
+    name: E2E (Playwright, parte ${{ matrix.shard }} de 3)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     env:
       E2E_BACKEND_DIR: resthub-backend
       E2E_DB: ${{ github.workspace }}/.e2e/e2e.db
@@ -249,27 +271,91 @@ jobs:
       - name: Entorno (backend, dependencias y base sembrada)
         uses: ./.github/actions/entorno-e2e
 
+      # Los binarios de Chromium se guardan entre corridas; las librerías del sistema
+      # que pide (`install-deps`) se instalan igual, porque no viven en esa carpeta.
+      - name: Caché de Chromium de Playwright
+        id: chromium
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Instalar Chromium de Playwright
+        if: steps.chromium.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Instalar las dependencias del sistema de Chromium
+        if: steps.chromium.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Pruebas E2E (escritorio y celular a 390 px)
         env:
           E2E_DB_PREPARED: '1'
-        run: pnpm test:e2e
+          E2E_BLOB_DIR: e2e/.blob
+        run: pnpm test:e2e --shard=${{ matrix.shard }}/3
 
-      - name: Subir el reporte de Playwright
+      - name: Subir la parte del reporte
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: reporte-playwright
-          # Las carpetas del reporte empiezan con punto (e2e/.report): sin
-          # esto, upload-artifact v4 las descarta como ocultas.
+          name: reporte-playwright-parte-${{ matrix.shard }}
+          # Las carpetas empiezan con punto (e2e/.blob): sin esto, upload-artifact
+          # las descarta como ocultas.
           include-hidden-files: true
           path: |
-            e2e/.report
+            e2e/.blob
             e2e/.report-coverage-ui.json
             e2e/.results
           retention-days: 14
+
+  # Junta las tres partes en un solo reporte HTML y falla si alguna falló.
+  e2e-report:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: e2e
+    if: ${{ !cancelled() }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Instalar Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Bajar las partes
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: reporte-playwright-parte-*
+          path: partes
+
+      - name: Juntar el reporte HTML
+        run: |
+          mkdir -p blobs
+          find partes -path '*/.blob/*.zip' -exec cp {} blobs/ \;
+          ls blobs
+          PLAYWRIGHT_HTML_OUTPUT_DIR=e2e/.report pnpm exec playwright merge-reports --reporter html blobs
+
+      - name: Subir el reporte de Playwright
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reporte-playwright
+          include-hidden-files: true
+          path: e2e/.report
+          retention-days: 14
+
+      - name: Las tres partes pasaron
+        if: ${{ needs.e2e.result != 'success' }}
+        run: |
+          echo "::error::Alguna parte de la E2E falló (${{ needs.e2e.result }}): mira su job o el reporte."
+          exit 1
 
   # Regresión visual de Chromium (escritorio y celular) dentro de la imagen
   # oficial de Playwright, la misma con la que se generaron las líneas base

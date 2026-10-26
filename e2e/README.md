@@ -2,7 +2,7 @@
 
 | Comando | Qué hace |
 |---|---|
-| `pnpm test:e2e` | Inventario de interfaz (`coverage`) y E2E en Chromium: escritorio 1366 × 900 y celular 390 × 844 (pruebas `@mobile`). Corre en el CI (job `e2e`). |
+| `pnpm test:e2e` | Inventario de interfaz (`coverage`) y E2E en Chromium: escritorio 1366 × 900 y celular 390 × 844 (pruebas `@mobile`). Corre en el CI repartida en tres máquinas (jobs «E2E (Playwright, parte N de 3)»); el job «E2E (Playwright)» junta el reporte. |
 | `pnpm test:visual:ci` | Regresión visual de Chromium, escritorio y celular (`visual-chromium-desktop` y `visual-chromium-mobile`). Corre en el CI (job `visual`), dentro de la imagen oficial de Playwright. |
 | `pnpm test:visual:update` | Regenera esas líneas base en un contenedor con la misma imagen del CI (docker o podman). |
 | `pnpm test:visual` | Regresión visual en los tres navegadores. Firefox y WebKit solo en local. |

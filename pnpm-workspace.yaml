@@ -69,6 +69,12 @@ overrides:
   handlebars@>=4.0.0 <4.7.10: 4.7.10
   # OAuth del SDK de MCP (alto): lo trae la CLI de shadcn, que no corre en la app.
   '@modelcontextprotocol/sdk@<1.31.0': 1.31.0
+  # GHSA-xjj6-f33q-929c y GHSA-27r3-jxmh-p828 (altos): undici de la CLI de shadcn
+  # (también por @shadcn/registry y @dotenvx/dotenvx), que no corre en la app.
+  undici@>=7.18.0 <7.30.1: 7.30.1
+  # Denegación de servicio con bytes de más tras un cuerpo comprimido (alto):
+  # body-parser de express, en el servidor falso de Pact y en el SDK de MCP.
+  body-parser@>=2.0.0 <2.4.0: 2.4.0
 
 auditConfig:
   ignoreGhsas:

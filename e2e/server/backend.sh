@@ -36,6 +36,13 @@ export PLATFORM_TWO_FACTOR_REQUIRED=false
 # cerraba la sesión que una prueba larga de plataforma seguía usando (PLA-17
 # volvía al acceso a mitad de camino). Solo aquí; producción sigue con 10.
 export MAX_SESSIONS_PER_ACCOUNT=100
+# Argon2id al costo mínimo, como en las pruebas del backend: cada prueba da de alta
+# un encargado y entra con él, y con el costo de producción (64 MiB y tres pasadas
+# por contraseña) el servidor, de un solo proceso, pasaba buena parte de la corrida
+# calculando hashes. El algoritmo es el mismo; solo baja el costo.
+export PASSWORD_ARGON2_TIME_COST=1
+export PASSWORD_ARGON2_MEMORY_KIB=8
+export PASSWORD_ARGON2_PARALLELISM=1
 export CORS_ALLOWED_ORIGINS="[\"$FRONT\"]"
 export FRONTEND_BASE_URL="$FRONT"
 
