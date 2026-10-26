@@ -27,6 +27,9 @@ const VISUAL = /visual\/.*\.spec\.ts/u
 // ejemplo, la E2E y la visual) necesitan carpetas distintas.
 const OUTPUT = process.env['E2E_OUTPUT'] ?? './e2e/.results'
 const REPORT = process.env['E2E_REPORT'] ?? './e2e/.report'
+// En el CI la E2E se reparte en varias máquinas (`--shard`): cada una deja su parte
+// en formato blob y el job «E2E (Playwright)» las junta en un solo reporte HTML.
+const BLOB = process.env['E2E_BLOB_DIR']
 
 export default defineConfig({
   testDir: './e2e',
@@ -44,7 +47,7 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/visual/baselines/{projectName}/{arg}{ext}',
   reporter: [
     ['list'],
-    ['html', { outputFolder: REPORT, open: 'never' }],
+    BLOB === undefined ? ['html', { outputFolder: REPORT, open: 'never' }] : ['blob', { outputDir: BLOB }],
     ['json', { outputFile: `${REPORT}-json/resultados.json` }],
     ['./e2e/support/reportCoverage.ts'],
   ],
