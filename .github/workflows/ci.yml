@@ -15,6 +15,13 @@ concurrency:
 env:
   NODE_VERSION: '24'
 
+# Dentro de un contenedor, `run` usa `sh -e` en vez de `bash -eo pipefail`: sin
+# esto, una tubería que falla pasa por buena y la trampa EXIT de dash cambia el
+# código de salida del paso.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   frontend:
     name: Frontend
@@ -204,6 +211,9 @@ jobs:
     name: Huella de carbono (A+ en la primera visita)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -219,22 +229,8 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
-      # Los binarios de Chromium se guardan entre corridas; las librerías del sistema
-      # que pide (`install-deps`) se instalan igual, porque no viven en esa carpeta.
-      - name: Caché de Chromium de Playwright
-        id: chromium
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Instalar Chromium de Playwright
-        if: steps.chromium.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-
-      - name: Instalar las dependencias del sistema de Chromium
-        if: steps.chromium.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+      - name: Navegadores de la imagen
+        uses: ./.github/actions/navegadores-imagen
 
       - name: Medir la primera visita de cada ruta
         run: pnpm carbon:browser --verbose --json carbon.json
@@ -254,10 +250,18 @@ jobs:
   # Se reparten en tres máquinas (`--shard`), cada una con su propio backend y su
   # propia base: así no compiten por la CPU ni por SQLite. El job `e2e-report`
   # junta sus reportes y es el que lleva el nombre «E2E (Playwright)».
+  #
+  # Corren dentro de la imagen oficial de Playwright, como `visual` y `carbon`: la
+  # imagen ya trae Chromium y sus librerías, así que no se instala nada con `apt`
+  # (el espejo de Ubuntu llegó a tardar diez minutos en dárselas). Su versión es la
+  # exacta de `playwright` en package.json; si no, falla «Navegadores de la imagen».
   e2e:
     name: E2E (Playwright, parte ${{ matrix.shard }} de 3)
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
     strategy:
       fail-fast: false
       matrix:
@@ -271,22 +275,8 @@ jobs:
       - name: Entorno (backend, dependencias y base sembrada)
         uses: ./.github/actions/entorno-e2e
 
-      # Los binarios de Chromium se guardan entre corridas; las librerías del sistema
-      # que pide (`install-deps`) se instalan igual, porque no viven en esa carpeta.
-      - name: Caché de Chromium de Playwright
-        id: chromium
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Instalar Chromium de Playwright
-        if: steps.chromium.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-
-      - name: Instalar las dependencias del sistema de Chromium
-        if: steps.chromium.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+      - name: Navegadores de la imagen
+        uses: ./.github/actions/navegadores-imagen
 
       - name: Pruebas E2E (escritorio y celular a 390 px)
         env:
@@ -378,13 +368,8 @@ jobs:
       - name: Entorno (backend, dependencias y base sembrada)
         uses: ./.github/actions/entorno-e2e
 
-      # Si `playwright` sube de versión y la imagen no, los navegadores que
-      # espera no están en ella.
-      - name: La imagen trae los navegadores de la versión instalada de Playwright
-        run: |
-          loc="$(pnpm exec playwright install --dry-run chromium-headless-shell | sed -n 's/.*Install location: *//p' | head -1)"
-          echo "Se espera: $loc"
-          test -d "$loc"
+      - name: Navegadores de la imagen
+        uses: ./.github/actions/navegadores-imagen
 
       - name: Regresión visual
         env:
