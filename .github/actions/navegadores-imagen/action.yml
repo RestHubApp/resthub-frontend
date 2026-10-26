@@ -1,0 +1,20 @@
+# Para los jobs que corren dentro de la imagen oficial de Playwright
+# (mcr.microsoft.com/playwright): la imagen ya trae Chromium y las librerías del
+# sistema que pide, así que no se instala nada. Si `playwright` sube de versión en
+# package.json y la imagen no, los navegadores que espera no están en ella: este
+# paso falla antes de las pruebas y dice qué ruta buscó.
+# Requiere las dependencias del frontend ya instaladas (`pnpm install`).
+name: Navegadores de la imagen de Playwright
+description: Comprueba que la imagen trae los navegadores de la versión instalada de Playwright.
+
+runs:
+  using: composite
+  steps:
+    - name: La imagen trae los navegadores de la versión instalada de Playwright
+      shell: bash
+      run: |
+        for browser in chromium chromium-headless-shell; do
+          loc="$(pnpm exec playwright install --dry-run "$browser" | sed -n 's/.*Install location: *//p' | head -1)"
+          echo "$browser, se espera en: $loc"
+          test -d "$loc"
+        done

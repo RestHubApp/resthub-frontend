@@ -17,6 +17,9 @@ jobs:
   axe:
     name: axe-core (pantallas sin sesión)
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -32,8 +35,8 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
-      - name: Instalar Chromium de Playwright
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Navegadores de la imagen
+        uses: ./.github/actions/navegadores-imagen
 
       - name: Compilar
         run: pnpm build
@@ -61,6 +64,9 @@ jobs:
     name: axe-core (pantallas con sesión)
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
     env:
       E2E_BACKEND_DIR: resthub-backend
       E2E_DB: ${{ github.workspace }}/.e2e/a11y.db
@@ -74,8 +80,8 @@ jobs:
       - name: Entorno (backend, dependencias y base sembrada)
         uses: ./.github/actions/entorno-e2e
 
-      - name: Instalar Chromium de Playwright
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Navegadores de la imagen
+        uses: ./.github/actions/navegadores-imagen
 
       - name: Compilar contra el backend de pruebas
         env:
