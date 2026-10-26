@@ -145,12 +145,12 @@ export async function recoverCsrf(): Promise<boolean> {
   return credential.onCsrfLost === null ? false : credential.onCsrfLost()
 }
 
-/** Qué hacer cuando la plataforma pide activar la verificación en dos pasos (403 `two_factor_setup_required`). */
+/** Qué hacer cuando el servidor pide activar la verificación en dos pasos (403 `two_factor_setup_required`). */
 export function setTwoFactorSetupHandler(handler: (() => void) | null): void {
   credential.onTwoFactorSetup = handler
 }
 
-/** La cuenta de plataforma tiene que activar la verificación en dos pasos antes de seguir (RFS-22). */
+/** La cuenta tiene que activar la verificación en dos pasos antes de seguir (RFS-22). */
 export function requireTwoFactorSetup(): void {
   credential.onTwoFactorSetup?.()
 }

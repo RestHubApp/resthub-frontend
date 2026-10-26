@@ -155,7 +155,7 @@ function needsAccountSetup(error: ApiError): boolean {
   return isPasswordChangeRequired(error) || hasCode(error, 'two_factor_setup_required')
 }
 
-/** Si la plataforma pide activar antes la verificación en dos pasos (403 `two_factor_setup_required`). */
+/** Si la cuenta (de plataforma, o quien administra el personal) tiene que activar antes la verificación en dos pasos (403 `two_factor_setup_required`). */
 export function isTwoFactorSetupRequired(error: unknown): boolean {
   return hasCode(error, 'two_factor_setup_required')
 }

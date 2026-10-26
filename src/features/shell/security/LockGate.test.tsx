@@ -44,7 +44,7 @@ describe('bloqueo de la sesión por inactividad (RFS-29)', () => {
     await user.click(screen.getByRole('button', UNLOCK_BUTTON))
 
     expect(await screen.findByText(CONTENT)).toBeInTheDocument()
-    expect(api.calls('post', UNLOCK)[0]?.body).toEqual({ pin: '4321', rotate_session: false })
+    expect(api.calls('post', UNLOCK)[0]?.body).toEqual({ pin: '4321', rotate_session: true })
     expect(isLocked()).toBe(false)
   })
 
@@ -78,7 +78,7 @@ describe('bloqueo de la sesión por inactividad (RFS-29)', () => {
     await user.click(screen.getByRole('button', UNLOCK_BUTTON))
 
     expect(await screen.findByText(CONTENT)).toBeInTheDocument()
-    expect(api.calls('post', UNLOCK)[0]?.body).toEqual({ password: TEST_SECRET, rotate_session: false })
+    expect(api.calls('post', UNLOCK)[0]?.body).toEqual({ password: TEST_SECRET, rotate_session: true })
   })
 
   it('se bloquea sola tras los minutos sin uso del restaurante', async () => {

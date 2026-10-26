@@ -14,7 +14,7 @@ interface RecoveryCodesProps {
  *
  * Se muestran tal como los manda el servidor, que ya los parte en grupos
  * (`XXXX-XXXX-…`): reagruparlos aquí cambiaría lo que la persona copia. Son
- * largos (29 caracteres): van en una sola columna salvo que quepan dos enteros,
+ * largos (34 caracteres): van en una sola columna salvo que quepan dos enteros,
  * y en la pantalla más angosta un código se parte antes que salirse.
  */
 export function RecoveryCodes({ codes, onDone }: RecoveryCodesProps) {
@@ -32,7 +32,7 @@ export function RecoveryCodes({ codes, onDone }: RecoveryCodesProps) {
       <p className="m-0">
         Guarda estos códigos en un lugar seguro, fuera de este dispositivo. Si pierdes el celular, cada uno te deja entrar una vez. No se vuelven a mostrar.
       </p>
-      <ul aria-label="Códigos de recuperación" className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-2 rounded-md bg-muted p-3 font-mono text-base break-all">
+      <ul aria-label="Códigos de recuperación" className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,21rem),1fr))] gap-2 rounded-md bg-muted p-3 font-mono text-base break-all">
         {codes.map((code) => <li key={code}>{code}</li>)}
       </ul>
       <div className="flex flex-wrap gap-2">

@@ -42,8 +42,8 @@ export function SessionActions({ account, onNavigate }: SessionActionsProps) {
     pending.length === 0 ? (
       signOutMenuItem(handleSignOut)
     ) : (
-      // Los pedidos no se borran, pero no salen hasta que esta cuenta vuelva
-      // a entrar: quien cierra la sesion tiene que saberlo.
+      // Los que llevan datos del cliente se descartan y los demás no salen hasta
+      // que esta cuenta vuelva a entrar: quien cierra la sesion tiene que saberlo.
       <ConfirmDialog
         trigger={signOutMenuItem()}
         title={notice.title}

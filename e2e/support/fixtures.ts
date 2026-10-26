@@ -53,6 +53,9 @@ function expiryOf(token: string): number {
  * recupera el token de la cookie, como tras recargar.
  */
 export async function openAs(page: Page, session: Session | SessionPlatform, destination = '/'): Promise<void> {
+  // El API las escribe con el prefijo `__Host-`, pero Chromium no deja ponerlas a
+  // mano con `url` (les agrega `Domain`): van con el nombre de antes, que el API
+  // todavía lee (`read_cookie` en backend:core/session_cookie.py).
   const cookie = session.account.kind === 'platform' ? 'resthub_platform_session' : 'resthub_session'
   await page.context().addCookies([
     { name: cookie, value: session.token, url: API_ORIGIN, httpOnly: true },

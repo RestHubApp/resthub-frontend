@@ -309,6 +309,19 @@ if (typeof window !== 'undefined' && !isPreviewTab()) {
   })
 }
 
+/**
+ * Deja en la sesión el token que el servidor dio al cambiarle el identificador
+ * (al confirmar la contraseña o desbloquear, ASVS V7.2.4): la cuenta es la misma
+ * y el token anterior ya no vale. `null` (no hubo cambio) no toca nada.
+ */
+export function adoptRotatedToken(token: string | null): void {
+  const { token: origin, account, renew } = useSession.getState()
+  if (token === null || account === null) {
+    return
+  }
+  renew(origin, token, account)
+}
+
 /** Si la sesion abierta es una vista previa del local de muestra, segun el servidor. */
 export function usePreview(): boolean {
   return useSession((state) => state.account?.preview === true)
