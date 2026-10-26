@@ -59,7 +59,7 @@ for (const view of Object.keys(VIEWS)) {
 await browserSessions.close()
 
 const routeSummary = join(dir, 'resumen.json')
-const partial = process.env.A11Y_ONLY || process.env.A11Y_CLASS || process.env.A11Y_VIEWS
+const partial = process.env.A11Y_ONLY || process.env.A11Y_CLASS || process.env.A11Y_VIEWS || process.env.A11Y_SHARD
 const previous = existsSync(routeSummary) && partial ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.view}`))
 const all = [...previous.rows.filter((f) => !fresh.has(`${f.id}--${f.view}`)), ...rows]

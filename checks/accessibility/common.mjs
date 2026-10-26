@@ -62,11 +62,21 @@ export async function readJson(route) {
   return JSON.parse(await readFile(route, 'utf8'))
 }
 
-/** Los estados a medir, filtrables con A11Y_ONLY=id1,id2 y A11Y_CLASS=ruta|overlay. */
+/**
+ * Los estados a medir, filtrables con A11Y_ONLY=id1,id2 y A11Y_CLASS=ruta|overlay.
+ * A11Y_SHARD=2/4 deja solo la segunda de cuatro partes (el CI las reparte en
+ * varias máquinas): se toman de a una, alternando, para que cada parte reciba
+ * rutas y modales por igual.
+ */
 export function filterStatuses(list = STATUSES) {
   const only = process.env.A11Y_ONLY?.split(',').filter(Boolean)
   const kind = process.env.A11Y_CLASS
-  return list.filter((e) => (!only || only.includes(e.id)) && (!kind || e.class === kind))
+  const filtered = list.filter((e) => (!only || only.includes(e.id)) && (!kind || e.class === kind))
+  const shard = process.env.A11Y_SHARD
+  if (!shard) return filtered
+  const [part, total] = shard.split('/').map(Number)
+  if (!(total >= 1 && part >= 1 && part <= total)) throw new Error(`A11Y_SHARD inválido: ${shard}. Se espera parte/total, como 2/4`)
+  return filtered.filter((_, i) => i % total === part - 1)
 }
 
 export function filterViews(status) {
