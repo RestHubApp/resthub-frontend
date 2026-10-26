@@ -55,7 +55,7 @@ dejan.
 | `pnpm test:visual:ci` | Regresión visual de Chromium (escritorio y celular); el CI la corre en la imagen de Playwright (job `visual`) |
 | `pnpm test:visual` | Regresión visual en los tres navegadores; Firefox y WebKit solo en local |
 | `pnpm test:visual:update` | Regenera las líneas base de Chromium dentro de la imagen de Playwright (docker o podman). Ver `e2e/README.md` |
-| `pnpm a11y [axe] [keyboard] …` | Revisión de accesibilidad de cada ruta y modal con la sesión de cada rol (`checks/accessibility/`). Con `A11Y_STRICT=1` falla ante violaciones serious o critical de axe; el job `con-sesion` del CI corre `pnpm a11y axe keyboard` así |
+| `pnpm a11y [axe] [keyboard] …` | Revisión de accesibilidad de cada ruta y modal con la sesión de cada rol (`checks/accessibility/`). Con `A11Y_STRICT=1` falla ante violaciones serious o critical de axe; el job `con-sesion` del CI corre `pnpm a11y axe keyboard` así, repartido en cuatro partes con `A11Y_SHARD` |
 
 ### Pruebas
 

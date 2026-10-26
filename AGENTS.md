@@ -296,7 +296,9 @@ El aislamiento lo garantiza el backend; el frontend no debe abrirle huecos.
   el backend de develop con `seed_dev` y `seed_history`, cada ruta y modal con
   la cuenta de su rol, escritorio y celular) fallan ante una violación serious
   o critical (`A11Y_STRICT=1`) o un estado que no se pueda abrir. Los reportes
-  quedan como artefacto. Se arregla en el código; no se desactiva una regla de
+  quedan como artefacto. `con-sesion` se reparte en cuatro máquinas con
+  `A11Y_SHARD=1/4` … `4/4` (`checks/accessibility/common.mjs`); el teclado va en
+  la primera. Se arregla en el código; no se desactiva una regla de
   axe salvo un falso positivo documentado. Localmente: backend con
   `E2E_BACKEND_PORT=8202 E2E_FRONT_ORIGIN=http://localhost:5202 E2E_SEED_HISTORY=1 bash e2e/server/backend.sh`,
   `vite build --outDir dist-a11y` con `VITE_API_URL=http://localhost:8202`,

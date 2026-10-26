@@ -2,7 +2,7 @@
 // en móvil. Con un modal abierto, axe analiza el documento entero: el diálogo
 // y lo que queda detrás (que Radix marca con aria-hidden).
 //
-// Variables: A11Y_ONLY, A11Y_CLASS, A11Y_VIEWS (ver common.mjs) y
+// Variables: A11Y_ONLY, A11Y_CLASS, A11Y_VIEWS, A11Y_SHARD (ver common.mjs) y
 // A11Y_WITHOUT_WIDGET=1 para medir sin el widget de accesibilidad Sienna (se
 // bloquea la descarga de su archivo), que deja los reportes en `axe-sin-widget/`.
 import { writeFile } from 'node:fs/promises'
@@ -68,7 +68,7 @@ await browser.close()
 const { existsSync } = await import('node:fs')
 const { readJson } = await import('./common.mjs')
 const routeSummary = join(dir, 'resumen.json')
-const previous = existsSync(routeSummary) && (process.env.A11Y_ONLY || process.env.A11Y_CLASS || process.env.A11Y_VIEWS) ? await readJson(routeSummary) : { rows: [] }
+const previous = existsSync(routeSummary) && (process.env.A11Y_ONLY || process.env.A11Y_CLASS || process.env.A11Y_VIEWS || process.env.A11Y_SHARD) ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.view}`))
 const all = [...previous.rows.filter((f) => !fresh.has(`${f.id}--${f.view}`)), ...rows]
 await writeJson(routeSummary, { date: new Date().toISOString(), labels: LABELS, withoutWidget, rows: all })

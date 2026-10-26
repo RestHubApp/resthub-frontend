@@ -143,7 +143,7 @@ try {
 
 // Resumen combinado con lo que ya había si se midió una parte.
 const routeSummary = join(dir, 'resumen.json')
-const previousRows = existsSync(routeSummary) && (process.env.A11Y_ONLY || process.env.A11Y_PRESETS) ? await readJson(routeSummary) : { rows: [] }
+const previousRows = existsSync(routeSummary) && (process.env.A11Y_ONLY || process.env.A11Y_PRESETS || process.env.A11Y_SHARD) ? await readJson(routeSummary) : { rows: [] }
 const fresh = new Set(rows.map((f) => `${f.id}--${f.preset}`))
 const all = [...previousRows.rows.filter((f) => !fresh.has(`${f.id}--${f.preset}`)), ...rows]
 await writeJson(routeSummary, { date: new Date().toISOString(), categories: CATEGORIES, repeat, rows: all })
