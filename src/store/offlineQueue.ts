@@ -132,7 +132,7 @@ export function queuedOrders(owner: QueueOwner | null): readonly QueuedOrder[] {
 }
 
 /** Si el pedido guarda datos del cliente: su nombre, su teléfono o una dirección de entrega. */
-export function hasCustomerData(order: QueuedOrder): boolean {
+function hasCustomerData(order: QueuedOrder): boolean {
   const { customer_name, customer_phone, delivery_address, delivery_reference } = order.request
   return [customer_name, customer_phone, delivery_address, delivery_reference].join('').trim() !== ''
 }

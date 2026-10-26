@@ -217,7 +217,7 @@ describe('cerrar la sesión con pedidos en cola', () => {
     await user.click(screen.getByRole('button', SIGN_OUT))
 
     const notice = await screen.findByRole('alertdialog')
-    expect(within(notice).getByText(/Llevan datos del cliente: al salir se descartan/u)).toBeInTheDocument()
+    expect(within(notice).getByText(/Al salir se descartan los que llevan datos del cliente/u)).toBeInTheDocument()
     await user.click(within(notice).getByRole('button', SIGN_OUT))
     expect(await screen.findByText(ACCESS_FORM)).toBeInTheDocument()
     expect(queuedOrders(ownerOf(account))).toEqual([])

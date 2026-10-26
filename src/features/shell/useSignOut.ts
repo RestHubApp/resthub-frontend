@@ -2,32 +2,19 @@ import { useNavigate } from 'react-router'
 
 import { reportSignOut } from '@/api/auth'
 import { paths } from '@/services/paths'
-import { type QueuedOrder, discardCustomerDataOf, hasCustomerData, ownerOf, useQueuedOrders } from '@/store/offlineQueue'
+import { type QueuedOrder, discardCustomerDataOf, ownerOf, useQueuedOrders } from '@/store/offlineQueue'
 import { staffOf, useSession, useStaffAccount } from '@/store/session'
 
-function labels(orders: readonly QueuedOrder[]): string {
-  return orders.map((order) => order.label).join(', ')
-}
-
-function whatHappens(discarded: readonly QueuedOrder[], kept: readonly QueuedOrder[]): string {
-  const sentLater = 'se envían cuando vuelvas a entrar con tu cuenta.'
-  if (discarded.length === 0) return `Quedan guardados en este celular y ${sentLater}`
-  if (kept.length === 0) return 'Llevan datos del cliente: al salir se descartan, para que no queden en este celular.'
-  return `Al salir se descartan los que llevan datos del cliente (${labels(discarded)}); los demás (${labels(kept)}) quedan guardados y ${sentLater}`
-}
-
 /**
- * El aviso antes de salir con pedidos que todavía no llegaron al servidor. Los
- * que guardan datos del cliente se descartan al salir; los demás se quedan.
+ * El aviso antes de salir con pedidos que todavía no llegaron al servidor: al
+ * salir se descartan los que llevan datos del cliente y los demás se quedan.
  */
 export function pendingOrdersNotice(pending: readonly QueuedOrder[]): { readonly title: string; readonly description: string } {
   const howMany =
     pending.length === 1 ? 'Un pedido tuyo espera' : `${String(pending.length)} pedidos tuyos esperan`
-  const discarded = pending.filter(hasCustomerData)
-  const kept = pending.filter((order) => !hasCustomerData(order))
   return {
     title: '¿Cerrar sesión con pedidos sin enviar?',
-    description: `${howMany} señal: ${labels(pending)}. ${whatHappens(discarded, kept)}`,
+    description: `${howMany} señal: ${pending.map((order) => order.label).join(', ')}. Al salir se descartan los que llevan datos del cliente; los demás se envían cuando vuelvas a entrar.`,
   }
 }
 

@@ -12,12 +12,12 @@ const OFF = { enabled: false, pending: false, recovery_codes_left: 0, recovery_c
 const ON = { ...OFF, enabled: true, recovery_codes_left: 10 }
 const TITLE = { name: 'Protege tu cuenta con la verificación en dos pasos' }
 
-/** Como al entrar: la pestaña pasa de no tener cuenta a tenerla. */
+/** Como al entrar por el formulario: la sesión abierta y la recomendación pendiente (`useLogin`). */
 function enter(permissions: readonly PermissionCode[], status: typeof OFF, changes = {}) {
   const api = server().on('get', TWO_FACTOR, status)
-  useSession.setState({ token: null, account: null })
   const account = buildAccount(permissions, changes)
   useSession.setState({ token: 'token-de-prueba', account })
+  useSignInTip.getState().arm()
   return { api, ...mountScreen(<TwoFactorReminder account={account} />) }
 }
 
