@@ -30,6 +30,8 @@ export REAUTHENTICATION_WINDOW_SECONDS=7200
 # La verificación en dos pasos es obligatoria para la plataforma (RFS-22): las
 # pruebas de la plataforma entran sin ella, con la cuenta de la semilla.
 export PLATFORM_TWO_FACTOR_REQUIRED=false
+# Lo mismo para el encargado: administra el personal y también la tiene obligatoria.
+export STAFF_TWO_FACTOR_REQUIRED=false
 # Cada prueba da de alta su restaurante entrando con la cuenta de plataforma de
 # la semilla: en una corrida son unos 200 accesos de la misma cuenta. Con el
 # tope de producción (10 sesiones por cuenta, ASVS V7.1.2) el acceso número 11
