@@ -5,6 +5,7 @@
 // El API de estas funciones se responde con datos fijos (`securityData.ts`).
 import { covers } from '../support/coverage'
 import { openAs } from '../support/fixtures'
+import { signInByForm } from '../support/platform'
 import { capture, captureWindow, expect, deadline, test } from './capture'
 import { answer, DEVICE_SESSIONS, profileSecurity, RECOVERY_CODES, staffSecurity, TWO_FACTOR_ON, TWO_FACTOR_SETUP, withLockFields } from './securityData'
 
@@ -78,6 +79,19 @@ test('VIS-27 activar la verificación en dos pasos y desactivarla', async ({ pag
   const disable = page.getByRole('alertdialog', { name: '¿Desactivar la verificación en dos pasos?' })
   await captureWindow(disable, 'confirmar-desactivar-dos-pasos')
   await disable.getByRole('button', { name: 'Cancelar' }).click()
+})
+
+test('VIS-30 al entrar sin la verificación en dos pasos, al encargado se le recomienda activarla', async ({ page, local }) => {
+  deadline(60_000)
+  covers('confirmacion:shell/security/TwoFactorReminder')
+
+  await profileSecurity(page)
+  await page.goto('/acceso')
+  await signInByForm(page, local.owner.email, local.owner.password)
+  const reminder = page.getByRole('alertdialog', { name: 'Protege tu cuenta con la verificación en dos pasos' })
+  await captureWindow(reminder, 'recomendar-dos-pasos')
+  await reminder.getByRole('button', { name: 'Ahora no' }).click()
+  await expect(reminder).toBeHidden()
 })
 
 test('VIS-28 las sesiones y los accesos de otra persona y las cuentas sin uso, en Personal', async ({ page, local }) => {

@@ -162,7 +162,7 @@ export const OVERLAYS = [
   { id: 'o-nueva-orden', name: 'Diálogo «Nueva orden de compra»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }, { button: 'Nueva orden' }] },
   { id: 'o-recibir-orden', name: 'Diálogo «Recibir la orden»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Compras' }, { button: 'Recibir' }] },
   { id: 'o-iniciar-conteo', name: 'Diálogo «Iniciar conteo físico»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Conteos' }, { button: 'Iniciar conteo' }] },
-  { id: 'o-tendencia-conteo', name: 'Hoja «Tendencia» de un insumo contado', type: 'Sheet', route: '/inventario/conteos/:stockCount', account: 'owner', steps: [{ button: /^Tendencia de/ }] },
+  { id: 'o-tendencia-conteo', name: 'Hoja «Tendencia» de un insumo contado', type: 'Sheet', route: '/inventario/conteos/:stockCount', account: 'owner', steps: [{ button: /^Ver tendencia de/ }] },
   { id: 'o-nuevo-proveedor', name: 'Diálogo «Nuevo proveedor»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }, { button: 'Nuevo proveedor' }] },
   { id: 'o-editar-proveedor', name: 'Diálogo «Editar proveedor»', type: 'Dialog', route: '/inventario', account: 'owner', steps: [{ tab: 'Proveedores' }, { button: 'Editar' }] },
 

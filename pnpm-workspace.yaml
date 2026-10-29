@@ -75,6 +75,9 @@ overrides:
   # Denegación de servicio con bytes de más tras un cuerpo comprimido (alto):
   # body-parser de express, en el servidor falso de Pact y en el SDK de MCP.
   body-parser@>=2.0.0 <2.4.0: 2.4.0
+  # GHSA-3f7j-7jwc-fxfj (alto): systeminformation de @dotenvx/dotenvx, en la CLI de
+  # shadcn, que no corre en la app.
+  systeminformation@<5.33.16: 5.33.16
 
 auditConfig:
   ignoreGhsas:

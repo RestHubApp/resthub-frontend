@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { reauthenticate } from '@/api/accountSecurity'
 import { hasCode } from '@/services/apiError'
 import type { CurrentPasswordValues } from '@/services/securityRules'
+import { adoptRotatedToken } from '@/store/session'
 
 /** Cómo terminó un envío: confirmada, o el servidor pide además el código de dos pasos. */
 type Outcome = 'confirmed' | 'code-required'
@@ -17,12 +18,12 @@ type Outcome = 'confirmed' | 'code-required'
  */
 /**
  * Verifica la contraseña (y el código, si va) sin cambiar nada guardado en
- * caché: la sesión sigue siendo la misma, solo se abre la ventana de unos
- * minutos para las acciones críticas.
+ * caché: la cuenta sigue siendo la misma, con un token nuevo, y se abre la
+ * ventana de unos minutos para las acciones críticas.
  */
 async function verifyPassword(password: string, code: string | undefined): Promise<Outcome> {
   try {
-    await reauthenticate(password, code)
+    adoptRotatedToken(await reauthenticate(password, code))
     return 'confirmed'
   } catch (error) {
     if (hasCode(error, 'two_factor_required')) return 'code-required'

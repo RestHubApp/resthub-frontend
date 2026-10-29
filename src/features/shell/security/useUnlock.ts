@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { type UnlockCredential, unlockOwnSession } from '@/api/accountSecurity'
-import { useSession } from '@/store/session'
+import { adoptRotatedToken, useSession } from '@/store/session'
 
 /**
  * Desbloquea la sesión con el PIN o la contraseña y relee lo que se muestra:
@@ -15,7 +15,8 @@ export function useUnlock() {
   const setLocked = useSession((state) => state.setLocked)
   return useMutation({
     mutationFn: (payload: UnlockCredential) => unlockOwnSession(payload),
-    onSuccess: () => {
+    onSuccess: (unlocked) => {
+      adoptRotatedToken(unlocked?.access_token ?? null)
       setLocked(false)
       void queryClient.invalidateQueries()
     },

@@ -118,7 +118,7 @@ test('GES-51 un conteo por peso y en kg, cerrado con lo pendiente avisado, deja 
   expect(await stockOf(local, 'Pisco')).toBe('1875.000')
   expect(await stockOf(local, 'Cebolla roja')).toBe('3000.000')
 
-  await page.getByRole('button', { name: 'Tendencia de Pisco' }).click()
+  await page.getByRole('button', { name: 'Ver tendencia de Pisco' }).click()
   const trend = page.getByRole('dialog', { name: 'Tendencia: Pisco' })
   await expect(trend.getByRole('list', { name: 'Diferencias de Pisco por conteo' }).getByRole('listitem')).toHaveCount(1)
   await page.keyboard.press('Escape')

@@ -40,7 +40,7 @@ export function QuickPaletteHost({ entries, account }: QuickPaletteHostProps) {
         description={notice.description}
         confirmLabel="Cerrar sesión"
         confirmVariant="default"
-        onConfirm={signOut}
+        onConfirm={() => { signOut() }}
       />
     </>
   )
