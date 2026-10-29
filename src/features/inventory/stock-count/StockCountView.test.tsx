@@ -137,10 +137,10 @@ describe('reporte de diferencias', () => {
         { count_id: 1, count_number: 1, closed_at: '2026-09-01T15:00:00Z', expected: '2000', counted: '1900', difference: '-100', difference_percent: '-5.00', unit_cost: '0.04', difference_value: '-4.00' },
       ],
     })
-    await user.click(await screen.findByRole('button', { name: 'Tendencia de Pisco' }))
+    await user.click(await screen.findByRole('button', { name: 'Ver tendencia de Pisco' }))
 
     const sheet = await screen.findByRole('dialog', { name: 'Tendencia: Pisco' })
     const bars = await within(sheet).findByRole('list', { name: 'Diferencias de Pisco por conteo' })
-    expect(within(bars).getAllByRole('listitem').map((bar) => flat(bar.textContent))).toEqual(['Conteo #2−S/ 30.00', 'Conteo #1−S/ 4.00'])
+    expect(within(bars).getAllByRole('listitem').map((bar) => flat(bar.textContent))).toEqual(['Conteo #2 −S/ 30.00', 'Conteo #1 −S/ 4.00'])
   })
 })

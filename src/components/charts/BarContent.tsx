@@ -18,6 +18,10 @@ export function BarContent({ datum, max, reservation }: BarContentProps) {
         </span>
         {datum.badge}
       </span>
+      {/* Separa la etiqueta del valor en el texto visible («Lomo saltado 12 porc.»), que
+          debe estar dentro del nombre de la fila (WCAG 2.5.3). Entre celdas de la grilla
+          no se dibuja. */}
+      {' '}
       <span aria-hidden className="flex min-w-0 items-center gap-2">
         <span
           className="h-3.5 shrink-0 rounded-r-[4px]"
