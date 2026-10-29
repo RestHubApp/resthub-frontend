@@ -1,8 +1,8 @@
 {
-  "total": 505,
+  "total": 506,
   "byType": {
     "ruta": 40,
-    "confirmacion": 18,
+    "confirmacion": 19,
     "desplegable": 9,
     "dialogo": 34,
     "hoja": 14,
@@ -341,6 +341,12 @@
       "type": "confirmacion",
       "description": "notice.title",
       "origin": "src/features/shell/quick/QuickPaletteHost.tsx"
+    },
+    {
+      "id": "confirmacion:shell/security/TwoFactorReminder",
+      "type": "confirmacion",
+      "description": "Protege tu cuenta con la verificación en dos pasos",
+      "origin": "src/features/shell/security/TwoFactorReminder.tsx"
     },
     {
       "id": "confirmacion:shell/SessionActions",

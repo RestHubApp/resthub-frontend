@@ -23,13 +23,13 @@ export function QuickAppearancePanel({ onNavigate }: { readonly onNavigate: () =
       <div className="flex flex-col gap-2">
         <p className="m-0 text-sm font-medium">Texto</p>
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="icon" aria-label="Texto más pequeño" disabled={!quick.canSmaller} onClick={quick.smaller}>
+          <Button type="button" variant="outline" size="icon" aria-label="A− Texto más pequeño" disabled={!quick.canSmaller} onClick={quick.smaller}>
             <span aria-hidden="true">A−</span>
           </Button>
           <p role="status" className="m-0 min-w-0 flex-1 text-center text-sm">
             {size === undefined ? '' : `${size.label} (${size.percent})`}
           </p>
-          <Button type="button" variant="outline" size="icon" aria-label="Texto más grande" disabled={!quick.canLarger} onClick={quick.larger}>
+          <Button type="button" variant="outline" size="icon" aria-label="A+ Texto más grande" disabled={!quick.canLarger} onClick={quick.larger}>
             <span aria-hidden="true">A+</span>
           </Button>
         </div>

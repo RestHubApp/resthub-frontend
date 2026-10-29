@@ -42,7 +42,7 @@ export function buildDifferenceColumns(onTrend: (line: CountDifference) => void)
       id: 'tendencia',
       header: 'Tendencia',
       cell: (line) => (
-        <Button type="button" variant="outline" size="sm" aria-label={`Tendencia de ${line.ingredient_name}`} onClick={() => { onTrend(line) }}>
+        <Button type="button" variant="outline" size="sm" aria-label={`Ver tendencia de ${line.ingredient_name}`} onClick={() => { onTrend(line) }}>
           <Icon name="chart" size={14} />
           <span>Ver</span>
         </Button>

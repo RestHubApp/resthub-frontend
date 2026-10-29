@@ -5,7 +5,7 @@ import { signInAs, mountRoutes, TEST_SCREENS, PERMISSIONS_OWNER, PERMISSIONS_WAI
 import { currentUserQueryKey } from '@/api/auth'
 import { queryClient } from '@/services/queryClient'
 import type { OpenOrderRequest } from '@/api/types'
-import { enqueueOrder, removeQueued } from '@/store/offlineQueue'
+import { enqueueOrder, ownerOf, queuedOrders, removeQueued } from '@/store/offlineQueue'
 import { useAppearance } from '@/store/appearance'
 import { useSession } from '@/store/session'
 import { AppShell } from './AppShell'
@@ -198,5 +198,28 @@ describe('AppShell: sesión y precargas', () => {
     await user.hover(within(sidebar()).getByRole('link', { name: 'Caja' }))
 
     expect(prefetch).toHaveBeenCalled()
+  })
+})
+
+describe('cerrar la sesión con pedidos en cola', () => {
+  it('al cerrar la sesión descarta los pedidos en cola con datos del cliente, y lo avisa', async () => {
+    server()
+    const account = signInAs(PERMISSIONS_WAITER)
+    enqueueOrder({
+      userId: account.user.id,
+      restaurantId: account.restaurant.id,
+      request: { client_request_id: 'delivery-en-cola', customer_name: 'Ana', customer_phone: '987654321' } as OpenOrderRequest,
+      queuedAt: '2026-09-26T13:00:00Z',
+      label: 'Delivery · Ana',
+    })
+    const { user } = openShell()
+
+    await user.click(screen.getByRole('button', SIGN_OUT))
+
+    const notice = await screen.findByRole('alertdialog')
+    expect(within(notice).getByText(/Al salir se descartan los que llevan datos del cliente/u)).toBeInTheDocument()
+    await user.click(within(notice).getByRole('button', SIGN_OUT))
+    expect(await screen.findByText(ACCESS_FORM)).toBeInTheDocument()
+    expect(queuedOrders(ownerOf(account))).toEqual([])
   })
 })

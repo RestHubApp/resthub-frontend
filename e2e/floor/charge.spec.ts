@@ -213,13 +213,11 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
   await chicha.getByRole('button', { name: 'Cobrar' }).click()
   await expect(chicha).not.toContainText('Invita la casa')
   await expect(dialog).toContainText(/Total a cobrar\s*S\/\s*40\.00/u)
+  // «Invitar» sigue deshabilitado hasta que termina de guardarse el cobro: el clic
+  // espera a que se habilite y el motivo ya no lo cierra la respuesta.
   await chicha.getByRole('button', { name: 'Invitar' }).click()
-  // Al reabrirlo, el formulario puede volver a montarse justo después de
-  // escribir y perder el motivo: se reintenta hasta que Confirmar se habilite.
-  await expect(async () => {
-    await reason.fill('Cumpleaños')
-    await expect(chicha.getByRole('button', { name: 'Confirmar' })).toBeEnabled({ timeout: 1000 })
-  }).toPass()
+  await reason.fill('Cumpleaños')
+  await expect(chicha.getByRole('button', { name: 'Confirmar' })).toBeEnabled()
   await chicha.getByRole('button', { name: 'Confirmar' }).click()
   await expect(chicha).toContainText('Invita la casa: Cumpleaños')
 
