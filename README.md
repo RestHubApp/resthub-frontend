@@ -197,7 +197,8 @@ Lo que mantiene la primera visita liviana:
 - **El service worker precachea solo el armazón** (lo que enlaza `index.html`:
   8 archivos, no los 123 de antes (casi todas las pantallas y bibliotecas)). Cada pantalla se
   guarda la primera vez que se abre (`runtimeCaching`, con `clientsClaim` para
-  que lo haga desde la primera sesión) y, para no romper el modo sin señal, al
+  que lo haga desde la primera sesión; con `skipWaiting`, una versión nueva toma
+  el control en la siguiente recarga, lo comprueba `checks/pwa/swActivation.mjs`) y, para no romper el modo sin señal, al
   entrar con sesión y tres segundos después de que el service worker está
   listo se bajan las pantallas que el mesero necesita sin conexión
   (`offline: true` en `router/screens/ordersScreens.ts`,
