@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 
+import { ConfirmAction } from './ConfirmAction'
 import { useReturnFocus } from './useReturnFocus'
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -36,6 +36,7 @@ interface ConfirmDialogProps {
 /**
  * Confirmacion antes de una accion que no se deshace.
  *
+ * La confirmación se dispara una sola vez por apertura (`ConfirmAction`).
  * Reemplaza a `window.confirm`, que no toma el tema, no se puede leer bien en
  * todos los lectores de pantalla y en algunos navegadores se puede silenciar.
  */
@@ -71,9 +72,9 @@ export function ConfirmDialog({
         {children}
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction variant={confirmVariant} disabled={isConfirmDisabled} onClick={onConfirm}>
+          <ConfirmAction variant={confirmVariant} disabled={isConfirmDisabled} onConfirm={onConfirm}>
             {confirmLabel}
-          </AlertDialogAction>
+          </ConfirmAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
