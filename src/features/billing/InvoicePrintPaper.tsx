@@ -1,5 +1,6 @@
 import type { BillingSettings, Invoice } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PRINT_CSS } from '@/components/printSheet'
 import { Button } from '@/components/ui/button'
 import { InvoiceSheet } from './InvoiceSheet'
@@ -20,7 +21,7 @@ export function InvoicePrintPaper({ invoice, settings, timeZone }: InvoicePrintP
       <Button type="button" className="print:hidden" onClick={() => {
         window.print()
       }}>
-        <Icon name="print" size={16} />
+        <Icon glyph={icons.print} size={16} />
         <span>Imprimir</span>
       </Button>
       <article id="hoja-impresa" className="w-[74mm] bg-white p-3 font-mono text-black shadow-md">

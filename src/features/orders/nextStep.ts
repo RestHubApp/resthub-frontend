@@ -1,13 +1,14 @@
 import type { OrderStep } from '@/api/orders'
 import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse, OrderStatus, PermissionCode } from '@/api/types'
-import type { IconName } from '@/components/icons'
+import type { IconGlyph } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { STATUS_LABELS } from './orderLabels'
 
 /** Lo siguiente que se hace con un pedido en cada estado, y quien puede hacerlo. */
 export interface NextStep {
   readonly label: string
-  readonly icon: IconName
+  readonly icon: IconGlyph
   /** Una transicion sin cuerpo, o `charge` para abrir el cobro. */
   readonly action: OrderStep | 'charge'
   readonly permission: PermissionCode
@@ -18,28 +19,28 @@ export interface NextStep {
 const STEPS: Partial<Record<OrderStatus, NextStep>> = {
   open: {
     label: 'Enviar a cocina',
-    icon: 'send',
+    icon: icons.send,
     action: 'send',
     permission: PERMISSION.ordersTake,
     waiting: 'Abierto: falta enviarlo a cocina.',
   },
   in_kitchen: {
     label: 'Marcar listo',
-    icon: 'ready',
+    icon: icons.ready,
     action: 'ready',
     permission: PERMISSION.ordersManage,
     waiting: 'En cocina: esta pantalla avisa sola cuando esté listo.',
   },
   ready: {
     label: 'Marcar servido',
-    icon: 'serve',
+    icon: icons.serve,
     action: 'served',
     permission: PERMISSION.ordersTake,
     waiting: 'Listo: falta servirlo.',
   },
   served: {
     label: 'Cobrar',
-    icon: 'payment',
+    icon: icons.payment,
     action: 'charge',
     permission: PERMISSION.ordersCharge,
     waiting: 'Servido, por cobrar: lo cobra quien lo atendió o el encargado.',

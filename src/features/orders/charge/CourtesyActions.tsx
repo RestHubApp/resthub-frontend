@@ -1,5 +1,6 @@
 import type { OrderItemResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 interface CourtesyActionsProps {
@@ -24,7 +25,7 @@ export function CourtesyActions({ item, isPending, isReasonOpen, onRevoke, onInv
     // Mientras se guarda un cambio del plato (volver a cobrarlo), el motivo que se abra lo
     // cerraría la respuesta: se espera a que termine.
     <Button type="button" size="sm" variant="outline" disabled={isReasonOpen || isPending} onClick={onInvite}>
-      <Icon name="courtesy" size={14} />
+      <Icon glyph={icons.courtesy} size={14} />
       <span>Invitar</span>
     </Button>
   )

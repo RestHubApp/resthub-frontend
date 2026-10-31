@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import type { LiveStatus } from '@/store/liveStatus'
 
@@ -31,7 +32,7 @@ export function LiveIndicator({ status }: LiveIndicatorProps) {
             <span className="relative inline-flex size-2.5 rounded-full bg-success" />
           </span>
         ) : (
-          <Icon name={status === 'offline' ? 'offline' : 'live'} size={16} />
+          <Icon glyph={status === 'offline' ? icons.offline : icons.live} size={16} />
         )}
         <span>{label}</span>
       </p>

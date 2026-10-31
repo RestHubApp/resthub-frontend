@@ -4,6 +4,7 @@ import { PasswordField } from '@/components/PasswordField'
 import { TextField } from '@/components/TextField'
 import { MIN_PASSWORD } from '@/services/fieldLimits'
 import { onlyLetters } from '@/services/fieldRules'
+import * as icons from '@/components/icons'
 
 interface OwnerFieldsProps {
   /** Distingue los `id` cuando hay más de un formulario en la pantalla. */
@@ -33,7 +34,7 @@ export function OwnerFields({ idPrefix, fields, errors }: OwnerFieldsProps) {
           id={`${idPrefix}-full-name`}
           label="Nombre completo"
           placeholder="María Quispe Rojas"
-          icon="profile"
+          icon={icons.profile}
           autoComplete="off"
           sanitize={onlyLetters}
           field={fields.full_name}

@@ -1,15 +1,15 @@
-import { Icon } from '@/components/Icon'
-import type { IconName } from '@/components/icons'
+import { Icon, type IconGlyph } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { MODES, resolveTheme } from '@/services/appearanceRules'
 import { useAppearance } from '@/store/appearance'
 import { OptionCard } from './OptionCard'
 import { ThemeChip } from './ThemeChip'
 import { useQuickAppearance } from '@/features/shell/useQuickAppearance'
 
-const MODE_ICON: Record<(typeof MODES)[number]['id'], IconName> = {
-  light: 'lightMode',
-  dark: 'darkMode',
-  system: 'deviceMode',
+const MODE_ICON: Record<(typeof MODES)[number]['id'], IconGlyph> = {
+  light: icons.lightMode,
+  dark: icons.darkMode,
+  system: icons.deviceMode,
 }
 
 /** Claro, oscuro o automático, cada uno con una muestra de cómo queda con el color elegido. */
@@ -45,7 +45,7 @@ export function ModePicker() {
               ) : (
                 <ThemeChip theme={option.id === 'dark' ? dark : light} />
               )}
-              <Icon name={MODE_ICON[option.id]} size={16} className="text-muted-foreground" />
+              <Icon glyph={MODE_ICON[option.id]} size={16} className="text-muted-foreground" />
             </span>
           </OptionCard>
         ))}

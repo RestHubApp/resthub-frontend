@@ -2,7 +2,8 @@ import type { ComponentPropsWithRef } from 'react'
 
 import { EntryBadge } from './EntryBadge'
 import type { NavEntry } from './navigation'
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { TAB_ACTIVE, TAB_IDLE } from './tabStyles'
 
 type MoreButtonProps = Readonly<ComponentPropsWithRef<'button'>> & {
@@ -17,7 +18,7 @@ type MoreButtonProps = Readonly<ComponentPropsWithRef<'button'>> & {
 export function MoreButton({ entries, label, isInside, ...trigger }: MoreButtonProps) {
   return (
     <button type="button" {...trigger} className={isInside ? TAB_ACTIVE : TAB_IDLE}>
-      <ShellIcon name={entries.length > 0 ? 'more' : 'profile'} size={22} />
+      <Icon glyph={entries.length > 0 ? icons.more : icons.profile} size={22} />
       <span>{label}</span>
       {entries.map((entry) => (
         <EntryBadge key={entry.to} entry={entry} isFloating />

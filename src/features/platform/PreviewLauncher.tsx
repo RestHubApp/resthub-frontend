@@ -1,6 +1,7 @@
 import type { PreviewAs } from '@/api/types'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { hasCode } from '@/services/apiError'
 import { PREVIEW_AS_LABELS } from './previewLink'
@@ -35,7 +36,7 @@ export function PreviewLauncher() {
               handleOpen(as)
             }}
           >
-            <Icon name="view" size={18} />
+            <Icon glyph={icons.view} size={18} />
             <span>{start.isPending && start.variables === as ? 'Abriendo…' : `Ver como ${PREVIEW_AS_LABELS[as]}`}</span>
           </Button>
         ))}

@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import type { Direction } from './menuOrder'
 
@@ -20,7 +21,7 @@ export function DishOrderButtons({ isFirst, isLast, onMove }: DishOrderButtonsPr
           onMove('up')
         }}
       >
-        <Icon name="up" size={16} />
+        <Icon glyph={icons.up} size={16} />
         <span>Subir</span>
       </Button>
       <Button
@@ -31,7 +32,7 @@ export function DishOrderButtons({ isFirst, isLast, onMove }: DishOrderButtonsPr
           onMove('down')
         }}
       >
-        <Icon name="down" size={16} />
+        <Icon glyph={icons.down} size={16} />
         <span>Bajar</span>
       </Button>
     </div>

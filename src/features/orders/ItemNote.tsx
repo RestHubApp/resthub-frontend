@@ -1,5 +1,6 @@
 import { AllergyBadge } from '@/components/AllergyBadge'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 
 interface ItemNoteProps {
@@ -34,7 +35,7 @@ export function ItemNote({ note, flag, label }: ItemNoteProps) {
 
   return (
     <p className={`m-0 mt-1 flex items-start gap-1.5 rounded-md px-2 py-1 text-sm font-semibold ring-1 ${tone}`}>
-      {hasAllergy ? <AllergyBadge flag={flag} withNote={false} /> : <Icon name="note" size={16} className="mt-0.5 shrink-0" />}
+      {hasAllergy ? <AllergyBadge flag={flag} withNote={false} /> : <Icon glyph={icons.note} size={16} className="mt-0.5 shrink-0" />}
       <span className="min-w-0 flex-1 break-words">
         {label === undefined ? <span className="sr-only">Nota: </span> : <span className="text-foreground">{label}: </span>}
         {note}

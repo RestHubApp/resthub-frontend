@@ -3,7 +3,8 @@ import { Link } from 'react-router'
 import type { Session } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { accountLabels } from './accountLabels'
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
 import { usePreview } from '@/store/session'
@@ -32,7 +33,7 @@ export function SessionActions({ account, onNavigate }: SessionActionsProps) {
 
   const signOutMenuItem = (onClick?: () => void) => (
     <Button type="button" variant="ghost" className="justify-start gap-3 px-3" onClick={onClick}>
-      <ShellIcon name="signOut" size={18} />
+      <Icon glyph={icons.signOut} size={18} />
       <span>Cerrar sesión</span>
     </Button>
   )
@@ -58,7 +59,7 @@ export function SessionActions({ account, onNavigate }: SessionActionsProps) {
     <div className="flex flex-col gap-1 border-t pt-3">
       <Button asChild variant="ghost" className="h-auto min-h-11 justify-start gap-3 px-3 py-2">
         <Link to={paths.profile} onClick={onNavigate}>
-          <ShellIcon name="profile" size={18} />
+          <Icon glyph={icons.profile} size={18} />
           <span className="flex min-w-0 flex-col items-start leading-tight">
             <span className="max-w-full truncate">{fullName}</span>
             <span className="text-xs font-normal text-muted-foreground">{roleLabel}</span>

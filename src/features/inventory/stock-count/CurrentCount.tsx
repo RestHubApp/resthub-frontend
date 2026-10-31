@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 
 import type { StockCountSummary } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { paths } from '@/services/paths'
 import { progressText } from './countSummary'
@@ -23,7 +24,7 @@ export function CurrentCount({ draft, canManage, onStart }: CurrentCountProps) {
           <p className="m-0 text-sm text-muted-foreground">{progressText(draft)}</p>
         </div>
         <Link to={paths.inventory.count(draft.id)} className={buttonVariants()}>
-          <Icon name="count" size={16} />
+          <Icon glyph={icons.count} size={16} />
           <span>{canManage ? 'Seguir contando' : 'Ver avance'}</span>
         </Link>
       </div>
@@ -39,7 +40,7 @@ export function CurrentCount({ draft, canManage, onStart }: CurrentCountProps) {
         cuánto faltó o sobró, en soles.
       </p>
       <Button type="button" onClick={onStart}>
-        <Icon name="count" size={16} />
+        <Icon glyph={icons.count} size={16} />
         <span>Iniciar conteo</span>
       </Button>
     </div>

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { TwoFactorCodeField } from '@/components/TwoFactorCodeField'
 import { Button } from '@/components/ui/button'
 import { useCredentialsForm } from '@/hooks/useCredentialsForm'
@@ -53,7 +54,7 @@ export function LoginForm({ destination }: LoginFormProps) {
       ) : null}
 
       <Button type="submit" className="w-full" disabled={access.isPending}>
-        <Icon name="signIn" size={18} />
+        <Icon glyph={icons.signIn} size={18} />
         <span>{access.isPending ? 'Entrando…' : 'Entrar'}</span>
       </Button>
     </form>

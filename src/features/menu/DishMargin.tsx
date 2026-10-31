@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 
 import type { DishCost } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { formatMoney, formatPercent } from '@/services/format'
 import { paths } from '@/services/paths'
 
@@ -34,7 +35,7 @@ export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
       <p className="m-0 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
         <span>Sin receta: no se conoce su costo.</span>
         <Link to={destination} state={FROM_MENU} className={LINK} aria-label={`Agregar la receta de ${itemName}`}>
-          <Icon name="recipe" size={16} />
+          <Icon glyph={icons.recipe} size={16} />
           <span>Agregar receta</span>
         </Link>
       </p>
@@ -53,7 +54,7 @@ export function DishMargin({ itemId, itemName, cost }: DishMarginProps) {
         {isLost ? ' · se vende a pérdida' : ''}
       </span>
       <Link to={destination} state={FROM_MENU} className={LINK} aria-label={`Ver la receta de ${itemName}`}>
-        <Icon name="recipe" size={16} />
+        <Icon glyph={icons.recipe} size={16} />
         <span>Receta</span>
       </Link>
     </p>

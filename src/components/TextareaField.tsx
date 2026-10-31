@@ -4,7 +4,7 @@ import { FieldError } from './FieldError'
 import { FieldHint } from './FieldHint'
 import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
-import type { IconName } from './icons'
+import type { IconGlyph } from './Icon'
 import { Label } from './ui/label'
 import { Textarea } from './ui/textarea'
 
@@ -13,7 +13,7 @@ interface TextareaFieldProps {
   readonly label: string
   /** Lo que devuelve `register(...)` de react-hook-form. */
   readonly field: UseFormRegisterReturn
-  readonly icon?: IconName
+  readonly icon?: IconGlyph
   readonly error?: string | undefined
   readonly hint?: string
   readonly rows?: number

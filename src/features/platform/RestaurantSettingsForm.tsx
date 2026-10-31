@@ -2,6 +2,7 @@ import type { PlatformRestaurantDetail } from '@/api/types'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { TimeZoneField } from './TimeZoneField'
@@ -30,7 +31,7 @@ export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormPro
         <TextField
           id="settings-name"
           label="Nombre"
-          icon="restaurant"
+          icon={icons.restaurant}
           autoComplete="off"
           field={register('name')}
           error={errors.name?.message}
@@ -48,7 +49,7 @@ export function RestaurantSettingsForm({ restaurant }: RestaurantSettingsFormPro
       {save.isSuccess && !isDirty ? <FormMessage tone="ok">Cambios guardados.</FormMessage> : null}
       <div className="flex justify-end">
         <Button type="submit" disabled={save.isPending || !isDirty}>
-          <Icon name="confirm" size={18} />
+          <Icon glyph={icons.confirm} size={18} />
           <span>{save.isPending ? 'Guardando…' : 'Guardar cambios'}</span>
         </Button>
       </div>

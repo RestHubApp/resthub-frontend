@@ -30,7 +30,7 @@ export function RestockSummary({ counts, selected, onSelect }: RestockSummaryPro
             className={`flex flex-col items-start gap-2 rounded-xl bg-card p-4 text-left ring-1 outline-none transition-shadow focus-visible:ring-3 focus-visible:ring-ring/50 ${isActive ? 'ring-2 ring-foreground' : 'ring-foreground/10 hover:ring-foreground/30'}`}
           >
             <Badge variant={style.variant} className="font-semibold">
-              <Icon name={style.icon} size={14} />
+              <Icon glyph={style.icon} size={14} />
               {ACTION_LABELS[action]}
             </Badge>
             <span className="text-3xl leading-none font-semibold">{counts[action] ?? 0}</span>

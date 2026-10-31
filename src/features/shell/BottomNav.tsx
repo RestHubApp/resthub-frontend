@@ -1,4 +1,4 @@
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
 import type { Session } from '@/api/types'
 import { MoreSheet } from './MoreSheet'
 import type { NavEntry } from './navigation'
@@ -39,7 +39,7 @@ export function BottomNav({ bar, rest, account }: BottomNavProps) {
         {bar.map((entry) => (
           <li key={entry.to} className="flex flex-1">
             <EntryLink entry={entry} className={tabClass}>
-              <ShellIcon name={entry.icon} size={22} />
+              <Icon glyph={entry.icon} size={22} />
               <span className="max-w-full truncate">{entry.label}</span>
               <EntryBadge entry={entry} isFloating />
             </EntryLink>

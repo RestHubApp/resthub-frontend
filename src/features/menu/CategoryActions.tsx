@@ -4,6 +4,7 @@ import { deleteCategory, updateCategory } from '@/api/menu'
 import type { MenuSection } from '@/api/types'
 import { ActionsMenu, type ActionsMenuItem } from '@/components/ActionsMenu'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { type CategoryDialog, CategoryDialogs } from './CategoryDialogs'
 import { withCategory, withoutCategory } from './menuCache'
@@ -31,14 +32,14 @@ interface MenuEntriesOptions {
 /** Subir, bajar, desactivar (o activar) y, si está vacía, eliminar. */
 function menuEntries({ category, isFirst, isLast, isPending, onMove, onDialog, activate }: MenuEntriesOptions): ActionsMenuItem[] {
   const entries: ActionsMenuItem[] = [
-    { label: 'Subir', icon: 'up', isDisabled: isFirst, onSelect: () => { onMove('up') } },
-    { label: 'Bajar', icon: 'down', isDisabled: isLast, onSelect: () => { onMove('down') } },
+    { label: 'Subir', icon: icons.up, isDisabled: isFirst, onSelect: () => { onMove('up') } },
+    { label: 'Bajar', icon: icons.down, isDisabled: isLast, onSelect: () => { onMove('down') } },
     category.is_active
-      ? { label: 'Desactivar', icon: 'turnOn', onSelect: () => { onDialog('deactivate') } }
-      : { label: 'Activar', icon: 'turnOn', isDisabled: isPending, onSelect: activate },
+      ? { label: 'Desactivar', icon: icons.turnOn, onSelect: () => { onDialog('deactivate') } }
+      : { label: 'Activar', icon: icons.turnOn, isDisabled: isPending, onSelect: activate },
   ]
   if (category.items.length === 0) {
-    entries.push({ label: 'Eliminar', icon: 'delete', isDestructive: true, onSelect: () => { onDialog('delete') } })
+    entries.push({ label: 'Eliminar', icon: icons.delete, isDestructive: true, onSelect: () => { onDialog('delete') } })
   }
   return entries
 }
@@ -85,7 +86,7 @@ export function CategoryActions({ category, isFirst, isLast, onMove, onAddItem }
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button type="button" variant="secondary" className="px-3" onClick={onAddItem}>
-        <Icon name="add" size={16} />
+        <Icon glyph={icons.add} size={16} />
         <span>Agregar plato</span>
       </Button>
       <Button
@@ -97,7 +98,7 @@ export function CategoryActions({ category, isFirst, isLast, onMove, onAddItem }
           setDialog('edit')
         }}
       >
-        <Icon name="edit" size={16} />
+        <Icon glyph={icons.edit} size={16} />
         <span>Editar</span>
       </Button>
       <ActionsMenu label={`Más acciones de la categoría ${category.name}`} items={items} />

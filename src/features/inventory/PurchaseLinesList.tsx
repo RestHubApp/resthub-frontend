@@ -1,5 +1,6 @@
 import type { Ingredient } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { PurchaseLineEditor } from './PurchaseLineEditor'
 import { emptyLine, type LineDraft } from './purchaseLines'
@@ -33,7 +34,7 @@ export function PurchaseLinesList({ lines, ingredients, onChange }: PurchaseLine
       <Button type="button" variant="ghost" className="self-start" onClick={() => {
         onChange([...lines, emptyLine()])
       }}>
-        <Icon name="add" size={16} />
+        <Icon glyph={icons.add} size={16} />
         <span>Agregar insumo</span>
       </Button>
     </>

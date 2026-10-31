@@ -1,5 +1,6 @@
 import { PERMISSION } from '@/api/permissions'
 import { asDefault } from '@/components/lazyNamed'
+import * as icons from '@/components/icons'
 import { routePatterns } from '@/services/paths'
 import { prefetchOf, type Screen } from './screenTypes'
 
@@ -10,7 +11,7 @@ export const ORDERS_SCREENS: readonly Screen[] = [
     permission: PERMISSION.ordersTake,
     nav: {
       label: 'Pedidos',
-      icon: 'order',
+      icon: icons.order,
       description: 'Tomar pedidos por mesa o para llevar, enviarlos a cocina y marcarlos servidos.',
     },
     load: asDefault(() => import('@/features/orders/OrdersView'), 'OrdersView'),

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { PHOTO_TYPES } from './dishPhotoFile'
 
@@ -45,12 +46,12 @@ export function DishPhotoPicker({ id, dishName, hasPhoto, isUploading, isPending
           input.current?.click()
         }}
       >
-        <Icon name="upload" size={16} />
+        <Icon glyph={icons.upload} size={16} />
         <span>{isUploading ? 'Guardando…' : uploadLabel}</span>
       </Button>
       {hasPhoto ? (
         <Button type="button" variant="ghost" className="text-destructive hover:text-destructive" disabled={isPending} onClick={onRemove}>
-          <Icon name="delete" size={16} />
+          <Icon glyph={icons.delete} size={16} />
           <span>Quitar foto</span>
         </Button>
       ) : null}

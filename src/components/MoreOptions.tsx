@@ -1,6 +1,7 @@
 import { useId, useState, type ReactNode } from 'react'
 
 import { Icon } from './Icon'
+import * as icons from './icons'
 import { Button } from './ui/button'
 
 interface MoreOptionsProps {
@@ -40,7 +41,7 @@ export function MoreOptions({ label = 'Más opciones', summary, isForcedOpen = f
           <span>{label}</span>
           {summary === undefined ? null : <span className="text-xs font-normal text-muted-foreground">{summary}</span>}
         </span>
-        <Icon name={isShown ? 'up' : 'down'} size={18} />
+        <Icon glyph={isShown ? icons.up : icons.down} size={18} />
       </Button>
       <div id={regionId} hidden={!isShown} className="flex flex-col gap-5">
         {children}

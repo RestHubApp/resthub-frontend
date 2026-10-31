@@ -4,6 +4,7 @@ import { FieldIcon } from '@/components/FieldIcon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import * as icons from '@/components/icons'
 import { IngredientCount } from './IngredientCount'
 
 interface IngredientFiltersProps {
@@ -35,7 +36,7 @@ export function IngredientFilters({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex flex-col gap-2 sm:w-72">
           <Label htmlFor={searchId}>Buscar insumo</Label>
-          <FieldIcon icon="search">
+          <FieldIcon icon={icons.search}>
             <Input
               id={searchId}
               type="search"

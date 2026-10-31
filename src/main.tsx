@@ -14,9 +14,11 @@ import '@/store/appearance'
 import { router } from '@/router/routes'
 import { logger, logUncaughtErrors } from './services/logger'
 import { queryClient } from './services/queryClient'
+import { registerServiceWorker } from './services/serviceWorker'
 import './index.css'
 
 logUncaughtErrors()
+registerServiceWorker()
 
 // Con backend en otro origen, se inicia DNS/TLS mientras React monta la
 // pantalla. No se emite un preconnect vacío en desarrollo (API mismo origen).

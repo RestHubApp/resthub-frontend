@@ -2,6 +2,7 @@ import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import { TextField } from '@/components/TextField'
 import { centsToApi, formatCents } from '@/services/format'
+import * as icons from '@/components/icons'
 import { QuickAmounts } from './QuickAmounts'
 
 interface CashAmountFieldProps {
@@ -31,7 +32,7 @@ export function CashAmountField({
       <TextField
         id="monto-recibido"
         label="Monto recibido"
-        icon="payment"
+        icon={icons.payment}
         inputMode="decimal"
         autoComplete="off"
         placeholder={centsToApi(totalCents)}

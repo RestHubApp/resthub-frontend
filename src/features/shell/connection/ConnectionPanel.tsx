@@ -1,7 +1,8 @@
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { ShellIcon } from '@/features/shell/ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { useSendQueuedOrders } from '@/store/queuedDelivery'
 import type { LiveStatus } from '@/store/liveStatus'
 import { pendingText, STATE_COPY } from './connectionCopy'
@@ -49,7 +50,7 @@ export function ConnectionPanel({ connection: { state, live, pending } }: Connec
     <>
       <p role="status" className="m-0 flex items-center gap-2 font-semibold">
         <span aria-hidden="true" className={`size-2.5 shrink-0 rounded-full ${copy.dot}`} />
-        <ShellIcon name={copy.icon} size={18} />
+        <Icon glyph={copy.icon} size={18} />
         <span>{copy.label}</span>
       </p>
       <p className="m-0 text-sm text-muted-foreground">{stateDetail(state, live)}</p>
@@ -59,7 +60,7 @@ export function ConnectionPanel({ connection: { state, live, pending } }: Connec
             {pendingText(pending.length)}: {pending.map((order) => order.label).join(', ')}.
           </p>
           <Button type="button" variant="outline" className="self-start" disabled={isSending} onClick={() => void retryNow()}>
-            <ShellIcon name="retry" size={16} />
+            <Icon glyph={icons.retry} size={16} />
             <span>{isSending ? 'Reintentando…' : 'Reintentar ahora'}</span>
           </Button>
         </div>

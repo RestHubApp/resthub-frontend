@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useNotifications } from '@/store/notifications'
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 const AUTO_DISMISS_MS = 8_000
 
@@ -11,8 +12,8 @@ const AUTO_DISMISS_MS = 8_000
 // Un aviso informativo casi siempre confirma algo hecho: lleva la marca de
 // correcto, no la de alerta, que queda para lo que salió mal.
 const ICON_TONE = {
-  info: { name: 'correct', className: 'text-success' },
-  warning: { name: 'alert', className: 'text-warning' },
+  info: { glyph: icons.correct, className: 'text-success' },
+  warning: { glyph: icons.alert, className: 'text-warning' },
 } as const
 
 interface ToastItemProps {
@@ -35,7 +36,7 @@ export function ToastItem({ id, tone, message }: ToastItemProps) {
 
   return (
     <div className="flex items-start gap-3 rounded-xl bg-card p-3 text-sm text-card-foreground shadow-float ring-1 ring-foreground/10">
-      <ShellIcon name={ICON_TONE[tone].name} size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone].className}`} />
+      <Icon glyph={ICON_TONE[tone].glyph} size={18} className={`mt-0.5 shrink-0 ${ICON_TONE[tone].className}`} />
       <p className="m-0 flex-1">{message}</p>
       <Button
         type="button"
@@ -47,7 +48,7 @@ export function ToastItem({ id, tone, message }: ToastItemProps) {
           dismiss(id)
         }}
       >
-        <ShellIcon name="cancel" size={16} />
+        <Icon glyph={icons.cancel} size={16} />
       </Button>
     </div>
   )

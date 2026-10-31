@@ -1,5 +1,6 @@
 import type { CountDifference } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Badge } from '@/components/ui/badge'
 import { isBigDifference } from './differenceMath'
 
@@ -10,7 +11,7 @@ export function DifferenceIngredient({ line }: { readonly line: CountDifference 
       <span className="font-medium">{line.ingredient_name}</span>
       {isBigDifference(line) ? (
         <Badge variant="warning">
-          <Icon name="notice" size={12} />
+          <Icon glyph={icons.notice} size={12} />
           <span>Diferencia grande</span>
         </Badge>
       ) : null}

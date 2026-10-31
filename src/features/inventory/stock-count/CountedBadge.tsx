@@ -1,5 +1,6 @@
 import type { StockCountLine } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Badge } from '@/components/ui/badge'
 import { formatQuantity } from '@/services/format'
 import { unitOf } from './countEntry'
@@ -9,14 +10,14 @@ export function CountedBadge({ line }: { readonly line: StockCountLine }) {
   if (line.counted === null) {
     return (
       <Badge variant="warning">
-        <Icon name="schedule" size={12} />
+        <Icon glyph={icons.schedule} size={12} />
         <span>Pendiente</span>
       </Badge>
     )
   }
   return (
     <Badge variant="success">
-      <Icon name="confirm" size={12} />
+      <Icon glyph={icons.confirm} size={12} />
       <span>Contado: {formatQuantity(line.counted, unitOf(line))}</span>
     </Badge>
   )

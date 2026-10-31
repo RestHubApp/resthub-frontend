@@ -3,6 +3,7 @@ import type { UseFormRegisterReturn } from 'react-hook-form'
 import type { Role } from '@/api/types'
 import { ReadOnlyField } from '@/components/ReadOnlyField'
 import { TextField } from '@/components/TextField'
+import * as icons from '@/components/icons'
 import { MAX_ROLE_NAME } from './roleSchema'
 
 interface RoleNameFieldProps {
@@ -32,7 +33,7 @@ export function RoleNameField({ role, readOnly, field, error }: RoleNameFieldPro
       id="rol-nombre"
       label="Nombre"
       placeholder="Cocina, Caja, Delivery…"
-      icon="roles"
+      icon={icons.roles}
       autoComplete="off"
       maxLength={MAX_ROLE_NAME}
       field={field}

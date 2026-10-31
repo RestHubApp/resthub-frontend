@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 interface SuggestionsBarProps {
@@ -13,7 +14,7 @@ export function SuggestionsBar({ count, onLoad }: SuggestionsBarProps) {
     <div className="flex flex-wrap items-center justify-between gap-2">
       <span className="text-sm font-medium">Insumos</span>
       <Button type="button" variant="outline" size="sm" disabled={count === 0} onClick={onLoad}>
-        <Icon name="buy" size={14} />
+        <Icon glyph={icons.buy} size={14} />
         <span>Cargar sugerencias ({count})</span>
       </Button>
     </div>

@@ -52,10 +52,10 @@ export default defineConfig({
     // a la vista (`features/orders/offline`) que se envia sola al volver.
     VitePWA({
       registerType: 'autoUpdate',
-      // El registro del service worker no tiene que frenar el primer render:
-      // con `script` iba como <script> síncrono en el <head> (Lighthouse lo
-      // marcaba como recurso que bloquea el renderizado).
-      injectRegister: 'script-defer',
+      // El service worker lo registra el archivo inicial al terminar de cargar
+      // la página (`services/serviceWorker.ts`): un `registerSW.js` aparte era
+      // una petición más, con sus cabeceras, en cada primera visita.
+      injectRegister: false,
       // Ni los iconos de la aplicacion instalada ni los de la pestana van al
       // precache: el sistema guarda los primeros al instalar y el navegador pide
       // los segundos una vez. Sin senal no hacen falta.
@@ -133,6 +133,14 @@ export default defineConfig({
             // una peticion con sus cabeceras (1 kB de CSP y seguridad) y brotli comprime mejor
             // uno grande que veinte chicos. Las pantallas siguen siendo perezosas.
             { name: 'shell', tags: ['$initial'], priority: 5 },
+            // Un icono de Lucide sigue la regla de cualquier módulo compartido: va
+            // con las pantallas que lo dibujan (`components/icons.ts` los
+            // reexporta uno por uno). Los que usan seis pantallas o más (los de
+            // los campos, agregar, editar, las flechas...) van juntos en un solo
+            // archivo: si no, cada uno salía en el suyo, 200 bytes de icono con
+            // 800 de cabeceras. Los de una o pocas pantallas no entran, para que
+            // el acceso y Pedidos no bajen los del inventario o el panel.
+            { name: 'icons', test: /node_modules[\\/]lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/]/u, minShareCount: 6, priority: 4 },
           ],
         },
       },

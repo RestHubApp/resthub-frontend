@@ -9,6 +9,7 @@ import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { MIN_PASSWORD } from '@/services/fieldLimits'
 import { useNotifications } from '@/store/notifications'
+import * as icons from '@/components/icons'
 import { type ResetPasswordValues, resetPasswordSchema } from './staffSchema'
 
 interface StaffPasswordFormProps {
@@ -61,7 +62,7 @@ export function StaffPasswordForm({ account, onDone }: StaffPasswordFormProps) {
         mutation={reset}
         failureText="No se pudo restablecer la contraseña."
         onCancel={onDone}
-        submit={{ label: 'Restablecer', pendingLabel: 'Guardando…', icon: 'key' }}
+        submit={{ label: 'Restablecer', pendingLabel: 'Guardando…', icon: icons.key }}
       />
     </form>
   )

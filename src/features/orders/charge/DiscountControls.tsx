@@ -1,5 +1,6 @@
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { formatPercent, toCents } from '@/services/format'
 
@@ -17,7 +18,7 @@ export function DiscountControls({ order, isRemoving, onStart, onRemove }: Disco
   return (
     <div className="flex flex-wrap gap-2">
       <Button type="button" variant="outline" onClick={onStart}>
-        <Icon name="discount" size={16} />
+        <Icon glyph={icons.discount} size={16} />
         <span>
           {hasDiscount ? `Cambiar descuento (${formatPercent(order.discount_percent)})` : 'Aplicar descuento'}
         </span>

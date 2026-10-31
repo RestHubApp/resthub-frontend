@@ -3,14 +3,12 @@ import { useState } from 'react'
 
 import { suppliersQuery } from '@/api/purchasing'
 import type { Supplier } from '@/api/types'
-import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
-import { ListSkeleton } from '@/components/ListSkeleton'
+import * as icons from '@/components/icons'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
-import { ErrorMessage } from '@/components/ErrorMessage'
 import { SupplierDialog } from './SupplierDialog'
-import { SupplierRow } from './SupplierRow'
+import { SuppliersList } from './SuppliersList'
 
 interface SuppliersPanelProps {
   readonly canManage: boolean
@@ -21,7 +19,6 @@ export function SuppliersPanel({ canManage }: SuppliersPanelProps) {
   const suppliers = useQuery(suppliersQuery)
   // `undefined` cerrada; `null` para crear; un proveedor para editarlo.
   const [editing, setEditing] = useState<Supplier | null | undefined>(undefined)
-  const list = suppliers.data ?? []
 
   return (
     <SectionCard
@@ -31,29 +28,13 @@ export function SuppliersPanel({ canManage }: SuppliersPanelProps) {
           <Button type="button" onClick={() => {
             setEditing(null)
           }}>
-            <Icon name="add" size={16} />
+            <Icon glyph={icons.add} size={16} />
             <span>Nuevo proveedor</span>
           </Button>
         ) : undefined
       }
     >
-      {suppliers.isPending ? <ListSkeleton label="Cargando proveedores…" count={3} itemClassName="h-14 rounded-lg" /> : null}
-      <ErrorMessage isError={suppliers.isError} error={suppliers.error} fallback="No se pudieron cargar los proveedores." />
-      {suppliers.isSuccess && list.length === 0 ? (
-        <EmptyState title="Todavía no hay proveedores" description="Da de alta al mercado o distribuidor al que le compras." />
-      ) : null}
-      <ul className="m-0 flex list-none flex-col gap-1 p-0">
-        {list.map((supplier) => (
-          <SupplierRow
-            key={supplier.id}
-            supplier={supplier}
-            canManage={canManage}
-            onEdit={() => {
-              setEditing(supplier)
-            }}
-          />
-        ))}
-      </ul>
+      <SuppliersList suppliers={suppliers} canManage={canManage} onEdit={setEditing} />
       <SupplierDialog
         open={editing !== undefined}
         supplier={editing ?? null}

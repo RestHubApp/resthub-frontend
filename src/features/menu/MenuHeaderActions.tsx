@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 interface MenuHeaderActionsProps {
@@ -13,11 +14,11 @@ export function MenuHeaderActions({ canAddItem, onNewCategory, onNewItem }: Menu
   return (
     <>
       <Button type="button" variant="outline" onClick={onNewCategory}>
-        <Icon name="add" size={16} />
+        <Icon glyph={icons.add} size={16} />
         <span>Nueva categoría</span>
       </Button>
       <Button type="button" disabled={!canAddItem} onClick={onNewItem}>
-        <Icon name="add" size={16} />
+        <Icon glyph={icons.add} size={16} />
         <span>Nuevo plato</span>
       </Button>
     </>

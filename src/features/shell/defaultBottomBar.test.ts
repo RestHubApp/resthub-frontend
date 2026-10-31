@@ -3,6 +3,7 @@ import { describe, expect, it } from '@jest/globals'
 import { PERMISSION, PLATFORM_PERMISSION } from '@/api/permissions'
 import type { AnyPermissionCode } from '@/api/types'
 import { routePatterns } from '@/services/paths'
+import * as icons from '@/components/icons'
 import { defaultBottomPaths } from './defaultBottomBar'
 import { entriesFor } from './navigation'
 import type { ShellScreen } from './shellScreens'
@@ -30,7 +31,7 @@ const REGISTRY: readonly (readonly [string, AnyPermissionCode])[] = [
 const SCREENS: readonly ShellScreen[] = REGISTRY.map(([path, permission]) => ({
   path,
   permission,
-  nav: { label: path.slice(1), icon: 'order', description: path },
+  nav: { label: path.slice(1), icon: icons.order, description: path },
 }))
 
 function barFor(permissions: Parameters<typeof entriesFor>[1]): readonly string[] {

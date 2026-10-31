@@ -1,5 +1,6 @@
 import { ErrorMessage } from './ErrorMessage'
 import { Icon } from './Icon'
+import * as icons from './icons'
 import { Button } from './ui/button'
 
 interface RetryQueryErrorProps {
@@ -19,7 +20,7 @@ export function RetryQueryError({ error, fallback, onRetry, isFallbackNotice = f
     <div className="flex flex-col items-start gap-3" data-testid="retry-query-error" data-reintento={isFallbackNotice ? undefined : ''}>
       <ErrorMessage error={error} fallback={fallback} isFallbackNotice={isFallbackNotice} />
       <Button type="button" variant="outline" onClick={onRetry}>
-        <Icon name="retry" size={16} />
+        <Icon glyph={icons.retry} size={16} />
         <span>Reintentar</span>
       </Button>
     </div>

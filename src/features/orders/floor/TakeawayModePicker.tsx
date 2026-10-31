@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import type { TakeawayValues } from './takeawaySchema'
 
@@ -29,7 +30,7 @@ export function TakeawayModePicker({ value, onChange }: TakeawayModePickerProps)
             onChange(modeOption.value)
           }}
         >
-          <Icon name={modeOption.value === 'delivery' ? 'delivery' : 'takeaway'} size={16} />
+          <Icon glyph={modeOption.value === 'delivery' ? icons.delivery : icons.takeaway} size={16} />
           <span>{modeOption.label}</span>
         </Button>
       ))}

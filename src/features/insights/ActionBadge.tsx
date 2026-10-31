@@ -13,7 +13,7 @@ export function ActionBadge({ action, label }: ActionBadgeProps) {
   const style = ACTION_STYLES[action]
   return (
     <Badge variant={style.variant} className="font-semibold">
-      <Icon name={style.icon} size={14} />
+      <Icon glyph={style.icon} size={14} />
       {label}
     </Badge>
   )

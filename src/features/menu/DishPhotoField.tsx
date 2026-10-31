@@ -1,6 +1,7 @@
 import type { MenuItem } from '@/api/types'
 import { DishPhoto } from '@/components/DishPhoto'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { hasPhoto } from '@/hooks/useDishPhoto'
 import { DishPhotoPicker } from './DishPhotoPicker'
 import { useDishPhotoActions } from './useDishPhotoActions'
@@ -29,7 +30,7 @@ export function DishPhotoField({ item }: DishPhotoFieldProps) {
         <DishPhoto itemId={item.id} version={item.photo_version} isVisible className="aspect-4/3 w-full rounded-lg" />
       ) : (
         <p className="m-0 flex items-center gap-2 rounded-lg bg-muted px-3 py-4 text-sm text-muted-foreground">
-          <Icon name="noPhoto" size={18} />
+          <Icon glyph={icons.noPhoto} size={18} />
           <span>Este plato no tiene foto.</span>
         </p>
       )}

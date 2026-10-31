@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 const LABEL = 'Pantalla completa'
 
@@ -49,7 +50,7 @@ export function FullscreenButton() {
       title={title}
       onClick={toggleFullscreen}
     >
-      <ShellIcon name={isActive ? 'exitFullscreen' : 'fullscreen'} size={20} />
+      <Icon glyph={isActive ? icons.exitFullscreen : icons.fullscreen} size={20} />
     </Button>
   )
 }

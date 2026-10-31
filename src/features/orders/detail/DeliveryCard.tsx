@@ -1,5 +1,6 @@
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 interface DeliveryCardProps {
   readonly order: OrderResponse
@@ -13,7 +14,7 @@ export function DeliveryCard({ order }: DeliveryCardProps) {
   return (
     <section aria-label="Entrega" className="flex flex-col gap-2 rounded-lg bg-card p-4 ring-1 ring-foreground/10">
       <p className="m-0 flex items-start gap-2 font-medium">
-        <Icon name="location" size={18} />
+        <Icon glyph={icons.location} size={18} />
         <span>
           {order.delivery_address}
           {order.delivery_reference === '' ? null : (
@@ -23,7 +24,7 @@ export function DeliveryCard({ order }: DeliveryCardProps) {
       </p>
       {order.customer_phone === '' ? null : (
         <a href={`tel:${order.customer_phone}`} className="flex min-h-11 items-center gap-2 text-primary underline-offset-4 hover:underline">
-          <Icon name="phone" size={18} />
+          <Icon glyph={icons.phone} size={18} />
           <span>{order.customer_phone}</span>
         </a>
       )}

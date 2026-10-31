@@ -4,7 +4,8 @@ import { Link } from 'react-router'
 
 import { activityQueryKey } from '@/api/activity'
 import { PERMISSION } from '@/api/permissions'
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { useServerEvent } from '@/hooks/useServerEvent'
 import { paths } from '@/services/paths'
 import { useCan, usePreview, useStaffAccount } from '@/store/session'
@@ -37,7 +38,7 @@ export function DataAccessAlert() {
   return (
     <div className="mx-auto w-full max-w-app px-4 pt-3 sm:px-6">
       <div role="alert" className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-        <ShellIcon name="alert" size={18} className="shrink-0 text-destructive" />
+        <Icon glyph={icons.alert} size={18} className="shrink-0 text-destructive" />
         <p className="m-0 min-w-0 flex-1 font-medium">Alguien abrió muchas fichas de clientes en poco tiempo.</p>
         <Link to={paths.activityLogAccess} className="inline-flex min-h-11 items-center underline underline-offset-4">
           Ver en la bitácora

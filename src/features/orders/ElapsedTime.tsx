@@ -1,5 +1,6 @@
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { formatMinutes, minutesSince } from '@/services/format'
 import { elapsedLevel, TONE_BY_LEVEL } from './elapsedTone'
 
@@ -23,7 +24,7 @@ export function ElapsedTime({ order, now }: ElapsedTimeProps) {
 
   return (
     <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${TONE_BY_LEVEL[level]}`}>
-      <Icon name={isLate ? 'alert' : 'schedule'} size={14} />
+      <Icon glyph={isLate ? icons.alert : icons.schedule} size={14} />
       <span>
         {isLate ? 'Demorado · ' : ''}
         {formatMinutes(minutes)}

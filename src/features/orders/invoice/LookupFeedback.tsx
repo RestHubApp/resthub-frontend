@@ -1,5 +1,6 @@
 import type { DocumentLookup } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
+import * as icons from '@/components/icons'
 import { lookupErrorMessage, rucWarning } from './lookupMessages'
 
 interface LookupFeedbackProps {
@@ -17,7 +18,7 @@ export function LookupFeedback({ problem, error, found }: LookupFeedbackProps) {
     <>
       {problem === null ? null : <p className="m-0 text-xs text-muted-foreground">{problem}</p>}
       {error === null ? null : <FormMessage tone="error">{lookupErrorMessage(error)}</FormMessage>}
-      {warning === null ? null : <FormMessage tone="warning" icon="alert">{warning}</FormMessage>}
+      {warning === null ? null : <FormMessage tone="warning" icon={icons.alert}>{warning}</FormMessage>}
     </>
   )
 }

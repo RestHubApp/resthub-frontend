@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +36,7 @@ export function CloseCashButton({ pending, expected, difference, open, onCancel,
   return (
     <>
       <Button type="submit" variant="destructive" className="px-5" disabled={pending}>
-        <Icon name="cashRegister" size={18} />
+        <Icon glyph={icons.cashRegister} size={18} />
         <span>{pending ? 'Cerrando…' : 'Cerrar caja'}</span>
       </Button>
       <AlertDialog

@@ -4,6 +4,7 @@ import { SelectField } from '@/components/SelectField'
 import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
 import { onSubmit } from '@/hooks/formSubmit'
+import * as icons from '@/components/icons'
 import { ChoiceField } from './ChoiceField'
 import { QuantityField } from './QuantityField'
 import { StockPreview } from './StockPreview'
@@ -58,7 +59,7 @@ export function AdjustmentForm({ ingredient, onDone }: AdjustmentFormProps) {
       />
       <StockPreview ingredient={ingredient} delta={delta} />
 
-      <FormFooter mutation={adjustment} failureText="No se pudo registrar el ajuste." onCancel={onDone} submit={{ label: 'Guardar ajuste', icon: 'count' }} />
+      <FormFooter mutation={adjustment} failureText="No se pudo registrar el ajuste." onCancel={onDone} submit={{ label: 'Guardar ajuste', icon: icons.count }} />
     </form>
   )
 }

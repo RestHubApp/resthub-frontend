@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import { lazyNamed } from '@/components/lazyNamed'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { ShellIcon } from '@/features/shell/ShellIcon'
+import { Icon } from '@/components/Icon'
 import { connectionLabel, STATE_COPY } from './connectionCopy'
 import { useConnection } from './useConnection'
 
@@ -29,7 +29,7 @@ export function ConnectionButton() {
     <Sheet>
       <SheetTrigger asChild>
         <Button type="button" variant="ghost" size="icon" className="relative size-11" aria-label={label} title={label} data-connection={state}>
-          <ShellIcon name={copy.icon} size={20} />
+          <Icon glyph={copy.icon} size={20} />
           <span aria-hidden="true" className={`absolute right-2 bottom-2 size-2.5 rounded-full ring-2 ring-card ${copy.dot}`} />
           {pending.length > 0 ? (
             <span

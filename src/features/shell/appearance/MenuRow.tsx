@@ -2,8 +2,8 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
-import { ShellIcon } from '@/features/shell/ShellIcon'
 import type { NavEntry } from '@/features/shell/navigation'
 import { MenuRowActions } from './MenuRowActions'
 
@@ -46,10 +46,10 @@ export function MenuRow({ entry, index, count, isInBar, isBarFull, onStep, onTog
         {...attributes}
         {...listeners}
       >
-        <Icon name="dragHandle" size={18} />
+        <Icon glyph={icons.dragHandle} size={18} />
       </Button>
       <span className="flex min-w-0 flex-1 items-center gap-3 font-medium">
-        <ShellIcon name={entry.icon} size={18} className="shrink-0 text-muted-foreground" />
+        <Icon glyph={entry.icon} size={18} className="shrink-0 text-muted-foreground" />
         <span className="min-w-0 truncate">{entry.label}</span>
       </span>
       <MenuRowActions

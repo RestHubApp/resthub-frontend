@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { formatChange, toNumber } from '@/services/format'
 
 interface KpiTileProps {
@@ -29,9 +30,9 @@ function toneFor(change: number, higherIsBetter: boolean): Tone {
 
 function iconFor(change: number) {
   if (change === 0) {
-    return 'trendStable'
+    return icons.trendStable
   }
-  return change > 0 ? 'trendRises' : 'trendFalls'
+  return change > 0 ? icons.trendRises : icons.trendFalls
 }
 
 /**
@@ -52,7 +53,7 @@ export function KpiTile({ label, value, change, higherIsBetter, comparedTo, deta
         <p className="m-0 text-xs text-muted-foreground">Sin datos del período anterior</p>
       ) : (
         <p data-testid="kpi-change" className={`m-0 flex flex-wrap items-center gap-1 text-xs ${TONE_CLASS[toneFor(number, higherIsBetter)]}`}>
-          <Icon name={iconFor(number)} size={14} />
+          <Icon glyph={iconFor(number)} size={14} />
           <span className="font-semibold">{formatChange(number)}</span>
           <span className="text-muted-foreground">vs. {comparedTo}</span>
         </p>
