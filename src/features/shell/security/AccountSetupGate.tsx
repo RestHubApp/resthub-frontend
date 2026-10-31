@@ -2,6 +2,7 @@ import { type ComponentType, type ReactElement, Suspense } from 'react'
 
 import type { PlatformSession, Session } from '@/api/types'
 import '@/store/accountSetup'
+import { ReauthenticationHost } from './ReauthenticationHost'
 
 /** Las pantallas que tapan el armazón hasta completar la cuenta; las pasa el router (viven en `features/auth`). */
 export interface AccountSetupViews {
@@ -32,11 +33,17 @@ function pendingView(account: Session, views: AccountSetupViews): ReactElement |
 /**
  * Mientras a la cuenta le falte algo que el servidor exige antes de dejarla
  * trabajar, en vez del armazón se ve solo eso: sin menú, sin pantallas y sin el
- * canal de avisos, que el servidor también rechaza hasta entonces. La vista
- * previa nunca lo tiene.
+ * canal de avisos, que el servidor también rechaza hasta entonces. Solo queda
+ * «Confirma tu contraseña»: activar los dos pasos la pide (RFS-21) y, sin el
+ * armazón, nadie más la monta. La vista previa nunca lo tiene.
  */
 export function AccountSetupGate({ account, views, children }: AccountSetupGateProps) {
   const pending = pendingView(account, views)
   if (pending === null) return children
-  return <Suspense fallback={null}>{pending}</Suspense>
+  return (
+    <>
+      <Suspense fallback={null}>{pending}</Suspense>
+      <ReauthenticationHost />
+    </>
+  )
 }
