@@ -220,11 +220,13 @@ test('SAL-20 el encargado invita un plato, descuenta sin tope, cobra e imprime e
   await expect(chicha.getByRole('button', { name: 'Confirmar' })).toBeEnabled()
   await chicha.getByRole('button', { name: 'Confirmar' }).click()
   await expect(chicha).toContainText('Invita la casa: Cumpleaños')
+  // El motivo se cierra cuando termina de guardarse (se releen las listas).
+  await expect(reason).toBeHidden()
 
   await dialog.getByRole('button', { name: 'Aplicar descuento' }).click()
   await expect(dialog.getByText('Sin tope: lo aplicas como encargado.')).toBeVisible()
   await dialog.getByRole('textbox', { name: 'Descuento %' }).fill('25')
-  await dialog.getByRole('textbox', { name: 'Motivo' }).fill('Cliente frecuente')
+  await dialog.getByRole('textbox', { name: 'Motivo', exact: true }).fill('Cliente frecuente')
   await dialog.getByRole('button', { name: 'Aplicar descuento' }).click()
   await expect(dialog).toContainText(/Total a cobrar\s*S\/\s*24\.00/u)
   // eslint-disable-next-line security/detect-unsafe-regex -- se aplica a textos cortos de la interfaz o del API de prueba, sin entradas externas
