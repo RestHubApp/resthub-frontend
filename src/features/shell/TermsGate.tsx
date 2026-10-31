@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { TermsConsents } from './TermsConsents'
 import { TermsSignOut } from './TermsSignOut'
+import { hasCode } from '@/services/apiError'
 import { useAcceptTerms } from './useAcceptTerms'
 
 /**
@@ -46,7 +47,15 @@ export function TermsGate({ account }: { readonly account: StaffSession }) {
             type="button"
             disabled={accept.isPending || !hasAcceptedTerms || !hasAcceptedData}
             onClick={() => {
-              accept.mutate()
+              // Si el texto cambió mientras se leía, los dos se vuelven a marcar sobre la versión nueva.
+              accept.mutate(undefined, {
+                onError: (error) => {
+                  if (hasCode(error, 'outdated_terms')) {
+                    setHasAcceptedTerms(false)
+                    setHasAcceptedData(false)
+                  }
+                },
+              })
             }}
           >
             {accept.isPending ? 'Guardando…' : 'Continuar'}

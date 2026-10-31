@@ -209,6 +209,9 @@ describe('RequireSession: términos y privacidad', () => {
     await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
     expect(await screen.findByRole('link', { name: /versión 2027-01/u })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /términos y condiciones del servicio/u })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/u })).not.toBeChecked()
+    expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
   })
 
   it('«Salir» cierra la sesión también en el servidor', async () => {
