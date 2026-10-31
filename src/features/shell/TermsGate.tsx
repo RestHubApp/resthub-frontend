@@ -4,8 +4,8 @@ import { ErrorMessage } from '@/components/ErrorMessage'
 import type { StaffSession } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { useSession } from '@/store/session'
 import { TermsConsents } from './TermsConsents'
+import { TermsSignOut } from './TermsSignOut'
 import { useAcceptTerms } from './useAcceptTerms'
 
 /**
@@ -14,7 +14,6 @@ import { useAcceptTerms } from './useAcceptTerms'
  * el tratamiento de sus datos personales. Si cambia el texto de alguno, se vuelven a pedir.
  */
 export function TermsGate({ account }: { readonly account: StaffSession }) {
-  const signOut = useSession((state) => state.signOut)
   const accept = useAcceptTerms({ terms_version: account.terms_version, privacy_version: account.privacy_version })
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false)
   const [hasAcceptedData, setHasAcceptedData] = useState(false)
@@ -42,9 +41,7 @@ export function TermsGate({ account }: { readonly account: StaffSession }) {
           ) : null}
         </CardContent>
         <CardFooter className="flex flex-wrap justify-end gap-2 px-6">
-          <Button type="button" variant="outline" onClick={signOut}>
-            Salir
-          </Button>
+          <TermsSignOut />
           <Button
             type="button"
             disabled={accept.isPending || !hasAcceptedTerms || !hasAcceptedData}
