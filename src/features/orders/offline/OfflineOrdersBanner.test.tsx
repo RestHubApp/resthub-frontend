@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from '@jest/globals'
-import { act, screen } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 
 import { order } from '#jest/fixtures/orders'
 import { signInAs, mountScreen, ErrorResponse, server, withoutNetwork } from '#jest/harness'
@@ -107,5 +107,29 @@ describe('pedidos que esperan señal', () => {
     expect(screen.queryByText(/espera señal/u)).not.toBeInTheDocument()
     expect(api.calls('post', ORDERS)).toHaveLength(0)
     expect(queuedOrders({ userId: 99, restaurantId: 1 })).toHaveLength(1)
+  })
+})
+
+describe('pedidos que esperan señal: el límite de peticiones', () => {
+  it('el límite de peticiones (429) no es un rechazo: los pedidos siguen en la cola y no se sigue con el resto', async () => {
+    enqueue('Mesa 3', 'a')
+    enqueue('Mesa 4', 'b')
+    const { api } = open(new ErrorResponse(429, 'Demasiadas peticiones seguidas. Espera un momento y vuelve a intentar.', 'rate_limited'))
+    await waitFor(() => {
+      expect(api.calls('post', ORDERS)).toHaveLength(1)
+    })
+    expect(await screen.findByText(/2 pedidos esperan señal/u)).toBeInTheDocument()
+    expect(queuedOrders(OWNER)).toHaveLength(2)
+  })
+
+  it('si el envío a cocina choca con el límite de peticiones, el pedido sigue en la cola', async () => {
+    enqueue('Mesa 3', 'a')
+    const { api } = open()
+    api.on('post', SEND, new ErrorResponse(429, 'Demasiadas peticiones seguidas. Espera un momento y vuelve a intentar.', 'rate_limited'))
+    await waitFor(() => {
+      expect(api.calls('post', SEND)).toHaveLength(1)
+    })
+    expect(queuedOrders(OWNER)).toHaveLength(1)
+    expect(screen.queryByText(SENT)).not.toBeInTheDocument()
   })
 })
