@@ -2,6 +2,7 @@ import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 
 import type { IngredientUnit } from '@/api/types'
 import { TextField } from '@/components/TextField'
+import * as icons from '@/components/icons'
 import type { IngredientValues } from './inventorySchema'
 import { QuantityField } from './QuantityField'
 import { inputUnits, priceUnit } from './units'
@@ -29,7 +30,7 @@ export function IngredientStockFields({ register, errors, unit }: IngredientStoc
       <TextField
         id="ingredient-cost"
         label={`Costo por ${priceUnit(unit).label} (S/)`}
-        icon="cost"
+        icon={icons.cost}
         inputMode="decimal"
         autoComplete="off"
         hint="Cada compra lo recalcula con el promedio ponderado."

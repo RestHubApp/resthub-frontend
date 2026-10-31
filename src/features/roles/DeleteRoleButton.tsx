@@ -2,6 +2,7 @@ import { deleteRole } from '@/api/roles'
 import type { Role } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { removeFromList } from '@/services/cacheList'
 import { useRoleMutation } from './useRoleMutation'
@@ -34,7 +35,7 @@ export function DeleteRoleButton({ role }: DeleteRoleButtonProps) {
           aria-label={`Eliminar el rol ${role.name}`}
           disabled={remove.isPending}
         >
-          <Icon name="delete" size={16} />
+          <Icon glyph={icons.delete} size={16} />
           <span>Eliminar</span>
         </Button>
       }

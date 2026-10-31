@@ -3,6 +3,7 @@ import type { UseFormRegisterReturn } from 'react-hook-form'
 import type { Role } from '@/api/types'
 import { TextField } from '@/components/TextField'
 import { onlyLetters } from '@/services/fieldRules'
+import * as icons from '@/components/icons'
 import { StaffEmailField } from './StaffEmailField'
 import { StaffRoleField } from './StaffRoleField'
 
@@ -52,7 +53,7 @@ export function StaffFields({
           id="full_name"
           label="Nombre completo"
           placeholder="María Quispe Rojas"
-          icon="profile"
+          icon={icons.profile}
           autoComplete="off"
           sanitize={onlyLetters}
           field={fields.full_name}

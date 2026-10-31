@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useDeferredAction } from '@/components/useDeferredAction'
@@ -26,7 +27,7 @@ export function MenuRowActions({ entry, index, count, isInBar, isBarFull, onStep
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button type="button" variant="ghost" size="icon" id={menuActionsId(entry.to)} aria-label={`Acciones de ${entry.label}`}>
-          <Icon name="more" size={18} />
+          <Icon glyph={icons.more} size={18} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onCloseAutoFocus={onCloseAutoFocus}>
@@ -38,7 +39,7 @@ export function MenuRowActions({ entry, index, count, isInBar, isBarFull, onStep
             })
           }}
         >
-          <Icon name="up" size={16} />
+          <Icon glyph={icons.up} size={16} />
           <span>Subir</span>
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -49,7 +50,7 @@ export function MenuRowActions({ entry, index, count, isInBar, isBarFull, onStep
             })
           }}
         >
-          <Icon name="down" size={16} />
+          <Icon glyph={icons.down} size={16} />
           <span>Bajar</span>
         </DropdownMenuItem>
         <DropdownMenuItem

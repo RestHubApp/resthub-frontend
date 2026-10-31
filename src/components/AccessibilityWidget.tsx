@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { Icon } from './Icon'
+import * as icons from './icons'
 import { openAccessibilityMenu } from './accessibilityMenu'
 import { ATTRIBUTES_LABEL, patchMenuButton, pinWidgetMenu } from './accessibilityWidgetPatches'
 
@@ -88,7 +89,7 @@ export function AccessibilityWidget({ showLauncher = true }: AccessibilityWidget
       aria-expanded="false"
       onClick={openAccessibilityMenu}
     >
-      <Icon name="accessibility" size={24} />
+      <Icon glyph={icons.accessibility} size={24} />
     </button>
   )
 }

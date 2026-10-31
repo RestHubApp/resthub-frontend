@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button'
 import { useQueuedOrders } from '@/store/offlineQueue'
 import { useStaffAccount } from '@/store/session'
 import { leavePreview } from './leavePreview'
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 // En la franja, blanco sobre su color; en una pantalla, el botón principal de siempre.
 const STYLES = {
@@ -27,7 +28,7 @@ export function PreviewExitButton({ tone = 'banner' }: PreviewExitButtonProps) {
 
   const button = (onClick?: () => void) => (
     <Button type="button" className={STYLES[tone]} onClick={onClick}>
-      <ShellIcon name="signOut" size={18} />
+      <Icon glyph={icons.signOut} size={18} />
       <span>Salir de la vista previa</span>
     </Button>
   )

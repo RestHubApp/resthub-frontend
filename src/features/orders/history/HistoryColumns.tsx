@@ -1,6 +1,7 @@
 import type { OrderResponse } from '@/api/types'
 import type { DataColumn } from '@/components/DataTable'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { formatDateTime, formatMoney } from '@/services/format'
 import { orderPlace } from '@/features/orders/orderLabels'
@@ -29,7 +30,7 @@ export function buildColumns(timeZone: string): DataColumn<OrderResponse>[] {
         aria-label={`${isExpanded ? 'Ocultar' : 'Ver'} el detalle del pedido #${String(order.number)}`}
         onClick={toggleExpanded}
       >
-        <Icon name={isExpanded ? 'hide' : 'view'} size={16} />
+        <Icon glyph={isExpanded ? icons.hide : icons.view} size={16} />
         <span>{isExpanded ? 'Ocultar' : 'Ver'}</span>
       </Button>
     ),

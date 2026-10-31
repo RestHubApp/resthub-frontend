@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { saveFile } from '@/services/download'
 import { useNotifications } from '@/store/notifications'
@@ -40,11 +41,11 @@ export function RecoveryCodes({ codes, onDone }: RecoveryCodesProps) {
           <span>Copiar</span>
         </Button>
         <Button type="button" variant="outline" onClick={() => { saveFile(new Blob([`${text}\n`], { type: 'text/plain' }), 'resthub-codigos-de-recuperacion.txt') }}>
-          <Icon name="download" size={16} />
+          <Icon glyph={icons.download} size={16} />
           <span>Descargar</span>
         </Button>
         <Button type="button" onClick={onDone}>
-          <Icon name="confirm" size={16} />
+          <Icon glyph={icons.confirm} size={16} />
           <span>Ya los guardé</span>
         </Button>
       </div>

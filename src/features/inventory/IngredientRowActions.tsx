@@ -1,6 +1,7 @@
 import type { Ingredient } from '@/api/types'
 import { ActionsMenu, type ActionsMenuItem } from '@/components/ActionsMenu'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import type { StockAction } from './StockActionDialog'
 
@@ -34,12 +35,12 @@ export function IngredientRowActions({ ingredient, onAction }: IngredientRowActi
           onAction({ kind: 'purchase', ingredient })
         }}
       >
-        <Icon name="purchase" size={16} />
+        <Icon glyph={icons.purchase} size={16} />
         <span>Compra</span>
       </Button>
       <ActionsMenu
         label={`Más acciones de ${ingredient.name}`}
-        items={[item('waste', 'Merma', 'waste'), item('adjustment', 'Ajuste', 'count'), item('edit', 'Editar', 'edit')]}
+        items={[item('waste', 'Merma', icons.waste), item('adjustment', 'Ajuste', icons.count), item('edit', 'Editar', icons.edit)]}
       />
     </div>
   )

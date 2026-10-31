@@ -1,5 +1,6 @@
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useOfflineOrders } from './useOfflineOrders'
 
@@ -18,12 +19,12 @@ export function OfflineOrdersBanner() {
   return (
     <FormMessage
       tone="warning"
-      icon="offline"
+      icon={icons.offline}
       action={
         <Button type="button" size="sm" variant="outline" onClick={() => {
           void send()
         }}>
-          <Icon name="retry" size={14} />
+          <Icon glyph={icons.retry} size={14} />
           <span>Reintentar</span>
         </Button>
       }

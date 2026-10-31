@@ -4,6 +4,7 @@ import { restaurantQuery } from '@/api/restaurant'
 import type { Ingredient } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { formatMoney, toCents } from '@/services/format'
+import * as icons from '@/components/icons'
 
 interface WasteApprovalNoticeProps {
   readonly ingredient: Ingredient
@@ -26,7 +27,7 @@ export function WasteApprovalNotice({ ingredient, base }: WasteApprovalNoticePro
     return null
   }
   return (
-    <FormMessage tone="warning" icon="notice" role="status">
+    <FormMessage tone="warning" icon={icons.notice} role="status">
       Pasa de {formatMoney(threshold)}: quedará <strong>por aprobar</strong> y el stock no cambia hasta que el
       encargado la apruebe.
     </FormMessage>

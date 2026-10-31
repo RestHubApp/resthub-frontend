@@ -1,4 +1,4 @@
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
 import type { NavEntry } from './navigation'
 import { EntryBadge } from './EntryBadge'
 import { EntryLink } from './EntryLink'
@@ -31,7 +31,7 @@ export function NavList({ entries, onNavigate }: NavListProps) {
       {entries.map((entry) => (
         <li key={entry.to}>
           <EntryLink entry={entry} className={linkClass} onClick={onNavigate}>
-            <ShellIcon name={entry.icon} size={18} />
+            <Icon glyph={entry.icon} size={18} />
             <span>{entry.label}</span>
             <EntryBadge entry={entry} />
           </EntryLink>

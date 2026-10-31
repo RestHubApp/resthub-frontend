@@ -1,6 +1,7 @@
 import type { OrderResponse } from '@/api/types'
 import { BackLink } from '@/components/BackLink'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PRINT_CSS } from '@/components/printSheet'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
@@ -29,7 +30,7 @@ export function PrintSheet({ order, isTicket }: PrintSheetProps) {
         <Button type="button" onClick={() => {
           window.print()
         }}>
-          <Icon name="send" size={16} />
+          <Icon glyph={icons.send} size={16} />
           <span>Imprimir</span>
         </Button>
       </div>

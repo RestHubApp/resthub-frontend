@@ -4,6 +4,7 @@ import type { WasteApproval } from '@/api/types'
 import { approveWaste } from '@/api/wasteApprovals'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { InventoryFailure } from '@/features/inventory/InventoryFailure'
 import { formatMoney, formatQuantity } from '@/services/format'
@@ -34,7 +35,7 @@ export function WasteApprovalActions({ approval, onReject }: WasteApprovalAction
             setIsAsking(true)
           }}
         >
-          <Icon name="confirm" size={16} />
+          <Icon glyph={icons.confirm} size={16} />
           <span>{approve.isPending ? 'Aprobando…' : 'Aprobar'}</span>
         </Button>
         <Button
@@ -46,7 +47,7 @@ export function WasteApprovalActions({ approval, onReject }: WasteApprovalAction
             onReject(approval)
           }}
         >
-          <Icon name="cancel" size={16} />
+          <Icon glyph={icons.cancel} size={16} />
           <span>Rechazar</span>
         </Button>
       </div>

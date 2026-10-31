@@ -1,5 +1,4 @@
-import { Icon } from './Icon'
-import type { IconName } from './icons'
+import { Icon, type IconGlyph } from './Icon'
 import { Button } from './ui/button'
 
 /** La acción principal de un pie de formulario. */
@@ -7,7 +6,7 @@ export interface FooterSubmit {
   readonly label: string
   /** La etiqueta mientras se envía; por omisión, «Guardando…». */
   readonly pendingLabel?: string
-  readonly icon?: IconName
+  readonly icon?: IconGlyph
   readonly variant?: 'default' | 'destructive'
   /** Para una acción que no envía el formulario (`type="submit"`) sino que llama a esto. */
   readonly onClick?: () => void
@@ -29,7 +28,7 @@ export function FormSubmitButton({ submit, isPending }: FormSubmitButtonProps) {
       disabled={isPending || submit.isDisabled === true}
       onClick={submit.onClick}
     >
-      {submit.icon === undefined ? null : <Icon name={submit.icon} size={16} />}
+      {submit.icon === undefined ? null : <Icon glyph={submit.icon} size={16} />}
       <span>{isPending ? (submit.pendingLabel ?? 'Guardando…') : submit.label}</span>
     </Button>
   )

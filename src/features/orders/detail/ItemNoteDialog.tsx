@@ -7,6 +7,7 @@ import { textOptional } from '@/components/formRules'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
+import * as icons from '@/components/icons'
 
 // El mismo tope que el servidor.
 const MAX_NOTE = 200
@@ -50,7 +51,7 @@ export function ItemNoteDialog({
         <TextField
           id="nota-plato"
           label="Nota para cocina"
-          icon="note"
+          icon={icons.note}
           placeholder="Sin cebolla, alergia al maní…"
           maxLength={MAX_NOTE}
           autoComplete="off"

@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import type { Role } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useScreenAction } from '@/hooks/useScreenAction'
@@ -31,7 +32,7 @@ export function RolesView() {
           <Button type="button" onClick={() => {
             openSet(null)
           }}>
-            <Icon name="add" size={16} />
+            <Icon glyph={icons.add} size={16} />
             <span>Nuevo rol</span>
           </Button>
         }

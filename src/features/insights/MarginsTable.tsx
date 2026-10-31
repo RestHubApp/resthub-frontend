@@ -12,6 +12,7 @@ import { useState } from 'react'
 
 import type { DishMargin } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { MarginBar } from './MarginBar'
@@ -45,7 +46,7 @@ const columns = helper.columns([
           {row.original.category}
           {row.original.recipe_cost === null ? (
             <Badge variant="warning">
-              <Icon name="alert" size={12} />
+              <Icon glyph={icons.alert} size={12} />
               Sin receta
             </Badge>
           ) : null}
@@ -65,7 +66,7 @@ const columns = helper.columns([
   helper.accessor((row) => amount(row.gross_margin), { id: 'bruto', header: 'Ganancia bruta', ...NUMERIC, cell: ({ row }) => money(row.original.gross_margin) }),
 ])
 
-const SORT_ICON = { asc: 'orderAscending', desc: 'orderDescending', none: 'sort' } as const
+const SORT_ICON = { asc: icons.orderAscending, desc: icons.orderDescending, none: icons.sort } as const
 const ARIA_SORT = { asc: 'ascending', desc: 'descending', none: 'none' } as const
 
 interface MarginsTableProps {
@@ -98,7 +99,7 @@ export function MarginsTable({ dishes }: MarginsTableProps) {
                       className="inline-flex items-center gap-1 rounded-sm font-medium outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
                       <table.FlexRender header={header} />
-                      <Icon name={SORT_ICON[order]} size={14} className={order === 'none' ? 'opacity-50' : undefined} />
+                      <Icon glyph={SORT_ICON[order]} size={14} className={order === 'none' ? 'opacity-50' : undefined} />
                     </button>
                   </TableHead>
                 )

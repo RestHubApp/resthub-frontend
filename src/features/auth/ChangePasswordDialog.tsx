@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { FormDialog } from '@/components/FormDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useScreenAction } from '@/hooks/useScreenAction'
 import { ChangePasswordForm } from './ChangePasswordForm'
@@ -26,7 +27,7 @@ export function ChangePasswordDialog() {
           setIsOpen(true)
         }}
       >
-        <Icon name="key" size={16} />
+        <Icon glyph={icons.key} size={16} />
         <span>Cambiar contraseña</span>
       </Button>
       <FormDialog

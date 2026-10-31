@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { lowStockQuery } from '@/api/insights'
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
@@ -24,7 +25,7 @@ export function LowStockSection() {
       actions={
         <Button asChild variant="outline" size="sm">
           <Link to={paths.insights.restock}>
-            <Icon name="buy" size={14} />
+            <Icon glyph={icons.buy} size={14} />
             <span>Ver reposición sugerida</span>
           </Link>
         </Button>

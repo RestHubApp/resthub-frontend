@@ -1,45 +1,14 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
 
 import type { StaffResponse } from '@/api/types'
-import { ActionsMenu, type ActionsMenuItem } from '@/components/ActionsMenu'
+import { ActionsMenu } from '@/components/ActionsMenu'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
-import { PERMISSION } from '@/api/permissions'
-import { paths } from '@/services/paths'
-import { useCan } from '@/store/session'
 import { type StaffDialog, StaffRowDialogs } from './StaffRowDialogs'
+import { useStaffMenuItems } from './useStaffMenuItems'
 import { useStaffStatus } from './useStaffStatus'
-
-interface MenuItemsOptions {
-  readonly account: StaffResponse
-  readonly isSelf: boolean
-  readonly open: (dialog: StaffDialog) => void
-  readonly activate: () => void
-  /** Quien mira puede abrir la bitácora: se ofrece «Ver movimientos». */
-  readonly canSeeActivity: boolean
-  readonly seeActivity: () => void
-}
-
-/** «Ver movimientos» para todas; sesiones, contraseña y activar o desactivar no existen para la cuenta propia (las suyas están en Mi perfil). */
-function menuItems({ account, isSelf, open, activate, canSeeActivity, seeActivity }: MenuItemsOptions): ActionsMenuItem[] {
-  const movements: ActionsMenuItem[] = canSeeActivity
-    ? [{ label: 'Ver movimientos', icon: 'schedule', onSelect: seeActivity }]
-    : []
-  if (isSelf) {
-    return movements
-  }
-  return [
-    ...movements,
-    { label: 'Sesiones abiertas', icon: 'deviceMode', onSelect: () => { open('sesiones') } },
-    { label: 'Accesos', icon: 'history', onSelect: () => { open('accesos') } },
-    { label: 'Contraseña', icon: 'key', onSelect: () => { open('contrasena') } },
-    account.is_active
-      ? { label: 'Desactivar', icon: 'turnOn', onSelect: () => { open('desactivar') }, isDestructive: true }
-      : { label: 'Activar', icon: 'turnOn', onSelect: activate },
-  ]
-}
 
 interface StaffRowActionsProps {
   readonly account: StaffResponse
@@ -47,31 +16,6 @@ interface StaffRowActionsProps {
   readonly isSelf: boolean
   /** Falso si el rol de la cuenta tiene permisos que quien mira no tiene. */
   readonly manageable: boolean
-}
-
-interface MenuOptions {
-  readonly account: StaffResponse
-  readonly isSelf: boolean
-  readonly open: (dialog: StaffDialog) => void
-  readonly status: ReturnType<typeof useStaffStatus>
-}
-
-/** Los ítems del menú «⋯» de la fila: «Ver movimientos» solo para quien puede abrir la bitácora. */
-function useMenuItems({ account, isSelf, open, status }: MenuOptions): ActionsMenuItem[] {
-  const navigate = useNavigate()
-  const canSeeActivity = useCan(PERMISSION.activityRead)
-  return menuItems({
-    account,
-    isSelf,
-    open,
-    activate: () => {
-      status.mutate()
-    },
-    canSeeActivity,
-    seeActivity: () => {
-      void navigate(paths.activityLogOfPerson(account.id))
-    },
-  })
 }
 
 /**
@@ -86,7 +30,7 @@ function useMenuItems({ account, isSelf, open, status }: MenuOptions): ActionsMe
 export function StaffRowActions({ account, isSelf, manageable }: StaffRowActionsProps) {
   const [dialog, setDialog] = useState<StaffDialog>(null)
   const status = useStaffStatus(account)
-  const items = useMenuItems({ account, isSelf, open: setDialog, status })
+  const items = useStaffMenuItems({ account, isSelf, open: setDialog, status })
   const close = () => {
     setDialog(null)
   }
@@ -110,7 +54,7 @@ export function StaffRowActions({ account, isSelf, manageable }: StaffRowActions
             setDialog('editar')
           }}
         >
-          <Icon name="edit" size={14} />
+          <Icon glyph={icons.edit} size={14} />
           <span>Editar</span>
         </Button>
         {items.length === 0 ? null : <ActionsMenu label={`Más acciones de ${account.full_name}`} items={items} />}

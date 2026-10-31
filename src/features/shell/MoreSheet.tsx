@@ -1,19 +1,14 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 
-import { openAccessibilityMenu } from '@/components/accessibilityMenu'
-import { ShellIcon } from './ShellIcon'
-import { Button } from '@/components/ui/button'
 import type { Session } from '@/api/types'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { paths } from '@/services/paths'
 import { isCurrentEntry, type NavEntry } from './navigation'
+import { MoreAccessibilityItem } from './MoreAccessibilityItem'
 import { MoreButton } from './MoreButton'
 import { NavList } from './NavList'
 import { SessionActions } from './SessionActions'
-
-// Lo que tarda en cerrarse el panel (la animación de `sheet`).
-const SHEET_CLOSE_MS = 350
 
 interface MoreSheetProps {
   /** Las pantallas que no entraron en la barra. */
@@ -51,19 +46,7 @@ export function MoreSheet({ entries, account }: MoreSheetProps) {
           Otras pantallas, accesibilidad, tu perfil y la salida.
         </SheetDescription>
         {entries.length > 0 ? <NavList entries={entries} onNavigate={close} /> : null}
-        <Button
-          type="button"
-          variant="ghost"
-          className="justify-start gap-3 px-3"
-          onClick={() => {
-            close()
-            // El menú del widget se abre cuando el panel ya soltó el foco.
-            window.setTimeout(openAccessibilityMenu, SHEET_CLOSE_MS)
-          }}
-        >
-          <ShellIcon name="accessibility" size={18} />
-          <span>Accesibilidad</span>
-        </Button>
+        <MoreAccessibilityItem onClose={close} />
         <SessionActions account={account} onNavigate={close} />
       </SheetContent>
     </Sheet>

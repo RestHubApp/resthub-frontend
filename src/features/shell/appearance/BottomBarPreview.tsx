@@ -1,4 +1,5 @@
-import { ShellIcon } from '@/features/shell/ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import type { NavEntry } from '@/features/shell/navigation'
 import { BOTTOM_BAR_SLOTS } from '@/services/appearanceRules'
 
@@ -22,7 +23,7 @@ export function BottomBarPreview({ bar, hasRest }: BottomBarPreviewProps) {
       <ul className="m-0 flex list-none gap-1 p-0">
         {bar.map((entry) => (
           <li key={entry.to} className={`${SLOT} text-foreground`}>
-            <ShellIcon name={entry.icon} size={20} />
+            <Icon glyph={entry.icon} size={20} />
             <span className="max-w-full truncate">{entry.label}</span>
           </li>
         ))}
@@ -32,7 +33,7 @@ export function BottomBarPreview({ bar, hasRest }: BottomBarPreviewProps) {
           </li>
         ))}
         <li className={`${SLOT} text-muted-foreground`}>
-          <ShellIcon name={hasRest ? 'more' : 'profile'} size={20} />
+          <Icon glyph={hasRest ? icons.more : icons.profile} size={20} />
           <span>{hasRest ? 'Más' : 'Cuenta'}</span>
         </li>
       </ul>

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { EmptyState } from '@/components/EmptyState'
 import { FormDialog } from '@/components/FormDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useScreenAction } from '@/hooks/useScreenAction'
 import { OpenCashForm } from './OpenCashForm'
@@ -27,7 +28,7 @@ export function CashClosedPrompt() {
             setIsOpen(true)
           }}
         >
-          <Icon name="cashRegister" size={18} />
+          <Icon glyph={icons.cashRegister} size={18} />
           <span>Abrir caja</span>
         </Button>
       </EmptyState>

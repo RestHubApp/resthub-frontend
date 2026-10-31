@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { PERMISSION } from '@/api/permissions'
 import type { Reservation } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { todayIn } from '@/services/format'
@@ -34,7 +35,7 @@ export function ReservationsView() {
           <Button type="button" onClick={() => {
             setEditing({ reservation: null })
           }}>
-            <Icon name="add" size={18} />
+            <Icon glyph={icons.add} size={18} />
             <span>Nueva reserva</span>
           </Button>
         ) : undefined}

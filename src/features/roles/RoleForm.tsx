@@ -4,6 +4,7 @@ import type { Role } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
+import * as icons from '@/components/icons'
 import type { PermissionGroup } from './permissionGroups'
 import { RoleNameField } from './RoleNameField'
 import { RolePermissionsField } from './RolePermissionsField'
@@ -45,7 +46,7 @@ export function RoleForm({ role, groups, readOnly, onDone }: RoleFormProps) {
         failureText={ROLE_SAVE_FAILURE}
         onCancel={onDone}
         cancelLabel={readOnly ? 'Cerrar' : 'Cancelar'}
-        submit={readOnly ? undefined : { label: 'Guardar', icon: 'confirm' }}
+        submit={readOnly ? undefined : { label: 'Guardar', icon: icons.confirm }}
       />
     </form>
   )

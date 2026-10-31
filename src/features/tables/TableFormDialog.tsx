@@ -7,6 +7,7 @@ import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
+import * as icons from '@/components/icons'
 import { MAX_LABEL, tableSchema, type TableValues } from './tableSchema'
 import { TABLE_SAVE_FAILURE, useTableSave } from './useTableSave'
 
@@ -47,7 +48,7 @@ export function TableFormDialog({ table, open, onOpenChange }: TableFormDialogPr
         <TextField
           id="mesa-nombre"
           label="Nombre"
-          icon="table"
+          icon={icons.table}
           autoComplete="off"
           maxLength={MAX_LABEL}
           field={register('label')}

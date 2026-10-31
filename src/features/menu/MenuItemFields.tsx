@@ -3,6 +3,7 @@ import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import type { MenuSection } from '@/api/types'
 import { TextareaField } from '@/components/TextareaField'
 import { TextField } from '@/components/TextField'
+import * as icons from '@/components/icons'
 import { MenuItemCategorySelect } from './MenuItemCategorySelect'
 import type { MenuItemValues } from './menuSchema'
 
@@ -30,7 +31,7 @@ export function MenuItemFields({ register, errors, categories }: MenuItemFieldsP
         id="item-price"
         label="Precio (S/)"
         placeholder="28.00"
-        icon="price"
+        icon={icons.price}
         inputMode="decimal"
         autoComplete="off"
         hint="Con punto o coma para los céntimos."
@@ -42,7 +43,7 @@ export function MenuItemFields({ register, errors, categories }: MenuItemFieldsP
         <TextareaField
           id="item-description"
           label="Descripción (opcional)"
-          icon="description"
+          icon={icons.description}
           placeholder="Pescado del día, leche de tigre, camote y choclo."
           hint="La lee el mesero para contestar qué lleva el plato."
           field={register('description')}

@@ -1,12 +1,12 @@
 import { type ComponentType, createContext, useContext } from 'react'
 
 import type { AnyPermissionCode } from '@/api/types'
-import type { ShellIconName } from './ShellIcon'
+import type { IconGlyph } from '@/components/Icon'
 
 /** Cómo se muestra una pantalla en el menú. */
 export interface ScreenNav {
   readonly label: string
-  readonly icon: ShellIconName
+  readonly icon: IconGlyph
   /** Para que sirve la pantalla. Lo muestra el aviso de "Próximamente". */
   readonly description: string
   /**

@@ -1,4 +1,5 @@
-import { ShellIcon } from '@/features/shell/ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PRELOAD_QUICK_PALETTE } from './quickPaletteLoader'
 import { useQuickPalette } from './quickState'
 
@@ -19,7 +20,7 @@ export function QuickSearchField() {
       {...PRELOAD_QUICK_PALETTE}
       className="flex h-(--control-h) w-full items-center gap-2 rounded-lg border bg-background px-3 text-left text-sm text-muted-foreground outline-none transition-colors hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <ShellIcon name="search" size={16} />
+      <Icon glyph={icons.search} size={16} />
       <span className="min-w-0 flex-1 truncate">Buscar o ir a…</span>
       <kbd aria-hidden="true" className="rounded border bg-muted px-1.5 py-0.5 font-sans text-xs">
         {shortcutLabel()}

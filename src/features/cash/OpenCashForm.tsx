@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { openCash } from '@/api/cash'
 import type { OpenCashRequest } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
@@ -41,7 +42,7 @@ export function OpenCashForm() {
         <TextField
           id="caja-inicial"
           label="Efectivo inicial"
-          icon="payment"
+          icon={icons.payment}
           inputMode="decimal"
           autoComplete="off"
           placeholder="150.00"
@@ -60,7 +61,7 @@ export function OpenCashForm() {
       </div>
       <div className="flex justify-end">
         <Button type="submit" className="px-5" disabled={open.isPending}>
-          <Icon name="cashRegister" size={18} />
+          <Icon glyph={icons.cashRegister} size={18} />
           <span>{open.isPending ? 'Abriendo…' : 'Abrir caja'}</span>
         </Button>
       </div>

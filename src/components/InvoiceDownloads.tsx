@@ -1,6 +1,7 @@
 import { type DocumentFetcher, useInvoiceDownload, type DownloadableInvoice } from '@/hooks/useInvoiceDownload'
 import { FormMessage } from './FormMessage'
 import { Icon } from './Icon'
+import * as icons from './icons'
 import { Button } from './ui/button'
 
 interface InvoiceDownloadsProps {
@@ -28,7 +29,7 @@ export function InvoiceDownloads({ invoice, fetchFile, of }: InvoiceDownloadsPro
             download(file)
           }}
         >
-          <Icon name="download" size={14} />
+          <Icon glyph={icons.download} size={14} />
           <span>{pending === file.format ? 'Descargando…' : `Descargar ${file.label}`}</span>
           {of === undefined ? null : <span className="sr-only"> {of}</span>}
         </Button>

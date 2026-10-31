@@ -6,6 +6,7 @@ import { SelectField } from '@/components/SelectField'
 import { TextareaField } from '@/components/TextareaField'
 import { TextField } from '@/components/TextField'
 import { NativeSelectOption } from '@/components/ui/native-select'
+import * as icons from '@/components/icons'
 import { LIMITS, type ReservationValues } from './reservationSchema'
 
 interface ReservationFieldsProps {
@@ -25,13 +26,13 @@ export function ReservationFields({ form, tables }: ReservationFieldsProps) {
 
   return (
     <>
-      <TextField id="reservation-name" label="A nombre de" icon="profile" maxLength={LIMITS.name} field={register('customer_name')} error={messageOf(errors.customer_name)} />
+      <TextField id="reservation-name" label="A nombre de" icon={icons.profile} maxLength={LIMITS.name} field={register('customer_name')} error={messageOf(errors.customer_name)} />
       <TextField id="reservation-phone" label="Teléfono (opcional)" type="tel" inputMode="tel" maxLength={LIMITS.phone} field={register('phone')} error={messageOf(errors.phone)} />
       <TextField id="reservation-day" label="Día" type="date" field={register('day')} error={messageOf(errors.day)} />
       <TextField id="reservation-time" label="Hora" type="time" step="900" field={register('time')} error={messageOf(errors.time)} />
-      <TextField id="reservation-party" label="Personas" inputMode="numeric" icon="staff" field={register('party_size')} error={messageOf(errors.party_size)} />
+      <TextField id="reservation-party" label="Personas" inputMode="numeric" icon={icons.staff} field={register('party_size')} error={messageOf(errors.party_size)} />
       <TextField id="reservation-duration" label="Duración (minutos)" inputMode="numeric" field={register('duration_minutes')} error={messageOf(errors.duration_minutes)} hint="Cuánto se guarda la mesa." />
-      <SelectField id="reservation-table" label="Mesa (opcional)" icon="table" placeholder="Sin mesa asignada" field={register('table_id')} error={messageOf(errors.table_id)}>
+      <SelectField id="reservation-table" label="Mesa (opcional)" icon={icons.table} placeholder="Sin mesa asignada" field={register('table_id')} error={messageOf(errors.table_id)}>
         {tables.map((table) => (
           <NativeSelectOption key={table.id} value={String(table.id)}>
             {tableName(table.label)}

@@ -1,16 +1,16 @@
-import { Icon } from '@/components/Icon'
-import type { IconName } from '@/components/icons'
+import { Icon, type IconGlyph } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { LoginPattern } from './LoginPattern'
 
 interface PanelPoint {
-  readonly icon: IconName
+  readonly icon: IconGlyph
   readonly text: string
 }
 
 const POINTS: readonly PanelPoint[] = [
-  { icon: 'order', text: 'Toma los pedidos desde el celular, mesa por mesa o para llevar.' },
-  { icon: 'board', text: 'La cocina ve qué preparar y la caja sabe qué cobrar.' },
-  { icon: 'indicators', text: 'Ventas, inventario y lo que más se pide, al día. El equipo de RestHub administra el sistema desde aquí.' },
+  { icon: icons.order, text: 'Toma los pedidos desde el celular, mesa por mesa o para llevar.' },
+  { icon: icons.board, text: 'La cocina ve qué preparar y la caja sabe qué cobrar.' },
+  { icon: icons.indicators, text: 'Ventas, inventario y lo que más se pide, al día. El equipo de RestHub administra el sistema desde aquí.' },
 ]
 
 /**
@@ -29,7 +29,7 @@ export function LoginPanel() {
         <ul className="m-0 flex list-none flex-col gap-5 p-0" role="list">
           {POINTS.map((point) => (
             <li key={point.text} className="flex items-start gap-3 text-base leading-relaxed">
-              <Icon name={point.icon} size={20} className="mt-1 shrink-0" />
+              <Icon glyph={point.icon} size={20} className="mt-1 shrink-0" />
               <span>{point.text}</span>
             </li>
           ))}

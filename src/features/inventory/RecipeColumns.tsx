@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import type { DishCost } from '@/api/types'
 import type { DataColumn } from '@/components/DataTable'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { StatusBadge } from '@/components/StatusBadge'
 import { buttonVariants } from '@/components/ui/button'
 import { formatMoney, formatPercent } from '@/services/format'
@@ -52,7 +53,7 @@ export function buildRecipeColumns(canManage: boolean): DataColumn<DishCost>[] {
             className={buttonVariants({ variant: cost.has_recipe ? 'outline' : 'secondary' })}
             aria-label={`${text} de ${cost.menu_item_name}`}
           >
-            <Icon name="recipe" size={16} />
+            <Icon glyph={icons.recipe} size={16} />
             <span>{text}</span>
           </Link>
         )

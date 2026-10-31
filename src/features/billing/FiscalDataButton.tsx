@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 
@@ -12,7 +13,7 @@ interface FiscalDataButtonProps {
 export function FiscalDataButton({ isIncomplete, onClick }: FiscalDataButtonProps) {
   return (
     <Button type="button" variant="outline" onClick={onClick}>
-      <Icon name="settings" size={16} />
+      <Icon glyph={icons.settings} size={16} />
       <span>Datos fiscales</span>
       {isIncomplete ? <StatusBadge label="Falta completar" tone="pending" /> : null}
     </Button>

@@ -5,6 +5,7 @@ import { addPlatformOwner, PASSWORD_MUTATION_GC_TIME, platformMutationKeys } fro
 import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
+import * as icons from '@/components/icons'
 import { OwnerFields } from './OwnerFields'
 import { EMPTY_OWNER, ownerSchema, type OwnerValues } from './platformSchema'
 import { saveOwner } from './restaurantCache'
@@ -56,7 +57,7 @@ export function AddOwnerForm({ restaurantId, onDone }: AddOwnerFormProps) {
         mutation={registration}
         failureText="No se pudo agregar al encargado."
         onCancel={onDone}
-        submit={{ label: 'Agregar encargado', pendingLabel: 'Agregando…', icon: 'add' }}
+        submit={{ label: 'Agregar encargado', pendingLabel: 'Agregando…', icon: icons.add }}
       />
     </form>
   )

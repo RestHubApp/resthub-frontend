@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { purchaseOrdersQuery } from '@/api/purchasing'
 import type { PurchaseOrder } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { PurchaseOrderDialog } from './PurchaseOrderDialog'
@@ -34,7 +35,7 @@ export function PurchaseOrdersPanel({ canManage }: PurchaseOrdersPanelProps) {
         <Button type="button" onClick={() => {
           setIsCreating(true)
         }}>
-          <Icon name="add" size={16} />
+          <Icon glyph={icons.add} size={16} />
           <span>Nueva orden</span>
         </Button>
       ) : undefined}

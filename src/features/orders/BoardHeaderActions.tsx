@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
 import { LiveIndicator } from './LiveIndicator'
@@ -17,7 +18,7 @@ export function BoardHeaderActions({ live }: BoardHeaderActionsProps) {
       <LiveIndicator status={live} />
       <Button asChild variant="outline">
         <Link to={paths.board.history}>
-          <Icon name="history" size={18} />
+          <Icon glyph={icons.history} size={18} />
           <span>Historial</span>
         </Link>
       </Button>

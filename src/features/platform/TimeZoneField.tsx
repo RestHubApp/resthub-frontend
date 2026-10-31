@@ -2,6 +2,7 @@ import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import { SelectField } from '@/components/SelectField'
 import { NativeSelectOption } from '@/components/ui/native-select'
+import * as icons from '@/components/icons'
 import { timeZoneLabel, timeZoneOptions } from './timeZones'
 
 interface TimeZoneFieldProps {
@@ -18,7 +19,7 @@ export function TimeZoneField({ id, field, error, current }: TimeZoneFieldProps)
     <SelectField
       id={id}
       label="Zona horaria"
-      icon="schedule"
+      icon={icons.schedule}
       hint="Con ella se cuentan el día, la caja y las horas de los pedidos del local."
       field={field}
       error={error}

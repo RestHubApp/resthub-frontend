@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { advanceOrder, type OrderStep } from '@/api/orders'
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { paths } from '@/services/paths'
 import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
@@ -59,7 +60,7 @@ export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
             advance.mutate(step.action)
           }}
         >
-          <Icon name={step.icon} size={18} />
+          <Icon glyph={step.icon} size={18} />
           <span>{advance.isPending ? 'Guardando…' : step.label}</span>
         </Button>
       ) : (
@@ -67,7 +68,7 @@ export function OrderActions({ order, onCharge, onCancel }: OrderActionsProps) {
       )}
       <Button asChild variant="outline" size="lg" className={WIDE}>
         <Link to={paths.orders.addItems(order.id)}>
-          <Icon name="add" size={18} />
+          <Icon glyph={icons.add} size={18} />
           <span>Agregar platos</span>
         </Link>
       </Button>

@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -15,7 +16,7 @@ export function SearchBox({ value, onChange }: SearchBoxProps) {
         Buscar plato
       </Label>
       <Icon
-        name="search"
+        glyph={icons.search}
         size={18}
         className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted-foreground"
       />

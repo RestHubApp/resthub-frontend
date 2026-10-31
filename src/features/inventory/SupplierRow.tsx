@@ -1,5 +1,6 @@
 import type { Supplier } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 interface SupplierRowProps {
@@ -20,7 +21,7 @@ export function SupplierRow({ supplier, canManage, onEdit }: SupplierRowProps) {
       </span>
       {canManage ? (
         <Button type="button" variant="ghost" size="sm" onClick={onEdit}>
-          <Icon name="edit" size={14} />
+          <Icon glyph={icons.edit} size={14} />
           <span>Editar</span>
         </Button>
       ) : null}

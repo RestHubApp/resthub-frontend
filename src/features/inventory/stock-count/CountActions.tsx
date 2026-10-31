@@ -4,6 +4,7 @@ import { cancelStockCount, closeStockCount } from '@/api/stockCounts'
 import type { StockCount } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { InventoryFailure } from '@/features/inventory/InventoryFailure'
 import { closeWarning } from './countSummary'
@@ -33,11 +34,11 @@ export function CountActions({ count }: { readonly count: StockCount }) {
     <div className="flex flex-col items-end gap-2">
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="outline" disabled={isPending} onClick={ask('cancel')}>
-          <Icon name="cancel" size={16} />
+          <Icon glyph={icons.cancel} size={16} />
           <span>Cancelar conteo</span>
         </Button>
         <Button type="button" disabled={isPending || count.counted_lines === 0} onClick={ask('close')}>
-          <Icon name="confirm" size={16} />
+          <Icon glyph={icons.confirm} size={16} />
           <span>{close.isPending ? 'Cerrando…' : 'Cerrar conteo'}</span>
         </Button>
       </div>

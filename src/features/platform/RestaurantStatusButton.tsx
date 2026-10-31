@@ -5,6 +5,7 @@ import { platformMutationKeys, updatePlatformRestaurant } from '@/api/platform'
 import type { PlatformRestaurantDetail } from '@/api/types'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { saveRestaurant } from './restaurantCache'
 
@@ -44,7 +45,7 @@ export function RestaurantStatusButton({ restaurant }: RestaurantStatusButtonPro
       disabled={status.isPending}
       onClick={restaurant.is_active ? undefined : change}
     >
-      <Icon name="turnOn" size={18} />
+      <Icon glyph={icons.turnOn} size={18} />
       <span>{restaurant.is_active ? 'Desactivar restaurante' : 'Activar restaurante'}</span>
     </Button>
   )

@@ -3,6 +3,7 @@ import type { UseFormRegister } from 'react-hook-form'
 import type { MenuSection } from '@/api/types'
 import { SelectField } from '@/components/SelectField'
 import { NativeSelectOption } from '@/components/ui/native-select'
+import * as icons from '@/components/icons'
 import type { MenuItemValues } from './menuSchema'
 
 interface MenuItemCategorySelectProps {
@@ -17,7 +18,7 @@ export function MenuItemCategorySelect({ register, error, categories }: MenuItem
     <SelectField
       id="item-category"
       label="Categoría"
-      icon="dishMenu"
+      icon={icons.dishMenu}
       placeholder="Elige una categoría"
       field={register('category_id')}
       error={error}

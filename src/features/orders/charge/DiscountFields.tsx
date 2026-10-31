@@ -6,6 +6,7 @@ import { restaurantQuery } from '@/api/restaurant'
 import { TextField } from '@/components/TextField'
 import { formatPercent } from '@/services/format'
 import { useCan } from '@/store/session'
+import * as icons from '@/components/icons'
 import { MAX_ADJUSTMENT_REASON, type DiscountValues } from './discountSchema'
 
 interface DiscountFieldsProps {
@@ -38,7 +39,7 @@ export function DiscountFields({ register, errors }: DiscountFieldsProps) {
       <TextField
         id="descuento-porcentaje"
         label="Descuento %"
-        icon="discount"
+        icon={icons.discount}
         inputMode="decimal"
         autoComplete="off"
         placeholder="10"

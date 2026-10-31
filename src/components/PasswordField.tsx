@@ -6,6 +6,7 @@ import { FieldHint } from './FieldHint'
 import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
 import { Icon } from './Icon'
+import * as icons from './icons'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -43,7 +44,7 @@ export function PasswordField({
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <FieldIcon icon="lock">
+      <FieldIcon icon={icons.lock}>
         <Input
           id={id}
           type={isVisible ? 'text' : 'password'}
@@ -67,7 +68,7 @@ export function PasswordField({
               setIsVisible((actual) => !actual)
             }}
           >
-            <Icon name={isVisible ? 'hide' : 'view'} size={18} />
+            <Icon glyph={isVisible ? icons.hide : icons.view} size={18} />
           </Button>
         </div>
       </FieldIcon>

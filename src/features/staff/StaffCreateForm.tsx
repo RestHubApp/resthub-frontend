@@ -6,6 +6,7 @@ import { PasswordField } from '@/components/PasswordField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { MIN_PASSWORD } from '@/services/fieldLimits'
+import * as icons from '@/components/icons'
 import { defaultRoleId } from './roleOptions'
 import { StaffFields } from './StaffFields'
 import {
@@ -70,7 +71,7 @@ export function StaffCreateForm({ roles, onDone }: StaffCreateFormProps) {
         mutation={registration}
         failureText="No se pudo crear la cuenta."
         onCancel={onDone}
-        submit={{ label: 'Crear cuenta', pendingLabel: 'Creando…', icon: 'add' }}
+        submit={{ label: 'Crear cuenta', pendingLabel: 'Creando…', icon: icons.add }}
       />
     </form>
   )

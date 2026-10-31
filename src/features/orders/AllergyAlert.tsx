@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Badge } from '@/components/ui/badge'
 
 /**
@@ -8,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 export function AllergyAlert() {
   return (
     <Badge variant="destructive" className="shrink-0 font-bold ring-1 ring-destructive/40">
-      <Icon name="allergic" size={14} />
+      <Icon glyph={icons.allergic} size={14} />
       Con alergia
     </Badge>
   )

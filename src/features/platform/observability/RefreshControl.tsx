@@ -2,6 +2,7 @@ import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 
 import { platformObservabilityQueryKey } from '@/api/observability'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { refreshStatus } from './autoRefresh'
 import type { ObsRefresh } from './useObsRefresh'
@@ -28,7 +29,7 @@ export function RefreshControl({ refresh }: RefreshControlProps) {
             setPaused(!isPaused)
           }}
         >
-          <Icon name={isPaused ? 'resume' : 'pause'} size={16} />
+          <Icon glyph={isPaused ? icons.resume : icons.pause} size={16} />
           <span>{isPaused ? 'Reanudar' : 'Pausar'}</span>
         </Button>
         <Button
@@ -37,7 +38,7 @@ export function RefreshControl({ refresh }: RefreshControlProps) {
           disabled={isReading}
           onClick={() => void queryClient.invalidateQueries({ queryKey: platformObservabilityQueryKey })}
         >
-          <Icon name="update" size={16} className={isReading ? 'motion-safe:animate-spin' : undefined} />
+          <Icon glyph={icons.update} size={16} className={isReading ? 'motion-safe:animate-spin' : undefined} />
           <span>{isReading ? 'Actualizando…' : 'Actualizar ahora'}</span>
         </Button>
         <p role="status" className="m-0 text-sm text-muted-foreground">

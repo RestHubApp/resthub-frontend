@@ -1,6 +1,7 @@
 import type { AiDecision } from '@/api/types'
 import { DataTable, type DataColumn } from '@/components/DataTable'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { AiDecisionDetail } from './AiDecisionDetail'
 import { EngineBadge } from './EngineBadge'
@@ -82,7 +83,7 @@ function columns(timeZone: string): DataColumn<AiDecision>[] {
     header: 'Detalle',
     cell: (_, row) => (
       <Button type="button" variant="ghost" size="sm" aria-expanded={row.isExpanded} onClick={row.toggleExpanded}>
-        <Icon name="expand" size={14} className={row.isExpanded ? 'rotate-180' : undefined} />
+        <Icon glyph={icons.expand} size={14} className={row.isExpanded ? 'rotate-180' : undefined} />
         <span>{row.isExpanded ? 'Ocultar' : 'Ver JSON'}</span>
       </Button>
     ),

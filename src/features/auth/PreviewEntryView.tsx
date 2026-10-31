@@ -2,6 +2,7 @@ import { useLoaderData } from 'react-router'
 
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { appUrl } from '@/services/leaveTab'
 import { paths } from '@/services/paths'
@@ -45,7 +46,7 @@ export function PreviewEntryView() {
                 useSession.getState().exitPreview()
               }}
             >
-              <Icon name="previous" size={18} />
+              <Icon glyph={icons.previous} size={18} />
               <span>Volver a la administración del sistema</span>
             </a>
           </Button>

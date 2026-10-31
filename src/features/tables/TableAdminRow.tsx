@@ -2,6 +2,7 @@ import { tableName } from '@/api/tables'
 import type { TableState } from '@/api/types'
 import { ActionsMenu, type ActionsMenuItem } from '@/components/ActionsMenu'
 import { StatusBadge } from '@/components/StatusBadge'
+import * as icons from '@/components/icons'
 import { useTableStatus } from './useTableStatus'
 
 interface TableAdminRowProps {
@@ -18,12 +19,12 @@ type TableStatus = ReturnType<typeof useTableStatus>
 /** Las acciones de la mesa: subir y bajar en el recorrido, renombrar y activar o desactivar. */
 function tableEntries({ table, isFirst, isLast, moving, onMove, onRename }: TableAdminRowProps, status: TableStatus): ActionsMenuItem[] {
   const toggle: ActionsMenuItem = table.is_active
-    ? { label: 'Desactivar', icon: 'turnOn', isDestructive: true, isDisabled: status.isBlocked || status.isPending, onSelect: status.toggle }
-    : { label: 'Activar', icon: 'turnOn', isDisabled: status.isPending, onSelect: status.toggle }
+    ? { label: 'Desactivar', icon: icons.turnOn, isDestructive: true, isDisabled: status.isBlocked || status.isPending, onSelect: status.toggle }
+    : { label: 'Activar', icon: icons.turnOn, isDisabled: status.isPending, onSelect: status.toggle }
   return [
-    { label: 'Subir', icon: 'up', isDisabled: isFirst || moving, onSelect: () => { onMove(-1) } },
-    { label: 'Bajar', icon: 'down', isDisabled: isLast || moving, onSelect: () => { onMove(1) } },
-    { label: 'Renombrar', icon: 'edit', onSelect: onRename },
+    { label: 'Subir', icon: icons.up, isDisabled: isFirst || moving, onSelect: () => { onMove(-1) } },
+    { label: 'Bajar', icon: icons.down, isDisabled: isLast || moving, onSelect: () => { onMove(1) } },
+    { label: 'Renombrar', icon: icons.edit, onSelect: onRename },
     toggle,
   ]
 }

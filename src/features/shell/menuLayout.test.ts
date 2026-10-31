@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 
 import { BOTTOM_BAR_SLOTS, DEFAULT_MENU } from '@/services/appearanceRules'
+import * as icons from '@/components/icons'
 import { layoutMenu, orderEntries, reorderWithin, toggleBottom } from './menuLayout'
 import { entriesFor } from './navigation'
 import type { ShellScreen } from './shellScreens'
@@ -16,7 +17,7 @@ const OWNER_PERMISSIONS = ['orders.take', 'orders.read_all', 'orders.manage', 'r
 const SCREENS: readonly ShellScreen[] = PATHS.map((path, index) => ({
   path,
   permission: OWNER_PERMISSIONS[index] ?? WAITER_PERMISSIONS[0],
-  nav: { label: path.slice(1), icon: 'order', description: path },
+  nav: { label: path.slice(1), icon: icons.order, description: path },
 }))
 
 const ALL = entriesFor(SCREENS, OWNER_PERMISSIONS)

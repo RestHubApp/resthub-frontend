@@ -1,6 +1,7 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import type { RecipeIngredient } from './recipeMath'
 import { RecipeQuantityInput } from './RecipeQuantityInput'
@@ -51,7 +52,7 @@ export function RecipeLineRow({
           aria-label={`Quitar ${ingredient.name}`}
           onClick={onRemove}
         >
-          <Icon name="delete" size={18} />
+          <Icon glyph={icons.delete} size={18} />
         </Button>
       )}
     </li>
