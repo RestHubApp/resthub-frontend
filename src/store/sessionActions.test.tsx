@@ -86,6 +86,15 @@ describe('sesión de restaurante', () => {
     expect(queryClient.getQueryData(['platform', 'restaurants'])).toBeUndefined()
   })
 
+  it('entrar con otra cuenta sobre una sesión abierta no deja su caché', () => {
+    useSession.getState().signIn('t-1', WAITER)
+    queryClient.setQueryData(['orders', 'active'], [1, 2])
+
+    useSession.getState().signIn('t-2', buildAccount(PERMISSIONS_WAITER, { restaurant: { ...WAITER.restaurant, id: 2, name: 'Otro local' } }))
+
+    expect(queryClient.getQueryData(['orders', 'active'])).toBeUndefined()
+  })
+
   it('vencer marca la sesión como vencida; sin sesión abierta no cambia nada', () => {
     useSession.getState().expire()
     expect(useSession.getState().expired).toBe(false)
