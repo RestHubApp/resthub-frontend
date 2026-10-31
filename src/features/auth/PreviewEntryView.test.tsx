@@ -16,7 +16,7 @@ describe('PreviewEntryView', () => {
 
     expect(await screen.findByRole('heading', { name: 'No se pudo abrir la vista previa' })).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent('El código de vista previa no vale: venció (dura un minuto) o ya se usó.')
-    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reintentar' })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Volver a la administración del sistema' })).toHaveAttribute(
       'href',
       '/plataforma/vista-previa',
@@ -27,6 +27,9 @@ describe('PreviewEntryView', () => {
     openWithResult('offline')
 
     expect(await screen.findByRole('alert')).toHaveTextContent('No hubo conexión con el servidor para abrir la vista previa.')
+    // Recargar no sirve: el código ya salió de la dirección.
+    expect(screen.queryByRole('button', { name: 'Reintentar' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Volver a la administración del sistema' })).toHaveAttribute('href', '/plataforma/vista-previa')
   })
 
   it('mientras recarga la ruta de canje muestra que está abriendo', async () => {
