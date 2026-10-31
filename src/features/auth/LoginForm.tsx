@@ -1,11 +1,10 @@
-import { useState } from 'react'
-
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import { TwoFactorCodeField } from '@/components/TwoFactorCodeField'
 import { Button } from '@/components/ui/button'
 import { useCredentialsForm } from '@/hooks/useCredentialsForm'
+import { useTwoFactorCode } from '@/hooks/useTwoFactorCode'
 import { hasCode } from '@/services/apiError'
 import { LoginFields } from './LoginFields'
 import { useLogin } from './useLogin'
@@ -29,12 +28,12 @@ interface LoginFormProps {
  */
 export function LoginForm({ destination }: LoginFormProps) {
   const access = useLogin(destination)
-  const [code, setCode] = useState('')
-  const [isAskingCode, setIsAskingCode] = useState(false)
+  const twoFactor = useTwoFactorCode()
   const { bind, errors, submit } = useCredentialsForm((credentials) => {
+    if (twoFactor.isMissing()) return
     access.mutate(
-      isAskingCode && code !== '' ? { ...credentials, otp_code: code } : credentials,
-      { onError: (error) => { if (hasCode(error, 'two_factor_required')) setIsAskingCode(true) } },
+      twoFactor.isAskingCode ? { ...credentials, otp_code: twoFactor.code } : credentials,
+      { onError: (error) => { if (hasCode(error, 'two_factor_required')) twoFactor.askCode() } },
     )
   })
   // Que pida el código no es un error: lo explica el campo que aparece.
@@ -43,7 +42,7 @@ export function LoginForm({ destination }: LoginFormProps) {
   return (
     <form noValidate className="flex flex-col gap-5" onSubmit={submit}>
       <LoginFields bind={bind} errors={errors} />
-      {isAskingCode ? <TwoFactorCodeField onChange={setCode} /> : null}
+      {twoFactor.isAskingCode ? <TwoFactorCodeField onChange={twoFactor.setCode} error={twoFactor.error} /> : null}
 
       {hasFailed && hasCode(access.error, 'temporary_password_expired') ? (
         <FormMessage tone="error">{EXPIRED_TEMPORARY_NOTICE}</FormMessage>
