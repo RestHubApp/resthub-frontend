@@ -52,9 +52,9 @@ overrides:
   ip-address@<10.7.1: 10.7.1
   # GHSA-5r4p-p66f-jhc7: hono del SDK de MCP, en la CLI de shadcn.
   hono@>=4.12.4 <4.13.11: 4.13.11
-  # GHSA-q3jh-wrc6-jgq8 y GHSA-8r9p-f939-6h3c (altos): follow-redirects de axios
-  # y http-proxy, en Pact (pruebas de contrato).
-  follow-redirects@>=1.16.0 <1.16.1: 1.16.1
+  # GHSA-q3jh-wrc6-jgq8, GHSA-8r9p-f939-6h3c y GHSA-mrwp-f3q8-3g9p (altos):
+  # follow-redirects de axios y http-proxy, en Pact (pruebas de contrato).
+  follow-redirects@>=1.16.0 <1.16.2: 1.16.2
   # GHSA-hp3w-g68c-fv3c: sprintf-js no tiene versión corregida y llega por
   # argparse 1 de js-yaml 3. js-yaml 4 ya no usa sprintf-js y conserva `load`, lo
   # único que llama load-nyc-config (la cobertura de Jest).
