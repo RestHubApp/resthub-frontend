@@ -17,7 +17,8 @@ interface ReceivePayload {
  * Mientras no se escribe nada, los valores son los de lo pedido.
  */
 export function useReceiveOrder(order: PurchaseOrder | null, onClose: () => void) {
-  const [received, setReceived] = useState<Received | null>(null)
+  // El borrador va atado a su orden: nunca se aplica a otra que se abra después.
+  const [received, setReceived] = useState<{ readonly orderId: number; readonly values: Received } | null>(null)
   const close = () => {
     setReceived(null)
     onClose()
@@ -28,7 +29,8 @@ export function useReceiveOrder(order: PurchaseOrder | null, onClose: () => void
     failure: 'No se pudo recibir la orden.',
     onSuccess: close,
   })
-  const values = order === null ? {} : (received ?? initialReceived(order))
+  const draft = order !== null && received?.orderId === order.id ? received.values : null
+  const values = order === null ? {} : (draft ?? initialReceived(order))
   const lines = order === null ? [] : receivedLines(order, values)
 
   return {
@@ -37,10 +39,13 @@ export function useReceiveOrder(order: PurchaseOrder | null, onClose: () => void
     isPending: receive.isPending,
     close,
     edit: (lineId: number, change: Partial<{ quantity: string; unitCost: string }>) => {
+      if (order === null) {
+        return
+      }
       const current = values[lineId]
       setReceived({
-        ...values,
-        [lineId]: { quantity: current?.quantity ?? '0', unitCost: current?.unitCost ?? '0', ...change },
+        orderId: order.id,
+        values: { ...values, [lineId]: { quantity: current?.quantity ?? '0', unitCost: current?.unitCost ?? '0', ...change } },
       })
     },
     submit: () => {

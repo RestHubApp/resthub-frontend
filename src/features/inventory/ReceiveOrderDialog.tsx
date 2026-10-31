@@ -51,7 +51,7 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
       </ul>
       <FormFooter
         mutation={receive}
-        onCancel={onClose}
+        onCancel={receive.close}
         submit={{
           label: 'Recibir y cargar al stock',
           pendingLabel: 'Recibiendo…',
