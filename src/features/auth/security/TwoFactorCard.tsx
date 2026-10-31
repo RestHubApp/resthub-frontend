@@ -23,8 +23,10 @@ function statusText(status: TwoFactorStatus): string {
 /**
  * La verificación en dos pasos de la cuenta propia (RFS-22). Sin `canDisable`
  * (la administración del sistema, que la tiene obligatoria) no se ofrece apagarla.
+ * `onEnabled` avisa recién al cerrar la hoja tras activarla, cuando ya se vieron
+ * los códigos de recuperación.
  */
-export function TwoFactorCard({ canDisable }: { readonly canDisable: boolean }) {
+export function TwoFactorCard({ canDisable, onEnabled }: { readonly canDisable: boolean; readonly onEnabled?: (() => void) | undefined }) {
   const twoFactor = useTwoFactor()
   const { status, begin, confirm, renew, disable } = twoFactor
   const [isOpen, setIsOpen] = useState(false)
@@ -56,7 +58,7 @@ export function TwoFactorCard({ canDisable }: { readonly canDisable: boolean }) 
           )}
         </div>
       ) : null}
-      <TwoFactorSheet open={isOpen} twoFactor={twoFactor} onClose={() => { setIsOpen(false) }} />
+      <TwoFactorSheet open={isOpen} twoFactor={twoFactor} onClose={() => { setIsOpen(false); if (confirm.data !== undefined) onEnabled?.() }} />
     </SectionCard>
   )
 }

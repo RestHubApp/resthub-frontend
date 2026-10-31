@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { signInToPlatform } from '#jest/fixtures/platform'
 import { mountScreen, server } from '#jest/harness'
@@ -34,6 +34,26 @@ describe('alta obligatoria de los dos pasos en la plataforma (RFS-22)', () => {
       expect(useSession.getState().account).toMatchObject({ kind: 'platform', two_factor_setup_required: false })
     })
     expect(screen.queryByRole('button', { name: 'Desactivar' })).not.toBeInTheDocument()
+  })
+
+  it('al activarla muestra los códigos y abre la plataforma recién con «Ya los guardé»', async () => {
+    const { api, user } = open(OFF)
+    api.on('post', `${TWO_FACTOR}/setup`, { secret: 'JBSWY3DPEHPK3PXP', otpauth_uri: 'otpauth://totp/RestHub%3Aana?secret=JBSWY3DPEHPK3PXP&issuer=RestHub' })
+      .on('post', `${TWO_FACTOR}/confirm`, { recovery_codes: ['k7m2-pqrs-4tw8-x3yz-5abc-d6e9'] })
+
+    await user.click(await screen.findByRole('button', { name: 'Activar' }))
+    const sheet = await screen.findByRole('dialog')
+    await user.type(await within(sheet).findByLabelText('Código de la aplicación'), '123456')
+    // Como el servidor: tras confirmar ya está activa.
+    api.on('get', TWO_FACTOR, ON)
+    await user.click(within(sheet).getByRole('button', { name: 'Activar' }))
+
+    expect(await screen.findByRole('list', { name: 'Códigos de recuperación' })).toBeInTheDocument()
+    expect(useSession.getState().account).toMatchObject({ two_factor_setup_required: true })
+    await user.click(screen.getByRole('button', { name: 'Ya los guardé' }))
+    await waitFor(() => {
+      expect(useSession.getState().account).toMatchObject({ two_factor_setup_required: false })
+    })
   })
 
   it('«Salir» cierra la sesión', async () => {

@@ -319,7 +319,8 @@ celular del mesero nunca baja este código.
   `two_factor_setup_required` (o cualquier petición responde 403
   `two_factor_setup_required`), el armazón solo muestra el alta de la
   verificación (`TwoFactorSetupView`, en `AccountSetupGate` junto a la
-  contraseña temporal); al confirmar el primer código la plataforma se abre.
+  contraseña temporal). Al confirmar el primer código se muestran los códigos
+  de recuperación y la plataforma se abre recién con «Ya los guardé».
   Para la administración no se ofrece desactivarla.
 - Vence y se renueva igual para las dos clases (`hooks/useTokenRenewal.ts`,
   `POST /auth/refresh` cinco minutos antes) y se relee con `GET /auth/me`.
