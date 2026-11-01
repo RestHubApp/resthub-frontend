@@ -25,7 +25,8 @@ function onIssue(api: ReturnType<typeof server>, issued: ReturnType<typeof invoi
 }
 
 function issueFor(order: OrderResponse = paidBy('50.00'), permissions = PERMISSIONS_OWNER) {
-  const api = server()
+  // Como el servidor: un pedido sin comprobante responde `invoice_not_found`.
+  const api = server().on('get', OF_ORDER, new ErrorResponse(404, 'El pedido no tiene comprobante.', 'invoice_not_found'))
   signInAs(permissions)
   return { api, ...mountScreen(<InvoicePanel order={order} />) }
 }
@@ -119,5 +120,31 @@ describe('InvoicePanel', () => {
 
     expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
     expect(api.calls('get', OF_ORDER)).toHaveLength(0)
+  })
+})
+
+describe('InvoicePanel: si falla leer o emitir', () => {
+  it('si no se puede leer el comprobante, ofrece reintentar y no emitir', async () => {
+    const { api } = issueFor()
+    api.on('get', OF_ORDER, new ErrorResponse(500, 'Sin base'))
+
+    expect(await screen.findByText('Sin base')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
+  })
+
+  it('si ya estaba emitido (409), relee el comprobante del pedido y lo muestra', async () => {
+    const { api, user } = issueFor()
+    api.on('post', ISSUE, () => {
+      api.on('get', OF_ORDER, invoice())
+      return new ErrorResponse(409, 'El pedido ya tiene un comprobante.', 'order_already_invoiced')
+    })
+
+    await user.click(await screen.findByRole('button', OPEN))
+    await user.click(await screen.findByRole('button', ISSUE_SALES_RECEIPT))
+
+    expect(await screen.findByText('Boleta B001-15')).toBeInTheDocument()
+    expect(api.calls('get', OF_ORDER).length).toBeGreaterThan(1)
+    expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
   })
 })

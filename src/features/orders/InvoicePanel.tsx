@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { orderInvoiceQuery } from '@/api/billing'
 import { PERMISSION } from '@/api/permissions'
 import type { Invoice, OrderResponse } from '@/api/types'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { useCan } from '@/store/session'
 import { IssuedInvoice } from '@/features/orders/invoice/IssuedInvoice'
 import { IssueInvoiceButton } from '@/features/orders/invoice/IssueInvoiceButton'
@@ -29,6 +30,18 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
   const invoice = useQuery({ ...orderInvoiceQuery(order.id), enabled: isShown })
   if (!isShown || invoice.isPending) {
     return null
+  }
+  // Sin saber si ya tiene comprobante, no se ofrece emitir otro.
+  if (invoice.isError) {
+    return (
+      <RetryQueryError
+        error={invoice.error}
+        fallback="No se pudo saber si el pedido ya tiene comprobante."
+        onRetry={() => {
+          void invoice.refetch()
+        }}
+      />
+    )
   }
   const issued = invoice.data ?? null
 
