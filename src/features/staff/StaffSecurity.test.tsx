@@ -7,6 +7,7 @@ import { StaffView } from './StaffView'
 
 const RESTAURANT = '/restaurant'
 const ADD_PERIOD = 'Agregar tramo'
+const UNUSED_LIST = { name: 'Cuentas sin uso' }
 const SAVE_HOURS = { name: 'Guardar horario' }
 const LUIS_STATUS = '/staff/8/status'
 const LUIS_SESSIONS = '/staff/8/sessions'
@@ -28,7 +29,7 @@ describe('seguridad del personal', () => {
     const { api, user } = openStaff(UNUSED)
     api.on('patch', LUIS_STATUS, { ...member(), is_active: false })
 
-    const list = await screen.findByRole('list', { name: 'Cuentas sin uso' })
+    const list = await screen.findByRole('list', UNUSED_LIST)
     expect(within(list).getByText('Nunca entró · creada hace 75 días')).toBeInTheDocument()
     await user.click(within(list).getByRole('button', { name: 'Desactivar' }))
     await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Desactivar' }))
@@ -42,7 +43,7 @@ describe('seguridad del personal', () => {
     openStaff()
 
     expect(await screen.findByRole('row', { name: /Luis Quispe/u })).toBeInTheDocument()
-    expect(screen.queryByRole('list', { name: 'Cuentas sin uso' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('list', UNUSED_LIST)).not.toBeInTheDocument()
   })
 
   it('muestra y cierra las sesiones abiertas de una persona (RFS-17)', async () => {
@@ -132,5 +133,26 @@ describe('horario de atención mientras se carga', () => {
         ],
       })
     })
+  })
+})
+
+describe('cuentas sin uso de un rol más fuerte', () => {
+  it('no ofrece desactivar una cuenta cuyo rol tiene permisos que quien mira no tiene', async () => {
+    const owner = member({ id: 9, full_name: 'Rosa Díaz', role_id: ROLE_OWNER.id, role_label: 'Encargado' })
+    server()
+      .on('get', '/staff', { items: TEAM, total: TEAM.length })
+      .on('get', '/roles', [ROLE_OWNER, ROLE_WAITER])
+      .on('get', '/staff/unused', [...UNUSED, { member: owner, last_activity_at: null, unused_days: 90 }])
+      .on('get', RESTAURANT, { idle_lock_minutes: 10, opening_hours: [] })
+    signInAs(['staff.manage', 'orders.take', 'orders.charge'])
+    mountScreen(<StaffView />, { path: '/personal' })
+
+    const list = await screen.findByRole('list', UNUSED_LIST)
+    const rows = within(list).getAllByRole('listitem')
+    const ownerRow = firstOf(rows.filter((row) => within(row).queryByText('Rosa Díaz · Encargado') !== null))
+    const waiterRow = firstOf(rows.filter((row) => row !== ownerRow))
+    expect(within(ownerRow).getByText(/Su rol tiene permisos que tu cuenta no tiene/u)).toBeInTheDocument()
+    expect(within(ownerRow).queryByRole('button', { name: 'Desactivar' })).not.toBeInTheDocument()
+    expect(within(waiterRow).getByRole('button', { name: 'Desactivar' })).toBeInTheDocument()
   })
 })
