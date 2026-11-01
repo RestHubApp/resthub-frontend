@@ -14,7 +14,10 @@ export function InvoicePrintView() {
   const invoiceId = Number(useParams()["invoiceId"])
   const timeZone = useTimeZone()
   const canViewSettings = useCan(PERMISSION.billingManage)
-  const invoice = useQuery({ ...invoiceQuery(invoiceId), enabled: Number.isInteger(invoiceId) })
+  // Con un id mal escrito (`/comprobantes/abc/imprimir`) la consulta no corre y
+  // quedaría «Preparando…» para siempre.
+  const isValidId = Number.isInteger(invoiceId) && invoiceId > 0
+  const invoice = useQuery({ ...invoiceQuery(invoiceId), enabled: isValidId })
   // Los datos del emisor los ve el encargado; el mesero imprime sin encabezado
   // fiscal, que igual está en el PDF oficial del proveedor.
   // Se imprime con el emisor ya cargado: si no, la hoja salía sin RUC ni razón
@@ -29,6 +32,9 @@ export function InvoicePrintView() {
     }
   }, [isReady])
 
+  if (!isValidId) {
+    return <EmptyState title="Este comprobante no existe." />
+  }
   if (invoice.isPending || settings.isLoading) {
     return <EmptyState title="Preparando el comprobante…" />
   }

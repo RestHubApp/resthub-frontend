@@ -75,6 +75,17 @@ describe('InvoicePrintView', () => {
     expect(printSpy).not.toHaveBeenCalled()
   })
 
+  it('con un id que no es un número dice que no existe y no lo pide', async () => {
+    const printSpy = jest.spyOn(window, 'print')
+    const api = server().on('get', SETTINGS_URL, taxSettings())
+    signInAs()
+    mountScreen(<InvoicePrintView />, { path: ROUTE, en: '/comprobantes/abc/imprimir' })
+
+    expect(await screen.findByText('Este comprobante no existe.')).toBeInTheDocument()
+    expect(api.calls('get', /\/billing\/invoices\//u)).toHaveLength(0)
+    expect(printSpy).not.toHaveBeenCalled()
+  })
+
   it('el encargado no imprime hasta tener los datos del emisor', async () => {
     let answerSettings = (): void => undefined
     const settingsAnswered = new Promise<void>((resolve) => { answerSettings = resolve })
