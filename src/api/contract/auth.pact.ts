@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { errorStatus } from '@/services/apiError'
+import { errorCode, errorStatus } from '@/services/apiError'
 import { fetchCurrentUser, login, reportSignOut } from '@/api/auth'
 import {
   API_PREFIX,
@@ -25,8 +25,8 @@ const pact = newPact()
 const LOGIN_PATH = `${API_PREFIX}/auth/login`
 const OWNER = { email: 'admin@resthub.dev', password: SEED_PASSWORD }
 // El mismo texto para un correo que no existe y para una contraseña
-// equivocada: el mensaje no delata qué cuentas hay.
-const INVALID_CREDENTIALS = 'El correo o la contraseña no son correctos.'
+// equivocada: el mensaje no delata qué cuentas hay. El código va exacto.
+const INVALID_CREDENTIALS = { detail: 'El correo o la contraseña no son correctos.', code: 'invalid_credentials' }
 
 /** La sesión que abre el acceso y que devuelve `GET /auth/me`. */
 function sessionShape() {
@@ -88,11 +88,11 @@ describe('Contrato: acceso', () => {
       .given(STATE.ownerAccount)
       .uponReceiving('un acceso con la contraseña equivocada')
       .withRequest('POST', LOGIN_PATH, (req) => req.headers(JSON_HEADERS).jsonBody(wrong))
-      .willRespondWith(401, (res) => res.headers({ 'WWW-Authenticate': 'Bearer' }).jsonBody({ detail: INVALID_CREDENTIALS }))
+      .willRespondWith(401, (res) => res.headers({ 'WWW-Authenticate': 'Bearer' }).jsonBody(INVALID_CREDENTIALS))
       .executeTest(async (mockServer) => {
         connectWithoutSession(mockServer)
         const error = await rejectionOf(login(wrong))
-        expect(errorStatus(error)).toBe(401)
+        expect([errorStatus(error), errorCode(error)]).toEqual([401, 'invalid_credentials'])
       })
   })
 
@@ -103,11 +103,11 @@ describe('Contrato: acceso', () => {
       .given(STATE.ownerAccount)
       .uponReceiving('un acceso con un correo que no existe')
       .withRequest('POST', LOGIN_PATH, (req) => req.headers(JSON_HEADERS).jsonBody(unknown))
-      .willRespondWith(401, (res) => res.jsonBody({ detail: INVALID_CREDENTIALS }))
+      .willRespondWith(401, (res) => res.jsonBody(INVALID_CREDENTIALS))
       .executeTest(async (mockServer) => {
         connectWithoutSession(mockServer)
         const error = await rejectionOf(login(unknown))
-        expect(errorStatus(error)).toBe(401)
+        expect([errorStatus(error), errorCode(error)]).toEqual([401, 'invalid_credentials'])
       })
   })
 

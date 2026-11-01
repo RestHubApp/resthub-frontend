@@ -24,6 +24,7 @@ jobs:
   axe:
     name: axe-core (pantallas sin sesión)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     container:
       image: mcr.microsoft.com/playwright:v1.64.1-noble
       options: --ipc=host
@@ -53,8 +54,19 @@ jobs:
           A11Y_ONLY: acceso,raiz,plataforma-acceso,vista-previa-sin-codigo
           A11Y_STRICT: '1'
         run: |
+          # Espera a que responda la URL, hasta 120 s; falla antes si el proceso
+          # que la sirve ya terminó (puerto ocupado, compilación rota).
+          esperar() {
+            for _ in $(seq 1 120); do
+              curl -sf "$1" > /dev/null && return 0
+              kill -0 "$2" 2>/dev/null || { echo "$3 terminó antes de responder" >&2; return 1; }
+              sleep 1
+            done
+            echo "$3 no respondió en 120 s" >&2
+            return 1
+          }
           pnpm preview --port 5202 --strictPort &
-          until curl -sf http://localhost:5202/acceso > /dev/null; do sleep 1; done
+          esperar http://localhost:5202/acceso $! 'vite preview'
           node checks/accessibility/axe.mjs
 
       - name: Guardar el reporte
@@ -111,10 +123,23 @@ jobs:
           # Al terminar se cierran el backend y la vista previa: si `uv run` sigue
           # vivo, retiene la caché de uv y su limpieza final agota el tiempo.
           trap 'kill $(jobs -p) 2>/dev/null; wait 2>/dev/null' EXIT
+          # Espera a que responda la URL, hasta 120 s; falla antes si el proceso
+          # que la sirve ya terminó (puerto ocupado, compilación rota).
+          esperar() {
+            for _ in $(seq 1 120); do
+              curl -sf "$1" > /dev/null && return 0
+              kill -0 "$2" 2>/dev/null || { echo "$3 terminó antes de responder" >&2; return 1; }
+              sleep 1
+            done
+            echo "$3 no respondió en 120 s" >&2
+            return 1
+          }
           bash e2e/server/backend.sh &
+          backend=$!
           pnpm exec vite preview --outDir dist-a11y --port 5202 --strictPort &
-          until curl -sf http://localhost:8202/api/v1/health > /dev/null; do sleep 1; done
-          until curl -sf http://localhost:5202/acceso > /dev/null; do sleep 1; done
+          preview=$!
+          esperar http://localhost:8202/api/v1/health "$backend" 'El backend'
+          esperar http://localhost:5202/acceso "$preview" 'vite preview'
           pnpm a11y axe ${{ matrix.parte == 1 && 'keyboard' || '' }}
 
       - name: Guardar los reportes

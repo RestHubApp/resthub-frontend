@@ -64,9 +64,10 @@ describe('código del error', () => {
     expect(hasCode(new Error('phone_taken'), 'phone_taken')).toBe(false)
   })
 
-  it('una sesión se acaba por `unauthenticated` o `invalid_token`, no por el 401 en sí', () => {
+  it('una sesión se acaba por `unauthenticated`, `invalid_token` o `admin_unavailable`, no por el 401 en sí', () => {
     expect(isSessionEnded(apiError(401, { code: 'unauthenticated' }))).toBe(true)
     expect(isSessionEnded(apiError(401, { code: 'invalid_token' }))).toBe(true)
+    expect(isSessionEnded(apiError(401, { code: 'admin_unavailable' }))).toBe(true)
     expect(isSessionEnded(apiError(401, { code: 'invalid_credentials' }))).toBe(false)
     expect(isSessionEnded(apiError(401, {}))).toBe(false)
   })
@@ -77,6 +78,7 @@ describe('código del error', () => {
     expect(isTransportFailure(apiError(503, { code: 'database_unavailable' }))).toBe(true)
     expect(isTransportFailure(apiError(409, { code: 'table_occupied' }))).toBe(false)
     expect(isTransportFailure(apiError(401, { code: 'unauthenticated' }))).toBe(false)
+    expect(isTransportFailure(apiError(401, { code: 'admin_unavailable' }))).toBe(false)
     expect(isTransportFailure(withoutResponse())).toBe(true)
   })
 })

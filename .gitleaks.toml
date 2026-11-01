@@ -1,9 +1,20 @@
 title = "RestHub"
 
-# gitleaks recorre el historial. La semilla de accesibilidad manda una
-# contraseña a propósito incorrecta para generar un log de acceso fallido.
-# No es una clave de ningún servicio.
-[allowlist]
-description = "Contraseña falsa de checks/accessibility/data.mjs"
+# gitleaks recorre el historial con sus reglas por omisión más estas
+# excepciones. Sin [extend] este archivo reemplaza las reglas por omisión y el
+# escaneo no busca nada (el paso canario de ci.yml lo comprueba).
+[extend]
+useDefault = true
+
+# Datos de prueba falsos que siguen en el historial; no son claves de ningún
+# servicio. Van por texto y no por huella en .gitleaksignore: la huella lleva
+# el SHA del commit y cambia cuando se reescribe la historia.
+[[allowlists]]
+description = "Contraseñas y token de ejemplo de las pruebas"
 regexTarget = "line"
-regexes = ['''clave-equivocada-a11y''']
+regexes = [
+  '''clave-equivocada-a11y''',                 # checks/accessibility/data.mjs: intento fallido a propósito
+  '''tunki-quinua-48173''',                    # checks/accessibility/common.mjs: cuenta «sin-terminos»
+  '''kawsay-e2e-48173''',                      # e2e/support/api.ts: NEW_SECRET
+  '''eyJhbGciOiJIUzI1NiJ9\.contrato\.firma''', # src/api/contract/pactHarness.ts: EXAMPLE_TOKEN, no firma nada
+]

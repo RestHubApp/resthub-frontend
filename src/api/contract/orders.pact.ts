@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { errorStatus } from '@/services/apiError'
+import { errorCode, errorStatus } from '@/services/apiError'
 import { addOrderItems, fetchOrder, openOrder } from '@/api/orders'
 import type { OpenOrderRequest } from '@/api/types'
 import { orderItemShape, orderShape } from './orderShapes'
@@ -98,11 +98,12 @@ describe('Contrato: pedidos', () => {
       .withRequest('GET', statePath('/orders/${orderId}', `/orders/${String(EXAMPLE_ORDER)}`), (req) =>
         req.headers(bearer()),
       )
-      .willRespondWith(404, (res) => res.jsonBody(errorBody(`No existe el pedido ${String(EXAMPLE_ORDER)}.`)))
+      .willRespondWith(404, (res) => res.jsonBody(errorBody(`No existe el pedido ${String(EXAMPLE_ORDER)}.`, 'order_not_found')))
       .executeTest(async (mockServer) => {
         connectTo(mockServer)
         const error = await rejectionOf(fetchOrder(EXAMPLE_ORDER))
         expect(errorStatus(error)).toBe(404)
+        expect(errorCode(error)).toBe('order_not_found')
       })
   })
 })

@@ -1,11 +1,10 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { ACCESS_PAGE_SIZE, staffAccessHistoryQuery } from '@/api/accessHistory'
+import { staffAccessHistoryQuery } from '@/api/accessHistory'
 import type { StaffResponse } from '@/api/types'
 import { AccessHistoryPanel } from '@/components/AccessHistoryPanel'
 import { DetailSheet } from '@/components/DetailSheet'
-import { describeAccess } from '@/services/accessHistory'
+import { describeAccess, loadedAccesses } from '@/services/accessHistory'
 import { useTimeZone } from '@/store/session'
 
 interface StaffAccessSheetProps {
@@ -17,9 +16,8 @@ interface StaffAccessSheetProps {
 /** Los accesos de una persona del personal (RFS-15): cuándo entró o intentó entrar, y desde dónde. */
 export function StaffAccessSheet({ account, open, onClose }: StaffAccessSheetProps) {
   const timeZone = useTimeZone()
-  const [limit, setLimit] = useState(ACCESS_PAGE_SIZE)
-  const history = useQuery({ ...staffAccessHistoryQuery(account.id, limit), enabled: open, placeholderData: keepPreviousData })
-  const accesses = (history.data?.items ?? []).map((entry) => describeAccess(entry, timeZone))
+  const history = useInfiniteQuery({ ...staffAccessHistoryQuery(account.id), enabled: open })
+  const accesses = loadedAccesses(history.data?.pages).map((entry) => describeAccess(entry, timeZone))
 
   return (
     <DetailSheet
@@ -28,7 +26,7 @@ export function StaffAccessSheet({ account, open, onClose }: StaffAccessSheetPro
       title={`Accesos de ${account.full_name}`}
       description="Los intentos de entrar con su cuenta en los últimos 90 días."
     >
-      <AccessHistoryPanel label={`Accesos de ${account.full_name}`} history={history} accesses={accesses} onMore={() => { setLimit(limit + ACCESS_PAGE_SIZE) }} />
+      <AccessHistoryPanel label={`Accesos de ${account.full_name}`} history={history} accesses={accesses} />
     </DetailSheet>
   )
 }

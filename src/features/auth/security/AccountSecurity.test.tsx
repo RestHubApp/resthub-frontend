@@ -1,7 +1,7 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { mountScreen, PERMISSIONS_WAITER, server, signInAs } from '#jest/harness'
+import { ErrorResponse, mountScreen, PERMISSIONS_WAITER, server, signInAs } from '#jest/harness'
 import { useSession } from '@/store/session'
 import { AccountSecurity } from './AccountSecurity'
 
@@ -16,6 +16,25 @@ const CODES = ['k7m2-pqrs-4tw8-x3yz-5abc-d6e9', 'fghj-2kn4-p7qr-s3tu-v5w8-xyz2']
 
 const ACCESSES = '/auth/me/access-history'
 const ACCESS = { id: 1, occurred_at: '2026-10-17T15:00:00Z', outcome: 'succeeded', device: 'Chrome en Windows', network: '190.42.17.x', city: 'Lima', country: 'PE', new_device: false, new_country: true, outside_hours: false }
+
+// Como el servidor: `limit` admite hasta 100 y la tanda sale de `offset`.
+function accessPage(params: Record<string, string | string[]>, total: number) {
+  const limit = Number(params['limit'])
+  const offset = Number(params['offset'])
+  if (limit > 100) return new ErrorResponse(422, 'limit admite hasta 100.', 'validation_error')
+  const count = Math.max(0, Math.min(limit, total - offset))
+  return { items: Array.from({ length: count }, (_, index) => ({ ...ACCESS, id: offset + index + 1 })), total }
+}
+
+// Los accesos `newest`…1, del más nuevo al más viejo, en la tanda que empieza en `offset`.
+function newestFirst(newest: number, offset: number) {
+  const ids = Array.from({ length: newest }, (_, index) => newest - index).slice(offset, offset + 10)
+  return { items: ids.map((id) => ({ ...ACCESS, id })), total: newest }
+}
+
+function ownAccessList() {
+  return screen.findByRole('list', { name: 'Mis accesos' })
+}
 
 function openSecurity(twoFactor = OFF) {
   const api = server().on('get', SESSIONS, [THIS_DEVICE, PHONE]).on('get', TWO_FACTOR, twoFactor).on('get', ACCESSES, { items: [ACCESS], total: 12 })
@@ -97,14 +116,54 @@ describe('seguridad de la cuenta en Mi perfil', () => {
   it('«Mis accesos» lista los intentos y pide más con «Ver más» (RFS-15)', async () => {
     const { api, user } = openSecurity()
 
-    const list = await screen.findByRole('list', { name: 'Mis accesos' })
+    const list = await ownAccessList()
     expect(within(list).getByText('Correcto')).toBeInTheDocument()
     expect(within(list).getByText('País nuevo')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Ver más' }))
 
+    // La tanda siguiente empieza después del único acceso que mandó el servidor.
     await waitFor(() => {
-      expect(api.calls('get', ACCESSES).at(-1)?.params).toEqual({ limit: '20', offset: '0' })
+      expect(api.calls('get', ACCESSES).at(-1)?.params).toEqual({ limit: '10', offset: '1' })
     })
+  })
+})
+
+describe('historial de accesos largo en Mi perfil (RFS-15)', () => {
+  it('«Ver más» pide la tanda siguiente por `offset` y llega al final aunque haya más de 100 accesos', async () => {
+    const total = 130
+    const { api, user } = openSecurity()
+    api.on('get', ACCESSES, ({ params }: { params: Record<string, string | string[]> }) => accessPage(params, total))
+
+    const list = await ownAccessList()
+    for (let loaded = 10; loaded < total; loaded += 10) {
+      await user.click(await screen.findByRole('button', { name: 'Ver más' }))
+      await waitFor(() => {
+        expect(within(list).getAllByRole('listitem')).toHaveLength(loaded + 10)
+      })
+    }
+
+    expect(screen.queryByRole('button', { name: 'Ver más' })).not.toBeInTheDocument()
+    expect(screen.queryByText('No se pudieron cargar los accesos.')).not.toBeInTheDocument()
+    expect(api.calls('get', ACCESSES).every((call) => Number(call.params['limit']) <= 100)).toBe(true)
+  })
+
+  it('un acceso que entra entre dos tandas no sale repetido', async () => {
+    const { api, user } = openSecurity()
+    // Del más nuevo al más viejo; después de la primera tanda entra el acceso 16.
+    let newest = 15
+    api.on('get', ACCESSES, ({ params }: { params: Record<string, string | string[]> }) => {
+      const page = newestFirst(newest, Number(params['offset']))
+      newest = 16
+      return page
+    })
+
+    const list = await ownAccessList()
+    await user.click(await screen.findByRole('button', { name: 'Ver más' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Ver más' })).not.toBeInTheDocument()
+    })
+    expect(within(list).getAllByRole('listitem')).toHaveLength(15)
   })
 })
 

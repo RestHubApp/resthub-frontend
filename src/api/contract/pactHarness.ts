@@ -2,6 +2,7 @@ import path from 'node:path'
 
 import { MatchersV3, PactV4, type V3MockServer } from '@pact-foundation/pact'
 
+import type { ErrorCode } from '@/api/types'
 import { setAuthToken } from '@/services/apiCredentials'
 import { setApiOrigin } from '@/services/apiRouting'
 
@@ -95,9 +96,12 @@ export function oneOf(values: readonly string[], example: string) {
   return regex(new RegExp(`^(${values.join('|')})$`, 'u'), example)
 }
 
-/** El cuerpo de error de FastAPI cuando lo levanta el proyecto: `detail` es un texto. */
-export function errorBody(example: string) {
-  return { detail: string(example) }
+/**
+ * El cuerpo de error del proyecto: `detail` es un texto para la persona y `code`
+ * va exacto, porque el frontend decide por el código y nunca por el texto.
+ */
+export function errorBody(example: string, code: ErrorCode) {
+  return { detail: string(example), code }
 }
 
 export const JSON_HEADERS = { 'Content-Type': 'application/json' }
