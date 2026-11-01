@@ -1,5 +1,6 @@
 import type { ObsRouteSort } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { TableHead } from '@/components/ui/table'
 import { ariaSort } from './routeSort'
 
@@ -23,7 +24,7 @@ export function SortHeader({ column, sort, label, onSort }: SortHeaderProps) {
         className={`inline-flex min-h-11 items-center gap-1 rounded-md px-2 outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 ${isCurrent ? 'font-semibold' : 'font-medium text-muted-foreground'}`}
       >
         <span>{label}</span>
-        <Icon name={isCurrent ? 'orderDescending' : 'sort'} size={14} />
+        <Icon glyph={isCurrent ? icons.orderDescending : icons.sort} size={14} />
         <span className="sr-only">{isCurrent ? ', de mayor a menor' : ', ordenar de mayor a menor'}</span>
       </button>
     </TableHead>

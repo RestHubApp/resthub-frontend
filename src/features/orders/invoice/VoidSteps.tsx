@@ -3,12 +3,13 @@ import { useState } from 'react'
 import type { Invoice } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { billingErrorMessage } from '@/services/billingErrors'
+import * as icons from '@/components/icons'
 import { capitalize, invoiceName } from './invoiceVoid'
 import { ReissueStep } from './ReissueStep'
 import { useVoidInvoice } from './useVoidInvoice'
 import { VoidReasonStep } from './VoidReasonStep'
 
-const VOID_SUBMIT = { label: 'Anular comprobante', pendingLabel: 'Anulando…', icon: 'cancel', variant: 'destructive' } as const
+const VOID_SUBMIT = { label: 'Anular comprobante', pendingLabel: 'Anulando…', icon: icons.cancel, variant: 'destructive' } as const
 
 interface VoidStepsProps {
   readonly invoice: Invoice

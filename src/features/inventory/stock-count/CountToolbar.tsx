@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { SegmentedChoice } from '@/components/SegmentedChoice'
 import { Input } from '@/components/ui/input'
 import { COUNT_FILTERS, type CountFilter } from './countFilter'
@@ -23,7 +24,7 @@ export function CountToolbar({ search, onSearch, filter, onFilter, counted, tota
         <div className="h-full rounded-full bg-primary" style={{ width: `${String(total === 0 ? 0 : (counted / total) * 100)}%` }} />
       </div>
       <div className="relative">
-        <Icon name="search" size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+        <Icon glyph={icons.search} size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
           aria-label="Buscar insumo"

@@ -4,6 +4,7 @@ import type { Role } from '@/api/types'
 import { ReadOnlyField } from '@/components/ReadOnlyField'
 import { SelectField } from '@/components/SelectField'
 import { NativeSelectOption } from '@/components/ui/native-select'
+import * as icons from '@/components/icons'
 
 interface StaffRoleFieldProps {
   readonly field: UseFormRegisterReturn
@@ -29,7 +30,7 @@ export function StaffRoleField({ field, error, roles, lockedRoleLabel }: StaffRo
     <SelectField
       id="role_id"
       label="Rol"
-      icon="accountType"
+      icon={icons.accountType}
       hint="Solo aparecen los roles con permisos que tu cuenta también tiene."
       field={field}
       error={error}

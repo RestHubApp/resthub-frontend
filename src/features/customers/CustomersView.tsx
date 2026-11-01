@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { PERMISSION } from '@/api/permissions'
 import type { Customer } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
@@ -26,7 +27,7 @@ export function CustomersView() {
     <Button type="button" onClick={() => {
       setEditing({ customer: null })
     }}>
-      <Icon name="add" size={18} />
+      <Icon glyph={icons.add} size={18} />
       <span>Nuevo cliente</span>
     </Button>
   )

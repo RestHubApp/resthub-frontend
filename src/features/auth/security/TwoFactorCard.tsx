@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import type { TwoFactorStatus } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { RetryQueryError } from '@/components/RetryQueryError'
 import { SectionCard } from '@/components/SectionCard'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -50,7 +51,7 @@ export function TwoFactorCard({ canDisable }: { readonly canDisable: boolean }) 
             />
           ) : (
             <Button type="button" onClick={() => { open(() => { begin.mutate() }) }}>
-              <Icon name="key" size={16} />
+              <Icon glyph={icons.key} size={16} />
               <span>Activar</span>
             </Button>
           )}

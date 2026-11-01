@@ -1,5 +1,6 @@
 import type { DishCost, MenuItem } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { DishMargin } from './DishMargin'
 import { DishPhotoField } from './DishPhotoField'
@@ -29,18 +30,18 @@ export function DishSheetBody({ item, cost, isFirst, isLast, isPending, onMove, 
       <DishMargin itemId={item.id} itemName={item.name} cost={cost} />
       <div className="flex flex-col gap-2 border-t pt-4">
         <Button type="button" onClick={onEdit}>
-          <Icon name="edit" size={16} />
+          <Icon glyph={icons.edit} size={16} />
           <span>Editar plato</span>
         </Button>
         <DishOrderButtons isFirst={isFirst} isLast={isLast} onMove={onMove} />
         {item.is_active ? (
           <Button type="button" variant="ghost" className="text-destructive hover:text-destructive" onClick={onDeactivate}>
-            <Icon name="turnOn" size={16} />
+            <Icon glyph={icons.turnOn} size={16} />
             <span>Desactivar</span>
           </Button>
         ) : (
           <Button type="button" variant="secondary" disabled={isPending} onClick={onActivate}>
-            <Icon name="turnOn" size={16} />
+            <Icon glyph={icons.turnOn} size={16} />
             <span>Activar</span>
           </Button>
         )}

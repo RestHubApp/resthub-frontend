@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
@@ -51,7 +52,7 @@ export function ChangePasswordForm() {
         className="w-full sm:w-auto sm:self-start"
         disabled={change.isPending}
       >
-        <Icon name="key" size={16} />
+        <Icon glyph={icons.key} size={16} />
         <span>{change.isPending ? 'Guardando…' : 'Cambiar contraseña'}</span>
       </Button>
     </form>

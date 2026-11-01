@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 interface NewIngredientButtonProps {
@@ -9,7 +10,7 @@ interface NewIngredientButtonProps {
 export function NewIngredientButton({ onClick }: NewIngredientButtonProps) {
   return (
     <Button type="button" onClick={onClick}>
-      <Icon name="add" size={16} />
+      <Icon glyph={icons.add} size={16} />
       <span>Nuevo insumo</span>
     </Button>
   )

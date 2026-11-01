@@ -1,10 +1,10 @@
 import type { AnyPermissionCode, Session } from '@/api/types'
-import type { IconName } from '@/components/icons'
+import type { IconGlyph } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { ACTION_PARAM, SCREEN_ACTIONS } from '@/hooks/screenActions'
 import type { Appearance } from '@/services/appearanceRules'
 import { paths } from '@/services/paths'
 import type { NavEntry } from '@/features/shell/navigation'
-import type { ShellIconName } from '@/features/shell/ShellIcon'
 import { QUICK_SYNONYMS } from './quickSearch'
 
 export type QuickGroup = 'go' | 'actions' | 'appearance' | 'account'
@@ -22,8 +22,8 @@ export interface QuickCommand {
   readonly group: QuickGroup
   readonly label: string
   readonly description?: string
-  /** Un icono del armazón (las pantallas) o del registro general (lo demás). */
-  readonly icon: { readonly shell: ShellIconName } | { readonly general: IconName }
+  /** El de la entrada del menú en las pantallas; uno del registro en lo demás. */
+  readonly icon: IconGlyph
   /** Otras palabras con las que se busca, sin tildes. */
   readonly synonyms: readonly string[]
   /** Si es el ajuste que ya está puesto (el modo actual, el alto contraste activado). */
@@ -57,7 +57,7 @@ function goCommands({ entries }: QuickContext): readonly QuickCommand[] {
     group: 'go',
     label: entry.label,
     description: entry.description,
-    icon: { shell: entry.icon },
+    icon: entry.icon,
     synonyms: QUICK_SYNONYMS[entry.to] ?? [],
     effect: { type: 'navigate', to: entry.to },
   }))
@@ -82,7 +82,7 @@ function actionCommands({ entries, account }: QuickContext): readonly QuickComma
         group: 'actions',
         label: action.label,
         description: `En ${screen.label}`,
-        icon: { general: 'add' },
+        icon: icons.add,
         synonyms: QUICK_SYNONYMS[action.id] ?? [],
         effect: { type: 'navigate', to: `${action.screen}?${ACTION_PARAM}=${action.id}` },
       } satisfies QuickCommand,
@@ -90,10 +90,10 @@ function actionCommands({ entries, account }: QuickContext): readonly QuickComma
   })
 }
 
-const MODE_OPTIONS: readonly { readonly id: Appearance['mode']; readonly label: string; readonly icon: IconName }[] = [
-  { id: 'light', label: 'Modo claro', icon: 'lightMode' },
-  { id: 'dark', label: 'Modo oscuro', icon: 'darkMode' },
-  { id: 'system', label: 'Modo automático', icon: 'deviceMode' },
+const MODE_OPTIONS: readonly { readonly id: Appearance['mode']; readonly label: string; readonly icon: IconGlyph }[] = [
+  { id: 'light', label: 'Modo claro', icon: icons.lightMode },
+  { id: 'dark', label: 'Modo oscuro', icon: icons.darkMode },
+  { id: 'system', label: 'Modo automático', icon: icons.deviceMode },
 ]
 
 function modeCommands({ mode }: QuickContext): readonly QuickCommand[] {
@@ -102,7 +102,7 @@ function modeCommands({ mode }: QuickContext): readonly QuickCommand[] {
     group: 'appearance',
     label: option.label,
     ...(option.id === 'system' ? { description: 'Como tu celular o computadora' } : {}),
-    icon: { general: option.icon },
+    icon: option.icon,
     synonyms: ['tema', 'color', 'fondo', 'noche', 'dia'],
     isActive: mode === option.id,
     effect: { type: 'mode', mode: option.id },
@@ -121,7 +121,7 @@ function textCommands({ canSmaller, canLarger }: QuickContext): readonly QuickCo
       group: 'appearance',
       label: option.label,
       description: option.description,
-      icon: { general: 'textSize' },
+      icon: icons.textSize,
       synonyms: option.synonyms,
       effect: { type: 'textSize', step: option.step },
     }))
@@ -135,7 +135,7 @@ function appearanceCommands(context: QuickContext): readonly QuickCommand[] {
       id: 'appearance:contrast',
       group: 'appearance',
       label: context.isHighContrast ? 'Quitar el alto contraste' : 'Activar el alto contraste',
-      icon: { general: 'accessibility' },
+      icon: icons.accessibility,
       synonyms: ['accesibilidad', 'vista', 'legible'],
       isActive: context.isHighContrast,
       effect: { type: 'contrast' },
@@ -145,7 +145,7 @@ function appearanceCommands(context: QuickContext): readonly QuickCommand[] {
       group: 'appearance',
       label: 'Más ajustes de apariencia',
       description: 'Color, letra, densidad y orden del menú',
-      icon: { general: 'settings' },
+      icon: icons.settings,
       synonyms: ['personalizar', 'colores', 'menu', 'densidad'],
       effect: { type: 'navigate', to: paths.appearance },
     },
@@ -165,7 +165,7 @@ function accountCommands({ account, isPreview }: QuickContext): readonly QuickCo
       group: 'account',
       label: 'Mi perfil',
       description: 'Tus datos y tu cuenta',
-      icon: { shell: 'profile' },
+      icon: icons.profile,
       synonyms: ['usuario', 'datos'],
       effect: { type: 'navigate', to: paths.profile },
     },
@@ -175,7 +175,7 @@ function accountCommands({ account, isPreview }: QuickContext): readonly QuickCo
       id: 'account:password',
       group: 'account',
       label: 'Cambiar contraseña',
-      icon: { general: 'key' },
+      icon: icons.key,
       synonyms: ['clave', 'seguridad'],
       effect: { type: 'navigate', to: `${paths.profile}?${ACTION_PARAM}=cambiar-contrasena` },
     })
@@ -185,7 +185,7 @@ function accountCommands({ account, isPreview }: QuickContext): readonly QuickCo
       id: 'account:sign-out',
       group: 'account',
       label: 'Cerrar sesión',
-      icon: { shell: 'signOut' },
+      icon: icons.signOut,
       synonyms: ['salir', 'terminar turno'],
       effect: { type: 'signOut' },
     })

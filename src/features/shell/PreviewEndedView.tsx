@@ -2,7 +2,8 @@ import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useSession } from '@/store/session'
 import { leavePreview } from './leavePreview'
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 /**
  * Lo que queda en una pestaña de vista previa cuando su sesión terminó.
@@ -25,7 +26,7 @@ export function PreviewEndedView() {
           }
         >
           <Button type="button" onClick={leavePreview}>
-            <ShellIcon name="signOut" size={18} />
+            <Icon glyph={icons.signOut} size={18} />
             <span>Cerrar la vista previa</span>
           </Button>
         </EmptyState>

@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
-import { ShellIcon } from '@/features/shell/ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PRELOAD_QUICK_PALETTE } from './quickPaletteLoader'
 import { useQuickPalette } from './quickState'
 
@@ -17,7 +18,7 @@ export function QuickSearchButton() {
       onClick={open}
       {...PRELOAD_QUICK_PALETTE}
     >
-      <ShellIcon name="search" size={20} />
+      <Icon glyph={icons.search} size={20} />
     </Button>
   )
 }

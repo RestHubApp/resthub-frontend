@@ -5,7 +5,7 @@ import { FieldError } from './FieldError'
 import { FieldHint } from './FieldHint'
 import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
-import type { IconName } from './icons'
+import type { IconGlyph } from './Icon'
 import { Label } from './ui/label'
 import { NativeSelect, NativeSelectOption } from './ui/native-select'
 
@@ -14,7 +14,7 @@ interface SelectFieldProps {
   readonly label: string
   /** Lo que devuelve `register(...)` de react-hook-form. */
   readonly field: UseFormRegisterReturn
-  readonly icon?: IconName
+  readonly icon?: IconGlyph
   readonly error?: string | undefined
   readonly hint?: string
   /** Texto de la opcion vacia. Sin el, la lista no ofrece "ninguna". */

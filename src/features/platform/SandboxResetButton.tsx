@@ -10,6 +10,7 @@ import {
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 interface SandboxResetButtonProps {
@@ -43,7 +44,7 @@ export function SandboxResetButton({ exists, onReset }: SandboxResetButtonProps)
       <ConfirmDialog
         trigger={
           <Button type="button" variant="destructive" disabled={restart.isPending}>
-            <Icon name="update" size={18} />
+            <Icon glyph={icons.update} size={18} />
             <span>{restart.isPending ? 'Reiniciando…' : 'Reiniciar local de muestra'}</span>
           </Button>
         }

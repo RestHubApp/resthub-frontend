@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { OrderResponse, PaymentResponse } from '@/api/types'
 import { FormDialog } from '@/components/FormDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/services/format'
 import { VoidPaymentForm } from './VoidPaymentForm'
@@ -20,7 +21,7 @@ export function VoidPaymentButton({ order, payment }: VoidPaymentButtonProps) {
   return (
     <>
       <Button type="button" variant="ghost" size="sm" aria-label={`Anular el cobro de ${what}`} onClick={() => { setIsOpen(true) }}>
-        <Icon name="cancel" size={14} />
+        <Icon glyph={icons.cancel} size={14} />
         <span>Anular</span>
       </Button>
       <FormDialog

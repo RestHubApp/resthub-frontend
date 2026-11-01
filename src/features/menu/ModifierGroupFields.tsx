@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -38,7 +39,7 @@ export function ModifierGroupFields({ id, group, onChange, onRemove }: ModifierG
           <Label htmlFor={`${id}-obligatorio`} className="font-normal">Obligatorio</Label>
         </div>
         <Button type="button" variant="ghost" size="sm" aria-label={`Quitar el grupo ${group.name}`} onClick={onRemove}>
-          <Icon name="delete" size={16} />
+          <Icon glyph={icons.delete} size={16} />
         </Button>
       </div>
       <Label htmlFor={`${id}-opciones`} className="text-sm text-muted-foreground">

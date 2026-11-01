@@ -1,5 +1,6 @@
 import { FieldError } from '@/components/FieldError'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -37,7 +38,7 @@ export function OpeningPeriodRow({ draft, onChange, onRemove }: OpeningPeriodRow
           <Input id={`${id}-cierra`} type="time" step="900" className="w-32" value={draft.closes} aria-invalid={problem !== undefined} aria-describedby={errorId} onChange={(event) => { onChange({ ...draft, closes: event.target.value }) }} />
         </div>
         <Button type="button" variant="ghost" size="icon" aria-label={`Quitar el tramo del ${dayName.toLowerCase()} de ${draft.opens} a ${draft.closes}`} onClick={onRemove}>
-          <Icon name="delete" size={16} />
+          <Icon glyph={icons.delete} size={16} />
         </Button>
       </div>
       <FieldError id={`${id}-error`} message={problem} />

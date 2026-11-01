@@ -2,6 +2,7 @@ import type { Ingredient } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
+import * as icons from '@/components/icons'
 import { InventoryFailure } from './InventoryFailure'
 import { ChoiceField } from './ChoiceField'
 import { costHint, costLabel, purchaseUnits } from './purchaseMath'
@@ -42,7 +43,7 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
       <TextField
         id="purchase-cost"
         label={costLabel(costMode, price.label)}
-        icon="cost"
+        icon={icons.cost}
         inputMode="decimal"
         autoComplete="off"
         hint={costHint(accounts, price.label)}
@@ -60,7 +61,7 @@ export function PurchaseForm({ ingredient, onDone }: PurchaseFormProps) {
       <StockPreview ingredient={ingredient} delta={accounts?.baseQuantity ?? null} />
 
       <InventoryFailure mutation={purchase} fallback="No se pudo registrar la compra." />
-      <FormFooter mutation={purchase} onCancel={onDone} submit={{ label: 'Registrar compra', icon: 'purchase' }} />
+      <FormFooter mutation={purchase} onCancel={onDone} submit={{ label: 'Registrar compra', icon: icons.purchase }} />
     </form>
   )
 }

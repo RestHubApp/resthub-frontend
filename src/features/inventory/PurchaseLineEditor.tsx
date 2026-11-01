@@ -1,5 +1,6 @@
 import type { Ingredient, IngredientUnit } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
@@ -40,7 +41,7 @@ export function PurchaseLineEditor({ index, line, ingredients, onChange, onRemov
         ))}
       </NativeSelect>
       <Button type="button" variant="ghost" size="sm" aria-label={`Quitar la línea ${String(index + 1)}`} className="sm:order-last" onClick={onRemove}>
-        <Icon name="delete" size={16} />
+        <Icon glyph={icons.delete} size={16} />
       </Button>
       <Input
         id={`${id}-cantidad`}

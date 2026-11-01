@@ -1,5 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-
 import { voidPayment } from '@/api/orders'
 import type { OrderResponse, PaymentResponse } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
@@ -7,9 +5,10 @@ import { FormMessage } from '@/components/FormMessage'
 import { TextareaField } from '@/components/TextareaField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { QuickReasons } from '@/features/orders/QuickReasons'
-import { MAX_VOID_REASON, type VoidItemValues, voidItemSchema } from '@/features/orders/voidItemSchema'
+import { MAX_VOID_REASON } from '@/features/orders/voidItemSchema'
+import { useVoidReasonForm } from '@/features/orders/useVoidReasonForm'
 import { useOrderAction } from '@/features/orders/useOrderAction'
-import { useAppForm } from '@/hooks/useAppForm'
+import * as icons from '@/components/icons'
 import { QUICK_PAYMENT_VOID_REASONS, voidedPaymentMessage, voidPaymentErrorMessage } from './voidPaymentMessages'
 
 interface VoidPaymentFormProps {
@@ -20,10 +19,7 @@ interface VoidPaymentFormProps {
 
 /** El motivo de anular un cobro, escrito o elegido entre los rápidos. */
 export function VoidPaymentForm({ order, payment, onClose }: VoidPaymentFormProps) {
-  const { register, handleSubmit, formState, setValue } = useAppForm<VoidItemValues>({
-    resolver: zodResolver(voidItemSchema),
-    defaultValues: { reason: '' },
-  })
+  const { register, handleSubmit, formState, setValue } = useVoidReasonForm()
   const voided = useOrderAction({
     mutationFn: (reason: string) => voidPayment(order.id, payment.id, reason),
     success: (updated) => voidedPaymentMessage(payment, updated),
@@ -52,7 +48,7 @@ export function VoidPaymentForm({ order, payment, onClose }: VoidPaymentFormProp
         mutation={voided}
         onCancel={onClose}
         cancelLabel="Volver"
-        submit={{ label: 'Anular cobro', pendingLabel: 'Anulando…', icon: 'cancel', variant: 'destructive' }}
+        submit={{ label: 'Anular cobro', pendingLabel: 'Anulando…', icon: icons.cancel, variant: 'destructive' }}
       />
     </form>
   )

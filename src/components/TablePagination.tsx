@@ -1,4 +1,5 @@
 import { Icon } from './Icon'
+import * as icons from './icons'
 import { Button } from './ui/button'
 
 interface TablePaginationProps {
@@ -25,7 +26,7 @@ export function TablePagination({ actual, total, onChange }: TablePaginationProp
             onChange(actual - 1)
           }}
         >
-          <Icon name="previous" size={14} />
+          <Icon glyph={icons.previous} size={14} />
           <span>Anterior</span>
         </Button>
         <Button
@@ -38,7 +39,7 @@ export function TablePagination({ actual, total, onChange }: TablePaginationProp
           }}
         >
           <span>Siguiente</span>
-          <Icon name="next" size={14} />
+          <Icon glyph={icons.next} size={14} />
         </Button>
       </div>
     </nav>

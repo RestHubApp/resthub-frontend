@@ -1,6 +1,6 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { CommandItem } from '@/components/ui/command'
-import { ShellIcon } from '@/features/shell/ShellIcon'
 import type { QuickCommand } from './quickCommands'
 
 interface QuickPaletteItemProps {
@@ -10,7 +10,6 @@ interface QuickPaletteItemProps {
 
 /** Una opción de la paleta: su icono, su nombre, su descripción corta y si es el ajuste que ya está puesto. */
 export function QuickPaletteItem({ command, onRun }: QuickPaletteItemProps) {
-  const className = 'text-muted-foreground'
   return (
     <CommandItem
       value={command.id}
@@ -19,11 +18,7 @@ export function QuickPaletteItem({ command, onRun }: QuickPaletteItemProps) {
         onRun(command)
       }}
     >
-      {'shell' in command.icon ? (
-        <ShellIcon name={command.icon.shell} size={18} className={className} />
-      ) : (
-        <Icon name={command.icon.general} size={18} className={className} />
-      )}
+      <Icon glyph={command.icon} size={18} className="text-muted-foreground" />
       <span className="flex min-w-0 flex-1 flex-col leading-tight">
         <span className="truncate font-medium">{command.label}</span>
         {command.description === undefined ? null : (
@@ -32,7 +27,7 @@ export function QuickPaletteItem({ command, onRun }: QuickPaletteItemProps) {
       </span>
       {command.isActive === true ? (
         <>
-          <Icon name="confirm" size={16} className="text-primary" />
+          <Icon glyph={icons.confirm} size={16} className="text-primary" />
           <span className="sr-only">(activo)</span>
         </>
       ) : null}

@@ -8,6 +8,7 @@ import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { useReauthentication } from '@/store/reauthentication'
 import { type CurrentPasswordValues, currentPasswordSchema } from '@/services/securityRules'
+import * as icons from '@/components/icons'
 import { useReauthenticationConfirm } from './useReauthenticationConfirm'
 
 /**
@@ -65,7 +66,7 @@ export function ReauthenticationDialog() {
           mutation={confirm}
           failureText="No se pudo confirmar la contraseña."
           onCancel={cancel}
-          submit={{ label: 'Confirmar', pendingLabel: 'Confirmando…', icon: 'key' }}
+          submit={{ label: 'Confirmar', pendingLabel: 'Confirmando…', icon: icons.key }}
         />
       </form>
     </FormDialog>

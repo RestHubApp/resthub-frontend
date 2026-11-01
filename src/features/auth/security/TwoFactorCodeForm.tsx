@@ -5,6 +5,7 @@ import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { onlyDigits, type TotpValues, totpSchema } from '@/services/securityRules'
+import * as icons from '@/components/icons'
 
 interface TwoFactorCodeFormProps {
   readonly mutation: { readonly isPending: boolean; readonly isError: boolean; readonly error: unknown; readonly mutate: (code: string) => void }
@@ -20,7 +21,7 @@ export function TwoFactorCodeForm({ mutation, onCancel }: TwoFactorCodeFormProps
         id="two_factor_code"
         label="Código de la aplicación"
         hint="Los 6 dígitos que muestra ahora la aplicación."
-        icon="key"
+        icon={icons.key}
         inputMode="numeric"
         autoComplete="one-time-code"
         maxLength={6}
@@ -28,7 +29,7 @@ export function TwoFactorCodeForm({ mutation, onCancel }: TwoFactorCodeFormProps
         field={register('code')}
         error={formState.errors.code?.message}
       />
-      <FormFooter mutation={mutation} failureText="No se pudo activar la verificación." onCancel={onCancel} submit={{ label: 'Activar', pendingLabel: 'Activando…', icon: 'confirm' }} />
+      <FormFooter mutation={mutation} failureText="No se pudo activar la verificación." onCancel={onCancel} submit={{ label: 'Activar', pendingLabel: 'Activando…', icon: icons.confirm }} />
     </form>
   )
 }

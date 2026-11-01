@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { IdleLockCard } from './IdleLockCard'
@@ -25,7 +26,7 @@ export function StaffView() {
               setIsCreating(true)
             }}
           >
-            <Icon name="add" size={16} />
+            <Icon glyph={icons.add} size={16} />
             <span>Nueva cuenta</span>
           </Button>
         }

@@ -1,4 +1,5 @@
 import { Icon } from './Icon'
+import * as icons from './icons'
 import { StatusBadge } from './StatusBadge'
 import { Button } from './ui/button'
 
@@ -44,7 +45,7 @@ export function DeviceSessionList({ label, sessions, onClose, closingId = null }
                 onClose(session)
               }}
             >
-              <Icon name="signOut" size={14} />
+              <Icon glyph={icons.signOut} size={14} />
               <span>{closingId === session.id ? 'Cerrando…' : 'Cerrar'}</span>
             </Button>
           )}

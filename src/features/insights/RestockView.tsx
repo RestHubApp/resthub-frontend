@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { PanelHeader } from './PanelHeader'
 import { ReportState } from './ReportState'
@@ -16,7 +17,7 @@ export function RestockView() {
         description="Qué insumos comprar y cuándo, según el stock, el consumo de las últimas semanas y las mermas."
         actions={
           <Button type="button" disabled={update.isPending} onClick={() => { update.mutate() }}>
-            <Icon name="update" size={16} className={update.isPending ? 'animate-spin' : undefined} />
+            <Icon glyph={icons.update} size={16} className={update.isPending ? 'animate-spin' : undefined} />
             <span>{update.isPending ? 'Actualizando…' : 'Actualizar recomendaciones'}</span>
           </Button>
         }

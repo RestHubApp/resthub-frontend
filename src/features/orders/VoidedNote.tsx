@@ -1,5 +1,6 @@
 import type { OrderItemResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 interface VoidedNoteProps {
   readonly item: OrderItemResponse
@@ -9,7 +10,7 @@ interface VoidedNoteProps {
 export function VoidedNote({ item }: VoidedNoteProps) {
   return (
     <p className="m-0 mt-1 flex items-start gap-1.5 text-sm font-semibold text-foreground">
-      <Icon name="cancel" size={16} className="mt-0.5 shrink-0" />
+      <Icon glyph={icons.cancel} size={16} className="mt-0.5 shrink-0" />
       <span className="min-w-0 flex-1 break-words">Anulado: {item.void_reason ?? ''}</span>
     </p>
   )

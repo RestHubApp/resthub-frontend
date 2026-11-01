@@ -3,6 +3,7 @@ import type { UseFormRegisterReturn } from 'react-hook-form'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { formatCents } from '@/services/format'
+import * as icons from '@/components/icons'
 
 interface TipFieldProps {
   readonly field: UseFormRegisterReturn
@@ -25,7 +26,7 @@ export function TipField({ field, error, onQuick }: TipFieldProps) {
       <TextField
         id="propina"
         label="Propina (opcional)"
-        icon="tip"
+        icon={icons.tip}
         inputMode="decimal"
         autoComplete="off"
         placeholder="0.00"
