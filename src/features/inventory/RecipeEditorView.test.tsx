@@ -33,6 +33,19 @@ function rowOf(text: string): HTMLElement {
   return row
 }
 
+describe('RecipeEditorView: enlace inválido', () => {
+  it('un enlace con un plato que no es número dice que la receta no existe, sin quedarse cargando', async () => {
+    const api = server().on('get', INGREDIENTS, [ingredient()])
+    signInAs(PERMISSIONS_OWNER)
+    mountScreen(<RecipeEditorView />, { ...ROUTE, en: '/inventario/recetas/abc' })
+
+    expect(await screen.findByText('Esta receta no existe.')).toBeInTheDocument()
+    expect(screen.queryByText('Cargando la receta…')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Volver a recetas' })).toBeInTheDocument()
+    expect(api.calls('get', /^\/inventory\/recipes\//u)).toHaveLength(0)
+  })
+})
+
 describe('RecipeEditorView', () => {
   it('muestra precio, costo y margen de la porción y cada línea con su costo', async () => {
     openRecipe()
