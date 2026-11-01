@@ -9,7 +9,7 @@ import { useNotifications } from '@/store/notifications'
 import { ownerOf } from '@/store/offlineQueue'
 import { useStaffAccount } from '@/store/session'
 import { draftKey, type OrderTarget } from './orderTarget'
-import { NotSentError, QUEUED, sendDraft, successMessage } from './submitDraft'
+import { failureMessage, NotSentError, QUEUED, sendDraft, successMessage } from './submitDraft'
 import { type DraftLine, useDraftActions } from './useOrderDraft'
 
 /**
@@ -50,7 +50,8 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
     },
     onError: async (error) => {
       if (!(error instanceof NotSentError)) {
-        push({ tone: 'warning', message: errorMessage(error, 'No se pudo guardar el pedido.') })
+        if (target.kind === 'add') await refresh()
+        push({ tone: 'warning', message: failureMessage(target, error) })
         return
       }
       clear(key)
