@@ -20,8 +20,8 @@ function memoryStorage(): KeyValueStorage {
   }
 }
 
-function page(storage: KeyValueStorage | null, at: { now: number }): StaleChunkPage & { reload: jest.Mock<() => void> } {
-  return { storage, now: () => at.now, reload: jest.fn<() => void>() }
+function page(storage: KeyValueStorage | null, at: { now: number }, isOnline = true): StaleChunkPage & { reload: jest.Mock<() => void> } {
+  return { storage, now: () => at.now, isOnline: () => isOnline, reload: jest.fn<() => void>() }
 }
 
 describe('reloadForStaleChunk', () => {
@@ -43,6 +43,15 @@ describe('reloadForStaleChunk', () => {
     at.now += STALE_CHUNK_RETRY_MS
     expect(reloadForStaleChunk(tab)).toBe(true)
     expect(tab.reload).toHaveBeenCalledTimes(2)
+  })
+
+  it('sin conexión no recarga: el trozo falta por la red, no por un despliegue', () => {
+    const storage = memoryStorage()
+    const offline = page(storage, { now: 1_000_000 }, false)
+
+    expect(reloadForStaleChunk(offline)).toBe(false)
+    expect(offline.reload).not.toHaveBeenCalled()
+    expect(storage.getItem(STALE_CHUNK_RELOAD_KEY)).toBeNull()
   })
 
   it('no recarga sin almacenamiento ni si el almacenamiento falla', () => {

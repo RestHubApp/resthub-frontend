@@ -16,16 +16,21 @@ export interface StaleChunkPage {
   /** `null` si el navegador no deja usar `sessionStorage`. */
   readonly storage: KeyValueStorage | null
   readonly now: () => number
+  /** Sin conexión no se recarga: el trozo falta por la red, no por un despliegue. */
+  readonly isOnline: () => boolean
   readonly reload: () => void
 }
 
 /**
  * Recarga la página si no se recargó hace poco. Devuelve si lo hizo. Sin
- * almacenamiento no hay cómo saber si ya se intentó, así que no recarga.
+ * almacenamiento no hay cómo saber si ya se intentó, y sin conexión el trozo no
+ * falta por un despliegue: en los dos casos no recarga.
  */
 export function reloadForStaleChunk(page: StaleChunkPage): boolean {
   const { storage } = page
-  if (storage === null) {
+  // La precarga al pasar el dedo y la preparación sin señal piden trozos sin red y
+  // callan su error: recargar ahí dejaría al mesero sin la pantalla en la que estaba.
+  if (storage === null || !page.isOnline()) {
     return false
   }
   const now = page.now()
@@ -54,6 +59,7 @@ function tabStorage(): KeyValueStorage | null {
 export function reloadOnStaleChunks(page: StaleChunkPage = {
   storage: tabStorage(),
   now: () => Date.now(),
+  isOnline: () => navigator.onLine,
   reload: () => { window.location.reload() },
 }): void {
   window.addEventListener('vite:preloadError', (event) => {
