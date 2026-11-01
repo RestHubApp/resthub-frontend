@@ -76,6 +76,17 @@ export function toBaseCost(cost: number, factor: number): string {
   return withoutZerosTrailing((cost / factor).toFixed(6))
 }
 
+/**
+ * Un costo guardado por unidad base, mostrado por kilo, litro o unidad para
+ * rellenar un campo. Conserva los 6 decimales del servidor: por kilo son 3,
+ * por unidad los 6 (S/ 0.0004 por servilleta no se vuelve 0).
+ */
+export function costForInput(unitCost: string | number, unit: IngredientUnit): string {
+  const { factor } = priceUnit(unit)
+  const decimals = factor === 1 ? 6 : 3
+  return withoutZerosTrailing((Number(unitCost) * factor).toFixed(decimals))
+}
+
 /** Una cantidad base mostrada en la unidad elegida, para rellenar un campo. */
 export function fromBase(value: string | number, factor: number): string {
   return withoutZerosTrailing((Number(value) / factor).toFixed(3))

@@ -1,7 +1,7 @@
-import type { Ingredient, IngredientUnit, PackagingRequest } from '@/api/types'
+import type { Ingredient, IngredientUnit, PackagingRequest, UpdateIngredientRequest } from '@/api/types'
 import type { IngredientValues } from './inventorySchema'
 import type { PackagingValues } from './packagingSchema'
-import { findInputUnit, fromBase, type InputUnit, inputUnits, parseDecimal, priceUnit, toBaseCost, toBaseQuantity } from './units'
+import { costForInput, findInputUnit, fromBase, type InputUnit, inputUnits, parseDecimal, priceUnit, toBaseCost, toBaseQuantity } from './units'
 
 const NO_PACKAGING: PackagingValues = {
   packaging_size: '',
@@ -55,13 +55,12 @@ function packagingValuesOf(ingredient: Ingredient): PackagingValues {
 /** Los datos de un insumo, en kilos y litros, para editarlos. */
 export function ingredientValuesOf(ingredient: Ingredient): IngredientValues {
   const large = inputUnits(ingredient.unit)[0] ?? priceUnit(ingredient.unit)
-  const cost = Number(ingredient.unit_cost) * priceUnit(ingredient.unit).factor
   return {
     name: ingredient.name,
     unit: ingredient.unit,
     min_stock: fromBase(ingredient.min_stock, large.factor),
     min_stock_unit: large.value,
-    unit_cost: cost > 0 ? fromBase(cost, 1) : '',
+    unit_cost: Number(ingredient.unit_cost) > 0 ? costForInput(ingredient.unit_cost, ingredient.unit) : '',
     ...packagingValuesOf(ingredient),
   }
 }
@@ -73,6 +72,22 @@ export function ingredientNumbers(values: IngredientValues, unit: IngredientUnit
   return {
     min_stock: values.min_stock.trim() === '' ? '0' : toBaseQuantity(values.min_stock, factor),
     unit_cost: toBaseCost(cost, priceUnit(unit).factor),
+  }
+}
+
+/**
+ * La edición de un insumo: el nombre siempre; el mínimo y el costo, solo si se
+ * tocaron. Cada compra pondera el costo en el servidor, así que reenviar el que
+ * se leyó al abrir pisaría el actual con uno viejo.
+ */
+export function ingredientChanges(values: IngredientValues, ingredient: Ingredient): UpdateIngredientRequest {
+  const original = ingredientValuesOf(ingredient)
+  const numbers = ingredientNumbers(values, values.unit)
+  const isMinStockChanged = values.min_stock !== original.min_stock || values.min_stock_unit !== original.min_stock_unit
+  return {
+    name: values.name,
+    ...(isMinStockChanged ? { min_stock: numbers.min_stock } : {}),
+    ...(values.unit_cost === original.unit_cost ? {} : { unit_cost: numbers.unit_cost }),
   }
 }
 

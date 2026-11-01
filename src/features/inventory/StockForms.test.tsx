@@ -10,11 +10,12 @@ const LIMON = ingredient()
 const NEW = 'Nuevo insumo'
 const MIN = 'Stock mínimo'
 const CREATE = { name: 'Crear insumo' }
+const EDIT = 'Editar: Limón'
 const PURCHASES = '/inventory/purchases'
 const SETTINGS = '/inventory/adjustments'
 
-function open() {
-  const api = server().on('get', INGREDIENTS, [LIMON]).on('get', '/inventory/alerts/low-stock', []).on('get', '/restaurant', new ErrorResponse(404))
+function open(ingredients = [LIMON]) {
+  const api = server().on('get', INGREDIENTS, ingredients).on('get', '/inventory/alerts/low-stock', []).on('get', '/restaurant', new ErrorResponse(404))
   signInAs()
   return { api, ...mountScreen(<InventoryView />, { path: '/inventario' }) }
 }
@@ -65,14 +66,43 @@ describe('alta y edición de insumos', () => {
   it('editar parte de los datos en kilos, no deja cambiar la unidad y muestra el error del servidor', async () => {
     const { api, user } = open()
     api.on('patch', `${INGREDIENTS}/1`, new ErrorResponse(409, 'Ya hay un insumo con ese nombre.'))
-    const window = await menuAction(user, 'Editar', 'Editar: Limón')
+    const window = await menuAction(user, 'Editar', EDIT)
 
     expect(within(window).getByLabelText(MIN)).toHaveValue('2')
     expect(within(window).getByText(/Se mide en/u)).toHaveTextContent('Se mide en gramos')
     await user.click(within(window).getByRole('button', { name: 'Guardar' }))
 
     expect(await within(window).findByText('Ya hay un insumo con ese nombre.')).toBeInTheDocument()
-    expect(api.calls('patch', `${INGREDIENTS}/1`)[0]?.body).toEqual({ name: 'Limón', min_stock: '2000', unit_cost: '0.004' })
+    // Sin tocar el mínimo ni el costo, no se reenvían: el costo lo pondera cada compra.
+    expect(api.calls('patch', `${INGREDIENTS}/1`)[0]?.body).toEqual({ name: 'Limón' })
+  })
+
+  it('al cambiar solo el mínimo, la edición no reenvía el costo leído al abrir', async () => {
+    const { api, user } = open()
+    api.on('patch', `${INGREDIENTS}/1`, ingredient({ min_stock: '3000' }))
+    const window = await menuAction(user, 'Editar', EDIT)
+
+    await user.clear(within(window).getByLabelText(MIN))
+    await user.type(within(window).getByLabelText(MIN), '3')
+    await user.click(within(window).getByRole('button', { name: 'Guardar' }))
+
+    expect(await screen.findByText('Cambios guardados.')).toBeInTheDocument()
+    expect(api.calls('patch', `${INGREDIENTS}/1`)[0]?.body).toEqual({ name: 'Limón', min_stock: '3000' })
+  })
+
+  it('un insumo por unidad con costo de 6 decimales se muestra entero y renombrarlo no lo redondea', async () => {
+    const { api, user } = open([ingredient({ unit: 'unit', unit_cost: '0.0004', min_stock: '1.5' })])
+    api.on('patch', `${INGREDIENTS}/1`, ingredient({ name: 'Servilleta', unit: 'unit', unit_cost: '0.0004' }))
+    const window = await menuAction(user, 'Editar', EDIT)
+
+    expect(within(window).getByLabelText('Costo por unid. (S/)')).toHaveValue('0.0004')
+    await user.clear(within(window).getByLabelText('Nombre'))
+    await user.type(within(window).getByLabelText('Nombre'), 'Servilleta')
+    await user.click(within(window).getByRole('button', { name: 'Guardar' }))
+
+    expect(await screen.findByText('Cambios guardados.')).toBeInTheDocument()
+    expect(within(window).queryByText('Tiene que ser mayor que cero')).not.toBeInTheDocument()
+    expect(api.calls('patch', `${INGREDIENTS}/1`)[0]?.body).toEqual({ name: 'Servilleta' })
   })
 
   it('sin nombre no se envía', async () => {

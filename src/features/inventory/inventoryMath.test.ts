@@ -103,6 +103,9 @@ describe('ingredientValues', () => {
   it('muestra un insumo en kilos para editarlo', () => {
     expect(ingredientValuesOf(LIMON)).toMatchObject({ name: 'Limón', unit: 'g', min_stock: '2', min_stock_unit: 'kg', unit_cost: '4', packaging_size: '' })
     expect(ingredientValuesOf(ingredient({ unit_cost: '0' })).unit_cost).toBe('')
+    // Por unidad se conservan los 6 decimales del servidor.
+    expect(ingredientValuesOf(ingredient({ unit: 'unit', unit_cost: '3.333333' })).unit_cost).toBe('3.333333')
+    expect(ingredientValuesOf(ingredient({ unit: 'unit', unit_cost: '0.0004' })).unit_cost).toBe('0.0004')
   })
 
   it('vacío vale cero, y lo escrito se lleva a la unidad base', () => {
@@ -161,5 +164,13 @@ describe('inventorySchema', () => {
   it('un insumo necesita nombre y una receta cantidades positivas', () => {
     expect(ingredientSchema.safeParse(EMPTY_INGREDIENT).error?.issues[0]?.message).toBe('Escribe el nombre del insumo')
     expect(recipeSchema.safeParse({ lines: [{ ingredient_id: 1, quantity: '0' }] }).success).toBe(false)
+  })
+  it('el costo de un insumo admite 6 decimales por unidad y 3 por kilo o litro', () => {
+    const named = { ...EMPTY_INGREDIENT, name: 'Servilleta' }
+    expect(ingredientSchema.safeParse({ ...named, unit: 'unit', unit_cost: '0.0004' }).success).toBe(true)
+    expect(ingredientSchema.safeParse({ ...named, unit: 'g', unit_cost: '4.2' }).success).toBe(true)
+    expect(ingredientSchema.safeParse({ ...named, unit: 'g', unit_cost: '4.0001' }).error?.issues[0]?.message).toBe(
+      'Escribe un número con hasta 3 decimales',
+    )
   })
 })
