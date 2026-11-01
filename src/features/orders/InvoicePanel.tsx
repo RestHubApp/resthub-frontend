@@ -13,6 +13,14 @@ function isIssuable(issued: Invoice | null): boolean {
   return issued === null || issued.is_voided
 }
 
+/**
+ * Sin saber si ya tiene comprobante, no se ofrece emitir otro. Uno vigente ya
+ * leído sigue a la vista aunque falle releerlo: un comprobante no desaparece.
+ */
+function isUnknown(hasFailed: boolean, issued: Invoice | null): boolean {
+  return hasFailed && isIssuable(issued)
+}
+
 interface InvoicePanelProps {
   readonly order: OrderResponse
 }
@@ -31,8 +39,8 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
   if (!isShown || invoice.isPending) {
     return null
   }
-  // Sin saber si ya tiene comprobante, no se ofrece emitir otro.
-  if (invoice.isError) {
+  const issued = invoice.data ?? null
+  if (isUnknown(invoice.isError, issued)) {
     return (
       <RetryQueryError
         error={invoice.error}
@@ -43,7 +51,6 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
       />
     )
   }
-  const issued = invoice.data ?? null
 
   return (
     <>
