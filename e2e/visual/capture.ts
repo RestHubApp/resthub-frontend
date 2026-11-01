@@ -89,13 +89,19 @@ const INSTANT = /"(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:
 const CARD_WITH_REGISTRATION = /^\/api\/v1\/platform\/restaurants\/\d+$/u
 
 // En el historial de pedidos la columna «Abierto» muestra la fecha entera: el
-// día («11» o «20») también cambia su ancho y movía las demás columnas. Se
-// fija el instante entero (el historial no calcula tiempos).
-const ORDER_HISTORY = /^\/api\/v1\/orders$/u
+// día («11» o «20») también cambia su ancho y movía las demás columnas. Lo
+// mismo en el libro de movimientos y en la bandeja de mermas: del 1 al 9 de cada
+// mes el día tiene una cifra («1 nov.») y la captura salía distinta. Se fija el
+// instante entero (ninguna de estas listas calcula tiempos).
+const LISTS_WITH_DATE: readonly RegExp[] = [
+  /^\/api\/v1\/orders$/u,
+  /^\/api\/v1\/inventory\/movements$/u,
+  /^\/api\/v1\/inventory\/waste-approvals$/u,
+]
 
 function normalize(route: string, text: string): string {
   const withoutSuffixes = SUFFIXES.reduce((actual, [pattern, replacement]) => actual.replace(pattern, replacement), text)
-  if (CARD_WITH_REGISTRATION.test(route) || ORDER_HISTORY.test(route)) {
+  if (CARD_WITH_REGISTRATION.test(route) || LISTS_WITH_DATE.some((list) => list.test(route))) {
     return withoutSuffixes.replaceAll(INSTANT, '"2026-09-27T17:00:00Z"')
   }
   return LISTS_WITH_HOUR.some((list) => list.test(route)) ? withoutSuffixes.replaceAll(INSTANT, '"$1T17:00:00Z"') : withoutSuffixes
