@@ -98,6 +98,16 @@ describe('cabecera Authorization de cada petición', () => {
     expect(onExpireRestaurant).toHaveBeenCalledTimes(1)
   })
 
+  it('la cuenta de plataforma desactivada o con sus sesiones cortadas (`admin_unavailable`) cierra la sesión', async () => {
+    const onExpirePlatform = jest.fn()
+    setUnauthorizedHandler(onExpirePlatform)
+    setAuthToken('platform-token')
+    respondWith(401, { detail: 'La cuenta ya no está disponible.', code: 'admin_unavailable' })
+
+    await expect(readPlatform()).rejects.toBeInstanceOf(ApiError)
+    expect(onExpirePlatform).toHaveBeenCalledWith('platform-token')
+  })
+
   it('`withoutCredential` no manda ningún token aunque haya sesiones abiertas', async () => {
     setAuthToken('r1')
     respondWith(200, { access_token: 'x' })

@@ -121,8 +121,10 @@ export function errorMessage(error: unknown, fallback: string): string {
   return detailOf(error.body) ?? fallback
 }
 
-// Credencial ausente, vencida o revocada; o la sesión que el tercer PIN equivocado cerró.
-const SESSION_CODES: readonly ErrorCode[] = ['unauthenticated', 'invalid_token', 'unlock_attempts_exhausted']
+// Credencial ausente, vencida o revocada; la cuenta de plataforma desactivada o con sus
+// sesiones cortadas (cambio de contraseña en otro equipo); o la sesión que el tercer PIN
+// equivocado cerró.
+const SESSION_CODES: readonly ErrorCode[] = ['unauthenticated', 'invalid_token', 'unlock_attempts_exhausted', 'admin_unavailable']
 // El servidor no pudo atender: la base de datos o el plazo máximo de atención (503).
 const UNAVAILABLE_CODES: readonly ErrorCode[] = ['database_unavailable', 'request_timeout']
 // El estado cambió mientras tanto: otro pago entró, otro cambio del pedido.
