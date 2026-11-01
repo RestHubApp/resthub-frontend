@@ -97,6 +97,9 @@ jobs:
       - name: ESLint
         run: pnpm lint
 
+      - name: Acciones fijadas al mismo commit en todos los workflows
+        run: pnpm check:actions
+
   # Análisis estático con Semgrep y búsqueda de secretos en el historial con
   # gitleaks. ESLint security corre en el job de arriba. El detalle y los falsos
   # positivos revisados están en RestHub_Pruebas/07-seguridad/sast.md.

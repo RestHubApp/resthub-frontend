@@ -26,8 +26,12 @@ updates:
         dependency-type: production
         update-types: [minor, patch]
 
+  # `/` cubre .github/workflows; las acciones compuestas de .github/actions
+  # van aparte, si no sus versiones nunca reciben un PR. Llegan en el mismo
+  # grupo, y `pnpm check:actions` (job ESLint del CI) falla si quedan
+  # fijadas a otro commit que los workflows.
   - package-ecosystem: github-actions
-    directory: /
+    directories: ['/', '/.github/actions/*']
     target-branch: develop
     schedule:
       interval: monthly

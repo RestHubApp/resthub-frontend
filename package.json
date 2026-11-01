@@ -30,6 +30,7 @@
     "e2e:inventory": "node e2e/inventory/generate.ts",
     "type-coverage": "type-coverage",
     "size": "size-limit",
+    "check:actions": "node scripts/actionPins.ts",
     "carbon": "node scripts/carbon.ts",
     "carbon:browser": "node scripts/carbon.ts --mode browser",
     "doctor": "react-doctor . --verbose --no-score --no-supply-chain --blocking warning"
