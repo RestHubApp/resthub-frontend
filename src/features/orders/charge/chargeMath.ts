@@ -43,13 +43,16 @@ export function unpaidItems(order: OrderResponse): OrderItemResponse[] {
 /**
  * Lo que cuestan esos platos con el descuento del pedido.
  *
- * Si son todos los que faltan, es lo que falta: quien paga lo último cierra
+ * Si son todos los que faltan por cobrar, es lo que falta: quien paga lo último cierra
  * la cuenta con el redondeo, igual que en el servidor.
  */
 export function itemsCents(order: OrderResponse, itemIds: readonly number[]): number {
   const selected = new Set(itemIds)
   const pending = unpaidItems(order)
-  if (pending.length > 0 && pending.every((item) => selected.has(item.id))) {
+  // Como el servidor, solo cuentan los platos que todavía deben algo: una
+  // cortesía o un plato de S/ 0.00 sin marcar no impide cerrar la cuenta.
+  const payable = pending.filter((item) => !item.is_courtesy && toCents(item.subtotal) > 0)
+  if (payable.length > 0 && payable.every((item) => selected.has(item.id))) {
     return balanceCents(order)
   }
   const due = pending

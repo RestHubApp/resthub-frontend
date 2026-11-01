@@ -75,7 +75,8 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
       setPersonas((before) => Math.max(before - 1, 1))
     },
   })
-  const hasNoDishes = mode === 'items' && dishes.length === 0
+  // Sin platos, o solo cortesías: un pago de S/ 0.00 no cobra nada.
+  const hasNoDishes = mode === 'items' && (dishes.length === 0 || part === 0)
 
   return {
     form,
