@@ -10,6 +10,7 @@ const MAX_REASON = 200
 // Topes contra errores de tipeo, en la unidad que se escribe (kg, L o unid.).
 const MAX_QUANTITY = 100_000
 const MAX_COST = 100_000
+const THREE_DECIMALS = 'Escribe un número con hasta 3 decimales'
 
 // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
 const QUANTITY = /^\d+(?:[.,]\d{1,3})?$/u
@@ -20,12 +21,21 @@ function quantityRule({ allowsZero }: { readonly allowsZero: boolean }) {
     .string()
     .trim()
     .min(1, 'Escribe la cantidad')
-    .regex(QUANTITY, 'Escribe un número con hasta 3 decimales')
+    .regex(QUANTITY, THREE_DECIMALS)
     .refine((value) => allowsZero || parseDecimal(value) > 0, 'Tiene que ser mayor que cero')
     .refine((value) => parseDecimal(value) <= MAX_QUANTITY, 'Es demasiado. Revisa el dato')
 }
 
+// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
+const OPTIONAL_QUANTITY = /^(?:\d+(?:[.,]\d{1,3})?)?$/u
+
 const costRule = decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles', required: true })
+// El costo de un insumo: por unidad caben los 6 decimales del servidor; por kilo
+// o litro, 3 (que ya son 6 por gramo o mililitro).
+const UNIT_COST_RULES = {
+  perUnit: decimalRule({ max: MAX_COST, decimals: 6, unit: 'soles' }),
+  perKilo: decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles' }),
+}
 
 export const ingredientSchema = z
   .object({
@@ -35,15 +45,19 @@ export const ingredientSchema = z
       .min(1, 'Escribe el nombre del insumo')
       .max(MAX_NAME, `Usa como máximo ${String(MAX_NAME)} caracteres`),
     unit: z.enum(['g', 'ml', 'unit'], 'Elige cómo se mide'),
-    // eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-    min_stock: z.string().trim().regex(/^(?:\d+(?:[.,]\d{1,3})?)?$/u, 'Escribe un número con hasta 3 decimales'),
+    min_stock: z.string().trim().regex(OPTIONAL_QUANTITY, THREE_DECIMALS),
     min_stock_unit: z.string(),
-    unit_cost: decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles' }),
+    // Se revisa abajo, según la unidad: así el aviso dice los decimales que caben.
+    unit_cost: z.string().trim(),
     ...packagingFields,
   })
   .superRefine((values, context) => {
     for (const [field, message] of packagingIssues(values)) {
       context.addIssue({ code: 'custom', path: [field], message })
+    }
+    const rule = values.unit === 'unit' ? UNIT_COST_RULES.perUnit : UNIT_COST_RULES.perKilo
+    for (const issue of rule.safeParse(values.unit_cost).error?.issues ?? []) {
+      context.addIssue({ code: 'custom', path: ['unit_cost'], message: issue.message })
     }
   })
 

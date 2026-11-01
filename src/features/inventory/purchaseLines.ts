@@ -1,4 +1,5 @@
 import type { PurchaseSuggestion } from '@/api/types'
+import { decimalText, hasInvalidLineNumber, isLineCost, isLineQuantity } from './lineNumbers'
 
 /** Una línea de la orden mientras se escribe, con los textos del formulario. */
 export interface LineDraft {
@@ -8,9 +9,6 @@ export interface LineDraft {
   readonly quantity: string
   readonly unitCost: string
 }
-
-// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-const NUMBER = /^\d+(?:[.,]\d+)?$/u
 
 export function emptyLine(): LineDraft {
   return { key: crypto.randomUUID(), ingredientId: '', quantity: '', unitCost: '' }
@@ -26,10 +24,6 @@ export function linesFromSuggestions(suggestions: readonly PurchaseSuggestion[])
   }))
 }
 
-function number(value: string): string | null {
-  const clean = value.trim().replace(',', '.')
-  return NUMBER.test(clean) ? clean : null
-}
 
 /** Las líneas completas y válidas, o `null` si alguna está a medias. */
 export function linesForApi(
@@ -41,12 +35,17 @@ export function linesForApi(
   }
   const output = []
   for (const line of complete) {
-    const quantity = number(line.quantity)
-    const cost = number(line.unitCost === '' ? '0' : line.unitCost)
-    if (quantity === null || cost === null || Number(quantity) <= 0) {
+    const quantity = decimalText(line.quantity)
+    const cost = decimalText(line.unitCost === '' ? '0' : line.unitCost)
+    if (!isLineQuantity(quantity) || !isLineCost(cost) || Number(quantity) <= 0) {
       return null
     }
     output.push({ ingredient_id: Number(line.ingredientId), quantity: quantity, unit_cost: cost })
   }
   return output
+}
+
+/** Si alguna línea tiene un número con más decimales o cifras de los que acepta el servidor. */
+export function hasInvalidNumbers(lines: readonly LineDraft[]): boolean {
+  return hasInvalidLineNumber(lines.map((line) => ({ quantity: line.quantity, cost: line.unitCost })))
 }

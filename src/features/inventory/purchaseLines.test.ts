@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 
 import type { PurchaseSuggestion } from '@/api/types'
-import { type LineDraft, linesForApi, linesFromSuggestions } from './purchaseLines'
+import { hasInvalidNumbers, type LineDraft, linesForApi, linesFromSuggestions } from './purchaseLines'
 
 function line(ingredientId: string, quantity: string, unitCost = ''): LineDraft {
   return { key: ingredientId, ingredientId, quantity, unitCost }
@@ -22,6 +22,14 @@ describe('linesForApi', () => {
     expect(linesForApi([line('', '')])).toBeNull()
     expect(linesForApi([line('1', '0')])).toBeNull()
     expect(linesForApi([line('1', 'dos')])).toBeNull()
+  })
+
+  it('no admite más decimales de los que guarda el servidor, y lo avisa', () => {
+    expect(linesForApi([line('1', '1.2345', '0.003')])).toBeNull()
+    expect(linesForApi([line('1', '1', '0.0033333')])).toBeNull()
+    expect(linesForApi([line('1', '1.234', '0,003333')])).toEqual([{ ingredient_id: 1, quantity: '1.234', unit_cost: '0.003333' }])
+    expect(hasInvalidNumbers([line('1', '1.2345')])).toBe(true)
+    expect(hasInvalidNumbers([line('1', '', '')])).toBe(false)
   })
 })
 

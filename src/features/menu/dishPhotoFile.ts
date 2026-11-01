@@ -17,6 +17,9 @@ const WEBP = 'image/webp'
 
 export const PHOTO_TYPES = [JPEG, 'image/png', WEBP] as const
 
+/** Un archivo que no sirve como foto: su mensaje se le muestra tal cual a la persona. */
+export class PhotoFileError extends Error {}
+
 /** Lo que impide usar el archivo como foto, o `null` si sirve. */
 export function photoProblem(file: File | undefined): string | null {
   if (file === undefined) {
@@ -99,5 +102,5 @@ export async function preparePhoto(file: File): Promise<string> {
   } finally {
     bitmap.close()
   }
-  throw new Error('La foto es demasiado pesada aun reducida.')
+  throw new PhotoFileError('La foto es demasiado pesada aun reducida.')
 }

@@ -1,5 +1,7 @@
 import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { LINE_NUMBERS_HINT } from './lineNumbers'
 import { PurchaseLinesList } from './PurchaseLinesList'
 import { SuggestionsBar } from './SuggestionsBar'
 import { SupplierSelect } from './SupplierSelect'
@@ -33,6 +35,7 @@ export function PurchaseOrderDialog({ open, onClose }: PurchaseOrderDialogProps)
       <SupplierSelect suppliers={draft.suppliers} value={draft.supplier} onChange={draft.setSupplier} />
       <SuggestionsBar count={draft.suggestionCount} onLoad={draft.loadSuggestions} />
       <PurchaseLinesList lines={draft.lines} ingredients={draft.ingredients} onChange={draft.setLines} />
+      {draft.hasInvalidNumbers ? <FormMessage tone="warning">{LINE_NUMBERS_HINT}</FormMessage> : null}
       <FormFooter
         mutation={{ isPending: draft.isCreating }}
         onCancel={draft.close}

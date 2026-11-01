@@ -21,7 +21,7 @@ export function RecipeEditorView() {
   const menuItemId = Number(useParams()['menuItemId'])
   const back = returnFocus(useLocation().state)
   const canManage = useCan(PERMISSION.inventoryManage)
-  const { recipe, ingredients, error, isLoading } = useRecipeEditorData(menuItemId)
+  const { recipe, ingredients, error, isMissing, isLoading } = useRecipeEditorData(menuItemId)
 
   return (
     <div className="flex flex-col gap-6">
@@ -31,6 +31,7 @@ export function RecipeEditorView() {
         actions={<BackToLink to={back.to} label={back.label} />}
       />
       <ErrorMessage isError={error !== null} error={error} fallback="No se pudo cargar la receta." />
+      {isMissing ? <EmptyState title="Esta receta no existe." description="Revisa el enlace o búscala en Recetas." /> : null}
       {isLoading ? <EmptyState title="Cargando la receta…" /> : null}
       {recipe !== undefined && ingredients !== undefined ? (
         <RecipeEditor key={menuItemId} recipe={recipe} ingredients={ingredients} canManage={canManage} />
