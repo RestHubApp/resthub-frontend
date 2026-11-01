@@ -129,6 +129,18 @@ jobs:
             "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
           echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          # Canario: con la configuración del repo, gitleaks tiene que detectar
+          # un token de GitHub recién generado. Si .gitleaks.toml pierde las
+          # reglas por omisión, el escaneo del historial pasaría sin buscar
+          # nada. --exit-code 42 evita que un error de configuración pase por
+          # detección.
+          canary="$(mktemp -d)"
+          git -C "$canary" init -q
+          cp .gitleaks.toml "$canary/"
+          printf 'const t = "ghp_%s"\n' "$(head -c 96 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 36)" > "$canary/canario.ts"
+          git -C "$canary" add . && git -C "$canary" -c user.name=ci -c user.email=ci@local commit -qm canario
+          rc=0; "$RUNNER_TEMP/gitleaks" git --no-banner --redact --exit-code 42 --log-opts=HEAD "$canary" || rc=$?
+          [ "$rc" -eq 42 ] || { echo "gitleaks no detectó el canario (rc=$rc): .gitleaks.toml no carga las reglas" >&2; exit 1; }
           "$RUNNER_TEMP/gitleaks" git --no-banner --redact --log-opts=HEAD .
   # Pruebas de contrato del consumidor (Pact): las funciones reales de src/api
   # contra el servidor simulado de Pact. Generan el pact que el backend
