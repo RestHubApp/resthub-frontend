@@ -18,6 +18,22 @@ interface FormDialogProps {
 const WIDTHS = { md: 'sm:max-w-lg', lg: 'sm:max-w-2xl' } as const
 
 /**
+ * Si la última mutación enviada desde `since` falló. Un reintento que salió
+ * bien, o que sigue en curso, deja atrás la falla anterior aunque esta siga
+ * en el caché de mutaciones.
+ */
+function useHasFailedSince(since: number): boolean {
+  const moments = useMutationState({
+    select: (mutation) => ({ at: mutation.state.submittedAt, status: mutation.state.status }),
+  })
+  let latest: (typeof moments)[number] | undefined
+  for (const moment of moments) {
+    if (moment.at >= since && (latest === undefined || moment.at >= latest.at)) latest = moment
+  }
+  return latest?.status === 'error'
+}
+
+/**
  * Un formulario en una ventana sobre la pantalla.
  *
  * Deja la pantalla para lo que se consulta, la tabla o el cuadro, y trae el
@@ -39,11 +55,7 @@ export function FormDialog({
   const returnFocus = useReturnFocus(() => {
     setOpenFrom(Date.now())
   })
-  const failures = useMutationState({
-    filters: { status: 'error' },
-    select: (mutation) => mutation.state.submittedAt,
-  })
-  const hasFailureInThisDialog = open && failures.some((moment) => moment >= openFrom)
+  const hasFailureInThisDialog = useHasFailedSince(openFrom) && open
   // Sin descripción, Radix pide decirlo explícitamente para no anunciar un vacío.
   const withoutDescription = description === undefined ? { 'aria-describedby': undefined } : {}
 

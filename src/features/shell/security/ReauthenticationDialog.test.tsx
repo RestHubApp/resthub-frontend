@@ -47,6 +47,21 @@ describe('«Confirma tu contraseña» (RFS-21)', () => {
     expect(useSession.getState().token).toBe('token-rotado')
   })
 
+  it('al pedir el código lleva el foco al campo, y sin el código no reenvía', async () => {
+    const { api, user } = openDialog()
+    api.on('post', REAUTHENTICATE, new ErrorResponse(401, ASKS_FOR_CODE, 'two_factor_required'))
+
+    await user.type(screen.getByLabelText(PASSWORD_LABEL), TEST_SECRET)
+    await user.click(screen.getByRole('button', CONFIRM))
+
+    expect(await screen.findByLabelText(CODE_LABEL)).toHaveFocus()
+    expect(screen.getByText(/verificación en dos pasos: escribe el código/u)).toHaveAttribute('role', 'status')
+    await user.click(screen.getByRole('button', CONFIRM))
+
+    expect(await screen.findByText(ASKS_FOR_CODE)).toBeInTheDocument()
+    expect(api.calls('post', REAUTHENTICATE)).toHaveLength(1)
+  })
+
   it('con la verificación en dos pasos pide el código y lo manda con la contraseña', async () => {
     const { api, answer, user } = openDialog()
     api.on('post', REAUTHENTICATE, CONFIRMED).once('post', REAUTHENTICATE, new ErrorResponse(401, ASKS_FOR_CODE, 'two_factor_required'))

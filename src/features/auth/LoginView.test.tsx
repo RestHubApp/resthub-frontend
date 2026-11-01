@@ -162,6 +162,22 @@ describe('LoginView con la verificación en dos pasos', () => {
     expect(api.calls('post', LOGIN)[1]?.body).toEqual({ email: WAITER_EMAIL, password: TEST_SECRET, otp_code: '123456' })
   })
 
+  it('al pedir el código lleva el foco al campo, y sin el código no reenvía', async () => {
+    const { api, user } = openAccess()
+    api.on('post', LOGIN, new ErrorResponse(401, ASKS_FOR_CODE, 'two_factor_required'))
+
+    await user.type(screen.getByLabelText(EMAIL), WAITER_EMAIL)
+    await user.type(screen.getByLabelText(SECRET_LABEL), TEST_SECRET)
+    await user.click(screen.getByRole('button', SIGN_IN))
+
+    expect(await screen.findByLabelText(CODE_LABEL)).toHaveFocus()
+    expect(screen.getByText(/verificación en dos pasos: escribe el código/u)).toHaveAttribute('role', 'status')
+    await user.click(screen.getByRole('button', SIGN_IN))
+
+    expect(await screen.findByText('Escribe el código de verificación.')).toBeInTheDocument()
+    expect(api.calls('post', LOGIN)).toHaveLength(1)
+  })
+
   it('acepta entero un código de recuperación de 34 caracteres', async () => {
     const recovery = 'k7m2-pqrs-4tw8-x3yz-5abc-d6e9-h2jn'
     const { api, user } = openAccess()

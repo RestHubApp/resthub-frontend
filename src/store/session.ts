@@ -209,6 +209,10 @@ export const useSession = create<SessionState>((set, get) => ({
   passwordChanged: false,
 
   signIn: (token, account) => {
+    // Entrar sobre una sesión abierta (de otra cuenta o de la misma) no hereda su caché.
+    if (get().account !== null) {
+      clearQueries()
+    }
     openRecord()
     setCookieSession(!account.preview)
     keepToken(token, account)

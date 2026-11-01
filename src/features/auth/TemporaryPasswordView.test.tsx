@@ -11,6 +11,7 @@ import { TemporaryPasswordView } from './TemporaryPasswordView'
 const TEMPORARY = 'temporal-12345'
 const OWN = 'una-clave-propia'
 const PASSWORD_ROUTE = '/auth/me/password'
+const LOGOUT = '/auth/logout'
 
 async function fillChange(user: { type: (element: Element, text: string) => Promise<void>; click: (element: Element) => Promise<void> }) {
   await user.type(screen.getByLabelText('Contraseña actual'), TEMPORARY)
@@ -40,13 +41,25 @@ describe('TemporaryPasswordView', () => {
   })
 
   it('«Salir» cierra la sesión', async () => {
-    server().on('post', '/auth/logout', null, 204)
+    server().on('post', LOGOUT, null, 204)
     const account = signInAs(PERMISSIONS_WAITER, { must_change_password: true })
     const { user } = mountScreen(<TemporaryPasswordView account={account} />)
 
     await user.click(screen.getByRole('button', { name: 'Salir' }))
 
     expect(useSession.getState().token).toBeNull()
+  })
+
+  it('«Salir» avisa al servidor aunque el token todavía no se haya recuperado tras recargar', async () => {
+    const api = server().on('post', LOGOUT, null, 204)
+    const account = signInAs(PERMISSIONS_WAITER, { must_change_password: true })
+    useSession.setState({ token: null })
+    const { user } = mountScreen(<TemporaryPasswordView account={account} />)
+
+    await user.click(screen.getByRole('button', { name: 'Salir' }))
+
+    expect(api.calls('post', LOGOUT)).toHaveLength(1)
+    expect(useSession.getState().account).toBeNull()
   })
 
   it('la administración del sistema cambia la contraseña del alta y sigue con la sesión de plataforma', async () => {

@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
 
 import { reauthenticate } from '@/api/accountSecurity'
+import { useTwoFactorCode } from '@/hooks/useTwoFactorCode'
 import { hasCode } from '@/services/apiError'
 import type { CurrentPasswordValues } from '@/services/securityRules'
 import { adoptRotatedToken } from '@/store/session'
@@ -32,17 +32,20 @@ async function verifyPassword(password: string, code: string | undefined): Promi
 }
 
 export function useReauthenticationConfirm(onConfirmed: () => void) {
-  const [code, setCode] = useState('')
-  const [isAskingCode, setIsAskingCode] = useState(false)
+  const twoFactor = useTwoFactorCode()
   const confirm = useMutation({
-    mutationFn: (values: CurrentPasswordValues) => verifyPassword(values.password, isAskingCode && code !== '' ? code : undefined),
+    mutationFn: (values: CurrentPasswordValues) => verifyPassword(values.password, twoFactor.isAskingCode ? twoFactor.code : undefined),
     onSuccess: (outcome) => {
       if (outcome === 'confirmed') onConfirmed()
-      else setIsAskingCode(true)
+      else twoFactor.askCode()
     },
     onError: (error) => {
-      if (hasCode(error, 'invalid_two_factor_code')) setIsAskingCode(true)
+      if (hasCode(error, 'invalid_two_factor_code')) twoFactor.askCode()
     },
   })
-  return { confirm, isAskingCode, setCode }
+  // Con el código pedido y vacío, el envío no sale: el campo dice que falta.
+  const submit = (values: CurrentPasswordValues) => {
+    if (!twoFactor.isMissing()) confirm.mutate(values)
+  }
+  return { confirm, submit, twoFactor }
 }

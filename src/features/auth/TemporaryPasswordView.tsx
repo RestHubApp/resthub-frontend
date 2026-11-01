@@ -15,9 +15,9 @@ import { ChangePasswordForm } from './ChangePasswordForm'
 export function TemporaryPasswordView({ account }: { readonly account: Session }) {
   const name = account.kind === 'staff' ? account.user.full_name : account.admin.full_name
   const signOut = () => {
-    // Salir cierra también la sesión de este dispositivo en el servidor.
-    const { token } = useSession.getState()
-    if (typeof token === 'string') void reportSignOut(token)
+    // Salir cierra también la sesión de este dispositivo en el servidor. Sin
+    // token (recién recargada la página) la sesión va en la cookie.
+    void reportSignOut(useSession.getState().token)
     useSession.getState().signOut()
   }
 
