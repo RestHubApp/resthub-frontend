@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { errorMessage, errorStatus } from '@/services/apiError'
+import { errorCode, errorMessage, errorStatus } from '@/services/apiError'
 import { fetchCurrentCash } from '@/api/cash'
 import { addPayment } from '@/api/orders'
 import type { PaymentRequest } from '@/api/types'
@@ -78,12 +78,13 @@ describe('Contrato: cobro', () => {
       .uponReceiving('un pago con un saldo esperado que ya cambió')
       .withRequest('POST', PAYMENTS_PATH, (req) => req.headers({ ...bearer(), ...JSON_HEADERS }).jsonBody(paymentBody()))
       .willRespondWith(409, (res) =>
-        res.jsonBody(errorBody('La cuenta cambió mientras se cobraba: ahora faltan S/ 15.00. Revísala.')),
+        res.jsonBody(errorBody('La cuenta cambió mientras se cobraba: ahora faltan S/ 15.00. Revísala.', 'balance_changed')),
       )
       .executeTest(async (mockServer) => {
         connectTo(mockServer)
         const error = await rejectionOf(addPayment(EXAMPLE_ORDER, payment))
         expect(errorStatus(error)).toBe(409)
+        expect(errorCode(error)).toBe('balance_changed')
         expect(errorMessage(error, '')).toContain('cambió')
       })
   })
