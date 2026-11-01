@@ -41,6 +41,7 @@ export function PurchaseOrderCard({ order, canManage, isBusy, onSend, onReceive,
       {canManage && isOpen ? (
         <PurchaseOrderActions
           status={order.status}
+          number={order.number}
           isBusy={isBusy}
           onSend={onSend}
           onReceive={onReceive}

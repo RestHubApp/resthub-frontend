@@ -128,7 +128,8 @@ test('GES-09 el encargado arma una orden a mano, quita una línea y la cancela',
   await expect(notice(page, /Orden de compra 1 creada \(S\/\s*7\.00\)\./u)).toBeVisible()
 
   const oc = purchases.getByRole('listitem').filter({ hasText: 'OC 1 · Distribuidora Norte' })
-  await oc.getByRole('button', { name: 'Cancelar' }).click()
+  await oc.getByRole('button', { name: 'Cancelar orden' }).click()
+  await page.getByRole('alertdialog', { name: '¿Cancelar la OC 1?' }).getByRole('button', { name: 'Cancelar orden' }).click()
   await expect(notice(page, 'Orden 1: cancelada.')).toBeVisible()
   await expect(oc).toContainText('Cancelada')
   await expect(oc.getByRole('button')).toHaveCount(0)
