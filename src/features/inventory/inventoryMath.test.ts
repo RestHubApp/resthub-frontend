@@ -10,6 +10,7 @@ import { availableIngredients, lineCost, recipeCatalog, recipeCost, recipePayloa
 import { findInputUnit, formatUnitCost, fromBase, inputUnits, priceUnit, toBaseCost, toBaseQuantity } from './units'
 
 const LIMON = ingredient()
+const THREE_DECIMALS = 'Escribe un número con hasta 3 decimales'
 
 // Intl separa «S/» del monto con un espacio que no se corta.
 function flat(text: string | undefined): string | undefined {
@@ -151,7 +152,7 @@ describe('inventorySchema', () => {
   it('una compra pide una cantidad mayor que cero, con hasta tres decimales y sin exagerar', () => {
     const errors = (quantity: string) => purchaseSchema.safeParse({ ...PURCHASE, quantity }).error?.issues[0]?.message
     expect(errors('0')).toBe('Tiene que ser mayor que cero')
-    expect(errors('1.2345')).toBe('Escribe un número con hasta 3 decimales')
+    expect(errors('1.2345')).toBe(THREE_DECIMALS)
     expect(errors('100001')).toBe('Es demasiado. Revisa el dato')
     expect(errors('2,5')).toBeUndefined()
   })
@@ -174,7 +175,14 @@ describe('inventorySchema', () => {
     expect(ingredientSchema.safeParse({ ...named, unit: 'unit', unit_cost: '0.0004' }).success).toBe(true)
     expect(ingredientSchema.safeParse({ ...named, unit: 'g', unit_cost: '4.2' }).success).toBe(true)
     expect(ingredientSchema.safeParse({ ...named, unit: 'g', unit_cost: '4.0001' }).error?.issues[0]?.message).toBe(
-      'Escribe un número con hasta 3 decimales',
+      THREE_DECIMALS,
+    )
+    // Con más de 6 decimales, el aviso dice los que caben en esa unidad, y uno solo.
+    expect(ingredientSchema.safeParse({ ...named, unit: 'g', unit_cost: '4.0000001' }).error?.issues.map((issue) => issue.message)).toEqual([
+      THREE_DECIMALS,
+    ])
+    expect(ingredientSchema.safeParse({ ...named, unit: 'unit', unit_cost: '0.0000001' }).error?.issues[0]?.message).toBe(
+      'Escribe un número con hasta 6 decimales',
     )
   })
 })

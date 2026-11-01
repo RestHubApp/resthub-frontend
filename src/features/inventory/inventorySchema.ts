@@ -30,6 +30,12 @@ function quantityRule({ allowsZero }: { readonly allowsZero: boolean }) {
 const OPTIONAL_QUANTITY = /^(?:\d+(?:[.,]\d{1,3})?)?$/u
 
 const costRule = decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles', required: true })
+// El costo de un insumo: por unidad caben los 6 decimales del servidor; por kilo
+// o litro, 3 (que ya son 6 por gramo o mililitro).
+const UNIT_COST_RULES = {
+  perUnit: decimalRule({ max: MAX_COST, decimals: 6, unit: 'soles' }),
+  perKilo: decimalRule({ max: MAX_COST, decimals: 3, unit: 'soles' }),
+}
 
 export const ingredientSchema = z
   .object({
@@ -41,16 +47,17 @@ export const ingredientSchema = z
     unit: z.enum(['g', 'ml', 'unit'], 'Elige cómo se mide'),
     min_stock: z.string().trim().regex(OPTIONAL_QUANTITY, THREE_DECIMALS),
     min_stock_unit: z.string(),
-    // Por unidad caben los 6 decimales del servidor; por kilo o litro, 3 (que son 6 por gramo).
-    unit_cost: decimalRule({ max: MAX_COST, decimals: 6, unit: 'soles' }),
+    // Se revisa abajo, según la unidad: así el aviso dice los decimales que caben.
+    unit_cost: z.string().trim(),
     ...packagingFields,
   })
   .superRefine((values, context) => {
     for (const [field, message] of packagingIssues(values)) {
       context.addIssue({ code: 'custom', path: [field], message })
     }
-    if (values.unit !== 'unit' && !OPTIONAL_QUANTITY.test(values.unit_cost)) {
-      context.addIssue({ code: 'custom', path: ['unit_cost'], message: THREE_DECIMALS })
+    const rule = values.unit === 'unit' ? UNIT_COST_RULES.perUnit : UNIT_COST_RULES.perKilo
+    for (const issue of rule.safeParse(values.unit_cost).error?.issues ?? []) {
+      context.addIssue({ code: 'custom', path: ['unit_cost'], message: issue.message })
     }
   })
 
