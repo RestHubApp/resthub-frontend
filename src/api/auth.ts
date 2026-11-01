@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import { setCsrfRecovery, setCsrfToken } from '@/services/apiCredentials'
+import { isUnreachable } from '@/services/apiError'
 import { send } from './client'
 import type {
   AcceptTermsRequest,
@@ -85,10 +86,18 @@ async function restoreSession(): Promise<AccessTokenResponse> {
   return renewSession()
 }
 
+// Cada cuánto se vuelve a probar la recuperación mientras el servidor no responde.
+const RESTORE_RETRY_MS = 15_000
+
 /**
  * La recuperación como consulta: TanStack Query la reintenta sin red y no la
  * repite mientras ya viaja. No se guarda (`gcTime: 0`): cada token que falte
  * se recupera de nuevo.
+ *
+ * Un servidor caído o sin respuesta con la red «en línea» (un despliegue, un
+ * 502 del proxy) no es un rechazo: se vuelve a probar sola cada 15 s hasta
+ * recuperar el token, sin esperar al evento «online». Si no, la pestaña seguía
+ * sin token (sin canal de avisos ni renovación) hasta que vencía la sesión.
  */
 export const sessionRestoreQuery = queryOptions({
   queryKey: sessionRestoreQueryKey,
@@ -96,6 +105,7 @@ export const sessionRestoreQuery = queryOptions({
   gcTime: 0,
   staleTime: 0,
   meta: { background: true },
+  refetchInterval: (query) => (query.state.status === 'error' && isUnreachable(query.state.error) ? RESTORE_RETRY_MS : false),
 })
 
 // Si otra pestaña renovó la cookie, el valor anti-CSRF de esta ya no coincide:

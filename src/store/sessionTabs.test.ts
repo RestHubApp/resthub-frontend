@@ -123,6 +123,21 @@ describe('sesión de restaurante: aviso de otra pestaña', () => {
     expect(saved(local)?.account).toEqual(account(2))
   })
 
+  it('si otra pestaña cierra la sesión, esta descarta la confirmación de contraseña pendiente', async () => {
+    const local = fakeStorage()
+    const one = await openTab(local)
+    one.useSession.getState().signIn(tokenThatExpires(3600, 'a'), account(1))
+    const two = await openTab(local)
+    const { useReauthentication } = await import('./reauthentication')
+    const asked = useReauthentication.getState().ask()
+
+    one.useSession.getState().signOut()
+    notify(two.window, local, STORAGE_KEY)
+
+    await expect(asked).resolves.toBe(false)
+    expect(useReauthentication.getState().isAsking).toBe(false)
+  })
+
   it('la renovación de otra pestaña de la misma cuenta no cambia el token de esta', async () => {
     const local = fakeStorage()
     const old = tokenThatExpires(3600, 'a')

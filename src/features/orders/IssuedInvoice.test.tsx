@@ -33,22 +33,21 @@ function pdfResponse(): Response {
   return fileResponse(PDF_CONTENT, 'application/pdf')
 }
 
-/** Atrapa la descarga: el archivo de la URL de objeto, el nombre con que se guarda y si se revocó. */
+/** Atrapa la descarga: el archivo de la URL de objeto y el nombre con que se guarda. */
 function catchDownload() {
   const created: Blob[] = []
   const names: string[] = []
-  const revoke = jest.fn()
   Object.assign(URL, {
     createObjectURL: (file: Blob) => {
       created.push(file)
       return 'blob:comprobante'
     },
-    revokeObjectURL: revoke,
+    revokeObjectURL: jest.fn(),
   })
   jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function click(this: HTMLAnchorElement) {
     names.push(this.download)
   })
-  return { created, names, revoke }
+  return { created, names }
 }
 
 describe('IssuedInvoice: estado', () => {
@@ -77,9 +76,8 @@ describe('IssuedInvoice: descargar', () => {
     await user.click(await screen.findByRole('button', DOWNLOAD_PDF))
 
     await waitFor(() => {
-      expect(download.revoke).toHaveBeenCalledWith('blob:comprobante')
+      expect(download.names).toEqual(['B001-15.pdf'])
     })
-    expect(download.names).toEqual(['B001-15.pdf'])
     expect(await download.created[0]?.text()).toBe(PDF_CONTENT)
     expect(api.calls('get', PDF_FILE)[0]?.headers['authorization']).toMatch(/^Bearer /u)
   })

@@ -787,10 +787,10 @@ export default tseslint.config(
     rules: { 'import-x/no-default-export': 'off' },
   },
   // ---------------------------------------------------------------------
-  // Scripts de medición de accesibilidad (Node, fuera de la aplicación).
+  // Scripts de medición de accesibilidad y del service worker (Node, fuera de la aplicación).
   // ---------------------------------------------------------------------
   {
-    files: ['checks/accessibility/**/*.mjs'],
+    files: ['checks/accessibility/**/*.mjs', 'checks/pwa/**/*.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
     extends: [tseslint.configs.disableTypeChecked],
   },

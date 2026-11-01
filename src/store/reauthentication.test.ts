@@ -43,6 +43,39 @@ describe('acciones críticas con la contraseña confirmada (RFS-21)', () => {
     expect(api.calls('patch', STATUS)).toHaveLength(1)
   })
 
+  it('al cerrar la sesión descarta la confirmación pendiente y no la repite con la cuenta que entra después', async () => {
+    const account = signInAs()
+    const api = server().on('patch', STATUS, MEMBER).once('patch', STATUS, askedForPassword())
+
+    const saved = changeStaffStatus(3, false)
+    await waitFor(() => {
+      expect(useReauthentication.getState().isAsking).toBe(true)
+    })
+    useSession.getState().signOut()
+    expect(useReauthentication.getState().isAsking).toBe(false)
+
+    useSession.getState().signIn('token-de-otra-cuenta', { ...account, user: { ...account.user, id: 8, email: 'otra@resthub.dev' } })
+    useReauthentication.getState().settle(true)
+
+    await expect(saved).rejects.toMatchObject({ code: 'reauthentication_required' })
+    expect(api.calls('patch', STATUS)).toHaveLength(1)
+  })
+
+  it('al vencer la sesión descarta la confirmación pendiente', async () => {
+    signInAs()
+    const api = server().on('patch', STATUS, askedForPassword())
+
+    const saved = changeStaffStatus(3, false)
+    await waitFor(() => {
+      expect(useReauthentication.getState().isAsking).toBe(true)
+    })
+    useSession.getState().expire()
+
+    expect(useReauthentication.getState().isAsking).toBe(false)
+    await expect(saved).rejects.toMatchObject({ code: 'reauthentication_required' })
+    expect(api.calls('patch', STATUS)).toHaveLength(1)
+  })
+
   it('una sesión bloqueada por inactividad (423) muestra el desbloqueo', async () => {
     signInAs()
     server().on('patch', STATUS, new ErrorResponse(423, 'La sesión está bloqueada.', 'session_locked'))

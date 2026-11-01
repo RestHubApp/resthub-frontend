@@ -62,6 +62,11 @@ jobs:
       - name: Verificación de tipos y compilación
         run: pnpm build
 
+      # El service worker nuevo se activa solo (skipWaiting + clientsClaim): si no,
+      # tras un despliegue la app abierta sigue con la versión vieja al recargar.
+      - name: Activación del service worker
+        run: node checks/pwa/swActivation.mjs dist
+
       # Porcentaje de expresiones con tipo conocido (sin any): no puede bajar de 99,7 %.
       - name: Cobertura de tipos
         run: pnpm type-coverage
