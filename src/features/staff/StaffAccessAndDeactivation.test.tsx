@@ -13,7 +13,7 @@ function openStaff() {
     .on('get', '/staff', { items: [TEAM[0], TEAM[1], ROSA], total: 3 })
     .on('get', '/roles', [ROLE_OWNER, ROLE_WAITER])
     .on('get', '/staff/unused', [])
-    .on('get', '/restaurant', { idle_lock_minutes: 10 })
+    .on('get', '/restaurant', { idle_lock_minutes: 10, opening_hours: [] })
   signInAs(PERMISSIONS_OWNER)
   return { api, ...mountScreen(<StaffView />, { path: '/personal' }) }
 }
