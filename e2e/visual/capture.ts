@@ -92,17 +92,22 @@ const CARD_WITH_REGISTRATION = /^\/api\/v1\/platform\/restaurants\/\d+$/u
 // día («11» o «20») también cambia su ancho y movía las demás columnas. Lo
 // mismo en el libro de movimientos y en la bandeja de mermas: del 1 al 9 de cada
 // mes el día tiene una cifra («1 nov.») y la captura salía distinta. Se fija el
-// instante entero (ninguna de estas listas calcula tiempos).
-const LISTS_WITH_DATE: readonly RegExp[] = [
-  /^\/api\/v1\/orders$/u,
-  /^\/api\/v1\/inventory\/movements$/u,
-  /^\/api\/v1\/inventory\/waste-approvals$/u,
+// instante entero (ninguna de estas listas calcula tiempos), con el mes de su
+// línea base: en el teléfono «sept.» es más ancho que «oct.» y también movía
+// las columnas del libro de movimientos.
+const LISTS_WITH_DATE: readonly (readonly [RegExp, string])[] = [
+  [/^\/api\/v1\/orders$/u, '2026-09-27T17:00:00Z'],
+  [/^\/api\/v1\/inventory\/movements$/u, '2026-10-18T17:00:00Z'],
+  [/^\/api\/v1\/inventory\/waste-approvals$/u, '2026-09-27T17:00:00Z'],
 ]
 
 function normalize(route: string, text: string): string {
   const withoutSuffixes = SUFFIXES.reduce((actual, [pattern, replacement]) => actual.replace(pattern, replacement), text)
-  if (CARD_WITH_REGISTRATION.test(route) || LISTS_WITH_DATE.some((list) => list.test(route))) {
-    return withoutSuffixes.replaceAll(INSTANT, '"2026-09-27T17:00:00Z"')
+  const instant = CARD_WITH_REGISTRATION.test(route)
+    ? '2026-09-27T17:00:00Z'
+    : LISTS_WITH_DATE.find(([list]) => list.test(route))?.[1]
+  if (instant !== undefined) {
+    return withoutSuffixes.replaceAll(INSTANT, `"${instant}"`)
   }
   return LISTS_WITH_HOUR.some((list) => list.test(route)) ? withoutSuffixes.replaceAll(INSTANT, '"$1T17:00:00Z"') : withoutSuffixes
 }
