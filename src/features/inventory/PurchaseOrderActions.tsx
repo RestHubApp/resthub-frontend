@@ -8,7 +8,7 @@ interface PurchaseOrderActionsProps {
   readonly status: PurchaseOrder['status']
   /** El número de la orden, para la confirmación. */
   readonly number: number
-  /** Hay un cambio de la orden en curso: bloquea enviar y cancelar. */
+  /** Hay un cambio de la orden en curso: bloquea enviar, recibir y cancelar. */
   readonly isBusy: boolean
   readonly onSend: () => void
   readonly onReceive: () => void
@@ -29,7 +29,7 @@ export function PurchaseOrderActions({ status, number, isBusy, onSend, onReceive
           <span>Marcar enviada</span>
         </Button>
       ) : null}
-      <Button type="button" size="sm" onClick={onReceive}>
+      <Button type="button" size="sm" disabled={isBusy} onClick={onReceive}>
         <Icon glyph={icons.purchase} size={14} />
         <span>Recibir</span>
       </Button>

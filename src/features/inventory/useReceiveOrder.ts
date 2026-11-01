@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { receivePurchaseOrder } from '@/api/purchasing'
+import { purchaseOrdersQuery, receivePurchaseOrder } from '@/api/purchasing'
 import type { PurchaseOrder } from '@/api/types'
 import { formatMoney } from '@/services/format'
 import { areReceivedLinesValid, initialReceived, type Received, receivedLines, type ReceivedLine } from './receiveLines'
@@ -28,6 +28,7 @@ export function useReceiveOrder(order: PurchaseOrder | null, onClose: () => void
     success: (receivedOrder) => `Orden ${String(receivedOrder.number)} recibida: ${formatMoney(receivedOrder.received_total)} entraron al stock.`,
     failure: 'No se pudo recibir la orden.',
     onSuccess: close,
+    invalidateOnError: [purchaseOrdersQuery.queryKey],
   })
   const draft = order !== null && received?.orderId === order.id ? received.values : null
   const values = order === null ? {} : (draft ?? initialReceived(order))
