@@ -115,6 +115,7 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
     'dialogo:customers/CustomerDialog',
     'hoja:customers/CustomerSheet',
     'confirmacion:customers/CustomerRights',
+    'confirmacion:reservations/ReservationStatusButton',
   )
   // Un día fijo y lejano: una reserva de hoy a las 20:00 ya pasó si la prueba
   // corre de noche, y con «mañana» el día que muestra la pantalla («martes 21»,
@@ -143,6 +144,12 @@ test('VIS-07 las reservas y los clientes con sus ventanas', async ({ page, local
   await page.getByRole('main').getByLabel('Día', { exact: true }).fill(day)
   await expect(page.getByText('Lucía Paredes')).toBeVisible()
   await capture(page, 'reservas', { mask: [page.getByLabel('Día')] })
+
+  await page.getByRole('listitem').filter({ hasText: 'Lucía Paredes' }).getByRole('button', { name: 'Cancelar' }).click()
+  const cancelReservation = page.getByRole('alertdialog', { name: /^¿Cancelar la reserva de Lucía Paredes/u })
+  await captureWindow(cancelReservation, 'confirmacion-cancelar-reserva')
+  await cancelReservation.getByRole('button', { name: 'Volver' }).click()
+  await expect(cancelReservation).toBeHidden()
 
   await page.getByRole('button', { name: 'Nueva reserva' }).click()
   const reservation = page.getByRole('dialog', { name: 'Nueva reserva' })
