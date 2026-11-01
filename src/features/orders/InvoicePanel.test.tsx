@@ -1,9 +1,11 @@
 import { describe, expect, it } from '@jest/globals'
-import { screen, within } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 
 import { invoice, paid, payment, buildOrder } from '#jest/fixtures/charge'
 import { signInAs, mountScreen, PERMISSIONS_OWNER, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
+import { orderInvoiceQueryKey } from '@/api/billing'
 import type { OrderResponse } from '@/api/types'
+import { queryClient } from '@/services/queryClient'
 import { InvoicePanel } from './InvoicePanel'
 
 const ISSUE = '/billing/invoices'
@@ -11,6 +13,7 @@ const OF_ORDER = '/billing/orders/12/invoice'
 const OPEN = { name: 'Emitir boleta o factura' }
 const DIALOG = { name: 'Comprobante del pedido #34' }
 const ISSUE_SALES_RECEIPT = { name: 'Emitir boleta' }
+const ISSUED = 'Boleta B001-15'
 
 function paidBy(total: string): OrderResponse {
   return paid(buildOrder({ total, balance: total }), payment({ amount: total }))
@@ -25,7 +28,8 @@ function onIssue(api: ReturnType<typeof server>, issued: ReturnType<typeof invoi
 }
 
 function issueFor(order: OrderResponse = paidBy('50.00'), permissions = PERMISSIONS_OWNER) {
-  const api = server()
+  // Como el servidor: un pedido sin comprobante responde `invoice_not_found`.
+  const api = server().on('get', OF_ORDER, new ErrorResponse(404, 'El pedido no tiene comprobante.', 'invoice_not_found'))
   signInAs(permissions)
   return { api, ...mountScreen(<InvoicePanel order={order} />) }
 }
@@ -41,7 +45,7 @@ describe('InvoicePanel', () => {
     expect(dialog.getByLabelText('Documento del cliente')).toHaveValue('none')
     await user.click(dialog.getByRole('button', ISSUE_SALES_RECEIPT))
 
-    expect(await screen.findByText('Boleta B001-15')).toBeInTheDocument()
+    expect(await screen.findByText(ISSUED)).toBeInTheDocument()
     expect(screen.getByText('Aceptada por SUNAT')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Imprimir' })).toHaveAttribute('href', '/comprobantes/90/imprimir')
     expect(api.calls('post', ISSUE)[0]?.body).toEqual({
@@ -119,5 +123,51 @@ describe('InvoicePanel', () => {
 
     expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
     expect(api.calls('get', OF_ORDER)).toHaveLength(0)
+  })
+})
+
+describe('InvoicePanel: si falla leer o emitir', () => {
+  it('si no se puede leer el comprobante, ofrece reintentar y no emitir', async () => {
+    const { api } = issueFor()
+    api.on('get', OF_ORDER, new ErrorResponse(500, 'Sin base'))
+
+    expect(await screen.findByText('Sin base')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
+  })
+
+  it('si ya estaba emitido (409), relee el comprobante del pedido y lo muestra', async () => {
+    const { api, user } = issueFor()
+    api.on('post', ISSUE, () => {
+      api.on('get', OF_ORDER, invoice())
+      return new ErrorResponse(409, 'El pedido ya tiene un comprobante.', 'order_already_invoiced')
+    })
+
+    await user.click(await screen.findByRole('button', OPEN))
+    await user.click(await screen.findByRole('button', ISSUE_SALES_RECEIPT))
+
+    expect(await screen.findByText(ISSUED)).toBeInTheDocument()
+    expect(api.calls('get', OF_ORDER).length).toBeGreaterThan(1)
+    expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
+  })
+
+  it('si falla releer un comprobante vigente, lo sigue mostrando y no ofrece emitir', async () => {
+    const { api } = issueFor()
+    api.on('get', OF_ORDER, invoice())
+    expect(await screen.findByText(ISSUED)).toBeInTheDocument()
+
+    api.on('get', OF_ORDER, new ErrorResponse(500, 'Sin base'))
+    await act(async () => {
+      await queryClient.invalidateQueries({ queryKey: orderInvoiceQueryKey(12) })
+      // La vista se entera del fallo en la tanda siguiente de TanStack Query.
+      await new Promise((resolve) => {
+        setTimeout(resolve, 0)
+      })
+    })
+    expect(queryClient.getQueryState(orderInvoiceQueryKey(12))?.status).toBe('error')
+
+    expect(screen.getByText(ISSUED)).toBeInTheDocument()
+    expect(screen.queryByText('Sin base')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', OPEN)).not.toBeInTheDocument()
   })
 })

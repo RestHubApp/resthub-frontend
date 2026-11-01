@@ -1,5 +1,6 @@
 import { addOrderItems, advanceOrder, openOrder } from '@/api/orders'
 import type { OpenOrderRequest, OrderResponse } from '@/api/types'
+import { errorMessage } from '@/services/apiError'
 import { enqueueOrder, type QueueOwner } from '@/store/offlineQueue'
 import { stepDoneMessage } from '@/features/orders/nextStep'
 import { isOffline } from '@/features/orders/isOffline'
@@ -51,6 +52,18 @@ export function successMessage(target: OrderTarget, order: OrderResponse): strin
   return target.kind === 'add'
     ? `Platos agregados al pedido #${String(order.number)}.`
     : stepDoneMessage(order)
+}
+
+/**
+ * El aviso cuando el borrador no se guardó.
+ *
+ * Agregar platos no lleva id de petición: si la respuesta no llegó, puede que
+ * el servidor ya los haya agregado y un reintento a ciegas los duplicaría.
+ */
+export function failureMessage(target: OrderTarget, error: unknown): string {
+  return target.kind === 'add' && isOffline(error)
+    ? 'No se confirmó si se agregaron los platos: revisa el pedido antes de reintentar.'
+    : errorMessage(error, 'No se pudo guardar el pedido.')
 }
 
 interface SendDraftOptions {

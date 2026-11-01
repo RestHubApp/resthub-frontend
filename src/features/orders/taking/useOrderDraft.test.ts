@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it } from '@jest/globals'
 import { act, renderHook } from '@testing-library/react'
 
 import { buildMenu, dish, section } from '#jest/fixtures/orders'
+import { signInAs } from '#jest/harness'
+import { useSession } from '@/store/session'
 import { cartTotals } from './cartTotals'
 import { visibleSections } from './menuFilter'
 import { MAX_QUANTITY } from '@/features/orders/quantityLimit'
@@ -122,5 +124,33 @@ describe('visibleSections', () => {
       ...sections,
     ]
     expect(visibleSections(withInactive, '', null).map((s) => s.name)).toEqual(['Fondos', 'Bebidas'])
+  })
+})
+
+describe('borradores y sesión', () => {
+  function leaveDraft() {
+    signInAs()
+    const { result } = draft()
+    act(() => {
+      result.current.add(TABLE_KEY, LOMO)
+    })
+    expect(result.current.lines).toHaveLength(1)
+    return result
+  }
+
+  it('cerrar sesión borra los borradores', () => {
+    const result = leaveDraft()
+    act(() => {
+      useSession.getState().signOut()
+    })
+    expect(result.current.lines).toHaveLength(0)
+  })
+
+  it('una sesión vencida también los borra', () => {
+    const result = leaveDraft()
+    act(() => {
+      useSession.getState().expire()
+    })
+    expect(result.current.lines).toHaveLength(0)
   })
 })

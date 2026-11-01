@@ -9,8 +9,9 @@ import { toCents } from '@/services/format'
 /** Cómo se cobra esta vez: lo que falta, una parte igual o los platos de alguien. */
 export type SplitMode = 'all' | 'equal' | 'items'
 
-const PERCENT = 100
-const HALF = 0.5
+// El porcentaje en centésimas (`1.14` % = 114) y su medio, para redondear en enteros.
+const BASIS_POINTS = 10_000
+const HALF_BASIS_POINTS = 5000
 
 /** Lo que falta pagar, en céntimos. */
 export function balanceCents(order: OrderResponse): number {
@@ -30,9 +31,12 @@ export function equalPartCents(balance: number, remaining: number): number {
   return Math.floor(balance / remaining)
 }
 
-function discountOf(cents: number, percent: number): number {
-  // Medio céntimo hacia arriba, como `ROUND_HALF_UP` en el servidor.
-  return Math.floor((cents * percent) / PERCENT + HALF)
+function discountOf(cents: number, percent: string): number {
+  // Medio céntimo hacia arriba, como `ROUND_HALF_UP` en el servidor. El
+  // porcentaje llega con dos decimales: se lleva a centésimas enteras para que
+  // la cuenta no arrastre errores de coma flotante (25.00 al 1.14 % da 0.29).
+  const basisPoints = toCents(percent)
+  return Math.floor((cents * basisPoints + HALF_BASIS_POINTS) / BASIS_POINTS)
 }
 
 /** Los platos que todavía nadie pagó; los anulados no se cobran. */
@@ -43,19 +47,22 @@ export function unpaidItems(order: OrderResponse): OrderItemResponse[] {
 /**
  * Lo que cuestan esos platos con el descuento del pedido.
  *
- * Si son todos los que faltan, es lo que falta: quien paga lo último cierra
+ * Si son todos los que faltan por cobrar, es lo que falta: quien paga lo último cierra
  * la cuenta con el redondeo, igual que en el servidor.
  */
 export function itemsCents(order: OrderResponse, itemIds: readonly number[]): number {
   const selected = new Set(itemIds)
   const pending = unpaidItems(order)
-  if (pending.length > 0 && pending.every((item) => selected.has(item.id))) {
+  // Como el servidor, solo cuentan los platos que todavía deben algo: una
+  // cortesía o un plato de S/ 0.00 sin marcar no impide cerrar la cuenta.
+  const payable = pending.filter((item) => !item.is_courtesy && toCents(item.subtotal) > 0)
+  if (payable.length > 0 && payable.every((item) => selected.has(item.id))) {
     return balanceCents(order)
   }
   const due = pending
     .filter((item) => selected.has(item.id))
     .reduce((sum, item) => sum + (item.is_courtesy ? 0 : toCents(item.subtotal)), 0)
-  return due - discountOf(due, Number(order.discount_percent))
+  return due - discountOf(due, order.discount_percent)
 }
 
 /** Lo que define este pago: el pedido, el modo, entre cuántos y qué platos. */

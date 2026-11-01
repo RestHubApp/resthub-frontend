@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 
 import { table, reservation } from '#jest/fixtures/panel'
 import { signInAs, mountScreen, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
@@ -78,8 +78,29 @@ describe('ReservationsView: estado', () => {
     api.on('post', STATUS, new ErrorResponse(409, 'La reserva ya se canceló'))
 
     await user.click(await screen.findByRole('button', { name: 'No vinieron' }))
+    await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'No vinieron' }))
 
     expect(await screen.findByText('La reserva ya se canceló')).toBeInTheDocument()
     expect(api.calls('post', STATUS)[0]?.params).toEqual({ value: 'no_show' })
+  })
+
+  it('«Cancelar» pide confirmación antes de cambiar el estado', async () => {
+    const { api, user } = open()
+    api.on('post', STATUS, reservation({ status: 'cancelled', status_label: 'Cancelada' }))
+
+    await user.click(await screen.findByRole('button', { name: 'Cancelar' }))
+    const dialog = await screen.findByRole('alertdialog', { name: `¿Cancelar la reserva de ${FAMILY} a las 8:00 p. m.?` })
+    expect(api.calls('post', STATUS)).toHaveLength(0)
+
+    await user.click(within(dialog).getByRole('button', { name: 'Volver' }))
+    expect(api.calls('post', STATUS)).toHaveLength(0)
+
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+    await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Cancelar la reserva' }))
+
+    await waitFor(() => {
+      expect(api.calls('post', STATUS)).toHaveLength(1)
+    })
+    expect(api.calls('post', STATUS)[0]?.params).toEqual({ value: 'cancelled' })
   })
 })

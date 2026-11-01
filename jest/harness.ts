@@ -308,8 +308,9 @@ export function mountRoutes(routes: RouteObject[], en = '/'): Mount {
   return { ...result, user, router }
 }
 
+// Las consultas, sin reintentos; las mutaciones conservan las opciones de la aplicación (`networkMode`).
 beforeEach(() => {
-  queryClient.setDefaultOptions({ queries: { retry: false, staleTime: 30_000, refetchOnWindowFocus: false } })
+  queryClient.setDefaultOptions({ ...queryClient.getDefaultOptions(), queries: { retry: false, staleTime: 30_000, refetchOnWindowFocus: false } })
 })
 
 afterEach(() => {

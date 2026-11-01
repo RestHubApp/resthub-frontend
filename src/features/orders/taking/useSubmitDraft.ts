@@ -9,7 +9,7 @@ import { useNotifications } from '@/store/notifications'
 import { ownerOf } from '@/store/offlineQueue'
 import { useStaffAccount } from '@/store/session'
 import { draftKey, type OrderTarget } from './orderTarget'
-import { NotSentError, QUEUED, sendDraft, successMessage } from './submitDraft'
+import { failureMessage, NotSentError, QUEUED, sendDraft, successMessage } from './submitDraft'
 import { type DraftLine, useDraftActions } from './useOrderDraft'
 
 /**
@@ -36,11 +36,6 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
     ])
 
   return useMutation({
-    // Sin señal, TanStack Query pausa las mutaciones (`networkMode: 'online'`)
-    // y el botón quedaba en «Enviando…» hasta que volviera la conexión, sin
-    // llegar nunca a la cola. Esta mutación decide ella misma qué hacer sin
-    // señal: un pedido nuevo va a la cola y agregar platos avisa que falló.
-    networkMode: 'always',
     mutationFn: (lines: readonly DraftLine[]) => sendDraft({ target, lines, label, owner }),
     onSuccess: async (order) => {
       clear(key)
@@ -55,7 +50,8 @@ export function useSubmitDraft(target: OrderTarget, label: string) {
     },
     onError: async (error) => {
       if (!(error instanceof NotSentError)) {
-        push({ tone: 'warning', message: errorMessage(error, 'No se pudo guardar el pedido.') })
+        if (target.kind === 'add') await refresh()
+        push({ tone: 'warning', message: failureMessage(target, error) })
         return
       }
       clear(key)

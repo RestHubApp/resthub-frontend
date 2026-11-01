@@ -20,8 +20,11 @@ interface NotifiedMutationOptions<TVariables, TResult> {
   readonly shouldWait?: boolean
   /** Lo que sigue al éxito, ya con el aviso puesto (cerrar la ventana, limpiar el campo). */
   readonly onSuccess?: (result: TResult) => void
-  /** Las consultas que también se releen si falla (pudieron cambiar mientras tanto). */
-  readonly invalidateOnError?: readonly QueryKey[]
+  /**
+   * Las consultas que también se releen si falla (pudieron cambiar mientras
+   * tanto); una función las elige según el error.
+   */
+  readonly invalidateOnError?: readonly QueryKey[] | ((error: unknown) => readonly QueryKey[])
 }
 
 /**
@@ -64,7 +67,7 @@ export function useNotifiedMutation<TVariables = void, TResult = unknown>({
       return undefined
     },
     onError: (error) => {
-      void Promise.all(reread(invalidateOnError))
+      void Promise.all(reread(typeof invalidateOnError === 'function' ? invalidateOnError(error) : invalidateOnError))
       if (failure !== undefined) {
         push({ tone: 'warning', message: errorMessage(error, failure) })
       }

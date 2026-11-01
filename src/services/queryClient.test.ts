@@ -35,3 +35,9 @@ describe('clearQueries', () => {
     expect(queryClient.getMutationCache().getAll()).toEqual([])
   })
 })
+
+describe('queryClient', () => {
+  it('sin señal una mutación falla en el acto en vez de quedar en pausa', () => {
+    expect(queryClient.getDefaultOptions().mutations?.networkMode).toBe('always')
+  })
+})
