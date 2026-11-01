@@ -1,5 +1,5 @@
 import type { IngredientUnit } from '@/api/types'
-import { formatMoney } from '@/services/format'
+import { formatUnitPrice } from '@/services/format'
 
 // El inventario guarda cada cantidad en la unidad base (gramos, mililitros o
 // unidades), que es la que suma sin errores. La gente, en cambio, compra por
@@ -49,10 +49,10 @@ export function baseUnitLabel(unit: IngredientUnit): string {
   return BASE[unit].label
 }
 
-/** "S/ 4.20 por kg": el costo guardado por gramo, mostrado por kilo. */
+/** "S/ 4.20 por kg": el costo guardado por gramo, mostrado por kilo; "S/ 0.004 por unid." si no llega a un céntimo. */
 export function formatUnitCost(unitCost: string | number, unit: IngredientUnit): string {
   const price = priceUnit(unit)
-  return `${formatMoney(Number(unitCost) * price.factor)} por ${price.label}`
+  return `${formatUnitPrice(Number(unitCost) * price.factor)} por ${price.label}`
 }
 
 // "5.600" pasa a "5.6". Los textos llegan de `toFixed`, así que nunca son

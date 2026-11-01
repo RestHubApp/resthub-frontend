@@ -12,6 +12,7 @@ import {
   formatPercent,
   formatQuantity,
   formatSignedQuantity,
+  formatUnitPrice,
   toCents,
   toNumber,
 } from './format'
@@ -24,6 +25,14 @@ describe('dinero', () => {
     expect(formatMoney('1234.5')).toBe(`${S}1,234.50`)
     expect(formatMoney(0)).toBe(`${S}0.00`)
     expect(formatMoney('abc')).toBe('—')
+  })
+
+  it('un precio por unidad menor que un céntimo lleva sus decimales; el resto, dos', () => {
+    expect(formatUnitPrice('0.004')).toBe(`${S}0.004`)
+    expect(formatUnitPrice(0.000125)).toBe(`${S}0.000125`)
+    expect(formatUnitPrice('4.2')).toBe(`${S}4.20`)
+    expect(formatUnitPrice(0)).toBe(`${S}0.00`)
+    expect(formatUnitPrice('abc')).toBe('—')
   })
 
   it('en los ejes quita los céntimos en cero y compacta desde mil', () => {

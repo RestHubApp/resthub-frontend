@@ -32,6 +32,10 @@ describe('units', () => {
     expect(toBaseCost(4.2, 1000)).toBe('0.0042')
     expect(fromBase('5600', 1000)).toBe('5.6')
     expect(flat(formatUnitCost('0.0042', 'g'))).toBe('S/ 4.20 por kg')
+    // Menos de un céntimo por unidad no se lee «S/ 0.00».
+    expect(flat(formatUnitCost('0.004', 'unit'))).toBe('S/ 0.004 por unid.')
+    expect(flat(formatUnitCost('0.000125', 'unit'))).toBe('S/ 0.000125 por unid.')
+    expect(flat(formatUnitCost('0', 'unit'))).toBe('S/ 0.00 por unid.')
   })
 })
 
