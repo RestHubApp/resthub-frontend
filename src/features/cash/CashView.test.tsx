@@ -12,6 +12,7 @@ const OPEN = '/cash/open'
 const SCREEN = '/caja'
 const INITIAL = 'Efectivo inicial'
 const OPEN_CASH_REGISTER = { name: 'Abrir caja' }
+const SHIFT = 'Turno en curso'
 
 function openCashRegister(actual = CLOSED_CASH_REGISTER) {
   const api = server().on('get', ACTUAL, actual).on('get', SESSIONS, PAGE_EMPTY)
@@ -43,7 +44,7 @@ describe('CashView', () => {
     signInAs()
     const { router } = mountScreen(<CashView />, { path: SCREEN, en: `${SCREEN}?accion=abrir-caja&otro=1` })
 
-    expect(await screen.findByText('Turno en curso')).toBeInTheDocument()
+    expect(await screen.findByText(SHIFT)).toBeInTheDocument()
     expect(screen.queryByRole('dialog', OPEN_CASH_REGISTER)).not.toBeInTheDocument()
     await waitFor(() => {
       expect(router.state.location.search).toBe('?otro=1')
@@ -65,7 +66,7 @@ describe('CashView', () => {
 
     expect(await screen.findByText('Caja abierta con S/ 150.50. Ya se puede cobrar.')).toBeInTheDocument()
     expect(api.calls('post', OPEN)[0]?.body).toEqual({ opening_amount: '150.50', notes: 'Turno mañana' })
-    expect(await screen.findByRole('heading', { name: 'Turno en curso' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: SHIFT })).toBeInTheDocument()
   })
 
   it('un monto mal escrito no llega al servidor', async () => {
@@ -100,5 +101,38 @@ describe('CashView', () => {
 
     expect(await screen.findByText('Base caída')).toBeInTheDocument()
     expect(screen.queryByRole('button', OPEN_CASH_REGISTER)).not.toBeInTheDocument()
+  })
+})
+
+describe('CashView cuando otro equipo cambió la caja', () => {
+  it('si otro equipo ya cerró la caja, avisa y relee en vez de dejar el turno viejo', async () => {
+    const { api, user } = openCashRegister(currentOpenCash())
+    api.on('post', '/cash/close', () => {
+      api.on('get', ACTUAL, CLOSED_CASH_REGISTER)
+      return new ErrorResponse(404, 'No hay una caja abierta.')
+    })
+
+    await user.type(await screen.findByLabelText('Efectivo contado'), '200')
+    await user.click(screen.getByRole('button', { name: 'Cerrar caja' }))
+    const confirmation = await screen.findByRole('alertdialog', { name: '¿Cerrar la caja?' })
+    await user.click(within(confirmation).getByRole('button', { name: 'Cerrar caja' }))
+
+    expect(await screen.findByText('No hay una caja abierta.')).toBeInTheDocument()
+    expect(await screen.findByText('La caja está cerrada')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: SHIFT })).not.toBeInTheDocument()
+  })
+
+  it('si otro equipo ya abrió la caja, avisa y muestra el turno en curso', async () => {
+    const { api, user } = openCashRegister()
+    api.on('post', OPEN, () => {
+      api.on('get', ACTUAL, currentOpenCash())
+      return new ErrorResponse(409, 'Ya hay una caja abierta.')
+    })
+
+    await user.type(await openDialog(user), '100')
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', OPEN_CASH_REGISTER))
+
+    expect(await screen.findByText('Ya hay una caja abierta.')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: SHIFT })).toBeInTheDocument()
   })
 })
