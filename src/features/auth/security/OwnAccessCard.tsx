@@ -3,7 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { ownAccessHistoryQuery } from '@/api/accessHistory'
 import { AccessHistoryPanel } from '@/components/AccessHistoryPanel'
 import { SectionCard } from '@/components/SectionCard'
-import { describeAccess } from '@/services/accessHistory'
+import { describeAccess, loadedAccesses } from '@/services/accessHistory'
 import { useTimeZone } from '@/store/session'
 
 /**
@@ -14,7 +14,7 @@ import { useTimeZone } from '@/store/session'
 export function OwnAccessCard() {
   const timeZone = useTimeZone()
   const history = useInfiniteQuery(ownAccessHistoryQuery())
-  const accesses = (history.data?.pages ?? []).flatMap((page) => page.items).map((entry) => describeAccess(entry, timeZone))
+  const accesses = loadedAccesses(history.data?.pages).map((entry) => describeAccess(entry, timeZone))
 
   return (
     <SectionCard title="Mis accesos" description="Los intentos de entrar con tu cuenta en los últimos 90 días. Si no reconoces uno, cambia tu contraseña.">

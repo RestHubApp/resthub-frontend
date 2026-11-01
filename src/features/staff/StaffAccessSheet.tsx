@@ -4,7 +4,7 @@ import { staffAccessHistoryQuery } from '@/api/accessHistory'
 import type { StaffResponse } from '@/api/types'
 import { AccessHistoryPanel } from '@/components/AccessHistoryPanel'
 import { DetailSheet } from '@/components/DetailSheet'
-import { describeAccess } from '@/services/accessHistory'
+import { describeAccess, loadedAccesses } from '@/services/accessHistory'
 import { useTimeZone } from '@/store/session'
 
 interface StaffAccessSheetProps {
@@ -17,7 +17,7 @@ interface StaffAccessSheetProps {
 export function StaffAccessSheet({ account, open, onClose }: StaffAccessSheetProps) {
   const timeZone = useTimeZone()
   const history = useInfiniteQuery({ ...staffAccessHistoryQuery(account.id), enabled: open })
-  const accesses = (history.data?.pages ?? []).flatMap((page) => page.items).map((entry) => describeAccess(entry, timeZone))
+  const accesses = loadedAccesses(history.data?.pages).map((entry) => describeAccess(entry, timeZone))
 
   return (
     <DetailSheet

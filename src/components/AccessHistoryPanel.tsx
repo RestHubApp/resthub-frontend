@@ -10,8 +10,9 @@ interface HistoryQuery {
   readonly isPending: boolean
   readonly isError: boolean
   readonly isFetchingNextPage: boolean
+  /** La consulta decide si hay otra tanda (ver `getNextPageParam`), no el largo de la lista. */
+  readonly hasNextPage: boolean
   readonly error: unknown
-  readonly data?: { readonly pages: readonly { readonly total: number }[] } | undefined
   readonly refetch: () => unknown
   readonly fetchNextPage: () => unknown
 }
@@ -33,7 +34,7 @@ export function AccessHistoryPanel({ label, history, accesses }: AccessHistoryPa
     <AccessHistoryList
       label={label}
       accesses={accesses}
-      total={history.data?.pages.at(-1)?.total ?? 0}
+      hasMore={history.hasNextPage}
       isLoadingMore={history.isFetchingNextPage}
       onMore={() => { void history.fetchNextPage() }}
     />
