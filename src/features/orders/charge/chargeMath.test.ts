@@ -55,6 +55,13 @@ describe('itemsCents', () => {
     expect(itemsCents(sampleOrder, [2])).toBe(1395)
   })
 
+  it('el descuento redondea medio céntimo hacia arriba como el servidor, sin errores de coma flotante', () => {
+    const first = item(1, '25.00')
+    expect(itemsCents(order([first, item(2, '10.00')], '34.60', '1.14'), [first.id])).toBe(2500 - 29)
+    const second = item(1, '30.00')
+    expect(itemsCents(order([second, item(2, '10.00')], '39.54', '1.15'), [second.id])).toBe(3000 - 35)
+  })
+
   it('si son todos los que faltan, cobra el saldo exacto', () => {
     const sampleOrder = order(dishes, '31.95', '10')
     expect(itemsCents(sampleOrder, [1, 2, 3])).toBe(3195)
