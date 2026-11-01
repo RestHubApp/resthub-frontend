@@ -119,6 +119,7 @@ describe('pedidos que esperan señal: el límite de peticiones', () => {
       expect(api.calls('post', ORDERS)).toHaveLength(1)
     })
     expect(await screen.findByText(/2 pedidos esperan señal/u)).toBeInTheDocument()
+    expect(await screen.findByText('Mesa 3: Demasiadas peticiones seguidas. Espera un momento y vuelve a intentar.')).toBeInTheDocument()
     expect(queuedOrders(OWNER)).toHaveLength(2)
   })
 
@@ -129,6 +130,7 @@ describe('pedidos que esperan señal: el límite de peticiones', () => {
     await waitFor(() => {
       expect(api.calls('post', SEND)).toHaveLength(1)
     })
+    expect(await screen.findByText(/^Mesa 3: Demasiadas peticiones seguidas/u)).toBeInTheDocument()
     expect(queuedOrders(OWNER)).toHaveLength(1)
     expect(screen.queryByText(SENT)).not.toBeInTheDocument()
   })
