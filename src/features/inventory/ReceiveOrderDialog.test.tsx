@@ -49,7 +49,7 @@ describe('ReceiveOrderDialog', () => {
     await userEvent.click(screen.getByRole('button', { name: 'OC 7' }))
 
     expect(screen.getByLabelText('Cantidad recibida de Papa')).toHaveValue('2000')
-    expect(screen.getByLabelText('Costo real por unidad de Papa')).toHaveValue('0.003')
+    expect(screen.getByLabelText('Costo real por g de Papa')).toHaveValue('0.003')
   })
 
   it('al volver a abrir la misma orden tras «Cancelar», arranca otra vez con lo pedido', async () => {
