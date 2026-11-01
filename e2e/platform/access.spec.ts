@@ -3,9 +3,11 @@
 // Las cuentas de la semilla entran por el formulario de verdad (HU01). Los
 // errores de contraseña se prueban con cuentas del restaurante propio de cada
 // prueba, para no acercarse al límite de intentos fallidos de la semilla.
-import { SECRET, signInByApi, SEED } from '../support/api'
+import type { Role } from '../../src/api/types'
+import { NEW_SECRET, SECRET, signInByApi, SEED, unique } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, evidence, expect, test } from '../support/fixtures'
+import { api } from '../support/management'
 import {
   savedQueue,
   ownerOf,
@@ -228,6 +230,36 @@ test('ACC-09 cerrar sesión con pedidos sin enviar avisa y conserva la cola @mob
   await expect(page).toHaveURL(/\/acceso$/u)
   // Los pedidos no se borran: se envían cuando esa cuenta vuelva a entrar.
   expect(await savedQueue(page)).toBe(2)
+})
+
+test('ACC-09b «Salir» de «Antes de empezar» con pedidos sin enviar avisa y conserva la cola @mobile', async ({ page, local }) => {
+  covers('confirmacion:shell/TermsSignOut')
+  // Una cuenta nueva que todavía no aceptó los términos: entra a la puerta «Antes de empezar».
+  const roles = await api(local).list<Role>('/roles')
+  const email = `nueva-${unique()}@e2e.resthub.dev`
+  await api(local).post('/staff', {
+    email,
+    full_name: 'Mesera Nueva',
+    role_id: roles.find((role) => role.kind === 'waiter')?.id,
+    password: NEW_SECRET,
+  })
+  const newcomer = await signInByApi(email, NEW_SECRET, { acceptTerms: false })
+  await withoutOrdersSending(page)
+  await openAs(page, newcomer, '/pedidos')
+  await expect(page.getByRole('heading', { level: 1, name: 'Antes de empezar' })).toBeVisible()
+  await enqueueOrders(page, ownerOf(newcomer), [{ table: local.table('2'), dish: local.dish('Lomo saltado') }])
+  await page.reload()
+  await page.getByRole('button', { name: 'Salir', exact: true }).click()
+  const notice = page.getByRole('alertdialog', { name: '¿Cerrar sesión con pedidos sin enviar?' })
+  await expect(notice).toContainText('Un pedido tuyo espera señal: Mesa 2')
+  await notice.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(notice).toBeHidden()
+  await expect(page.getByRole('heading', { level: 1, name: 'Antes de empezar' })).toBeVisible()
+  await page.getByRole('button', { name: 'Salir', exact: true }).click()
+  await notice.getByRole('button', { name: 'Salir', exact: true }).click()
+  await expect(page).toHaveURL(/\/acceso$/u)
+  // El pedido no se borra: se envía cuando esa cuenta vuelva a entrar.
+  expect(await savedQueue(page)).toBe(1)
 })
 
 test('ACC-10 la hoja «Más» del celular abre las otras pantallas, la accesibilidad y el perfil @only-mobile', async ({ page, local }) => {

@@ -23,6 +23,7 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
     'funcion:reservas.no-vinieron',
     'funcion:reservas.cancelar',
     'funcion:reservas.cambiar-dia',
+    'confirmacion:reservations/ReservationStatusButton',
     'estado:reservas.vacio',
     'estado:reservas.error',
   )
@@ -95,9 +96,17 @@ test('GES-23 el encargado toma reservas de otro día, el servidor no deja cruzar
   await quispe.getByRole('button', { name: 'Llegaron' }).click()
   await expect(notice(page, 'Familia Quispe: Llegaron.')).toBeVisible()
   await expect(quispe.getByRole('button')).toHaveCount(0)
+  // No vinieron y cancelada no se deshacen: se confirman, y «Volver» no cambia nada.
   await torres.getByRole('button', { name: 'No vinieron' }).click()
+  const noShow = page.getByRole('alertdialog', { name: /^¿Marcar que no vino la reserva de Señor Torres a las /u })
+  await noShow.getByRole('button', { name: 'Volver' }).click()
+  await expect(noShow).toBeHidden()
+  await expect(torres).toContainText('Reservada')
+  await torres.getByRole('button', { name: 'No vinieron' }).click()
+  await noShow.getByRole('button', { name: 'No vinieron' }).click()
   await expect(notice(page, 'Señor Torres: No vinieron.')).toBeVisible()
   await group.getByRole('button', { name: 'Cancelar' }).click()
+  await page.getByRole('alertdialog', { name: /^¿Cancelar la reserva de Grupo Vargas a las /u }).getByRole('button', { name: 'Cancelar la reserva' }).click()
   await expect(group).toContainText('Cancelada')
   await evidence(page, 'ges-23-3-estados')
   const statuses = (await api(local).list<Reservation>(`/reservations?day=${manana}`)).map((r) => [r.customer_name, r.status])
