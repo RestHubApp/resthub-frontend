@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { onlineManager } from '@tanstack/react-query'
-import { act, screen, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 
 import { paid, payment, buildOrder } from '#jest/fixtures/charge'
 import { signInAs, mountScreen, ErrorResponse, server, withoutNetwork, type Request } from '#jest/harness'
@@ -8,6 +8,8 @@ import type { OrderResponse } from '@/api/types'
 import { ChargeDialog } from './ChargeDialog'
 
 const PAYMENTS = '/orders/12/payments'
+const ORDER = '/orders/12'
+const CASH = '/cash/current'
 const CONFIRM = { name: 'Confirmar pago' }
 const RECEIVED = 'Monto recibido'
 const REGISTERED = { name: 'Cobro registrado' }
@@ -19,8 +21,8 @@ type OnPay = (request: Request, actual: OrderResponse) => OrderResponse | ErrorR
 function charge(initial: OrderResponse = buildOrder(), respond?: OnPay) {
   let actual = initial
   const api = server()
-    .on('get', '/cash/current', { is_open: true, session: null })
-    .on('get', '/orders/12', () => actual)
+    .on('get', CASH, { is_open: true, session: null })
+    .on('get', ORDER, () => actual)
   api.on('post', PAYMENTS, (request: Request) => {
     const response = respond ? respond(request, actual) : paid(actual, payment({ method: 'cash', method_label: 'Efectivo' }))
     if (!(response instanceof ErrorResponse)) {
@@ -114,7 +116,7 @@ describe('ChargeDialog: sin caja o con error', () => {
   })
 
   it('con la caja cerrada lo avisa y no deja confirmar', async () => {
-    server().on('get', '/cash/current', { is_open: false, session: null })
+    server().on('get', CASH, { is_open: false, session: null })
     signInAs()
     mountScreen(<ChargeDialog order={buildOrder()} onClose={jest.fn()} />)
 
@@ -172,5 +174,47 @@ describe('ChargeDialog: sin caja o con error', () => {
     mountScreen(<ChargeDialog order={null} onClose={jest.fn()} />)
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+})
+
+describe('ChargeDialog: el pedido o la caja cambiaron', () => {
+  it('si el saldo cambió (409), relee el pedido y el siguiente intento envía el saldo nuevo', async () => {
+    const { api, user } = charge()
+    let hasChanged = false
+    api.on('get', ORDER, () => (hasChanged ? buildOrder({ paid_amount: '30.00', balance: '20.00' }) : buildOrder()))
+    api.once('post', PAYMENTS, () => {
+      hasChanged = true
+      return new ErrorResponse(409, 'La cuenta cambió mientras se cobraba: ahora faltan S/ 20.00. Revísala.', 'balance_changed')
+    })
+    await screen.findByRole('dialog', CHARGING)
+    const reads = api.calls('get', ORDER).length
+
+    await user.click(screen.getByRole('radio', { name: 'Yape' }))
+    await user.click(screen.getByRole('button', CONFIRM))
+
+    expect(await screen.findByText(/ahora faltan S\/ 20\.00/u)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(api.calls('get', ORDER).length).toBeGreaterThan(reads)
+    })
+    await user.click(await screen.findByRole('button', CONFIRM))
+    await waitFor(() => {
+      expect(api.calls('post', PAYMENTS)).toHaveLength(2)
+    })
+    expect(api.calls('post', PAYMENTS)[1]?.body).toMatchObject({ expected_balance: '20.00' })
+  })
+
+  it('si cerraron la caja mientras tanto, relee la caja y muestra el aviso', async () => {
+    let isOpen = true
+    const { api, user } = charge(buildOrder(), () => {
+      isOpen = false
+      return new ErrorResponse(409, 'La caja está cerrada. El encargado tiene que abrirla para cobrar.', 'cash_register_closed')
+    })
+    api.on('get', CASH, () => ({ is_open: isOpen, session: null }))
+
+    await user.click(await screen.findByRole('radio', { name: 'Yape' }))
+    await user.click(screen.getByRole('button', CONFIRM))
+
+    expect(await screen.findByText('La caja está cerrada.')).toBeInTheDocument()
+    expect(screen.getByRole('button', CONFIRM)).toBeDisabled()
   })
 })
