@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { UNUSED_DAYS, unusedStaffQuery } from '@/api/accountSecurity'
+import { rolesQuery } from '@/api/roles'
 import { SectionCard } from '@/components/SectionCard'
+import { usePermissions } from '@/store/session'
+import { canManageAccount } from './roleOptions'
 import { UnusedStaffRow } from './UnusedStaffRow'
 
 /**
@@ -11,6 +14,10 @@ import { UnusedStaffRow } from './UnusedStaffRow'
  */
 export function UnusedStaffCard() {
   const unused = useQuery(unusedStaffQuery)
+  // La lista trae todas las cuentas sin uso, también las de un rol con más
+  // permisos que quien mira: a esas el servidor no deja desactivarlas.
+  const roles = useQuery(rolesQuery())
+  const granted = usePermissions()
   const entries = unused.data ?? []
   if (entries.length === 0) return null
 
@@ -20,7 +27,9 @@ export function UnusedStaffCard() {
       description={`Cuentas activas que no se usan hace ${String(UNUSED_DAYS)} días o más. Si la persona ya no trabaja aquí, desactiva su cuenta.`}
     >
       <ul aria-label="Cuentas sin uso" className="m-0 flex list-none flex-col divide-y divide-border p-0">
-        {entries.map((entry) => <UnusedStaffRow key={entry.member.id} entry={entry} />)}
+        {entries.map((entry) => (
+          <UnusedStaffRow key={entry.member.id} entry={entry} canManage={canManageAccount(entry.member, roles.data, granted)} />
+        ))}
       </ul>
     </SectionCard>
   )

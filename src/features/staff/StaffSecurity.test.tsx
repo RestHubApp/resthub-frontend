@@ -6,6 +6,9 @@ import { ErrorResponse, firstOf, mountScreen, PERMISSIONS_OWNER, server, signInA
 import { StaffView } from './StaffView'
 
 const RESTAURANT = '/restaurant'
+const ADD_PERIOD = 'Agregar tramo'
+const UNUSED_LIST = { name: 'Cuentas sin uso' }
+const SAVE_HOURS = { name: 'Guardar horario' }
 const LUIS_STATUS = '/staff/8/status'
 const LUIS_SESSIONS = '/staff/8/sessions'
 const PHONE = { id: 'cc33', device: 'Chrome en Android', network: '181.65.2.x', city: 'Arequipa', country: 'PE', created_at: '2026-10-17T13:00:00Z', last_seen_at: '2026-10-17T15:00:00Z', current: false }
@@ -16,7 +19,7 @@ function openStaff(unused: unknown = []) {
     .on('get', '/staff', { items: TEAM, total: TEAM.length })
     .on('get', '/roles', [ROLE_OWNER, ROLE_WAITER])
     .on('get', '/staff/unused', unused)
-    .on('get', RESTAURANT, { idle_lock_minutes: 10 })
+    .on('get', RESTAURANT, { idle_lock_minutes: 10, opening_hours: [] })
   signInAs(PERMISSIONS_OWNER)
   return { api, ...mountScreen(<StaffView />, { path: '/personal' }) }
 }
@@ -26,7 +29,7 @@ describe('seguridad del personal', () => {
     const { api, user } = openStaff(UNUSED)
     api.on('patch', LUIS_STATUS, { ...member(), is_active: false })
 
-    const list = await screen.findByRole('list', { name: 'Cuentas sin uso' })
+    const list = await screen.findByRole('list', UNUSED_LIST)
     expect(within(list).getByText('Nunca entró · creada hace 75 días')).toBeInTheDocument()
     await user.click(within(list).getByRole('button', { name: 'Desactivar' }))
     await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Desactivar' }))
@@ -40,7 +43,7 @@ describe('seguridad del personal', () => {
     openStaff()
 
     expect(await screen.findByRole('row', { name: /Luis Quispe/u })).toBeInTheDocument()
-    expect(screen.queryByRole('list', { name: 'Cuentas sin uso' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('list', UNUSED_LIST)).not.toBeInTheDocument()
   })
 
   it('muestra y cierra las sesiones abiertas de una persona (RFS-17)', async () => {
@@ -79,22 +82,77 @@ describe('seguridad del personal', () => {
     api.on('patch', RESTAURANT, new ErrorResponse(422, 'El horario admite hasta 21 tramos.', 'invalid_opening_hours'))
 
     expect(await screen.findByText('Sin horario: no se marcan accesos fuera de horario.')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Agregar tramo' }))
-    await user.click(screen.getByRole('button', { name: 'Agregar tramo' }))
+    await user.click(screen.getByRole('button', { name: ADD_PERIOD }))
+    await user.click(screen.getByRole('button', { name: ADD_PERIOD }))
     const closes = screen.getAllByLabelText('Cierra')
     await user.clear(firstOf(closes))
     await user.type(firstOf(closes), '12:00')
     expect(screen.getByText('No puede abrir y cerrar a la misma hora.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Guardar horario' })).toBeDisabled()
+    expect(screen.getByRole('button', SAVE_HOURS)).toBeDisabled()
 
     await user.clear(firstOf(closes))
     await user.type(firstOf(closes), '02:00')
     await user.click(screen.getByRole('button', { name: 'Quitar el tramo del martes de 12:00 a 23:00' }))
-    await user.click(screen.getByRole('button', { name: 'Guardar horario' }))
+    await user.click(screen.getByRole('button', SAVE_HOURS))
 
     await waitFor(() => {
       expect(api.calls('patch', RESTAURANT)[0]?.body).toEqual({ opening_hours: [{ day: 0, opens: '12:00', closes: '02:00' }] })
     })
     expect(await screen.findByText('El horario admite hasta 21 tramos.')).toBeInTheDocument()
+  })
+})
+
+describe('horario de atención mientras se carga', () => {
+  it('si no se pudo leer el horario lo dice y no deja armar uno vacío encima', async () => {
+    const { api } = openStaff()
+    api.on('get', RESTAURANT, new ErrorResponse(500, 'Base caída'))
+
+    expect(await screen.findByRole('button', { name: /reintentar/i })).toBeInTheDocument()
+    expect(screen.queryByText('Sin horario: no se marcan accesos fuera de horario.')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: ADD_PERIOD })).not.toBeInTheDocument()
+  })
+
+  it('al agregar un tramo conserva los que ya estaban guardados', async () => {
+    const { api, user } = openStaff()
+    api.on('get', RESTAURANT, {
+      idle_lock_minutes: 10,
+      opening_hours: [{ day: 0, opens: '12:00:00', closes: '16:00:00' }, { day: 1, opens: '18:00:00', closes: '23:00:00' }],
+    })
+    api.on('patch', RESTAURANT, { idle_lock_minutes: 10, opening_hours: [] })
+
+    expect(await screen.findByRole('button', { name: 'Quitar el tramo del martes de 18:00 a 23:00' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: ADD_PERIOD }))
+    await user.click(screen.getByRole('button', SAVE_HOURS))
+
+    await waitFor(() => {
+      expect(api.calls('patch', RESTAURANT)[0]?.body).toEqual({
+        opening_hours: [
+          { day: 0, opens: '12:00', closes: '16:00' },
+          { day: 1, opens: '18:00', closes: '23:00' },
+          { day: 2, opens: '18:00', closes: '23:00' },
+        ],
+      })
+    })
+  })
+})
+
+describe('cuentas sin uso de un rol más fuerte', () => {
+  it('no ofrece desactivar una cuenta cuyo rol tiene permisos que quien mira no tiene', async () => {
+    const owner = member({ id: 9, full_name: 'Rosa Díaz', role_id: ROLE_OWNER.id, role_label: 'Encargado' })
+    server()
+      .on('get', '/staff', { items: TEAM, total: TEAM.length })
+      .on('get', '/roles', [ROLE_OWNER, ROLE_WAITER])
+      .on('get', '/staff/unused', [...UNUSED, { member: owner, last_activity_at: null, unused_days: 90 }])
+      .on('get', RESTAURANT, { idle_lock_minutes: 10, opening_hours: [] })
+    signInAs(['staff.manage', 'orders.take', 'orders.charge'])
+    mountScreen(<StaffView />, { path: '/personal' })
+
+    const list = await screen.findByRole('list', UNUSED_LIST)
+    const rows = within(list).getAllByRole('listitem')
+    const ownerRow = firstOf(rows.filter((row) => within(row).queryByText('Rosa Díaz · Encargado') !== null))
+    const waiterRow = firstOf(rows.filter((row) => row !== ownerRow))
+    expect(within(ownerRow).getByText(/Su rol tiene permisos que tu cuenta no tiene/u)).toBeInTheDocument()
+    expect(within(ownerRow).queryByRole('button', { name: 'Desactivar' })).not.toBeInTheDocument()
+    expect(within(waiterRow).getByRole('button', { name: 'Desactivar' })).toBeInTheDocument()
   })
 })

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 
 import { taxSettings, invoice } from '#jest/fixtures/panel'
 import { signInAs, mountScreen, PERMISSIONS_WAITER, ErrorResponse, server } from '#jest/harness'
@@ -7,10 +7,13 @@ import type { Invoice } from '@/api/types'
 import { InvoicePrintView } from './InvoicePrintView'
 
 const ROUTE = '/comprobantes/:invoiceId/imprimir'
+const INVOICE_URL = '/billing/invoices/5'
+const SETTINGS_URL = '/billing/settings'
+const ISSUER_RUC = 'RUC 20123456789'
 
 function print(taxInvoice: Invoice | ErrorResponse, permissions?: Parameters<typeof signInAs>[0]) {
   const printSpy = jest.spyOn(window, 'print')
-  const api = server().on('get', '/billing/invoices/5', taxInvoice).on('get', '/billing/settings', taxSettings())
+  const api = server().on('get', INVOICE_URL, taxInvoice).on('get', SETTINGS_URL, taxSettings())
   signInAs(permissions)
   const { user } = mountScreen(<InvoicePrintView />, { path: ROUTE, en: '/comprobantes/5/imprimir' })
   return { api, printSpy, user }
@@ -23,7 +26,7 @@ afterEach(() => {
 describe('InvoicePrintView', () => {
   it('el encargado ve el emisor con su RUC y la hoja se imprime sola', async () => {
     const { printSpy } = print(invoice())
-    expect(await screen.findByText('RUC 20123456789')).toBeInTheDocument()
+    expect(await screen.findByText(ISSUER_RUC)).toBeInTheDocument()
     expect(screen.getByText('La Picantería S.A.C.')).toBeInTheDocument()
     expect(screen.getByText('B001-12')).toBeInTheDocument()
     expect(screen.getByText('2 × Ceviche')).toBeInTheDocument()
@@ -34,8 +37,8 @@ describe('InvoicePrintView', () => {
   it('el mesero imprime sin el encabezado fiscal y sin pedir los ajustes', async () => {
     const { api } = print(invoice(), [...PERMISSIONS_WAITER, 'billing.issue'])
     expect(await screen.findByText('B001-12')).toBeInTheDocument()
-    expect(screen.queryByText('RUC 20123456789')).not.toBeInTheDocument()
-    expect(api.calls('get', '/billing/settings')).toHaveLength(0)
+    expect(screen.queryByText(ISSUER_RUC)).not.toBeInTheDocument()
+    expect(api.calls('get', SETTINGS_URL)).toHaveLength(0)
   })
 
   it('una factura muestra el documento del cliente, el descuento y el IGV', async () => {
@@ -70,5 +73,36 @@ describe('InvoicePrintView', () => {
     const { printSpy } = print(new ErrorResponse(404, 'Ese comprobante no existe'))
     expect(await screen.findByText('Ese comprobante no existe')).toBeInTheDocument()
     expect(printSpy).not.toHaveBeenCalled()
+  })
+
+  it('con un id que no es un número dice que no existe y no lo pide', async () => {
+    const printSpy = jest.spyOn(window, 'print')
+    const api = server().on('get', SETTINGS_URL, taxSettings())
+    signInAs()
+    mountScreen(<InvoicePrintView />, { path: ROUTE, en: '/comprobantes/abc/imprimir' })
+
+    expect(await screen.findByText('Este comprobante no existe.')).toBeInTheDocument()
+    expect(api.calls('get', /\/billing\/invoices\//u)).toHaveLength(0)
+    expect(printSpy).not.toHaveBeenCalled()
+  })
+
+  it('el encargado no imprime hasta tener los datos del emisor', async () => {
+    let answerSettings = (): void => undefined
+    const settingsAnswered = new Promise<void>((resolve) => { answerSettings = resolve })
+    const { api, printSpy } = print(invoice())
+    api.on('get', SETTINGS_URL, async () => {
+      await settingsAnswered
+      return taxSettings()
+    })
+
+    // El comprobante ya llegó; los ajustes, todavía no.
+    await waitFor(() => { expect(api.calls('get', INVOICE_URL)).toHaveLength(1) })
+    await new Promise((resolve) => { setTimeout(resolve, 50) })
+    expect(screen.getByText('Preparando el comprobante…')).toBeInTheDocument()
+    expect(printSpy).not.toHaveBeenCalled()
+
+    answerSettings()
+    expect(await screen.findByText(ISSUER_RUC)).toBeInTheDocument()
+    expect(printSpy).toHaveBeenCalledTimes(1)
   })
 })

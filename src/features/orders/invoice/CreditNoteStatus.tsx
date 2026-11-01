@@ -18,6 +18,9 @@ interface CreditNoteStatusProps {
  */
 export function CreditNoteStatus({ note, isVoided }: CreditNoteStatusProps) {
   const canManage = useCan(PERMISSION.billingManage)
+  // Los archivos los sirve el servidor solo a quien emite comprobantes: quien
+  // solo los revisa recibiría un 403.
+  const canDownload = useCan(PERMISSION.billingIssue)
   const resend = useResendCreditNote()
 
   return (
@@ -28,7 +31,7 @@ export function CreditNoteStatus({ note, isVoided }: CreditNoteStatusProps) {
       {note.status === 'rejected' && note.provider_message !== '' ? (
         <span className="basis-full text-destructive">{note.provider_message}</span>
       ) : null}
-      <InvoiceDownloads invoice={note} fetchFile={downloadCreditNoteDocument} of={`de la nota ${note.code}`} />
+      {canDownload ? <InvoiceDownloads invoice={note} fetchFile={downloadCreditNoteDocument} of={`de la nota ${note.code}`} /> : null}
       {canManage && note.status !== 'accepted' ? (
         <Button type="button" size="sm" variant="outline" disabled={resend.isPending} onClick={() => {
           resend.mutate(note.id)

@@ -12,8 +12,14 @@ function unusedText({ last_activity_at, unused_days }: UnusedStaff): string {
   return last_activity_at === null ? `Nunca entró · creada hace ${days}` : `Sin uso hace ${days}`
 }
 
+interface UnusedStaffRowProps {
+  readonly entry: UnusedStaff
+  /** Si quien mira puede desactivarla: no, si su rol tiene permisos que la cuenta de quien mira no tiene. */
+  readonly canManage: boolean
+}
+
 /** Una cuenta sin uso, con su botón para desactivarla. */
-export function UnusedStaffRow({ entry }: { readonly entry: UnusedStaff }) {
+export function UnusedStaffRow({ entry, canManage }: UnusedStaffRowProps) {
   const { member } = entry
   const queryClient = useQueryClient()
   const status = useStaffStatus(member)
@@ -28,13 +34,17 @@ export function UnusedStaffRow({ entry }: { readonly entry: UnusedStaff }) {
         <p className="m-0 text-sm text-muted-foreground">{unusedText(entry)}</p>
         {status.isError ? <ErrorMessage error={status.error} fallback="No se pudo desactivar la cuenta." /> : null}
       </div>
-      <ConfirmDialog
-        trigger={<Button type="button" size="sm" variant="outline" disabled={status.isPending}>Desactivar</Button>}
-        title={`¿Desactivar a ${member.full_name}?`}
-        description="Se cierran sus sesiones abiertas y no podrá entrar hasta que vuelvas a activar su cuenta. Sus pedidos y registros se conservan."
-        confirmLabel="Desactivar"
-        onConfirm={deactivate}
-      />
+      {canManage ? (
+        <ConfirmDialog
+          trigger={<Button type="button" size="sm" variant="outline" disabled={status.isPending}>Desactivar</Button>}
+          title={`¿Desactivar a ${member.full_name}?`}
+          description="Se cierran sus sesiones abiertas y no podrá entrar hasta que vuelvas a activar su cuenta. Sus pedidos y registros se conservan."
+          confirmLabel="Desactivar"
+          onConfirm={deactivate}
+        />
+      ) : (
+        <p className="m-0 text-sm text-muted-foreground">Su rol tiene permisos que tu cuenta no tiene: pídele al encargado que la revise.</p>
+      )}
     </li>
   )
 }

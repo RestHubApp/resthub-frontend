@@ -3,7 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { invoice, taxSettings } from '#jest/fixtures/panel'
 import { mountScreen, server, signInAs } from '#jest/harness'
-import type { Invoice } from '@/api/types'
+import type { CreditNote, Invoice } from '@/api/types'
 import { BillingScreen } from './BillingScreen'
 
 const LIST = '/billing/invoices'
@@ -20,12 +20,12 @@ const VOIDED = invoice({
 })
 const REPLACEMENT = invoice({ id: 6, kind: 'factura', kind_label: 'Factura', series: 'F001', number: 4, code: 'F001-4', replaces_invoice_id: 5 })
 
-function open(items: Invoice[]) {
+function open(items: Invoice[], permissions?: Parameters<typeof signInAs>[0]) {
   const api = server()
     .on('get', '/billing/settings', taxSettings())
     .on('get', LIST, { items, total: items.length })
     .on('get', '/billing/invoices/5', VOIDED)
-  signInAs()
+  signInAs(permissions)
   return { api, ...mountScreen(<BillingScreen />) }
 }
 
@@ -55,5 +55,22 @@ describe('Comprobantes: anulados y reemplazos en el listado', () => {
 
     expect(await screen.findByText(`Anulado: ${REASON}`)).toBeInTheDocument()
     expect(api.calls('post', VOID)[0]?.body).toEqual({ reason: REASON })
+  })
+})
+
+describe('Comprobantes: quien solo los revisa', () => {
+  it('no ofrece los archivos de la nota de crédito ni pide el comprobante reemplazado', async () => {
+    const note: CreditNote = {
+      id: 1, invoice_id: 5, code: 'BC01-1', series: 'BC01', number: 1, reason_code: '01',
+      reason_label: 'Anulación de la operación', reason: REASON, total: '50.00', status: 'accepted',
+      status_label: 'Aceptada por SUNAT', provider_message: '', has_pdf: true, has_xml: true, has_cdr: true,
+      issued_at: '2026-10-15T23:59:07Z',
+    }
+    const { api } = open([REPLACEMENT, { ...VOIDED, credit_note_id: 1, credit_note: note }], ['billing.manage'])
+
+    expect(await screen.findByText(/Nota de crédito BC01-1/u)).toBeInTheDocument()
+    expect(screen.getByText('Reemplaza a un comprobante anulado')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Descargar PDF/u })).not.toBeInTheDocument()
+    expect(api.calls('get', '/billing/invoices/5')).toHaveLength(0)
   })
 })
