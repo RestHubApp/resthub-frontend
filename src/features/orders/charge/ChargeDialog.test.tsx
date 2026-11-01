@@ -1,8 +1,9 @@
-import { describe, expect, it, jest } from '@jest/globals'
-import { screen, within } from '@testing-library/react'
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
+import { onlineManager } from '@tanstack/react-query'
+import { act, screen, within } from '@testing-library/react'
 
 import { paid, payment, buildOrder } from '#jest/fixtures/charge'
-import { signInAs, mountScreen, ErrorResponse, server, type Request } from '#jest/harness'
+import { signInAs, mountScreen, ErrorResponse, server, withoutNetwork, type Request } from '#jest/harness'
 import type { OrderResponse } from '@/api/types'
 import { ChargeDialog } from './ChargeDialog'
 
@@ -108,6 +109,10 @@ describe('ChargeDialog: todo junto', () => {
 })
 
 describe('ChargeDialog: sin caja o con error', () => {
+  afterEach(() => {
+    onlineManager.setOnline(true)
+  })
+
   it('con la caja cerrada lo avisa y no deja confirmar', async () => {
     server().on('get', '/cash/current', { is_open: false, session: null })
     signInAs()
@@ -125,6 +130,22 @@ describe('ChargeDialog: sin caja o con error', () => {
     expect(await screen.findByText('El saldo cambió: vuelve a revisar la cuenta.')).toBeInTheDocument()
     expect(screen.getByRole('dialog', CHARGING)).toBeInTheDocument()
     expect(api.calls('post', PAYMENTS)).toHaveLength(1)
+  })
+
+  it('sin señal, el cobro falla al instante y no queda pendiente para después', async () => {
+    const { api, user } = charge(buildOrder(), withoutNetwork)
+    await screen.findByRole('dialog', CHARGING)
+    act(() => {
+      onlineManager.setOnline(false)
+    })
+
+    await user.click(screen.getByRole('radio', { name: 'Yape' }))
+    await user.click(screen.getByRole('button', CONFIRM))
+
+    expect(await screen.findByText('No se pudo registrar el pago.')).toBeInTheDocument()
+    expect(api.calls('post', PAYMENTS)).toHaveLength(1)
+    expect(screen.getByRole('button', CONFIRM)).toBeEnabled()
+    expect(screen.queryByRole('button', { name: 'Cobrando…' })).not.toBeInTheDocument()
   })
 
   it('«Volver» cierra la ventana sin cobrar', async () => {

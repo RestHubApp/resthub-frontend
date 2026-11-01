@@ -16,6 +16,15 @@ export const queryClient = new QueryClient({
       staleTime: 30_000,
       refetchOnWindowFocus: false,
     },
+    mutations: {
+      // Sin señal, TanStack Query pausa una mutación (`networkMode: 'online'`)
+      // y la manda sola al volver la conexión: el botón quedaba en «Cobrando…»
+      // y el cobro o la anulación llegaban minutos después, sin que nadie lo
+      // supiera. Cobrar, cambiar estados o editar necesitan señal: sin ella la
+      // petición falla en el acto y se avisa. Lo que sí espera la señal (un
+      // pedido nuevo) lo guarda la cola propia del celular (`store/offlineQueue`).
+      networkMode: 'always',
+    },
   },
 })
 
