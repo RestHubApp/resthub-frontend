@@ -37,8 +37,13 @@ function stubBrowserImaging(): void {
     createImageBitmap: jest.fn(() => Promise.resolve({ width: 2000, height: 1500, close: jest.fn() })),
   })
   jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({ drawImage: jest.fn(), fillRect: jest.fn() } as unknown as CanvasRenderingContext2D)
+  stubEncoding(PNG)
+}
+
+/** Lo que devuelve el lienzo al codificar la foto reducida. */
+function stubEncoding(bytes: Uint8Array<ArrayBuffer>): void {
   jest.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((callback, type) => {
-    callback(new Blob([PNG], { type: type ?? 'image/webp' }))
+    callback(new Blob([bytes], { type: type ?? 'image/webp' }))
   })
 }
 
@@ -87,14 +92,18 @@ describe('DishPhotoField: la foto en la ficha del plato', () => {
     expect(within(record).getByRole('button', REMOVE)).toBeInTheDocument()
   })
 
-  it('un archivo vacío no se envía y el aviso lo explica', async () => {
+  it.each([
+    ['un archivo vacío', new File([], 'vacia.png', { type: PNG_TYPE }), PNG, 'El archivo está vacío.'],
+    ['una foto pesada aun reducida', new File([PNG], PNG_FILE, { type: PNG_TYPE }), new Uint8Array(400 * 1024), 'La foto es demasiado pesada aun reducida.'],
+  ])('%s no se envía y el aviso explica por qué', async (_case, file, encoded, message) => {
+    stubEncoding(encoded)
     const api = server().on('get', MENU, menuWith(null)).on('get', COSTS, [])
     const { user } = mountScreen(<MenuView />)
     const record = await openRecord(user)
 
-    await user.upload(within(record).getByLabelText(PICKER), new File([], 'vacia.png', { type: PNG_TYPE }))
+    await user.upload(within(record).getByLabelText(PICKER), file)
 
-    expect(await screen.findByText(/No se pudo guardar la foto/u)).toBeInTheDocument()
+    expect(await screen.findByText(message)).toBeInTheDocument()
     expect(api.calls('put', PHOTO)).toHaveLength(0)
   })
 
