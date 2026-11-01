@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import type { NewItemRequest, OrderMenuItem } from '@/api/types'
 import { centsToApi, toCents } from '@/services/format'
 import { MAX_QUANTITY } from '@/features/orders/quantityLimit'
+import { useSession } from '@/store/session'
 
 /** Una opción elegida de un grupo del plato, con lo que suma al precio. */
 export interface DraftModifier {
@@ -123,6 +124,14 @@ const useDraftStore = create<DraftState>((set) => ({
     })
   },
 }))
+
+// Al cerrar o vencer la sesión se descartan: en un celular compartido, la
+// cuenta siguiente no ve ni envía a su nombre los platos y notas de otra.
+useSession.subscribe((state) => {
+  if (state.account === null) {
+    useDraftStore.setState({ drafts: {} })
+  }
+})
 
 export function useDraftLines(key: string): readonly DraftLine[] {
   return useDraftStore((state) => state.drafts[key] ?? EMPTY)
