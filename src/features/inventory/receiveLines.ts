@@ -1,4 +1,5 @@
 import type { PurchaseOrder } from '@/api/types'
+import { decimalText, isLineCost, isLineQuantity } from './lineNumbers'
 
 /** Lo que se escribió por línea al recibir: cantidad y costo real, como texto. */
 export type Received = Readonly<Partial<Record<number, { quantity: string; unitCost: string }>>>
@@ -9,9 +10,6 @@ export interface ReceivedLine {
   readonly quantity: string
   readonly unit_cost: string
 }
-
-// eslint-disable-next-line security/detect-unsafe-regex -- sin retroceso catastrófico: recheck la clasifica como segura (ver sast.md)
-const NUMBER = /^\d+(?:[.,]\d+)?$/u
 
 /** Lo recibido al abrir: lo mismo que se pidió. */
 export function initialReceived(order: PurchaseOrder): Received {
@@ -24,12 +22,12 @@ export function initialReceived(order: PurchaseOrder): Received {
 export function receivedLines(order: PurchaseOrder, values: Received): ReceivedLine[] {
   return order.lines.map((line) => ({
     line_id: line.id,
-    quantity: (values[line.id]?.quantity ?? '0').replace(',', '.'),
-    unit_cost: (values[line.id]?.unitCost ?? '0').replace(',', '.'),
+    quantity: decimalText(values[line.id]?.quantity ?? '0'),
+    unit_cost: decimalText(values[line.id]?.unitCost ?? '0'),
   }))
 }
 
-/** Si todas las cantidades y costos escritos son números. */
+/** Si todas las cantidades y costos escritos son números que acepta el servidor (3 y 6 decimales). */
 export function areReceivedLinesValid(lines: readonly ReceivedLine[]): boolean {
-  return lines.every((line) => NUMBER.test(line.quantity) && NUMBER.test(line.unit_cost))
+  return lines.every((line) => isLineQuantity(line.quantity) && isLineCost(line.unit_cost))
 }

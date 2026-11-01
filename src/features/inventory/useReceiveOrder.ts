@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { purchaseOrdersQuery, receivePurchaseOrder } from '@/api/purchasing'
 import type { PurchaseOrder } from '@/api/types'
 import { formatMoney } from '@/services/format'
+import { hasInvalidLineNumber } from './lineNumbers'
 import { areReceivedLinesValid, initialReceived, type Received, receivedLines, type ReceivedLine } from './receiveLines'
 import { usePurchasingMutation } from './usePurchasingMutation'
 
@@ -37,6 +38,7 @@ export function useReceiveOrder(order: PurchaseOrder | null, onClose: () => void
   return {
     values,
     isValid: areReceivedLinesValid(lines),
+    hasInvalidNumbers: hasInvalidLineNumber(lines.map((line) => ({ quantity: line.quantity, cost: line.unit_cost }))),
     isPending: receive.isPending,
     close,
     edit: (lineId: number, change: Partial<{ quantity: string; unitCost: string }>) => {

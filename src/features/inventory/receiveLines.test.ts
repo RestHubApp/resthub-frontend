@@ -26,4 +26,10 @@ describe('receiveLines', () => {
     expect(areReceivedLinesValid([{ line_id: 1, quantity: 'dos', unit_cost: '3' }])).toBe(false)
     expect(areReceivedLinesValid([{ line_id: 1, quantity: '', unit_cost: '3' }])).toBe(false)
   })
+
+  it('rechaza más decimales de los que guarda el servidor: 3 en la cantidad y 6 en el costo', () => {
+    expect(areReceivedLinesValid([{ line_id: 1, quantity: '5000.000', unit_cost: '0.004200' }])).toBe(true)
+    expect(areReceivedLinesValid([{ line_id: 1, quantity: '5000', unit_cost: '0.0042001' }])).toBe(false)
+    expect(areReceivedLinesValid([{ line_id: 1, quantity: '1.2345', unit_cost: '0.004' }])).toBe(false)
+  })
 })

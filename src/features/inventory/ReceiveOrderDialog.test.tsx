@@ -58,4 +58,18 @@ describe('ReceiveOrderDialog', () => {
 
     expect(screen.getByLabelText(LEMON_QUANTITY)).toHaveValue('5000')
   })
+
+  it('una cantidad con más de 3 decimales no se envía y se explica por qué', async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <Panel />
+      </QueryClientProvider>,
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'OC 5' }))
+    await userEvent.clear(screen.getByLabelText(LEMON_QUANTITY))
+    await userEvent.type(screen.getByLabelText(LEMON_QUANTITY), '1.2345')
+
+    expect(screen.getByText('Usa hasta 3 decimales en la cantidad y hasta 6 en el costo.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Recibir y cargar al stock' })).toBeDisabled()
+  })
 })

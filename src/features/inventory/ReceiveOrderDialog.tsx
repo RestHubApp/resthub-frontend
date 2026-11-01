@@ -1,6 +1,8 @@
 import type { PurchaseOrder } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { FormDialog } from '@/components/FormDialog'
+import { FormMessage } from '@/components/FormMessage'
+import { LINE_NUMBERS_HINT } from './lineNumbers'
 import { ReceiveLineRow } from './ReceiveLineRow'
 import { useReceiveOrder } from './useReceiveOrder'
 
@@ -49,6 +51,7 @@ export function ReceiveOrderDialog({ order, onClose }: ReceiveOrderDialogProps) 
           />
         ))}
       </ul>
+      {receive.hasInvalidNumbers ? <FormMessage tone="warning">{LINE_NUMBERS_HINT}</FormMessage> : null}
       <FormFooter
         mutation={receive}
         onCancel={receive.close}
