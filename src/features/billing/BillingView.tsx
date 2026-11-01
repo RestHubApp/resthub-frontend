@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { billingSettingsQuery } from '@/api/billing'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { PageHeader } from '@/components/PageHeader'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { SectionCard } from '@/components/SectionCard'
 import { useScreenAction } from '@/hooks/useScreenAction'
 import { FiscalDataButton } from './FiscalDataButton'
@@ -37,6 +38,10 @@ export function BillingView({ InvoiceSlot }: { readonly InvoiceSlot?: InvoiceSlo
           settings.data === undefined ? undefined : <FiscalDataButton isIncomplete={!settings.data.is_ready} onClick={open} />
         }
       />
+      {/* Sin los datos fiscales no hay botón ni hoja: se dice y se ofrece reintentar. */}
+      {settings.isError ? (
+        <RetryQueryError error={settings.error} fallback="No se pudieron cargar los datos fiscales." onRetry={() => { void settings.refetch() }} />
+      ) : null}
       {/* «Emitidos» espera a los datos fiscales para no moverse al llegar (CLS). */}
       {settings.isPending ? (
         <ListSkeleton label="Cargando comprobantes…" count={4} itemClassName="h-14 rounded-lg" />
