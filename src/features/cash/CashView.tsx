@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { currentCashQuery } from '@/api/cash'
+import { PERMISSION } from '@/api/permissions'
 import { ListSkeleton } from '@/components/ListSkeleton'
 import { PageHeader } from '@/components/PageHeader'
 import { RetryQueryError } from '@/components/RetryQueryError'
 import { SectionCard } from '@/components/SectionCard'
+import { useCan } from '@/store/session'
 import { CashCurrentSections } from './CashCurrentSections'
 import { CashHistory } from './CashHistory'
 import { DiscountLimitForm } from './DiscountLimitForm'
@@ -19,6 +21,8 @@ import { useCashRefresh } from './useCashRefresh'
 export function CashView() {
   const cashRegister = useQuery(currentCashQuery)
   const refresh = useCashRefresh()
+  // El tope se guarda en el restaurante: solo lo ve quien puede cambiarlo.
+  const canEditRestaurant = useCan(PERMISSION.restaurantManage)
 
   return (
     <div className="flex flex-col gap-6">
@@ -34,9 +38,11 @@ export function CashView() {
           en escritorio y 0,46 en el celular). */}
       {cashRegister.isPending ? null : (
         <>
-          <SectionCard title="Descuentos del mesero" collapsible defaultOpen={false}>
-            <DiscountLimitForm />
-          </SectionCard>
+          {canEditRestaurant ? (
+            <SectionCard title="Descuentos del mesero" collapsible defaultOpen={false}>
+              <DiscountLimitForm />
+            </SectionCard>
+          ) : null}
           <SectionCard title="Turnos anteriores" collapsible>
             <CashHistory />
           </SectionCard>

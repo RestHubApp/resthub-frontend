@@ -13,6 +13,7 @@ const SCREEN = '/caja'
 const INITIAL = 'Efectivo inicial'
 const OPEN_CASH_REGISTER = { name: 'Abrir caja' }
 const SHIFT = 'Turno en curso'
+const CLOSED = 'La caja está cerrada'
 
 function openCashRegister(actual = CLOSED_CASH_REGISTER) {
   const api = server().on('get', ACTUAL, actual).on('get', SESSIONS, PAGE_EMPTY)
@@ -28,8 +29,20 @@ async function openDialog(user: ReturnType<typeof openCashRegister>['user']) {
 describe('CashView', () => {
   it('con la caja cerrada muestra un solo botón y el formulario no ocupa la pantalla', async () => {
     openCashRegister()
-    expect(await screen.findByText('La caja está cerrada')).toBeInTheDocument()
+    expect(await screen.findByText(CLOSED)).toBeInTheDocument()
     expect(screen.queryByLabelText(INITIAL)).not.toBeInTheDocument()
+    expect(screen.getByText('Descuentos del mesero')).toBeInTheDocument()
+  })
+
+  it('sin permiso para administrar el restaurante no ofrece el tope de descuento', async () => {
+    server().on('get', ACTUAL, CLOSED_CASH_REGISTER).on('get', SESSIONS, PAGE_EMPTY)
+    signInAs(['cash.manage', 'orders.charge'])
+    mountScreen(<CashView />, { path: SCREEN })
+
+    expect(await screen.findByText(CLOSED)).toBeInTheDocument()
+    expect(screen.getByText('Turnos anteriores')).toBeInTheDocument()
+    expect(screen.queryByText('Descuentos del mesero')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Guardar tope' })).not.toBeInTheDocument()
   })
 
   it('se abre sola desde la dirección con ?accion=abrir-caja', async () => {
@@ -118,7 +131,7 @@ describe('CashView cuando otro equipo cambió la caja', () => {
     await user.click(within(confirmation).getByRole('button', { name: 'Cerrar caja' }))
 
     expect(await screen.findByText('No hay una caja abierta.')).toBeInTheDocument()
-    expect(await screen.findByText('La caja está cerrada')).toBeInTheDocument()
+    expect(await screen.findByText(CLOSED)).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: SHIFT })).not.toBeInTheDocument()
   })
 
