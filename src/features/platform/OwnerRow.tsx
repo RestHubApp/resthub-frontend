@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { PlatformOwner } from '@/api/types'
 import { FormDialog } from '@/components/FormDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { ResetOwnerPasswordForm } from './ResetOwnerPasswordForm'
@@ -29,7 +30,7 @@ export function OwnerRow({ restaurantId, owner }: OwnerRowProps) {
         {owner.must_change_password ? <StatusBadge label="Contraseña temporal" tone="pending" /> : null}
         <StatusBadge label={owner.is_active ? 'Activa' : 'Inactiva'} tone={owner.is_active ? 'completed' : undefined} />
         <Button type="button" size="sm" variant="outline" aria-label={`Restablecer la contraseña de ${owner.full_name}`} onClick={() => { setIsResetting(true) }}>
-          <Icon name="key" size={14} />
+          <Icon glyph={icons.key} size={14} />
           <span>Contraseña</span>
         </Button>
       </span>

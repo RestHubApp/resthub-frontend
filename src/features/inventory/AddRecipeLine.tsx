@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
@@ -47,7 +48,7 @@ export function AddRecipeLine({ options, onAdd }: AddRecipeLineProps) {
           selectedSet('')
         }}
       >
-        <Icon name="add" size={16} />
+        <Icon glyph={icons.add} size={16} />
         <span>Agregar</span>
       </Button>
     </div>

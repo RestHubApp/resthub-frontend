@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { Icon } from './Icon'
+import * as icons from './icons'
 
 type Level = 'h2' | 'h3' | 'h4'
 
@@ -50,7 +51,7 @@ export function CollapsibleHeading({
           <span
             className={`inline-flex shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}
           >
-            <Icon name="next" size={18} />
+            <Icon glyph={icons.next} size={18} />
           </span>
           <span>{title}</span>
         </button>

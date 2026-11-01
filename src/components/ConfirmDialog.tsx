@@ -22,6 +22,8 @@ interface ConfirmDialogProps {
   readonly title: string
   readonly description: ReactNode
   readonly confirmLabel: string
+  /** El botón que cierra sin hacer nada; por omisión, «Cancelar». */
+  readonly cancelLabel?: string
   /** `default` para una accion afirmativa; `destructive` para una que quita algo. */
   readonly confirmVariant?: 'default' | 'destructive'
   readonly onConfirm: () => void
@@ -44,6 +46,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  cancelLabel = 'Cancelar',
   confirmVariant = 'destructive',
   onConfirm,
   children,
@@ -67,7 +70,7 @@ export function ConfirmDialog({
         </AlertDialogHeader>
         {children}
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction variant={confirmVariant} disabled={isConfirmDisabled} onClick={onConfirm}>
             {confirmLabel}
           </AlertDialogAction>

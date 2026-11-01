@@ -1,5 +1,6 @@
 import type { AiDecision, DecisionEngine } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 interface EngineBadgeProps {
   readonly engine: DecisionEngine
@@ -32,7 +33,7 @@ export function EngineBadge({ engine, fallbackReason, fallbackLabel }: EngineBad
         title={motor.title}
         className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium text-foreground"
       >
-        <Icon name={engine === 'jev' ? 'ai' : 'rules'} size={14} />
+        <Icon glyph={engine === 'jev' ? icons.ai : icons.rules} size={14} />
         {motor.name}
       </span>
       {fallbackReason === null || fallbackReason === undefined ? null : (

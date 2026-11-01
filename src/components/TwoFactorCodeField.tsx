@@ -1,5 +1,6 @@
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
+import * as icons from './icons'
 import { TextField } from './TextField'
 
 interface TwoFactorCodeFieldProps {
@@ -27,7 +28,7 @@ export function TwoFactorCodeField({ onChange }: TwoFactorCodeFieldProps) {
       id="otp_code"
       label="Código de verificación"
       hint="Los 6 dígitos de tu aplicación, o uno de tus códigos de recuperación."
-      icon="key"
+      icon={icons.key}
       autoComplete="one-time-code"
       // Lo mismo que acepta el servidor: un código de recuperación mide 29 con guiones y se puede escribir con espacios.
       maxLength={64}

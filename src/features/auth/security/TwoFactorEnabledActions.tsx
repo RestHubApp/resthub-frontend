@@ -1,5 +1,6 @@
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 interface TwoFactorEnabledActionsProps {
@@ -15,7 +16,7 @@ export function TwoFactorEnabledActions({ canDisable, isDisabling, onRenew, onDi
   return (
     <>
       <Button type="button" variant="outline" onClick={onRenew}>
-        <Icon name="retry" size={16} />
+        <Icon glyph={icons.retry} size={16} />
         <span>Nuevos códigos de recuperación</span>
       </Button>
       {canDisable ? (

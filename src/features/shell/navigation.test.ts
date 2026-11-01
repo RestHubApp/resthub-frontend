@@ -1,5 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
+import * as icons from '@/components/icons'
 import { entriesFor, isCurrentEntry, type NavEntry } from './navigation'
 import type { ShellScreen } from './shellScreens'
 
@@ -12,16 +13,16 @@ const ORDERS = '/pedidos'
 const LOG = '/plataforma/bitacora'
 
 const SCREENS: readonly ShellScreen[] = [
-  { path: ORDERS, permission: TAKE, nav: { label: 'Pedidos', icon: 'order', description: 'Pedidos.' } },
+  { path: ORDERS, permission: TAKE, nav: { label: 'Pedidos', icon: icons.order, description: 'Pedidos.' } },
   {
     path: PLATFORM,
     permission: RESTAURANTS_READ,
-    nav: { label: 'Restaurantes', icon: 'restaurant', description: 'Restaurantes.', activeOn: [RESTAURANTS_PREFIX] },
+    nav: { label: 'Restaurantes', icon: icons.restaurant, description: 'Restaurantes.', activeOn: [RESTAURANTS_PREFIX] },
   },
   {
     path: LOG,
     permission: ACTIVITY_READ,
-    nav: { label: 'Bitácora', icon: 'history', description: 'Bitácora.' },
+    nav: { label: 'Bitácora', icon: icons.history, description: 'Bitácora.' },
   },
   { path: '/perfil' },
 ]

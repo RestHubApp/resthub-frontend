@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { RestockAction, RestockItem, RestockReport } from '@/api/types'
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { RestockItemCard } from './RestockItemCard'
 import { RestockNotice } from './RestockNotice'
@@ -49,7 +50,7 @@ export function RestockReportContent({ report, isUpdating }: RestockReportConten
       )}
       {inWait > 0 ? (
         <Button type="button" variant="outline" className="self-start" onClick={() => { setIsViewingWait(true) }}>
-          <Icon name="expand" size={16} />
+          <Icon glyph={icons.expand} size={16} />
           <span>{`Ver también los ${String(inWait)} insumos que pueden esperar`}</span>
         </Button>
       ) : null}

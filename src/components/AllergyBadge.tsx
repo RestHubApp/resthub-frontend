@@ -1,5 +1,6 @@
 import type { OrderNoteFlag } from '@/hooks/useOrderNoteFlags'
 import { Icon } from './Icon'
+import * as icons from './icons'
 
 interface AllergyBadgeProps {
   /** Lo que devuelve `flagFor(pedido, ítem)` de `useOrderNoteFlags`. */
@@ -37,7 +38,7 @@ export function AllergyBadge({ flag, className, withNote = true }: AllergyBadgeP
       title={tooltip(flag)}
       className={`inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive px-2 py-0.5 text-xs font-semibold text-white dark:text-background ${className ?? ''}`}
     >
-      <Icon name="allergic" size={14} />
+      <Icon glyph={icons.allergic} size={14} />
       Alergia
       {withNote ? <span className="sr-only">{`: ${flag.note}`}</span> : null}
     </span>

@@ -1,5 +1,5 @@
-import { Icon } from './Icon'
-import type { IconName } from './icons'
+import { Icon, type IconGlyph } from './Icon'
+import * as icons from './icons'
 import { Button } from './ui/button'
 import {
   DropdownMenu,
@@ -13,7 +13,7 @@ import { useDeferredAction } from './useDeferredAction'
 /** Una acción secundaria dentro del menú «⋯». */
 export interface ActionsMenuItem {
   readonly label: string
-  readonly icon?: IconName
+  readonly icon?: IconGlyph
   readonly onSelect: () => void
   /** Una acción que quita algo: va en rojo y, por convención, al final. */
   readonly isDestructive?: boolean
@@ -48,7 +48,7 @@ export function ActionsMenu({ label, items, text }: ActionsMenuProps) {
           size={text === undefined ? 'icon-sm' : 'default'}
           aria-label={label}
         >
-          <Icon name="more" size={18} />
+          <Icon glyph={icons.more} size={18} />
           {text === undefined ? null : <span>{text}</span>}
         </Button>
       </DropdownMenuTrigger>
@@ -71,7 +71,7 @@ function renderEntry(item: ActionsMenuItem, choose: (action: () => void) => void
         choose(item.onSelect)
       }}
     >
-      {item.icon === undefined ? null : <Icon name={item.icon} size={16} />}
+      {item.icon === undefined ? null : <Icon glyph={item.icon} size={16} />}
       <span>{item.label}</span>
     </DropdownMenuItem>
   )

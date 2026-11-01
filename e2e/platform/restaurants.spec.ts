@@ -4,6 +4,7 @@ import { NEW_SECRET, Customer, signInByApi, unique } from '../support/api'
 import { covers } from '../support/coverage'
 import { openAs, openAsPlatform, evidence, expect, test } from '../support/fixtures'
 import {
+  dismissTwoFactorReminder,
   signInByForm,
   navigation,
   PAGE_PLATFORM,
@@ -78,6 +79,7 @@ test('PLA-01 el administrador da de alta un restaurante con su encargado y ese e
   await page.getByRole('checkbox', { name: /tratamiento de mis datos personales/u }).check()
   await proceed.click()
   await expect(page).toHaveURL(/\/pedidos$/u)
+  await dismissTwoFactorReminder(page)
   await expect(page.getByText(name).first()).toBeVisible()
   await expect(navigation(page).getByRole('link', { name: 'Personal' })).toBeVisible()
   await evidence(page, 'pla-01-encargado-entra')
@@ -267,6 +269,7 @@ test('PLA-07 el administrador restablece la contraseña del encargado y este la 
   await mobile.getByLabel('Repite la nueva contraseña').fill(chosen)
   await mobile.getByRole('button', { name: 'Cambiar contraseña' }).click()
   await expect(mobile.getByRole('heading', { level: 1, name: 'Cambia tu contraseña' })).toBeHidden()
+  await dismissTwoFactorReminder(mobile)
   await expect(navigation(mobile)).toBeVisible()
   await context.close()
 })

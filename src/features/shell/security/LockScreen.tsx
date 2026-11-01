@@ -38,7 +38,8 @@ export function LockScreen({ account }: { readonly account: StaffSession }) {
               {isUsingPassword ? 'Usar mi PIN' : 'Usar mi contraseña'}
             </Button>
           ) : null}
-          <Button type="button" variant="outline" onClick={signOut}>
+          {/* Sale como si la sesión hubiera vencido: la cola sin conexión se conserva entera. */}
+          <Button type="button" variant="outline" onClick={() => { signOut({ discardCustomerData: false }) }}>
             Salir
           </Button>
         </CardFooter>

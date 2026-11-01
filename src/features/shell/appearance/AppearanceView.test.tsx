@@ -216,7 +216,10 @@ describe('AppearanceView: pestaña Menú', () => {
     expect(all).not.toContain('Personal')
   })
 
-  it('«Bajar» y «Subir» del «⋯» reordenan dentro del grupo, se anuncia el lugar y el orden se guarda', async () => {
+  // Una acción del «⋯» por prueba: la acción corre después de que Radix cierra el menú
+  // y devuelve el foco, y con la suite cargada el segundo menú abierto justo después
+  // a veces no llegaba a mostrarse.
+  it('«Bajar» del «⋯» reordena dentro del grupo, se anuncia el lugar y el orden se guarda', async () => {
     const { user } = openAppearance()
     await openTab(user, 'Menú')
     const [first = '', second = ''] = groupOrder(BAR)
@@ -227,9 +230,17 @@ describe('AppearanceView: pestaña Menú', () => {
     expect(screen.getAllByRole('status').some((node) => node.textContent === `${first}: lugar 2 de ${String(groupOrder(BAR).length)} en la barra de abajo.`)).toBe(true)
     const stored = useAppearance.getState().appearance.menu.order
     expect(stored.indexOf(pathOf(second) ?? '')).toBeLessThan(stored.indexOf(pathOf(first) ?? ''))
+  })
 
-    await chooseFromMenu(user, first, 'Subir')
-    expect(groupOrder(BAR).slice(0, 2)).toEqual([first, second])
+  it('«Subir» del «⋯» lleva la pantalla un lugar arriba dentro del grupo', async () => {
+    const { user } = openAppearance()
+    await openTab(user, 'Menú')
+    const [first = '', second = ''] = groupOrder(BAR)
+
+    await chooseFromMenu(user, second, 'Subir')
+
+    expect(groupOrder(BAR).slice(0, 2)).toEqual([second, first])
+    expect(screen.getAllByRole('status').some((node) => node.textContent === `${second}: lugar 1 de ${String(groupOrder(BAR).length)} en la barra de abajo.`)).toBe(true)
   })
 
   it('subir la primera o bajar la última no se puede', async () => {

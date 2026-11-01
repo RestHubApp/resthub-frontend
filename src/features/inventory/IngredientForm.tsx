@@ -1,6 +1,7 @@
 import type { Ingredient, IngredientUnit } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
+import * as icons from '@/components/icons'
 import { onSubmit } from '@/hooks/formSubmit'
 import { InventoryFailure } from './InventoryFailure'
 import { IngredientPackagingFields } from './IngredientPackagingFields'
@@ -48,7 +49,7 @@ export function IngredientForm({ ingredient, onDone }: IngredientFormProps) {
       <FormFooter
         mutation={change}
         onCancel={onDone}
-        submit={{ label: isNew ? 'Crear insumo' : 'Guardar', icon: isNew ? 'add' : 'confirm' }}
+        submit={{ label: isNew ? 'Crear insumo' : 'Guardar', icon: isNew ? icons.add : icons.confirm }}
       />
     </form>
   )

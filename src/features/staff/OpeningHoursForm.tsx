@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { restaurantQuery, restaurantQueryKey, updateRestaurant } from '@/api/restaurant'
 import type { OpeningPeriod } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 import { OpeningPeriodRow } from './OpeningPeriodRow'
@@ -51,7 +52,7 @@ export function OpeningHoursForm() {
       </ul>
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" onClick={() => { setDrafts([...shown, newDraft(shown)]) }}>
-          <Icon name="add" size={16} />
+          <Icon glyph={icons.add} size={16} />
           <span>Agregar tramo</span>
         </Button>
         <Button type="submit" disabled={!isValid || drafts === null || save.isPending}>

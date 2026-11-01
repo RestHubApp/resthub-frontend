@@ -14,10 +14,12 @@ import '@/store/appearance'
 import { router } from '@/router/routes'
 import { logger, logUncaughtErrors } from './services/logger'
 import { queryClient } from './services/queryClient'
+import { registerServiceWorker } from './services/serviceWorker'
 import { reloadOnStaleChunks } from './services/staleChunks'
 import './index.css'
 
 logUncaughtErrors()
+registerServiceWorker()
 reloadOnStaleChunks()
 
 // Con backend en otro origen, se inicia DNS/TLS mientras React monta la

@@ -2,6 +2,7 @@ import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 
 import { TextField } from '@/components/TextField'
 import { centsToApi, formatCents } from '@/services/format'
+import * as icons from '@/components/icons'
 import { type CloseCashValues, MAX_CASH_NOTES } from './cashSchema'
 
 interface CloseCashFieldsProps {
@@ -18,7 +19,7 @@ export function CloseCashFields({ register, errors, expected }: CloseCashFieldsP
       <TextField
         id="caja-contado"
         label="Efectivo contado"
-        icon="payment"
+        icon={icons.payment}
         inputMode="decimal"
         autoComplete="off"
         placeholder={centsToApi(expected)}

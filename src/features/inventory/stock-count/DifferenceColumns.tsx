@@ -1,6 +1,7 @@
 import type { CountDifference } from '@/api/types'
 import type { DataColumn } from '@/components/DataTable'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { formatPercent, formatQuantity, formatSignedQuantity } from '@/services/format'
 import { DifferenceIngredient } from './DifferenceIngredient'
@@ -42,8 +43,8 @@ export function buildDifferenceColumns(onTrend: (line: CountDifference) => void)
       id: 'tendencia',
       header: 'Tendencia',
       cell: (line) => (
-        <Button type="button" variant="outline" size="sm" aria-label={`Tendencia de ${line.ingredient_name}`} onClick={() => { onTrend(line) }}>
-          <Icon name="chart" size={14} />
+        <Button type="button" variant="outline" size="sm" aria-label={`Ver tendencia de ${line.ingredient_name}`} onClick={() => { onTrend(line) }}>
+          <Icon glyph={icons.chart} size={14} />
           <span>Ver</span>
         </Button>
       ),

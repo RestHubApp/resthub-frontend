@@ -3,6 +3,7 @@ import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
 import { ActionsMenu } from '@/components/ActionsMenu'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
 import { nextStepFor, stepDoneMessage } from '@/features/orders/nextStep'
@@ -43,7 +44,7 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
             advance.mutate(step.action)
           }}
         >
-          <Icon name={step.icon} size={16} />
+          <Icon glyph={step.icon} size={16} />
           <span>{step.label}</span>
         </Button>
       ) : null}
@@ -53,7 +54,7 @@ export function BoardCardActions({ order, onCharge, onCancel }: BoardCardActions
           items={[
             {
               label: 'Cancelar pedido',
-              icon: 'cancel',
+              icon: icons.cancel,
               isDestructive: true,
               onSelect: () => {
                 onCancel(order)

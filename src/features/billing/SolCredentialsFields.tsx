@@ -4,6 +4,7 @@ import { useWatch, type UseFormReturn } from 'react-hook-form'
 import { FormMessage } from '@/components/FormMessage'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
+import * as icons from '@/components/icons'
 import type { SettingsValues } from './billingSettingsSchema'
 
 interface SolCredentialsFieldsProps {
@@ -34,7 +35,7 @@ export function SolCredentialsFields({ form, hasCredentials, savedRuc }: SolCred
       <div className="flex flex-col gap-2">
         <FormMessage
           tone="ok"
-          icon="key"
+          icon={icons.key}
           action={<Button type="button" variant="outline" size="sm" onClick={() => {
             setIsReplacing(true)
           }}>Reemplazar</Button>}
@@ -50,7 +51,7 @@ export function SolCredentialsFields({ form, hasCredentials, savedRuc }: SolCred
       <legend className="mb-2 text-sm font-medium">Credenciales SOL de SUNAT</legend>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField id="fiscal-sol-usuario" label="Usuario SOL" autoComplete="off" spellCheck={false} hint="El usuario secundario, sin el RUC delante." field={register('sol_user')} error={formState.errors.sol_user?.message} />
-        <TextField id="fiscal-sol-clave" label="Clave SOL" type="password" autoComplete="new-password" icon="lock" field={register('sol_password')} error={formState.errors.sol_password?.message} />
+        <TextField id="fiscal-sol-clave" label="Clave SOL" type="password" autoComplete="new-password" icon={icons.lock} field={register('sol_password')} error={formState.errors.sol_password?.message} />
       </div>
       {canKeep ? (
         <Button type="button" variant="ghost" size="sm" className="self-start" onClick={() => {

@@ -3,12 +3,12 @@ import { z } from 'zod'
 
 import type { BillingSettings } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
-import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { billingErrorMessage } from '@/services/billingErrors'
-import { CERTIFICATE_EXTENSIONS, certificateFileProblem } from './certificateFile'
+import { CertificateFields } from './CertificateFields'
+import { certificateFileProblem } from './certificateFile'
 import { CertificateStatus } from './CertificateStatus'
 import { useCertificateUpload } from './useCertificateUpload'
 
@@ -49,10 +49,11 @@ export function CertificateForm({ settings, now }: CertificateFormProps) {
     }))}>
       <h3 id="certificado-titulo" className="m-0 text-base font-semibold">Certificado digital</h3>
       <CertificateStatus settings={settings} now={now} />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <TextField id="certificado-archivo" label={settings.has_certificate ? 'Nuevo certificado' : 'Archivo del certificado'} type="file" icon="upload" accept={CERTIFICATE_EXTENSIONS.join(',')} hint=".pfx, .p12 o .pem; hasta 64 KB." field={register('file')} error={formState.errors.file?.message} />
-        <TextField id="certificado-clave" label="Contraseña del certificado" type="password" autoComplete="off" icon="lock" hint="Vacía si el .pem no tiene contraseña. No se guarda." field={register('password')} error={formState.errors.password?.message} />
-      </div>
+      <CertificateFields
+        hasCertificate={settings.has_certificate}
+        file={{ field: register('file'), error: formState.errors.file?.message }}
+        password={{ field: register('password'), error: formState.errors.password?.message }}
+      />
       {upload.isError ? <FormMessage tone="error">{billingErrorMessage(upload.error, 'No se pudo subir el certificado.')}</FormMessage> : null}
       <Button type="submit" variant="outline" className="self-end" disabled={upload.isPending}>
         {upload.isPending ? 'Subiendo…' : 'Subir certificado'}

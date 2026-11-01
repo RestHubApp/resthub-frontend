@@ -63,7 +63,7 @@ test('VIS-23 el conteo en curso, sus confirmaciones, el reporte y la tendencia',
   await page.reload()
   await expect(page.getByRole('region', { name: 'Diferencias por insumo' }).getByText('Pisco')).toBeVisible()
   await capture(page, 'conteo-reporte')
-  await page.getByRole('button', { name: 'Tendencia de Pisco' }).click()
+  await page.getByRole('button', { name: 'Ver tendencia de Pisco' }).click()
   const trend = page.getByRole('dialog', { name: 'Tendencia: Pisco' })
   await expect(trend.getByRole('list', { name: 'Diferencias de Pisco por conteo' })).toBeVisible()
   await captureWindow(trend, 'hoja-tendencia-conteo')

@@ -1,5 +1,6 @@
 import { PERMISSION } from '@/api/permissions'
 import { asDefault } from '@/components/lazyNamed'
+import * as icons from '@/components/icons'
 import { routePatterns } from '@/services/paths'
 import type { Screen } from './screenTypes'
 
@@ -10,7 +11,7 @@ export const AUDIT_SCREENS: readonly Screen[] = [
     permission: PERMISSION.activityRead,
     nav: {
       label: 'Bitácora',
-      icon: 'history',
+      icon: icons.history,
       description: 'Quién hizo qué en el restaurante, y quién abrió los datos de los clientes.',
     },
     load: asDefault(() => import('@/features/activity/ActivityLogView'), 'ActivityLogView'),

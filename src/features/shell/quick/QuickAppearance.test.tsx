@@ -25,7 +25,7 @@ describe('Apariencia rápida', () => {
     await user.click(firstOf(screen.getAllByRole('button', SHEET)))
     const sheet = await screen.findByRole('dialog', SHEET)
     await user.click(within(sheet).getByRole('radio', { name: 'Oscuro' }))
-    await user.click(within(sheet).getByRole('button', { name: 'Texto más grande' }))
+    await user.click(within(sheet).getByRole('button', { name: /Texto más grande$/u }))
     await user.click(within(sheet).getByRole('button', { name: /Alto contraste/u }))
 
     expect(useAppearance.getState().appearance).toMatchObject({ mode: 'dark', textSize: 'large', contrast: 'high' })
@@ -37,7 +37,7 @@ describe('Apariencia rápida', () => {
     await user.click(firstOf(screen.getAllByRole('button', SHEET)))
     const sheet = await screen.findByRole('dialog', SHEET)
 
-    expect(within(sheet).getByRole('button', { name: 'Texto más pequeño' })).toBeDisabled()
+    expect(within(sheet).getByRole('button', { name: /Texto más pequeño$/u })).toBeDisabled()
   })
 
   it('lleva a la pantalla completa de Apariencia', async () => {

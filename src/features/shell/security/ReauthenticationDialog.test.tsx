@@ -3,6 +3,7 @@ import { screen, within } from '@testing-library/react'
 
 import { ErrorResponse, mountScreen, server, signInAs } from '#jest/harness'
 import { useReauthentication } from '@/store/reauthentication'
+import { useSession } from '@/store/session'
 import { ReauthenticationDialog } from './ReauthenticationDialog'
 
 const REAUTHENTICATE = '/auth/me/reauthenticate'
@@ -31,8 +32,19 @@ describe('«Confirma tu contraseña» (RFS-21)', () => {
     await user.click(screen.getByRole('button', CONFIRM))
 
     await expect(answer).resolves.toBe(true)
-    expect(api.calls('post', REAUTHENTICATE)[0]?.body).toEqual({ password: TEST_SECRET, rotate_session: false })
+    expect(api.calls('post', REAUTHENTICATE)[0]?.body).toEqual({ password: TEST_SECRET, rotate_session: true })
     expect(screen.queryByLabelText(CODE_LABEL)).not.toBeInTheDocument()
+  })
+
+  it('deja en la sesión el token nuevo que el servidor da al cambiarle el identificador', async () => {
+    const { api, answer, user } = openDialog()
+    api.on('post', REAUTHENTICATE, { ...CONFIRMED, access_token: 'token-rotado', csrf_token: 'csrf-nuevo' })
+
+    await user.type(screen.getByLabelText(PASSWORD_LABEL), TEST_SECRET)
+    await user.click(screen.getByRole('button', CONFIRM))
+
+    await expect(answer).resolves.toBe(true)
+    expect(useSession.getState().token).toBe('token-rotado')
   })
 
   it('con la verificación en dos pasos pide el código y lo manda con la contraseña', async () => {
@@ -49,7 +61,7 @@ describe('«Confirma tu contraseña» (RFS-21)', () => {
     await user.click(screen.getByRole('button', CONFIRM))
 
     await expect(answer).resolves.toBe(true)
-    expect(api.calls('post', REAUTHENTICATE)[1]?.body).toEqual({ password: TEST_SECRET, otp_code: '123456', rotate_session: false })
+    expect(api.calls('post', REAUTHENTICATE)[1]?.body).toEqual({ password: TEST_SECRET, otp_code: '123456', rotate_session: true })
   })
 
   it('un código equivocado se avisa y la ventana sigue abierta para corregirlo', async () => {

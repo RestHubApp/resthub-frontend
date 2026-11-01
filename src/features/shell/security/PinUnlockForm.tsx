@@ -4,6 +4,7 @@ import { TextField } from '@/components/TextField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { onlyDigits, type PinValues, pinSchema } from '@/services/securityRules'
+import * as icons from '@/components/icons'
 import { UnlockFooter } from './UnlockFooter'
 import { useUnlock } from './useUnlock'
 
@@ -17,7 +18,7 @@ export function PinUnlockForm() {
         id="unlock_pin"
         label="PIN"
         type="password"
-        icon="key"
+        icon={icons.key}
         inputMode="numeric"
         autoComplete="off"
         maxLength={6}

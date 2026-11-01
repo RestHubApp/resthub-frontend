@@ -10,6 +10,7 @@ import {
   savedQueue,
   ownerOf,
   enqueueOrders,
+  dismissTwoFactorReminder,
   signInByForm,
   navigation,
   sections,
@@ -49,13 +50,25 @@ const OF_KITCHEN = ['Tablero', 'Inventario']
 const ERROR_CREDENTIALS = 'El correo o la contraseña no son correctos.'
 
 test('ACC-01 el encargado de la semilla entra por el formulario y ve todas las secciones', async ({ page }) => {
-  covers('ruta:/acceso', 'ruta:/', 'funcion:acceso.entrar', 'funcion:inicio.redirige-por-rol', 'funcion:permisos.navegacion-por-rol', 'rol:encargado')
+  covers(
+    'ruta:/acceso',
+    'ruta:/',
+    'funcion:acceso.entrar',
+    'funcion:inicio.redirige-por-rol',
+    'funcion:permisos.navegacion-por-rol',
+    'rol:encargado',
+    'confirmacion:shell/security/TwoFactorReminder',
+  )
   await page.goto('/')
   await expect(page).toHaveURL(/\/acceso$/u)
   await expect(page.getByRole('heading', { name: 'Iniciar sesión', level: 1 })).toBeVisible()
   await evidence(page, 'acc-01-formulario')
   await signInByForm(page, SEED.owner, SECRET)
   await expect(page).toHaveURL(/\/pedidos$/u)
+  // Al entrar sin la verificación en dos pasos, al encargado se le recomienda activarla.
+  await expect(page.getByRole('alertdialog', { name: 'Protege tu cuenta con la verificación en dos pasos' })).toBeVisible()
+  await evidence(page, 'acc-01-recomendacion-dos-pasos')
+  await dismissTwoFactorReminder(page)
   await expect.poll(() => sections(page)).toEqual(ALL)
   await expect(page.getByText('Encargado Demo')).toBeVisible()
   await evidence(page, 'acc-01-navegacion')
@@ -158,6 +171,7 @@ test('ACC-06 cerrar sesión lleva al acceso y, al volver a entrar, a la pantalla
   await evidence(page, 'acc-06-sin-sesion')
   await signInByForm(page, local.owner.email, local.owner.password)
   await expect(page).toHaveURL(/\/inventario$/u)
+  await dismissTwoFactorReminder(page)
   await expect(page.getByRole('heading', { name: 'Inventario', level: 1 })).toBeVisible()
 })
 

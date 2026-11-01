@@ -86,7 +86,7 @@ test('PAL-05 cambiar el modo desde la paleta y desde «Apariencia rápida» usa 
   const sheet = page.getByRole('dialog', { name: 'Apariencia rápida' })
   await sheet.locator('label').filter({ hasText: /^Claro$/u }).click()
   await expect(html).toHaveAttribute('data-theme', 'terracotta')
-  await sheet.getByRole('button', { name: 'Texto más grande' }).click()
+  await sheet.getByRole('button', { name: /Texto más grande$/u }).click()
   await expect(html).toHaveAttribute('data-text-size', 'large')
   await evidence(page, 'pal-05-apariencia-rapida')
   await sheet.getByRole('link', { name: 'Más ajustes de apariencia' }).click()

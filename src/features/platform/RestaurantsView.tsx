@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
 import { TablePagination } from '@/components/TablePagination'
@@ -27,7 +28,7 @@ export function RestaurantsView() {
         actions={
           <Button asChild>
             <Link to={paths.platform.newRestaurant}>
-              <Icon name="add" size={18} />
+              <Icon glyph={icons.add} size={18} />
               <span>Nuevo restaurante</span>
             </Link>
           </Button>

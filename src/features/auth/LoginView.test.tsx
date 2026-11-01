@@ -162,8 +162,8 @@ describe('LoginView con la verificación en dos pasos', () => {
     expect(api.calls('post', LOGIN)[1]?.body).toEqual({ email: WAITER_EMAIL, password: TEST_SECRET, otp_code: '123456' })
   })
 
-  it('acepta entero un código de recuperación de 29 caracteres', async () => {
-    const recovery = 'k7m2-pqrs-4tw8-x3yz-5abc-d6e9'
+  it('acepta entero un código de recuperación de 34 caracteres', async () => {
+    const recovery = 'k7m2-pqrs-4tw8-x3yz-5abc-d6e9-h2jn'
     const { api, user } = openAccess()
     api.on('post', LOGIN, accessResponse()).once('post', LOGIN, new ErrorResponse(401, ASKS_FOR_CODE, 'two_factor_required'))
 

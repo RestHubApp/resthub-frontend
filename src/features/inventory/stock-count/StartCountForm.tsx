@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { InventoryFailure } from '@/features/inventory/InventoryFailure'
 import { useIngredients } from '@/features/inventory/useIngredients'
+import * as icons from '@/components/icons'
 import { IngredientPicker } from './IngredientPicker'
 import { ScopeChoice, type CountScope } from './ScopeChoice'
 import { useStartCount } from './useStartCount'
@@ -50,7 +51,7 @@ export function StartCountForm({ onCancel }: { readonly onCancel: () => void }) 
         <Input id="conteo-nota" maxLength={MAX_NOTE} placeholder="Cierre de mes, barra…" value={note} onChange={(event) => { setNote(event.target.value) }} />
       </div>
       <InventoryFailure mutation={start} fallback="No se pudo iniciar el conteo." />
-      <FormFooter mutation={start} onCancel={onCancel} submit={{ label: 'Iniciar conteo', icon: 'count' }} />
+      <FormFooter mutation={start} onCancel={onCancel} submit={{ label: 'Iniciar conteo', icon: icons.count }} />
     </form>
   )
 }

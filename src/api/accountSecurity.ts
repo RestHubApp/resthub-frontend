@@ -1,8 +1,9 @@
 import { queryOptions } from '@tanstack/react-query'
 
+import { setCsrfToken } from '@/services/apiCredentials'
 import { send } from './client'
 import { staffQueryKey } from './staff'
-import type { DeviceSession, UnlockRequest, UnusedStaff } from './types'
+import type { DeviceSession, StaffAccessTokenResponse, UnlockRequest, UnusedStaff } from './types'
 
 /** Lo que la persona escribe para desbloquear: el PIN o la contraseña. */
 export type UnlockCredential = Omit<UnlockRequest, 'rotate_session'>
@@ -34,11 +35,16 @@ export async function closeOtherSessions(): Promise<void> {
  * Confirma la contraseña: las acciones críticas quedan habilitadas unos minutos
  * en este dispositivo. Con la verificación en dos pasos activa, el servidor
  * pide también el código (`otpCode`): sin él responde 401 `two_factor_required`.
- * La sesión no cambia de token (`rotate_session: false`).
+ *
+ * La sesión cambia de identificador (`rotate_session: true`, ASVS V7.2.4): el
+ * servidor manda un token nuevo y el anterior deja de valer. Devuelve ese token,
+ * que quien llama deja en la sesión, y anota el valor anti-CSRF de la cookie nueva.
  */
-export async function reauthenticate(password: string, otpCode?: string): Promise<void> {
-  const body = otpCode === undefined ? { password, rotate_session: false } : { password, otp_code: otpCode, rotate_session: false }
-  await send((client) => client.POST('/api/v1/auth/me/reauthenticate', { body }))
+export async function reauthenticate(password: string, otpCode?: string): Promise<string | null> {
+  const body = otpCode === undefined ? { password, rotate_session: true } : { password, otp_code: otpCode, rotate_session: true }
+  const confirmed = await send((client) => client.POST('/api/v1/auth/me/reauthenticate', { body }))
+  setCsrfToken(confirmed.csrf_token)
+  return confirmed.access_token ?? null
 }
 
 export function staffSessionsQueryKey(userId: number) {
@@ -90,7 +96,15 @@ export async function removeOwnPin(): Promise<void> {
   await send((client) => client.DELETE('/api/v1/auth/me/pin'))
 }
 
-/** Desbloquea la sesión con el PIN o con la contraseña, sin cambiar de sesión (`rotate_session`). */
-export async function unlockOwnSession(payload: UnlockCredential): Promise<void> {
-  await send((client) => client.POST('/api/v1/auth/me/unlock', { body: { ...payload, rotate_session: false } }))
+/**
+ * Desbloquea la sesión con el PIN o con la contraseña. Como al confirmar la
+ * contraseña, la sesión cambia de identificador (`rotate_session: true`): devuelve
+ * el token nuevo, o nada si la sesión no estaba bloqueada (204, conserva el suyo).
+ */
+export async function unlockOwnSession(payload: UnlockCredential): Promise<StaffAccessTokenResponse | undefined> {
+  const unlocked: StaffAccessTokenResponse | undefined = await send((client) =>
+    client.POST('/api/v1/auth/me/unlock', { body: { ...payload, rotate_session: true } }),
+  )
+  setCsrfToken(unlocked?.csrf_token)
+  return unlocked
 }

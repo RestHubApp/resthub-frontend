@@ -1,6 +1,7 @@
 import type { UseFormReturn } from 'react-hook-form'
 
 import { TextField } from '@/components/TextField'
+import * as icons from '@/components/icons'
 import { MAX_ADDRESS, MAX_PHONE, MAX_REFERENCE, type TakeawayValues } from './takeawaySchema'
 
 interface DeliveryFieldsProps {
@@ -29,7 +30,7 @@ export function DeliveryFields({ form }: DeliveryFieldsProps) {
         id="takeaway-address"
         label="Dirección de entrega"
         placeholder="Calle, número, distrito"
-        icon="location"
+        icon={icons.location}
         autoComplete="off"
         maxLength={MAX_ADDRESS}
         field={register('address')}
@@ -39,7 +40,7 @@ export function DeliveryFields({ form }: DeliveryFieldsProps) {
         id="takeaway-reference"
         label="Referencia (opcional)"
         placeholder="Por ejemplo, frente al parque"
-        icon="note"
+        icon={icons.note}
         autoComplete="off"
         maxLength={MAX_REFERENCE}
         field={register('reference')}

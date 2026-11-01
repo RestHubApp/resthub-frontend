@@ -2,6 +2,7 @@ import { useLocation } from 'react-router'
 
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { entryFor } from './navigation'
 import { useShellScreens } from './shellScreens'
@@ -23,7 +24,7 @@ export function ComingSoonView() {
         description="Esta pantalla se está construyendo. Mientras tanto, el resto de RestHub funciona."
       >
         <span className="flex size-12 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-          <Icon name={entry?.icon ?? 'soon'} size={24} />
+          <Icon glyph={entry?.icon ?? icons.soon} size={24} />
         </span>
       </EmptyState>
     </div>

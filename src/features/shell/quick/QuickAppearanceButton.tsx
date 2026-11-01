@@ -2,7 +2,8 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { ShellIcon } from '@/features/shell/ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { QuickAppearancePanel } from './QuickAppearancePanel'
 
@@ -26,12 +27,12 @@ export function QuickAppearanceButton({ variant }: QuickAppearanceButtonProps) {
       <SheetTrigger asChild>
         {variant === 'icon' ? (
           <Button type="button" variant="ghost" size="icon" aria-label={LABEL}>
-            <ShellIcon name="appearance" size={22} />
+            <Icon glyph={icons.appearance} size={22} />
           </Button>
         ) : (
           // 44 px fijos, aun con la densidad compacta: es un blanco solo de ícono.
           <Button type="button" variant="ghost" size="icon" className="size-11" aria-label={LABEL} title={LABEL}>
-            <ShellIcon name="appearance" size={20} />
+            <Icon glyph={icons.appearance} size={20} />
           </Button>
         )}
       </SheetTrigger>

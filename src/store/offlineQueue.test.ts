@@ -192,6 +192,31 @@ describe('discardPreviewQueue', () => {
   })
 })
 
+describe('discardCustomerDataOf', () => {
+  it('al cerrar la sesión borra los pedidos de esa cuenta con datos del cliente y deja los demás', async () => {
+    const { enqueueOrder, discardCustomerDataOf, queuedOrders } = await queue()
+    const delivery = { ...order('d', waiter), label: 'Delivery · Ana', request: { client_request_id: 'd', customer_name: 'Ana', customer_phone: '987654321' } as OpenOrderRequest }
+    const othersDelivery = { ...delivery, ...otherWaiter }
+    enqueueOrder(order('mesa', waiter))
+    enqueueOrder(delivery)
+    enqueueOrder(othersDelivery)
+
+    discardCustomerDataOf(waiter)
+
+    expect(queuedOrders(waiter).map((p) => p.label)).toEqual(['Mesa mesa'])
+    expect(queuedOrders(otherWaiter).map((p) => p.label)).toEqual(['Delivery · Ana'])
+  })
+
+  it('sin sesión no borra nada', async () => {
+    const { enqueueOrder, discardCustomerDataOf, queuedOrders } = await queue()
+    enqueueOrder({ ...order('d', waiter), request: { client_request_id: 'd', delivery_address: 'Av. Sol 123' } as OpenOrderRequest })
+
+    discardCustomerDataOf(null)
+
+    expect(queuedOrders(waiter)).toHaveLength(1)
+  })
+})
+
 describe('ownerOf', () => {
   it('toma la persona y el local de la sesión', async () => {
     const { ownerOf } = await queue()

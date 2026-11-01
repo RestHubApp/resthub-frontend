@@ -67,6 +67,16 @@ export async function signInByForm(page: Page, email: string, password: string):
   await page.getByRole('button', { name: 'Entrar' }).click()
 }
 
+/**
+ * Al encargado que entra sin la verificación en dos pasos se le recomienda
+ * activarla: espera el aviso y lo cierra con «Ahora no».
+ */
+export async function dismissTwoFactorReminder(page: Page): Promise<void> {
+  const reminder = page.getByRole('alertdialog', { name: 'Protege tu cuenta con la verificación en dos pasos' })
+  await reminder.getByRole('button', { name: 'Ahora no' }).click()
+  await expect(reminder).toBeHidden()
+}
+
 /** La navegación principal que se ve: la barra lateral en escritorio o la inferior en el celular. */
 export function navigation(page: Page) {
   return page.getByRole('navigation', { name: 'Navegación principal' })

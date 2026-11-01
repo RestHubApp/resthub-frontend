@@ -15,8 +15,11 @@ import { tabStorage } from '@/services/tabStorage'
 // Cada pedido es de la cuenta que lo tomó. En un celular compartido la cola
 // guarda los de varias cuentas, pero cada una ve y envía solo los suyos: el
 // envío sale con el token activo y no puede abrir un pedido a nombre de otro
-// mesero ni en otro local. Cerrar la sesión no los borra; vuelven a aparecer
-// cuando esa misma cuenta entra otra vez.
+// mesero ni en otro local. Cerrar la sesión borra los que guardan datos del
+// cliente (nombre, teléfono, dirección: un delivery o un pedido para llevar), para
+// que no queden en el celular sin nadie dentro (ASVS V14.3.1); los demás vuelven a
+// aparecer cuando esa misma cuenta entra otra vez. Si la sesión vence sola, quedan
+// todos: la cuenta los envía al volver a entrar.
 //
 // La versión va en la clave: la v1 no decía de quién era cada pedido y no se lee.
 const STORAGE_KEY = 'resthub.pedidos-sin-enviar.v2'
@@ -126,6 +129,21 @@ export function queuedOrders(owner: QueueOwner | null): readonly QueuedOrder[] {
     view.value = base.filter((order) => belongsTo(order, owner))
   }
   return view.value
+}
+
+/** Si el pedido guarda datos del cliente: su nombre, su teléfono o una dirección de entrega. */
+function hasCustomerData(order: QueuedOrder): boolean {
+  const { customer_name, customer_phone, delivery_address, delivery_reference } = order.request
+  return [customer_name, customer_phone, delivery_address, delivery_reference].join('').trim() !== ''
+}
+
+/** Al cerrar la sesión: borra los pedidos de esa cuenta que guardan datos del cliente. */
+export function discardCustomerDataOf(owner: QueueOwner | null): void {
+  const queue = fresh()
+  const kept = queue.filter((order) => !(belongsTo(order, owner) && hasCustomerData(order)))
+  if (kept.length !== queue.length) {
+    write(kept)
+  }
 }
 
 export function enqueueOrder(order: QueuedOrder): void {

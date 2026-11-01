@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { CartLineList } from './CartLineList'
@@ -58,7 +59,7 @@ export function CartSheet({
             Seguir eligiendo
           </Button>
           <Button type="button" size="lg" disabled={lines.length === 0 || pending} onClick={onSubmit}>
-            <Icon name="send" size={18} />
+            <Icon glyph={icons.send} size={18} />
             <span>{pending ? 'Enviando…' : submitLabel}</span>
           </Button>
         </div>

@@ -2,6 +2,7 @@ import { Suspense, useState } from 'react'
 import { lazyNamed } from '@/components/lazyNamed'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 // El formulario trae react-hook-form y zod: se baja al tocar el botón.
@@ -18,7 +19,7 @@ export function TakeawayDialog() {
       <Button type="button" onClick={() => {
         setIsOpen(true)
       }}>
-        <Icon name="takeaway" size={18} />
+        <Icon glyph={icons.takeaway} size={18} />
         <span>Para llevar / Delivery</span>
       </Button>
       {isOpen ? (

@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 interface RecipeFooterProps {
@@ -12,11 +13,11 @@ interface RecipeFooterProps {
 const DELETE_ACTION = {
   label: 'Borrar receta',
   variant: 'destructive',
-  icon: 'delete',
+  icon: icons.delete,
   notice: 'Sin insumos: al guardar, el plato queda sin receta y sin costo.',
 } as const
 
-const SAVE_ACTION = { label: 'Guardar receta', variant: 'default', icon: 'confirm', notice: '' } as const
+const SAVE_ACTION = { label: 'Guardar receta', variant: 'default', icon: icons.confirm, notice: '' } as const
 
 /** El aviso bajo el botón: qué pasa al guardar, o que hay cambios pendientes. */
 function noticeOf(isDeleting: boolean, dirty: boolean): string {
@@ -37,7 +38,7 @@ export function RecipeFooter({ empty, hadRecipe, dirty, pending }: RecipeFooterP
         {noticeOf(isDeleting, dirty)}
       </p>
       <Button type="submit" variant={action.variant} className="px-5" disabled={pending || !dirty}>
-        <Icon name={action.icon} size={16} />
+        <Icon glyph={action.icon} size={16} />
         <span>{pending ? 'Guardando…' : action.label}</span>
       </Button>
     </div>
