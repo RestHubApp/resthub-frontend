@@ -1,4 +1,4 @@
-import { useMutationState, useQuery } from '@tanstack/react-query'
+import { useMutationState, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import { reportSignOut } from '@/api/auth'
@@ -22,7 +22,11 @@ export function TwoFactorSetupView({ account }: { readonly account: PlatformSess
   const isEnabled = status.data?.enabled === true
   // Una confirmación en esta pantalla deja los códigos a la vista: el estado releído no abre la plataforma.
   const confirmations = useMutationState({ filters: { mutationKey: twoFactorConfirmKey } }).length
+  const queryClient = useQueryClient()
   const openPlatform = () => {
+    // Ya se vieron los códigos: la confirmación deja de sostener el alta (ver AccountSetupGate).
+    const mutations = queryClient.getMutationCache()
+    for (const mutation of mutations.findAll({ mutationKey: twoFactorConfirmKey })) mutations.remove(mutation)
     useSession.getState().refresh({ ...account, two_factor_setup_required: false })
   }
 

@@ -3,7 +3,9 @@ import { screen, waitFor, within } from '@testing-library/react'
 
 import { signInToPlatform } from '#jest/fixtures/platform'
 import { mountScreen, server } from '#jest/harness'
+import { twoFactorConfirmKey } from '@/api/twoFactor'
 import type { PlatformSession } from '@/api/types'
+import { queryClient } from '@/services/queryClient'
 import { useSession } from '@/store/session'
 import { TwoFactorSetupView } from './TwoFactorSetupView'
 
@@ -54,6 +56,8 @@ describe('alta obligatoria de los dos pasos en la plataforma (RFS-22)', () => {
     await waitFor(() => {
       expect(useSession.getState().account).toMatchObject({ two_factor_setup_required: false })
     })
+    // Si quedara, AccountSetupGate seguiría sosteniendo el alta.
+    expect(queryClient.getMutationCache().findAll({ mutationKey: twoFactorConfirmKey })).toHaveLength(0)
   })
 
   it('«Salir» cierra la sesión', async () => {

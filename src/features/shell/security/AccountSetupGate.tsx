@@ -1,5 +1,7 @@
+import { useMutationState } from '@tanstack/react-query'
 import { type ComponentType, type ReactElement, Suspense } from 'react'
 
+import { twoFactorConfirmKey } from '@/api/twoFactor'
 import type { PlatformSession, Session } from '@/api/types'
 import '@/store/accountSetup'
 import { ReauthenticationHost } from './ReauthenticationHost'
@@ -18,13 +20,25 @@ interface AccountSetupGateProps {
   readonly children: ReactElement
 }
 
-function pendingView(account: Session, views: AccountSetupViews): ReactElement | null {
+/**
+ * Si la cuenta de plataforma sigue en el alta de los dos pasos. Tras confirmar
+ * el primer código, la cuenta releída (`GET /auth/me` cada cinco minutos, o la
+ * renovación del token) ya no la pide, pero los códigos de recuperación, que no
+ * se vuelven a mostrar, siguen en pantalla: el alta se queda hasta «Ya los
+ * guardé», que borra esa confirmación.
+ */
+function useIsSettingUpTwoFactor(account: Session): boolean {
+  const confirmed = useMutationState({ filters: { mutationKey: twoFactorConfirmKey, status: 'success' } }).length
+  return account.kind === 'platform' && (account.two_factor_setup_required || confirmed > 0)
+}
+
+function pendingView(account: Session, views: AccountSetupViews, isSettingUpTwoFactor: boolean): ReactElement | null {
   if (account.preview) return null
   // Primero la contraseña: hasta cambiar la temporal, el servidor tampoco deja activar los dos pasos.
   if (account.must_change_password && views.passwordChange !== undefined) {
     return <views.passwordChange account={account} />
   }
-  if (account.kind === 'platform' && account.two_factor_setup_required && views.twoFactorSetup !== undefined) {
+  if (isSettingUpTwoFactor && account.kind === 'platform' && views.twoFactorSetup !== undefined) {
     return <views.twoFactorSetup account={account} />
   }
   return null
@@ -38,7 +52,7 @@ function pendingView(account: Session, views: AccountSetupViews): ReactElement |
  * armazón, nadie más la monta. La vista previa nunca lo tiene.
  */
 export function AccountSetupGate({ account, views, children }: AccountSetupGateProps) {
-  const pending = pendingView(account, views)
+  const pending = pendingView(account, views, useIsSettingUpTwoFactor(account))
   if (pending === null) return children
   return (
     <>

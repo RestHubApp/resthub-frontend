@@ -1,11 +1,12 @@
 import { describe, expect, it } from '@jest/globals'
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 
 import { FAKE_SETUP_VIEWS } from '#jest/accountSetupViews'
 import { ErrorResponse, mountScreen, PERMISSIONS_WAITER, server, signInAs } from '#jest/harness'
 import { signInToPlatform } from '#jest/fixtures/platform'
 import { send } from '@/api/client'
-import { beginTwoFactor } from '@/api/twoFactor'
+import { beginTwoFactor, twoFactorConfirmKey } from '@/api/twoFactor'
+import { queryClient } from '@/services/queryClient'
 import { useSession } from '@/store/session'
 import { AccountSetupGate } from './AccountSetupGate'
 
@@ -92,6 +93,28 @@ describe('verificación en dos pasos obligatoria en la plataforma (RFS-22)', () 
 
     await expect(started).resolves.toEqual(setup)
     expect(api.calls('post', TWO_FACTOR_SETUP)).toHaveLength(2)
+  })
+})
+
+describe('códigos de recuperación del alta obligatoria (RFS-22)', () => {
+  it('releer la cuenta mientras se ven los códigos no abre el armazón; sí al dar por vistos los códigos', async () => {
+    server()
+    const account = { ...signInToPlatform(), two_factor_setup_required: true }
+    useSession.setState({ account })
+    mountScreen(<Gate />)
+    // Lo que deja «Activar» al confirmar el primer código: los códigos están a la vista.
+    const mutations = queryClient.getMutationCache()
+    const confirmed = mutations.build(queryClient, { mutationKey: twoFactorConfirmKey, mutationFn: () => Promise.resolve({ recovery_codes: [] }) })
+    await act(async () => { await confirmed.execute(undefined) })
+
+    // Como `GET /auth/me` cada cinco minutos: el servidor ya no pide el alta.
+    act(() => { useSession.getState().refresh({ ...account, two_factor_setup_required: false }) })
+    expect(screen.getByRole('heading', { name: SETUP_TWO_FACTOR })).toBeInTheDocument()
+    expect(screen.queryByText(CONTENT)).not.toBeInTheDocument()
+
+    // «Ya los guardé» borra esa confirmación.
+    act(() => { mutations.remove(confirmed) })
+    expect(await screen.findByText(CONTENT)).toBeInTheDocument()
   })
 })
 
