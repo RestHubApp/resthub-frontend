@@ -1,5 +1,6 @@
 import type { Role } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { DeleteRoleButton } from './DeleteRoleButton'
@@ -39,7 +40,7 @@ export function RoleRow({ role, groups, access, onOpen }: RoleRowProps) {
           aria-label={isEditable ? `Editar el rol ${role.name}` : `Ver permisos del rol ${role.name}`}
           onClick={onOpen}
         >
-          <Icon name={isEditable ? 'edit' : 'view'} size={16} />
+          <Icon glyph={isEditable ? icons.edit : icons.view} size={16} />
           <span>{isEditable ? 'Editar' : 'Ver permisos'}</span>
         </Button>
         {isEditable && role.is_deletable ? <DeleteRoleButton role={role} /> : null}

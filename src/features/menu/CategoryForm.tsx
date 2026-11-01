@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { MenuCategory } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { TextField } from '@/components/TextField'
+import * as icons from '@/components/icons'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { type CategoryValues, categorySchema } from './menuSchema'
@@ -44,7 +45,7 @@ export function CategoryForm({ category, onDone }: CategoryFormProps) {
         mutation={save}
         failureText="No se pudo guardar la categoría."
         onCancel={onDone}
-        submit={{ label: 'Guardar', icon: category === undefined ? 'add' : 'confirm' }}
+        submit={{ label: 'Guardar', icon: category === undefined ? icons.add : icons.confirm }}
       />
     </form>
   )

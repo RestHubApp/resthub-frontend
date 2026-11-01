@@ -4,6 +4,7 @@ import { currentCashQuery } from '@/api/cash'
 import type { OrderResponse } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
+import * as icons from '@/components/icons'
 import { BillSummary } from './BillSummary'
 import { CashClosedNotice } from './CashClosedNotice'
 import { ChargeFields } from './ChargeFields'
@@ -42,7 +43,7 @@ export function ChargeForm({ order, onPaid, onCancel }: ChargeFormProps) {
           submit={{
             label: 'Confirmar pago',
             pendingLabel: 'Cobrando…',
-            icon: 'payment',
+            icon: icons.payment,
             isDisabled: isClosed || !payment.canCharge,
           }}
         />

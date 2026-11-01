@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { cartTotals } from './cartTotals'
 import type { DraftLine } from './useOrderDraft'
@@ -41,7 +42,7 @@ export function CartBar({ lines, submitLabel, pending, onOpen, onSubmit }: CartB
           <span className="text-lg font-bold tabular-nums">{total}</span>
         </button>
         <Button type="button" size="lg" className="px-4" disabled={dishes === 0 || pending} onClick={onSubmit}>
-          <Icon name="send" size={18} />
+          <Icon glyph={icons.send} size={18} />
           <span>{pending ? 'Enviando…' : submitLabel}</span>
         </Button>
       </div>

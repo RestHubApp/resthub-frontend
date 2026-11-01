@@ -1,6 +1,7 @@
 import type { PlatformRestaurantDetail } from '@/api/types'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { SectionCard } from '@/components/SectionCard'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
@@ -29,7 +30,7 @@ export function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProp
       <SectionCard title="Restaurante">
         <div className="grid items-start gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <TextField id="name" label="Nombre" placeholder="La Esquina de Lucho" icon="restaurant" autoComplete="off" field={name} error={errors.name?.message} />
+            <TextField id="name" label="Nombre" placeholder="La Esquina de Lucho" icon={icons.restaurant} autoComplete="off" field={name} error={errors.name?.message} />
           </div>
           <TextField
             id="slug"
@@ -59,7 +60,7 @@ export function NewRestaurantForm({ onCreated, onCancel }: NewRestaurantFormProp
           Cancelar
         </Button>
         <Button type="submit" disabled={registration.isPending || registration.isSuccess}>
-          <Icon name="add" size={18} />
+          <Icon glyph={icons.add} size={18} />
           <span>{registration.isPending ? 'Creando…' : 'Crear restaurante'}</span>
         </Button>
       </div>

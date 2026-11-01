@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react'
 
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 
@@ -48,7 +49,7 @@ export function ChartCard({
               setIsTableView((value) => !value)
             }}
           >
-            <Icon name={isTableView ? 'chart' : 'grid'} size={14} />
+            <Icon glyph={isTableView ? icons.chart : icons.grid} size={14} />
             <span>{isTableView ? 'Ver gráfico' : 'Ver tabla'}</span>
           </Button>
         </>

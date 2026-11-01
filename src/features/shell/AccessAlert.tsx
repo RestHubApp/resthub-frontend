@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button'
 import { useServerEvent } from '@/hooks/useServerEvent'
 import { paths } from '@/services/paths'
 import { useCan, usePreview, useStaffAccount } from '@/store/session'
-import { ShellIcon } from './ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 /**
  * El servidor avisa (`access_alert`, RFS-16) cuando alguien entra con una
@@ -38,7 +39,7 @@ export function AccessAlert() {
   return (
     <div className="mx-auto w-full max-w-app px-4 pt-3 sm:px-6">
       <div role="alert" className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-        <ShellIcon name="alert" size={18} className="shrink-0 text-destructive" />
+        <Icon glyph={icons.alert} size={18} className="shrink-0 text-destructive" />
         <p className="m-0 min-w-0 flex-1 font-medium">Alguien entró desde un dispositivo o un país nuevo. Si no fuiste tú, cambia tu contraseña.</p>
         <Link to={paths.profile} className="inline-flex min-h-11 items-center underline underline-offset-4">Ver mis accesos</Link>
         {canManageStaff ? <Link to={paths.staff} className="inline-flex min-h-11 items-center underline underline-offset-4">Ver el personal</Link> : null}

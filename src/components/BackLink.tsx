@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 
 import { Icon } from './Icon'
+import * as icons from './icons'
 
 interface BackLinkProps {
   readonly to: string
@@ -14,7 +15,7 @@ export function BackLink({ to, label = 'Volver' }: BackLinkProps) {
       to={to}
       className="-ml-2 inline-flex min-h-11 w-fit items-center gap-1 rounded-lg px-2 text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <Icon name="previous" size={18} />
+      <Icon glyph={icons.previous} size={18} />
       <span>{label}</span>
     </Link>
   )

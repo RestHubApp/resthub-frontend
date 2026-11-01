@@ -1,12 +1,11 @@
 import { cn } from 'cn'
 import type { ReactNode } from 'react'
 
-import { Icon } from './Icon'
-import type { IconName } from './icons'
+import { Icon, type IconGlyph } from './Icon'
 
 interface FieldIconProps {
   /** Sin icono, el campo se muestra tal cual. */
-  readonly icon: IconName | undefined
+  readonly icon: IconGlyph | undefined
   /** En un texto largo el icono va arriba, a la altura de la primera línea. */
   readonly multiline?: boolean
   readonly children: ReactNode
@@ -30,7 +29,7 @@ export function FieldIcon({ icon, multiline = false, children }: FieldIconProps)
       {children}
       {icon === undefined ? null : (
         <Icon
-          name={icon}
+          glyph={icon}
           size={16}
           className={cn(
             'pointer-events-none absolute left-3 text-muted-foreground',

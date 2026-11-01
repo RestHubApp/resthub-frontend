@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import type { InsightsPeriod } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { CustomRangeForm } from './CustomRangeForm'
 import { RANGE_PRESETS } from './dateRange'
 import type { InsightsRange } from './useInsightsRange'
@@ -52,7 +53,7 @@ export function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
                 }}
                 className={isActive ? `${OPTION} bg-card font-semibold text-foreground shadow-sm` : `${OPTION} text-muted-foreground hover:text-foreground`}
               >
-                {isActive ? <Icon name="confirm" size={14} /> : null}
+                {isActive ? <Icon glyph={icons.confirm} size={14} /> : null}
                 {preset.label}
               </button>
             )
@@ -60,7 +61,7 @@ export function RangeFilter({ range, period, timeZone }: RangeFilterProps) {
         </div>
         {period === undefined ? null : (
           <p className="m-0 flex items-center gap-1.5 text-sm text-muted-foreground" aria-live="polite">
-            <Icon name="date" size={16} />
+            <Icon glyph={icons.date} size={16} />
             {periodText(period)}
           </p>
         )}

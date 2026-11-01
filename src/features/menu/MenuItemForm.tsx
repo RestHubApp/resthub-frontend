@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import type { MenuItem, MenuSection } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
+import * as icons from '@/components/icons'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
 import { MenuItemFields } from './MenuItemFields'
@@ -58,7 +59,7 @@ export function MenuItemForm({
         mutation={save}
         failureText="No se pudo guardar el plato."
         onCancel={onDone}
-        submit={{ label: item === undefined ? 'Crear plato' : 'Guardar', icon: item === undefined ? 'add' : 'confirm' }}
+        submit={{ label: item === undefined ? 'Crear plato' : 'Guardar', icon: item === undefined ? icons.add : icons.confirm }}
       />
     </form>
   )

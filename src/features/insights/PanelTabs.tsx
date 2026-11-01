@@ -1,13 +1,13 @@
 import { NavLink } from 'react-router'
 
-import { Icon } from '@/components/Icon'
-import type { IconName } from '@/components/icons'
+import { Icon, type IconGlyph } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { paths } from '@/services/paths'
 
-const TABS: readonly { to: string; label: string; icon: IconName; end: boolean }[] = [
-  { to: paths.insights.overview, label: 'Indicadores', icon: 'indicators', end: true },
-  { to: paths.insights.restock, label: 'Reposición', icon: 'buy', end: false },
-  { to: paths.insights.aiAudit, label: 'Decisiones de la IA', icon: 'ai', end: false },
+const TABS: readonly { to: string; label: string; icon: IconGlyph; end: boolean }[] = [
+  { to: paths.insights.overview, label: 'Indicadores', icon: icons.indicators, end: true },
+  { to: paths.insights.restock, label: 'Reposición', icon: icons.buy, end: false },
+  { to: paths.insights.aiAudit, label: 'Decisiones de la IA', icon: icons.ai, end: false },
 ]
 
 const BASE =
@@ -29,7 +29,7 @@ export function PanelTabs() {
                   : `${BASE} text-muted-foreground hover:text-foreground`
               }
             >
-              <Icon name={tab.icon} size={16} />
+              <Icon glyph={tab.icon} size={16} />
               <span>{tab.label}</span>
             </NavLink>
           </li>

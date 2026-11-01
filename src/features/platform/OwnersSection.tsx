@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { PlatformRestaurantDetail } from '@/api/types'
 import { FormDialog } from '@/components/FormDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { AddOwnerForm } from './AddOwnerForm'
@@ -33,7 +34,7 @@ export function OwnersSection({ restaurant }: OwnersSectionProps) {
             setIsAdding(true)
           }}
         >
-          <Icon name="add" size={18} />
+          <Icon glyph={icons.add} size={18} />
           <span>Agregar encargado</span>
         </Button>
       }

@@ -2,6 +2,7 @@ import { advanceOrder } from '@/api/orders'
 import { PERMISSION } from '@/api/permissions'
 import type { OrderResponse } from '@/api/types'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useCan } from '@/store/session'
 import { stepDoneMessage } from '@/features/orders/nextStep'
@@ -32,7 +33,7 @@ export function KitchenReadyButton({ order }: KitchenReadyButtonProps) {
         ready.mutate()
       }}
     >
-      <Icon name="ready" size={18} />
+      <Icon glyph={icons.ready} size={18} />
       <span>{ready.isPending ? 'Guardando…' : 'Listo'}</span>
     </Button>
   )

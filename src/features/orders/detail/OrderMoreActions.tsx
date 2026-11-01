@@ -6,6 +6,7 @@ import { ActionsMenu, type ActionsMenuItem } from '@/components/ActionsMenu'
 import { paths } from '@/services/paths'
 import { useCan } from '@/store/session'
 import { isActive } from '@/features/orders/orderLabels'
+import * as icons from '@/components/icons'
 import { TableMoveDialogs } from './TableMoveDialogs'
 import { type TableMoves, useTableMoves } from './useTableMoves'
 
@@ -31,10 +32,10 @@ function tableEntries({ order, moves }: EntriesOptions): ActionsMenuItem[] {
     return []
   }
   const entries: ActionsMenuItem[] = [
-    { label: 'Cambiar de mesa', icon: 'movements', onSelect: () => { moves.setDialog('mover') } },
+    { label: 'Cambiar de mesa', icon: icons.movements, onSelect: () => { moves.setDialog('mover') } },
   ]
   if (order.payments.length === 0 && moves.isMine(order.waiter_id)) {
-    entries.push({ label: 'Unir otra mesa', icon: 'table', onSelect: () => { moves.setDialog('unir') } })
+    entries.push({ label: 'Unir otra mesa', icon: icons.table, onSelect: () => { moves.setDialog('unir') } })
   }
   return entries
 }
@@ -44,12 +45,12 @@ function tableEntries({ order, moves }: EntriesOptions): ActionsMenuItem[] {
 function printEntries({ order, goTo }: EntriesOptions): ActionsMenuItem[] {
   const entries: ActionsMenuItem[] = []
   if (order.status !== 'open' && order.status !== 'cancelled') {
-    entries.push({ label: 'Imprimir comanda', icon: 'print', onSelect: () => { goTo(paths.orders.print(order.id, 'comanda')) } })
+    entries.push({ label: 'Imprimir comanda', icon: icons.print, onSelect: () => { goTo(paths.orders.print(order.id, 'comanda')) } })
   }
   if (order.status !== 'cancelled') {
     entries.push({
       label: order.status === 'paid' ? 'Imprimir ticket' : 'Imprimir precuenta',
-      icon: 'print',
+      icon: icons.print,
       onSelect: () => { goTo(paths.orders.print(order.id, 'cuenta')) },
     })
   }
@@ -59,7 +60,7 @@ function printEntries({ order, goTo }: EntriesOptions): ActionsMenuItem[] {
 function entriesOf(options: EntriesOptions): ActionsMenuItem[] {
   const cancel: ActionsMenuItem[] =
     options.canCancel && isActive(options.order.status)
-      ? [{ label: 'Cancelar pedido', icon: 'cancel', isDestructive: true, onSelect: options.onCancel }]
+      ? [{ label: 'Cancelar pedido', icon: icons.cancel, isDestructive: true, onSelect: options.onCancel }]
       : []
   return [...tableEntries(options), ...printEntries(options), ...cancel]
 }

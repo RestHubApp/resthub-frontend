@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormDialog } from '@/components/FormDialog'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { SectionCard } from '@/components/SectionCard'
 import { Button } from '@/components/ui/button'
 import { PinForm } from './PinForm'
@@ -32,7 +33,7 @@ export function PinCard() {
     >
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" onClick={() => { setIsOpen(true) }}>
-          <Icon name="key" size={16} />
+          <Icon glyph={icons.key} size={16} />
           <span>{hasPin ? 'Cambiar PIN' : 'Elegir un PIN'}</span>
         </Button>
         {hasPin ? (
@@ -45,7 +46,7 @@ export function PinCard() {
           />
         ) : null}
         <Button type="button" variant="outline" onClick={lockNow}>
-          <Icon name="lock" size={16} />
+          <Icon glyph={icons.lock} size={16} />
           <span>Bloquear ahora</span>
         </Button>
       </div>

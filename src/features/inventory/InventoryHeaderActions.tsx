@@ -1,4 +1,5 @@
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { NewIngredientButton } from './NewIngredientButton'
 
@@ -12,7 +13,7 @@ export function InventoryHeaderActions({ onRules, onNewIngredient }: InventoryHe
   return (
     <>
       <Button type="button" variant="outline" onClick={onRules}>
-        <Icon name="settings" size={16} />
+        <Icon glyph={icons.settings} size={16} />
         <span>Reglas de stock</span>
       </Button>
       <NewIngredientButton onClick={onNewIngredient} />

@@ -1,6 +1,7 @@
 import type { UseFormReturn } from 'react-hook-form'
 
 import { TextField } from '@/components/TextField'
+import * as icons from '@/components/icons'
 import { DeliveryFields } from './DeliveryFields'
 import { MAX_CUSTOMER, type TakeawayValues } from './takeawaySchema'
 
@@ -20,7 +21,7 @@ export function TakeawayFields({ form, delivery }: TakeawayFieldsProps) {
         id="takeaway-customer"
         label={delivery ? 'Nombre de quien recibe' : 'Nombre del cliente (opcional)'}
         placeholder="Por ejemplo, Ana"
-        icon="profile"
+        icon={icons.profile}
         autoComplete="off"
         maxLength={MAX_CUSTOMER}
         hint="Se muestra en el tablero para entregar el pedido correcto."

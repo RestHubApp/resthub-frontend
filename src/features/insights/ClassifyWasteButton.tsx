@@ -1,6 +1,7 @@
 import { FormMessage } from '@/components/FormMessage'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useClassifyWaste } from './useClassifyWaste'
 
@@ -28,7 +29,7 @@ export function ClassifyWasteButton({ pending }: ClassifyWasteButtonProps) {
           classify.mutate()
         }}
       >
-        <Icon name="ai" size={14} className={classify.isPending ? 'animate-pulse' : undefined} />
+        <Icon glyph={icons.ai} size={14} className={classify.isPending ? 'animate-pulse' : undefined} />
         <span>{classify.isPending ? 'Clasificando…' : `Clasificar mermas pendientes (${String(pending)})`}</span>
       </Button>
       {classify.isError ? (

@@ -5,17 +5,18 @@ import { FieldError } from './FieldError'
 import { FieldHint } from './FieldHint'
 import { FieldIcon } from './FieldIcon'
 import { fieldIds } from './fieldIds'
-import type { IconName } from './icons'
+import type { IconGlyph } from './Icon'
+import * as icons from './icons'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 
 // El icono que corresponde por el tipo de dato, cuando el campo no pide otro.
-const ICON_BY_TYPE: Readonly<Partial<Record<string, IconName>>> = {
-  email: 'email',
-  tel: 'phone',
-  date: 'date',
-  time: 'schedule',
-  number: 'number',
+const ICON_BY_TYPE: Readonly<Partial<Record<string, IconGlyph>>> = {
+  email: icons.email,
+  tel: icons.phone,
+  date: icons.date,
+  time: icons.schedule,
+  number: icons.number,
 }
 
 interface TextFieldProps {
@@ -25,7 +26,7 @@ interface TextFieldProps {
   readonly field: UseFormRegisterReturn
   readonly type?: HTMLInputTypeAttribute
   /** Icono a la izquierda. Sin él, se usa el del tipo de dato, si lo hay. */
-  readonly icon?: IconName
+  readonly icon?: IconGlyph
   readonly error?: string | undefined
   readonly hint?: string | undefined
   readonly placeholder?: string

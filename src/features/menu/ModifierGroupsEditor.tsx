@@ -1,5 +1,6 @@
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { ModifierGroupFields } from './ModifierGroupFields'
 import { emptyGroup, type GroupDraft } from './modifierDrafts'
@@ -46,7 +47,7 @@ export function ModifierGroupsEditor({ groups, error, onChange }: ModifierGroups
         <Button type="button" variant="outline" className="self-start" onClick={() => {
           onChange([...groups, emptyGroup()])
         }}>
-          <Icon name="add" size={16} />
+          <Icon glyph={icons.add} size={16} />
           <span>Agregar grupo de opciones</span>
         </Button>
       ) : null}

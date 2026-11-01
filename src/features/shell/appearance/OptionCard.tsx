@@ -1,7 +1,8 @@
 import { cn } from 'cn'
 import type { ReactNode } from 'react'
 
-import { ShellIcon } from '@/features/shell/ShellIcon'
+import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 
 interface OptionCardProps {
   /** El grupo de opciones: las que comparten `name` se eligen de una en una. */
@@ -48,7 +49,7 @@ export function OptionCard({ name, value, label, description, isChecked, onSelec
           <span id={labelId} className="text-sm font-medium text-foreground">
             {label}
           </span>
-          {isChecked ? <ShellIcon name="correct" size={16} className="shrink-0 text-primary" /> : null}
+          {isChecked ? <Icon glyph={icons.correct} size={16} className="shrink-0 text-primary" /> : null}
         </span>
         {description === undefined ? null : (
           <span id={detailId} className={isChecked ? 'text-xs text-muted-foreground' : 'sr-only'}>

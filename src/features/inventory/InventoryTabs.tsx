@@ -29,7 +29,7 @@ export function InventoryTabs({ value, onChange, panels }: InventoryTabsProps) {
         <TabsList className="group-data-horizontal/tabs:h-auto">
           {SECTIONS.map((section) => (
             <TabsTrigger key={section.value} value={section.value} className="h-11 flex-none px-3.5">
-              <Icon name={section.icon} size={16} />
+              <Icon glyph={section.icon} size={16} />
               <span>{section.label}</span>
             </TabsTrigger>
           ))}

@@ -1,5 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-
 import { voidOrderItem } from '@/api/orders'
 import type { OrderItemResponse, OrderResponse } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
@@ -8,9 +6,10 @@ import { TextareaField } from '@/components/TextareaField'
 import { onSubmit } from '@/hooks/formSubmit'
 import { QuickReasons } from '@/features/orders/QuickReasons'
 import { useOrderAction } from '@/features/orders/useOrderAction'
+import * as icons from '@/components/icons'
 import { QUICK_VOID_REASONS, voidErrorMessage } from './voidItemMessages'
-import { MAX_VOID_REASON, type VoidItemValues, voidItemSchema } from '@/features/orders/voidItemSchema'
-import { useAppForm } from '@/hooks/useAppForm'
+import { MAX_VOID_REASON } from '@/features/orders/voidItemSchema'
+import { useVoidReasonForm } from '@/features/orders/useVoidReasonForm'
 
 interface VoidItemFormProps {
   readonly order: OrderResponse
@@ -22,10 +21,7 @@ interface VoidItemFormProps {
 
 /** El motivo de la anulación, escrito o elegido entre los rápidos. */
 export function VoidItemForm({ order, item, onClose, onVoided }: VoidItemFormProps) {
-  const { register, handleSubmit, formState, setValue } = useAppForm<VoidItemValues>({
-    resolver: zodResolver(voidItemSchema),
-    defaultValues: { reason: '' },
-  })
+  const { register, handleSubmit, formState, setValue } = useVoidReasonForm()
   const voidItem = useOrderAction({
     mutationFn: (reason: string) => voidOrderItem(order.id, item.id, reason),
     success: () => `${item.name} anulado.`,
@@ -63,7 +59,7 @@ export function VoidItemForm({ order, item, onClose, onVoided }: VoidItemFormPro
         mutation={voidItem}
         onCancel={onClose}
         cancelLabel="Volver"
-        submit={{ label: 'Anular plato', pendingLabel: 'Anulando…', icon: 'cancel', variant: 'destructive' }}
+        submit={{ label: 'Anular plato', pendingLabel: 'Anulando…', icon: icons.cancel, variant: 'destructive' }}
       />
     </form>
   )

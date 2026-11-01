@@ -6,6 +6,7 @@ import type { Role, StaffResponse } from '@/api/types'
 import { FormFooter } from '@/components/FormFooter'
 import { onSubmit } from '@/hooks/formSubmit'
 import { useAppForm } from '@/hooks/useAppForm'
+import * as icons from '@/components/icons'
 import { StaffFields } from './StaffFields'
 import { saveStaffMember } from './staffList'
 import {
@@ -71,7 +72,7 @@ export function StaffEditForm({ account, roles, isSelf, onDone }: StaffEditFormP
         mutation={save}
         failureText="No se pudieron guardar los cambios."
         onCancel={onDone}
-        submit={{ label: 'Guardar', pendingLabel: 'Guardando…', icon: 'confirm' }}
+        submit={{ label: 'Guardar', pendingLabel: 'Guardando…', icon: icons.confirm }}
       />
     </form>
   )

@@ -1,5 +1,6 @@
 import { DishPhoto } from '@/components/DishPhoto'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { formatMoney } from '@/services/format'
 import { useAppearance } from '@/store/appearance'
 
@@ -44,7 +45,7 @@ export function DishRowButton({ itemId, photoVersion, name, price, hasOptions, r
       ) : null}
       {!isOutOfStock && !isSelected ? (
         <span className="flex size-10 items-center justify-center rounded-full bg-secondary text-primary ring-1 ring-primary/25">
-          <Icon name="add" size={18} label="Agregar" />
+          <Icon glyph={icons.add} size={18} label="Agregar" />
         </span>
       ) : null}
     </button>

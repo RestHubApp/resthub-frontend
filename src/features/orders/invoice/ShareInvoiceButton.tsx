@@ -1,6 +1,7 @@
 import type { Invoice } from '@/api/types'
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
+import * as icons from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useStaffAccount } from '@/store/session'
 import { useShareInvoice } from './useShareInvoice'
@@ -18,7 +19,7 @@ export function ShareInvoiceButton({ invoice }: { readonly invoice: Invoice }) {
   return (
     <>
       <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={share}>
-        <Icon name="send" size={14} />
+        <Icon glyph={icons.send} size={14} />
         <span>{labelOf(isPending, isReady)}</span>
       </Button>
       {error === null ? null : (

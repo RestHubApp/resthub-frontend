@@ -29,7 +29,7 @@ const UI_IMPORTS = [
   {
     name: 'lucide-react',
     message:
-      'Los iconos salen del registro unico: usa <Icon name="..." /> y agrega el trazo en src/components/icons.ts.',
+      'Los iconos salen del registro unico de src/components/icons.ts: usa <Icon glyph={icons.x} /> (import * as icons) y agrega alli el trazo que falte.',
   },
   {
     name: 'radix-ui',
@@ -331,14 +331,8 @@ export default tseslint.config(
   // que es la unica fuente de verdad. Lucide y Radix llegan como dependencias
   // de shadcn/ui y solo pueden usarse dentro de src/components/ui y, en el
   // caso de Lucide, en el registro; el resto de la aplicacion usa el registro
-  // y los componentes ya tematizados.
-  //
-  // La unica excepcion es src/features/shell/ShellIcon.tsx: el registro
-  // completo (unos 90 iconos) se carga siempre porque el armazon (la barra de
-  // navegacion, "Más", la sesion) lo usa, aunque cada pantalla dibuje solo un
-  // puñado. ShellIcon tiene su propio registro chico, del mismo tamaño fijo
-  // que el armazon, para que el resto de los iconos llegue con la pantalla
-  // que los usa.
+  // y los componentes ya tematizados. El armazón usa el mismo registro: cada
+  // archivo nombra sus iconos (`icons.order`) y solo esos viajan con él.
   // ---------------------------------------------------------------------
   {
     files: [
@@ -346,7 +340,7 @@ export default tseslint.config(
       'src/components/*.{ts,tsx}',
       'src/main.tsx',
     ],
-    ignores: ['src/components/icons.ts', 'src/features/shell/ShellIcon.tsx', 'src/hooks/useAppForm.ts'],
+    ignores: ['src/components/icons.ts', 'src/hooks/useAppForm.ts'],
     rules: { 'no-restricted-imports': ['error', { paths: [...UI_IMPORTS, FORM_IMPORT] }] },
   },
   // El envoltorio es el único que llama a `useForm`.
@@ -763,6 +757,15 @@ export default tseslint.config(
   // ruta real.
   // ---------------------------------------------------------------------
   ...noBarrelFiles.configs['flat/recommended'],
+  // La excepción es el registro de iconos: es la única puerta a Lucide y la
+  // cruza reexportando. Con un reexport, el empaquetador lleva cada icono
+  // directo al archivo de la pantalla que lo dibuja; con un objeto o una
+  // constante por icono, todos quedarían donde vive el registro, que es el
+  // archivo inicial.
+  {
+    files: ['src/components/icons.ts'],
+    rules: { 'no-barrel-files/no-barrel-files': 'off' },
+  },
 
   // ---------------------------------------------------------------------
   // Archivos de configuracion.

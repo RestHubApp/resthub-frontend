@@ -8,6 +8,7 @@ import { TextareaField } from '@/components/TextareaField'
 import { TextField } from '@/components/TextField'
 import { useAppForm } from '@/hooks/useAppForm'
 import { useNotifications } from '@/store/notifications'
+import * as icons from '@/components/icons'
 import { CustomerConsent } from './CustomerConsent'
 import { customerDefaults, customerRequest, customerSchema, type CustomerValues, LIMITS } from './customerSchema'
 
@@ -54,11 +55,11 @@ export function CustomerDialog({ open, customer, onClose: handleClose }: Custome
       failureText="No se pudo guardar el cliente."
       handleSubmit={handleSubmit((values) => save.mutateAsync(values).catch(() => undefined))}
     >
-      <TextField id="customer-name" label="Nombre" icon="profile" maxLength={LIMITS.name} field={register('name')} error={errors.name?.message} />
+      <TextField id="customer-name" label="Nombre" icon={icons.profile} maxLength={LIMITS.name} field={register('name')} error={errors.name?.message} />
       <TextField id="customer-phone" label="Teléfono (opcional)" type="tel" inputMode="tel" maxLength={LIMITS.phone} hint="No se repite: identifica al cliente." field={register('phone')} error={errors.phone?.message} />
       <TextField id="customer-email" label="Correo (opcional)" type="email" maxLength={LIMITS.email} field={register('email')} error={errors.email?.message} />
-      <TextField id="customer-address" label="Dirección (opcional)" icon="location" maxLength={LIMITS.address} field={register('address')} error={errors.address?.message} />
-      <TextField id="customer-reference" label="Referencia (opcional)" icon="note" maxLength={LIMITS.reference} field={register('reference')} error={errors.reference?.message} />
+      <TextField id="customer-address" label="Dirección (opcional)" icon={icons.location} maxLength={LIMITS.address} field={register('address')} error={errors.address?.message} />
+      <TextField id="customer-reference" label="Referencia (opcional)" icon={icons.note} maxLength={LIMITS.reference} field={register('reference')} error={errors.reference?.message} />
       <TextareaField id="customer-notes" label="Notas (opcional)" rows={2} placeholder="Alergias, preferencias, cómo pide" maxLength={LIMITS.notes} field={register('notes')} error={errors.notes?.message} />
       <div className="sm:col-span-2">
         <CustomerConsent control={control} customer={customer} errors={errors} />
