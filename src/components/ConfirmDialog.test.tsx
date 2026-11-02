@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { ActionsMenu } from './ActionsMenu'
 import { ConfirmDialog } from './ConfirmDialog'
+import { Button } from './ui/button'
 
 const MENU = { name: 'Más acciones de Ana' }
 const OPEN = { name: 'Abrir' }
@@ -53,5 +54,24 @@ describe('ConfirmDialog: retorno del foco', () => {
     await user.click(screen.getByRole('button', { name: 'Cancelar' }))
 
     await waitFor(() => { expect(screen.getByRole('button', OPEN)).toHaveFocus() })
+  })
+})
+
+describe('ConfirmDialog: el botón que la abre', () => {
+  it('sigue siendo un botón chico de la interfaz, con su objetivo táctil de 44 px en el celular', () => {
+    render(
+      <ConfirmDialog
+        trigger={<Button type="button" size="sm">Cancelar</Button>}
+        title="¿Cancelar la reserva?"
+        description="No se puede deshacer."
+        confirmLabel="Cancelar la reserva"
+        onConfirm={() => undefined}
+      />,
+    )
+    // index.css agranda a 44 px con el dedo los `[data-slot='button'][data-size='sm']`.
+    const trigger = screen.getByRole('button', { name: 'Cancelar' })
+    expect(trigger).toHaveAttribute('data-slot', 'button')
+    expect(trigger).toHaveAttribute('data-size', 'sm')
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog')
   })
 })
