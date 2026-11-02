@@ -1,8 +1,8 @@
 {
-  "total": 506,
+  "total": 509,
   "byType": {
     "ruta": 40,
-    "confirmacion": 19,
+    "confirmacion": 22,
     "desplegable": 9,
     "dialogo": 34,
     "hoja": 14,
@@ -283,6 +283,12 @@
       "origin": "src/features/customers/CustomerRights.tsx"
     },
     {
+      "id": "confirmacion:inventory/PurchaseOrderActions",
+      "type": "confirmacion",
+      "description": "`¿Cancelar la OC ${String(number)}?`",
+      "origin": "src/features/inventory/PurchaseOrderActions.tsx"
+    },
+    {
       "id": "confirmacion:inventory/stock-count/CountActions#1",
       "type": "confirmacion",
       "description": "`¿Cerrar el conteo #${String(count.number)}?`",
@@ -325,6 +331,12 @@
       "origin": "src/features/platform/SandboxResetButton.tsx"
     },
     {
+      "id": "confirmacion:reservations/ReservationStatusButton",
+      "type": "confirmacion",
+      "description": "action.confirm.title(who)",
+      "origin": "src/features/reservations/ReservationStatusButton.tsx"
+    },
+    {
       "id": "confirmacion:roles/DeleteRoleButton",
       "type": "confirmacion",
       "description": "`¿Eliminar el rol ${role.name}?`",
@@ -353,6 +365,12 @@
       "type": "confirmacion",
       "description": "notice.title",
       "origin": "src/features/shell/SessionActions.tsx"
+    },
+    {
+      "id": "confirmacion:shell/TermsSignOut",
+      "type": "confirmacion",
+      "description": "notice.title",
+      "origin": "src/features/shell/TermsSignOut.tsx"
     },
     {
       "id": "confirmacion:staff/StaffDeactivateConfirm",

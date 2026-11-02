@@ -101,7 +101,7 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
 })
 
 test('GES-09 el encargado arma una orden a mano, quita una línea y la cancela', async ({ page, local }) => {
-  covers('funcion:compras.orden-a-mano', 'funcion:compras.cancelar')
+  covers('funcion:compras.orden-a-mano', 'funcion:compras.cancelar', 'confirmacion:inventory/PurchaseOrderActions')
   await api(local).post('/inventory/suppliers', { name: 'Distribuidora Norte', contact: '', phone: '', notes: '', is_active: true })
   await openAs(page, local.owner, '/inventario?vista=compras')
   const purchases = page.getByRole('tabpanel', { name: /Compras/u })
@@ -128,8 +128,14 @@ test('GES-09 el encargado arma una orden a mano, quita una línea y la cancela',
   await expect(notice(page, /Orden de compra 1 creada \(S\/\s*7\.00\)\./u)).toBeVisible()
 
   const oc = purchases.getByRole('listitem').filter({ hasText: 'OC 1 · Distribuidora Norte' })
+  // Cancelar no se deshace: se confirma, y «Volver» deja la orden como estaba.
   await oc.getByRole('button', { name: 'Cancelar orden' }).click()
-  await page.getByRole('alertdialog', { name: '¿Cancelar la OC 1?' }).getByRole('button', { name: 'Cancelar orden' }).click()
+  const cancel = page.getByRole('alertdialog', { name: '¿Cancelar la OC 1?' })
+  await cancel.getByRole('button', { name: 'Volver' }).click()
+  await expect(cancel).toBeHidden()
+  await expect(oc.getByRole('button', { name: 'Recibir' })).toBeVisible()
+  await oc.getByRole('button', { name: 'Cancelar orden' }).click()
+  await cancel.getByRole('button', { name: 'Cancelar orden' }).click()
   await expect(notice(page, 'Orden 1: cancelada.')).toBeVisible()
   await expect(oc).toContainText('Cancelada')
   await expect(oc.getByRole('button')).toHaveCount(0)

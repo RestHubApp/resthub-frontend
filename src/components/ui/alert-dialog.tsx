@@ -13,8 +13,11 @@ function AlertDialog({
 function AlertDialogTrigger({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
+  // Con `asChild` el hijo (un `Button`) conserva su `data-slot="button"`: si se
+  // lo pisara, perdería los 44 px táctiles del celular (`pointer: coarse` en index.css).
+  const slot = props.asChild === true ? {} : { "data-slot": "alert-dialog-trigger" }
   return (
-    <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
+    <AlertDialogPrimitive.Trigger {...slot} {...props} />
   )
 }
 
