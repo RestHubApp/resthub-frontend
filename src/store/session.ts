@@ -7,6 +7,7 @@ import { expiryTimer } from '@/services/tokenExpiry'
 import { clearQueries } from '@/services/queryClient'
 import { isPreviewTab, setPreviewTabMark } from '@/services/tabStorage'
 import { discardPreviewQueue } from './offlineQueue'
+import { useReauthentication } from './reauthentication'
 import { adoptRecord, canAdoptStoredSession, isCurrent, logSignedIn, noteExpiry, opened, openRecord, otherTabChange, recordOf } from './sessionRecord'
 import { forgetOldSessions, persistence, readSaved, STORAGE, STORAGE_KEY, writeStoredSession } from './sessionStorageAccess'
 import type { AnyPermissionCode, PermissionCode, Session, StaffSession } from '@/api/types'
@@ -81,6 +82,9 @@ function cleanSession(): void {
   // En una vista previa, al salir o vencer, su cola (solo de esta pestana y
   // del local de muestra) ya no tiene con que enviarse. En una normal no hace nada.
   discardPreviewQueue()
+  // Una acción crítica que esperaba la contraseña muere con la sesión que la pidió:
+  // si no, se repetía con el token de la cuenta que entrara después.
+  useReauthentication.getState().settle(false)
 }
 
 /**
@@ -94,6 +98,7 @@ function dropSession(): void {
   adoptRecord(null)
   scheduleExpiry(null)
   clearQueries()
+  useReauthentication.getState().settle(false)
 }
 
 forgetOldSessions()
@@ -204,6 +209,10 @@ export const useSession = create<SessionState>((set, get) => ({
   passwordChanged: false,
 
   signIn: (token, account) => {
+    // Entrar sobre una sesión abierta (de otra cuenta o de la misma) no hereda su caché.
+    if (get().account !== null) {
+      clearQueries()
+    }
     openRecord()
     setCookieSession(!account.preview)
     keepToken(token, account)

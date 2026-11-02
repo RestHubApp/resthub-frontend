@@ -177,12 +177,15 @@ async function withOwnContext<T>(steps: (http: APIRequestContext) => Promise<T>)
   }
 }
 
-/** Entra por el API con una cuenta del personal, desde un contexto propio (ver `withOwnContext`). */
-export async function signInByApi(email: string, password = SECRET): Promise<Session> {
-  return withOwnContext((http) => staffSignIn(http, email, password))
+/**
+ * Entra por el API con una cuenta del personal, desde un contexto propio (ver `withOwnContext`).
+ * `acceptTerms: false` la deja sin aceptar los términos, para las pruebas de la puerta «Antes de empezar».
+ */
+export async function signInByApi(email: string, password = SECRET, { acceptTerms = true } = {}): Promise<Session> {
+  return withOwnContext((http) => staffSignIn(http, email, password, acceptTerms))
 }
 
-async function staffSignIn(http: APIRequestContext, email: string, password: string): Promise<Session> {
+async function staffSignIn(http: APIRequestContext, email: string, password: string, acceptTerms: boolean): Promise<Session> {
   const access = await keptPassword(http, email, password)
   if (access.kind !== 'staff') {
     throw new Error(`${email} no es una cuenta del personal.`)
@@ -192,7 +195,7 @@ async function staffSignIn(http: APIRequestContext, email: string, password: str
   // Como la persona al entrar por primera vez: acepta los términos vigentes
   // (Ley N.º 29733). Su pantalla tiene sus propias pruebas; las demás entran
   // con la cuenta ya al día.
-  const data = access.terms_accepted && access.privacy_accepted ? access : await body<StaffSession>(
+  const data = !acceptTerms || (access.terms_accepted && access.privacy_accepted) ? access : await body<StaffSession>(
     await http.post(`${API}/auth/me/terms`, {
       data: { terms_version: access.terms_version, privacy_version: access.privacy_version },
       headers: { Authorization: `Bearer ${token}` },

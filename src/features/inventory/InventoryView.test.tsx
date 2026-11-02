@@ -102,6 +102,15 @@ describe('InventoryView: tabla de insumos', () => {
     expect(screen.getByText('3 insumos')).toBeInTheDocument()
   })
 
+  it('un insumo por unidad que cuesta menos de un céntimo muestra su costo, no S/ 0.00', async () => {
+    const { api } = open()
+    api.on('get', INGREDIENTS, [ingredient({ name: 'Servilleta', unit: 'unit', unit_cost: '0.004' })])
+
+    await screen.findByText('Servilleta')
+    expect(within(rowOf('Servilleta')).getByText('S/ 0.004 por unid.')).toBeInTheDocument()
+    expect(within(rowOf('Servilleta')).queryByText('S/ 0.00 por unid.')).not.toBeInTheDocument()
+  })
+
   it('busca sin importar tildes ni mayúsculas y filtra lo que está bajo el mínimo', async () => {
     const { user } = open()
     await user.type(await screen.findByLabelText(SEARCH), 'LIMON')

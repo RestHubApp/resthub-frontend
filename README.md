@@ -197,7 +197,8 @@ Lo que mantiene la primera visita liviana:
 - **El service worker precachea solo el armazón** (lo que enlaza `index.html`:
   8 archivos, no los 123 de antes (casi todas las pantallas y bibliotecas)). Cada pantalla se
   guarda la primera vez que se abre (`runtimeCaching`, con `clientsClaim` para
-  que lo haga desde la primera sesión) y, para no romper el modo sin señal, al
+  que lo haga desde la primera sesión; con `skipWaiting`, una versión nueva toma
+  el control en la siguiente recarga, lo comprueba `checks/pwa/swActivation.mjs`) y, para no romper el modo sin señal, al
   entrar con sesión y tres segundos después de que el service worker está
   listo se bajan las pantallas que el mesero necesita sin conexión
   (`offline: true` en `router/screens/ordersScreens.ts`,
@@ -319,7 +320,9 @@ celular del mesero nunca baja este código.
   `two_factor_setup_required` (o cualquier petición responde 403
   `two_factor_setup_required`), el armazón solo muestra el alta de la
   verificación (`TwoFactorSetupView`, en `AccountSetupGate` junto a la
-  contraseña temporal); al confirmar el primer código la plataforma se abre.
+  contraseña temporal). Al confirmar el primer código se muestran los códigos
+  de recuperación y la plataforma se abre recién con «Ya los guardé», aunque
+  mientras tanto la cuenta releída ya no pida el alta.
   Para la administración no se ofrece desactivarla.
 - Vence y se renueva igual para las dos clases (`hooks/useTokenRenewal.ts`,
   `POST /auth/refresh` cinco minutos antes) y se relee con `GET /auth/me`.

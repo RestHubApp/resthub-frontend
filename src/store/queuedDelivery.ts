@@ -22,12 +22,26 @@ async function sendQueued(order: QueuedOrder): Promise<number> {
   return open.number
 }
 
+// Si el servidor no explica el 429, el aviso dice igual qué hacer.
+const RATE_LIMITED_MESSAGE = 'hay demasiadas peticiones seguidas; espera un momento y pulsa «Reintentar».'
+
+/**
+ * Si el fallo se arregla esperando y no es un rechazo del pedido: sin señal o
+ * el servidor caído, el límite de peticiones seguidas (429 `rate_limited`) o la
+ * sesión vencida o bloqueada (vuelve a salir cuando esa cuenta entre o la
+ * desbloquee). Reenviarlo es seguro: el servidor lo reconoce por su
+ * `client_request_id` y no abre otro.
+ */
+function shouldWaitAndRetry(error: unknown): boolean {
+  return isUnreachable(error) || hasCode(error, 'rate_limited') || isSessionEnded(error) || isSessionLocked(error)
+}
+
 /**
  * Entrega un pedido de la cola y avisa el resultado.
  *
  * Devuelve `true` si la cola puede seguir con el siguiente (se envio o fue un
  * rechazo de verdad y salio de la cola) y `false` si hay que cortar y
- * reintentar despues (sin señal o sesion vencida).
+ * reintentar despues (sin señal, el límite de peticiones o la sesion vencida).
  */
 async function deliverQueued(order: QueuedOrder, notify: NotifyQueued): Promise<boolean> {
   const requestId = order.request.client_request_id ?? ''
@@ -37,10 +51,12 @@ async function deliverQueued(order: QueuedOrder, notify: NotifyQueued): Promise<
     notify({ tone: 'info', message: `${order.label}: pedido #${String(number)} enviado a cocina.` })
     return true
   } catch (error: unknown) {
-    // Sin señal (no hubo respuesta del servidor) se corta y se reintenta
-    // después, igual que con la sesión vencida o bloqueada: vuelve a salir
-    // cuando esa cuenta entre o la desbloquee. Un rechazo sale de la cola.
-    if (isUnreachable(error) || isSessionEnded(error) || isSessionLocked(error)) {
+    if (shouldWaitAndRetry(error)) {
+      // Con el límite de peticiones la señal no se perdió y no llega un evento
+      // «online» que lo reintente: se avisa para que el mesero reintente en un momento.
+      if (hasCode(error, 'rate_limited')) {
+        notify({ tone: 'warning', message: `${order.label}: ${errorMessage(error, RATE_LIMITED_MESSAGE)}` })
+      }
       return false
     }
     removeQueued(requestId)

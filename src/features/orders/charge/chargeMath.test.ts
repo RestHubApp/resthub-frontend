@@ -55,6 +55,13 @@ describe('itemsCents', () => {
     expect(itemsCents(sampleOrder, [2])).toBe(1395)
   })
 
+  it('el descuento redondea medio céntimo hacia arriba como el servidor, sin errores de coma flotante', () => {
+    const first = item(1, '25.00')
+    expect(itemsCents(order([first, item(2, '10.00')], '34.60', '1.14'), [first.id])).toBe(2500 - 29)
+    const second = item(1, '30.00')
+    expect(itemsCents(order([second, item(2, '10.00')], '39.54', '1.15'), [second.id])).toBe(3000 - 35)
+  })
+
   it('si son todos los que faltan, cobra el saldo exacto', () => {
     const sampleOrder = order(dishes, '31.95', '10')
     expect(itemsCents(sampleOrder, [1, 2, 3])).toBe(3195)
@@ -64,6 +71,28 @@ describe('itemsCents', () => {
     const sampleOrder = order([item(1, '20.00', { is_paid: true }), item(2, '15.50')], '15.50')
     expect(unpaidItems(sampleOrder).map((dish) => dish.id)).toEqual([2])
     expect(itemsCents(sampleOrder, [1])).toBe(0)
+  })
+
+  it('una cortesía sin elegir no impide cerrar la cuenta: los últimos platos cobran el saldo', () => {
+    const lomo = item(1, '40.00')
+    const ceviche = item(2, '30.00')
+    const dessert = item(3, '10.00', { is_courtesy: true })
+    // Una parte igual de S/ 35.00 ya se pagó: no marca platos pagados.
+    const sampleOrder = order([lomo, ceviche, dessert], '35.00')
+    expect(itemsCents(sampleOrder, [lomo.id, ceviche.id])).toBe(3500)
+  })
+
+  it('con descuento, el último plato cobrable cierra la cuenta con el redondeo del servidor', () => {
+    const first = item(1, '10.05', { is_paid: true })
+    const second = item(2, '10.05')
+    const dessert = item(3, '5.00', { is_courtesy: true })
+    const sampleOrder = order([first, second, dessert], '9.05', '10.00')
+    expect(itemsCents(sampleOrder, [second.id])).toBe(905)
+  })
+
+  it('solo cortesías elegidas no cobran nada', () => {
+    const sampleOrder = order([item(1, '40.00'), item(2, '10.00', { is_courtesy: true })], '40.00')
+    expect(itemsCents(sampleOrder, [2])).toBe(0)
   })
 
   it('un plato anulado no se cobra por platos: elegir los vigentes cierra la cuenta', () => {

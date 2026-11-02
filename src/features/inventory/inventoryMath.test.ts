@@ -10,6 +10,7 @@ import { availableIngredients, lineCost, recipeCatalog, recipeCost, recipePayloa
 import { findInputUnit, formatUnitCost, fromBase, inputUnits, priceUnit, toBaseCost, toBaseQuantity } from './units'
 
 const LIMON = ingredient()
+const THREE_DECIMALS = 'Escribe un número con hasta 3 decimales'
 
 // Intl separa «S/» del monto con un espacio que no se corta.
 function flat(text: string | undefined): string | undefined {
@@ -32,6 +33,10 @@ describe('units', () => {
     expect(toBaseCost(4.2, 1000)).toBe('0.0042')
     expect(fromBase('5600', 1000)).toBe('5.6')
     expect(flat(formatUnitCost('0.0042', 'g'))).toBe('S/ 4.20 por kg')
+    // Menos de un céntimo por unidad no se lee «S/ 0.00».
+    expect(flat(formatUnitCost('0.004', 'unit'))).toBe('S/ 0.004 por unid.')
+    expect(flat(formatUnitCost('0.000125', 'unit'))).toBe('S/ 0.000125 por unid.')
+    expect(flat(formatUnitCost('0', 'unit'))).toBe('S/ 0.00 por unid.')
   })
 })
 
@@ -103,6 +108,9 @@ describe('ingredientValues', () => {
   it('muestra un insumo en kilos para editarlo', () => {
     expect(ingredientValuesOf(LIMON)).toMatchObject({ name: 'Limón', unit: 'g', min_stock: '2', min_stock_unit: 'kg', unit_cost: '4', packaging_size: '' })
     expect(ingredientValuesOf(ingredient({ unit_cost: '0' })).unit_cost).toBe('')
+    // Por unidad se conservan los 6 decimales del servidor.
+    expect(ingredientValuesOf(ingredient({ unit: 'unit', unit_cost: '3.333333' })).unit_cost).toBe('3.333333')
+    expect(ingredientValuesOf(ingredient({ unit: 'unit', unit_cost: '0.0004' })).unit_cost).toBe('0.0004')
   })
 
   it('vacío vale cero, y lo escrito se lleva a la unidad base', () => {
@@ -144,7 +152,7 @@ describe('inventorySchema', () => {
   it('una compra pide una cantidad mayor que cero, con hasta tres decimales y sin exagerar', () => {
     const errors = (quantity: string) => purchaseSchema.safeParse({ ...PURCHASE, quantity }).error?.issues[0]?.message
     expect(errors('0')).toBe('Tiene que ser mayor que cero')
-    expect(errors('1.2345')).toBe('Escribe un número con hasta 3 decimales')
+    expect(errors('1.2345')).toBe(THREE_DECIMALS)
     expect(errors('100001')).toBe('Es demasiado. Revisa el dato')
     expect(errors('2,5')).toBeUndefined()
   })
@@ -161,5 +169,20 @@ describe('inventorySchema', () => {
   it('un insumo necesita nombre y una receta cantidades positivas', () => {
     expect(ingredientSchema.safeParse(EMPTY_INGREDIENT).error?.issues[0]?.message).toBe('Escribe el nombre del insumo')
     expect(recipeSchema.safeParse({ lines: [{ ingredient_id: 1, quantity: '0' }] }).success).toBe(false)
+  })
+  it('el costo de un insumo admite 6 decimales por unidad y 3 por kilo o litro', () => {
+    const named = { ...EMPTY_INGREDIENT, name: 'Servilleta' }
+    expect(ingredientSchema.safeParse({ ...named, unit: 'unit', unit_cost: '0.0004' }).success).toBe(true)
+    expect(ingredientSchema.safeParse({ ...named, unit: 'g', unit_cost: '4.2' }).success).toBe(true)
+    expect(ingredientSchema.safeParse({ ...named, unit: 'g', unit_cost: '4.0001' }).error?.issues[0]?.message).toBe(
+      THREE_DECIMALS,
+    )
+    // Con más de 6 decimales, el aviso dice los que caben en esa unidad, y uno solo.
+    expect(ingredientSchema.safeParse({ ...named, unit: 'g', unit_cost: '4.0000001' }).error?.issues.map((issue) => issue.message)).toEqual([
+      THREE_DECIMALS,
+    ])
+    expect(ingredientSchema.safeParse({ ...named, unit: 'unit', unit_cost: '0.0000001' }).error?.issues[0]?.message).toBe(
+      'Escribe un número con hasta 6 decimales',
+    )
   })
 })

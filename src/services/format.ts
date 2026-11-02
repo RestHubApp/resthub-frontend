@@ -11,6 +11,9 @@ const LOCALE = 'es-PE'
 export const DEFAULT_TIME_ZONE = 'America/Lima'
 
 const SOLES = new Intl.NumberFormat(LOCALE, { style: 'currency', currency: 'PEN' })
+// Un precio unitario de céntimos de céntimo (una servilleta, un sobre) con los 6 decimales del servidor.
+const SOLES_FINE = new Intl.NumberFormat(LOCALE, { style: 'currency', currency: 'PEN', maximumFractionDigits: 6 })
+const ONE_CENT = 0.01
 const SOLES_COMPACT = new Intl.NumberFormat(LOCALE, {
   style: 'currency',
   currency: 'PEN',
@@ -52,6 +55,18 @@ function finite(value: string | number): number | null {
 export function formatMoney(value: string | number): string {
   const number = finite(value)
   return number === null ? NO_VALUE : SOLES.format(number)
+}
+
+/**
+ * Un precio por unidad: `S/ 4.20`, pero `S/ 0.004` cuando no llega a un
+ * céntimo, que con dos decimales se leería `S/ 0.00` como si no tuviera costo.
+ */
+export function formatUnitPrice(value: string | number): string {
+  const number = finite(value)
+  if (number === null) {
+    return NO_VALUE
+  }
+  return number !== 0 && Math.abs(number) < ONE_CENT ? SOLES_FINE.format(number) : SOLES.format(number)
 }
 
 /** Para los ejes de un gráfico: `S/ 850` o `S/ 2.5 K`. */

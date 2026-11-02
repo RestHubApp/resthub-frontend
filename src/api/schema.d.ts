@@ -170,6 +170,8 @@ export interface paths {
          *     incluido. La respuesta trae el token nuevo y la sesión, para que quien
          *     cambió la contraseña siga dentro sin volver a entrar. 400
          *     `wrong_current_password`, 422 `weak_password`, 401 `temporary_password_expired`.
+         *     La contraseña actual equivocada cuenta en el mismo límite que la
+         *     reautenticación: tras varios intentos responde 429 `login_throttled`.
          */
         post: operations["change_own_password_api_v1_auth_me_password_post"];
         delete?: never;
@@ -1990,11 +1992,11 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Quitar un plato (solo con el pedido abierto) */
+        /** Quitar un plato que aún no salió a cocina */
         delete: operations["remove_item_api_v1_orders__order_id__items__item_id__delete"];
         options?: never;
         head?: never;
-        /** Cambiar cantidad o nota de un plato (solo con el pedido abierto) */
+        /** Cambiar cantidad o nota de un plato que aún no salió a cocina */
         patch: operations["change_item_api_v1_orders__order_id__items__item_id__patch"];
         trace?: never;
     };
@@ -2098,8 +2100,9 @@ export interface paths {
          * @description RFS-25: un cobro mal hecho se anula, no se borra: queda con quién y por qué.
          *
          *     El pedido vuelve a deber ese monto. 409 si el turno de caja del cobro ya se
-         *     cerró (`payment_not_voidable`) o si el pedido tiene comprobante vigente
-         *     (`order_already_invoiced`).
+         *     cerró (`payment_not_voidable`), si el pedido tiene comprobante vigente
+         *     (`order_already_invoiced`) o si estaba pagado y su mesa ya la ocupa otro
+         *     pedido (`table_occupied`).
          */
         post: operations["void_payment_api_v1_orders__order_id__payments__payment_id__void_post"];
         delete?: never;
@@ -2640,8 +2643,12 @@ export interface paths {
         put?: never;
         /**
          * Dar de alta a alguien con uno de los roles del restaurante
-         * @description En el local de muestra, el correo se guarda en el dominio de muestra.
+         * @description Pide la contraseña de nuevo (RFS-21), como cambiarle el rol a alguien.
          *
+         *     Dar de alta una cuenta con un rol es más que cambiárselo a otra: sin esa
+         *     marca, quien encuentra una sesión abierta se haría una cuenta propia.
+         *
+         *     En el local de muestra, el correo se guarda en el dominio de muestra.
          *     `ana@gmail.com` queda como `ana-<id del local>@muestra.resthub.invalid`, y
          *     la respuesta trae el correo con el que quedó.
          */
@@ -2706,6 +2713,10 @@ export interface paths {
         /**
          * Los últimos inicios de sesión de un miembro
          * @description RFS-15: el encargado revisa los accesos de su personal. Otro local responde 404.
+         *
+         *     Como sus sesiones, pide poder gestionar esa cuenta: el historial trae el
+         *     mismo dispositivo y la misma ubicación, así que una cuenta con permisos que
+         *     uno no tiene responde 403.
          */
         get: operations["read_staff_access_history_api_v1_staff__user_id__access_history_get"];
         put?: never;
@@ -2725,7 +2736,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Restablecer la contraseña de una cuenta */
+        /**
+         * Restablecer la contraseña de una cuenta
+         * @description Pide la contraseña de nuevo (RFS-21): fijarle la contraseña a otro es tomar su cuenta.
+         */
         post: operations["reset_staff_password_api_v1_staff__user_id__password_post"];
         delete?: never;
         options?: never;
@@ -3821,7 +3835,7 @@ export interface components {
          * @description Código estable de un error del API (ver `resthub.core.error_codes`).
          * @enum {string}
          */
-        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "request_too_large" | "login_throttled" | "csrf_token_invalid" | "password_change_required" | "temporary_password_expired" | "session_locked" | "two_factor_required" | "invalid_two_factor_code" | "two_factor_setup_required" | "two_factor_state_conflict" | "unlock_attempts_exhausted" | "session_not_found" | "reauthentication_required" | "database_unavailable" | "request_timeout" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invalid_idle_lock" | "invalid_opening_hours" | "invalid_pin" | "wrong_pin" | "pin_not_set" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "payment_not_found" | "payment_not_voidable" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "owner_not_found" | "invalid_deactivation_reason" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
+        ErrorCode: "bad_request" | "unauthenticated" | "forbidden" | "not_found" | "method_not_allowed" | "conflict" | "validation_error" | "unprocessable" | "rate_limited" | "request_too_large" | "login_throttled" | "csrf_token_invalid" | "password_change_required" | "temporary_password_expired" | "session_locked" | "two_factor_required" | "invalid_two_factor_code" | "two_factor_setup_required" | "two_factor_state_conflict" | "unlock_attempts_exhausted" | "session_not_found" | "reauthentication_required" | "database_unavailable" | "request_timeout" | "internal_error" | "timezone_required" | "http_error" | "admin_unavailable" | "balance_changed" | "base_role_name_fixed" | "base_role_not_deletable" | "cannot_change_own_role" | "cannot_deactivate_self" | "cannot_grant_permissions" | "cannot_manage_stronger_account" | "cannot_manage_stronger_role" | "cannot_reset_own_password" | "cash_register_already_open" | "cash_register_closed" | "cash_session_not_found" | "category_name_taken" | "category_not_empty" | "category_not_found" | "consumption_rejected" | "consent_required" | "customer_has_active_orders" | "customer_not_found" | "discount_not_allowed" | "document_not_found" | "credit_note_not_found" | "dish_not_found" | "dish_unavailable" | "email_already_registered" | "email_delivery" | "email_rate_limited" | "email_sending_disabled" | "archive_disabled" | "document_archive" | "billing_provider" | "invalid_billing_credentials" | "invalid_certificate" | "invalid_packaging" | "invalid_quantity_entry" | "invalid_stock_count" | "invalid_waste_approval" | "invalid_waste_approval_threshold" | "invalid_idle_lock" | "invalid_opening_hours" | "invalid_pin" | "wrong_pin" | "pin_not_set" | "invoice_document_unavailable" | "inactive_restaurant" | "ingredient_inactive" | "ingredient_in_recipes" | "ingredient_name_taken" | "ingredient_not_found" | "invalid_account_data" | "invalid_billing_settings" | "invalid_cash_session" | "invalid_credentials" | "invalid_customer" | "invalid_discount_limit" | "invalid_email" | "invalid_full_name" | "invalid_ingredient" | "invalid_invoice" | "invalid_document_number" | "invalid_menu_category" | "invalid_menu_item" | "invalid_movement" | "invalid_order" | "invalid_ordering" | "invalid_period" | "invalid_preview_code" | "invalid_purchase_order" | "invalid_recipe" | "invalid_reservation" | "invalid_restaurant_data" | "invalid_restaurant_name" | "invalid_role_name" | "invalid_slug" | "invalid_supplier" | "invalid_table" | "invalid_table_ordering" | "invalid_timezone" | "invalid_token" | "invalid_transition" | "invoice_already_voided" | "invoice_not_found" | "invoice_not_voidable" | "invoice_number_taken" | "item_already_sent" | "item_already_voided" | "log_entry_not_found" | "lookup_disabled" | "lookup_rate_limited" | "lookup_unavailable" | "menu_item_name_taken" | "menu_item_not_found" | "missing_permission" | "not_a_sandbox_account" | "not_your_order" | "order_already_invoiced" | "order_has_payments" | "order_item_not_found" | "order_not_found" | "order_number_taken" | "outdated_terms" | "paid_order_not_found" | "payment_not_found" | "payment_not_voidable" | "phone_taken" | "preview_session_restricted" | "purchase_order_not_found" | "reservation_conflict" | "reservation_not_found" | "reserved_slug" | "restaurant_already_has_staff" | "restaurant_not_found" | "role_in_use" | "role_name_taken" | "role_not_editable" | "role_not_found" | "sandbox_account_unavailable" | "sandbox_already_active" | "slug_already_taken" | "stock_count_already_open" | "stock_count_not_closed" | "stock_count_not_found" | "stock_count_not_open" | "supplier_name_taken" | "supplier_not_found" | "table_inactive" | "table_label_taken" | "table_not_found" | "table_occupied" | "user_not_found" | "owner_not_found" | "invalid_deactivation_reason" | "waste_already_decided" | "waste_approval_not_found" | "weak_password" | "wrong_current_password";
         /**
          * ErrorResponse
          * @description Un error del API: el texto para la persona y el código estable.

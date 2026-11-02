@@ -209,6 +209,20 @@ describe('RequireSession: términos y privacidad', () => {
     await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
     expect(await screen.findByRole('link', { name: /versión 2027-01/u })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /términos y condiciones del servicio/u })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: /tratamiento de mis datos personales/u })).not.toBeChecked()
+    expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
+  })
+
+  it('«Salir» cierra la sesión también en el servidor', async () => {
+    const api = server().on('post', '/auth/logout', null, 204)
+    signInAs(PERMISSIONS_OWNER, { terms_accepted: false, privacy_accepted: false })
+    const { user } = openProtected()
+
+    await user.click(screen.getByRole('button', { name: 'Salir' }))
+
+    expect(api.calls('post', '/auth/logout')).toHaveLength(1)
+    expect(useSession.getState().account).toBeNull()
   })
 
   it('una vista previa no los pide: quien mira no es el dueño de la cuenta', () => {

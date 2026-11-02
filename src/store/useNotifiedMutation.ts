@@ -10,8 +10,9 @@ interface NotifiedMutationOptions<TVariables, TResult> {
   /**
    * El aviso si el servidor lo rechaza; el `detail` del servidor tiene prioridad.
    * Sin él no hay aviso: el formulario muestra el error junto a sus campos.
+   * Una función arma el aviso ella misma (p. ej. para un error propio del navegador).
    */
-  readonly failure?: string | undefined
+  readonly failure?: string | ((error: unknown) => string) | undefined
   /** Pone la respuesta del servidor en la caché, sin esperar a releerla. */
   readonly updateCache?: (queryClient: QueryClient, result: TResult) => void
   /** Las consultas que se releen de fondo al terminar. */
@@ -20,8 +21,11 @@ interface NotifiedMutationOptions<TVariables, TResult> {
   readonly shouldWait?: boolean
   /** Lo que sigue al éxito, ya con el aviso puesto (cerrar la ventana, limpiar el campo). */
   readonly onSuccess?: (result: TResult) => void
-  /** Las consultas que también se releen si falla (pudieron cambiar mientras tanto). */
-  readonly invalidateOnError?: readonly QueryKey[]
+  /**
+   * Las consultas que también se releen si falla (pudieron cambiar mientras
+   * tanto); una función las elige según el error.
+   */
+  readonly invalidateOnError?: readonly QueryKey[] | ((error: unknown) => readonly QueryKey[])
 }
 
 /**
@@ -64,9 +68,9 @@ export function useNotifiedMutation<TVariables = void, TResult = unknown>({
       return undefined
     },
     onError: (error) => {
-      void Promise.all(reread(invalidateOnError))
+      void Promise.all(reread(typeof invalidateOnError === 'function' ? invalidateOnError(error) : invalidateOnError))
       if (failure !== undefined) {
-        push({ tone: 'warning', message: errorMessage(error, failure) })
+        push({ tone: 'warning', message: typeof failure === 'function' ? failure(error) : errorMessage(error, failure) })
       }
     },
   })

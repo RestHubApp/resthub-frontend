@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it } from '@jest/globals'
+import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 
 import { buildAccount, ErrorResponse, PERMISSIONS_WAITER, server, withoutNetwork } from '#jest/harness'
@@ -26,6 +26,7 @@ function reloaded(): void {
 }
 
 afterEach(() => {
+  jest.useRealTimers()
   useSession.getState().signOut()
 })
 
@@ -63,5 +64,25 @@ describe('recuperar la sesión de la cookie', () => {
 
     await waitFor(() => { expect(api.calls('get', ME).length).toBeGreaterThan(0) })
     expect(useSession.getState()).toMatchObject({ token: null, account: WAITER, expired: false })
+  })
+
+  it('con el servidor caído (502) lo vuelve a intentar solo, sin el evento «online», y recupera el token', async () => {
+    // Solo los relojes: el servidor de prueba (MSW) responde en microtareas.
+    jest.useFakeTimers({ doNotFake: ['queueMicrotask', 'nextTick', 'setImmediate'] })
+    const api = server()
+    api.on('get', ME, new ErrorResponse(502, ''))
+    reloaded()
+
+    renderHook(() => { useSessionRenewal() }, { wrapper })
+    // Las pruebas no reintentan (`retry: false`): el primer intento ya se agotó.
+    await act(async () => { await jest.advanceTimersByTimeAsync(5000) })
+    expect(api.calls('get', ME)).toHaveLength(1)
+    expect(useSession.getState().token).toBeNull()
+
+    api.on('get', ME, { ...WAITER, csrf_token: 'c' })
+    api.on('post', REFRESH, { ...WAITER, access_token: RESTORED, token_type: 'bearer', expires_in: 3600, csrf_token: 'c2' })
+    await act(async () => { await jest.advanceTimersByTimeAsync(15_000) })
+
+    expect(useSession.getState()).toMatchObject({ token: RESTORED, expired: false })
   })
 })

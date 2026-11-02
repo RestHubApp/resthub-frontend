@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import { act, screen } from '@testing-library/react'
 
 import { ErrorResponse, mountScreen, PERMISSIONS_WAITER, server, signInAs } from '#jest/harness'
+import { noteActivity } from '@/store/idleActivity'
 import { useSession } from '@/store/session'
 import { LockGate } from './LockGate'
 
@@ -91,6 +92,24 @@ describe('bloqueo de la sesión por inactividad (RFS-29)', () => {
     expect(isLocked()).toBe(false)
     await act(async () => { await jest.advanceTimersByTimeAsync(2 * 60_000) })
 
+    expect(isLocked()).toBe(true)
+    expect(api.calls('post', LOCK)).toHaveLength(1)
+  })
+
+  it('no se bloquea mientras se usa otra pestaña con la misma sesión', async () => {
+    jest.useFakeTimers()
+    const { api } = mountLocked({ session_locked: false, idle_lock_minutes: 1 })
+    api.on('post', LOCK, null, 204)
+
+    // Otra pestaña anota su uso cada 30 s; en esta nadie toca nada.
+    for (let step = 0; step < 6; step += 1) {
+      noteActivity()
+      await act(async () => { await jest.advanceTimersByTimeAsync(30_000) })
+    }
+    expect(api.calls('post', LOCK)).toHaveLength(0)
+    expect(isLocked()).toBe(false)
+
+    await act(async () => { await jest.advanceTimersByTimeAsync(75_000) })
     expect(isLocked()).toBe(true)
     expect(api.calls('post', LOCK)).toHaveLength(1)
   })

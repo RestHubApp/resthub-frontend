@@ -5,7 +5,7 @@ import { ingredientsQuery } from '@/api/inventory'
 import { createPurchaseOrder, purchaseSuggestionsQuery, suppliersQuery } from '@/api/purchasing'
 import type { CreatePurchaseOrderRequest } from '@/api/types'
 import { formatMoney } from '@/services/format'
-import { emptyLine, type LineDraft, linesForApi, linesFromSuggestions } from './purchaseLines'
+import { emptyLine, hasInvalidNumbers, type LineDraft, linesForApi, linesFromSuggestions } from './purchaseLines'
 import { usePurchasingMutation } from './usePurchasingMutation'
 
 const NO_ITEMS: readonly never[] = []
@@ -46,6 +46,7 @@ export function usePurchaseOrderDraft(open: boolean, onClose: () => void) {
     setLines,
     close,
     isCreating: create.isPending,
+    hasInvalidNumbers: hasInvalidNumbers(lines),
     canCreate: supplier !== '' && apiLines !== null && !create.isPending,
     loadSuggestions: () => {
       setLines(linesFromSuggestions(suggestions.data ?? NO_ITEMS))

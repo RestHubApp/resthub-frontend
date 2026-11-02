@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals'
 
-import { errorStatus } from '@/services/apiError'
+import { errorCode, errorStatus } from '@/services/apiError'
 import { fetchSalesSummary } from '@/api/insights'
 import {
   API_PREFIX,
@@ -67,11 +67,12 @@ describe('Contrato: indicadores', () => {
       .given(STATE.waiterSession)
       .uponReceiving('la lectura de indicadores sin el permiso insights.read')
       .withRequest('GET', SUMMARY_PATH, (req) => req.headers(bearer()).query(RANGE))
-      .willRespondWith(403, (res) => res.jsonBody(errorBody('No tienes permiso para esta acción.')))
+      .willRespondWith(403, (res) => res.jsonBody(errorBody('No tienes permiso para esta acción.', 'missing_permission')))
       .executeTest(async (mockServer) => {
         connectTo(mockServer)
         const error = await rejectionOf(fetchSalesSummary(RANGE))
         expect(errorStatus(error)).toBe(403)
+        expect(errorCode(error)).toBe('missing_permission')
       })
   })
 })

@@ -1,16 +1,19 @@
 import { describe, expect, it } from '@jest/globals'
-import { screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 
 import { FAKE_SETUP_VIEWS } from '#jest/accountSetupViews'
 import { ErrorResponse, mountScreen, PERMISSIONS_WAITER, server, signInAs } from '#jest/harness'
 import { signInToPlatform } from '#jest/fixtures/platform'
 import { send } from '@/api/client'
+import { beginTwoFactor, twoFactorConfirmKey } from '@/api/twoFactor'
+import { queryClient } from '@/services/queryClient'
 import { useSession } from '@/store/session'
 import { AccountSetupGate } from './AccountSetupGate'
 
 const CONTENT = 'Pedidos del salón'
 const SETUP_TWO_FACTOR = 'Activa los dos pasos, Equipo RestHub'
 const PLATFORM_PASSWORD = 'Cambia tu contraseña, Equipo RestHub'
+const TWO_FACTOR_SETUP = '/auth/me/two-factor/setup'
 
 /** Como en el armazón: la cuenta sale del almacén de sesión. */
 function Gate() {
@@ -70,6 +73,48 @@ describe('verificación en dos pasos obligatoria en la plataforma (RFS-22)', () 
     await expect(send((client) => client.GET('/api/v1/platform/restaurants'))).rejects.toMatchObject({ code: 'two_factor_setup_required' })
 
     expect(await screen.findByRole('heading', { name: SETUP_TWO_FACTOR })).toBeInTheDocument()
+  })
+
+  it('el alta pide la contraseña aunque el armazón no esté montado', async () => {
+    const setup = { secret: 'JBSWY3DPEHPK3PXP', otpauth_uri: 'otpauth://totp/RestHub:admin?secret=JBSWY3DPEHPK3PXP' }
+    const api = server()
+      .on('post', TWO_FACTOR_SETUP, setup)
+      .once('post', TWO_FACTOR_SETUP, new ErrorResponse(403, 'Confirma tu contraseña para seguir.', 'reauthentication_required'))
+      .on('post', '/auth/me/reauthenticate', { reauthenticated_at: '2026-10-20T15:00:00Z', valid_until: '2026-10-20T15:05:00Z' })
+    useSession.setState({ account: { ...signInToPlatform(), two_factor_setup_required: true } })
+    const { user } = mountScreen(<Gate />)
+    expect(await screen.findByRole('heading', { name: SETUP_TWO_FACTOR })).toBeInTheDocument()
+
+    const started = beginTwoFactor()
+    const dialog = await screen.findByRole('dialog', { name: 'Confirma tu contraseña' })
+    // La contraseña de las cuentas de la semilla de desarrollo, no una credencial real.
+    await user.type(within(dialog).getByLabelText('Tu contraseña'), 'resthub123')
+    await user.click(within(dialog).getByRole('button', { name: 'Confirmar' }))
+
+    await expect(started).resolves.toEqual(setup)
+    expect(api.calls('post', TWO_FACTOR_SETUP)).toHaveLength(2)
+  })
+})
+
+describe('códigos de recuperación del alta obligatoria (RFS-22)', () => {
+  it('releer la cuenta mientras se ven los códigos no abre el armazón; sí al dar por vistos los códigos', async () => {
+    server()
+    const account = { ...signInToPlatform(), two_factor_setup_required: true }
+    useSession.setState({ account })
+    mountScreen(<Gate />)
+    // Lo que deja «Activar» al confirmar el primer código: los códigos están a la vista.
+    const mutations = queryClient.getMutationCache()
+    const confirmed = mutations.build(queryClient, { mutationKey: twoFactorConfirmKey, mutationFn: () => Promise.resolve({ recovery_codes: [] }) })
+    await act(async () => { await confirmed.execute(undefined) })
+
+    // Como `GET /auth/me` cada cinco minutos: el servidor ya no pide el alta.
+    act(() => { useSession.getState().refresh({ ...account, two_factor_setup_required: false }) })
+    expect(screen.getByRole('heading', { name: SETUP_TWO_FACTOR })).toBeInTheDocument()
+    expect(screen.queryByText(CONTENT)).not.toBeInTheDocument()
+
+    // «Ya los guardé» borra esa confirmación.
+    act(() => { mutations.remove(confirmed) })
+    expect(await screen.findByText(CONTENT)).toBeInTheDocument()
   })
 })
 

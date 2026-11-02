@@ -8,6 +8,9 @@ import type { TwoFactorSetup, TwoFactorStatus } from './types'
 
 export const twoFactorQueryKey = ['auth', 'two-factor'] as const
 
+/** La confirmación del primer código: el alta obligatoria sabe así que los códigos de recuperación están a la vista. */
+export const twoFactorConfirmKey = [...twoFactorQueryKey, 'confirm'] as const
+
 export const twoFactorQuery = queryOptions({
   queryKey: twoFactorQueryKey,
   queryFn: (): Promise<TwoFactorStatus> => send((client) => client.GET('/api/v1/auth/me/two-factor')),

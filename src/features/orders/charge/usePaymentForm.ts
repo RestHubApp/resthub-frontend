@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 
+import { currentCashQueryKey } from '@/api/cash'
 import { addPayment } from '@/api/orders'
 import type { OrderResponse, PaymentRequest } from '@/api/types'
 import { decimalForApi } from '@/components/formRules'
 import { useAppForm } from '@/hooks/useAppForm'
+import { hasCode } from '@/services/apiError'
 import { centsToApi, formatMoney } from '@/services/format'
 import { useOrderAction } from '@/features/orders/useOrderAction'
 import { balanceCents, chargeCents, type SplitMode } from './chargeMath'
@@ -65,6 +67,8 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
     mutationFn: (payload: PaymentRequest) => addPayment(order.id, payload),
     success: partialMessage,
     failure: 'No se pudo registrar el pago.',
+    // Si cerraron la caja mientras tanto, se relee para mostrar el aviso.
+    rereadOnError: (error) => (hasCode(error, 'cash_register_closed') ? [currentCashQueryKey] : []),
     onSuccess: (paid) => {
       if (paid.status === 'paid') {
         onPaid(paid)
@@ -75,7 +79,8 @@ export function usePaymentForm(order: OrderResponse, onPaid: (order: OrderRespon
       setPersonas((before) => Math.max(before - 1, 1))
     },
   })
-  const hasNoDishes = mode === 'items' && dishes.length === 0
+  // Sin platos, o solo cortesías: un pago de S/ 0.00 no cobra nada.
+  const hasNoDishes = mode === 'items' && (dishes.length === 0 || part === 0)
 
   return {
     form,

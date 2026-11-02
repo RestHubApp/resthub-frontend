@@ -4,6 +4,13 @@
 # (Actions > Líneas base visuales > Run workflow). Siempre deja las imágenes
 # como artefacto; con «commit» activo también las sube como un commit a la rama.
 # Alternativa local: `pnpm test:visual:update` (docker o podman).
+#
+# Un push hecho con GITHUB_TOKEN no dispara otros workflows: CI, Accesibilidad
+# y Atribución no correrían sobre el commit de las líneas base y el PR quedaría
+# esperando sus checks. Si existe el secreto VISUAL_BASELINES_TOKEN (token de
+# una GitHub App o PAT fino con contents:write solo en este repositorio), el
+# commit sale con él y el PR corre el CI. Sin el secreto el job lo avisa: hay
+# que subir otro commit a la rama (`git commit --allow-empty`) para que corra.
 name: Líneas base visuales
 
 on:
@@ -34,6 +41,8 @@ jobs:
       E2E_DB: ${{ github.workspace }}/.e2e/e2e.db
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ secrets.VISUAL_BASELINES_TOKEN || github.token }}
 
       - name: Entorno (backend, dependencias y base sembrada)
         uses: ./.github/actions/entorno-e2e
@@ -54,6 +63,8 @@ jobs:
 
       - name: Subir un commit con las líneas base
         if: ${{ inputs.commit }}
+        env:
+          HAS_TOKEN: ${{ secrets.VISUAL_BASELINES_TOKEN != '' }}
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name "github-actions[bot]"
@@ -64,4 +75,7 @@ jobs:
           else
             git commit -m "test(visual): regenerar líneas base de Chromium en la imagen de Playwright"
             git push
+            if [ "$HAS_TOKEN" != "true" ]; then
+              echo "::warning::El commit salió con GITHUB_TOKEN y no dispara el CI del PR. Sube otro commit a la rama (git commit --allow-empty -m 'ci: volver a correr' && git push) o configura el secreto VISUAL_BASELINES_TOKEN."
+            fi
           fi

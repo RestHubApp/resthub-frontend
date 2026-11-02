@@ -29,7 +29,7 @@ export function ReauthenticationDialog() {
     resolver: zodResolver(currentPasswordSchema),
     defaultValues: { password: '' },
   })
-  const { confirm, isAskingCode, setCode } = useReauthenticationConfirm(() => {
+  const { confirm, submit, twoFactor } = useReauthenticationConfirm(() => {
     settle(true)
   })
   const cancel = () => {
@@ -49,9 +49,7 @@ export function ReauthenticationDialog() {
         noValidate
         className="flex flex-col gap-5"
         onSubmit={onSubmit(
-          handleSubmit((values) => {
-            confirm.mutate(values)
-          }),
+          handleSubmit(submit),
         )}
       >
         <PasswordField
@@ -61,7 +59,7 @@ export function ReauthenticationDialog() {
           field={register('password')}
           error={formState.errors.password?.message}
         />
-        {isAskingCode ? <TwoFactorCodeField onChange={setCode} /> : null}
+        {twoFactor.isAskingCode ? <TwoFactorCodeField onChange={twoFactor.setCode} error={twoFactor.error} /> : null}
         <FormFooter
           mutation={confirm}
           failureText="No se pudo confirmar la contraseña."

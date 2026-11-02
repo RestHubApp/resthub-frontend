@@ -1,6 +1,6 @@
 // Cómo se describe un acceso del historial (RFS-15), en «Mi perfil» y en la
 // hoja de una cuenta del personal.
-import type { AccessEntry, AccessOutcome } from '@/api/types'
+import type { AccessEntry, AccessHistoryPage, AccessOutcome } from '@/api/types'
 import { formatDateTime } from './format'
 
 const OUTCOME_LABELS: Readonly<Record<AccessOutcome, string>> = {
@@ -46,4 +46,18 @@ export function describeAccess(entry: AccessEntry, timeZone: string): AccessLine
     detail: [placeOf(entry), entry.network].filter((part) => part !== '').join(' · '),
     marks: marksOf(entry),
   }
+}
+
+/**
+ * Los accesos de las tandas ya cargadas, sin repetir. Las tandas van por
+ * `offset`: si entra un acceso nuevo entre dos, el último de una vuelve como
+ * el primero de la siguiente.
+ */
+export function loadedAccesses(pages: readonly AccessHistoryPage[] | undefined): AccessEntry[] {
+  const seen = new Set<number>()
+  return (pages ?? []).flatMap((page) => page.items).filter((entry) => {
+    if (seen.has(entry.id)) return false
+    seen.add(entry.id)
+    return true
+  })
 }

@@ -93,6 +93,12 @@ export default defineConfig({
         // armazon de la primera visita no pasa por el y las pantallas que se bajan
         // despues (`useOfflineWarmup`) no se guardarian hasta la siguiente carga.
         clientsClaim: true,
+        // vite-plugin-pwa activa solo el service worker nuevo únicamente con
+        // `injectRegister: 'auto'` (o sin la opción), no con el registro que usa
+        // este proyecto: sin esto, tras un despliegue quedaba esperando mientras
+        // la app estuviera abierta y «Recargar» seguía sirviendo la versión vieja. Con esto, la versión nueva
+        // toma el control en la siguiente recarga o al volver a abrir la app.
+        skipWaiting: true,
         // El runtime de Workbox dentro de sw.js: un archivo menos que bajar al instalarse.
         inlineWorkboxRuntime: true,
         globPatterns: ['**/*.{js,css,html,woff2}'],

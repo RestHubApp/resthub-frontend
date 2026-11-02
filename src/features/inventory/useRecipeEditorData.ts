@@ -9,9 +9,11 @@ import { useIngredients } from './useIngredients'
  * El editor parte de lo que hay en el servidor, no de una copia vieja.
  */
 export function useRecipeEditorData(menuItemId: number) {
+  // Un enlace mal copiado (`/inventario/recetas/abc`) no tiene plato que pedir.
+  const isValidId = Number.isInteger(menuItemId) && menuItemId > 0
   const recipe = useQuery({
     ...recipeQuery(menuItemId),
-    enabled: Number.isInteger(menuItemId),
+    enabled: isValidId,
     // El editor parte de lo que hay en el servidor, no de una copia vieja.
     staleTime: 0,
   })
@@ -22,6 +24,7 @@ export function useRecipeEditorData(menuItemId: number) {
     recipe: recipe.data,
     ingredients: ingredients.data,
     error,
-    isLoading: error === null && (recipe.data === undefined || ingredients.data === undefined),
+    isMissing: !isValidId,
+    isLoading: isValidId && error === null && (recipe.data === undefined || ingredients.data === undefined),
   }
 }

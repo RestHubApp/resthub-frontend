@@ -40,9 +40,13 @@ function pathOf(label: string): string | undefined {
   return TEST_SCREENS.find((entry) => entry.nav?.label === label)?.path
 }
 
+// Con la suite completa en CI, abrir el menú de Radix tras mover un elemento de
+// lista pasó del segundo que espera `findBy` por omisión.
+const MENU_WAIT = { timeout: 5000 }
+
 async function chooseFromMenu(user: ReturnType<typeof openAppearance>['user'], label: string, action: string) {
   await user.click(screen.getByRole('button', { name: `Acciones de ${label}` }))
-  await user.click(await screen.findByRole('menuitem', { name: action }))
+  await user.click(await screen.findByRole('menuitem', { name: action }, MENU_WAIT))
   // La acción corre cuando el menú ya se cerró y devolvió el foco.
   await waitFor(() => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument()
@@ -268,7 +272,7 @@ describe('AppearanceView: pestaña Menú', () => {
     expect(screen.getByText('Está llena: quita una para poner otra.')).toBeInTheDocument()
     const [outside = ''] = groupOrder(MORE)
     await user.click(screen.getByRole('button', { name: `Acciones de ${outside}` }))
-    expect(await screen.findByRole('menuitem', { name: 'Poner en la barra de abajo' })).toHaveAttribute('aria-disabled', 'true')
+    expect(await screen.findByRole('menuitem', { name: 'Poner en la barra de abajo' }, MENU_WAIT)).toHaveAttribute('aria-disabled', 'true')
     await user.keyboard('{Escape}')
 
     const [inside = ''] = groupOrder(BAR)

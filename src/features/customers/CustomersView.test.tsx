@@ -161,7 +161,7 @@ describe('CustomersView: derechos ARCO', () => {
     await user.click(within(card).getByRole('button', { name: 'Descargar sus datos' }))
 
     await waitFor(() => {
-      expect(drop).toHaveBeenCalledWith('blob:datos')
+      expect(create).toHaveBeenCalledTimes(1)
     })
     expect(api.calls('get', EXPORT)).toHaveLength(1)
   })

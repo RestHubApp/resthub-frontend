@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { billingQueryKey, issueInvoice, orderInvoiceQueryKey } from '@/api/billing'
 import type { IssueInvoiceRequest, OrderResponse } from '@/api/types'
+import { hasCode, isUnreachable } from '@/services/apiError'
 import { useInvoiceDraft } from './useInvoiceDraft'
 
 /**
@@ -19,6 +20,13 @@ export function useInvoiceForm(order: OrderResponse, onClose: () => void) {
       queryClient.setQueryData(orderInvoiceQueryKey(order.id), invoice)
       void queryClient.invalidateQueries({ queryKey: billingQueryKey })
       onClose()
+    },
+    // Sin respuesta, o con «ya tiene comprobante», puede que sí se haya emitido:
+    // se relee el del pedido para mostrarlo en vez de seguir ofreciendo emitir.
+    onError: (error) => {
+      if (hasCode(error, 'order_already_invoiced') || isUnreachable(error)) {
+        void queryClient.invalidateQueries({ queryKey: orderInvoiceQueryKey(order.id) })
+      }
     },
   })
 

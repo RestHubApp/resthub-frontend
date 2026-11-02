@@ -17,7 +17,9 @@ import { PreviewEntryPending } from './PreviewEntryPending'
  *
  * Si sirvió, el `loader` ya llevó a la aplicación y esta pantalla no se ve.
  * El enlace de vuelta recarga la página: la pestaña deja de ser de vista
- * previa y vuelve a leer la sesión del navegador.
+ * previa y vuelve a leer la sesión del navegador. No hay «Reintentar»: el
+ * código ya salió de la dirección al cargar y se usa una sola vez, así que
+ * recargar no lo vuelve a canjear; se pide otro.
  */
 export function PreviewEntryView() {
   const result = useLoaderData<PreviewEntryResult>()
@@ -34,11 +36,6 @@ export function PreviewEntryView() {
           <p className="m-0 text-base text-muted-foreground">
             Pide otra desde «Vista previa» en la administración del sistema: cada código sirve una sola vez.
           </p>
-          <Button type="button" variant="outline" className="w-full" onClick={() => {
-            window.location.reload()
-          }}>
-            Reintentar
-          </Button>
           <Button asChild className="w-full">
             <a
               href={appUrl(paths.platform.preview)}

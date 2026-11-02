@@ -82,7 +82,7 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
   await expect(receive).toContainText('Mercado Mayorista')
   await expect(receive).toContainText('Pedido: 300 g')
   await receive.getByLabel('Cantidad recibida de Culantro').fill('250')
-  await receive.getByLabel('Costo real por unidad de Culantro').fill('0.014')
+  await receive.getByLabel('Costo real por g de Culantro').fill('0.014')
   await evidence(page, 'ges-08-3-recibir')
   await receive.getByRole('button', { name: 'Recibir y cargar al stock' }).click()
   await expect(notice(page, /Orden 1 recibida: S\/\s*3\.50 entraron al stock\./u)).toBeVisible()
@@ -101,7 +101,7 @@ test('GES-08 el encargado da de alta un proveedor, arma una orden desde las suge
 })
 
 test('GES-09 el encargado arma una orden a mano, quita una línea y la cancela', async ({ page, local }) => {
-  covers('funcion:compras.orden-a-mano', 'funcion:compras.cancelar')
+  covers('funcion:compras.orden-a-mano', 'funcion:compras.cancelar', 'confirmacion:inventory/PurchaseOrderActions')
   await api(local).post('/inventory/suppliers', { name: 'Distribuidora Norte', contact: '', phone: '', notes: '', is_active: true })
   await openAs(page, local.owner, '/inventario?vista=compras')
   const purchases = page.getByRole('tabpanel', { name: /Compras/u })
@@ -117,7 +117,7 @@ test('GES-09 el encargado arma una orden a mano, quita una línea y la cancela',
   await order.getByLabel('Proveedor').selectOption({ label: 'Distribuidora Norte' })
   await order.getByLabel('Insumo de la línea 1').selectOption({ label: 'Cebolla roja' })
   await order.getByLabel('Cantidad en g').fill('2000')
-  await order.getByLabel('Costo por unidad').fill('0.0035')
+  await order.getByLabel('Costo por g').fill('0.0035')
   await order.getByRole('button', { name: 'Agregar insumo' }).click()
   await order.getByLabel('Insumo de la línea 2').selectOption({ label: 'Lomo de res' })
   await expect(order.getByRole('button', { name: 'Crear orden' })).toBeDisabled()
@@ -128,7 +128,14 @@ test('GES-09 el encargado arma una orden a mano, quita una línea y la cancela',
   await expect(notice(page, /Orden de compra 1 creada \(S\/\s*7\.00\)\./u)).toBeVisible()
 
   const oc = purchases.getByRole('listitem').filter({ hasText: 'OC 1 · Distribuidora Norte' })
-  await oc.getByRole('button', { name: 'Cancelar' }).click()
+  // Cancelar no se deshace: se confirma, y «Volver» deja la orden como estaba.
+  await oc.getByRole('button', { name: 'Cancelar orden' }).click()
+  const cancel = page.getByRole('alertdialog', { name: '¿Cancelar la OC 1?' })
+  await cancel.getByRole('button', { name: 'Volver' }).click()
+  await expect(cancel).toBeHidden()
+  await expect(oc.getByRole('button', { name: 'Recibir' })).toBeVisible()
+  await oc.getByRole('button', { name: 'Cancelar orden' }).click()
+  await cancel.getByRole('button', { name: 'Cancelar orden' }).click()
   await expect(notice(page, 'Orden 1: cancelada.')).toBeVisible()
   await expect(oc).toContainText('Cancelada')
   await expect(oc.getByRole('button')).toHaveCount(0)

@@ -16,8 +16,8 @@ interface AccessHistoryListProps {
   /** El nombre de la lista para el lector de pantalla. */
   readonly label: string
   readonly accesses: readonly AccessLine[]
-  /** Cuántos accesos hay en total, para ofrecer «Ver más». */
-  readonly total: number
+  /** Si quedan accesos por cargar, para ofrecer «Ver más». */
+  readonly hasMore: boolean
   readonly onMore: () => void
   readonly isLoadingMore: boolean
 }
@@ -27,7 +27,7 @@ interface AccessHistoryListProps {
  * qué dispositivo y dónde. Un dispositivo o país nuevo lleva su marca. Es una
  * lista y no una tabla para que en el celular no se desplace de costado.
  */
-export function AccessHistoryList({ label, accesses, total, onMore, isLoadingMore }: AccessHistoryListProps) {
+export function AccessHistoryList({ label, accesses, hasMore, onMore, isLoadingMore }: AccessHistoryListProps) {
   return (
     <div className="flex flex-col gap-3">
       <ul aria-label={label} className="m-0 flex list-none flex-col divide-y divide-border p-0">
@@ -42,7 +42,7 @@ export function AccessHistoryList({ label, accesses, total, onMore, isLoadingMor
           </li>
         ))}
       </ul>
-      {accesses.length < total ? (
+      {hasMore ? (
         <Button type="button" variant="outline" className="self-start" disabled={isLoadingMore} onClick={onMore}>
           {isLoadingMore ? 'Cargando…' : 'Ver más'}
         </Button>

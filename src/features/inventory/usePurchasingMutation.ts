@@ -1,3 +1,5 @@
+import type { QueryKey } from '@tanstack/react-query'
+
 import { inventoryQueryKey } from '@/api/inventory'
 import { useNotifiedMutation } from '@/store/useNotifiedMutation'
 
@@ -6,6 +8,8 @@ interface PurchasingMutationOptions<TVariables, TResult> {
   readonly success: (result: TResult) => string
   readonly failure: string
   readonly onSuccess?: (result: TResult) => void
+  /** Lo que se relee si el servidor lo rechaza (p. ej. otro ya cambió la orden). */
+  readonly invalidateOnError?: readonly QueryKey[]
 }
 
 /**
@@ -19,12 +23,14 @@ export function usePurchasingMutation<TVariables, TResult>({
   success,
   failure,
   onSuccess,
+  invalidateOnError = [],
 }: PurchasingMutationOptions<TVariables, TResult>) {
   return useNotifiedMutation({
     mutationFn,
     success,
     failure,
     invalidate: [inventoryQueryKey],
+    invalidateOnError,
     ...(onSuccess === undefined ? {} : { onSuccess }),
   })
 }

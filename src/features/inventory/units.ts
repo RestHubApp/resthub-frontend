@@ -1,5 +1,5 @@
 import type { IngredientUnit } from '@/api/types'
-import { formatMoney } from '@/services/format'
+import { formatUnitPrice } from '@/services/format'
 
 // El inventario guarda cada cantidad en la unidad base (gramos, mililitros o
 // unidades), que es la que suma sin errores. La gente, en cambio, compra por
@@ -49,10 +49,10 @@ export function baseUnitLabel(unit: IngredientUnit): string {
   return BASE[unit].label
 }
 
-/** "S/ 4.20 por kg": el costo guardado por gramo, mostrado por kilo. */
+/** "S/ 4.20 por kg": el costo guardado por gramo, mostrado por kilo; "S/ 0.004 por unid." si no llega a un céntimo. */
 export function formatUnitCost(unitCost: string | number, unit: IngredientUnit): string {
   const price = priceUnit(unit)
-  return `${formatMoney(Number(unitCost) * price.factor)} por ${price.label}`
+  return `${formatUnitPrice(Number(unitCost) * price.factor)} por ${price.label}`
 }
 
 // "5.600" pasa a "5.6". Los textos llegan de `toFixed`, así que nunca son
@@ -74,6 +74,17 @@ export function toBaseQuantity(text: string, factor: number): string {
 /** Un costo por kilo o por litro, llevado a la unidad base (hasta 6 decimales). */
 export function toBaseCost(cost: number, factor: number): string {
   return withoutZerosTrailing((cost / factor).toFixed(6))
+}
+
+/**
+ * Un costo guardado por unidad base, mostrado por kilo, litro o unidad para
+ * rellenar un campo. Conserva los 6 decimales del servidor: por kilo son 3,
+ * por unidad los 6 (S/ 0.0004 por servilleta no se vuelve 0).
+ */
+export function costForInput(unitCost: string | number, unit: IngredientUnit): string {
+  const { factor } = priceUnit(unit)
+  const decimals = factor === 1 ? 6 : 3
+  return withoutZerosTrailing((Number(unitCost) * factor).toFixed(decimals))
 }
 
 /** Una cantidad base mostrada en la unidad elegida, para rellenar un campo. */

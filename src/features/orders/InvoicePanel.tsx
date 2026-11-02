@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { orderInvoiceQuery } from '@/api/billing'
 import { PERMISSION } from '@/api/permissions'
 import type { Invoice, OrderResponse } from '@/api/types'
+import { RetryQueryError } from '@/components/RetryQueryError'
 import { useCan } from '@/store/session'
 import { IssuedInvoice } from '@/features/orders/invoice/IssuedInvoice'
 import { IssueInvoiceButton } from '@/features/orders/invoice/IssueInvoiceButton'
@@ -10,6 +11,14 @@ import { IssueInvoiceButton } from '@/features/orders/invoice/IssueInvoiceButton
 /** Sin comprobante, o con el vigente anulado, se puede emitir uno. */
 function isIssuable(issued: Invoice | null): boolean {
   return issued === null || issued.is_voided
+}
+
+/**
+ * Sin saber si ya tiene comprobante, no se ofrece emitir otro. Uno vigente ya
+ * leído sigue a la vista aunque falle releerlo: un comprobante no desaparece.
+ */
+function isUnknown(hasFailed: boolean, issued: Invoice | null): boolean {
+  return hasFailed && isIssuable(issued)
 }
 
 interface InvoicePanelProps {
@@ -31,6 +40,17 @@ export function InvoicePanel({ order }: InvoicePanelProps) {
     return null
   }
   const issued = invoice.data ?? null
+  if (isUnknown(invoice.isError, issued)) {
+    return (
+      <RetryQueryError
+        error={invoice.error}
+        fallback="No se pudo saber si el pedido ya tiene comprobante."
+        onRetry={() => {
+          void invoice.refetch()
+        }}
+      />
+    )
+  }
 
   return (
     <>

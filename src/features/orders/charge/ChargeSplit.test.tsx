@@ -10,6 +10,7 @@ const PAYMENTS = '/orders/12/payments'
 const CONFIRM = { name: 'Confirmar pago' }
 const EQUAL = { name: 'Partes iguales' }
 const MORE = { name: /Más opciones/u }
+const BY_ITEMS = { name: 'Por platos' }
 
 // Tras un pago parcial, el pedido baja su saldo; con el último, queda pagado.
 function after(actual: OrderResponse, amount: string): OrderResponse {
@@ -89,7 +90,7 @@ describe('cobro por platos', () => {
     const { api, user } = chargeSplit()
 
     await user.click(await screen.findByRole('button', MORE))
-    await user.click(await screen.findByRole('radio', { name: 'Por platos' }))
+    await user.click(await screen.findByRole('radio', BY_ITEMS))
     expect(screen.getByText('Elige al menos un plato')).toBeInTheDocument()
     expect(screen.getByRole('button', CONFIRM)).toBeDisabled()
     await user.click(screen.getByRole('checkbox', { name: /Chicha morada/u }))
@@ -115,11 +116,25 @@ describe('cobro por platos', () => {
     const { user } = chargeSplit(order)
 
     await user.click(await screen.findByRole('button', MORE))
-    await user.click(await screen.findByRole('radio', { name: 'Por platos' }))
+    await user.click(await screen.findByRole('radio', BY_ITEMS))
 
     expect(screen.queryByRole('checkbox', { name: /Lomo saltado/u })).not.toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: /Postre/u })).toHaveAccessibleName(/cortesía/u)
     expect(screen.getByText('Falta cobrar')).toBeInTheDocument()
+  })
+
+  it('solo una cortesía elegida no deja confirmar un pago de S/ 0.00', async () => {
+    const order = buildOrder({
+      items: [dish(), dish({ id: 3, name: 'Postre', subtotal: '8.00', is_courtesy: true, courtesy_reason: 'Cumpleaños' })],
+      balance: '30.00',
+    })
+    const { user } = chargeSplit(order)
+
+    await user.click(await screen.findByRole('button', MORE))
+    await user.click(await screen.findByRole('radio', BY_ITEMS))
+    await user.click(screen.getByRole('checkbox', { name: /Postre/u }))
+
+    expect(screen.getByRole('button', CONFIRM)).toBeDisabled()
   })
 })
 

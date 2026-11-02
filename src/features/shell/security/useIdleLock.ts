@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
 import { lockOwnSession } from '@/api/auth'
+import { lastActivity, noteActivity } from '@/store/idleActivity'
 import { useSession, useStaffAccount } from '@/store/session'
 
 // Lo que cuenta como uso: tocar, escribir, hacer clic o desplazarse.
@@ -20,7 +21,9 @@ function idleMinutesOf(minutes: unknown): number {
  * restaurante (RFS-29). El servidor bloquea solo la sesión que vuelve después
  * de ese tiempo, pero las lecturas de fondo (la cuenta, el canal de avisos)
  * siguen llegando aunque nadie toque la pantalla: por eso el armazón cuenta
- * el uso de verdad y avisa al servidor que bloquee.
+ * el uso de verdad y avisa al servidor que bloquee. El uso se cuenta en todas
+ * las pestañas: comparten la sesión, y una quieta no la bloquea mientras se
+ * trabaja en otra.
  */
 export function useIdleLock(): void {
   const account = useStaffAccount()
@@ -31,9 +34,10 @@ export function useIdleLock(): void {
     let lastUse = Date.now()
     const markUse = () => {
       lastUse = Date.now()
+      noteActivity()
     }
     const timer = setInterval(() => {
-      if (Date.now() - lastUse < minutes * MINUTE_MS) return
+      if (Date.now() - Math.max(lastUse, lastActivity()) < minutes * MINUTE_MS) return
       useSession.getState().setLocked(true)
       void lockOwnSession()
     }, CHECK_MS)

@@ -82,6 +82,7 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
     'dialogo:inventory/SupplierDialog',
     'dialogo:inventory/PurchaseOrderDialog',
     'dialogo:inventory/ReceiveOrderDialog',
+    'confirmacion:inventory/PurchaseOrderActions',
     'ruta:/inventario/recetas/:menuItemId',
   )
   const supplier = await api(local).post<Supplier>('/inventory/suppliers', {
@@ -130,6 +131,11 @@ test('VIS-09 el inventario en cada pestaña, sus ventanas y la receta de un plat
   await form(page, purchases.getByRole('button', { name: 'Nueva orden' }), 'Nueva orden de compra', 'dialogo-orden-de-compra')
   const oc = purchases.getByRole('listitem').filter({ hasText: 'OC 1 · Mercado Mayorista' })
   await form(page, oc.getByRole('button', { name: 'Recibir' }), 'Recibir la orden 1', 'dialogo-recibir-orden')
+  await oc.getByRole('button', { name: 'Cancelar orden' }).click()
+  const cancelOrder = page.getByRole('alertdialog', { name: '¿Cancelar la OC 1?' })
+  await captureWindow(cancelOrder, 'confirmacion-cancelar-orden')
+  await cancelOrder.getByRole('button', { name: 'Volver' }).click()
+  await expect(cancelOrder).toBeHidden()
 
   await page.goto(`/inventario/recetas/${String(local.dish('Lomo saltado').id)}`)
   await expect(page.getByRole('heading', { name: 'Receta: Lomo saltado' })).toBeVisible()
