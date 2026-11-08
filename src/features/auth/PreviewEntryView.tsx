@@ -1,5 +1,3 @@
-import { useLoaderData } from 'react-router'
-
 import { FormMessage } from '@/components/FormMessage'
 import { Icon } from '@/components/Icon'
 import * as icons from '@/components/icons'
@@ -15,15 +13,13 @@ import { PreviewEntryPending } from './PreviewEntryPending'
 /**
  * Lo que queda en `/vista-previa` si el código no sirvió.
  *
- * Si sirvió, el `loader` ya llevó a la aplicación y esta pantalla no se ve.
+ * Si sirvió, `PreviewEntryRoute` ya llevó a la aplicación y esta pantalla no se ve.
  * El enlace de vuelta recarga la página: la pestaña deja de ser de vista
  * previa y vuelve a leer la sesión del navegador. No hay «Reintentar»: el
  * código ya salió de la dirección al cargar y se usa una sola vez, así que
  * recargar no lo vuelve a canjear; se pide otro.
  */
-export function PreviewEntryView() {
-  const result = useLoaderData<PreviewEntryResult>()
-
+export function PreviewEntryView({ result }: { readonly result: PreviewEntryResult }) {
   if (result === 'reloading') {
     return <PreviewEntryPending />
   }
