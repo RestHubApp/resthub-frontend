@@ -366,11 +366,12 @@ vista previa se usa de verdad (tomar pedidos, cobrar, encolar sin señal).
    deja la barra y el historial. La ruta se reconoce como la compara React
    Router (sin distinguir mayúsculas, decodificada, con o sin barra final:
    `/Vista-Previa/` o `/vista%2Dprevia` cuentan) y queda escrita como
-   `/vista-previa`. El `loader` de la ruta (`features/auth/previewEntry.ts`,
-   fuera de las guardas) toma el código de memoria y lo canjea con
-   `POST /auth/preview`, sin credencial (`withoutCredential`): tampoco manda
-   la de una vista previa ya abierta en esa pestaña. Es el `loader` y no un
-   efecto: corre una vez por carga, aunque el modo estricto repita los efectos.
+   `/vista-previa`. La ruta (`features/auth/PreviewEntryRoute.tsx` y
+   `previewEntry.ts`, fuera de las guardas) toma el código de memoria y lo
+   canjea con `POST /auth/preview`, sin credencial (`withoutCredential`):
+   tampoco manda la de una vista previa ya abierta en esa pestaña. No es un
+   efecto: la pantalla lee el canje con `use` y `enterPreviewOnce` lo corre una
+   sola vez por llegada a la ruta, aunque el modo estricto renderice dos veces.
    Si se llegó navegando desde una pestaña normal, carga una sola vez
    `/vista-previa` con el fragmento (`location.replace`), nunca `reload()`.
    Si el servidor lo acepta (`preview: true`), entra al armazón normal; si no,

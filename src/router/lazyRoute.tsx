@@ -1,14 +1,13 @@
-import type { ComponentType } from 'react'
-
-import { EmptyState } from '@/components/EmptyState'
-
-// Al abrir la aplicacion directo en una pantalla perezosa (recargar el
-// tablero), esto se ve dentro del armazon mientras llega su archivo.
-const LOADING = <EmptyState title="Cargando…" />
+import { type ComponentType, lazy, type ReactElement } from 'react'
 
 type LoadScreen = () => Promise<{ default: ComponentType }>
 
-/** Una ruta cuya pantalla se descarga recién al abrirla. */
-export function lazyRoute(load: LoadScreen) {
-  return { hydrateFallbackElement: LOADING, lazy: { Component: async () => (await load()).default } } as const
+/**
+ * Una pantalla que se descarga recién al abrirla. No lleva su propio `Suspense`:
+ * la espera la muestra `ScreenOutlet`, uno solo para todas las pantallas del
+ * armazón, para que al navegar se quede a la vista la pantalla anterior.
+ */
+export function lazyScreen(load: LoadScreen): ReactElement {
+  const Screen = lazy(load)
+  return <Screen />
 }

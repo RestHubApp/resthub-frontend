@@ -7,7 +7,7 @@ import { PreviewEntryView } from './PreviewEntryView'
 
 function openWithResult(result: PreviewEntryResult) {
   server()
-  return mountRoutes([{ path: '/vista-previa', loader: () => result, Component: PreviewEntryView }], '/vista-previa')
+  return mountRoutes([{ path: '/vista-previa', element: <PreviewEntryView result={result} /> }], '/vista-previa')
 }
 
 describe('PreviewEntryView', () => {
