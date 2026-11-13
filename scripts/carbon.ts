@@ -1,6 +1,6 @@
 // Huella de carbono de la primera visita de cada ruta (Sustainable Web Design v4,
-// la misma de websitecarbon.com) y su nota, de A+ a F. Falla si una ruta baja
-// de la nota mínima (A+).
+// la misma de websitecarbon.com) y su nota, de A+ a F, con su indicador SCI
+// (ISO/IEC 21031:2024, `carbon/sci.ts`). Falla si una ruta baja de la nota mínima (A+).
 //
 // Uso:  pnpm carbon                    modo estático: suma el tamaño comprimido (brotli)
 //                                      de lo que la ruta carga según el manifest de Vite.
@@ -19,6 +19,7 @@ import { build, preview } from 'vite'
 import { browserVisit, launchChromium } from './carbon/browserMode.ts'
 import { parseGrade, type Grade } from './carbon/grade.ts'
 import { heaviestLines, resultOf, summaryLines, type RouteResult } from './carbon/report.ts'
+import { sciLines, sciOf } from './carbon/sci.ts'
 import { totalBytes, unique, type Resource } from './carbon/resources.ts'
 import { OFFLINE_SCREENS, ROUTES, type Route } from './carbon/routes.ts'
 import { serviceWorkerVisit } from './carbon/serviceWorker.ts'
@@ -92,6 +93,8 @@ async function browserVisits(dist: string, settleMs: number): Promise<Map<Route,
 function report(results: readonly RouteResult[], dist: string, settings: Settings): void {
   console.warn(`Huella de la primera visita (SWD v4, modo ${settings.mode}, nota mínima ${settings.minimum})`)
   for (const line of summaryLines(results)) console.warn(line)
+  console.warn('SCI por primera visita (ISO/IEC 21031:2024; E, I y M del mismo modelo SWD v4):')
+  for (const line of sciLines(results)) console.warn(line)
   const pack = totalBytes(offlinePack(dist, OFFLINE_SCREENS))
   console.warn(`Paquete sin señal (una vez por celular, ya con sesión; no cuenta arriba): ${(pack / 1000).toFixed(1)} kB`)
   if (settings.isVerbose) {
@@ -112,7 +115,7 @@ async function main(): Promise<void> {
   report(results, dist, settings)
   if (settings.jsonFile !== undefined) {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- el archivo lo pide quien corre el script
-    writeFileSync(settings.jsonFile, `${JSON.stringify(results.map(({ route, bytes, grams, grade }) => ({ path: route.path, bytes, grams, grade })), null, 2)}\n`)
+    writeFileSync(settings.jsonFile, `${JSON.stringify(results.map(({ route, bytes, grams, grade }) => ({ path: route.path, bytes, grams, grade, sci: sciOf(bytes) })), null, 2)}\n`)
   }
   if (results.some((result) => !result.passes)) {
     console.error(`Alguna ruta bajó de ${settings.minimum}.`)

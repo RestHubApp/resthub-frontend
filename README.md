@@ -176,6 +176,13 @@ pnpm carbon:browser        # modo navegador (el del CI): sirve la compilación c
 pnpm carbon --verbose      # lista los archivos que más pesan de cada ruta
 ```
 
+El informe también da el indicador **SCI** (Software Carbon Intensity, ISO/IEC
+21031:2024) de cada ruta: `SCI = (E × I) + M` por `R`, con `R` una primera visita
+sin caché, `E` la energía de la transferencia, `I` la intensidad de la red
+(media mundial de SWD v4) y `M` las emisiones de fabricación del hardware que le
+tocan a la visita (`scripts/carbon/sci.ts`). Sale del mismo modelo que la nota, así
+que suma los mismos gramos, separados en operación y fabricación; `--json` lo guarda.
+
 Cada visita es de un contexto nuevo (sin caché). La del mesero entra con una
 sesión de prueba y el API responde datos vacíos: sus bytes no se cuentan. Si
 Chromium no arranca en WSL (falta `libnspr4`), `pnpm carbon` no lo necesita; para
