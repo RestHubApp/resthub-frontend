@@ -25,7 +25,8 @@ describe('PrivacyView', () => {
 
     expect(screen.getByText(/Argon2id.*AES-256-GCM/u)).toBeInTheDocument()
     expect(screen.queryByText(/bcrypt/u)).not.toBeInTheDocument()
-    for (const provider of ['TypeSafe AI', 'OpenRouter', 'Railway', 'Vercel', 'GitHub', 'Google Drive', 'Brevo', 'Lycet', 'Azure', 'SUNAT']) {
+    expect(screen.queryByText(/Railway/u)).not.toBeInTheDocument()
+    for (const provider of ['TypeSafe AI', 'OpenRouter', 'Contabo', 'Supabase', 'Vercel', 'GitHub', 'Google Drive', 'Brevo', 'Lycet', 'Azure', 'SUNAT']) {
       expect(screen.getAllByText((text) => text.includes(provider)).length).toBeGreaterThan(0)
     }
   })

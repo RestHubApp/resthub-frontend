@@ -75,7 +75,7 @@ const SECTIONS: readonly Section[] = [
     id: 'terceros',
     title: 'Servicios de terceros',
     paragraphs: [
-      'RestHub se apoya en otros servicios: Railway y Vercel para el alojamiento, un servicio de facturación propio (Lycet) y la SUNAT para los comprobantes, Factiliza para consultar RUC y DNI, Brevo para enviar correos, Google Drive para el respaldo de comprobantes y, si el restaurante los tiene activados, proveedores de inteligencia artificial a través de OpenRouter.',
+      'RestHub se apoya en otros servicios: Contabo, Supabase y Vercel para el alojamiento, un servicio de facturación propio (Lycet) y la SUNAT para los comprobantes, Factiliza para consultar RUC y DNI, Brevo para enviar correos, Google Drive para el respaldo de comprobantes y, si el restaurante los tiene activados, proveedores de inteligencia artificial a través de OpenRouter.',
       'El uso de esos servicios se rige además por sus propias condiciones. Cómo se tratan los datos personales en ellos se explica en la política de privacidad.',
     ],
   },
