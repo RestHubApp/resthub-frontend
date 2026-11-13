@@ -111,6 +111,7 @@ está en el CI.
 |---|---|
 | `VITE_API_URL` | Origen del backend en producción, sin `/api/v1` (por ejemplo `https://api.resthub.pe`). Vacía en desarrollo. Al compilar con ella, la CSP limita `connect-src` a la propia aplicación y a ese origen. **Defínela en Vercel** o `connect-src` queda abierto a cualquier https. |
 | `VITE_LOG_LEVEL` | Nivel mínimo de los logs del navegador. Por defecto `debug` en desarrollo y `warn` en producción. |
+| `VITE_FEEDBACK_FORM_URL` | Formulario https (por ejemplo, un Google Forms) donde el personal cuenta si algo va lento, pesa mucho o gasta batería. El perfil lo ofrece en «Uso eficiente», junto a los consejos de uso; sin la variable, el enlace no aparece. **Defínela en Vercel.** |
 
 ## Tipos del API
 
@@ -174,6 +175,13 @@ pnpm carbon:browser        # modo navegador (el del CI): sirve la compilación c
                            # (cuerpo comprimido y cabeceras), esperando 10 s tras `load`
 pnpm carbon --verbose      # lista los archivos que más pesan de cada ruta
 ```
+
+El informe también da el indicador **SCI** (Software Carbon Intensity, ISO/IEC
+21031:2024) de cada ruta: `SCI = (E × I) + M` por `R`, con `R` una primera visita
+sin caché, `E` la energía de la transferencia, `I` la intensidad de la red
+(media mundial de SWD v4) y `M` las emisiones de fabricación del hardware que le
+tocan a la visita (`scripts/carbon/sci.ts`). Sale del mismo modelo que la nota, así
+que suma los mismos gramos, separados en operación y fabricación; `--json` lo guarda.
 
 Cada visita es de un contexto nuevo (sin caché). La del mesero entra con una
 sesión de prueba y el API responde datos vacíos: sus bytes no se cuentan. Si

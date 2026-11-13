@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   /** Origen del backend en produccion, sin `/api/v1`. Vacio en desarrollo. */
   readonly VITE_API_URL?: string
   readonly VITE_LOG_LEVEL?: string
+  /** Formulario https de comentarios sobre rendimiento y sostenibilidad. Sin ella, el perfil no lo ofrece. */
+  readonly VITE_FEEDBACK_FORM_URL?: string
 }
 
 interface ImportMeta {
