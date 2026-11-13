@@ -111,6 +111,7 @@ está en el CI.
 |---|---|
 | `VITE_API_URL` | Origen del backend en producción, sin `/api/v1` (por ejemplo `https://api.resthub.pe`). Vacía en desarrollo. Al compilar con ella, la CSP limita `connect-src` a la propia aplicación y a ese origen. **Defínela en Vercel** o `connect-src` queda abierto a cualquier https. |
 | `VITE_LOG_LEVEL` | Nivel mínimo de los logs del navegador. Por defecto `debug` en desarrollo y `warn` en producción. |
+| `VITE_FEEDBACK_FORM_URL` | Formulario https (por ejemplo, un Google Forms) donde el personal cuenta si algo va lento, pesa mucho o gasta batería. El perfil lo ofrece en «Uso eficiente», junto a los consejos de uso; sin la variable, el enlace no aparece. **Defínela en Vercel.** |
 
 ## Tipos del API
 

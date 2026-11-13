@@ -1,10 +1,12 @@
 import { PageHeader } from '@/components/PageHeader'
 import { SectionCard } from '@/components/SectionCard'
 import { useScreenAction } from '@/hooks/useScreenAction'
+import { FEEDBACK_FORM_URL } from '@/services/feedbackForm'
 import { SYSTEM_ADMINISTRATION } from '@/services/systemAdministration'
 import { usePreview, useSession } from '@/store/session'
 import { AppearanceLink } from './AppearanceLink'
 import { ChangePasswordDialog } from './ChangePasswordDialog'
+import { EfficientUseCard } from './EfficientUseCard'
 import { AccountSecurity } from './security/AccountSecurity'
 
 const TERM = 'm-0 text-sm text-muted-foreground'
@@ -66,6 +68,7 @@ export function ProfileView() {
 
       <AppearanceLink />
 
+      <EfficientUseCard feedbackFormUrl={FEEDBACK_FORM_URL} />
     </div>
   )
 }
