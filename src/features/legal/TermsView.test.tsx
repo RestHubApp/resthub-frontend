@@ -17,6 +17,14 @@ describe('TermsView', () => {
     expect(screen.getByRole('heading', { level: 2, name: '8. Limitación de responsabilidad' })).toBeInTheDocument()
   })
 
+  it('nombra a los proveedores de alojamiento actuales', () => {
+    server()
+    mountScreen(<TermsView />, { path: TERMS })
+
+    expect(screen.getByText(/Contabo, Supabase y Vercel para el alojamiento/u)).toBeInTheDocument()
+    expect(screen.queryByText(/Railway/u)).not.toBeInTheDocument()
+  })
+
   it('el índice enlaza cada sección con un ancla estable', () => {
     server()
     mountScreen(<TermsView />, { path: TERMS })
