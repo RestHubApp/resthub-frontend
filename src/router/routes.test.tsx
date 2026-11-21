@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { signInToPlatform } from '#jest/fixtures/platform'
 import { signInAs, mountRoutes, PERMISSIONS_OWNER, PERMISSIONS_WAITER, server } from '#jest/harness'
-import { router } from './routes'
+import { routes } from './routes'
 
 const PROFILE = '/perfil'
 const CASH_REGISTER = '/caja'
@@ -12,7 +12,7 @@ const PLATFORM_HOME = '/plataforma'
 const PLATFORM = /^\/platform\//u
 
 function open(en: string) {
-  return mountRoutes(router.routes, en).router
+  return mountRoutes(routes, en).router
 }
 
 async function arrivesTo(inMemory: ReturnType<typeof open>, route: string) {

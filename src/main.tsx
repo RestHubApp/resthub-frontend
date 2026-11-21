@@ -1,9 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// El de `react-router/dom` es el que le pasa `flushSync` de react-dom al
-// router. Sin el, la opcion `flushSync` de `navigate` se ignora en silencio.
-import { RouterProvider } from 'react-router/dom'
+import { BrowserRouter } from 'react-router'
 
 // Primero: al cargarse elige el almacenamiento de la pestaña y saca de la barra
 // el código de vista previa, antes de que el router lea la dirección.
@@ -11,7 +9,7 @@ import './services/tabStorage'
 // Pone el tema, la letra y el tamaño de la cuenta en <html> antes de que React
 // pinte: así la página no sale con un tema y salta a otro.
 import '@/store/appearance'
-import { router } from '@/router/routes'
+import { AppRoutes } from '@/router/AppRoutes'
 import { logger, logUncaughtErrors } from './services/logger'
 import { queryClient } from './services/queryClient'
 import { registerServiceWorker } from './services/serviceWorker'
@@ -55,7 +53,9 @@ createRoot(container, {
 }).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <AppRoutes />
+      </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,
 )

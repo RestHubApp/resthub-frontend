@@ -1,21 +1,27 @@
+import { Suspense } from 'react'
 import type { RouteObject } from 'react-router'
 
-import { asDefault } from '@/components/lazyNamed'
+import { lazyNamed } from '@/components/lazyNamed'
 import { PreviewEntryPending } from '@/features/auth/PreviewEntryPending'
 import { routePatterns } from '@/services/paths'
+import { RouteBoundary } from './RouteBoundary'
+
+const PreviewEntryRoute = lazyNamed(() => import('@/features/auth/PreviewEntryRoute'), 'PreviewEntryRoute')
 
 /**
  * La pestaña que abre «Ver como…» en el área de plataforma.
  *
- * Va fuera de las dos guardas: canjea el código de un solo uso (el `loader`,
- * que corre una vez por carga) y lleva al armazón del restaurante con la
- * sesión de vista previa, que vive solo en esta pestaña.
+ * Va fuera de las dos guardas: canjea el código de un solo uso (una vez por
+ * llegada a la ruta, `enterPreviewOnce`) y lleva al armazón del restaurante con
+ * la sesión de vista previa, que vive solo en esta pestaña.
  */
 export const PREVIEW: RouteObject = {
   path: routePatterns.previewEntry,
-  hydrateFallbackElement: <PreviewEntryPending />,
-  lazy: {
-    loader: async () => (await import('@/features/auth/previewEntry')).previewEntryLoader,
-    Component: async () => (await asDefault(() => import('@/features/auth/PreviewEntryView'), 'PreviewEntryView')()).default,
-  },
+  element: (
+    <RouteBoundary>
+      <Suspense fallback={<PreviewEntryPending />}>
+        <PreviewEntryRoute />
+      </Suspense>
+    </RouteBoundary>
+  ),
 }
